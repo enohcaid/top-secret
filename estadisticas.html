@@ -58,10 +58,20 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 .upload-sub{font-size:.82rem;color:var(--muted);}
 .upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 
-.preview-box{display:none;border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:20px;position:relative;}
-.preview-box img{width:100%;max-height:320px;object-fit:contain;background:#000;}
-.preview-change{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:5px 12px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .18s;}
-.preview-change:hover{background:var(--border2);}
+/* multi-image queue */
+.img-queue{display:none;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.img-queue.show{display:flex;}
+.img-thumb{position:relative;width:120px;height:90px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);flex-shrink:0;}
+.img-thumb img{width:100%;height:100%;object-fit:cover;}
+.img-thumb .thumb-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:rgba(0,0,0,.5);}
+.img-thumb .thumb-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.img-thumb .thumb-remove:hover{background:var(--loss);}
+.img-thumb.analyzing .thumb-status{background:rgba(10,11,14,.7);}
+.img-thumb.done .thumb-status{background:rgba(62,207,142,.2);}
+.img-thumb.error .thumb-status{background:rgba(232,80,46,.2);}
+.add-more-btn{width:120px;height:90px;border-radius:10px;border:2px dashed var(--border2);background:transparent;color:var(--muted);font-size:1.6rem;cursor:pointer;transition:all .18s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.add-more-btn:hover{border-color:var(--gold);color:var(--gold);}
+.add-more-input{display:none;}
 
 .btn-analyze{width:100%;padding:14px;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;}
 .btn-analyze:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,168,75,.3);}
@@ -248,23 +258,22 @@ footer span{color:var(--gold);}
 
     <div class="upload-area" id="uploadArea">
       <span class="upload-icon">📸</span>
-      <div class="upload-title">Arrastrá o hacé clic para subir la captura</div>
-      <div class="upload-sub">Estadísticas post-partido de EA FC · PNG, JPG, WEBP</div>
-      <input type="file" id="fileInput" accept="image/*">
+      <div class="upload-title">Arrastrá o hacé clic para subir capturas</div>
+      <div class="upload-sub">Podés subir múltiples imágenes de EA FC · PNG, JPG, WEBP</div>
+      <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
-    <div class="preview-box" id="previewBox">
-      <img id="previewImg" src="" alt="preview">
-      <button class="preview-change" onclick="resetUpload()">✕ Cambiar imagen</button>
-    </div>
+    <!-- thumbnail queue -->
+    <div class="img-queue" id="imgQueue"></div>
+    <input type="file" id="addMoreInput" class="add-more-input" accept="image/*" multiple>
 
-    <button class="btn-analyze" id="btnAnalyze" onclick="analyzeImage()" disabled>
-      <span>🤖</span> Analizar con IA
+    <button class="btn-analyze" id="btnAnalyze" onclick="analyzeAll()" disabled>
+      <span>🤖</span> <span id="btnAnalyzeLabel">Analizar con IA</span>
     </button>
 
     <div class="analyzing-state" id="analyzingState">
       <div class="spinner"></div>
-      <div class="analyzing-text">La IA está leyendo la captura...<br><b>Extrayendo estadísticas de EA FC</b></div>
+      <div class="analyzing-text" id="analyzingText">La IA está leyendo las capturas...<br><b>Extrayendo estadísticas de EA FC</b></div>
     </div>
 
     <div class="result-card" id="resultCard">
@@ -446,50 +455,85 @@ function renderSeason(){
     lgHTML;
 }
 
-// ── UPLOAD ──
-let currentImageBase64 = null;
+// ── UPLOAD (multi-image) ──
+let imageQueue = []; // [{base64, dataUrl, status:'pending'|'analyzing'|'done'|'error', result}]
 let pendingResult = null;
 
 document.getElementById('metaDate').value = new Date().toISOString().split('T')[0];
 
-const uploadArea = document.getElementById('uploadArea');
-const fileInput  = document.getElementById('fileInput');
+const uploadArea   = document.getElementById('uploadArea');
+const fileInput    = document.getElementById('fileInput');
+const addMoreInput = document.getElementById('addMoreInput');
 
 ['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.remove('drag');}));
-uploadArea.addEventListener('drop',e=>{ if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change',()=>{ if(fileInput.files[0]) handleFile(fileInput.files[0]); });
+uploadArea.addEventListener('drop',e=>{ if(e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change',()=>{ if(fileInput.files.length) addFiles(fileInput.files); });
+addMoreInput.addEventListener('change',()=>{ if(addMoreInput.files.length) addFiles(addMoreInput.files); });
 
-function handleFile(file){
-  if(!file.type.startsWith('image/')){ showToast('Solo se aceptan imágenes','error'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    currentImageBase64 = e.target.result.split(',')[1];
-    document.getElementById('previewImg').src = e.target.result;
-    uploadArea.style.display = 'none';
-    document.getElementById('previewBox').style.display = 'block';
-    document.getElementById('btnAnalyze').disabled = false;
-    document.getElementById('resultCard').classList.remove('show');
-    document.getElementById('analyzingState').classList.remove('show');
-    pendingResult = null;
-  };
-  reader.readAsDataURL(file);
+function addFiles(files){
+  Array.from(files).forEach(file=>{
+    if(!file.type.startsWith('image/')){ showToast('Solo imágenes (PNG, JPG, WEBP)','error'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      imageQueue.push({base64: e.target.result.split(',')[1], dataUrl: e.target.result, status:'pending', result:null});
+      renderQueue();
+    };
+    reader.readAsDataURL(file);
+  });
+  fileInput.value = '';
+  addMoreInput.value = '';
+}
+
+function removeFromQueue(idx){
+  imageQueue.splice(idx,1);
+  renderQueue();
+}
+
+function renderQueue(){
+  const queue = document.getElementById('imgQueue');
+  if(!imageQueue.length){
+    queue.classList.remove('show');
+    uploadArea.style.display = '';
+    document.getElementById('btnAnalyze').disabled = true;
+    document.getElementById('btnAnalyzeLabel').textContent = 'Analizar con IA';
+    return;
+  }
+  uploadArea.style.display = 'none';
+  queue.classList.add('show');
+  const statusIcon = s => s==='pending'?'':'s==='analyzing'?'⏳':s==='done'?'✅':'❌';
+  queue.innerHTML = imageQueue.map((img,i)=>`
+    <div class="img-thumb ${img.status!=='pending'?img.status:''}">
+      <img src="${img.dataUrl}" alt="img ${i+1}">
+      ${img.status!=='pending'?`<div class="thumb-status">${statusIcon(img.status)}</div>`:''}
+      ${img.status==='pending'?`<button class="thumb-remove" onclick="removeFromQueue(${i})">✕</button>`:''}
+    </div>
+  `).join('') + `<button class="add-more-btn" onclick="addMoreInput.click()" title="Agregar más">+</button>`;
+
+  const pending = imageQueue.filter(i=>i.status==='pending').length;
+  const btn = document.getElementById('btnAnalyze');
+  btn.disabled = pending === 0;
+  document.getElementById('btnAnalyzeLabel').textContent =
+    pending === 1 ? 'Analizar 1 imagen' : `Analizar ${pending} imágenes`;
 }
 
 function resetUpload(){
-  currentImageBase64 = null;
-  document.getElementById('previewBox').style.display = 'none';
+  imageQueue = [];
+  pendingResult = null;
+  document.getElementById('imgQueue').classList.remove('show');
   uploadArea.style.display = '';
   document.getElementById('btnAnalyze').disabled = true;
-  fileInput.value = '';
+  document.getElementById('btnAnalyzeLabel').textContent = 'Analizar con IA';
   document.getElementById('resultCard').classList.remove('show');
   document.getElementById('analyzingState').classList.remove('show');
-  pendingResult = null;
+  fileInput.value = '';
 }
 
-// ── AI ANALYSIS ──
-async function analyzeImage(){
-  if(!currentImageBase64) return;
+// ── AI ANALYSIS (multi) ──
+async function analyzeAll(){
+  const pending = imageQueue.filter(i=>i.status==='pending');
+  if(!pending.length) return;
+
   const rival  = document.getElementById('metaRival').value.trim() || 'Desconocido';
   const league = document.getElementById('metaLeague').value || '?';
   const date   = document.getElementById('metaDate').value || new Date().toISOString().split('T')[0];
@@ -526,34 +570,73 @@ Extraé las estadísticas de CADA jugador visible. Devolvé ÚNICAMENTE JSON vá
 
 Reglas: si un valor no es legible usá null. rating es decimal. pass_accuracy es % sin símbolo. Intentá identificar cada jugador con alguien del plantel.`;
 
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{
-          role:'user',
-          content:[
-            {type:'image', source:{type:'base64', media_type:'image/jpeg', data:currentImageBase64}},
-            {type:'text', text:prompt}
-          ]
-        }]
-      })
-    });
-    const data = await resp.json();
-    const text = data.content?.find(b=>b.type==='text')?.text||'';
-    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
-    pendingResult = {rival, league, date, uploadedAt:new Date().toISOString(), ...parsed};
-    renderResultPreview(pendingResult);
-  } catch(err){
-    console.error(err);
-    showToast('Error al analizar. Revisá que sea una captura clara de EA FC.','error');
+  let mergedPlayers = [];
+  let matchResult = null;
+
+  for(let i=0; i<imageQueue.length; i++){
+    const img = imageQueue[i];
+    if(img.status !== 'pending') continue;
+
+    img.status = 'analyzing';
+    renderQueue();
+    document.getElementById('analyzingText').innerHTML =
+      `Analizando imagen ${i+1} de ${imageQueue.length}...<br><b>Extrayendo estadísticas de EA FC</b>`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1000,
+          messages:[{
+            role:'user',
+            content:[
+              {type:'image', source:{type:'base64', media_type:'image/jpeg', data:img.base64}},
+              {type:'text', text:prompt}
+            ]
+          }]
+        })
+      });
+      const data = await resp.json();
+      const text = data.content?.find(b=>b.type==='text')?.text||'';
+      const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+
+      img.status = 'done';
+      img.result = parsed;
+
+      // Merge players: if a player already exists from a previous image, merge stats
+      (parsed.players||[]).forEach(p=>{
+        const key = (p.matched||p.name||'').toLowerCase();
+        const existing = mergedPlayers.find(ep=>(ep.matched||ep.name||'').toLowerCase()===key);
+        if(existing){
+          // Fill in null fields from this image
+          ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions'].forEach(f=>{
+            if(existing[f]===null && p[f]!==null && p[f]!==undefined) existing[f] = p[f];
+          });
+        } else {
+          mergedPlayers.push({...p});
+        }
+      });
+      if(!matchResult && parsed.match_result) matchResult = parsed.match_result;
+
+    } catch(err){
+      console.error(err);
+      img.status = 'error';
+      showToast(`Error en imagen ${i+1}. Continuando...`,'error');
+    }
+    renderQueue();
   }
 
   document.getElementById('analyzingState').classList.remove('show');
   document.getElementById('btnAnalyze').disabled = false;
+
+  if(mergedPlayers.length){
+    pendingResult = {rival, league, date, uploadedAt:new Date().toISOString(), players:mergedPlayers, match_result:matchResult, notes:''};
+    renderResultPreview(pendingResult);
+  } else {
+    showToast('No se pudo extraer ninguna estadística.','error');
+  }
 }
 
 function renderResultPreview(data){
@@ -581,6 +664,7 @@ function saveResult(){
   matches.push(pendingResult);
   saveMatches(matches);
   showToast('✓ Partido guardado correctamente','success');
+  imageQueue = [];
   resetUpload();
   pendingResult = null;
 }

@@ -1124,7 +1124,7 @@ function exportHTML(){
   const blob = new Blob([html], {type:'text/html'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'index.html';
+  a.download = 'calendario.html';
   a.click();
   URL.revokeObjectURL(a.href);
 }
