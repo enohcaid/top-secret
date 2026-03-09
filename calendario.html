@@ -1166,6 +1166,20 @@ function showToast(msg, type='success'){
   }, 3000);
 }
 
+// ── EXPONER FUNCIONES AL SCOPE GLOBAL (necesario para type="module") ──────────
+window.filter         = filter;
+window.openModal      = openModal;
+window.closeModal     = closeModal;
+window.saveRes        = saveRes;
+window.clearRes       = clearRes;
+window.openEditModal  = openEditModal;
+window.closeEditModal = closeEditModal;
+window.saveEdit       = saveEdit;
+window.toggleHome     = toggleHome;
+window.suspendMatch   = suspendMatch;
+window.restoreMatch   = restoreMatch;
+window.saveToFirebase = saveToFirebase;
+
 // render() is called by onSnapshot when Firebase data loads
 </script>
 
