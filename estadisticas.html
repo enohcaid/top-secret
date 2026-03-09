@@ -614,21 +614,18 @@ Reglas adicionales: si un valor no es legible usá null. rating es decimal. pass
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:1000,
-          messages:[{
-            role:'user',
-            content:[
-              {type:'image', source:{type:'base64', media_type: img.mediaType || 'image/jpeg', data:img.base64}},
-              {type:'text', text:prompt}
+          contents:[{
+            parts:[
+              { inline_data: { mime_type: img.mediaType || 'image/jpeg', data: img.base64 } },
+              { text: prompt }
             ]
-          }]
+          }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
         })
       });
       const data = await resp.json();
-      // Si la API devuelve error, mostrarlo claramente
       if(data.error) throw new Error(`API error: ${data.error.message || JSON.stringify(data.error)}`);
-      const text = data.content?.find(b=>b.type==='text')?.text||'';
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       if(!text) throw new Error(`Respuesta vacía. Raw: ${JSON.stringify(data).slice(0,200)}`);
       const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
 
