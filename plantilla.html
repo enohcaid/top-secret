@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Secret FC · Plantel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0e;--card:#101318;--card2:#13161e;
+  --border:#1e2230;--border2:#2a2f42;
+  --text:#f0f2f8;--muted:#8890a8;--muted2:#5a6278;
+  --gold:#c8a84b;--gold2:#e8c96a;--gold-dim:rgba(200,168,75,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 28px;gap:0;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto;}
+.nav-logo img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(200,168,75,.4));}
+.nav-logo span{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;letter-spacing:.08em;color:var(--text);}
+.nav-logo span b{color:var(--gold);}
+.nav-links{display:flex;gap:2px;}
+.nav-links a{padding:8px 14px;border-radius:8px;text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:var(--muted);transition:all .18s;}
+.nav-links a:hover{color:var(--text);background:var(--border);}
+.nav-links a.active{color:var(--gold);background:var(--gold-dim);}
+
+/* PAGE HEADER */
+.page-header{
+  padding:100px 24px 48px;
+  max-width:960px;margin:0 auto;
+}
+.page-eyebrow{
+  font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;
+}
+.page-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(2.4rem,6vw,4rem);font-weight:900;
+  line-height:.95;letter-spacing:-.01em;
+}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:.88rem;color:var(--muted);margin-top:10px;}
+
+/* POSITION FILTER */
+.pos-filter{
+  max-width:960px;margin:0 auto 36px;
+  padding:0 24px;
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.pfbtn{
+  padding:7px 16px;
+  border-radius:8px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted);
+  font-family:'Barlow',sans-serif;font-size:.8rem;font-weight:600;
+  cursor:pointer;transition:all .18s;
+}
+.pfbtn:hover{border-color:var(--gold);color:var(--gold);}
+.pfbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+
+/* SQUAD GRID */
+.squad-grid{
+  max-width:960px;margin:0 auto;
+  padding:0 24px 80px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:14px;
+}
+.player-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px 20px 20px;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+  transition:transform .2s, border-color .2s, box-shadow .2s;
+  cursor:default;
+  position:relative;
+  overflow:hidden;
+}
+.player-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:3px;
+  transition:opacity .2s;
+  opacity:0;
+}
+.player-card.POR::before{background:#f5c518;}
+.player-card.DEF::before{background:#3ecf8e;}
+.player-card.MED::before{background:#c8a84b;}
+.player-card.LAT::before{background:#7c6fff;}
+.player-card.DEL::before{background:#e8502e;}
+.player-card:hover{transform:translateY(-4px);border-color:var(--border2);box-shadow:0 12px 32px rgba(0,0,0,.4);}
+.player-card:hover::before{opacity:1;}
+
+.player-avatar{
+  width:72px;height:72px;border-radius:50%;
+  background:var(--card2);border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.8rem;font-weight:900;
+  color:var(--muted2);
+  position:relative;
+}
+.player-card.POR .player-avatar{border-color:rgba(245,197,24,.4);color:#f5c518;}
+.player-card.DEF .player-avatar{border-color:rgba(62,207,142,.4);color:#3ecf8e;}
+.player-card.MED .player-avatar{border-color:rgba(200,168,75,.4);color:var(--gold);}
+.player-card.LAT .player-avatar{border-color:rgba(124,111,255,.4);color:#7c6fff;}
+.player-card.DEL .player-avatar{border-color:rgba(232,80,46,.4);color:#e8502e;}
+
+.player-num{
+  position:absolute;bottom:-2px;right:-2px;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--bg);border:1px solid var(--border2);
+  font-size:.6rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted2);
+}
+.player-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.05rem;font-weight:800;
+  letter-spacing:.04em;
+  word-break:break-all;
+  line-height:1.2;
+  margin-bottom:8px;
+}
+.player-pos-badge{
+  font-size:.65rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 10px;border-radius:20px;
+}
+.player-card.POR .player-pos-badge{background:rgba(245,197,24,.12);color:#f5c518;}
+.player-card.DEF .player-pos-badge{background:rgba(62,207,142,.12);color:#3ecf8e;}
+.player-card.MED .player-pos-badge{background:rgba(200,168,75,.12);color:var(--gold);}
+.player-card.LAT .player-pos-badge{background:rgba(124,111,255,.12);color:#7c6fff;}
+.player-card.DEL .player-pos-badge{background:rgba(232,80,46,.12);color:#e8502e;}
+
+.player-card.hidden{display:none;}
+
+/* LEGEND */
+.pos-legend{
+  max-width:960px;margin:0 auto 24px;
+  padding:0 24px;
+  display:flex;gap:20px;flex-wrap:wrap;
+}
+.pos-leg{display:flex;align-items:center;gap:7px;font-size:.75rem;color:var(--muted);}
+.pos-dot{width:8px;height:8px;border-radius:50%;}
+.pos-dot.POR{background:#f5c518;}
+.pos-dot.DEF{background:#3ecf8e;}
+.pos-dot.MED{background:var(--gold);}
+.pos-dot.LAT{background:#7c6fff;}
+.pos-dot.DEL{background:#e8502e;}
+
+footer{border-top:1px solid var(--border);padding:28px 24px;text-align:center;font-size:.78rem;color:var(--muted2);}
+footer span{color:var(--gold);}
+
+@media(max-width:600px){
+  nav{padding:0 16px;}
+  .nav-links a{padding:8px 10px;font-size:.76rem;}
+  .squad-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <img src="Top-Secret.png" alt="TS">
+    <span>TOP <b>SECRET</b></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Inicio</a>
+    <a href="plantilla.html" class="active">Plantel</a>
+    <a href="calendario.html">Calendario</a>
+    <a href="estadisticas.html">Estadísticas</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-eyebrow">Temporada 2026</div>
+  <h1 class="page-title">El <span>Plantel</span></h1>
+  <p class="page-sub">14 jugadores · Top Secret Football Club</p>
+</div>
+
+<div class="pos-filter">
+  <button class="pfbtn active" onclick="filterPos('all',this)">Todos</button>
+  <button class="pfbtn" onclick="filterPos('POR',this)">🥅 Arqueros</button>
+  <button class="pfbtn" onclick="filterPos('DEF',this)">🛡️ Defensas</button>
+  <button class="pfbtn" onclick="filterPos('LAT',this)">⚡ Laterales</button>
+  <button class="pfbtn" onclick="filterPos('MED',this)">🎯 Mediocampistas</button>
+  <button class="pfbtn" onclick="filterPos('DEL',this)">⚽ Delanteros</button>
+</div>
+
+<div class="pos-legend">
+  <div class="pos-leg"><div class="pos-dot POR"></div>Arquero</div>
+  <div class="pos-leg"><div class="pos-dot DEF"></div>Defensa</div>
+  <div class="pos-leg"><div class="pos-dot LAT"></div>Lateral</div>
+  <div class="pos-leg"><div class="pos-dot MED"></div>Mediocampista</div>
+  <div class="pos-leg"><div class="pos-dot DEL"></div>Delantero</div>
+</div>
+
+<div class="squad-grid" id="squadGrid"></div>
+
+<footer>
+  <p>Top Secret <span>Football Club</span> · Temporada 2026</p>
+</footer>
+
+<script>
+const PLAYERS = [
+  {name:'Woolfyboyzx2',    pos:'POR', posLabel:'Arquero'},
+  {name:'Zurdo-_CABJ12',   pos:'DEF', posLabel:'Defensa'},
+  {name:'Agubostero7',     pos:'DEF', posLabel:'Defensa'},
+  {name:'Alexiisraiies23', pos:'DEF', posLabel:'Defensa'},
+  {name:'RS32-DaniStone',  pos:'MED', posLabel:'Mediocampista'},
+  {name:'Juan_Martinez4',  pos:'MED', posLabel:'Mediocampista'},
+  {name:'CipriMancini',    pos:'MED', posLabel:'Mediocampista'},
+  {name:'Buraa07',         pos:'MED', posLabel:'Mediocampista'},
+  {name:'Huber236',        pos:'LAT', posLabel:'Lateral'},
+  {name:'zPibu__',         pos:'LAT', posLabel:'Lateral'},
+  {name:'Guiidow',         pos:'MED', posLabel:'Mediocampista'},
+  {name:'BlackPanther-CG', pos:'DEL', posLabel:'Delantero'},
+  {name:'cansitrGd22_',    pos:'DEL', posLabel:'Delantero'},
+  {name:'Lautavester7',    pos:'DEL', posLabel:'Delantero'},
+];
+
+function initials(name){
+  const clean = name.replace(/[-_]/g,' ').replace(/\s+/g,' ').trim();
+  const parts = clean.split(' ').filter(p=>p.length>0);
+  if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
+  return name.slice(0,2).toUpperCase();
+}
+
+const grid = document.getElementById('squadGrid');
+grid.innerHTML = PLAYERS.map((p,i)=>`
+  <div class="player-card ${p.pos}" data-pos="${p.pos}">
+    <div class="player-avatar">
+      ${initials(p.name)}
+      <div class="player-num">${i+1}</div>
+    </div>
+    <div class="player-name">${p.name}</div>
+    <div class="player-pos-badge">${p.posLabel}</div>
+  </div>
+`).join('');
+
+function filterPos(pos, btn){
+  document.querySelectorAll('.pfbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.player-card').forEach(c=>{
+    c.classList.toggle('hidden', pos!=='all' && c.dataset.pos!==pos);
+  });
+}
+</script>
+</body>
+</html>
