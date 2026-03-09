@@ -374,13 +374,7 @@ footer span{color:var(--gold);}
   <p>Top Secret <span>Football Club</span> · Temporada 2026</p>
 </footer>
 
-<script>
-// ── LOGO (base64 encoded image from local file)
-const LOGO_URL = 'Top-Secret.png';
-document.getElementById('navLogo').src = LOGO_URL;
-document.getElementById('heroShield').src = LOGO_URL;
-
-// ── MATCH DATA (same as calendario.html)
+<script type="module">
 const RAW = [
   {date:'2026-03-02',time:'22:30',league:'VPUG', rival:'Suda eSports',        isHome:true,  result:[2,0]},
   {date:'2026-03-03',time:'22:30',league:'VPUG', rival:'Team Valhalla',       isHome:false, result:[0,5]},
@@ -458,6 +452,24 @@ const RAW = [
   {date:'2026-04-16',time:'23:00',league:'11x11',rival:'Escuela Vieja',       isHome:true,  result:null},
   {date:'2026-04-16',time:'23:30',league:'11x11',rival:'Team Valhalla',       isHome:true,  result:null},
 ];
+];
+
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M",
+  authDomain: "top-secret-fc.firebaseapp.com",
+  projectId: "top-secret-fc",
+  storageBucket: "top-secret-fc.firebasestorage.app",
+  messagingSenderId: "303110190986",
+  appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const CAL_DOC = doc(db, 'calendario', 'estado');
 
 function getResult(m){
   if(!m.result) return null;
@@ -469,69 +481,95 @@ function getResult(m){
   return 'D';
 }
 
-// Quick stats
-const played = RAW.filter(m=>m.result&&!m.free);
-const wins = played.filter(m=>getResult(m)==='W').length;
-const draws = played.filter(m=>getResult(m)==='D').length;
-const losses = played.filter(m=>getResult(m)==='L').length;
-const gf = played.reduce((s,m)=>s+(m.isHome?m.result[0]:m.result[1]),0);
-const ga = played.reduce((s,m)=>s+(m.isHome?m.result[1]:m.result[0]),0);
-
-document.getElementById('quickStats').innerHTML = `
-  <div class="qs-card"><div class="qs-val gold">${played.length}</div><div class="qs-lbl">Jugados</div></div>
-  <div class="qs-card"><div class="qs-val green">${wins}</div><div class="qs-lbl">Victorias</div></div>
-  <div class="qs-card"><div class="qs-val yellow">${draws}</div><div class="qs-lbl">Empates</div></div>
-  <div class="qs-card"><div class="qs-val red">${losses}</div><div class="qs-lbl">Derrotas</div></div>
-  <div class="qs-card"><div class="qs-val gold">${gf}</div><div class="qs-lbl">Goles a Favor</div></div>
-`;
-
-// Upcoming matches (next 5 pending)
-const today = new Date().toISOString().split('T')[0];
-const upcoming = RAW.filter(m=>!m.free && !m.result && m.date >= today)
-  .sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time))
-  .slice(0,5);
-
 const leagueClass = l => l==='VPN'?'vpn':l==='VPUG'?'vpug':'e11';
-const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const dayNames   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-document.getElementById('upcomingList').innerHTML = upcoming.map(m=>{
-  const d = new Date(m.date+'T12:00:00');
-  const dateStr = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]}`;
-  return `<div class="upcoming-card">
-    <div class="u-bar ${leagueClass(m.league)}"></div>
-    <div class="u-info">
-      <div class="u-rival">${m.rival}</div>
-      <div class="u-meta">${m.league} · ${dateStr}</div>
-    </div>
-    <div class="u-badge ${m.isHome?'home':'away'}">${m.isHome?'LOCAL':'VISITA'}</div>
-    <div class="u-time">${m.time}</div>
-  </div>`;
-}).join('');
+function buildMatches(results, edits, suspended){
+  return RAW.map((m, i) => {
+    const base = Object.assign({}, m);
+    if(edits[i])     Object.assign(base, edits[i]);
+    if(suspended[i]) base.date = suspended[i].newDate;
+    if(results[i])   base.result = results[i];
+    return base;
+  });
+}
 
-// Leagues breakdown
-const leagues = ['VPN','VPUG','11x11'];
-const leagueInfo = {
-  VPN:{name:'VPN',days:'Lun / Mié',cls:'vpn'},
-  VPUG:{name:'VPUG',days:'Lun – Jue',cls:'vpug'},
-  '11x11':{name:'11x11',days:'Mar / Jue',cls:'e11'},
-};
-document.getElementById('leaguesGrid').innerHTML = leagues.map(lg=>{
-  const lm = RAW.filter(m=>m.league===lg&&!m.free);
-  const lp = lm.filter(m=>m.result);
-  const lw = lp.filter(m=>getResult(m)==='W').length;
-  const ll = lp.filter(m=>getResult(m)==='L').length;
-  const info = leagueInfo[lg];
-  return `<div class="league-card ${info.cls}">
-    <div class="lc-name">${info.name}</div>
-    <div class="lc-days">${info.days}</div>
-    <div class="lc-stats">
-      <div class="lc-stat"><div class="val">${lp.length}</div><div class="lbl">Jugados</div></div>
-      <div class="lc-stat"><div class="val" style="color:var(--win)">${lw}</div><div class="lbl">Victorias</div></div>
-      <div class="lc-stat"><div class="val" style="color:var(--loss)">${ll}</div><div class="lbl">Derrotas</div></div>
-    </div>
-  </div>`;
-}).join('');
+function renderAll(results={}, edits={}, suspended={}){
+  const MATCHES = buildMatches(results, edits, suspended);
+
+  // Quick stats
+  const played = MATCHES.filter(m=>m.result&&!m.free);
+  const wins   = played.filter(m=>getResult(m)==='W').length;
+  const draws  = played.filter(m=>getResult(m)==='D').length;
+  const losses = played.filter(m=>getResult(m)==='L').length;
+  const gf = played.reduce((s,m)=>s+(m.isHome?m.result[0]:m.result[1]),0);
+
+  document.getElementById('quickStats').innerHTML = `
+    <div class="qs-card"><div class="qs-val gold">${played.length}</div><div class="qs-lbl">Jugados</div></div>
+    <div class="qs-card"><div class="qs-val green">${wins}</div><div class="qs-lbl">Victorias</div></div>
+    <div class="qs-card"><div class="qs-val yellow">${draws}</div><div class="qs-lbl">Empates</div></div>
+    <div class="qs-card"><div class="qs-val red">${losses}</div><div class="qs-lbl">Derrotas</div></div>
+    <div class="qs-card"><div class="qs-val gold">${gf}</div><div class="qs-lbl">Goles a Favor</div></div>
+  `;
+
+  // Upcoming matches (next 5 pending)
+  const today = new Date().toISOString().split('T')[0];
+  const upcoming = MATCHES
+    .filter(m=>!m.free && !m.result && m.date >= today)
+    .sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time))
+    .slice(0,5);
+
+  document.getElementById('upcomingList').innerHTML = upcoming.length ? upcoming.map(m=>{
+    const d = new Date(m.date+'T12:00:00');
+    const dateStr = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]}`;
+    return `<div class="upcoming-card">
+      <div class="u-bar ${leagueClass(m.league)}"></div>
+      <div class="u-info">
+        <div class="u-rival">${m.rival}</div>
+        <div class="u-meta">${m.league} · ${dateStr}</div>
+      </div>
+      <div class="u-badge ${m.isHome?'home':'away'}">${m.isHome?'LOCAL':'VISITA'}</div>
+      <div class="u-time">${m.time}</div>
+    </div>`;
+  }).join('') : `<div style="color:var(--muted2);font-size:.85rem;padding:16px 0">No hay partidos pendientes próximamente</div>`;
+
+  // Leagues breakdown
+  const leagues = ['VPN','VPUG','11x11'];
+  const leagueInfo = {
+    VPN:{name:'VPN',days:'Lun / Mié',cls:'vpn'},
+    VPUG:{name:'VPUG',days:'Lun – Jue',cls:'vpug'},
+    '11x11':{name:'11x11',days:'Mar / Jue',cls:'e11'},
+  };
+  document.getElementById('leaguesGrid').innerHTML = leagues.map(lg=>{
+    const lm = MATCHES.filter(m=>m.league===lg&&!m.free);
+    const lp = lm.filter(m=>m.result);
+    const lw = lp.filter(m=>getResult(m)==='W').length;
+    const ll = lp.filter(m=>getResult(m)==='L').length;
+    const info = leagueInfo[lg];
+    return `<div class="league-card ${info.cls}">
+      <div class="lc-name">${info.name}</div>
+      <div class="lc-days">${info.days}</div>
+      <div class="lc-stats">
+        <div class="lc-stat"><div class="val">${lp.length}</div><div class="lbl">Jugados</div></div>
+        <div class="lc-stat"><div class="val" style="color:var(--win)">${lw}</div><div class="lbl">Victorias</div></div>
+        <div class="lc-stat"><div class="val" style="color:var(--loss)">${ll}</div><div class="lbl">Derrotas</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Initial render with empty data while Firebase loads
+renderAll();
+
+// Live updates from Firebase
+onSnapshot(CAL_DOC, snap => {
+  if(snap.exists()){
+    const { results={}, edits={}, suspended={} } = snap.data();
+    renderAll(results, edits, suspended);
+  }
+});
 </script>
+
 </body>
 </html>

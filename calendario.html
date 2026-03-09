@@ -1,8 +1,10 @@
-<html lang="es"><head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Top Secret FC · Calendario</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&amp;family=Barlow:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -571,11 +573,11 @@ body{padding-top:60px;}
 
 <!-- Stats -->
 <div class="stats" id="statsBar">
-  <div class="stat-card"><div class="stat-val" id="sTotal">55</div><div class="stat-lbl">Partidos totales</div></div>
-  <div class="stat-card"><div class="stat-val" style="color:var(--win)" id="sWin">7</div><div class="stat-lbl">Victorias</div></div>
+  <div class="stat-card"><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Partidos totales</div></div>
+  <div class="stat-card"><div class="stat-val" style="color:var(--win)" id="sWin">0</div><div class="stat-lbl">Victorias</div></div>
   <div class="stat-card"><div class="stat-val" style="color:var(--draw)" id="sDraw">0</div><div class="stat-lbl">Empates</div></div>
-  <div class="stat-card"><div class="stat-val" style="color:var(--loss)" id="sLoss">1</div><div class="stat-lbl">Derrotas</div></div>
-  <div class="stat-card"><div class="stat-val" id="sPlayed">8</div><div class="stat-lbl">Jugados</div></div>
+  <div class="stat-card"><div class="stat-val" style="color:var(--loss)" id="sLoss">0</div><div class="stat-lbl">Derrotas</div></div>
+  <div class="stat-card"><div class="stat-val" id="sPlayed">0</div><div class="stat-lbl">Jugados</div></div>
 </div>
 
 <!-- Controls -->
@@ -594,1125 +596,7 @@ body{padding-top:60px;}
   </div>
 </div>
 
-<div class="calendar" id="cal"><div class="week"><div class="week-title">Semana del 2 al 8 de Marzo</div><div class="day"><div class="day-label">Lunes 2 de Marzo</div><div class="match" data-league="VPUG" data-id="0" style="animation-delay: 0s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Suda eSports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(0)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box win final" onclick="openModal(0)">
-                <div class="result-score">2 – 0</div>
-                <div class="result-label">Victoria</div>
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Martes 3 de Marzo</div><div class="match" data-league="VPUG" data-id="1" style="animation-delay: 0.03s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Team Valhalla</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(1)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box win final" onclick="openModal(1)">
-                <div class="result-score">5 – 0</div>
-                <div class="result-label">Victoria</div>
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="2" style="animation-delay: 0.06s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Instituto Reserva</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(2)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box loss final" onclick="openModal(2)">
-                <div class="result-score">0 – 3</div>
-                <div class="result-label">Derrota</div>
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="3" style="animation-delay: 0.09s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Los Picantes Esports</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(3)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box win final" onclick="openModal(3)">
-                <div class="result-score">7 – 0</div>
-                <div class="result-label">Victoria</div>
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Miércoles 4 de Marzo</div><div class="match" data-league="VPUG" data-id="4" style="animation-delay: 0.12s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">La Unión FC</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(4)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box win final" onclick="openModal(4)">
-                <div class="result-score">8 – 1</div>
-                <div class="result-label">Victoria</div>
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Jueves 5 de Marzo</div><div class="match" data-league="VPUG" data-id="5" style="animation-delay: 0.15s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Ferro eSports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(5)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box win final" onclick="openModal(5)">
-                <div class="result-score">1 – 0</div>
-                <div class="result-label">Victoria</div>
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="6" style="animation-delay: 0.18s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Talleres Cantera</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(6)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box win final" onclick="openModal(6)">
-                <div class="result-score">6 – 0</div>
-                <div class="result-label">Victoria</div>
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="7" style="animation-delay: 0.21s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Instituto Senior</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(7)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box win final" onclick="openModal(7)">
-                <div class="result-score">6 – 0</div>
-                <div class="result-label">Victoria</div>
-              </div>
-            </div>
-          </div></div></div><div class="week"><div class="week-title">Semana del 9 al 15 de Marzo</div><div class="day"><div class="day-label">Lunes 9 de Marzo</div><div class="match" data-league="VPUG" data-id="16" style="animation-delay: 0.18s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">I.A.C.C Cantera</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(16)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(16)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="8" style="animation-delay: 0.24s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Los Lesionados</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(8)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(8)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="9" style="animation-delay: 0.27s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Olimpo Esports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(9)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(9)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Martes 10 de Marzo</div><div class="match" data-league="VPUG" data-id="19" style="animation-delay: 0.27s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Evermeet Rising</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(19)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(19)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="10" style="animation-delay: 0s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Talleres Reserva</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(10)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(10)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="11" style="animation-delay: 0.03s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Estudiantes Río Cuarto</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(11)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(11)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Miércoles 11 de Marzo</div><div class="match" data-league="VPUG" data-id="22" style="animation-delay: 0.06s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Team Ceniza</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(22)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(22)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="12" style="animation-delay: 0.06s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Suda Esports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(12)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(12)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="13" style="animation-delay: 0.09s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">4BDOMIFL4NES</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(13)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(13)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Jueves 12 de Marzo</div><div class="match" data-league="VPUG" data-id="25" style="animation-delay: 0.15s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Real Marcianos FC</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(25)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(25)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="14" style="animation-delay: 0.12s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Escuela Vieja</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(14)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(14)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="15" style="animation-delay: 0.15s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Team Valhalla</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(15)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(15)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div></div><div class="week"><div class="week-title">Semana del 16 al 22 de Marzo</div><div class="day"><div class="day-label">Lunes 16 de Marzo</div><div class="match" data-league="VPUG" data-id="30" style="animation-delay: 0s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Germinal eSports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(30)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(30)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="17" style="animation-delay: 0.21s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">All Boys</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(17)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(17)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="18" style="animation-delay: 0.24s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">FERRO</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(18)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(18)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Martes 17 de Marzo</div><div class="match" data-league="VPUG" data-id="33" style="animation-delay: 0.09s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Olimpo eSports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(33)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(33)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="20" style="animation-delay: 0s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Deportivo Ballester</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(20)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(20)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="21" style="animation-delay: 0.03s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Olimpo Esports</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(21)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(21)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Miércoles 18 de Marzo</div><div class="match" data-league="VPUG" data-id="36" style="animation-delay: 0.18s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">DeLa Nada FC</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(36)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(36)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="23" style="animation-delay: 0.09s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">La Resaca</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(23)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(23)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="24" style="animation-delay: 0.12s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Almirante Brown eSport</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(24)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(24)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Jueves 19 de Marzo</div><div class="match" data-league="VPUG" data-id="39" style="animation-delay: 0.27s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Villa Dalmine eSp</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(39)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(39)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="26" style="animation-delay: 0.18s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Acosta Beef Esports</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(26)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(26)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="27" style="animation-delay: 0.21s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">IACC Cantera</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(27)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(27)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div></div><div class="week"><div class="week-title">Semana del 23 al 29 de Marzo</div><div class="day"><div class="day-label">Lunes 23 de Marzo</div><div class="match" data-league="VPUG" data-id="42" style="animation-delay: 0.06s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Atletico Titan</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(42)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(42)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match free-day" data-league="VPN" data-id="28" style="animation-delay: 0.24s;">
-            <div class="match-bar bar-vpn" style="opacity:.4"></div>
-            <div class="match-body">
-              <div class="rival"><span class="free-icon">🗓️</span>Fecha libre</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-          </div><div class="match free-day" data-league="VPN" data-id="29" style="animation-delay: 0.27s;">
-            <div class="match-bar bar-vpn" style="opacity:.4"></div>
-            <div class="match-body">
-              <div class="rival"><span class="free-icon">🗓️</span>Fecha libre</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-          </div></div><div class="day"><div class="day-label">Martes 24 de Marzo</div><div class="match" data-league="VPUG" data-id="45" style="animation-delay: 0.15s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Belgrano eSports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(45)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(45)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="31" style="animation-delay: 0.03s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Altoke Perro</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(31)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(31)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="32" style="animation-delay: 0.06s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">All Boys</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(32)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(32)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Miércoles 25 de Marzo</div><div class="match" data-league="VPUG" data-id="48" style="animation-delay: 0.24s;">
-            <div class="match-bar bar-vpug"></div>
-            <div class="match-body">
-              <div class="rival">Almirante Brown eSp</div>
-              <div class="meta">
-                <span class="league-badge badge-vpug">VPUG</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">22:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(48)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(48)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="34" style="animation-delay: 0.12s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">SUB 21CF</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(34)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(34)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="35" style="animation-delay: 0.15s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Parke Avellaneda</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(35)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(35)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Jueves 26 de Marzo</div><div class="match" data-league="11x11" data-id="37" style="animation-delay: 0.21s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">ROKA56</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(37)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(37)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="38" style="animation-delay: 0.24s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Cambaceres</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(38)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(38)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div></div><div class="week"><div class="week-title">Semana del 30 al 5 de Abril</div><div class="day"><div class="day-label">Lunes 30 de Marzo</div><div class="match" data-league="VPN" data-id="40" style="animation-delay: 0s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Nueva Chicago eSports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(40)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(40)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="41" style="animation-delay: 0.03s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Instituto Reserva</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(41)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(41)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Martes 31 de Marzo</div><div class="match" data-league="11x11" data-id="43" style="animation-delay: 0.09s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">4BDOMIFL4NES</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(43)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(43)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="44" style="animation-delay: 0.12s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Camioneros Esports</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(44)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(44)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Miércoles 1 de Abril</div><div class="match" data-league="VPN" data-id="46" style="animation-delay: 0.18s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Team Caniza</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(46)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(46)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="47" style="animation-delay: 0.21s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Instituto Cantera</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(47)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(47)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Jueves 2 de Abril</div><div class="match" data-league="11x11" data-id="49" style="animation-delay: 0.27s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Sub 21 CF</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(49)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(49)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="50" style="animation-delay: 0s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Ferro</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(50)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(50)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="11x11" data-id="53" style="animation-delay: 0.09s;">
-            <div class="match-bar bar-e11"></div>
-            <div class="match-body">
-              <div class="rival">Suda ESP</div>
-              <div class="meta">
-                <span class="league-badge badge-e11">11x11</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:50</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(53)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(53)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div></div><div class="week"><div class="week-title">Semana del 6 al 12 de Abril</div><div class="day"><div class="day-label">Lunes 6 de Abril</div><div class="match" data-league="VPN" data-id="51" style="animation-delay: 0.03s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Infinitx</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(51)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(51)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="52" style="animation-delay: 0.06s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Lirico FC</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">🏠 Local</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(52)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(52)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div><div class="day"><div class="day-label">Miércoles 8 de Abril</div><div class="match" data-league="VPN" data-id="54" style="animation-delay: 0.12s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Deportivo Ballester</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:00</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(54)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(54)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="55" style="animation-delay: 0.15s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Villa Dalmine Esports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:30</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(55)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(55)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div><div class="match" data-league="VPN" data-id="56" style="animation-delay: 0.18s;">
-            <div class="match-bar bar-vpn"></div>
-            <div class="match-body">
-              <div class="rival">Camioneros eSports</div>
-              <div class="meta">
-                <span class="league-badge badge-vpn">VPN</span>
-                <span class="loc">✈️ Visita</span>
-                
-              </div>
-            </div>
-            <div class="match-time">23:50</div>
-            <div class="card-actions">
-              <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(56)">✏️</button>
-            </div>
-            <div class="result-cell">
-              <div class="result-box pending" onclick="openModal(56)">
-                <div class="result-score">· · ·</div>
-                
-              </div>
-            </div>
-          </div></div></div></div>
+<div class="calendar" id="cal"></div>
 
 <!-- Edit Modal -->
 <div class="overlay" id="editOverlay">
@@ -1751,12 +635,12 @@ body{padding-top:60px;}
 <!-- Modal -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <h3 id="mTitle">Instituto Reserva</h3>
-    <div class="sub" id="mSub">Martes 3 de Marzo · 23:00 · 11x11</div>
+    <h3 id="mTitle">Resultado</h3>
+    <div class="sub" id="mSub"></div>
     <div class="score-input">
-      <input type="number" id="mHome" min="0" max="99" placeholder="0" data-sharkid="__0">
+      <input type="number" id="mHome" min="0" max="99" placeholder="0">
       <span class="score-sep">–</span>
-      <input type="number" id="mAway" min="0" max="99" placeholder="0" data-sharkid="__1">
+      <input type="number" id="mAway" min="0" max="99" placeholder="0">
     </div>
     <div class="modal-btns">
       <button class="mbtn mbtn-clear" onclick="clearRes()">Borrar</button>
@@ -1766,509 +650,172 @@ body{padding-top:60px;}
   </div>
 </div>
 
-<script>
+<script type="module">
 // ── MATCH DATA ────────────────────────────────────────────────────────────────
 // location: 'L'=Local (Top Secret primero), 'V'=Visitante (rival primero)
 // result: null=pending, [homeGoals, awayGoals] (desde perspectiva del partido, no del equipo)
 // isHome: true si TOP SECRET juega de local
 
 const RAW = [
-  {
-    "date": "2026-03-02",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Suda eSports",
-    "isHome": true,
-    "result": [
-      2,
-      0
-    ]
-  },
-  {
-    "date": "2026-03-03",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Team Valhalla",
-    "isHome": false,
-    "result": [
-      0,
-      5
-    ]
-  },
-  {
-    "date": "2026-03-03",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Instituto Reserva",
-    "isHome": false,
-    "result": [
-      3,
-      0
-    ]
-  },
-  {
-    "date": "2026-03-03",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Los Picantes Esports",
-    "isHome": true,
-    "result": [
-      7,
-      0
-    ]
-  },
-  {
-    "date": "2026-03-04",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "La Unión FC",
-    "isHome": true,
-    "result": [
-      8,
-      1
-    ]
-  },
-  {
-    "date": "2026-03-05",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Ferro eSports",
-    "isHome": false,
-    "result": [
-      0,
-      1
-    ]
-  },
-  {
-    "date": "2026-03-05",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Talleres Cantera",
-    "isHome": true,
-    "result": [
-      6,
-      0
-    ]
-  },
-  {
-    "date": "2026-03-05",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Instituto Senior",
-    "isHome": true,
-    "result": [
-      6,
-      0
-    ]
-  },
-  {
-    "date": "2026-03-09",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "Los Lesionados",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-09",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "Olimpo Esports",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-10",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Talleres Reserva",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-10",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Estudiantes Río Cuarto",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-11",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "Suda Esports",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-11",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "4BDOMIFL4NES",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-12",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Escuela Vieja",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-12",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Team Valhalla",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-09",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "I.A.C.C Cantera",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-16",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "All Boys",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-16",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "FERRO",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-10",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Evermeet Rising",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-17",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Deportivo Ballester",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-17",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Olimpo Esports",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-11",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Team Ceniza",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-18",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "La Resaca",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-18",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "Almirante Brown eSport",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-12",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Real Marcianos FC",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-19",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Acosta Beef Esports",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-19",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "IACC Cantera",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-23",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "FECHA LIBRE",
-    "isHome": null,
-    "result": null,
-    "free": true
-  },
-  {
-    "date": "2026-03-23",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "FECHA LIBRE",
-    "isHome": null,
-    "result": null,
-    "free": true
-  },
-  {
-    "date": "2026-03-16",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Germinal eSports",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-24",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Altoke Perro",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-24",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "All Boys",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-17",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Olimpo eSports",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-25",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "SUB 21CF",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-25",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "Parke Avellaneda",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-18",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "DeLa Nada FC",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-26",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "ROKA56",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-26",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Cambaceres",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-19",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Villa Dalmine eSp",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-30",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "Nueva Chicago eSports",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-30",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "Instituto Reserva",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-23",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Atletico Titan",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-03-31",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "4BDOMIFL4NES",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-31",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Camioneros Esports",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-24",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Belgrano eSports",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-04-01",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "Team Caniza",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-01",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "Instituto Cantera",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-03-25",
-    "time": "22:30",
-    "league": "VPUG",
-    "rival": "Almirante Brown eSp",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-02",
-    "time": "23:00",
-    "league": "11x11",
-    "rival": "Sub 21 CF",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-02",
-    "time": "23:30",
-    "league": "11x11",
-    "rival": "Ferro",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-06",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "Infinitx",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-06",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "Lirico FC",
-    "isHome": true,
-    "result": null
-  },
-  {
-    "date": "2026-04-02",
-    "time": "23:50",
-    "league": "11x11",
-    "rival": "Suda ESP",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-08",
-    "time": "23:00",
-    "league": "VPN",
-    "rival": "Deportivo Ballester",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-08",
-    "time": "23:30",
-    "league": "VPN",
-    "rival": "Villa Dalmine Esports",
-    "isHome": false,
-    "result": null
-  },
-  {
-    "date": "2026-04-08",
-    "time": "23:50",
-    "league": "VPN",
-    "rival": "Camioneros eSports",
-    "isHome": false,
-    "result": null
-  }
+  // ══ SEMANA 2-5 MARZO ══
+  // Lun 02 Mar - VPUG
+  {date:'2026-03-02',time:'22:30',league:'VPUG', rival:'Suda eSports',       isHome:true,  result:[2,0]},
+  // Mar 03 Mar - VPUG + 11x11
+  {date:'2026-03-03',time:'22:30',league:'VPUG', rival:'Team Valhalla',      isHome:false, result:[0,5]},
+  {date:'2026-03-03',time:'23:00',league:'11x11',rival:'Instituto Reserva',   isHome:false, result:[0,3]},
+  {date:'2026-03-03',time:'23:30',league:'11x11',rival:'Los Picantes Esports',isHome:true,  result:[7,0]},
+  // Mié 04 Mar - VPUG
+  {date:'2026-03-04',time:'22:30',league:'VPUG', rival:'La Unión FC',        isHome:true,  result:[8,1]},
+  // Jue 05 Mar - VPUG + 11x11
+  {date:'2026-03-05',time:'22:30',league:'VPUG', rival:'Ferro eSports',      isHome:false, result:[0,1]},
+  {date:'2026-03-05',time:'23:00',league:'11x11',rival:'Talleres Cantera',    isHome:true,  result:[6,0]},
+  {date:'2026-03-05',time:'23:30',league:'11x11',rival:'Instituto Senior',    isHome:true,  result:[6,0]},
+
+  // ══ SEMANA 9-12 MARZO ══
+  // Lun 9 Mar
+  {date:'2026-03-09',time:'23:00',league:'VPN',  rival:'Los Lesionados',    isHome:true,  result:null},
+  {date:'2026-03-09',time:'23:30',league:'VPN',  rival:'Olimpo Esports',     isHome:false, result:null},
+
+  // Mar 10 Mar
+  {date:'2026-03-10',time:'23:00',league:'11x11',rival:'Talleres Reserva',   isHome:true,  result:null},
+  {date:'2026-03-10',time:'23:30',league:'11x11',rival:'Estudiantes Río Cuarto',isHome:true,result:null},
+
+  // Mié 11 Mar
+  {date:'2026-03-11',time:'23:00',league:'VPN',  rival:'Suda Esports',       isHome:true,  result:null},
+  {date:'2026-03-11',time:'23:30',league:'VPN',  rival:'4BDOMIFL4NES',       isHome:false, result:null},
+
+  // Jue 12 Mar
+  {date:'2026-03-12',time:'23:00',league:'11x11',rival:'Escuela Vieja',      isHome:false, result:null},
+  {date:'2026-03-12',time:'23:30',league:'11x11',rival:'Team Valhalla',      isHome:false, result:null},
+
+  // ══ SEMANA 16-19 MARZO ══
+  // Lun 16 Mar
+  {date:'2026-03-09',time:'22:30',league:'VPUG', rival:'I.A.C.C Cantera',    isHome:true,  result:null},
+  {date:'2026-03-16',time:'23:00',league:'VPN',  rival:'All Boys',           isHome:true,  result:null},
+  {date:'2026-03-16',time:'23:30',league:'VPN',  rival:'FERRO',              isHome:false, result:null},
+
+  // Mar 17 Mar
+  {date:'2026-03-10',time:'22:30',league:'VPUG', rival:'Evermeet Rising',    isHome:false, result:null},
+  {date:'2026-03-17',time:'23:00',league:'11x11',rival:'Deportivo Ballester',isHome:false, result:null},
+  {date:'2026-03-17',time:'23:30',league:'11x11',rival:'Olimpo Esports',     isHome:true,  result:null},
+
+  // Mié 18 Mar
+  {date:'2026-03-11',time:'22:30',league:'VPUG', rival:'Team Ceniza',    isHome:true,  result:null},
+  {date:'2026-03-18',time:'23:00',league:'VPN',  rival:'La Resaca',          isHome:true,  result:null},
+  {date:'2026-03-18',time:'23:30',league:'VPN',  rival:'Almirante Brown eSport',isHome:false,result:null},
+
+  // Jue 19 Mar
+  {date:'2026-03-12',time:'22:30',league:'VPUG', rival:'Real Marcianos FC',  isHome:false, result:null},
+  {date:'2026-03-19',time:'23:00',league:'11x11',rival:'Acosta Beef Esports',isHome:false, result:null},
+  {date:'2026-03-19',time:'23:30',league:'11x11',rival:'IACC Cantera',       isHome:false, result:null},
+
+  // ══ SEMANA 23-26 MARZO ══
+  // Lun 23 Mar
+  {date:'2026-03-23',time:'23:00',league:'VPN',  rival:'FECHA LIBRE',       isHome:null, result:null, free:true},
+  {date:'2026-03-23',time:'23:30',league:'VPN',  rival:'FECHA LIBRE',       isHome:null, result:null, free:true},
+  // Mar 24 Mar
+  {date:'2026-03-16',time:'22:30',league:'VPUG', rival:'Germinal eSports',   isHome:true,  result:null},
+  {date:'2026-03-24',time:'23:00',league:'11x11',rival:'Altoke Perro',       isHome:false, result:null},
+  {date:'2026-03-24',time:'23:30',league:'11x11',rival:'All Boys',           isHome:true,  result:null},
+
+  // Mié 25 Mar
+  {date:'2026-03-17',time:'22:30',league:'VPUG', rival:'Olimpo eSports',     isHome:true,  result:null},
+  {date:'2026-03-25',time:'23:00',league:'VPN',  rival:'SUB 21CF',           isHome:true,  result:null},
+  {date:'2026-03-25',time:'23:30',league:'VPN',  rival:'Parke Avellaneda',   isHome:true,  result:null},
+
+  // Jue 26 Mar
+  {date:'2026-03-18',time:'22:30',league:'VPUG', rival:'DeLa Nada FC',       isHome:false, result:null},
+  {date:'2026-03-26',time:'23:00',league:'11x11',rival:'ROKA56',             isHome:false, result:null},
+  {date:'2026-03-26',time:'23:30',league:'11x11',rival:'Cambaceres',         isHome:true,  result:null},
+
+  // ══ SEMANA 30 MAR - 2 ABR ══
+  // Lun 30 Mar
+  {date:'2026-03-19',time:'22:30',league:'VPUG', rival:'Villa Dalmine eSp',  isHome:true,  result:null},
+  {date:'2026-03-30',time:'23:00',league:'VPN',  rival:'Nueva Chicago eSports',isHome:false,result:null},
+  {date:'2026-03-30',time:'23:30',league:'VPN',  rival:'Instituto Reserva',  isHome:false, result:null},
+
+  // Mar 31 Mar
+  {date:'2026-03-23',time:'22:30',league:'VPUG', rival:'Atletico Titan',     isHome:false, result:null},
+  {date:'2026-03-31',time:'23:00',league:'11x11',rival:'4BDOMIFL4NES',       isHome:true,  result:null},
+  {date:'2026-03-31',time:'23:30',league:'11x11',rival:'Camioneros Esports', isHome:true,  result:null},
+
+  // Mié 1 Abr
+  {date:'2026-03-24',time:'22:30',league:'VPUG', rival:'Belgrano eSports',   isHome:true,  result:null},
+  {date:'2026-04-01',time:'23:00',league:'VPN',  rival:'Team Caniza',        isHome:false, result:null},
+  {date:'2026-04-01',time:'23:30',league:'VPN',  rival:'Instituto Cantera',  isHome:true,  result:null},
+
+  // Jue 2 Abr
+  {date:'2026-03-25',time:'22:30',league:'VPUG', rival:'Almirante Brown eSp',isHome:false, result:null},
+  {date:'2026-04-02',time:'23:00',league:'11x11',rival:'Sub 21 CF',          isHome:false, result:null},
+  {date:'2026-04-02',time:'23:30',league:'11x11',rival:'Ferro',              isHome:false, result:null},
+
+  // ══ SEMANA 6-9 ABR ══
+  // Lun 6 Abr
+  {date:'2026-04-06',time:'23:00',league:'VPN',  rival:'Infinitx',           isHome:false, result:null},
+  {date:'2026-04-06',time:'23:30',league:'VPN',  rival:'Lirico FC',          isHome:true,  result:null},
+
+  // Mar 7 Abr
+  {date:'2026-04-02',time:'23:50',league:'11x11',rival:'Suda ESP',           isHome:false, result:null},
+
+  // Mié 8 Abr
+  {date:'2026-04-08',time:'23:00',league:'VPN',  rival:'Deportivo Ballester',isHome:false, result:null},
+  {date:'2026-04-08',time:'23:30',league:'VPN',  rival:'Villa Dalmine Esports',isHome:false,result:null},
+  {date:'2026-04-08',time:'23:50',league:'VPN',  rival:'Camioneros eSports', isHome:false, result:null},
+
 ];
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let results    = {};
-let edits      = {};
-let suspended  = {}; // id -> {originalDate, newDate}
+let results    = JSON.parse(localStorage.getItem('ts_results')   ||'{}');
+let edits      = JSON.parse(localStorage.getItem('ts_edits')     ||'{}');
+let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}'); // id -> {originalDate, newDate}
 let currentFilter = 'all';
 let editingId = null;
 let editHomeVal = true;
 
-function saveState(){
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M",
+  authDomain: "top-secret-fc.firebaseapp.com",
+  projectId: "top-secret-fc",
+  storageBucket: "top-secret-fc.firebasestorage.app",
+  messagingSenderId: "303110190986",
+  appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const CAL_DOC = doc(db, 'calendario', 'estado');
+
+let _fbReady = false;
+
+// Load from Firestore on start, then keep local state in sync
+onSnapshot(CAL_DOC, snap => {
+  if(snap.exists()){
+    const data = snap.data();
+    results   = data.results   || {};
+    edits     = data.edits     || {};
+    suspended = data.suspended || {};
+    // sync to localStorage as backup
+    localStorage.setItem('ts_results',   JSON.stringify(results));
+    localStorage.setItem('ts_edits',     JSON.stringify(edits));
+    localStorage.setItem('ts_suspended', JSON.stringify(suspended));
+  }
+  if(!_fbReady){ _fbReady = true; render(); }
+  else { render(); }
+});
+
+async function saveState(){
+  // Save locally
   localStorage.setItem('ts_results',   JSON.stringify(results));
   localStorage.setItem('ts_edits',     JSON.stringify(edits));
   localStorage.setItem('ts_suspended', JSON.stringify(suspended));
+  // Save to Firebase
+  try {
+    await setDoc(CAL_DOC, { results, edits, suspended }, { merge: true });
+  } catch(e){ console.warn('Firebase write error:', e); }
 }
 
 // Returns effective match data (with edits and suspension applied)
@@ -2622,8 +1169,8 @@ function exportHTML(){
   URL.revokeObjectURL(a.href);
 }
 
-render();
+// render() is called by onSnapshot when Firebase data loads
 </script>
 
-
-</body><chatgpt-sidebar data-gpts-theme="light"></chatgpt-sidebar></html>
+</body>
+</html>
