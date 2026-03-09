@@ -501,7 +501,7 @@ function renderQueue(){
   }
   uploadArea.style.display = 'none';
   queue.classList.add('show');
-  const statusIcon = s => s==='pending'?'':'s==='analyzing'?'⏳':s==='done'?'✅':'❌';
+  const statusIcon = s => s==='pending'?'':s==='analyzing'?'⏳':s==='done'?'✅':'❌';
   queue.innerHTML = imageQueue.map((img,i)=>`
     <div class="img-thumb ${img.status!=='pending'?img.status:''}">
       <img src="${img.dataUrl}" alt="img ${i+1}">

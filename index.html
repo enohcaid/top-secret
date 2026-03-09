@@ -559,15 +559,23 @@ function renderAll(results={}, edits={}, suspended={}){
   }).join('');
 }
 
-// Initial render with empty data while Firebase loads
-renderAll();
+// Mostrar estado de carga mientras Firebase conecta
+function renderLoading(){
+  document.getElementById('quickStats').innerHTML = `
+    <div class="qs-card"><div class="qs-val gold" style="opacity:.3">—</div><div class="qs-lbl">Jugados</div></div>
+    <div class="qs-card"><div class="qs-val green" style="opacity:.3">—</div><div class="qs-lbl">Victorias</div></div>
+    <div class="qs-card"><div class="qs-val yellow" style="opacity:.3">—</div><div class="qs-lbl">Empates</div></div>
+    <div class="qs-card"><div class="qs-val red" style="opacity:.3">—</div><div class="qs-lbl">Derrotas</div></div>
+    <div class="qs-card"><div class="qs-val gold" style="opacity:.3">—</div><div class="qs-lbl">Goles a Favor</div></div>
+  `;
+}
+renderLoading();
 
 // Live updates from Firebase
 onSnapshot(CAL_DOC, snap => {
-  if(snap.exists()){
-    const { results={}, edits={}, suspended={} } = snap.data();
-    renderAll(results, edits, suspended);
-  }
+  const data = snap.exists() ? snap.data() : {};
+  const { results={}, edits={}, suspended={} } = data;
+  renderAll(results, edits, suspended);
 });
 </script>
 
