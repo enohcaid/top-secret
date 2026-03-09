@@ -476,7 +476,9 @@ function addFiles(files){
     if(!file.type.startsWith('image/')){ showToast('Solo imágenes (PNG, JPG, WEBP)','error'); return; }
     const reader = new FileReader();
     reader.onload = e => {
-      imageQueue.push({base64: e.target.result.split(',')[1], dataUrl: e.target.result, status:'pending', result:null});
+      const dataUrl = e.target.result;
+      const mediaType = dataUrl.split(';')[0].split(':')[1] || 'image/jpeg';
+      imageQueue.push({base64: dataUrl.split(',')[1], dataUrl, mediaType, status:'pending', result:null});
       renderQueue();
     };
     reader.readAsDataURL(file);
@@ -617,14 +619,17 @@ Reglas adicionales: si un valor no es legible usá null. rating es decimal. pass
           messages:[{
             role:'user',
             content:[
-              {type:'image', source:{type:'base64', media_type:'image/jpeg', data:img.base64}},
+              {type:'image', source:{type:'base64', media_type: img.mediaType || 'image/jpeg', data:img.base64}},
               {type:'text', text:prompt}
             ]
           }]
         })
       });
       const data = await resp.json();
+      // Si la API devuelve error, mostrarlo claramente
+      if(data.error) throw new Error(`API error: ${data.error.message || JSON.stringify(data.error)}`);
       const text = data.content?.find(b=>b.type==='text')?.text||'';
+      if(!text) throw new Error(`Respuesta vacía. Raw: ${JSON.stringify(data).slice(0,200)}`);
       const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
 
       img.status = 'done';
@@ -645,9 +650,9 @@ Reglas adicionales: si un valor no es legible usá null. rating es decimal. pass
       if(!matchResult && parsed.match_result) matchResult = parsed.match_result;
 
     } catch(err){
-      console.error(err);
+      console.error('Error imagen', i+1, err);
       img.status = 'error';
-      showToast(`Error en imagen ${i+1}. Continuando...`,'error');
+      showToast(`Error imagen ${i+1}: ${err.message}`, 'error');
     }
     renderQueue();
   }
