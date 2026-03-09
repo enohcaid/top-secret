@@ -566,6 +566,7 @@ body{
     <button class="fbtn" onclick="filter('VPN',this)">VPN</button>
     <button class="fbtn vpug" onclick="filter('VPUG',this)">VPUG</button>
     <button class="fbtn e11" onclick="filter('11x11',this)">11x11</button>
+    <button class="fbtn" onclick="exportHTML()" style="border-color:#3ecf8e;color:#3ecf8e;" title="Descargá el archivo actualizado y subilo a GitHub">💾 Exportar</button>
   </div>
 </div>
 
@@ -1060,6 +1061,47 @@ document.getElementById('editOverlay').addEventListener('click',function(e){
   if(e.target===this) closeEditModal();
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeEditModal(); } });
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportHTML(){
+  // Bake all edits, suspensions and results into RAW
+  const bakedRAW = RAW.map((m, i) => {
+    const out = Object.assign({}, m);
+    if(edits[i])     Object.assign(out, edits[i]);
+    if(suspended[i]) out.date = suspended[i].newDate;
+    if(results[i])   out.result = results[i];
+    return out;
+  });
+
+  let html = document.documentElement.outerHTML;
+
+  // Replace RAW array with baked version
+  html = html.replace(
+    /const RAW = \[[\s\S]*?\];/,
+    'const RAW = ' + JSON.stringify(bakedRAW, null, 2) + ';'
+  );
+
+  // Clear localStorage reads since data is now baked in
+  html = html.replace(
+    `let results    = JSON.parse(localStorage.getItem('ts_results')   ||'{}');`,
+    `let results    = {};`
+  );
+  html = html.replace(
+    `let edits      = JSON.parse(localStorage.getItem('ts_edits')     ||'{}');`,
+    `let edits      = {};`
+  );
+  html = html.replace(
+    `let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}');`,
+    `let suspended  = {};`
+  );
+
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 render();
 </script>
