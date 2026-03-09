@@ -542,17 +542,42 @@ async function analyzeAll(){
   document.getElementById('analyzingState').classList.add('show');
   document.getElementById('resultCard').classList.remove('show');
 
-  const rosterNames = ROSTER.map(p=>p.name).join(', ');
+  // URL del Cloudflare Worker (proxy para evitar CORS)
+  const WORKER_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+
+  // Roster con apodos conocidos para mejorar el matching
+  const rosterList = ROSTER.map(p => `- ${p.name} (${p.pos})`).join('\n');
   const prompt = `Sos un analista de datos de EA FC / FIFA. Se te envía una captura de estadísticas post-partido del equipo "Top Secret FC".
 
-Nuestro plantel: ${rosterNames}
+PLANTEL OFICIAL (nombre exacto · posición):
+${rosterList}
+
+REGLAS DE IDENTIFICACIÓN DE JUGADORES:
+Los nombres en pantalla son apodos o versiones abreviadas de los nombres del plantel. Usá estas equivalencias conocidas y también deducí por similitud fonética o parcial:
+- "Lautavester7" → Lautavester7 ✓ (coincidencia exacta)
+- "T. cansitrGD22" o "cansitr" → cansitrGd22_
+- "BlackPanther" o "Black" → BlackPanther-CG
+- "ciprimancini" o "Cipri" → CipriMancini
+- "J. Martinez" o "Martinez" → Juan_Martinez4
+- "Guiidow" → Guiidow ✓
+- "O. Pibu" o "Pibu" → zPibu__
+- "Agubostero7" o "Agubo" → Agubostero7 ✓
+- "Alexisraies2" o "Alexis" → Alexiisraiies23
+- "ZurdoCABJ" o "Zurdo" → Zurdo-_CABJ12
+- "Woolfyboyzx2" o "Woolfy" → Woolfyboyzx2 ✓
+- "Huber" o "Huber236" → Huber236
+- "Buraa" o "Bura" → Buraa07
+- "DaniStone" o "RS32" → RS32-DaniStone
+
+Para cualquier nombre que no esté en la lista anterior, intentá hacer la equivalencia por similitud.
+El campo "matched" SIEMPRE debe ser el nombre exacto del plantel oficial (no el apodo).
 
 Extraé las estadísticas de CADA jugador visible. Devolvé ÚNICAMENTE JSON válido sin texto extra ni markdown:
 {
   "players": [
     {
-      "name": "nombre como aparece en pantalla",
-      "matched": "nombre del plantel más cercano o null",
+      "name": "apodo como aparece en pantalla",
+      "matched": "nombre EXACTO del plantel oficial",
       "rating": 7.5,
       "goals": 1,
       "assists": 0,
@@ -568,7 +593,7 @@ Extraé las estadísticas de CADA jugador visible. Devolvé ÚNICAMENTE JSON vá
   "notes": ""
 }
 
-Reglas: si un valor no es legible usá null. rating es decimal. pass_accuracy es % sin símbolo. Intentá identificar cada jugador con alguien del plantel.`;
+Reglas adicionales: si un valor no es legible usá null. rating es decimal. pass_accuracy es % sin símbolo.`;
 
   let mergedPlayers = [];
   let matchResult = null;
@@ -583,7 +608,7 @@ Reglas: si un valor no es legible usá null. rating es decimal. pass_accuracy es
       `Analizando imagen ${i+1} de ${imageQueue.length}...<br><b>Extrayendo estadísticas de EA FC</b>`;
 
     try {
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      const resp = await fetch(WORKER_URL, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -605,12 +630,11 @@ Reglas: si un valor no es legible usá null. rating es decimal. pass_accuracy es
       img.status = 'done';
       img.result = parsed;
 
-      // Merge players: if a player already exists from a previous image, merge stats
+      // Merge players: si ya existe por nombre del plantel, completar campos null
       (parsed.players||[]).forEach(p=>{
         const key = (p.matched||p.name||'').toLowerCase();
         const existing = mergedPlayers.find(ep=>(ep.matched||ep.name||'').toLowerCase()===key);
         if(existing){
-          // Fill in null fields from this image
           ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions'].forEach(f=>{
             if(existing[f]===null && p[f]!==null && p[f]!==undefined) existing[f] = p[f];
           });
