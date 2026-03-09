@@ -592,7 +592,7 @@ body{padding-top:60px;}
     <button class="fbtn" onclick="filter('VPN',this)">VPN</button>
     <button class="fbtn vpug" onclick="filter('VPUG',this)">VPUG</button>
     <button class="fbtn e11" onclick="filter('11x11',this)">11x11</button>
-    <button class="fbtn" onclick="exportHTML()" style="border-color:#3ecf8e;color:#3ecf8e;" title="Descargá el archivo actualizado y subilo a GitHub">💾 Exportar</button>
+    <button class="fbtn" onclick="saveToFirebase()" id="btnSave" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar cambios para todos">☁️ Guardar</button>
   </div>
 </div>
 
@@ -1128,45 +1128,42 @@ document.getElementById('editOverlay').addEventListener('click',function(e){
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeEditModal(); } });
 
-// ── EXPORT ────────────────────────────────────────────────────────────────────
-function exportHTML(){
-  // Bake all edits, suspensions and results into RAW
-  const bakedRAW = RAW.map((m, i) => {
-    const out = Object.assign({}, m);
-    if(edits[i])     Object.assign(out, edits[i]);
-    if(suspended[i]) out.date = suspended[i].newDate;
-    if(results[i])   out.result = results[i];
-    return out;
-  });
+// ── SAVE TO FIREBASE ──────────────────────────────────────────────────────────
+async function saveToFirebase(){
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando...';
+  try {
+    await setDoc(CAL_DOC, { results, edits, suspended }, { merge: true });
+    showToast('✓ Cambios guardados para todos', 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('✗ Error al guardar. Revisá tu conexión.', 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = '☁️ Guardar';
+}
 
-  let html = document.documentElement.outerHTML;
-
-  // Replace RAW array with baked version
-  html = html.replace(
-    /const RAW = \[[\s\S]*?\];/,
-    'const RAW = ' + JSON.stringify(bakedRAW, null, 2) + ';'
-  );
-
-  // Clear localStorage reads since data is now baked in
-  html = html.replace(
-    `let results    = JSON.parse(localStorage.getItem('ts_results')   ||'{}');`,
-    `let results    = {};`
-  );
-  html = html.replace(
-    `let edits      = JSON.parse(localStorage.getItem('ts_edits')     ||'{}');`,
-    `let edits      = {};`
-  );
-  html = html.replace(
-    `let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}');`,
-    `let suspended  = {};`
-  );
-
-  const blob = new Blob([html], {type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'calendario.html';
-  a.click();
-  URL.revokeObjectURL(a.href);
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='success'){
+  let t = document.getElementById('cal-toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'cal-toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);padding:12px 24px;border-radius:10px;font-family:Barlow,sans-serif;font-size:.9rem;font-weight:600;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.background = type === 'success' ? '#1a3a2a' : '#3a1a1a';
+  t.style.color       = type === 'success' ? '#3ecf8e'  : '#e8502e';
+  t.style.border      = `1px solid ${type === 'success' ? '#3ecf8e' : '#e8502e'}`;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3000);
 }
 
 // render() is called by onSnapshot when Firebase data loads
