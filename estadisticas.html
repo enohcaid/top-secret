@@ -215,6 +215,70 @@ footer span{color:var(--gold);}
   .tabs{overflow-x:auto;}
   .tab{white-space:nowrap;padding:10px 14px;}
 }
+
+/* ── MODAL JUGADOR ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--border2);border-radius:18px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;animation:modalIn .2s ease;}
+@keyframes modalIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:1;}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:900;letter-spacing:.04em;}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.3rem;line-height:1;padding:4px 8px;border-radius:6px;}
+.modal-close:hover{color:var(--text);background:var(--border2);}
+.modal-body{padding:20px 22px;}
+.modal-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.modal-kpi{background:var(--card2);border-radius:10px;padding:12px;text-align:center;}
+.modal-kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:900;line-height:1;}
+.modal-kpi-lbl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-top:3px;}
+.modal-section-title{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted2);margin:16px 0 8px;}
+.modal-match-row{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:.82rem;transition:background .15s;}
+.modal-match-row:hover{background:var(--card2);}
+.modal-match-date{font-size:.72rem;color:var(--muted2);white-space:nowrap;}
+.modal-match-rival{font-weight:600;}
+.modal-match-g{font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--win);}
+.modal-match-a{font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--vpug);}
+.modal-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.modal-stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--card2);border-radius:8px;}
+.modal-stat-lbl{font-size:.78rem;color:var(--muted);}
+.modal-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;}
+.modal-chart-wrap{margin-top:4px;}
+
+/* ── TEAM STATS HERO ── */
+.ts-hero{background:linear-gradient(135deg,rgba(200,168,75,.12) 0%,rgba(200,168,75,.04) 60%,transparent 100%);border:1px solid rgba(200,168,75,.25);border-radius:16px 16px 0 0;padding:22px 24px 16px;border-bottom:none;}
+.ts-hero-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);}
+.ts-hero-sub{font-size:.75rem;color:var(--muted2);margin-top:3px;}
+.ts-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:none;border-bottom:none;}
+.ts-kpi{padding:18px 16px;text-align:center;border-right:1px solid var(--border);}
+.ts-kpi:last-child{border-right:none;}
+.ts-kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:900;line-height:1;}
+.ts-kpi-unit{font-size:1.2rem;font-weight:700;}
+.ts-kpi-lbl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-top:4px;}
+.ts-kpi-accent{background:rgba(245,197,24,.04);}
+.ts-charts-row{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:1px solid var(--border);border-bottom:none;}
+.ts-chart-block{padding:20px 16px;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;}
+.ts-chart-block:last-child{border-right:none;}
+.ts-chart-title{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;text-align:center;}
+.ts-chart-legend{font-size:.68rem;color:var(--muted2);margin-top:10px;text-align:center;}
+.ts-bars-section{background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:1px solid var(--border);border-radius:0 0 16px 16px;padding:18px 24px 20px;margin-bottom:20px;}
+.ts-bars-title{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;}
+.ts-bars-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 32px;}
+.ts2-row{display:flex;align-items:center;gap:10px;}
+.ts2-lbl{font-size:.74rem;color:var(--muted);width:148px;flex-shrink:0;}
+.ts2-track{flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden;}
+.ts2-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.ts2-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.9rem;width:36px;text-align:right;flex-shrink:0;}
+@media(max-width:700px){
+  .ts-kpi-row{grid-template-columns:repeat(3,1fr);}
+  .ts-charts-row{grid-template-columns:1fr;}
+  .ts-chart-block{border-right:none;border-bottom:1px solid var(--border);}
+  .ts-bars-grid{grid-template-columns:1fr;}
+}
+
+/* "ver más" en pcard */
+.pcard-more{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);text-align:center;}
+.btn-more{background:none;border:1px solid var(--border2);color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:5px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.btn-more:hover{border-color:var(--gold);color:var(--gold);}
+
 </style>
 </head>
 <body>
@@ -351,6 +415,18 @@ footer span{color:var(--gold);}
   </div>
 </div>
 
+
+<!-- MODAL JUGADOR -->
+<div class="modal-overlay" id="playerModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">—</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
 <footer><p>Top Secret <span>Football Club</span> · Estadísticas IA · Temporada 2025</p></footer>
 <div class="toast" id="toast"></div>
 
@@ -426,7 +502,9 @@ function loadMatches(){ return cloudMatches; }
 // SEED — datos de los 6 partidos conocidos
 // ════════════════════════════════════════════
 const SEED_MATCHES = [
-  {rival:'Los Picantes', league:'11x11', date:'2025-03-03', match_result:'7-0', uploadedAt:'2025-03-03T00:00:00.000Z', notes:'', players:[
+  {rival:'Los Picantes', league:'11x11', date:'2025-03-03', match_result:'7-0', uploadedAt:'2025-03-03T00:00:00.000Z', notes:'',
+  team_stats:{posesion:55,tiros:11,tiros_arco:10,goles_esperados:5.3,pases:199,precision_pases:86,entradas:28,entradas_exito:3,intercepciones:19,paradas:1,faltas:1,fuera_juego:0,corneres:4,regates_exito:93,precision_tiro:91},
+  players:[
     {name:'zPibu__',matched:'zPibu__',rating:8.5,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:2,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:3,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
@@ -439,7 +517,9 @@ const SEED_MATCHES = [
     {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.6,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:6.9,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
   ]},
-  {rival:'Talleres R', league:'11x11', date:'2025-03-05', match_result:'6-1', uploadedAt:'2025-03-05T00:00:00.000Z', notes:'', players:[
+  {rival:'Talleres R', league:'11x11', date:'2025-03-05', match_result:'6-1', uploadedAt:'2025-03-05T00:00:00.000Z', notes:'',
+  team_stats:{posesion:64,tiros:13,tiros_arco:8,goles_esperados:6.9,pases:240,precision_pases:90,entradas:18,entradas_exito:4,intercepciones:28,paradas:0,faltas:1,fuera_juego:3,corneres:2,regates_exito:92,precision_tiro:62},
+  players:[
     {name:'zPibu__',matched:'zPibu__',rating:9.5,goals:0,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'Lautavester7',matched:'Lautavester7',rating:9.0,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
@@ -452,7 +532,9 @@ const SEED_MATCHES = [
     {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:8.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:5.2,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
   ]},
-  {rival:'Inst. Senior', league:'11x11', date:'2025-03-05', match_result:'6-0', uploadedAt:'2025-03-05T01:00:00.000Z', notes:'', players:[
+  {rival:'Inst. Senior', league:'11x11', date:'2025-03-05', match_result:'6-0', uploadedAt:'2025-03-05T01:00:00.000Z', notes:'',
+  team_stats:{posesion:62,tiros:14,tiros_arco:9,goles_esperados:6.1,pases:208,precision_pases:88,entradas:25,entradas_exito:9,intercepciones:18,paradas:2,faltas:0,fuera_juego:0,corneres:4,regates_exito:91,precision_tiro:64},
+  players:[
     {name:'zPibu__',matched:'zPibu__',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'Lautavester7',matched:'Lautavester7',rating:8.0,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
@@ -478,7 +560,9 @@ const SEED_MATCHES = [
     {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:7.3,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
   ]},
-  {rival:'Team Valhala', league:'VPUG', date:'2025-03-03', match_result:'5-0', uploadedAt:'2025-03-03T01:00:00.000Z', notes:'', players:[
+  {rival:'Team Valhala', league:'VPUG', date:'2025-03-03', match_result:'5-0', uploadedAt:'2025-03-03T01:00:00.000Z', notes:'',
+  team_stats:{posesion:68,tiros:11,tiros_arco:8,goles_esperados:7.3,pases:242,precision_pases:87,entradas:19,entradas_exito:8,intercepciones:17,paradas:3,faltas:0,fuera_juego:1,corneres:4,regates_exito:95,precision_tiro:73},
+  players:[
     {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:3,assists:1,passes:16,pass_accuracy:88,distance_km:17.9,sprints:null,tackles:6,interceptions:null},
     {name:'cansitrGd22_',matched:'cansitrGd22_',rating:7.4,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
     {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.4,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
@@ -553,6 +637,98 @@ function leagueClass(l){ return l==='VPUG'?'vpug':l==='11x11'?'e11':'vpn'; }
 // ════════════════════════════════════════════
 // CANVAS CHARTS
 // ════════════════════════════════════════════
+
+function drawDonut(canvasId, val1, val2, colors, size){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const S = size || 160;
+  canvas.width = S*dpr; canvas.height = S*dpr;
+  canvas.style.width = S+'px'; canvas.style.height = S+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const cx = S/2, cy = S/2, R = S*0.42, r = S*0.27;
+  const total = val1+val2 || 1;
+  const slices = [{v:val1,c:colors[0]},{v:val2,c:colors[1]}];
+  let start = -Math.PI/2;
+  slices.forEach(sl => {
+    const angle = (sl.v/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,R,start,start+angle);
+    ctx.closePath();
+    ctx.fillStyle=sl.c; ctx.fill();
+    start+=angle;
+  });
+  // hole
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='#101318'; ctx.fill();
+  // center text
+  ctx.fillStyle='rgba(240,242,248,.9)';
+  ctx.font='900 '+(S*0.18)+'px Barlow Condensed,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(val1.toFixed(0)+'%', cx, cy);
+}
+
+function drawRadar(canvasId, axes, color, size){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const S = size || 200;
+  canvas.width = S*dpr; canvas.height = S*dpr;
+  canvas.style.width = S+'px'; canvas.style.height = S+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const cx=S/2, cy=S/2, R=S*0.36, n=axes.length;
+  const angle = i => (i/n)*Math.PI*2 - Math.PI/2;
+  const pt = (i,r) => ({x: cx+Math.cos(angle(i))*r, y: cy+Math.sin(angle(i))*r});
+
+  // grid rings
+  [0.25,0.5,0.75,1].forEach(f=>{
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const p=pt(i,R*f);
+      i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle='rgba(255,255,255,'+(f===1?.1:.05)+')'; ctx.lineWidth=1; ctx.stroke();
+    if(f===1){ ctx.fillStyle='rgba(255,255,255,.02)'; ctx.fill(); }
+  });
+
+  // spokes
+  for(let i=0;i<n;i++){
+    const p=pt(i,R);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p.x,p.y);
+    ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1; ctx.stroke();
+  }
+
+  // data fill
+  ctx.beginPath();
+  axes.forEach((ax,i)=>{
+    const p=pt(i,R*(ax.val/100));
+    i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);
+  });
+  ctx.closePath();
+  ctx.fillStyle=color+'33'; ctx.fill();
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+
+  // dots
+  axes.forEach((ax,i)=>{
+    const p=pt(i,R*(ax.val/100));
+    ctx.beginPath(); ctx.arc(p.x,p.y,3.5,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill();
+  });
+
+  // labels
+  axes.forEach((ax,i)=>{
+    const p=pt(i,R*1.22);
+    ctx.fillStyle='rgba(136,144,168,.8)';
+    ctx.font='600 '+(S*0.054)+'px Barlow,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(ax.lbl, p.x, p.y);
+  });
+}
+
 function drawBarChart(canvasId, labels, values, color, maxVal){
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
@@ -761,21 +937,130 @@ function renderSeason(){
     <div class="chart-wrap"><canvas class="chart" id="chartTrend"></canvas></div>
   </div>`:'';
 
+  // ── Team stats aggregate ──
+  const tsMatches = matches.filter(m=>m.team_stats);
+  let teamStatsBlock = '';
+  if(tsMatches.length){
+    const ts = tsMatches.map(m=>m.team_stats);
+    const tsAvg = key => { const v=ts.map(t=>t[key]).filter(v=>v!=null); return v.length ? +(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1) : null; };
+    const tsSum = key => ts.reduce((s,t)=>s+(t[key]||0),0);
+    const n = tsMatches.length;
+
+    // Valores calculados
+    const posesion      = tsAvg('posesion');
+    const tirosPP       = +(tsSum('tiros')/n).toFixed(1);
+    const tirosArcoPP   = +(tsSum('tiros_arco')/n).toFixed(1);
+    const precTiro      = tsAvg('precision_tiro');
+    const pasesPP       = +(tsSum('pases')/n).toFixed(0);
+    const precPases     = tsAvg('precision_pases');
+    const xg            = tsAvg('goles_esperados');
+    const interc        = +(tsSum('intercepciones')/n).toFixed(1);
+    const regates       = tsAvg('regates_exito');
+    const paradas       = +(tsSum('paradas')/n).toFixed(1);
+    const faltas        = +(tsSum('faltas')/n).toFixed(1);
+    const corneres      = +(tsSum('corneres')/n).toFixed(1);
+
+    // Barras de stats secundarias
+    const barStats = [
+      {lbl:'Pases / partido',    val:pasesPP,   pct:Math.min(100,pasesPP/300*100),    color:'#4a9eff', unit:''},
+      {lbl:'Precisión de pases', val:precPases, pct:precPases,                         color:'#4a9eff', unit:'%'},
+      {lbl:'Intercepciones',     val:interc,    pct:Math.min(100,interc/30*100),        color:'#7c6fff', unit:''},
+      {lbl:'Regates con éxito',  val:regates,   pct:regates,                            color:'var(--gold)', unit:'%'},
+      {lbl:'Paradas del arco',   val:paradas,   pct:Math.min(100,paradas/5*100),        color:'var(--muted)', unit:''},
+      {lbl:'Córneres',           val:corneres,  pct:Math.min(100,corneres/8*100),       color:'var(--muted)', unit:''},
+      {lbl:'Faltas cometidas',   val:faltas,    pct:Math.min(100,faltas/10*100),        color:'var(--loss)',  unit:''},
+    ].filter(s=>s.val!=null);
+
+    const barHTML = barStats.map(s =>
+      '<div class="ts2-row">' +
+        '<span class="ts2-lbl">' + s.lbl + '</span>' +
+        '<div class="ts2-track"><div class="ts2-fill" style="width:' + s.pct + '%;background:' + s.color + '"></div></div>' +
+        '<span class="ts2-val" style="color:' + s.color + '">' + s.val + s.unit + '</span>' +
+      '</div>'
+    ).join('');
+
+    teamStatsBlock =
+      // ── Fila 1: KPIs grandes ──
+      '<div class="ts-hero">' +
+        '<div class="ts-hero-inner">' +
+          '<div class="ts-hero-label">ESTADÍSTICAS DEL EQUIPO</div>' +
+          '<div class="ts-hero-sub">Promedio de ' + n + ' partido' + (n!==1?'s':'') + ' con datos completos</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ts-kpi-row">' +
+        (posesion!=null ? '<div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--gold)">' + posesion + '<span class="ts-kpi-unit">%</span></div><div class="ts-kpi-lbl">Posesión</div></div>' : '') +
+        (tirosPP!=null  ? '<div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--win)">'  + tirosPP  + '</div><div class="ts-kpi-lbl">Tiros / partido</div></div>' : '') +
+        (tirosArcoPP!=null ? '<div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--win)">'+ tirosArcoPP +'</div><div class="ts-kpi-lbl">Al arco / partido</div></div>' : '') +
+        (precTiro!=null ? '<div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--win)">'  + precTiro  + '<span class="ts-kpi-unit">%</span></div><div class="ts-kpi-lbl">Precisión de tiro</div></div>' : '') +
+        (xg!=null       ? '<div class="ts-kpi ts-kpi-accent"><div class="ts-kpi-val" style="color:var(--draw)">' + xg + '</div><div class="ts-kpi-lbl">xG / partido</div></div>' : '') +
+      '</div>' +
+      // ── Fila 2: Torta posesión + Donut tiro + Radar ──
+      '<div class="ts-charts-row">' +
+        '<div class="ts-chart-block">' +
+          '<div class="ts-chart-title">Posesión del balón</div>' +
+          '<canvas id="chartPosesion" style="width:100%;max-width:180px;display:block;margin:0 auto"></canvas>' +
+          '<div class="ts-chart-legend">' +
+            '<span style="color:var(--gold)">■</span> Top Secret &nbsp;' +
+            '<span style="color:var(--border2)">■</span> Rival' +
+          '</div>' +
+        '</div>' +
+        '<div class="ts-chart-block">' +
+          '<div class="ts-chart-title">Tiros al arco vs. fuera</div>' +
+          '<canvas id="chartTiros" style="width:100%;max-width:180px;display:block;margin:0 auto"></canvas>' +
+          '<div class="ts-chart-legend">' +
+            '<span style="color:var(--win)">■</span> Al arco &nbsp;' +
+            '<span style="color:var(--border2)">■</span> Fuera' +
+          '</div>' +
+        '</div>' +
+        '<div class="ts-chart-block">' +
+          '<div class="ts-chart-title">Perfil del equipo</div>' +
+          '<canvas id="chartRadar" style="width:100%;max-width:200px;display:block;margin:0 auto"></canvas>' +
+        '</div>' +
+      '</div>' +
+      // ── Fila 3: barras secundarias ──
+      '<div class="ts-bars-section">' +
+        '<div class="ts-bars-title">Métricas de juego</div>' +
+        '<div class="ts-bars-grid">' + barHTML + '</div>' +
+      '</div>';
+  }
+
   grid.innerHTML =
+    teamStatsBlock +
     rankBlock('Goleadores','⚽', players, p=>p.goals,    'goles',    'var(--win)',  p=>`${p.assists} asist · ${p.games} PJ`, 'chartGoals') +
     rankBlock('Rating',    '⭐', players, p=>avg(p.ratings), 'prom', 'var(--gold)', p=>`${p.games} partidos`, 'chartRating') +
     rankBlock('Asistencias','🎯', players, p=>p.assists,  'asist.',   'var(--vpug)', p=>`${p.goals} goles`) +
-    rankBlock('Tackles',   '🛡', players, p=>p.tackles,  'tackles',  'var(--muted)',p=>`${p.interceptions} interc.`) +
     trendBlock +
     resultsHTML;
 
   // Draw charts after DOM update
   requestAnimationFrame(()=>{
+    // Player charts
     const goalsSorted = [...players].filter(p=>p.goals>0).sort((a,b)=>b.goals-a.goals).slice(0,6);
     drawBarChart('chartGoals', goalsSorted.map(p=>p.name), goalsSorted.map(p=>p.goals), '#3ecf8e', null);
     const ratingSorted = [...players].filter(p=>p.ratings.length>0).sort((a,b)=>avg(b.ratings)-avg(a.ratings)).slice(0,6);
     drawBarChart('chartRating', ratingSorted.map(p=>p.name), ratingSorted.map(p=>+(avg(p.ratings).toFixed(2))), '#c8a84b', 10);
     if(trendVals.length>1) drawLineChart('chartTrend', trendLabels, trendVals, '#c8a84b');
+
+    // Team charts
+    if(tsMatches.length){
+      const ts2 = tsMatches.map(m=>m.team_stats);
+      const ta  = key => { const v=ts2.map(t=>t[key]).filter(v=>v!=null); return v.length ? v.reduce((s,x)=>s+x,0)/v.length : null; };
+      const tn  = tsMatches.length;
+      const posVal = ta('posesion') || 50;
+      const tirosT = +(ts2.reduce((s,t)=>s+(t.tiros||0),0)/tn).toFixed(1);
+      const arcosT = +(ts2.reduce((s,t)=>s+(t.tiros_arco||0),0)/tn).toFixed(1);
+
+      drawDonut('chartPosesion', posVal, 100-posVal, ['#c8a84b','#1e2230'], 160);
+      drawDonut('chartTiros',    arcosT, Math.max(0,tirosT-arcosT), ['#3ecf8e','#1e2230'], 160);
+      drawRadar('chartRadar', [
+        {lbl:'Ataque',   val: Math.min(100, (tirosT/15)*100)},
+        {lbl:'Precisión',val: ta('precision_tiro') || 0},
+        {lbl:'Posesión', val: posVal},
+        {lbl:'Pases',    val: ta('precision_pases') || 0},
+        {lbl:'Defensa',  val: Math.min(100, ((ta('intercepciones')||0)/25)*100)},
+        {lbl:'Regates',  val: ta('regates_exito') || 0},
+      ], '#c8a84b', 200);
+    }
   });
 }
 
@@ -815,9 +1100,26 @@ function renderPlayers(filter){
     const avgR=avg(ratings);
     const totalG=sum(entries.map(e=>e.goals||0));
     const totalA=sum(entries.map(e=>e.assists||0));
-    const totalT=sum(entries.map(e=>e.tackles||0));
-    const avgDist=avg(entries.map(e=>e.distance_km).filter(v=>v!=null));
-    const avgPrec=avg(entries.map(e=>e.pass_accuracy).filter(v=>v!=null));
+
+    // Threshold: sólo mostrar si ≥10 valores no-null
+    const tacklesVals=entries.map(e=>e.tackles).filter(v=>v!=null);
+    const intercVals=entries.map(e=>e.interceptions).filter(v=>v!=null);
+    const distVals=entries.map(e=>e.distance_km).filter(v=>v!=null);
+    const precVals=entries.map(e=>e.pass_accuracy).filter(v=>v!=null);
+    const sprintVals=entries.map(e=>e.sprints).filter(v=>v!=null);
+    const passVals=entries.map(e=>e.passes).filter(v=>v!=null);
+
+    const MIN = 10;
+    const showTackles = tacklesVals.length >= MIN;
+    const showInterc  = intercVals.length >= MIN;
+    const showDist    = distVals.length >= MIN;
+    const showPrec    = precVals.length >= MIN;
+    const showSprints = sprintVals.length >= MIN;
+    const showPasses  = passVals.length >= MIN;
+
+    const avgDist = showDist ? avg(distVals) : null;
+    const avgPrec = showPrec ? avg(precVals) : null;
+    const totalT  = showTackles ? sum(tacklesVals) : null;
 
     const lastR=ratings.slice(-8);
     const minR=Math.min(...lastR,5), maxR=Math.max(...lastR,10);
@@ -827,26 +1129,33 @@ function renderPlayers(filter){
       return `<div class="spark-bar" style="height:${h}px;background:${c}" title="${r}"></div>`;
     }).join(''):'';
 
-    return `<div class="pcard">
-      <div class="pcard-header">
-        <div class="pcard-avatar">${initials(player.name)}</div>
-        <div><div class="pcard-name">${player.name}</div><div class="pcard-games">${entries.length} partido${entries.length!==1?'s':''}</div></div>
-      </div>
-      <div class="pcard-stats">
-        <div class="ps-item"><div class="ps-val" style="color:var(--win)">${totalG}</div><div class="ps-lbl">Goles</div></div>
-        <div class="ps-item"><div class="ps-val" style="color:var(--vpug)">${totalA}</div><div class="ps-lbl">Asist.</div></div>
-        <div class="ps-item"><div class="ps-val" style="color:var(--muted)">${totalT}</div><div class="ps-lbl">Tackles</div></div>
-      </div>
-      ${avgDist!=null||avgPrec!=null?`<div class="pcard-stats" style="margin-top:8px">
+    const statsRow2 = (avgDist!=null||avgPrec!=null)?`<div class="pcard-stats" style="margin-top:8px">
         ${avgDist!=null?`<div class="ps-item"><div class="ps-val" style="color:var(--muted);font-size:1.1rem">${avgDist.toFixed(1)}</div><div class="ps-lbl">km prom</div></div>`:''}
         ${avgPrec!=null?`<div class="ps-item"><div class="ps-val" style="color:var(--muted);font-size:1.1rem">${avgPrec.toFixed(0)}%</div><div class="ps-lbl">precisión</div></div>`:''}
-      </div>`:''}
-      <div class="avg-rating">
-        <span class="lbl">Rating prom.</span>
-        <span class="val" style="color:${vrColor(avgR)}">${avgR!=null?avgR.toFixed(1):'—'}</span>
-      </div>
-      ${sparkHTML?`<div class="sparkline">${sparkHTML}</div>`:''}
-    </div>`;
+      </div>`:'';
+
+    const pname = player.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const stat3 = totalT !== null
+      ? '<div class="ps-item"><div class="ps-val" style="color:var(--muted)">' + totalT + '</div><div class="ps-lbl">Tackles</div></div>'
+      : '<div class="ps-item"><div class="ps-val" style="color:var(--gold)">' + (avgR != null ? avgR.toFixed(1) : '—') + '</div><div class="ps-lbl">Rating</div></div>';
+    const sparkWrap = sparkHTML ? '<div class="sparkline">' + sparkHTML + '</div>' : '';
+    return '<div class="pcard">' +
+      '<div class="pcard-header">' +
+        '<div class="pcard-avatar">' + initials(player.name) + '</div>' +
+        '<div><div class="pcard-name">' + player.name + '</div>' +
+        '<div class="pcard-games">' + entries.length + ' partido' + (entries.length!==1?'s':'') + '</div></div>' +
+      '</div>' +
+      '<div class="pcard-stats">' +
+        '<div class="ps-item"><div class="ps-val" style="color:var(--win)">' + totalG + '</div><div class="ps-lbl">Goles</div></div>' +
+        '<div class="ps-item"><div class="ps-val" style="color:var(--vpug)">' + totalA + '</div><div class="ps-lbl">Asist.</div></div>' +
+        stat3 +
+      '</div>' +
+      statsRow2 +
+      '<div class="avg-rating"><span class="lbl">Rating prom.</span>' +
+        '<span class="val" style="color:' + vrColor(avgR) + '">' + (avgR!=null?avgR.toFixed(1):'—') + '</span></div>' +
+      sparkWrap +
+      '<div class="pcard-more"><button class="btn-more" onclick="openPlayerModal(\'' + pname + '\')">Ver estadísticas completas →</button></div>' +
+    '</div>';
   }).join('');
 }
 
@@ -1115,6 +1424,122 @@ function showToast(msg,type='success'){
   clearTimeout(toastTimeout);
   toastTimeout=setTimeout(()=>t.classList.remove('show'),3200);
 }
+
+
+// ════════════════════════════════════════════
+// MODAL ESTADÍSTICAS COMPLETAS
+// ════════════════════════════════════════════
+function openPlayerModal(playerName){
+  const matches = loadMatches();
+  const player = ROSTER.find(p=>p.name===playerName);
+  if(!player) return;
+
+  const entries = [];
+  matches.forEach(m=>{
+    const p=(m.players||[]).find(p=>(p.matched||'').toLowerCase()===player.name.toLowerCase());
+    if(p) entries.push({...p, rival:m.rival, date:m.date, league:m.league, match_result:m.match_result});
+  });
+
+  const ratings  = entries.map(e=>e.rating).filter(v=>v!=null);
+  const avgR     = avg(ratings);
+  const totalG   = entries.reduce((s,e)=>s+(e.goals||0),0);
+  const totalA   = entries.reduce((s,e)=>s+(e.assists||0),0);
+  const distVals = entries.map(e=>e.distance_km).filter(v=>v!=null);
+  const precVals = entries.map(e=>e.pass_accuracy).filter(v=>v!=null);
+  const passVals = entries.map(e=>e.passes).filter(v=>v!=null);
+  const tackVals = entries.map(e=>e.tackles).filter(v=>v!=null);
+  const intVals  = entries.map(e=>e.interceptions).filter(v=>v!=null);
+  const sprVals  = entries.map(e=>e.sprints).filter(v=>v!=null);
+
+  const v = (arr, fn='avg', dec=1) => {
+    if(!arr.length) return null;
+    const val = fn==='avg' ? arr.reduce((s,v)=>s+v,0)/arr.length : arr.reduce((s,v)=>s+v,0);
+    return +val.toFixed(dec);
+  };
+
+  // KPIs
+  const kpis = [
+    {lbl:'Partidos', val:entries.length,              color:'var(--gold)'},
+    {lbl:'Goles',    val:totalG,                      color:'var(--win)'},
+    {lbl:'Asist.',   val:totalA,                      color:'var(--vpug)'},
+    {lbl:'Rating prom.', val:avgR!=null?avgR.toFixed(1):'—', color:vrColor(avgR)},
+  ];
+
+  // Optional stats — mostrar siempre en modal, indicar muestra
+  const optStats = [
+    {lbl:'Dist. prom. (km)',   vals:distVals, fn:'avg'},
+    {lbl:'Precisión pases',   vals:precVals, fn:'avg', suffix:'%'},
+    {lbl:'Pases prom.',       vals:passVals, fn:'avg'},
+    {lbl:'Tackles totales',   vals:tackVals, fn:'sum'},
+    {lbl:'Intercepciones',    vals:intVals,  fn:'sum'},
+    {lbl:'Sprints prom.',     vals:sprVals,  fn:'avg'},
+  ].filter(s=>s.vals.length>0);
+
+  // Historial de partidos
+  const matchRows = [...entries].reverse().map(e=>{
+    const r=e.rating;
+    const rc=r==null?'':r>=8?'high':r>=6.5?'mid':'low';
+    const lc=leagueClass(e.league);
+    return `<div class="modal-match-row">
+      <span class="modal-match-date">${formatDate(e.date)}</span>
+      <span class="modal-match-rival">vs ${e.rival} <span class="res-league ${lc}" style="font-size:.6rem;padding:1px 6px;border-radius:3px">${e.league}</span></span>
+      <span class="modal-match-g">${e.goals||0}⚽</span>
+      <span class="modal-match-a">${e.assists||0}🅰️</span>
+      <span>${r!=null?`<span class="rating-pill ${rc}" style="padding:2px 6px;font-size:.85rem">${r}</span>`:'—'}</span>
+    </div>`;
+  }).join('');
+
+  // Rating trend mini-chart
+  const ratingTrendId = 'modalRatingTrend';
+  const sortedEntries = [...entries].sort((a,b)=>a.date.localeCompare(b.date));
+  const trendVals = sortedEntries.map(e=>e.rating).filter(v=>v!=null);
+  const trendLabels = sortedEntries.filter(e=>e.rating!=null).map(e=>e.rival.split(' ')[0]);
+
+  // Construir HTML de stats avanzadas fuera del template para evitar expresiones complejas
+  const optStatsHTML = optStats.map(s => {
+    const val = s.fn === 'avg'
+      ? (s.vals.reduce((a,b) => a+b, 0) / s.vals.length).toFixed(1) + (s.suffix||'')
+      : s.vals.reduce((a,b) => a+b, 0);
+    const sample = s.vals.length < 10
+      ? '<span style="font-size:.6rem;color:var(--muted2)"> (' + s.vals.length + ' datos)</span>'
+      : '';
+    return '<div class="modal-stat-row"><span class="modal-stat-lbl">' + s.lbl + sample + '</span><span class="modal-stat-val">' + val + '</span></div>';
+  }).join('');
+
+  const kpisHTML = kpis.map(k =>
+    '<div class="modal-kpi"><div class="modal-kpi-val" style="color:' + k.color + '">' + k.val + '</div><div class="modal-kpi-lbl">' + k.lbl + '</div></div>'
+  ).join('');
+
+  const trendHTML = trendVals.length > 1
+    ? '<div class="modal-section-title">Evolución del rating</div><div class="modal-chart-wrap"><canvas class="chart" id="' + ratingTrendId + '" style="height:100px"></canvas></div>'
+    : '';
+
+  const advHTML = optStats.length
+    ? '<div class="modal-section-title">Estadísticas avanzadas</div><div class="modal-stat-grid">' + optStatsHTML + '</div>'
+    : '';
+
+  document.getElementById('modalTitle').textContent = playerName + ' · ' + player.pos;
+  document.getElementById('modalBody').innerHTML =
+    '<div class="modal-kpis">' + kpisHTML + '</div>' +
+    trendHTML + advHTML +
+    '<div class="modal-section-title">Historial de partidos</div>' +
+    (matchRows || '<div style="color:var(--muted2);font-size:.8rem">Sin datos</div>');
+
+  document.getElementById('playerModal').classList.add('open');
+  document.body.style.overflow='hidden';
+
+  if(trendVals.length>1){
+    requestAnimationFrame(()=>drawLineChart(ratingTrendId, trendLabels, trendVals, '#c8a84b'));
+  }
+}
+
+function closeModal(){
+  document.getElementById('playerModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
 
 // Init: cargar datos de la nube y renderizar temporada
 cloudLoad().then(()=>renderSeason());
