@@ -663,11 +663,12 @@ function drawDonut(canvasId, val1, val2, colors, size){
   // hole
   ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
   ctx.fillStyle='#101318'; ctx.fill();
-  // center text
+  // center text — mostrar el % real calculado, no val1 crudo
+  const pct = Math.round(val1 / (val1+val2||1) * 100);
   ctx.fillStyle='rgba(240,242,248,.9)';
   ctx.font='900 '+(S*0.18)+'px Barlow Condensed,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(val1.toFixed(0)+'%', cx, cy);
+  ctx.fillText(pct+'%', cx, cy);
 }
 
 function drawRadar(canvasId, axes, color, size){
