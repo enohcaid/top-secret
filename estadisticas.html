@@ -297,6 +297,52 @@ footer span{color:var(--gold);}
   .ts-bars-grid{grid-template-columns:1fr;}
 }
 
+/* ── LEAGUE FILTER ── */
+.league-filter{display:flex;align-items:center;gap:6px;padding:14px 0 4px;flex-wrap:wrap;}
+.league-filter label{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-right:2px;}
+.lbtn{background:var(--card);border:1px solid var(--border);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 16px;border-radius:6px;cursor:pointer;transition:color .15s,border-color .15s,background .15s;}
+.lbtn:hover{border-color:var(--border2);color:var(--text);}
+.lbtn.active{background:rgba(220,225,240,.08);border-color:rgba(220,225,240,.5);color:#dce1f0;}
+.lbtn.vpug.active{background:rgba(62,207,142,.1);border-color:var(--vpug);color:var(--vpug);}
+.lbtn.e11.active{background:rgba(232,80,46,.1);border-color:#e8502e;color:#e8502e;}
+.lbtn.vpn.active{background:rgba(245,197,24,.1);border-color:var(--vpn);color:var(--vpn);}
+
+/* ── RESULTADO W/L/D ── */
+.res-score.win{color:var(--win);}
+.res-score.draw{color:var(--draw);}
+.res-score.loss{color:var(--loss);}
+.wld-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.7rem;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+.wld-badge.win{background:rgba(62,207,142,.15);color:var(--win);}
+.wld-badge.draw{background:rgba(245,197,24,.15);color:var(--draw);}
+.wld-badge.loss{background:rgba(232,80,46,.15);color:var(--loss);}
+
+/* ── TABLA COMPARATIVA JUGADORES ── */
+.view-toggle{display:flex;gap:4px;margin-left:auto;}
+.vtbtn{background:var(--card);border:1px solid var(--border);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.06em;padding:5px 14px;border-radius:6px;cursor:pointer;transition:color .15s,border-color .15s,background .15s;}
+.vtbtn:hover{border-color:var(--border2);color:var(--text);}
+.vtbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.compare-wrap{overflow-x:auto;}
+.compare-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+.compare-table th{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);padding:8px 12px;border-bottom:1px solid var(--border);text-align:right;cursor:pointer;user-select:none;white-space:nowrap;}
+.compare-table th:first-child{text-align:left;}
+.compare-table th.sort-asc::after{content:' ↑';}
+.compare-table th.sort-desc::after{content:' ↓';}
+.compare-table td{padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;color:var(--muted);}
+.compare-table td:first-child{text-align:left;font-weight:600;color:var(--text);}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
+.cmp-pos{font-size:.62rem;color:var(--muted2);font-weight:500;margin-left:4px;}
+.cmp-val-hi{color:var(--text);font-weight:700;}
+.cmp-locked{color:var(--border2);font-size:.7rem;}
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+/* ── HISTORIAL FILTROS ── */
+.history-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.history-filters label{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);}
+.hf-select{background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'Barlow',sans-serif;font-size:.82rem;padding:6px 12px;border-radius:6px;cursor:pointer;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.hf-select:hover{border-color:var(--border2);}
+.hf-select:focus{border-color:var(--gold);}
+.hf-select option{background:var(--card2);}
+
 /* "ver más" en pcard */
 .pcard-more{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);text-align:center;}
 .btn-more{background:none;border:1px solid var(--border2);color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:5px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
@@ -335,6 +381,13 @@ footer span{color:var(--gold);}
 
   <!-- ── TAB TEMPORADA ── -->
   <div class="tab-content active" id="tab-season">
+    <div class="league-filter">
+      <label>Liga:</label>
+      <button class="lbtn active" onclick="setLeague('all',this)">Todas</button>
+      <button class="lbtn vpug" onclick="setLeague('VPUG',this)">VPUG</button>
+      <button class="lbtn e11" onclick="setLeague('11x11',this)">11x11</button>
+      <button class="lbtn vpn" onclick="setLeague('VPN',this)">VPN</button>
+    </div>
     <div class="kpi-row" id="kpiRow"></div>
     <div class="season-grid" id="seasonGrid"></div>
   </div>
@@ -349,12 +402,29 @@ footer span{color:var(--gold);}
       <button class="fbtn" onclick="filterPlayers('LAT',this)">Laterales</button>
       <button class="fbtn" onclick="filterPlayers('MED',this)">Mediocampistas</button>
       <button class="fbtn" onclick="filterPlayers('DEL',this)">Delanteros</button>
+      <div class="view-toggle">
+        <button class="vtbtn active" id="btnViewCards" onclick="setPlayerView('cards',this)">⊞ Cards</button>
+        <button class="vtbtn" id="btnViewTable" onclick="setPlayerView('table',this)">☰ Tabla</button>
+      </div>
     </div>
-    <div class="player-cards-grid" id="playerGrid"></div>
+    <div id="playerGrid"></div>
   </div>
 
   <!-- ── TAB HISTORIAL ── -->
   <div class="tab-content" id="tab-history">
+    <div class="history-filters">
+      <label>Liga:</label>
+      <select class="hf-select" id="histFilterLeague" onchange="renderHistory()">
+        <option value="all">Todas</option>
+        <option value="VPUG">VPUG</option>
+        <option value="11x11">11x11</option>
+        <option value="VPN">VPN</option>
+      </select>
+      <label style="margin-left:8px">Mes:</label>
+      <select class="hf-select" id="histFilterMonth" onchange="renderHistory()">
+        <option value="all">Todos</option>
+      </select>
+    </div>
     <div class="history-wrap">
       <table class="history-table">
         <thead>
@@ -365,6 +435,7 @@ footer span{color:var(--gold);}
         </thead>
         <tbody id="historyBody"></tbody>
       </table>
+    </div>
     </div>
   </div>
 
@@ -631,6 +702,37 @@ function switchTab(name, btn){
 // ════════════════════════════════════════════
 const avg = arr => arr.length ? arr.reduce((s,v)=>s+v,0)/arr.length : null;
 const sum = arr => arr.reduce((s,v)=>s+v,0);
+
+function parseScore(result){
+  if(!result) return null;
+  const m = String(result).match(/^(\d+)\s*[-\u2013]\s*(\d+)$/);
+  return m ? {own:+m[1], rival:+m[2]} : null;
+}
+function wldClass(result){
+  const s=parseScore(result); if(!s) return '';
+  return s.own>s.rival?'win':s.own<s.rival?'loss':'draw';
+}
+function wldLabel(result){
+  const c=wldClass(result); return c==='win'?'V':c==='loss'?'D':c==='draw'?'E':'';
+}
+
+let currentLeague='all';
+let currentPlayerView='cards';
+let currentPlayerFilter='all';
+
+function setLeague(league,btn){
+  currentLeague=league;
+  document.querySelectorAll('.lbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSeason();
+}
+function setPlayerView(view,btn){
+  currentPlayerView=view;
+  document.querySelectorAll('.vtbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPlayers(currentPlayerFilter);
+}
+
 function initials(name){
   const p = name.replace(/[-_]/g,' ').trim().split(/\s+/);
   return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():name.slice(0,2).toUpperCase();
@@ -941,13 +1043,19 @@ function drawLineChart(canvasId, labels, values, color){
 // TAB TEMPORADA
 // ════════════════════════════════════════════
 function renderSeason(){
-  const matches = loadMatches();
+  const allMatches = loadMatches();
+  const matches = currentLeague==='all' ? allMatches : allMatches.filter(m=>m.league===currentLeague);
   const kpiRow   = document.getElementById('kpiRow');
   const grid     = document.getElementById('seasonGrid');
 
-  if(!matches.length){
+  if(!allMatches.length){
     kpiRow.innerHTML='';
     grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏆</div><div class="empty-title">Sin datos todavía</div><div class="empty-sub">Subí el primer partido para ver el resumen</div></div>`;
+    return;
+  }
+  if(!matches.length){
+    kpiRow.innerHTML='';
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">Sin partidos de ${currentLeague}</div><div class="empty-sub">Cambiá el filtro de liga para ver otros datos</div></div>`;
     return;
   }
 
@@ -972,11 +1080,16 @@ function renderSeason(){
   const totalGoals = players.reduce((s,p)=>s+p.goals,0);
   const allRatings = matches.flatMap(m=>(m.players||[]).map(p=>p.rating).filter(v=>v!=null));
   const teamAvgRating = avg(allRatings);
+  const wins   = matches.filter(m=>wldClass(m.match_result)==='win').length;
+  const draws  = matches.filter(m=>wldClass(m.match_result)==='draw').length;
+  const losses = matches.filter(m=>wldClass(m.match_result)==='loss').length;
+  const scored   = matches.reduce((s,m)=>{ const sc=parseScore(m.match_result); return s+(sc?sc.own:0); },0);
+  const conceded = matches.reduce((s,m)=>{ const sc=parseScore(m.match_result); return s+(sc?sc.rival:0); },0);
   kpiRow.innerHTML = [
-    {val:matches.length, lbl:'Partidos', color:'var(--gold)'},
-    {val:totalGoals,     lbl:'Goles',    color:'var(--win)'},
-    {val:`${matches.length}-0`, lbl:'Victorias', color:'var(--win)'},
-    {val:teamAvgRating!=null?teamAvgRating.toFixed(1):'—', lbl:'Rating Prom. Equipo', color:vrColor(teamAvgRating)},
+    {val:matches.length,         lbl:'Partidos',    color:'var(--gold)'},
+    {val:scored+':'+conceded,    lbl:'Goles F/C',   color:'var(--win)'},
+    {val:wins+'-'+draws+'-'+losses, lbl:'V · E · D', color:wins>losses?'var(--win)':losses>wins?'var(--loss)':'var(--draw)'},
+    {val:teamAvgRating!=null?teamAvgRating.toFixed(1):'—', lbl:'Rating Prom.', color:vrColor(teamAvgRating)},
   ].map(k=>`<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`).join('');
 
   // Rank helper
@@ -1003,15 +1116,16 @@ function renderSeason(){
   const resultsHTML = `<div class="season-block full">
     <div class="sb-header"><span class="sb-icon">📅</span><h3>Resultados</h3></div>
     <div class="results-list">
-      ${[...matches].reverse().map(m=>`
-        <div class="result-row">
+      ${[...matches].reverse().map(m=>{
+        const wl=wldClass(m.match_result), lbl=wldLabel(m.match_result);
+        return `<div class="result-row">
           <div>
-            <div class="res-rival">vs ${m.rival}</div>
+            <div class="res-rival">vs ${m.rival}${lbl?` <span class="wld-badge ${wl}">${lbl}</span>`:''}</div>
             <div class="res-date">${formatDate(m.date)}</div>
           </div>
           <span class="res-league ${leagueClass(m.league)}">${m.league}</span>
-          <span class="res-score">${m.match_result||'✓'}</span>
-        </div>`).join('')}
+          <span class="res-score ${wl}">${m.match_result||'✓'}</span>
+        </div>`; }).join('')}
     </div>
   </div>`;
 
@@ -1233,6 +1347,7 @@ function renderSeason(){
 // TAB POR JUGADOR
 // ════════════════════════════════════════════
 function filterPlayers(pos, btn){
+  currentPlayerFilter=pos;
   document.querySelectorAll('#tab-players .fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderPlayers(pos);
@@ -1248,12 +1363,75 @@ function renderPlayers(filter){
     return;
   }
 
-  grid.innerHTML = players.map(player=>{
+  // Pre-calcular stats
+  const allStats = players.map(player=>{
     const entries=[];
     matches.forEach(m=>{
       const p=(m.players||[]).find(p=>(p.matched||'').toLowerCase()===player.name.toLowerCase());
-      if(p) entries.push({...p, rival:m.rival, date:m.date, league:m.league});
+      if(p) entries.push({...p,rival:m.rival,date:m.date,league:m.league,match_result:m.match_result});
     });
+    if(!entries.length) return {player,entries:[],hasData:false};
+    const ratings=entries.map(e=>e.rating).filter(v=>v!=null);
+    const avgR=avg(ratings);
+    const totalG=sum(entries.map(e=>e.goals||0));
+    const totalA=sum(entries.map(e=>e.assists||0));
+    const tacklesVals=entries.map(e=>e.tackles).filter(v=>v!=null);
+    const intercVals=entries.map(e=>e.interceptions).filter(v=>v!=null);
+    const distVals=entries.map(e=>e.distance_km).filter(v=>v!=null);
+    const precVals=entries.map(e=>e.pass_accuracy).filter(v=>v!=null);
+    const MIN=10;
+    return {player,entries,hasData:true,ratings,avgR,totalG,totalA,
+      tacklesVals,intercVals,distVals,precVals,
+      showTackles:tacklesVals.length>=MIN,showDist:distVals.length>=MIN,showPrec:precVals.length>=MIN,
+      avgDist:distVals.length?avg(distVals):null,
+      avgPrec:precVals.length?avg(precVals):null,
+      totalTackles:tacklesVals.length?sum(tacklesVals):null,
+    };
+  });
+  const statsWithData=allStats.filter(s=>s.hasData);
+
+  // VISTA TABLA
+  if(currentPlayerView==='table'){
+    if(!statsWithData.length){grid.innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Sin datos todavía</div></div>';return;}
+    let sortKey='avgR',sortDir=-1;
+    const cols=['name','entries','totalG','totalA','avgR','avgDist','avgPrec','totalTackles'];
+    const lbls=['Jugador','PJ','Goles','Asist.','Rating Prom.','Dist. Prom.','Prec. Pases','Tackles'];
+    function sortVal(s,k){if(k==='name')return s.player.name;if(k==='entries')return s.entries.length;return s[k]!=null?s[k]:-999;}
+    function fmtCell(s,k){
+      const best=statsWithData.filter(x=>sortVal(x,k)>-999);
+      const isTop=best.length&&sortVal(s,k)===Math.max(...best.map(x=>sortVal(x,k)));
+      const hi=isTop?'cmp-val-hi':'';
+      if(k==='name')return '<td>'+s.player.name+'<span class="cmp-pos">'+s.player.pos+'</span></td>';
+      if(k==='entries')return '<td>'+s.entries.length+'</td>';
+      if(k==='totalG')return '<td class="'+hi+'">'+s.totalG+'</td>';
+      if(k==='totalA')return '<td class="'+hi+'">'+s.totalA+'</td>';
+      if(k==='avgR')return '<td class="'+hi+'">'+(s.avgR!=null?'<span style="color:'+vrColor(s.avgR)+'">'+s.avgR.toFixed(1)+'</span>':'—')+'</td>';
+      if(k==='avgDist')return '<td>'+(s.avgDist!=null?s.avgDist.toFixed(1)+' km':'—')+'</td>';
+      if(k==='avgPrec')return '<td>'+(s.avgPrec!=null?s.avgPrec.toFixed(0)+'%':'—')+'</td>';
+      if(k==='totalTackles')return '<td>'+(s.totalTackles!=null?s.totalTackles:'—')+'</td>';
+      return '<td>—</td>';
+    }
+    function buildTable(){
+      const sorted=[...statsWithData].sort((a,b)=>sortDir*(sortVal(b,sortKey)-sortVal(a,sortKey)));
+      const thead='<tr>'+cols.map((c,i)=>{
+        const cls=c===sortKey?(sortDir>0?'sort-asc':'sort-desc'):'';
+        return '<th class="'+cls+'" data-key="'+c+'">'+lbls[i]+'</th>';
+      }).join('')+'</tr>';
+      const tbody=sorted.map(s=>'<tr>'+cols.map(c=>fmtCell(s,c)).join('')+'</tr>').join('');
+      grid.innerHTML='<div class="compare-wrap"><table class="compare-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table></div>';
+      grid.querySelectorAll('.compare-table th').forEach(th=>{
+        th.onclick=()=>{if(sortKey===th.dataset.key)sortDir*=-1;else{sortKey=th.dataset.key;sortDir=-1;}buildTable();};
+      });
+    }
+    buildTable();
+    return;
+  }
+
+  // VISTA CARDS
+  grid.className='player-cards-grid';
+  grid.innerHTML = players.map(player=>{
+    const st=allStats.find(s=>s.player.name===player.name);
+    const entries=st?st.entries:[];
 
     if(!entries.length) return `<div class="pcard">
       <div class="pcard-header">
@@ -1261,30 +1439,8 @@ function renderPlayers(filter){
         <div><div class="pcard-name">${player.name}</div><div class="pcard-games">Sin datos aún</div></div>
       </div></div>`;
 
-    const ratings=entries.map(e=>e.rating).filter(v=>v!=null);
-    const avgR=avg(ratings);
-    const totalG=sum(entries.map(e=>e.goals||0));
-    const totalA=sum(entries.map(e=>e.assists||0));
-
-    // Threshold: sólo mostrar si ≥10 valores no-null
-    const tacklesVals=entries.map(e=>e.tackles).filter(v=>v!=null);
-    const intercVals=entries.map(e=>e.interceptions).filter(v=>v!=null);
-    const distVals=entries.map(e=>e.distance_km).filter(v=>v!=null);
-    const precVals=entries.map(e=>e.pass_accuracy).filter(v=>v!=null);
-    const sprintVals=entries.map(e=>e.sprints).filter(v=>v!=null);
-    const passVals=entries.map(e=>e.passes).filter(v=>v!=null);
-
-    const MIN = 10;
-    const showTackles = tacklesVals.length >= MIN;
-    const showInterc  = intercVals.length >= MIN;
-    const showDist    = distVals.length >= MIN;
-    const showPrec    = precVals.length >= MIN;
-    const showSprints = sprintVals.length >= MIN;
-    const showPasses  = passVals.length >= MIN;
-
-    const avgDist = showDist ? avg(distVals) : null;
-    const avgPrec = showPrec ? avg(precVals) : null;
-    const totalT  = showTackles ? sum(tacklesVals) : null;
+    const {ratings,avgR,totalG,totalA,showTackles,showDist,showPrec,avgDist,avgPrec,tacklesVals}=st;
+    const totalT=showTackles?sum(tacklesVals):null;
 
     const lastR=ratings.slice(-8);
     const minR=Math.min(...lastR,5), maxR=Math.max(...lastR,10);
@@ -1328,15 +1484,38 @@ function renderPlayers(filter){
 // TAB HISTORIAL
 // ════════════════════════════════════════════
 function renderHistory(){
-  const matches = loadMatches();
-  const tbody = document.getElementById('historyBody');
-  if(!matches.length){
+  const allMatches=loadMatches();
+  const leagueF=document.getElementById('histFilterLeague')?.value||'all';
+  const monthF=document.getElementById('histFilterMonth')?.value||'all';
+  const monthSel=document.getElementById('histFilterMonth');
+  if(monthSel){
+    const months=[...new Set(allMatches.map(m=>(m.date||'').slice(0,7)).filter(Boolean))].sort().reverse();
+    const cur=monthSel.value;
+    const mNames=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    monthSel.innerHTML='<option value="all">Todos</option>'+months.map(m=>{
+      const [y,mo]=m.split('-');
+      return '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+mNames[+mo-1]+' '+y+'</option>';
+    }).join('');
+  }
+  const matches=allMatches.filter(m=>{
+    if(leagueF!=='all'&&m.league!==leagueF) return false;
+    if(monthF!=='all'&&!(m.date||'').startsWith(monthF)) return false;
+    return true;
+  });
+  const tbody=document.getElementById('historyBody');
+  if(!allMatches.length){
     tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sin partidos registrados</div></div></td></tr>`;
     return;
   }
+  if(!matches.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div style="padding:24px;text-align:center;color:var(--muted2)">Sin partidos para este filtro</div></td></tr>`;
+    return;
+  }
   tbody.innerHTML=[...matches].reverse().map((m,ri)=>{
-    const i=matches.length-1-ri;
+    const i=allMatches.indexOf(m);
     const lc=leagueClass(m.league);
+    const wl=wldClass(m.match_result);
+    const lbl=wldLabel(m.match_result);
     const detailId=`detail-${i}`;
     const detailRows=(m.players||[]).map(p=>{
       const r=p.rating;
@@ -1354,9 +1533,9 @@ function renderHistory(){
     return `<tr>
       <td><button class="expand-btn" onclick="toggleDetail('${detailId}',this)">▶</button></td>
       <td>${formatDate(m.date)}</td>
-      <td style="font-weight:600">${m.rival||'—'}</td>
+      <td style="font-weight:600">${m.rival||'—'}${lbl?` <span class="wld-badge ${wl}">${lbl}</span>`:''}</td>
       <td><span class="res-league ${lc}" style="font-size:.72rem;padding:2px 8px;border-radius:4px;font-weight:700">${m.league||'—'}</span></td>
-      <td style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--win)">${m.match_result||'—'}</td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700" class="${wl}">${m.match_result||'—'}</td>
       <td>${(m.players||[]).length} jugadores</td>
       <td style="color:var(--muted2);font-size:.75rem">${formatDateTime(m.uploadedAt)}</td>
       <td><button class="delete-btn" onclick="deleteMatch(${i})" title="Eliminar">🗑</button></td>
@@ -1476,7 +1655,7 @@ async function analyzeAll(){
 PLANTEL OFICIAL (nombre exacto · posición):
 ${rosterList}
 
-REGLAS DE IDENTIFICACIÓN:
+REGLAS DE IDENTIFICACIÓN DE JUGADORES:
 - "Lautavester7" → Lautavester7
 - "T. cansitrGD22" o "cansitr" → cansitrGd22_
 - "BlackPanther" o "Black" → BlackPanther-CG
@@ -1491,11 +1670,34 @@ REGLAS DE IDENTIFICACIÓN:
 - "DaniStone" o "RS32" → RS32-DaniStone
 - "Huber" → Huber236
 
-El campo "matched" SIEMPRE debe ser el nombre exacto del plantel. Si un valor no es legible usá null.
-Devolvé ÚNICAMENTE JSON válido sin markdown:
-{"players":[{"name":"apodo","matched":"nombre exacto","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"match_result":"2-1","notes":""}`;
+TIPOS DE CAPTURA:
+1. Pantalla de JUGADORES (stats individuales): extraé el array "players".
+2. Pantalla de RESUMEN / EQUIPO (posesión, tiros, pases del partido): extraé "team_stats".
+3. Pantalla mixta: extraé ambos.
 
-  let mergedPlayers=[]; let matchResult=result;
+Para team_stats extraé estos campos si están visibles (usá null si no aparecen):
+- posesion: % de posesión del balón de Top Secret (número entero, ej: 62)
+- tiros: total de tiros
+- tiros_arco: tiros al arco
+- goles_esperados: xG (puede aparecer como "Expected Goals" o "xG")
+- pases: total de pases
+- precision_pases: % precisión de pases
+- entradas: total de entradas/tackles del equipo
+- intercepciones: total de intercepciones del equipo
+- paradas: paradas del arquero
+- faltas: faltas cometidas
+- corneres: córneres a favor
+- regates_exito: % de regates con éxito
+- precision_tiro: % de precisión de tiro
+
+El campo "matched" SIEMPRE debe ser el nombre exacto del plantel. Si un valor no es legible usá null.
+Devolvé ÚNICAMENTE JSON válido sin markdown, con esta estructura completa:
+{"players":[{"name":"apodo","matched":"nombre exacto","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"team_stats":{"posesion":62,"tiros":13,"tiros_arco":9,"goles_esperados":6.1,"pases":208,"precision_pases":88,"entradas":null,"intercepciones":18,"paradas":null,"faltas":null,"corneres":null,"regates_exito":91,"precision_tiro":69},"match_result":"6-0","notes":""}
+Si no hay datos de equipo en la imagen, omití el campo team_stats.
+Si no hay jugadores en la imagen, devolvé "players":[].
+`;
+
+  let mergedPlayers=[]; let matchResult=result; let mergedTeamStats=null;
 
   for(let i=0;i<imageQueue.length;i++){
     const img=imageQueue[i];
@@ -1526,6 +1728,10 @@ Devolvé ÚNICAMENTE JSON válido sin markdown:
         } else { mergedPlayers.push({...p}); }
       });
       if(!matchResult&&parsed.match_result) matchResult=parsed.match_result;
+      if(parsed.team_stats){
+        if(!mergedTeamStats) mergedTeamStats=parsed.team_stats;
+        else Object.keys(parsed.team_stats).forEach(k=>{if(mergedTeamStats[k]==null&&parsed.team_stats[k]!=null) mergedTeamStats[k]=parsed.team_stats[k];});
+      }
     }catch(err){
       img.status='error';
       showToast(`Error imagen ${i+1}: ${err.message}`,'error');
@@ -1537,7 +1743,7 @@ Devolvé ÚNICAMENTE JSON válido sin markdown:
   document.getElementById('btnAnalyze').disabled=false;
 
   if(mergedPlayers.length){
-    pendingResult={rival,league,date,uploadedAt:new Date().toISOString(),players:mergedPlayers,match_result:matchResult,notes:''};
+    pendingResult={rival,league,date,uploadedAt:new Date().toISOString(),players:mergedPlayers,match_result:matchResult,notes:'',...(mergedTeamStats?{team_stats:mergedTeamStats}:{})};
     renderResultPreview(pendingResult);
   } else { showToast('No se pudo extraer ninguna estadística.','error'); }
 }
