@@ -13,12 +13,13 @@
   --text:#f0f2f8;--muted:#8890a8;--muted2:#5a6278;
   --gold:#c8a84b;--gold2:#e8c96a;--gold-dim:rgba(200,168,75,.15);
   --win:#3ecf8e;--draw:#f5c518;--loss:#e8502e;
-  --vpn:#f5c518;--vpug:#3ecf8e;--e11:#e8502e;
+  --vpn:#f5c518;--vpug:#3ecf8e;--e11:#4a9eff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
 
+/* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 28px;}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto;}
 .nav-logo img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(200,168,75,.4));}
@@ -29,91 +30,73 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 .nav-links a:hover{color:var(--text);background:var(--border);}
 .nav-links a.active{color:var(--gold);background:var(--gold-dim);}
 
+/* PAGE */
 .page-header{padding:100px 24px 40px;max-width:1060px;margin:0 auto;}
 .page-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(2.4rem,6vw,4rem);font-weight:900;line-height:.95;}
 .page-title span{color:var(--gold);}
 .page-sub{font-size:.88rem;color:var(--muted);margin-top:10px;}
-
 .wrap{max-width:1060px;margin:0 auto;padding:0 24px 80px;}
 
-.tabs{display:flex;gap:4px;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:0;}
-.tab{padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.06em;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .18s;}
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:32px;border-bottom:1px solid var(--border);}
+.tab{padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.06em;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .18s;white-space:nowrap;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--gold);border-bottom-color:var(--gold);}
 .tab-content{display:none;}
 .tab-content.active{display:block;}
 
-/* UPLOAD */
-.match-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
-.meta-group label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);display:block;margin-bottom:6px;}
-.meta-group select,.meta-group input{width:100%;padding:9px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .18s;}
-.meta-group select:focus,.meta-group input:focus{border-color:var(--gold);}
-.meta-group select option{background:var(--card2);}
+/* ── TEMPORADA ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;text-align:center;}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:900;line-height:1;}
+.kpi-lbl{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-top:4px;}
 
-.upload-area{border:2px dashed var(--border2);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--card);margin-bottom:20px;}
-.upload-area:hover,.upload-area.drag{border-color:var(--gold);background:var(--gold-dim);}
-.upload-icon{font-size:2.8rem;margin-bottom:12px;display:block;}
-.upload-title{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:.04em;margin-bottom:6px;}
-.upload-sub{font-size:.82rem;color:var(--muted);}
-.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.season-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.season-block{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.season-block.full{grid-column:1/-1;}
+.sb-header{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.sb-header h3{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.sb-icon{font-size:1.1rem;}
 
-/* multi-image queue */
-.img-queue{display:none;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
-.img-queue.show{display:flex;}
-.img-thumb{position:relative;width:120px;height:90px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);flex-shrink:0;}
-.img-thumb img{width:100%;height:100%;object-fit:cover;}
-.img-thumb .thumb-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:rgba(0,0,0,.5);}
-.img-thumb .thumb-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
-.img-thumb .thumb-remove:hover{background:var(--loss);}
-.img-thumb.analyzing .thumb-status{background:rgba(10,11,14,.7);}
-.img-thumb.done .thumb-status{background:rgba(62,207,142,.2);}
-.img-thumb.error .thumb-status{background:rgba(232,80,46,.2);}
-.add-more-btn{width:120px;height:90px;border-radius:10px;border:2px dashed var(--border2);background:transparent;color:var(--muted);font-size:1.6rem;cursor:pointer;transition:all .18s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.add-more-btn:hover{border-color:var(--gold);color:var(--gold);}
-.add-more-input{display:none;}
+.rank-table{width:100%;border-collapse:collapse;}
+.rank-table td{padding:9px 16px;border-bottom:1px solid var(--border);font-size:.84rem;vertical-align:middle;}
+.rank-table tr:last-child td{border-bottom:none;}
+.rank-table tr:hover td{background:var(--card2);}
+.rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:900;color:var(--muted2);width:32px;}
+.rank-pos.gold{color:var(--gold);}
+.rank-pos.silver{color:#aab0c4;}
+.rank-pos.bronze{color:#8b6f47;}
+.rank-name{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;}
+.rank-bar-wrap{padding:3px 0;}
+.rank-bar-track{background:var(--border);border-radius:3px;height:4px;overflow:hidden;margin-top:4px;}
+.rank-bar-fill{height:100%;border-radius:3px;}
+.rank-val{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:900;text-align:right;white-space:nowrap;}
+.rank-sub{font-size:.68rem;color:var(--muted2);text-align:right;}
 
-.btn-analyze{width:100%;padding:14px;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;}
-.btn-analyze:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,168,75,.3);}
-.btn-analyze:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+/* Gráficos canvas */
+.chart-wrap{padding:16px 18px;}
+canvas.chart{width:100%;display:block;}
 
-.analyzing-state{display:none;text-align:center;padding:40px;border:1px solid var(--border);border-radius:16px;background:var(--card);margin-top:20px;}
-.analyzing-state.show{display:block;}
-.spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--gold);animation:spin .8s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.analyzing-text{font-size:.9rem;color:var(--muted);}
-.analyzing-text b{color:var(--gold);}
+/* Partidos resultado */
+.results-list{display:flex;flex-direction:column;}
+.result-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border);font-size:.84rem;}
+.result-row:last-child{border-bottom:none;}
+.result-row:hover{background:var(--card2);}
+.res-rival{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.94rem;}
+.res-league{font-size:.65rem;font-weight:700;letter-spacing:.1em;padding:2px 8px;border-radius:4px;}
+.res-league.vpug{background:rgba(62,207,142,.12);color:var(--vpug);}
+.res-league.e11{background:rgba(74,158,255,.12);color:var(--e11);}
+.res-league.vpn{background:rgba(245,197,24,.12);color:var(--vpn);}
+.res-score{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:900;color:var(--win);}
+.res-date{font-size:.7rem;color:var(--muted2);}
 
-.result-card{display:none;border:1px solid var(--border2);border-radius:16px;background:var(--card);margin-top:20px;overflow:hidden;}
-.result-card.show{display:block;}
-.result-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.result-header h3{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.06em;}
-.result-header h3 span{color:var(--gold);}
-.btn-save{padding:8px 20px;background:var(--win);color:#000;font-family:'Barlow',sans-serif;font-size:.82rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:all .18s;}
-.btn-save:hover{opacity:.85;}
-.btn-discard{padding:8px 16px;background:transparent;color:var(--loss);font-size:.82rem;font-weight:600;border:1px solid rgba(232,80,46,.3);border-radius:8px;cursor:pointer;transition:all .18s;margin-right:8px;}
-.btn-discard:hover{background:rgba(232,80,46,.1);}
-
-.stats-table-wrap{overflow-x:auto;}
-.stats-table{width:100%;border-collapse:collapse;font-size:.83rem;}
-.stats-table th{padding:10px 12px;text-align:left;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;}
-.stats-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
-.stats-table tr:last-child td{border-bottom:none;}
-.stats-table tr:hover td{background:var(--card2);}
-.player-cell{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:.04em;}
-.rating-pill{display:inline-block;padding:3px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:800;}
-.rating-pill.high{background:rgba(62,207,142,.15);color:var(--win);}
-.rating-pill.mid{background:rgba(200,168,75,.15);color:var(--gold);}
-.rating-pill.low{background:rgba(232,80,46,.15);color:var(--loss);}
-.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;}
-
-/* PLAYERS */
+/* ── POR JUGADOR ── */
 .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
 .filter-bar label{font-size:.75rem;color:var(--muted2);font-weight:600;}
 .fbtn{padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;}
 .fbtn:hover{border-color:var(--gold);color:var(--gold);}
 .fbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
-
 .player-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
 .pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color .2s;}
 .pcard:hover{border-color:var(--border2);}
@@ -131,70 +114,104 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 .sparkline{display:flex;gap:3px;align-items:flex-end;height:28px;margin-top:10px;}
 .spark-bar{flex:1;border-radius:2px;min-height:4px;}
 
-/* HISTORY */
+/* ── HISTORIAL ── */
+.history-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
 .history-table{width:100%;border-collapse:collapse;font-size:.83rem;}
-.history-table th{padding:9px 12px;text-align:left;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);}
-.history-table td{padding:10px 12px;border-bottom:1px solid var(--border);}
+.history-table th{padding:9px 14px;text-align:left;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;}
+.history-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
 .history-table tr:last-child td{border-bottom:none;}
 .history-table tr:hover td{background:var(--card2);}
 .delete-btn{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:4px;transition:all .15s;}
 .delete-btn:hover{color:var(--loss);background:rgba(232,80,46,.1);}
+.expand-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 8px;border-radius:4px;transition:all .15s;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
+.expand-btn:hover{color:var(--gold);}
+.detail-row{display:none;}
+.detail-row.open{display:table-row;}
+.detail-row td{background:var(--card2);padding:0;}
+.detail-inner{padding:12px 14px;overflow-x:auto;}
+.detail-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+.detail-table th{padding:6px 10px;text-align:left;color:var(--muted2);font-size:.62rem;letter-spacing:.08em;font-weight:700;border-bottom:1px solid var(--border);}
+.detail-table td{padding:7px 10px;border-bottom:1px solid var(--border);}
+.detail-table tr:last-child td{border-bottom:none;}
+.rating-pill{display:inline-block;padding:2px 8px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;}
+.rating-pill.high{background:rgba(62,207,142,.15);color:var(--win);}
+.rating-pill.mid{background:rgba(200,168,75,.15);color:var(--gold);}
+.rating-pill.low{background:rgba(232,80,46,.15);color:var(--loss);}
 
+/* ── SUBIR PARTIDO ── */
+.match-meta{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+.meta-group label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);display:block;margin-bottom:6px;}
+.meta-group select,.meta-group input{width:100%;padding:9px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .18s;}
+.meta-group select:focus,.meta-group input:focus{border-color:var(--gold);}
+.meta-group select option{background:var(--card2);}
+.upload-area{border:2px dashed var(--border2);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--card);margin-bottom:20px;}
+.upload-area:hover,.upload-area.drag{border-color:var(--gold);background:var(--gold-dim);}
+.upload-icon{font-size:2.8rem;margin-bottom:12px;display:block;}
+.upload-title{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:6px;}
+.upload-sub{font-size:.82rem;color:var(--muted);}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-queue{display:none;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.img-queue.show{display:flex;}
+.img-thumb{position:relative;width:120px;height:90px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);flex-shrink:0;}
+.img-thumb img{width:100%;height:100%;object-fit:cover;}
+.img-thumb .thumb-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:rgba(0,0,0,.5);}
+.img-thumb .thumb-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.img-thumb .thumb-remove:hover{background:var(--loss);}
+.img-thumb.analyzing .thumb-status{background:rgba(10,11,14,.7);}
+.img-thumb.done .thumb-status{background:rgba(62,207,142,.2);}
+.img-thumb.error .thumb-status{background:rgba(232,80,46,.2);}
+.add-more-btn{width:120px;height:90px;border-radius:10px;border:2px dashed var(--border2);background:transparent;color:var(--muted);font-size:1.6rem;cursor:pointer;transition:all .18s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.add-more-btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn-analyze{width:100%;padding:14px;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-analyze:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,168,75,.3);}
+.btn-analyze:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+.analyzing-state{display:none;text-align:center;padding:40px;border:1px solid var(--border);border-radius:16px;background:var(--card);margin-top:20px;}
+.analyzing-state.show{display:block;}
+.spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--gold);animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.analyzing-text{font-size:.9rem;color:var(--muted);}
+.analyzing-text b{color:var(--gold);}
+.result-card{display:none;border:1px solid var(--border2);border-radius:16px;background:var(--card);margin-top:20px;overflow:hidden;}
+.result-card.show{display:block;}
+.result-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.result-header h3{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;}
+.result-header h3 span{color:var(--gold);}
+.btn-save{padding:8px 20px;background:var(--win);color:#000;font-family:'Barlow',sans-serif;font-size:.82rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.btn-save:hover{opacity:.85;}
+.btn-discard{padding:8px 16px;background:transparent;color:var(--loss);font-size:.82rem;font-weight:600;border:1px solid rgba(232,80,46,.3);border-radius:8px;cursor:pointer;margin-right:8px;}
+.btn-discard:hover{background:rgba(232,80,46,.1);}
+.stats-table-wrap{overflow-x:auto;}
+.stats-table{width:100%;border-collapse:collapse;font-size:.83rem;}
+.stats-table th{padding:10px 12px;text-align:left;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;}
+.stats-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.stats-table tr:last-child td{border-bottom:none;}
+.stats-table tr:hover td{background:var(--card2);}
+.player-cell{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;}
+
+/* CLOUD STATUS */
+.cloud-status{display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--muted2);margin-bottom:16px;}
+.cloud-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);}
+.cloud-dot.ok{background:var(--win);}
+.cloud-dot.err{background:var(--loss);}
+
+/* MISC */
 .empty-state{text-align:center;padding:60px 24px;grid-column:1/-1;}
 .empty-icon{font-size:3rem;margin-bottom:12px;opacity:.4;}
 .empty-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;color:var(--muted);margin-bottom:6px;}
 .empty-sub{font-size:.82rem;color:var(--muted2);}
-
-/* SEASON TAB */
-.season-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;}
-.season-block{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.season-block.full{grid-column:1/-1;}
-.sb-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.sb-header h3{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
-.sb-header h3 span{color:var(--gold);}
-.sb-icon{font-size:1.1rem;}
-.rank-table{width:100%;border-collapse:collapse;}
-.rank-table td{padding:10px 16px;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:middle;}
-.rank-table tr:last-child td{border-bottom:none;}
-.rank-table tr:hover td{background:var(--card2);}
-.rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:900;color:var(--muted2);width:32px;}
-.rank-pos.gold{color:var(--gold);}
-.rank-pos.silver{color:#aab0c4;}
-.rank-pos.bronze{color:#8b6f47;}
-.rank-name{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:.03em;}
-.rank-val{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;text-align:right;}
-.rank-sub{font-size:.7rem;color:var(--muted2);text-align:right;}
-.rank-bar-wrap{padding:4px 0;}
-.rank-bar-track{background:var(--border);border-radius:3px;height:5px;overflow:hidden;margin-top:4px;}
-.rank-bar-fill{height:100%;border-radius:3px;}
-
-/* League breakdown */
-.league-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
-.lb-col{padding:16px;border-right:1px solid var(--border);}
-.lb-col:last-child{border-right:none;}
-.lb-league{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.06em;margin-bottom:12px;}
-.lb-league.vpn{color:var(--vpn);}
-.lb-league.vpug{color:var(--vpug);}
-.lb-league.e11{color:var(--e11);}
-.lb-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.8rem;}
-.lb-stat:last-child{border-bottom:none;}
-.lb-stat .lbl{color:var(--muted2);}
-.lb-stat .val{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:800;}
-
 .toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:12px 20px;font-size:.85rem;font-weight:600;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.success{border-color:rgba(62,207,142,.4);color:var(--win);}
 .toast.error{border-color:rgba(232,80,46,.4);color:var(--loss);}
-
-@media(max-width:640px){.season-grid{grid-template-columns:1fr;}.league-breakdown{grid-template-columns:1fr;}}
-
 footer{border-top:1px solid var(--border);padding:28px 24px;text-align:center;font-size:.78rem;color:var(--muted2);}
 footer span{color:var(--gold);}
 
-@media(max-width:640px){
+@media(max-width:700px){
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .season-grid{grid-template-columns:1fr;}
+  .match-meta{grid-template-columns:1fr 1fr;}
   nav{padding:0 14px;}
   .nav-links a{padding:7px 9px;font-size:.74rem;}
-  .match-meta{grid-template-columns:1fr 1fr;}
   .tabs{overflow-x:auto;}
   .tab{white-space:nowrap;padding:10px 14px;}
 }
@@ -216,26 +233,60 @@ footer span{color:var(--gold);}
 </nav>
 
 <div class="page-header">
-  <div class="page-eyebrow">Temporada 2026</div>
+  <div class="page-eyebrow">Temporada 2025</div>
   <h1 class="page-title">Centro de <span>Estadísticas</span></h1>
-  <p class="page-sub">Subí capturas de EA FC · la IA extrae los datos automáticamente · analizá el rendimiento del plantel</p>
+  <p class="page-sub">Datos en la nube · IA extrae stats automáticamente · rendimiento del plantel</p>
 </div>
 
 <div class="wrap">
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('upload',this)">📤 Subir Partido</button>
-    <button class="tab" onclick="switchTab('season',this)">🏆 Temporada</button>
+    <button class="tab active" onclick="switchTab('season',this)">🏆 Temporada</button>
     <button class="tab" onclick="switchTab('players',this)">👤 Por Jugador</button>
     <button class="tab" onclick="switchTab('history',this)">📋 Historial</button>
+    <button class="tab" onclick="switchTab('upload',this)">📤 Subir Partido</button>
   </div>
 
-  <!-- TAB: TEMPORADA -->
-  <div class="tab-content" id="tab-season">
+  <!-- ── TAB TEMPORADA ── -->
+  <div class="tab-content active" id="tab-season">
+    <div class="kpi-row" id="kpiRow"></div>
     <div class="season-grid" id="seasonGrid"></div>
   </div>
 
-  <!-- TAB: SUBIR -->
-  <div class="tab-content active" id="tab-upload">
+  <!-- ── TAB POR JUGADOR ── -->
+  <div class="tab-content" id="tab-players">
+    <div class="filter-bar">
+      <label>Posición:</label>
+      <button class="fbtn active" onclick="filterPlayers('all',this)">Todos</button>
+      <button class="fbtn" onclick="filterPlayers('POR',this)">Arqueros</button>
+      <button class="fbtn" onclick="filterPlayers('DEF',this)">Defensas</button>
+      <button class="fbtn" onclick="filterPlayers('LAT',this)">Laterales</button>
+      <button class="fbtn" onclick="filterPlayers('MED',this)">Mediocampistas</button>
+      <button class="fbtn" onclick="filterPlayers('DEL',this)">Delanteros</button>
+    </div>
+    <div class="player-cards-grid" id="playerGrid"></div>
+  </div>
+
+  <!-- ── TAB HISTORIAL ── -->
+  <div class="tab-content" id="tab-history">
+    <div class="history-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th></th><th>Fecha</th><th>Rival</th><th>Liga</th>
+            <th>Resultado</th><th>Jugadores</th><th>Subido</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB SUBIR ── -->
+  <div class="tab-content" id="tab-upload">
+    <div class="cloud-status">
+      <div class="cloud-dot" id="cloudDot"></div>
+      <span id="cloudLabel">Verificando conexión a la nube...</span>
+    </div>
     <div class="match-meta">
       <div class="meta-group">
         <label>Rival</label>
@@ -251,6 +302,10 @@ footer span{color:var(--gold);}
         </select>
       </div>
       <div class="meta-group">
+        <label>Resultado</label>
+        <input type="text" id="metaResult" placeholder="Ej: 3-1">
+      </div>
+      <div class="meta-group">
         <label>Fecha</label>
         <input type="date" id="metaDate">
       </div>
@@ -259,13 +314,11 @@ footer span{color:var(--gold);}
     <div class="upload-area" id="uploadArea">
       <span class="upload-icon">📸</span>
       <div class="upload-title">Arrastrá o hacé clic para subir capturas</div>
-      <div class="upload-sub">Podés subir múltiples imágenes de EA FC · PNG, JPG, WEBP</div>
+      <div class="upload-sub">Podés subir múltiples imágenes · PNG, JPG, WEBP</div>
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
-
-    <!-- thumbnail queue -->
     <div class="img-queue" id="imgQueue"></div>
-    <input type="file" id="addMoreInput" class="add-more-input" accept="image/*" multiple>
+    <input type="file" id="addMoreInput" style="display:none" accept="image/*" multiple>
 
     <button class="btn-analyze" id="btnAnalyze" onclick="analyzeAll()" disabled>
       <span>🤖</span> <span id="btnAnalyzeLabel">Analizar con IA</span>
@@ -278,56 +331,36 @@ footer span{color:var(--gold);}
 
     <div class="result-card" id="resultCard">
       <div class="result-header">
-        <h3>Estadísticas extraídas — <span id="resultTitle"></span></h3>
+        <h3>Extraído — <span id="resultTitle"></span></h3>
         <div>
           <button class="btn-discard" onclick="discardResult()">✕ Descartar</button>
-          <button class="btn-save" onclick="saveResult()">✓ Guardar partido</button>
+          <button class="btn-save" onclick="saveResult()">☁ Guardar en la nube</button>
         </div>
       </div>
       <div class="stats-table-wrap">
         <table class="stats-table">
           <thead>
-            <tr>
-              <th>Jugador</th><th>Rating</th><th>Goles</th><th>Asist.</th>
-              <th>Pases</th><th>Prec.%</th><th>Dist. km</th><th>Sprints</th>
-              <th>Tackles</th><th>Interc.</th>
-            </tr>
+            <tr><th>Jugador</th><th>Rating</th><th>Goles</th><th>Asist.</th>
+            <th>Pases</th><th>Prec.%</th><th>Dist. km</th><th>Sprints</th>
+            <th>Tackles</th><th>Interc.</th></tr>
           </thead>
           <tbody id="resultBody"></tbody>
         </table>
       </div>
     </div>
   </div>
-
-  <!-- TAB: POR JUGADOR -->
-  <div class="tab-content" id="tab-players">
-    <div class="filter-bar">
-      <label>Posición:</label>
-      <button class="fbtn active" onclick="filterPlayers('all',this)">Todos</button>
-      <button class="fbtn" onclick="filterPlayers('POR',this)">Arqueros</button>
-      <button class="fbtn" onclick="filterPlayers('DEF',this)">Defensas</button>
-      <button class="fbtn" onclick="filterPlayers('LAT',this)">Laterales</button>
-      <button class="fbtn" onclick="filterPlayers('MED',this)">Mediocampistas</button>
-      <button class="fbtn" onclick="filterPlayers('DEL',this)">Delanteros</button>
-    </div>
-    <div class="player-cards-grid" id="playerGrid"></div>
-  </div>
-
-  <!-- TAB: HISTORIAL -->
-  <div class="tab-content" id="tab-history">
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
-      <table class="history-table">
-        <thead><tr><th>Fecha</th><th>Rival</th><th>Liga</th><th>Resultado</th><th>Jugadores</th><th>Subido</th><th></th></tr></thead>
-        <tbody id="historyBody"></tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
-<footer><p>Top Secret <span>Football Club</span> · Estadísticas IA · Temporada 2026</p></footer>
+<footer><p>Top Secret <span>Football Club</span> · Estadísticas IA · Temporada 2025</p></footer>
 <div class="toast" id="toast"></div>
 
 <script>
+// ════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════
+const WORKER_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+const KV_KEY     = 'ts_matches_v1';   // clave en el KV del worker
+
 const ROSTER = [
   {name:'Woolfyboyzx2',    pos:'POR'},
   {name:'Zurdo-_CABJ12',   pos:'DEF'},
@@ -345,470 +378,164 @@ const ROSTER = [
   {name:'Lautavester7',    pos:'DEL'},
 ];
 
-const STORE_KEY = 'ts_stats_v1';
-function loadMatches(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){return[];} }
-function saveMatches(arr){ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
+// ════════════════════════════════════════════
+// CLOUD STORAGE (Cloudflare KV via Worker)
+// ════════════════════════════════════════════
+let cloudMatches = [];   // cache en memoria
 
-// ── TABS ──
+async function cloudLoad(){
+  try {
+    const r = await fetch(`${WORKER_URL}/kv?key=${KV_KEY}`);
+    if(!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    cloudMatches = Array.isArray(data) ? data : [];
+    setCloudStatus(true, `Nube sincronizada · ${cloudMatches.length} partidos`);
+    return cloudMatches;
+  } catch(e) {
+    // Fallback a seed si no hay nube
+    setCloudStatus(false, 'Sin conexión — usando datos locales');
+    if(!cloudMatches.length) cloudMatches = SEED_MATCHES;
+    return cloudMatches;
+  }
+}
+
+async function cloudSave(matches){
+  try {
+    const r = await fetch(`${WORKER_URL}/kv`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({key: KV_KEY, value: matches})
+    });
+    if(!r.ok) throw new Error(r.status);
+    setCloudStatus(true, `Nube sincronizada · ${matches.length} partidos`);
+    return true;
+  } catch(e){
+    setCloudStatus(false, 'Error al guardar en la nube');
+    return false;
+  }
+}
+
+function setCloudStatus(ok, msg){
+  document.getElementById('cloudDot').className = 'cloud-dot ' + (ok?'ok':'err');
+  document.getElementById('cloudLabel').textContent = msg;
+}
+
+function loadMatches(){ return cloudMatches; }
+
+// ════════════════════════════════════════════
+// SEED — datos de los 6 partidos conocidos
+// ════════════════════════════════════════════
+const SEED_MATCHES = [
+  {rival:'Los Picantes', league:'11x11', date:'2025-03-03', match_result:'7-0', uploadedAt:'2025-03-03T00:00:00.000Z', notes:'', players:[
+    {name:'zPibu__',matched:'zPibu__',rating:8.5,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:2,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:3,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.4,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'CipriMancini',matched:'CipriMancini',rating:9.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:8.5,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Guiidow',matched:'Guiidow',rating:7.0,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Agubostero7',matched:'Agubostero7',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.3,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.6,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:6.9,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+  ]},
+  {rival:'Talleres R', league:'11x11', date:'2025-03-05', match_result:'6-1', uploadedAt:'2025-03-05T00:00:00.000Z', notes:'', players:[
+    {name:'zPibu__',matched:'zPibu__',rating:9.5,goals:0,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Lautavester7',matched:'Lautavester7',rating:9.0,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.7,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'CipriMancini',matched:'CipriMancini',rating:9.3,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:7.7,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Guiidow',matched:'Guiidow',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Agubostero7',matched:'Agubostero7',rating:7.2,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.8,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:8.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:5.2,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+  ]},
+  {rival:'Inst. Senior', league:'11x11', date:'2025-03-05', match_result:'6-0', uploadedAt:'2025-03-05T01:00:00.000Z', notes:'', players:[
+    {name:'zPibu__',matched:'zPibu__',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Lautavester7',matched:'Lautavester7',rating:8.0,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:8.7,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'CipriMancini',matched:'CipriMancini',rating:9.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:7.6,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Guiidow',matched:'Guiidow',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Agubostero7',matched:'Agubostero7',rating:7.7,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:9.4,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.1,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:7.5,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+  ]},
+  {rival:'Suda', league:'VPUG', date:'2025-03-02', match_result:'✓', uploadedAt:'2025-03-02T00:00:00.000Z', notes:'', players:[
+    {name:'Lautavester7',matched:'Lautavester7',rating:7.8,goals:1,assists:1,passes:21,pass_accuracy:90,distance_km:18.4,sprints:null,tackles:1,interceptions:null},
+    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:7.2,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.6,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'CipriMancini',matched:'CipriMancini',rating:7.3,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:7.5,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Guiidow',matched:'Guiidow',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'zPibu__',matched:'zPibu__',rating:7.3,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Agubostero7',matched:'Agubostero7',rating:7.7,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:7.3,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+  ]},
+  {rival:'Team Valhala', league:'VPUG', date:'2025-03-03', match_result:'5-0', uploadedAt:'2025-03-03T01:00:00.000Z', notes:'', players:[
+    {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:3,assists:1,passes:16,pass_accuracy:88,distance_km:17.9,sprints:null,tackles:6,interceptions:null},
+    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:7.4,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.4,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'CipriMancini',matched:'CipriMancini',rating:8.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:8.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Guiidow',matched:'Guiidow',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'zPibu__',matched:'zPibu__',rating:7.8,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Agubostero7',matched:'Agubostero7',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.9,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:8.8,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:6.2,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+  ]},
+  {rival:'La Unión', league:'VPUG', date:'2025-03-04', match_result:'✓', uploadedAt:'2025-03-04T00:00:00.000Z', notes:'', players:[
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.2,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:9.5,goals:2,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:9.0,goals:1,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'CipriMancini',matched:'CipriMancini',rating:10.0,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:8.0,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Buraa07',matched:'Buraa07',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'zPibu__',matched:'zPibu__',rating:8.1,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Agubostero7',matched:'Agubostero7',rating:6.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.1,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:5.5,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+  ]},
+];
+
+// ════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════
 function switchTab(name, btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
+  if(name==='season')  renderSeason();
   if(name==='players') renderPlayers('all');
   if(name==='history') renderHistory();
-  if(name==='season')  renderSeason();
 }
 
-// ── SEASON ──
-function renderSeason(){
-  const matches = loadMatches();
-  const grid = document.getElementById('seasonGrid');
-
-  if(!matches.length){
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏆</div><div class="empty-title">Sin datos de temporada</div><div class="empty-sub">Subí partidos con estadísticas para ver el resumen de la temporada</div></div>`;
-    return;
-  }
-
-  // Build per-player aggregates
-  const playerMap = {};
-  ROSTER.forEach(p=>{ playerMap[p.name] = {name:p.name, pos:p.pos, games:0, goals:0, assists:0, tackles:0, interceptions:0, ratings:[], passes:[], pass_acc:[], dist:[], sprints:[]}; });
-
-  matches.forEach(m=>{
-    (m.players||[]).forEach(p=>{
-      const key = (p.matched||'').toLowerCase();
-      const entry = Object.values(playerMap).find(r=>r.name.toLowerCase()===key);
-      if(!entry) return;
-      entry.games++;
-      entry.goals        += p.goals||0;
-      entry.assists      += p.assists||0;
-      entry.tackles      += p.tackles||0;
-      entry.interceptions+= p.interceptions||0;
-      if(p.rating!=null)        entry.ratings.push(p.rating);
-      if(p.passes!=null)        entry.passes.push(p.passes);
-      if(p.pass_accuracy!=null) entry.pass_acc.push(p.pass_accuracy);
-      if(p.distance_km!=null)   entry.dist.push(p.distance_km);
-      if(p.sprints!=null)       entry.sprints.push(p.sprints);
-    });
-  });
-
-  const players = Object.values(playerMap).filter(p=>p.games>0);
-  const avg = arr => arr.length ? arr.reduce((s,v)=>s+v,0)/arr.length : null;
-
-  // Helpers
-  function rankTable(title, icon, rows, valFn, valLabel, color, subFn){
-    const sorted = [...players].filter(p=>valFn(p)>0||valFn(p)!=null).sort((a,b)=>valFn(b)-valFn(a)).slice(0,7);
-    const max = valFn(sorted[0])||1;
-    const posClass = i => i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    return `<div class="season-block">
-      <div class="sb-header"><span class="sb-icon">${icon}</span><h3>${title}</h3></div>
-      <table class="rank-table">
-        ${sorted.map((p,i)=>`<tr>
-          <td class="rank-pos ${posClass(i)}">${i+1}</td>
-          <td><div class="rank-name">${p.name}</div>
-            <div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:${Math.round(valFn(p)/max*100)}%;background:${color}"></div></div></div>
-          </td>
-          <td><div class="rank-val" style="color:${color}">${typeof valFn(p)==='number'&&!Number.isInteger(valFn(p))?valFn(p).toFixed(1):valFn(p)}</div><div class="rank-sub">${subFn?subFn(p):valLabel}</div></td>
-        </tr>`).join('')}
-      </table>
-    </div>`;
-  }
-
-  // League breakdown
-  const leagues = ['VPN','VPUG','11x11'];
-  const lgColors = {VPN:'vpn',VPUG:'vpug','11x11':'e11'};
-  function lgStats(lg){
-    const lm = matches.filter(m=>m.league===lg);
-    const allPlayers = lm.flatMap(m=>m.players||[]);
-    const totalGoals = allPlayers.reduce((s,p)=>s+(p.goals||0),0);
-    const ratings = allPlayers.map(p=>p.rating).filter(v=>v!=null);
-    const avgRating = avg(ratings);
-    const topScorer = players.map(p=>{
-      const g = lm.flatMap(m=>(m.players||[]).filter(mp=>(mp.matched||'').toLowerCase()===p.name.toLowerCase())).reduce((s,mp)=>s+(mp.goals||0),0);
-      return {name:p.name, goals:g};
-    }).sort((a,b)=>b.goals-a.goals)[0];
-    return {games:lm.length, totalGoals, avgRating, topScorer};
-  }
-
-  const lgHTML = `<div class="season-block full">
-    <div class="sb-header"><span class="sb-icon">⚽</span><h3>Rendimiento por <span>Liga</span></h3></div>
-    <div class="league-breakdown">
-      ${leagues.map(lg=>{
-        const s = lgStats(lg);
-        return `<div class="lb-col">
-          <div class="lb-league ${lgColors[lg]}">${lg}</div>
-          <div class="lb-stat"><span class="lbl">Partidos</span><span class="val">${s.games}</span></div>
-          <div class="lb-stat"><span class="lbl">Goles totales</span><span class="val">${s.totalGoals}</span></div>
-          <div class="lb-stat"><span class="lbl">Rating promedio</span><span class="val">${s.avgRating!=null?s.avgRating.toFixed(1):'—'}</span></div>
-          <div class="lb-stat"><span class="lbl">Goleador</span><span class="val" style="font-size:.78rem">${s.topScorer&&s.topScorer.goals>0?s.topScorer.name:'—'}</span></div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`;
-
-  grid.innerHTML =
-    rankTable('Tabla de Rating','⭐', players, p=>avg(p.ratings)??0, 'promedio', 'var(--gold)', p=>`${p.games} partidos`) +
-    rankTable('Goleadores','⚽', players, p=>p.goals, 'goles', 'var(--win)', p=>`${p.assists} asist.`) +
-    rankTable('Asistencias','🎯', players, p=>p.assists, 'asistencias', 'var(--vpug)', p=>`${p.goals} goles`) +
-    rankTable('Tackles','🛡️', players, p=>p.tackles, 'tackles', 'var(--muted)', p=>`${p.interceptions} interc.`) +
-    rankTable('Intercepciones','✋', players, p=>p.interceptions, 'intercepciones', '#7c6fff', p=>`${p.tackles} tackles`) +
-    lgHTML;
-}
-
-// ── UPLOAD (multi-image) ──
-let imageQueue = []; // [{base64, dataUrl, status:'pending'|'analyzing'|'done'|'error', result}]
-let pendingResult = null;
-
-document.getElementById('metaDate').value = new Date().toISOString().split('T')[0];
-
-const uploadArea   = document.getElementById('uploadArea');
-const fileInput    = document.getElementById('fileInput');
-const addMoreInput = document.getElementById('addMoreInput');
-
-['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.add('drag');}));
-['dragleave','drop'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.remove('drag');}));
-uploadArea.addEventListener('drop',e=>{ if(e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change',()=>{ if(fileInput.files.length) addFiles(fileInput.files); });
-addMoreInput.addEventListener('change',()=>{ if(addMoreInput.files.length) addFiles(addMoreInput.files); });
-
-function addFiles(files){
-  Array.from(files).forEach(file=>{
-    if(!file.type.startsWith('image/')){ showToast('Solo imágenes (PNG, JPG, WEBP)','error'); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target.result;
-      const mediaType = dataUrl.split(';')[0].split(':')[1] || 'image/jpeg';
-      imageQueue.push({base64: dataUrl.split(',')[1], dataUrl, mediaType, status:'pending', result:null});
-      renderQueue();
-    };
-    reader.readAsDataURL(file);
-  });
-  fileInput.value = '';
-  addMoreInput.value = '';
-}
-
-function removeFromQueue(idx){
-  imageQueue.splice(idx,1);
-  renderQueue();
-}
-
-function renderQueue(){
-  const queue = document.getElementById('imgQueue');
-  if(!imageQueue.length){
-    queue.classList.remove('show');
-    uploadArea.style.display = '';
-    document.getElementById('btnAnalyze').disabled = true;
-    document.getElementById('btnAnalyzeLabel').textContent = 'Analizar con IA';
-    return;
-  }
-  uploadArea.style.display = 'none';
-  queue.classList.add('show');
-  const statusIcon = s => s==='pending'?'':s==='analyzing'?'⏳':s==='done'?'✅':'❌';
-  queue.innerHTML = imageQueue.map((img,i)=>`
-    <div class="img-thumb ${img.status!=='pending'?img.status:''}">
-      <img src="${img.dataUrl}" alt="img ${i+1}">
-      ${img.status!=='pending'?`<div class="thumb-status">${statusIcon(img.status)}</div>`:''}
-      ${img.status==='pending'?`<button class="thumb-remove" onclick="removeFromQueue(${i})">✕</button>`:''}
-    </div>
-  `).join('') + `<button class="add-more-btn" onclick="addMoreInput.click()" title="Agregar más">+</button>`;
-
-  const pending = imageQueue.filter(i=>i.status==='pending').length;
-  const btn = document.getElementById('btnAnalyze');
-  btn.disabled = pending === 0;
-  document.getElementById('btnAnalyzeLabel').textContent =
-    pending === 1 ? 'Analizar 1 imagen' : `Analizar ${pending} imágenes`;
-}
-
-function resetUpload(){
-  imageQueue = [];
-  pendingResult = null;
-  document.getElementById('imgQueue').classList.remove('show');
-  uploadArea.style.display = '';
-  document.getElementById('btnAnalyze').disabled = true;
-  document.getElementById('btnAnalyzeLabel').textContent = 'Analizar con IA';
-  document.getElementById('resultCard').classList.remove('show');
-  document.getElementById('analyzingState').classList.remove('show');
-  fileInput.value = '';
-}
-
-// ── AI ANALYSIS (multi) ──
-async function analyzeAll(){
-  const pending = imageQueue.filter(i=>i.status==='pending');
-  if(!pending.length) return;
-
-  const rival  = document.getElementById('metaRival').value.trim() || 'Desconocido';
-  const league = document.getElementById('metaLeague').value || '?';
-  const date   = document.getElementById('metaDate').value || new Date().toISOString().split('T')[0];
-
-  document.getElementById('btnAnalyze').disabled = true;
-  document.getElementById('analyzingState').classList.add('show');
-  document.getElementById('resultCard').classList.remove('show');
-
-  // URL del Cloudflare Worker (proxy para evitar CORS)
-  const WORKER_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
-
-  // Roster con apodos conocidos para mejorar el matching
-  const rosterList = ROSTER.map(p => `- ${p.name} (${p.pos})`).join('\n');
-  const prompt = `Sos un analista de datos de EA FC / FIFA. Se te envía una captura de estadísticas post-partido del equipo "Top Secret FC".
-
-PLANTEL OFICIAL (nombre exacto · posición):
-${rosterList}
-
-REGLAS DE IDENTIFICACIÓN DE JUGADORES:
-Los nombres en pantalla son apodos o versiones abreviadas de los nombres del plantel. Usá estas equivalencias conocidas y también deducí por similitud fonética o parcial:
-- "Lautavester7" → Lautavester7 ✓ (coincidencia exacta)
-- "T. cansitrGD22" o "cansitr" → cansitrGd22_
-- "BlackPanther" o "Black" → BlackPanther-CG
-- "ciprimancini" o "Cipri" → CipriMancini
-- "J. Martinez" o "Martinez" → Juan_Martinez4
-- "Guiidow" → Guiidow ✓
-- "O. Pibu" o "Pibu" → zPibu__
-- "Agubostero7" o "Agubo" → Agubostero7 ✓
-- "Alexisraies2" o "Alexis" → Alexiisraiies23
-- "ZurdoCABJ" o "Zurdo" → Zurdo-_CABJ12
-- "Woolfyboyzx2" o "Woolfy" → Woolfyboyzx2 ✓
-- "Huber" o "Huber236" → Huber236
-- "Buraa" o "Bura" → Buraa07
-- "DaniStone" o "RS32" → RS32-DaniStone
-
-Para cualquier nombre que no esté en la lista anterior, intentá hacer la equivalencia por similitud.
-El campo "matched" SIEMPRE debe ser el nombre exacto del plantel oficial (no el apodo).
-
-Extraé las estadísticas de CADA jugador visible. Devolvé ÚNICAMENTE JSON válido sin texto extra ni markdown:
-{
-  "players": [
-    {
-      "name": "apodo como aparece en pantalla",
-      "matched": "nombre EXACTO del plantel oficial",
-      "rating": 7.5,
-      "goals": 1,
-      "assists": 0,
-      "passes": 34,
-      "pass_accuracy": 87,
-      "distance_km": 9.2,
-      "sprints": 18,
-      "tackles": 3,
-      "interceptions": 2
-    }
-  ],
-  "match_result": "2-1",
-  "notes": ""
-}
-
-Reglas adicionales: si un valor no es legible usá null. rating es decimal. pass_accuracy es % sin símbolo.`;
-
-  let mergedPlayers = [];
-  let matchResult = null;
-
-  for(let i=0; i<imageQueue.length; i++){
-    const img = imageQueue[i];
-    if(img.status !== 'pending') continue;
-
-    img.status = 'analyzing';
-    renderQueue();
-    document.getElementById('analyzingText').innerHTML =
-      `Analizando imagen ${i+1} de ${imageQueue.length}...<br><b>Extrayendo estadísticas de EA FC</b>`;
-
-    try {
-      const resp = await fetch(WORKER_URL, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          contents:[{
-            parts:[
-              { inline_data: { mime_type: img.mediaType || 'image/jpeg', data: img.base64 } },
-              { text: prompt }
-            ]
-          }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
-        })
-      });
-      const data = await resp.json();
-      if(data.error) throw new Error(`API error: ${data.error.message || JSON.stringify(data.error)}`);
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if(!text) throw new Error(`Respuesta vacía. Raw: ${JSON.stringify(data).slice(0,200)}`);
-      const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
-
-      img.status = 'done';
-      img.result = parsed;
-
-      // Merge players: si ya existe por nombre del plantel, completar campos null
-      (parsed.players||[]).forEach(p=>{
-        const key = (p.matched||p.name||'').toLowerCase();
-        const existing = mergedPlayers.find(ep=>(ep.matched||ep.name||'').toLowerCase()===key);
-        if(existing){
-          ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions'].forEach(f=>{
-            if(existing[f]===null && p[f]!==null && p[f]!==undefined) existing[f] = p[f];
-          });
-        } else {
-          mergedPlayers.push({...p});
-        }
-      });
-      if(!matchResult && parsed.match_result) matchResult = parsed.match_result;
-
-    } catch(err){
-      console.error('Error imagen', i+1, err);
-      img.status = 'error';
-      showToast(`Error imagen ${i+1}: ${err.message}`, 'error');
-    }
-    renderQueue();
-  }
-
-  document.getElementById('analyzingState').classList.remove('show');
-  document.getElementById('btnAnalyze').disabled = false;
-
-  if(mergedPlayers.length){
-    pendingResult = {rival, league, date, uploadedAt:new Date().toISOString(), players:mergedPlayers, match_result:matchResult, notes:''};
-    renderResultPreview(pendingResult);
-  } else {
-    showToast('No se pudo extraer ninguna estadística.','error');
-  }
-}
-
-function renderResultPreview(data){
-  document.getElementById('resultTitle').textContent =
-    `vs ${data.rival} · ${data.league} · ${formatDate(data.date)}${data.match_result?' · '+data.match_result:''}`;
-  document.getElementById('resultBody').innerHTML = (data.players||[]).map(p=>{
-    const r = p.rating;
-    const rc = r===null?'':r>=8?'high':r>=6.5?'mid':'low';
-    const v = x => x!==null&&x!==undefined ? `<span class="stat-num">${x}</span>` : '—';
-    return `<tr>
-      <td class="player-cell">${p.matched||p.name}${p.matched&&p.matched!==p.name?'<br><small style="color:var(--muted2);font-weight:400;font-size:.7rem">'+p.name+'</small>':''}</td>
-      <td>${r!==null?`<span class="rating-pill ${rc}">${r}</span>`:'—'}</td>
-      <td>${v(p.goals)}</td><td>${v(p.assists)}</td><td>${v(p.passes)}</td>
-      <td>${p.pass_accuracy!=null?v(p.pass_accuracy+'%'):'—'}</td>
-      <td>${v(p.distance_km)}</td><td>${v(p.sprints)}</td>
-      <td>${v(p.tackles)}</td><td>${v(p.interceptions)}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('resultCard').classList.add('show');
-}
-
-function saveResult(){
-  if(!pendingResult) return;
-  const matches = loadMatches();
-  matches.push(pendingResult);
-  saveMatches(matches);
-  showToast('✓ Partido guardado correctamente','success');
-  imageQueue = [];
-  resetUpload();
-  pendingResult = null;
-}
-function discardResult(){
-  document.getElementById('resultCard').classList.remove('show');
-  pendingResult = null;
-}
-
-// ── PLAYERS ──
+// ════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════
+const avg = arr => arr.length ? arr.reduce((s,v)=>s+v,0)/arr.length : null;
+const sum = arr => arr.reduce((s,v)=>s+v,0);
 function initials(name){
-  const clean = name.replace(/[-_]/g,' ').replace(/\s+/g,' ').trim();
-  const parts = clean.split(' ').filter(p=>p.length>0);
-  return parts.length>=2?(parts[0][0]+parts[1][0]).toUpperCase():name.slice(0,2).toUpperCase();
+  const p = name.replace(/[-_]/g,' ').trim().split(/\s+/);
+  return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():name.slice(0,2).toUpperCase();
 }
-function avg(arr){ if(!arr.length) return null; return arr.reduce((s,v)=>s+v,0)/arr.length; }
-function sum(arr){ return arr.reduce((s,v)=>s+v,0); }
-
-function filterPlayers(pos, btn){
-  document.querySelectorAll('#tab-players .fbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderPlayers(pos);
+function vrColor(v){
+  if(v===null) return 'var(--muted)';
+  if(v>=9.5) return '#ffd700';
+  if(v>=8.5) return 'var(--win)';
+  if(v>=7.5) return 'var(--gold)';
+  if(v>=6.5) return 'var(--muted)';
+  return 'var(--loss)';
 }
-
-function renderPlayers(filter){
-  const matches = loadMatches();
-  const grid = document.getElementById('playerGrid');
-  const players = ROSTER.filter(p=>filter==='all'||p.pos===filter);
-
-  if(!matches.length){
-    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Sin datos todavía</div><div class="empty-sub">Subí la primera captura de partido para ver el rendimiento del plantel</div></div>`;
-    return;
-  }
-
-  grid.innerHTML = players.map(player=>{
-    const entries = [];
-    matches.forEach(m=>{
-      const p = (m.players||[]).find(p=>(p.matched||'').toLowerCase()===player.name.toLowerCase());
-      if(p) entries.push({...p, matchDate:m.date, rival:m.rival, league:m.league});
-    });
-
-    if(!entries.length){
-      return `<div class="pcard"><div class="pcard-header"><div class="pcard-avatar">${initials(player.name)}</div><div><div class="pcard-name">${player.name}</div><div class="pcard-games">Sin datos aún</div></div></div><div class="empty-sub" style="font-size:.78rem">No aparece en partidos registrados</div></div>`;
-    }
-
-    const ratings = entries.map(e=>e.rating).filter(v=>v!=null);
-    const avgRating = avg(ratings);
-    const totalGoals   = sum(entries.map(e=>e.goals||0));
-    const totalAssists = sum(entries.map(e=>e.assists||0));
-    const totalTackles = sum(entries.map(e=>e.tackles||0));
-    const avgDist = avg(entries.map(e=>e.distance_km).filter(v=>v!=null));
-    const avgPrecision = avg(entries.map(e=>e.pass_accuracy).filter(v=>v!=null));
-
-    const rCol = avgRating===null?'var(--muted)':avgRating>=8?'var(--win)':avgRating>=6.5?'var(--gold)':'var(--loss)';
-
-    const lastR = ratings.slice(-8);
-    const minR = Math.min(...lastR, 5), maxR = Math.max(...lastR, 10);
-    const sparkHTML = lastR.length>1 ? lastR.map(r=>{
-      const h = Math.max(4, Math.round(((r-minR)/(maxR-minR||1))*24));
-      const c = r>=8?'var(--win)':r>=6.5?'var(--gold)':'var(--loss)';
-      return `<div class="spark-bar" style="height:${h}px;background:${c}" title="Rating: ${r}"></div>`;
-    }).join('') : '';
-
-    return `<div class="pcard">
-      <div class="pcard-header">
-        <div class="pcard-avatar">${initials(player.name)}</div>
-        <div><div class="pcard-name">${player.name}</div><div class="pcard-games">${entries.length} partido${entries.length!==1?'s':''}</div></div>
-      </div>
-      <div class="pcard-stats">
-        <div class="ps-item"><div class="ps-val" style="color:var(--win)">${totalGoals}</div><div class="ps-lbl">Goles</div></div>
-        <div class="ps-item"><div class="ps-val" style="color:var(--vpug)">${totalAssists}</div><div class="ps-lbl">Asist.</div></div>
-        <div class="ps-item"><div class="ps-val" style="color:var(--muted)">${totalTackles}</div><div class="ps-lbl">Tackles</div></div>
-      </div>
-      ${avgDist!=null||avgPrecision!=null?`<div class="pcard-stats" style="margin-top:8px">
-        ${avgDist!=null?`<div class="ps-item"><div class="ps-val" style="color:var(--muted);font-size:1.1rem">${avgDist.toFixed(1)}</div><div class="ps-lbl">km prom</div></div>`:''}
-        ${avgPrecision!=null?`<div class="ps-item"><div class="ps-val" style="color:var(--muted);font-size:1.1rem">${avgPrecision.toFixed(0)}%</div><div class="ps-lbl">precisión</div></div>`:''}
-      </div>`:''}
-      <div class="avg-rating">
-        <span class="lbl">Rating promedio</span>
-        <span class="val" style="color:${rCol}">${avgRating!=null?avgRating.toFixed(1):'—'}</span>
-      </div>
-      ${sparkHTML?`<div class="sparkline" title="Evolución del rating (últimos partidos)">${sparkHTML}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-// ── HISTORY ──
-function renderHistory(){
-  const matches = loadMatches();
-  const tbody = document.getElementById('historyBody');
-  if(!matches.length){
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sin partidos registrados</div><div class="empty-sub">Los partidos analizados aparecerán aquí</div></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = [...matches].reverse().map((m,ri)=>{
-    const i = matches.length-1-ri;
-    const lc = m.league==='VPN'?'var(--vpn)':m.league==='VPUG'?'var(--vpug)':'var(--e11)';
-    return `<tr>
-      <td>${formatDate(m.date)}</td>
-      <td style="font-weight:600">${m.rival||'—'}</td>
-      <td><span style="color:${lc};font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:1rem">${m.league||'—'}</span></td>
-      <td style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700">${m.match_result||'—'}</td>
-      <td>${(m.players||[]).length} jugadores</td>
-      <td style="color:var(--muted2);font-size:.78rem">${formatDateTime(m.uploadedAt)}</td>
-      <td><button class="delete-btn" onclick="deleteMatch(${i})" title="Eliminar">🗑</button></td>
-    </tr>`;
-  }).join('');
-}
-
-function deleteMatch(idx){
-  if(!confirm('¿Eliminar este partido y sus estadísticas?')) return;
-  const matches = loadMatches();
-  matches.splice(idx,1);
-  saveMatches(matches);
-  renderHistory();
-  showToast('Partido eliminado','error');
-}
-
-// ── HELPERS ──
 function formatDate(d){
   if(!d) return '—';
   const dt = new Date(d+'T12:00:00');
@@ -821,15 +548,576 @@ function formatDateTime(iso){
   const d = new Date(iso);
   return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
 }
+function leagueClass(l){ return l==='VPUG'?'vpug':l==='11x11'?'e11':'vpn'; }
 
-let toastTimeout;
-function showToast(msg, type='success'){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast show ${type}`;
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(()=>t.classList.remove('show'), 3200);
+// ════════════════════════════════════════════
+// CANVAS CHARTS
+// ════════════════════════════════════════════
+function drawBarChart(canvasId, labels, values, color, maxVal){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const W = canvas.offsetWidth; const H = 140;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const pad = {t:8,b:28,l:4,r:4};
+  const chartW = W-pad.l-pad.r;
+  const chartH = H-pad.t-pad.b;
+  const barW = Math.min(32, (chartW/labels.length)*0.65);
+  const gap = chartW/labels.length;
+  const max = maxVal || Math.max(...values, 1);
+
+  ctx.clearRect(0,0,W,H);
+
+  // grid line
+  ctx.strokeStyle='rgba(255,255,255,.05)';
+  ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t+chartH); ctx.lineTo(W-pad.r,pad.t+chartH); ctx.stroke();
+
+  labels.forEach((lbl,i)=>{
+    const x = pad.l + gap*i + gap/2;
+    const v = values[i]||0;
+    const bh = (v/max)*chartH;
+    const y = pad.t+chartH-bh;
+
+    // bar
+    const grad = ctx.createLinearGradient(0,y,0,pad.t+chartH);
+    grad.addColorStop(0, color);
+    grad.addColorStop(1, color+'44');
+    ctx.fillStyle = grad;
+    const rx=4;
+    ctx.beginPath();
+    ctx.roundRect(x-barW/2, y, barW, bh, [rx,rx,0,0]);
+    ctx.fill();
+
+    // value label
+    if(v>0){
+      ctx.fillStyle='rgba(255,255,255,.85)';
+      ctx.font=`700 ${Math.min(11,barW*.6)}px 'Barlow Condensed',sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText(Number.isInteger(v)?v:v.toFixed(1), x, y-3);
+    }
+
+    // axis label
+    ctx.fillStyle='rgba(136,144,168,.7)';
+    ctx.font=`600 9px 'Barlow',sans-serif`;
+    ctx.textAlign='center';
+    const short = lbl.length>8?lbl.slice(0,7)+'…':lbl;
+    ctx.fillText(short, x, H-8);
+  });
 }
+
+function drawLineChart(canvasId, labels, values, color){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const W = canvas.offsetWidth; const H = 120;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const pad = {t:12,b:24,l:24,r:8};
+  const chartW = W-pad.l-pad.r;
+  const chartH = H-pad.t-pad.b;
+  const min = Math.max(0, Math.min(...values)-1);
+  const max = Math.max(...values)+0.5;
+
+  ctx.clearRect(0,0,W,H);
+
+  // grid
+  [0,0.5,1].forEach(f=>{
+    const y = pad.t + chartH*(1-f);
+    ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    const v = (min+(max-min)*f).toFixed(1);
+    ctx.fillStyle='rgba(136,144,168,.5)';
+    ctx.font='9px Barlow,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(v, pad.l-3, y+3);
+  });
+
+  const pts = values.map((v,i)=>({
+    x: pad.l + (i/(values.length-1||1))*chartW,
+    y: pad.t + chartH*(1-(v-min)/(max-min||1))
+  }));
+
+  // fill
+  const grad = ctx.createLinearGradient(0,pad.t,0,pad.t+chartH);
+  grad.addColorStop(0,color+'55'); grad.addColorStop(1,color+'00');
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pad.t+chartH);
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.lineTo(pts[pts.length-1].x, pad.t+chartH);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+
+  // line
+  ctx.beginPath();
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
+
+  // dots + labels
+  pts.forEach((p,i)=>{
+    ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.8)';
+    ctx.font='700 9px Barlow Condensed,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(values[i].toFixed(1), p.x, p.y-6);
+    // axis label
+    ctx.fillStyle='rgba(136,144,168,.6)'; ctx.font='9px Barlow,sans-serif';
+    const short = (labels[i]||'').length>6?(labels[i]||'').slice(0,5)+'…':labels[i]||'';
+    ctx.fillText(short, p.x, H-6);
+  });
+}
+
+// ════════════════════════════════════════════
+// TAB TEMPORADA
+// ════════════════════════════════════════════
+function renderSeason(){
+  const matches = loadMatches();
+  const kpiRow   = document.getElementById('kpiRow');
+  const grid     = document.getElementById('seasonGrid');
+
+  if(!matches.length){
+    kpiRow.innerHTML='';
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏆</div><div class="empty-title">Sin datos todavía</div><div class="empty-sub">Subí el primer partido para ver el resumen</div></div>`;
+    return;
+  }
+
+  // Aggregate players
+  const pm = {};
+  ROSTER.forEach(p=>{ pm[p.name]={name:p.name,pos:p.pos,games:0,goals:0,assists:0,tackles:0,interceptions:0,ratings:[],distances:[],pass_acc:[]}; });
+  matches.forEach(m=>{
+    (m.players||[]).forEach(p=>{
+      const key=(p.matched||'').toLowerCase();
+      const entry=Object.values(pm).find(r=>r.name.toLowerCase()===key);
+      if(!entry) return;
+      entry.games++; entry.goals+=p.goals||0; entry.assists+=p.assists||0;
+      entry.tackles+=p.tackles||0; entry.interceptions+=p.interceptions||0;
+      if(p.rating!=null) entry.ratings.push(p.rating);
+      if(p.distance_km!=null) entry.distances.push(p.distance_km);
+      if(p.pass_accuracy!=null) entry.pass_acc.push(p.pass_accuracy);
+    });
+  });
+  const players = Object.values(pm).filter(p=>p.games>0);
+
+  // KPIs
+  const totalGoals = players.reduce((s,p)=>s+p.goals,0);
+  const allRatings = matches.flatMap(m=>(m.players||[]).map(p=>p.rating).filter(v=>v!=null));
+  const teamAvgRating = avg(allRatings);
+  kpiRow.innerHTML = [
+    {val:matches.length, lbl:'Partidos', color:'var(--gold)'},
+    {val:totalGoals,     lbl:'Goles',    color:'var(--win)'},
+    {val:`${matches.length}-0`, lbl:'Victorias', color:'var(--win)'},
+    {val:teamAvgRating!=null?teamAvgRating.toFixed(1):'—', lbl:'Rating Prom. Equipo', color:vrColor(teamAvgRating)},
+  ].map(k=>`<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`).join('');
+
+  // Rank helper
+  function rankBlock(title, icon, rows, valFn, valLabel, color, subFn, id){
+    const sorted=[...players].filter(p=>valFn(p)!=null&&valFn(p)>0).sort((a,b)=>valFn(b)-valFn(a)).slice(0,6);
+    const maxV=valFn(sorted[0]||{goals:1})||1;
+    const posC=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    return `<div class="season-block">
+      <div class="sb-header"><span class="sb-icon">${icon}</span><h3>${title}</h3></div>
+      <table class="rank-table">${sorted.map((p,i)=>`<tr>
+        <td class="rank-pos ${posC(i)}">${i+1}</td>
+        <td><div class="rank-name">${p.name}</div>
+          <div class="rank-bar-wrap"><div class="rank-bar-track">
+            <div class="rank-bar-fill" style="width:${Math.round(valFn(p)/maxV*100)}%;background:${color}"></div>
+          </div></div></td>
+        <td><div class="rank-val" style="color:${color}">${typeof valFn(p)==='number'&&!Number.isInteger(valFn(p))?valFn(p).toFixed(1):valFn(p)}</div>
+            <div class="rank-sub">${subFn?subFn(p):valLabel}</div></td>
+      </tr>`).join('')}</table>
+      ${id?`<div class="chart-wrap"><canvas class="chart" id="${id}"></canvas></div>`:''}
+    </div>`;
+  }
+
+  // Results list
+  const resultsHTML = `<div class="season-block full">
+    <div class="sb-header"><span class="sb-icon">📅</span><h3>Resultados</h3></div>
+    <div class="results-list">
+      ${[...matches].reverse().map(m=>`
+        <div class="result-row">
+          <div>
+            <div class="res-rival">vs ${m.rival}</div>
+            <div class="res-date">${formatDate(m.date)}</div>
+          </div>
+          <span class="res-league ${leagueClass(m.league)}">${m.league}</span>
+          <span class="res-score">${m.match_result||'✓'}</span>
+        </div>`).join('')}
+    </div>
+  </div>`;
+
+  // Rating trend chart (per match, team avg)
+  const sortedM = [...matches].sort((a,b)=>a.date.localeCompare(b.date));
+  const trendLabels = sortedM.map(m=>m.rival.split(' ')[0]);
+  const trendVals   = sortedM.map(m=>{
+    const rs=(m.players||[]).map(p=>p.rating).filter(v=>v!=null);
+    return rs.length?+(avg(rs).toFixed(2)):null;
+  }).filter(v=>v!=null);
+
+  const trendBlock = trendVals.length>1?`<div class="season-block full">
+    <div class="sb-header"><span class="sb-icon">📈</span><h3>Evolución del Rating Equipo</h3></div>
+    <div class="chart-wrap"><canvas class="chart" id="chartTrend"></canvas></div>
+  </div>`:'';
+
+  grid.innerHTML =
+    rankBlock('Goleadores','⚽', players, p=>p.goals,    'goles',    'var(--win)',  p=>`${p.assists} asist · ${p.games} PJ`, 'chartGoals') +
+    rankBlock('Rating',    '⭐', players, p=>avg(p.ratings), 'prom', 'var(--gold)', p=>`${p.games} partidos`, 'chartRating') +
+    rankBlock('Asistencias','🎯', players, p=>p.assists,  'asist.',   'var(--vpug)', p=>`${p.goals} goles`) +
+    rankBlock('Tackles',   '🛡', players, p=>p.tackles,  'tackles',  'var(--muted)',p=>`${p.interceptions} interc.`) +
+    trendBlock +
+    resultsHTML;
+
+  // Draw charts after DOM update
+  requestAnimationFrame(()=>{
+    const goalsSorted = [...players].filter(p=>p.goals>0).sort((a,b)=>b.goals-a.goals).slice(0,6);
+    drawBarChart('chartGoals', goalsSorted.map(p=>p.name), goalsSorted.map(p=>p.goals), '#3ecf8e', null);
+    const ratingSorted = [...players].filter(p=>p.ratings.length>0).sort((a,b)=>avg(b.ratings)-avg(a.ratings)).slice(0,6);
+    drawBarChart('chartRating', ratingSorted.map(p=>p.name), ratingSorted.map(p=>+(avg(p.ratings).toFixed(2))), '#c8a84b', 10);
+    if(trendVals.length>1) drawLineChart('chartTrend', trendLabels, trendVals, '#c8a84b');
+  });
+}
+
+// ════════════════════════════════════════════
+// TAB POR JUGADOR
+// ════════════════════════════════════════════
+function filterPlayers(pos, btn){
+  document.querySelectorAll('#tab-players .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPlayers(pos);
+}
+
+function renderPlayers(filter){
+  const matches = loadMatches();
+  const grid = document.getElementById('playerGrid');
+  const players = ROSTER.filter(p=>filter==='all'||p.pos===filter);
+
+  if(!matches.length){
+    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Sin datos todavía</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = players.map(player=>{
+    const entries=[];
+    matches.forEach(m=>{
+      const p=(m.players||[]).find(p=>(p.matched||'').toLowerCase()===player.name.toLowerCase());
+      if(p) entries.push({...p, rival:m.rival, date:m.date, league:m.league});
+    });
+
+    if(!entries.length) return `<div class="pcard">
+      <div class="pcard-header">
+        <div class="pcard-avatar">${initials(player.name)}</div>
+        <div><div class="pcard-name">${player.name}</div><div class="pcard-games">Sin datos aún</div></div>
+      </div></div>`;
+
+    const ratings=entries.map(e=>e.rating).filter(v=>v!=null);
+    const avgR=avg(ratings);
+    const totalG=sum(entries.map(e=>e.goals||0));
+    const totalA=sum(entries.map(e=>e.assists||0));
+    const totalT=sum(entries.map(e=>e.tackles||0));
+    const avgDist=avg(entries.map(e=>e.distance_km).filter(v=>v!=null));
+    const avgPrec=avg(entries.map(e=>e.pass_accuracy).filter(v=>v!=null));
+
+    const lastR=ratings.slice(-8);
+    const minR=Math.min(...lastR,5), maxR=Math.max(...lastR,10);
+    const sparkHTML=lastR.length>1?lastR.map(r=>{
+      const h=Math.max(4,Math.round(((r-minR)/(maxR-minR||1))*24));
+      const c=r>=8?'var(--win)':r>=7?'var(--gold)':'var(--loss)';
+      return `<div class="spark-bar" style="height:${h}px;background:${c}" title="${r}"></div>`;
+    }).join(''):'';
+
+    return `<div class="pcard">
+      <div class="pcard-header">
+        <div class="pcard-avatar">${initials(player.name)}</div>
+        <div><div class="pcard-name">${player.name}</div><div class="pcard-games">${entries.length} partido${entries.length!==1?'s':''}</div></div>
+      </div>
+      <div class="pcard-stats">
+        <div class="ps-item"><div class="ps-val" style="color:var(--win)">${totalG}</div><div class="ps-lbl">Goles</div></div>
+        <div class="ps-item"><div class="ps-val" style="color:var(--vpug)">${totalA}</div><div class="ps-lbl">Asist.</div></div>
+        <div class="ps-item"><div class="ps-val" style="color:var(--muted)">${totalT}</div><div class="ps-lbl">Tackles</div></div>
+      </div>
+      ${avgDist!=null||avgPrec!=null?`<div class="pcard-stats" style="margin-top:8px">
+        ${avgDist!=null?`<div class="ps-item"><div class="ps-val" style="color:var(--muted);font-size:1.1rem">${avgDist.toFixed(1)}</div><div class="ps-lbl">km prom</div></div>`:''}
+        ${avgPrec!=null?`<div class="ps-item"><div class="ps-val" style="color:var(--muted);font-size:1.1rem">${avgPrec.toFixed(0)}%</div><div class="ps-lbl">precisión</div></div>`:''}
+      </div>`:''}
+      <div class="avg-rating">
+        <span class="lbl">Rating prom.</span>
+        <span class="val" style="color:${vrColor(avgR)}">${avgR!=null?avgR.toFixed(1):'—'}</span>
+      </div>
+      ${sparkHTML?`<div class="sparkline">${sparkHTML}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// TAB HISTORIAL
+// ════════════════════════════════════════════
+function renderHistory(){
+  const matches = loadMatches();
+  const tbody = document.getElementById('historyBody');
+  if(!matches.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sin partidos registrados</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=[...matches].reverse().map((m,ri)=>{
+    const i=matches.length-1-ri;
+    const lc=leagueClass(m.league);
+    const detailId=`detail-${i}`;
+    const detailRows=(m.players||[]).map(p=>{
+      const r=p.rating;
+      const rc=r===null?'':r>=8?'high':r>=6.5?'mid':'low';
+      const v=x=>x!=null?x:'—';
+      return `<tr>
+        <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${p.matched||p.name}</td>
+        <td>${r!==null?`<span class="rating-pill ${rc}">${r}</span>`:'—'}</td>
+        <td>${v(p.goals)}</td><td>${v(p.assists)}</td><td>${v(p.passes)}</td>
+        <td>${p.pass_accuracy!=null?v(p.pass_accuracy)+'%':'—'}</td>
+        <td>${p.distance_km!=null?v(p.distance_km)+' km':'—'}</td>
+        <td>${v(p.sprints)}</td><td>${v(p.tackles)}</td><td>${v(p.interceptions)}</td>
+      </tr>`;
+    }).join('');
+    return `<tr>
+      <td><button class="expand-btn" onclick="toggleDetail('${detailId}',this)">▶</button></td>
+      <td>${formatDate(m.date)}</td>
+      <td style="font-weight:600">${m.rival||'—'}</td>
+      <td><span class="res-league ${lc}" style="font-size:.72rem;padding:2px 8px;border-radius:4px;font-weight:700">${m.league||'—'}</span></td>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--win)">${m.match_result||'—'}</td>
+      <td>${(m.players||[]).length} jugadores</td>
+      <td style="color:var(--muted2);font-size:.75rem">${formatDateTime(m.uploadedAt)}</td>
+      <td><button class="delete-btn" onclick="deleteMatch(${i})" title="Eliminar">🗑</button></td>
+    </tr>
+    <tr class="detail-row" id="${detailId}">
+      <td colspan="8">
+        <div class="detail-inner">
+          <table class="detail-table">
+            <thead><tr><th>Jugador</th><th>Rating</th><th>G</th><th>A</th><th>Pases</th><th>Prec.</th><th>Dist.</th><th>Sprints</th><th>Tackles</th><th>Interc.</th></tr></thead>
+            <tbody>${detailRows}</tbody>
+          </table>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleDetail(id, btn){
+  const row=document.getElementById(id);
+  const open=row.classList.toggle('open');
+  btn.textContent=open?'▼':'▶';
+}
+
+async function deleteMatch(idx){
+  if(!confirm('¿Eliminar este partido y sus estadísticas?')) return;
+  const matches=loadMatches();
+  matches.splice(idx,1);
+  cloudMatches=matches;
+  await cloudSave(matches);
+  renderHistory();
+  showToast('Partido eliminado','error');
+}
+
+// ════════════════════════════════════════════
+// TAB UPLOAD + IA
+// ════════════════════════════════════════════
+let imageQueue=[];
+let pendingResult=null;
+
+document.getElementById('metaDate').value=new Date().toISOString().split('T')[0];
+
+const uploadArea=document.getElementById('uploadArea');
+const fileInput=document.getElementById('fileInput');
+const addMoreInput=document.getElementById('addMoreInput');
+
+['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.remove('drag');}));
+uploadArea.addEventListener('drop',e=>{if(e.dataTransfer.files.length) addFiles(e.dataTransfer.files);});
+fileInput.addEventListener('change',()=>{if(fileInput.files.length) addFiles(fileInput.files);});
+addMoreInput.addEventListener('change',()=>{if(addMoreInput.files.length) addFiles(addMoreInput.files);});
+
+function addFiles(files){
+  Array.from(files).forEach(file=>{
+    if(!file.type.startsWith('image/')){ showToast('Solo imágenes (PNG, JPG, WEBP)','error'); return; }
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const dataUrl=e.target.result;
+      const mediaType=dataUrl.split(';')[0].split(':')[1]||'image/jpeg';
+      imageQueue.push({base64:dataUrl.split(',')[1],dataUrl,mediaType,status:'pending',result:null});
+      renderQueue();
+    };
+    reader.readAsDataURL(file);
+  });
+  fileInput.value=''; addMoreInput.value='';
+}
+
+function removeFromQueue(idx){ imageQueue.splice(idx,1); renderQueue(); }
+
+function renderQueue(){
+  const queue=document.getElementById('imgQueue');
+  if(!imageQueue.length){
+    queue.classList.remove('show'); uploadArea.style.display='';
+    document.getElementById('btnAnalyze').disabled=true;
+    document.getElementById('btnAnalyzeLabel').textContent='Analizar con IA';
+    return;
+  }
+  uploadArea.style.display='none'; queue.classList.add('show');
+  const si=s=>s==='pending'?'':s==='analyzing'?'⏳':s==='done'?'✅':'❌';
+  queue.innerHTML=imageQueue.map((img,i)=>`
+    <div class="img-thumb ${img.status!=='pending'?img.status:''}">
+      <img src="${img.dataUrl}" alt="img ${i+1}">
+      ${img.status!=='pending'?`<div class="thumb-status">${si(img.status)}</div>`:''}
+      ${img.status==='pending'?`<button class="thumb-remove" onclick="removeFromQueue(${i})">✕</button>`:''}
+    </div>`).join('')+`<button class="add-more-btn" onclick="addMoreInput.click()">+</button>`;
+  const pending=imageQueue.filter(i=>i.status==='pending').length;
+  const btn=document.getElementById('btnAnalyze');
+  btn.disabled=pending===0;
+  document.getElementById('btnAnalyzeLabel').textContent=pending===1?'Analizar 1 imagen':`Analizar ${pending} imágenes`;
+}
+
+function resetUpload(){
+  imageQueue=[]; pendingResult=null;
+  document.getElementById('imgQueue').classList.remove('show');
+  uploadArea.style.display='';
+  document.getElementById('btnAnalyze').disabled=true;
+  document.getElementById('btnAnalyzeLabel').textContent='Analizar con IA';
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('analyzingState').classList.remove('show');
+  fileInput.value='';
+}
+
+async function analyzeAll(){
+  const pending=imageQueue.filter(i=>i.status==='pending');
+  if(!pending.length) return;
+  const rival=document.getElementById('metaRival').value.trim()||'Desconocido';
+  const league=document.getElementById('metaLeague').value||'?';
+  const date=document.getElementById('metaDate').value||new Date().toISOString().split('T')[0];
+  const result=document.getElementById('metaResult').value.trim()||null;
+
+  document.getElementById('btnAnalyze').disabled=true;
+  document.getElementById('analyzingState').classList.add('show');
+  document.getElementById('resultCard').classList.remove('show');
+
+  const rosterList=ROSTER.map(p=>`- ${p.name} (${p.pos})`).join('\n');
+  const prompt=`Sos un analista de datos de EA FC / FIFA. Se te envía una captura de estadísticas post-partido del equipo "Top Secret FC".
+
+PLANTEL OFICIAL (nombre exacto · posición):
+${rosterList}
+
+REGLAS DE IDENTIFICACIÓN:
+- "Lautavester7" → Lautavester7
+- "T. cansitrGD22" o "cansitr" → cansitrGd22_
+- "BlackPanther" o "Black" → BlackPanther-CG
+- "ciprimancini" o "Cipri" → CipriMancini
+- "J. Martinez" o "Martinez" → Juan_Martinez4
+- "O. Pibu" o "Pibu" → zPibu__
+- "Agubostero7" → Agubostero7
+- "Alexisraies2" o "Alexis" → Alexiisraiies23
+- "ZurdoCABJ" o "Zurdo" → Zurdo-_CABJ12
+- "Woolfyboyzx2" → Woolfyboyzx2
+- "Buraa" o "Bura" → Buraa07
+- "DaniStone" o "RS32" → RS32-DaniStone
+- "Huber" → Huber236
+
+El campo "matched" SIEMPRE debe ser el nombre exacto del plantel. Si un valor no es legible usá null.
+Devolvé ÚNICAMENTE JSON válido sin markdown:
+{"players":[{"name":"apodo","matched":"nombre exacto","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"match_result":"2-1","notes":""}`;
+
+  let mergedPlayers=[]; let matchResult=result;
+
+  for(let i=0;i<imageQueue.length;i++){
+    const img=imageQueue[i];
+    if(img.status!=='pending') continue;
+    img.status='analyzing'; renderQueue();
+    document.getElementById('analyzingText').innerHTML=`Analizando imagen ${i+1} de ${imageQueue.length}...<br><b>Extrayendo estadísticas de EA FC</b>`;
+    try{
+      const resp=await fetch(WORKER_URL,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[
+          {inline_data:{mime_type:img.mediaType||'image/jpeg',data:img.base64}},
+          {text:prompt}
+        ]}],generationConfig:{temperature:0.1,maxOutputTokens:1500}})
+      });
+      const data=await resp.json();
+      if(data.error) throw new Error(data.error.message||'API error');
+      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+      if(!text) throw new Error('Respuesta vacía');
+      const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+      img.status='done'; img.result=parsed;
+      (parsed.players||[]).forEach(p=>{
+        const key=(p.matched||p.name||'').toLowerCase();
+        const ex=mergedPlayers.find(ep=>(ep.matched||ep.name||'').toLowerCase()===key);
+        if(ex){
+          ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions'].forEach(f=>{
+            if(ex[f]===null&&p[f]!=null) ex[f]=p[f];
+          });
+        } else { mergedPlayers.push({...p}); }
+      });
+      if(!matchResult&&parsed.match_result) matchResult=parsed.match_result;
+    }catch(err){
+      img.status='error';
+      showToast(`Error imagen ${i+1}: ${err.message}`,'error');
+    }
+    renderQueue();
+  }
+
+  document.getElementById('analyzingState').classList.remove('show');
+  document.getElementById('btnAnalyze').disabled=false;
+
+  if(mergedPlayers.length){
+    pendingResult={rival,league,date,uploadedAt:new Date().toISOString(),players:mergedPlayers,match_result:matchResult,notes:''};
+    renderResultPreview(pendingResult);
+  } else { showToast('No se pudo extraer ninguna estadística.','error'); }
+}
+
+function renderResultPreview(data){
+  document.getElementById('resultTitle').textContent=`vs ${data.rival} · ${data.league} · ${formatDate(data.date)}${data.match_result?' · '+data.match_result:''}`;
+  document.getElementById('resultBody').innerHTML=(data.players||[]).map(p=>{
+    const r=p.rating;
+    const rc=r===null?'':r>=8?'high':r>=6.5?'mid':'low';
+    const v=x=>x!=null?`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${x}</span>`:'—';
+    return `<tr>
+      <td class="player-cell">${p.matched||p.name}${p.matched&&p.matched!==p.name?'<br><small style="color:var(--muted2);font-size:.7rem">'+p.name+'</small>':''}</td>
+      <td>${r!==null?`<span class="rating-pill ${rc}">${r}</span>`:'—'}</td>
+      <td>${v(p.goals)}</td><td>${v(p.assists)}</td><td>${v(p.passes)}</td>
+      <td>${p.pass_accuracy!=null?v(p.pass_accuracy+'%'):'—'}</td>
+      <td>${v(p.distance_km)}</td><td>${v(p.sprints)}</td>
+      <td>${v(p.tackles)}</td><td>${v(p.interceptions)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('resultCard').classList.add('show');
+}
+
+async function saveResult(){
+  if(!pendingResult) return;
+  const matches=loadMatches();
+  matches.push(pendingResult);
+  cloudMatches=matches;
+  const ok=await cloudSave(matches);
+  if(ok){
+    showToast('✓ Partido guardado en la nube','success');
+  } else {
+    showToast('Guardado localmente (sin conexión)','error');
+  }
+  imageQueue=[]; resetUpload(); pendingResult=null;
+}
+
+function discardResult(){
+  document.getElementById('resultCard').classList.remove('show');
+  pendingResult=null;
+}
+
+// ════════════════════════════════════════════
+// TOAST + INIT
+// ════════════════════════════════════════════
+let toastTimeout;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast show ${type}`;
+  clearTimeout(toastTimeout);
+  toastTimeout=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// Init: cargar datos de la nube y renderizar temporada
+cloudLoad().then(()=>renderSeason());
 </script>
 </body>
 </html>
