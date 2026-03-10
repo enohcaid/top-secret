@@ -259,6 +259,29 @@ footer span{color:var(--gold);}
 .ts-chart-block:last-child{border-right:none;}
 .ts-chart-title{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;text-align:center;}
 .ts-chart-legend{font-size:.68rem;color:var(--muted2);margin-top:10px;text-align:center;}
+.ts-chart-hint{font-size:.6rem;color:var(--muted2);margin-top:6px;opacity:.7;text-align:center;}
+.ts-chart-block canvas{cursor:pointer;transition:opacity .15s;}
+.ts-chart-block canvas:hover{opacity:.85;}
+.ts-breakdown{display:none;width:100%;margin-top:12px;border-top:1px solid var(--border);padding-top:10px;}
+.ts-breakdown.open{display:block;}
+.ts-breakdown-title{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;text-align:center;}
+.ts-bd-row{display:flex;align-items:center;gap:8px;padding:5px 4px;border-radius:6px;transition:background .12s;}
+.ts-bd-row:hover{background:rgba(255,255,255,.04);}
+.ts-bd-rival{font-size:.75rem;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ts-bd-date{font-size:.65rem;color:var(--muted2);white-space:nowrap;}
+.ts-bd-league{font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;}
+.ts-bd-val{font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:.95rem;min-width:32px;text-align:right;}
+.ts-bd-bar{flex:1;max-width:60px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.ts-bd-bar-fill{height:100%;border-radius:2px;}
+/* radar axis highlight */
+.ts-radar-axes{display:none;width:100%;margin-top:10px;border-top:1px solid var(--border);padding-top:8px;}
+.ts-radar-axes.open{display:block;}
+.ts-axis-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:5px 8px;border-radius:6px;border:none;background:none;color:var(--text);cursor:pointer;font-size:.75rem;transition:background .12s;text-align:left;}
+.ts-axis-btn:hover,.ts-axis-btn.sel{background:rgba(200,168,75,.1);}
+.ts-axis-btn .ax-lbl{font-weight:600;}
+.ts-axis-btn .ax-val{font-family:"Barlow Condensed",sans-serif;font-weight:900;color:var(--gold);}
+.ts-axis-detail{padding:6px 8px 2px;display:none;}
+.ts-axis-detail.open{display:block;}
 .ts-bars-section{background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:1px solid var(--border);border-radius:0 0 16px 16px;padding:18px 24px 20px;margin-bottom:20px;}
 .ts-bars-title{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;}
 .ts-bars-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 32px;}
@@ -638,7 +661,7 @@ function leagueClass(l){ return l==='VPUG'?'vpug':l==='11x11'?'e11':'vpn'; }
 // CANVAS CHARTS
 // ════════════════════════════════════════════
 
-function drawDonut(canvasId, val1, val2, colors, size){
+function drawDonut(canvasId, val1, val2, colors, size, onClickFn){
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
   const dpr = window.devicePixelRatio||1;
@@ -650,28 +673,62 @@ function drawDonut(canvasId, val1, val2, colors, size){
   const cx = S/2, cy = S/2, R = S*0.42, r = S*0.27;
   const total = val1+val2 || 1;
   const slices = [{v:val1,c:colors[0]},{v:val2,c:colors[1]}];
-  let start = -Math.PI/2;
-  slices.forEach(sl => {
-    const angle = (sl.v/total)*Math.PI*2;
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,R,start,start+angle);
-    ctx.closePath();
-    ctx.fillStyle=sl.c; ctx.fill();
-    start+=angle;
-  });
-  // hole
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.fillStyle='#101318'; ctx.fill();
-  // center text — mostrar el % real calculado, no val1 crudo
-  const pct = Math.round(val1 / (val1+val2||1) * 100);
-  ctx.fillStyle='rgba(240,242,248,.9)';
-  ctx.font='900 '+(S*0.18)+'px Barlow Condensed,sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(pct+'%', cx, cy);
+
+  function render(hovered){
+    ctx.clearRect(0,0,S,S);
+    let start = -Math.PI/2;
+    slices.forEach((sl,i) => {
+      const angle = (sl.v/total)*Math.PI*2;
+      const offset = (hovered===i) ? 6 : 0;
+      const midAngle = start + angle/2;
+      ctx.save();
+      ctx.translate(Math.cos(midAngle)*offset, Math.sin(midAngle)*offset);
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,R,start,start+angle);
+      ctx.closePath();
+      ctx.fillStyle = hovered===i ? sl.c : sl.c+'cc';
+      ctx.fill();
+      if(hovered===i){ ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5; ctx.stroke(); }
+      ctx.restore();
+      start+=angle;
+    });
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle='#101318'; ctx.fill();
+    const pct = Math.round(val1/(val1+val2||1)*100);
+    ctx.fillStyle='rgba(240,242,248,.9)';
+    ctx.font='900 '+(S*0.18)+'px Barlow Condensed,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(pct+'%', cx, cy);
+  }
+
+  render(-1);
+
+  function getSlice(mx,my){
+    const dx=mx-cx, dy=my-cy, dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<r||dist>R) return -1;
+    let a = Math.atan2(dy,dx);
+    if(a < -Math.PI/2) a += Math.PI*2;
+    let start=-Math.PI/2, idx=-1;
+    slices.forEach((sl,i)=>{ const angle=(sl.v/total)*Math.PI*2; if(a>=start&&a<start+angle) idx=i; start+=angle; });
+    return idx;
+  }
+
+  canvas.onmousemove = e => {
+    const r2=canvas.getBoundingClientRect();
+    const mx=(e.clientX-r2.left)*(S/r2.width), my=(e.clientY-r2.top)*(S/r2.height);
+    render(getSlice(mx,my));
+  };
+  canvas.onmouseleave = () => render(-1);
+  canvas.onclick = e => {
+    const r2=canvas.getBoundingClientRect();
+    const mx=(e.clientX-r2.left)*(S/r2.width), my=(e.clientY-r2.top)*(S/r2.height);
+    const idx=getSlice(mx,my);
+    if(onClickFn) onClickFn(idx);
+  };
 }
 
-function drawRadar(canvasId, axes, color, size){
+function drawRadar(canvasId, axes, color, size, selectedAxis=-1){
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
   const dpr = window.devicePixelRatio||1;
@@ -723,11 +780,44 @@ function drawRadar(canvasId, axes, color, size){
   // labels
   axes.forEach((ax,i)=>{
     const p=pt(i,R*1.22);
-    ctx.fillStyle='rgba(136,144,168,.8)';
-    ctx.font='600 '+(S*0.054)+'px Barlow,sans-serif';
+    ctx.fillStyle = (selectedAxis===i) ? color : 'rgba(136,144,168,.8)';
+    ctx.font = (selectedAxis===i ? '700 ' : '600 ')+(S*0.054)+'px Barlow,sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(ax.lbl, p.x, p.y);
   });
+}
+
+// hitTest para radar: retorna índice del eje más cercano al click
+function radarHitTest(canvas, ex, ey, n, S){
+  const rc = canvas.getBoundingClientRect();
+  const mx = (ex - rc.left) * (S / rc.width);
+  const my = (ey - rc.top)  * (S / rc.height);
+  const cx = S/2, cy = S/2, R = S*0.36;
+  const angle = i => (i/n)*Math.PI*2 - Math.PI/2;
+  // Primero buscar en etiquetas (zona generosa)
+  let best = -1, bestDist = 44;
+  for(let i=0;i<n;i++){
+    const lx = cx + Math.cos(angle(i))*R*1.22;
+    const ly = cy + Math.sin(angle(i))*R*1.22;
+    const d  = Math.sqrt((mx-lx)**2+(my-ly)**2);
+    if(d<bestDist){ bestDist=d; best=i; }
+  }
+  // Si no pegó en etiqueta, buscar por ángulo dentro del radar
+  if(best<0){
+    const distC = Math.sqrt((mx-cx)**2+(my-cy)**2);
+    if(distC < R){
+      let a = Math.atan2(my-cy,mx-cx);
+      if(a < -Math.PI/2) a += Math.PI*2;
+      let minDiff=Infinity;
+      for(let i=0;i<n;i++){
+        let axA = (i/n)*Math.PI*2 - Math.PI/2;
+        if(axA < -Math.PI/2) axA += Math.PI*2;
+        const diff = Math.min(Math.abs(a-axA), Math.abs(Math.abs(a-axA)-Math.PI*2));
+        if(diff<minDiff){ minDiff=diff; best=i; }
+      }
+    }
+  }
+  return best;
 }
 
 function drawBarChart(canvasId, labels, values, color, maxVal){
@@ -999,23 +1089,23 @@ function renderSeason(){
       '<div class="ts-charts-row">' +
         '<div class="ts-chart-block">' +
           '<div class="ts-chart-title">Posesión del balón</div>' +
-          '<canvas id="chartPosesion" style="width:100%;max-width:180px;display:block;margin:0 auto"></canvas>' +
-          '<div class="ts-chart-legend">' +
-            '<span style="color:var(--gold)">■</span> Top Secret &nbsp;' +
-            '<span style="color:var(--border2)">■</span> Rival' +
-          '</div>' +
+          '<canvas id="chartPosesion" style="width:160px;height:160px;display:block;margin:0 auto"></canvas>' +
+          '<div class="ts-chart-legend"><span style="color:var(--gold)">■</span> Top Secret &nbsp;<span style="color:var(--border2)">■</span> Rival</div>' +
+          '<div class="ts-chart-hint">Hacé click para desglosar</div>' +
+          '<div class="ts-breakdown" id="bdPosesion"></div>' +
         '</div>' +
         '<div class="ts-chart-block">' +
           '<div class="ts-chart-title">Tiros al arco vs. fuera</div>' +
-          '<canvas id="chartTiros" style="width:100%;max-width:180px;display:block;margin:0 auto"></canvas>' +
-          '<div class="ts-chart-legend">' +
-            '<span style="color:var(--win)">■</span> Al arco &nbsp;' +
-            '<span style="color:var(--border2)">■</span> Fuera' +
-          '</div>' +
+          '<canvas id="chartTiros" style="width:160px;height:160px;display:block;margin:0 auto"></canvas>' +
+          '<div class="ts-chart-legend"><span style="color:var(--win)">■</span> Al arco &nbsp;<span style="color:var(--border2)">■</span> Fuera</div>' +
+          '<div class="ts-chart-hint">Hacé click para desglosar</div>' +
+          '<div class="ts-breakdown" id="bdTiros"></div>' +
         '</div>' +
         '<div class="ts-chart-block">' +
           '<div class="ts-chart-title">Perfil del equipo</div>' +
-          '<canvas id="chartRadar" style="width:100%;max-width:200px;display:block;margin:0 auto"></canvas>' +
+          '<canvas id="chartRadar" style="width:200px;height:200px;display:block;margin:0 auto"></canvas>' +
+          '<div class="ts-chart-hint">Hacé click en un eje</div>' +
+          '<div class="ts-radar-axes" id="radarAxes"></div>' +
         '</div>' +
       '</div>' +
       // ── Fila 3: barras secundarias ──
@@ -1051,16 +1141,90 @@ function renderSeason(){
       const tirosT = +(ts2.reduce((s,t)=>s+(t.tiros||0),0)/tn).toFixed(1);
       const arcosT = +(ts2.reduce((s,t)=>s+(t.tiros_arco||0),0)/tn).toFixed(1);
 
-      drawDonut('chartPosesion', posVal, 100-posVal, ['#c8a84b','#1e2230'], 160);
-      drawDonut('chartTiros',    arcosT, Math.max(0,tirosT-arcosT), ['#3ecf8e','#1e2230'], 160);
-      drawRadar('chartRadar', [
-        {lbl:'Ataque',   val: Math.min(100, (tirosT/15)*100)},
-        {lbl:'Precisión',val: ta('precision_tiro') || 0},
-        {lbl:'Posesión', val: posVal},
-        {lbl:'Pases',    val: ta('precision_pases') || 0},
-        {lbl:'Defensa',  val: Math.min(100, ((ta('intercepciones')||0)/25)*100)},
-        {lbl:'Regates',  val: ta('regates_exito') || 0},
-      ], '#c8a84b', 200);
+      // Helper: render breakdown panel
+      function renderBreakdown(panelId, matchList, keyFn, label, color, unit){
+        const panel = document.getElementById(panelId);
+        if(!panel) return;
+        const isOpen = panel.classList.contains('open');
+        if(isOpen){ panel.classList.remove('open'); return; }
+        const maxVal = Math.max(...matchList.map(m=>keyFn(m)||0), 1);
+        const rows = matchList.map(m => {
+          const val = keyFn(m);
+          if(val==null) return '';
+          const pct = Math.round(val/maxVal*100);
+          const lc = leagueClass(m.league);
+          return '<div class="ts-bd-row">' +
+            '<span class="ts-bd-rival">vs ' + m.rival + '</span>' +
+            '<span class="ts-bd-date">' + formatDate(m.date) + '</span>' +
+            '<span class="ts-bd-league ' + lc + '">' + m.league + '</span>' +
+            '<div class="ts-bd-bar"><div class="ts-bd-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+            '<span class="ts-bd-val" style="color:' + color + '">' + val + (unit||'') + '</span>' +
+          '</div>';
+        }).join('');
+        panel.innerHTML = '<div class="ts-breakdown-title">' + label + ' por partido</div>' + rows;
+        panel.classList.add('open');
+        // cerrar el otro panel abierto
+        document.querySelectorAll('.ts-breakdown.open, .ts-radar-axes.open').forEach(el => { if(el.id!==panelId) el.classList.remove('open'); });
+      }
+
+      // Radar axes data
+      const radarAxes = [
+        {lbl:'Ataque',    val: Math.min(100,(tirosT/15)*100),    key:'tiros',          unit:'',  color:'#e8502e'},
+        {lbl:'Precisión', val: ta('precision_tiro')||0,           key:'precision_tiro', unit:'%', color:'#3ecf8e'},
+        {lbl:'Posesión',  val: posVal,                            key:'posesion',       unit:'%', color:'#c8a84b'},
+        {lbl:'Pases',     val: ta('precision_pases')||0,          key:'precision_pases',unit:'%', color:'#4a9eff'},
+        {lbl:'Defensa',   val: Math.min(100,((ta('intercepciones')||0)/25)*100), key:'intercepciones', unit:'', color:'#7c6fff'},
+        {lbl:'Regates',   val: ta('regates_exito')||0,            key:'regates_exito',  unit:'%', color:'#f5c518'},
+      ];
+
+      let selectedRadarAxis = -1;
+
+      function renderRadar(selIdx){
+        drawRadar('chartRadar', radarAxes, '#c8a84b', 200, selIdx);
+        const axPanel = document.getElementById('radarAxes');
+        if(!axPanel) return;
+        if(selIdx < 0){ axPanel.classList.remove('open'); return; }
+        const ax = radarAxes[selIdx];
+        const matchList = tsMatches.filter(m=>m.team_stats[ax.key]!=null);
+        const maxV = Math.max(...matchList.map(m=>m.team_stats[ax.key]||0), 1);
+        const bRows = matchList.map(m => {
+          const val = m.team_stats[ax.key];
+          const pct = Math.round(val/maxV*100);
+          const lc = leagueClass(m.league);
+          return '<div class="ts-bd-row">' +
+            '<span class="ts-bd-rival">vs ' + m.rival + '</span>' +
+            '<span class="ts-bd-date">' + formatDate(m.date) + '</span>' +
+            '<span class="ts-bd-league ' + lc + '">' + m.league + '</span>' +
+            '<div class="ts-bd-bar"><div class="ts-bd-bar-fill" style="width:' + pct + '%;background:' + ax.color + '"></div></div>' +
+            '<span class="ts-bd-val" style="color:' + ax.color + '">' + val + ax.unit + '</span>' +
+          '</div>';
+        }).join('');
+        axPanel.innerHTML = '<div class="ts-breakdown-title">' + ax.lbl + ' por partido</div>' + bRows;
+        axPanel.classList.add('open');
+        document.querySelectorAll('.ts-breakdown.open').forEach(el=>el.classList.remove('open'));
+      }
+
+      // Draw donuts with click handlers
+      drawDonut('chartPosesion', posVal, 100-posVal, ['#c8a84b','#1e2230'], 160, idx => {
+        if(idx===0) renderBreakdown('bdPosesion', tsMatches, m=>m.team_stats.posesion, 'Posesión', '#c8a84b', '%');
+        else        renderBreakdown('bdPosesion', tsMatches, m=>100-m.team_stats.posesion, 'Posesión rival', '#2a2f42', '%');
+      });
+      drawDonut('chartTiros', arcosT, Math.max(0,tirosT-arcosT), ['#3ecf8e','#1e2230'], 160, idx => {
+        if(idx===0) renderBreakdown('bdTiros', tsMatches, m=>m.team_stats.tiros_arco, 'Tiros al arco', '#3ecf8e', '');
+        else        renderBreakdown('bdTiros', tsMatches, m=>(m.team_stats.tiros||0)-(m.team_stats.tiros_arco||0), 'Tiros fuera', '#2a2f42', '');
+      });
+
+      // Radar — click en label de eje
+      renderRadar(-1);
+      const radarCanvas = document.getElementById('chartRadar');
+      if(radarCanvas){
+        radarCanvas.onclick = e => {
+          const hit = radarHitTest(radarCanvas, e.clientX, e.clientY, radarAxes.length, 200);
+          if(hit < 0) return;
+          selectedRadarAxis = (selectedRadarAxis===hit) ? -1 : hit;
+          renderRadar(selectedRadarAxis);
+        };
+      }
     }
   });
 }
