@@ -593,95 +593,189 @@ function setCloudStatus(ok, msg){
 function loadMatches(){ return cloudMatches; }
 
 // ════════════════════════════════════════════
-// SEED — datos de los 6 partidos conocidos
+// SEED — 11 partidos cargados desde reportes oficiales
 // ════════════════════════════════════════════
 const SEED_MATCHES = [
+
+  // ── VPUG ──────────────────────────────────
+  {rival:'Suda', league:'VPUG', date:'2025-03-02', match_result:'✓', uploadedAt:'2025-03-02T00:00:00.000Z', notes:'',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:7.8, goals:1, assists:1, passes:21,  pass_accuracy:90, distance_km:18.4, sprints:null, tackles:1,  interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:7.2, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:7.6, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  {rival:'Team Valhala', league:'VPUG', date:'2025-03-03', match_result:'5-0', uploadedAt:'2025-03-03T01:00:00.000Z', notes:'',
+  team_stats:{posesion:68,tiros:11,tiros_arco:null,goles_esperados:7.3,pases:242,precision_pases:87,entradas:19,entradas_exito:8,intercepciones:null,paradas:3,faltas:4,fuera_juego:2,corneres:4,regates_exito:95,precision_tiro:73},
+  players:[
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:10.0, goals:3, assists:1, passes:16,  pass_accuracy:88, distance_km:17.9, sprints:null, tackles:6,  interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:7.4,  goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:7.4,  goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:8.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:8.0,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.9,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:8.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:6.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  {rival:'La Unión', league:'VPUG', date:'2025-03-04', match_result:'✓', uploadedAt:'2025-03-04T00:00:00.000Z', notes:'',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.2,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:10.0, goals:4, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:9.5,  goals:2, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:9.0,  goals:1, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:10.0, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:8.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa07',        matched:'Buraa07',        rating:7.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:8.1,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:6.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.1,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:5.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  {rival:'IACC Cantera', league:'VPUG', date:'2025-03-09', match_result:'2-4', uploadedAt:'2025-03-09T00:00:00.000Z', notes:'',
+  team_stats:{posesion:57,tiros:6,tiros_arco:null,goles_esperados:2.9,pases:234,precision_pases:83,entradas:19,entradas_exito:5,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:5,regates_exito:96,precision_tiro:83},
+  players:[
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:6.3,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:8.5,  goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',       rating:6.7,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:8.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:7.2,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:9.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:6.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:4.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // ── 11x11 ─────────────────────────────────
   {rival:'Los Picantes', league:'11x11', date:'2025-03-03', match_result:'7-0', uploadedAt:'2025-03-03T00:00:00.000Z', notes:'',
   team_stats:{posesion:55,tiros:11,tiros_arco:10,goles_esperados:5.3,pases:199,precision_pases:86,entradas:28,entradas_exito:3,intercepciones:19,paradas:1,faltas:1,fuera_juego:0,corneres:4,regates_exito:93,precision_tiro:91},
   players:[
-    {name:'zPibu__',matched:'zPibu__',rating:8.5,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:2,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:3,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.4,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'CipriMancini',matched:'CipriMancini',rating:9.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:8.5,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Guiidow',matched:'Guiidow',rating:7.0,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Agubostero7',matched:'Agubostero7',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.3,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.6,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:6.9,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:8.5,  goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:10.0, goals:2, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:10.0, goals:3, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:7.4,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:9.0,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:8.5,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.3,  goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.6,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:6.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
-  {rival:'Talleres R', league:'11x11', date:'2025-03-05', match_result:'6-1', uploadedAt:'2025-03-05T00:00:00.000Z', notes:'',
-  team_stats:{posesion:64,tiros:13,tiros_arco:8,goles_esperados:6.9,pases:240,precision_pases:90,entradas:18,entradas_exito:4,intercepciones:28,paradas:0,faltas:1,fuera_juego:3,corneres:2,regates_exito:92,precision_tiro:62},
+
+  {rival:'Talleres R eSp', league:'11x11', date:'2025-03-05', match_result:'6-1', uploadedAt:'2025-03-05T00:00:00.000Z', notes:'',
+  team_stats:{posesion:64,tiros:13,tiros_arco:null,goles_esperados:6.9,pases:240,precision_pases:90,entradas:18,entradas_exito:4,intercepciones:28,paradas:0,faltas:1,fuera_juego:3,corneres:2,regates_exito:92,precision_tiro:62},
   players:[
-    {name:'zPibu__',matched:'zPibu__',rating:9.5,goals:0,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Lautavester7',matched:'Lautavester7',rating:9.0,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.7,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'CipriMancini',matched:'CipriMancini',rating:9.3,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:7.7,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Guiidow',matched:'Guiidow',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Agubostero7',matched:'Agubostero7',rating:7.2,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.8,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:8.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:5.2,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:9.5,  goals:0, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:9.0,  goals:1, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:10.0, goals:4, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:7.7,  goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:9.3,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:7.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:7.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:8.0,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:5.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
+
   {rival:'Inst. Senior', league:'11x11', date:'2025-03-05', match_result:'6-0', uploadedAt:'2025-03-05T01:00:00.000Z', notes:'',
-  team_stats:{posesion:62,tiros:14,tiros_arco:9,goles_esperados:6.1,pases:208,precision_pases:88,entradas:25,entradas_exito:9,intercepciones:18,paradas:2,faltas:0,fuera_juego:0,corneres:4,regates_exito:91,precision_tiro:64},
+  team_stats:{posesion:62,tiros:14,tiros_arco:null,goles_esperados:6.1,pases:208,precision_pases:88,entradas:25,entradas_exito:9,intercepciones:18,paradas:2,faltas:0,fuera_juego:0,corneres:4,regates_exito:91,precision_tiro:64},
   players:[
-    {name:'zPibu__',matched:'zPibu__',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Lautavester7',matched:'Lautavester7',rating:8.0,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:8.7,goals:1,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'CipriMancini',matched:'CipriMancini',rating:9.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:7.6,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Guiidow',matched:'Guiidow',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Agubostero7',matched:'Agubostero7',rating:7.7,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:9.4,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.1,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:7.5,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:8.0,  goals:1, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:10.0, goals:4, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:8.7,  goals:1, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:9.0,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:7.6,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:7.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:9.4,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.1,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:7.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
-  {rival:'Suda', league:'VPUG', date:'2025-03-02', match_result:'✓', uploadedAt:'2025-03-02T00:00:00.000Z', notes:'', players:[
-    {name:'Lautavester7',matched:'Lautavester7',rating:7.8,goals:1,assists:1,passes:21,pass_accuracy:90,distance_km:18.4,sprints:null,tackles:1,interceptions:null},
-    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:7.2,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.6,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'CipriMancini',matched:'CipriMancini',rating:7.3,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:7.5,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Guiidow',matched:'Guiidow',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'zPibu__',matched:'zPibu__',rating:7.3,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Agubostero7',matched:'Agubostero7',rating:7.7,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:7.3,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-  ]},
-  {rival:'Team Valhala', league:'VPUG', date:'2025-03-03', match_result:'5-0', uploadedAt:'2025-03-03T01:00:00.000Z', notes:'',
-  team_stats:{posesion:68,tiros:11,tiros_arco:8,goles_esperados:7.3,pases:242,precision_pases:87,entradas:19,entradas_exito:8,intercepciones:17,paradas:3,faltas:0,fuera_juego:1,corneres:4,regates_exito:95,precision_tiro:73},
+
+  {rival:'Talleres Reserva', league:'11x11', date:'2025-03-10', match_result:'0-1', uploadedAt:'2025-03-10T00:00:00.000Z', notes:'',
+  team_stats:{posesion:65,tiros:7,tiros_arco:null,goles_esperados:3.9,pases:226,precision_pases:87,entradas:22,entradas_exito:6,intercepciones:12,paradas:1,faltas:0,fuera_juego:0,corneres:7,regates_exito:93,precision_tiro:86},
   players:[
-    {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:3,assists:1,passes:16,pass_accuracy:88,distance_km:17.9,sprints:null,tackles:6,interceptions:null},
-    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:7.4,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:7.4,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'CipriMancini',matched:'CipriMancini',rating:8.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:8.0,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Guiidow',matched:'Guiidow',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'zPibu__',matched:'zPibu__',rating:7.8,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Agubostero7',matched:'Agubostero7',rating:7.6,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.9,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:8.8,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:6.2,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:6.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:6.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:6.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:8.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32-DaniStone', matched:'RS32-DaniStone', rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:6.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:5.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
-  {rival:'La Unión', league:'VPUG', date:'2025-03-04', match_result:'✓', uploadedAt:'2025-03-04T00:00:00.000Z', notes:'', players:[
-    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.2,goals:0,assists:1,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Lautavester7',matched:'Lautavester7',rating:10.0,goals:4,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'cansitrGd22_',matched:'cansitrGd22_',rating:9.5,goals:2,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'BlackPanther-CG',matched:'BlackPanther-CG',rating:9.0,goals:1,assists:2,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'CipriMancini',matched:'CipriMancini',rating:10.0,goals:1,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Juan_Martinez4',matched:'Juan_Martinez4',rating:8.0,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Buraa07',matched:'Buraa07',rating:7.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'zPibu__',matched:'zPibu__',rating:8.1,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Agubostero7',matched:'Agubostero7',rating:6.4,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Zurdo-_CABJ12',matched:'Zurdo-_CABJ12',rating:7.1,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
-    {name:'Woolfyboyzx2',matched:'Woolfyboyzx2',rating:5.5,goals:0,assists:0,passes:null,pass_accuracy:null,distance_km:null,sprints:null,tackles:null,interceptions:null},
+
+  {rival:'Estudiantes RC', league:'11x11', date:'2025-03-10', match_result:'4-0', uploadedAt:'2025-03-10T01:00:00.000Z', notes:'',
+  team_stats:{posesion:67,tiros:10,tiros_arco:null,goles_esperados:6.1,pases:214,precision_pases:90,entradas:25,entradas_exito:10,intercepciones:17,paradas:1,faltas:0,fuera_juego:1,corneres:2,regates_exito:92,precision_tiro:80},
+  players:[
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:8.3,  goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:9.8,  goals:2, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:6.3,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:8.8,  goals:0, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:8.3,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32-DaniStone', matched:'RS32-DaniStone', rating:7.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.8,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:8.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:7.1,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
+
+  // ── VPN ───────────────────────────────────
+  {rival:'Los Lesionados', league:'VPN', date:'2025-03-09', match_result:'0-1', uploadedAt:'2025-03-09T01:00:00.000Z', notes:'',
+  team_stats:{posesion:60,tiros:8,tiros_arco:null,goles_esperados:3.3,pases:219,precision_pases:86,entradas:18,entradas_exito:6,intercepciones:18,paradas:1,faltas:0,fuera_juego:0,corneres:3,regates_exito:92,precision_tiro:63},
+  players:[
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:6.3,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:6.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',       rating:6.1,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:7.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:7.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:7.3,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:8.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:6.0,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  {rival:'Olimpo Esports', league:'VPN', date:'2025-03-09', match_result:'3-3', uploadedAt:'2025-03-09T02:00:00.000Z', notes:'',
+  team_stats:{posesion:62,tiros:4,tiros_arco:null,goles_esperados:2.5,pases:212,precision_pases:83,entradas:14,entradas_exito:6,intercepciones:14,paradas:3,faltas:1,fuera_juego:3,corneres:0,regates_exito:95,precision_tiro:75},
+  players:[
+    {name:'zPibu__',        matched:'zPibu__',        rating:7.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',   rating:7.7,  goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',   matched:'cansitrGd22_',   rating:8.5,  goals:1, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',       rating:6.1,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',   matched:'CipriMancini',   rating:7.9,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', rating:6.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',        rating:7.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',    rating:7.4,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:5.3,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 // ════════════════════════════════════════════
@@ -1154,7 +1248,8 @@ function renderSeason(){
     // Valores calculados
     const posesion      = tsAvg('posesion');
     const tirosPP       = +(tsSum('tiros')/n).toFixed(1);
-    const tirosArcoPP   = +(tsSum('tiros_arco')/n).toFixed(1);
+    // tiros_arco derivado: usar campo directo si existe, sino tiros×precisión/100
+    const tirosArcoPP   = +((tsMatches.reduce((s,m)=>{ const t=m.team_stats; if(t.tiros_arco!=null) return s+t.tiros_arco; if(t.tiros!=null&&t.precision_tiro!=null) return s+(t.tiros*t.precision_tiro/100); return s+(t.tiros||0)*0.7; },0))/n).toFixed(1);
     const precTiro      = tsAvg('precision_tiro');
     const pasesPP       = +(tsSum('pases')/n).toFixed(0);
     const precPases     = tsAvg('precision_pases');
@@ -1216,7 +1311,7 @@ function renderSeason(){
           '<div class="ts-breakdown" id="bdTiros"></div>' +
         '</div>' +
         '<div class="ts-chart-block">' +
-          '<div class="ts-chart-title">Perfil del equipo</div>' +
+          '<div class="ts-chart-title">Perfil del equipo</div><div style="font-size:.58rem;color:var(--muted2);text-align:center;margin-bottom:4px">Ataque = xG · Precisión = % tiro · Defensa = intercepciones</div>' +
           '<canvas id="chartRadar" style="width:200px;height:200px;display:block;margin:0 auto"></canvas>' +
           '<div class="ts-chart-hint">Hacé click en un eje</div>' +
           '<div class="ts-radar-axes" id="radarAxes"></div>' +
@@ -1253,7 +1348,12 @@ function renderSeason(){
       const tn  = tsMatches.length;
       const posVal = ta('posesion') || 50;
       const tirosT = +(ts2.reduce((s,t)=>s+(t.tiros||0),0)/tn).toFixed(1);
-      const arcosT = +(ts2.reduce((s,t)=>s+(t.tiros_arco||0),0)/tn).toFixed(1);
+      // Derivar tiros al arco: usar tiros_arco si existe, sino tiros × precision_tiro/100
+      const arcosT = +(ts2.reduce((s,t)=>{
+        if(t.tiros_arco!=null) return s+t.tiros_arco;
+        if(t.tiros!=null && t.precision_tiro!=null) return s+(t.tiros*t.precision_tiro/100);
+        return s+(t.tiros||0)*0.7;
+      },0)/tn).toFixed(1);
 
       // Helper: render breakdown panel
       function renderBreakdown(panelId, matchList, keyFn, label, color, unit){
@@ -1283,7 +1383,7 @@ function renderSeason(){
 
       // Radar axes data
       const radarAxes = [
-        {lbl:'Ataque',    val: Math.min(100,(tirosT/15)*100),    key:'tiros',          unit:'',  color:'#e8502e'},
+        {lbl:'Ataque',    val: Math.min(100,((ta('goles_esperados')||0)/7)*100), key:'goles_esperados', unit:'',  color:'#e8502e', unitSuffix:' xG'},
         {lbl:'Precisión', val: ta('precision_tiro')||0,           key:'precision_tiro', unit:'%', color:'#3ecf8e'},
         {lbl:'Posesión',  val: posVal,                            key:'posesion',       unit:'%', color:'#c8a84b'},
         {lbl:'Pases',     val: ta('precision_pases')||0,          key:'precision_pases',unit:'%', color:'#4a9eff'},
@@ -1313,7 +1413,8 @@ function renderSeason(){
             '<span class="ts-bd-val" style="color:' + ax.color + '">' + val + ax.unit + '</span>' +
           '</div>';
         }).join('');
-        axPanel.innerHTML = '<div class="ts-breakdown-title">' + ax.lbl + ' por partido</div>' + bRows;
+        const axTitle = ax.lbl === 'Ataque' ? 'xG (Goles esperados) por partido' : ax.lbl + ' por partido';
+        axPanel.innerHTML = '<div class="ts-breakdown-title">' + axTitle + '</div>' + bRows;
         axPanel.classList.add('open');
         document.querySelectorAll('.ts-breakdown.open').forEach(el=>el.classList.remove('open'));
       }
@@ -1323,9 +1424,19 @@ function renderSeason(){
         if(idx===0) renderBreakdown('bdPosesion', tsMatches, m=>m.team_stats.posesion, 'Posesión', '#c8a84b', '%');
         else        renderBreakdown('bdPosesion', tsMatches, m=>100-m.team_stats.posesion, 'Posesión rival', '#2a2f42', '%');
       });
+      const arcosDerivadoFn = m => {
+        const t = m.team_stats;
+        if(t.tiros_arco!=null) return +t.tiros_arco.toFixed(1);
+        if(t.tiros!=null && t.precision_tiro!=null) return +(t.tiros*t.precision_tiro/100).toFixed(1);
+        return +(t.tiros||0)*0.7;
+      };
+      const fueraDerivadoFn = m => {
+        const arcos = arcosDerivadoFn(m);
+        return Math.max(0, +((m.team_stats.tiros||0) - arcos).toFixed(1));
+      };
       drawDonut('chartTiros', arcosT, Math.max(0,tirosT-arcosT), ['#3ecf8e','#1e2230'], 160, idx => {
-        if(idx===0) renderBreakdown('bdTiros', tsMatches, m=>m.team_stats.tiros_arco, 'Tiros al arco', '#3ecf8e', '');
-        else        renderBreakdown('bdTiros', tsMatches, m=>(m.team_stats.tiros||0)-(m.team_stats.tiros_arco||0), 'Tiros fuera', '#2a2f42', '');
+        if(idx===0) renderBreakdown('bdTiros', tsMatches, arcosDerivadoFn, 'Tiros al arco', '#3ecf8e', '');
+        else        renderBreakdown('bdTiros', tsMatches, fueraDerivadoFn, 'Tiros fuera del arco', '#8890a8', '');
       });
 
       // Radar — click en label de eje
