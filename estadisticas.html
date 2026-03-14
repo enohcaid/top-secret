@@ -552,7 +552,7 @@ const ROSTER = [
 // ════════════════════════════════════════════
 // CLOUD STORAGE (Cloudflare KV via Worker)
 // ════════════════════════════════════════════
-let cloudMatches = [];   // cache en memoria
+let cloudMatches = [];   // solo partidos subidos por UI
 
 async function cloudLoad(){
   try {
@@ -560,12 +560,12 @@ async function cloudLoad(){
     if(!r.ok) throw new Error(r.status);
     const data = await r.json();
     cloudMatches = Array.isArray(data) ? data : [];
-    setCloudStatus(true, `Nube sincronizada · ${cloudMatches.length} partidos`);
+    const total = SEED_MATCHES.length + cloudMatches.length;
+    setCloudStatus(true, `Nube sincronizada · ${total} partidos (${SEED_MATCHES.length} base + ${cloudMatches.length} subidos)`);
     return cloudMatches;
   } catch(e) {
-    // Fallback a seed si no hay nube
-    setCloudStatus(false, 'Sin conexión — usando datos locales');
-    if(!cloudMatches.length) cloudMatches = SEED_MATCHES;
+    setCloudStatus(false, 'Sin conexión a la nube — mostrando datos base');
+    cloudMatches = [];
     return cloudMatches;
   }
 }
@@ -578,7 +578,8 @@ async function cloudSave(matches){
       body: JSON.stringify({key: KV_KEY, value: matches})
     });
     if(!r.ok) throw new Error(r.status);
-    setCloudStatus(true, `Nube sincronizada · ${matches.length} partidos`);
+    const total = SEED_MATCHES.length + matches.length;
+    setCloudStatus(true, `Nube sincronizada · ${total} partidos (${SEED_MATCHES.length} base + ${matches.length} subidos)`);
     return true;
   } catch(e){
     setCloudStatus(false, 'Error al guardar en la nube');
@@ -591,7 +592,8 @@ function setCloudStatus(ok, msg){
   document.getElementById('cloudLabel').textContent = msg;
 }
 
-function loadMatches(){ return cloudMatches; }
+// SEED siempre es la base + lo que se suba por la UI
+function loadMatches(){ return [...SEED_MATCHES, ...cloudMatches]; }
 
 // ════════════════════════════════════════════
 // SEED — 11 partidos cargados desde reportes oficiales
@@ -1784,11 +1786,15 @@ function toggleDetail(id, btn){
 }
 
 async function deleteMatch(idx){
+  const seedLen = SEED_MATCHES.length;
+  if(idx < seedLen){
+    showToast('Los partidos base no se pueden eliminar','error');
+    return;
+  }
   if(!confirm('¿Eliminar este partido y sus estadísticas?')) return;
-  const matches=loadMatches();
-  matches.splice(idx,1);
-  cloudMatches=matches;
-  await cloudSave(matches);
+  const cloudIdx = idx - seedLen;
+  cloudMatches.splice(cloudIdx, 1);
+  await cloudSave(cloudMatches);
   renderHistory();
   showToast('Partido eliminado','error');
 }
@@ -1994,10 +2000,8 @@ function renderResultPreview(data){
 
 async function saveResult(){
   if(!pendingResult) return;
-  const matches=loadMatches();
-  matches.push(pendingResult);
-  cloudMatches=matches;
-  const ok=await cloudSave(matches);
+  cloudMatches.push(pendingResult);
+  const ok=await cloudSave(cloudMatches);
   if(ok){
     showToast('✓ Partido guardado en la nube','success');
   } else {
@@ -2169,6 +2173,8 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
 
 // Init: cargar datos de la nube y renderizar temporada
+// Init: mostrar datos SEED de inmediato, luego sincronizar con nube
+renderSeason();
 cloudLoad().then(()=>renderSeason());
 </script>
 </body>
