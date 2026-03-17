@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Secret FC · Posiciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0e;--card:#101318;--card2:#13161e;
+  --border:#1e2230;--border2:#2a2f42;
+  --text:#f0f2f8;--muted:#8890a8;--muted2:#5a6278;
+  --gold:#c8a84b;--gold2:#e8c96a;--gold-dim:rgba(200,168,75,.15);
+  --vpn:#f5c518;--vpug:#3ecf8e;--e11:#4a9eff;
+  --win:#3ecf8e;--loss:#e8502e;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 28px;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto;}
+.nav-logo img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(200,168,75,.4));}
+.nav-logo span{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;letter-spacing:.08em;color:var(--text);}
+.nav-logo span b{color:var(--gold);}
+.nav-links{display:flex;gap:2px;}
+.nav-links a{padding:8px 14px;border-radius:8px;text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:var(--muted);transition:all .18s;}
+.nav-links a:hover{color:var(--text);background:var(--border);}
+.nav-links a.active{color:var(--gold);background:var(--gold-dim);}
+
+.page-header{padding:100px 24px 40px;max-width:1100px;margin:0 auto;}
+.page-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(2.4rem,6vw,4rem);font-weight:900;line-height:.95;}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:.88rem;color:var(--muted);margin-top:10px;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px 80px;}
+
+.league-tabs{display:flex;gap:6px;margin-bottom:28px;}
+.ltab{flex:1;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.ltab:hover{border-color:var(--border2);color:var(--text);}
+.ltab.active{border-width:2px;}
+.ltab[data-l="vpug"].active{border-color:var(--vpug);color:var(--vpug);background:rgba(62,207,142,.06);}
+.ltab[data-l="vpn"].active{border-color:var(--vpn);color:var(--vpn);background:rgba(245,197,24,.06);}
+.ltab[data-l="e11"].active{border-color:var(--e11);color:var(--e11);background:rgba(74,158,255,.06);}
+.ltab-dot{width:8px;height:8px;border-radius:50%;}
+.ltab[data-l="vpug"] .ltab-dot{background:var(--vpug);}
+.ltab[data-l="vpn"] .ltab-dot{background:var(--vpn);}
+.ltab[data-l="e11"] .ltab-dot{background:var(--e11);}
+
+.panel{display:none;}.panel.active{display:block;}
+
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.table-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.table-title{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.06em;}
+.table-src{font-size:.7rem;color:var(--muted2);}
+.table-src a{color:var(--muted);text-decoration:none;}
+.table-src a:hover{color:var(--gold);}
+
+.pos-table{width:100%;border-collapse:collapse;font-size:.84rem;}
+.pos-table th{padding:8px 12px;text-align:left;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;}
+.pos-table th.num{text-align:center;}
+.pos-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.pos-table tr:last-child td{border-bottom:none;}
+.pos-table tr:hover td{background:var(--card2);}
+.pos-table td.num{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
+
+.pos-table tr.ts-row{background:rgba(200,168,75,.06);}
+.pos-table tr.ts-row td{border-bottom-color:rgba(200,168,75,.2);border-top:1px solid rgba(200,168,75,.2);}
+.pos-table tr.ts-row .team-name{color:var(--gold);font-weight:800;}
+
+.pos-num{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:900;color:var(--muted2);width:32px;text-align:center;}
+.pos-num.p1{color:var(--gold);}
+.pos-num.p2{color:#aab0c4;}
+.pos-num.p3{color:#8b6f47;}
+
+.team-cell{display:flex;align-items:center;gap:10px;}
+.team-logo{width:24px;height:24px;border-radius:4px;object-fit:contain;background:var(--card2);flex-shrink:0;}
+.team-logo-ph{width:24px;height:24px;border-radius:4px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:800;color:var(--muted2);flex-shrink:0;}
+.team-name{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.pts-cell{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;}
+.gd-pos{color:var(--win);}
+.gd-neg{color:var(--loss);}
+
+.table-status{padding:60px 24px;text-align:center;}
+.table-status .spinner{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.table-status .msg{font-size:.85rem;color:var(--muted);}
+.table-status .err{color:var(--loss);}
+
+.iframe-wrap{border-radius:0 0 14px 14px;overflow:hidden;}
+.iframe-wrap iframe{width:100%;height:70vh;min-height:500px;border:none;background:#fff;}
+
+footer{border-top:1px solid var(--border);padding:28px 24px;text-align:center;font-size:.78rem;color:var(--muted2);}
+footer span{color:var(--gold);}
+
+@media(max-width:640px){
+  nav{padding:0 14px;}
+  .nav-links a{padding:7px 9px;font-size:.74rem;}
+  .league-tabs{flex-direction:column;}
+  .pos-table{font-size:.78rem;}
+  .pos-table th,.pos-table td{padding:8px 8px;}
+  .hide-m{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <img src="Top-Secret.png" alt="TS">
+    <span>TOP <b>SECRET</b></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Inicio</a>
+    <a href="plantilla.html">Plantel</a>
+    <a href="calendario.html">Calendario</a>
+    <a href="estadisticas.html">Estadísticas</a>
+    <a href="posiciones.html" class="active">Posiciones</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-eyebrow">Temporada 2026</div>
+  <h1 class="page-title">Tablas de <span>Posiciones</span></h1>
+  <p class="page-sub">Clasificación en vivo · Se actualiza automáticamente</p>
+</div>
+
+<div class="wrap">
+  <div class="league-tabs">
+    <button class="ltab active" data-l="vpn" onclick="switchTab('vpn',this)"><div class="ltab-dot"></div>VPN</button>
+    <button class="ltab" data-l="e11" onclick="switchTab('e11',this)"><div class="ltab-dot"></div>11x11</button>
+    <button class="ltab" data-l="vpug" onclick="switchTab('vpug',this)"><div class="ltab-dot"></div>VPUG</button>
+  </div>
+
+  <div class="panel active" id="panel-vpn">
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="table-title" style="color:var(--vpn)">VPN · Liga Argentina 2da División</span>
+        <span class="table-src"><a href="https://www.virtualpronetwork.com/web/app/league/2127/liga-argentina-2da-division" target="_blank">virtualpronetwork.com ↗</a></span>
+      </div>
+      <div id="vpn-content"><div class="table-status"><div class="spinner"></div><div class="msg">Cargando posiciones...</div></div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-e11">
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="table-title" style="color:var(--e11)">11x11 · Challengers</span>
+        <span class="table-src"><a href="https://virtualprogaming.com/league/Challengers" target="_blank">virtualprogaming.com ↗</a></span>
+      </div>
+      <div id="e11-content"><div class="table-status"><div class="spinner"></div><div class="msg">Cargando posiciones...</div></div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-vpug">
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="table-title" style="color:var(--vpug)">VPUG · Comunidad VPUG</span>
+        <span class="table-src"><a href="https://copafacil.com/-fthh5@n619" target="_blank">copafacil.com ↗</a></span>
+      </div>
+      <div id="vpug-content"><div class="table-status"><div class="spinner"></div><div class="msg">Cargando posiciones...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<footer><p>Top Secret <span>Football Club</span> · Temporada 2026</p></footer>
+
+<script>
+function switchTab(id, btn){
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+function isTS(name){ return name.trim().toLowerCase().replace(/\s+/g,' ').includes('top secret'); }
+
+function renderTable(containerId, data, accentColor){
+  const c = document.getElementById(containerId);
+  if(!data||!data.length){ c.innerHTML='<div class="table-status"><div class="msg err">No se encontraron datos</div></div>'; return; }
+
+  data.sort((a,b)=>b.pts-a.pts || b.gd-a.gd || b.gf-a.gf);
+
+  let h='<table class="pos-table"><thead><tr>';
+  h+='<th class="num">#</th><th>Equipo</th><th class="num">PJ</th><th class="num">G</th>';
+  h+='<th class="num">E</th><th class="num">P</th>';
+  h+='<th class="num hide-m">GF</th><th class="num hide-m">GC</th>';
+  h+='<th class="num">DG</th><th class="num">PTS</th>';
+  h+='</tr></thead><tbody>';
+
+  data.forEach((t,i)=>{
+    const p=i+1;
+    const pc=p===1?'p1':p===2?'p2':p===3?'p3':'';
+    const ts=isTS(t.name);
+    const gs=t.gd>0?'+':'';
+    const gc=t.gd>0?'gd-pos':t.gd<0?'gd-neg':'';
+    const logo=t.logo
+      ? '<img class="team-logo" src="'+t.logo+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="team-logo-ph" style="display:none">'+t.abbr.slice(0,3)+'</div>'
+      : '<div class="team-logo-ph">'+t.abbr.slice(0,3)+'</div>';
+
+    h+='<tr class="'+(ts?'ts-row':'')+'">';
+    h+='<td class="pos-num '+pc+'">'+p+'</td>';
+    h+='<td><div class="team-cell">'+logo+'<span class="team-name">'+t.name+'</span></div></td>';
+    h+='<td class="num">'+t.gp+'</td><td class="num">'+t.w+'</td>';
+    h+='<td class="num">'+t.d+'</td><td class="num">'+t.l+'</td>';
+    h+='<td class="num hide-m">'+t.gf+'</td><td class="num hide-m">'+t.gc+'</td>';
+    h+='<td class="num '+gc+'">'+gs+t.gd+'</td>';
+    h+='<td class="num"><span class="pts-cell" style="color:'+accentColor+'">'+t.pts+'</span></td>';
+    h+='</tr>';
+  });
+
+  h+='</tbody></table>';
+  c.innerHTML=h;
+}
+
+async function loadVPN(){
+  try{
+    const r=await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-table');
+    const j=await r.json();
+    const data=j.map(t=>({
+      name:t.team.name, abbr:t.team.short_name||t.team.name.slice(0,3),
+      logo:t.team.logoSmallUrl,
+      gp:t.gp, w:t.gw, d:t.gt, l:t.gl,
+      gf:t.gf, gc:t.gc, gd:t.gd, pts:t.pts
+    }));
+    renderTable('vpn-content',data,'var(--vpn)');
+  }catch(e){
+    document.getElementById('vpn-content').innerHTML='<div class="table-status"><div class="msg err">Error al cargar: '+e.message+'</div></div>';
+  }
+}
+
+async function loadE11(){
+  try{
+    const r=await fetch('https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2&is_history=false');
+    const j=await r.json();
+    const data=j.map(t=>({
+      name:t.team_name, abbr:t.team_abbr||t.team_name.slice(0,3),
+      logo:t.team_logo?'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/'+t.team_logo+'/smThumb':null,
+      gp:t.played, w:t.wins, d:t.draws, l:t.losses,
+      gf:t.score_for, gc:t.score_against,
+      gd:t.score_for-t.score_against, pts:t.points
+    }));
+    renderTable('e11-content',data,'var(--e11)');
+  }catch(e){
+    document.getElementById('e11-content').innerHTML='<div class="table-status"><div class="msg err">Error al cargar: '+e.message+'</div></div>';
+  }
+}
+
+// Fallback VPUG data (última actualización manual)
+const VPUG_FALLBACK = [
+  {name:'Villa Dalmine eSp',gp:8,w:7,d:1,l:0,gf:15,gc:4,gd:11,pts:22,abbr:'VDE',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWPzqBjj1QCR6oNHIq.png?alt=media&token=1&m=1772317663374'},
+  {name:'Olimpo eSports',gp:8,w:7,d:0,l:1,gf:19,gc:6,gd:13,pts:21,abbr:'OLI',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQZ5S-K-1ldHjcKr5.png?alt=media&token=1&m=1772380968642'},
+  {name:'Belgrano eSports',gp:8,w:6,d:2,l:0,gf:32,gc:5,gd:27,pts:20,abbr:'BEL',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQd38klMYc1SXTieq.png?alt=media&token=1&m=1772390751462'},
+  {name:'Top Secret',gp:8,w:6,d:1,l:1,gf:28,gc:8,gd:20,pts:19,abbr:'TOP',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQeSVWAbDUKxJnob8.png?alt=media&token=1&m=1772317528220'},
+  {name:'DeLa Nada FC',gp:8,w:5,d:1,l:2,gf:15,gc:12,gd:3,pts:16,abbr:'DLN',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQ0MufFJXRfgIVmHe.png?alt=media&token=1&m=1772498462722'},
+  {name:'Team Ceniza eSp',gp:8,w:4,d:3,l:1,gf:10,gc:6,gd:4,pts:15,abbr:'TCE',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQahqeP1Oj8FLyfnL.png?alt=media&token=1&m=1772317926184'},
+  {name:'Germinal eSports',gp:8,w:4,d:3,l:1,gf:10,gc:7,gd:3,pts:15,abbr:'GER',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQBt3_uLnROnldiub.png?alt=media&token=1&m=1772318076678'},
+  {name:'Real Marcianos FC',gp:8,w:3,d:2,l:3,gf:9,gc:15,gd:-6,pts:11,abbr:'RMF',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQ_4SjtSpugPrOWa_.png?alt=media&token=1&m=1772317796442'},
+  {name:'I.A.C.C Cantera',gp:8,w:2,d:4,l:2,gf:10,gc:10,gd:0,pts:10,abbr:'IAC',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQDb5zqa_OKFyn8zo.png?alt=media&token=1&m=1772317648375'},
+  {name:'Suda eSports',gp:8,w:3,d:1,l:4,gf:9,gc:12,gd:-3,pts:10,abbr:'SUD',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQ_rAu_6Zevu8oU98.png?alt=media&token=1&m=1772317506134'},
+  {name:'Atletico Titan',gp:8,w:2,d:0,l:6,gf:4,gc:17,gd:-13,pts:6,abbr:'ATI',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQgJkxe2aOb2rkvsm.png?alt=media&token=1&m=1772317606387'},
+  {name:'La Unión FC',gp:8,w:2,d:0,l:6,gf:8,gc:22,gd:-14,pts:6,abbr:'LUF',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQY3r14eNWX3Cyx7a.png?alt=media&token=1&m=1772317469069'},
+  {name:'Evermeet Rising',gp:8,w:1,d:1,l:6,gf:5,gc:14,gd:-9,pts:4,abbr:'EVR',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQ4G2jxJJZx9uQlt5.png?alt=media&token=1&m=1772317860184'},
+  {name:'Team Valhalla',gp:8,w:1,d:1,l:6,gf:7,gc:25,gd:-18,pts:4,abbr:'VAL',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmeeQ3bJdE1ZjjH5amD.png?alt=media&token=1&m=1772390729940'},
+  {name:'Almirante Brown eSp',gp:8,w:1,d:0,l:7,gf:6,gc:16,gd:-10,pts:3,abbr:'ALM',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWPyWKU7Oymp2eMZkG.png?alt=media&token=1&m=1772317689432'},
+  {name:'Ferro eSports',gp:8,w:0,d:0,l:8,gf:0,gc:8,gd:-8,pts:0,abbr:'FER',logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQ6Q3bwb1rc3039Hj.png?alt=media&token=1&m=1772317337506'},
+];
+
+async function loadVPUG(){
+  try{
+    const r=await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpug-table');
+    const j=await r.json();
+    if(j.error || j.fallback || !Array.isArray(j)){
+      // Firebase blocked — use fallback
+      renderTable('vpug-content',VPUG_FALLBACK,'var(--vpug)');
+      return;
+    }
+    const data=j.map(t=>({...t, abbr:t.abbr||t.name.slice(0,3)}));
+    renderTable('vpug-content',data,'var(--vpug)');
+  }catch(e){
+    renderTable('vpug-content',VPUG_FALLBACK,'var(--vpug)');
+  }
+}
+
+loadVPN();
+loadE11();
+loadVPUG();
+</script>
+</body>
+</html>
