@@ -618,12 +618,13 @@ body{padding-top:60px;}
       </div>
     </div>
     <div class="suspend-section">
-      <h4>🔴 Suspender partido</h4>
+      <h4>📅 Reprogramar partido</h4>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;text-align:left;">Los partidos pendientes de esta liga en la fecha destino y siguientes se desplazarán automáticamente.</div>
       <div class="field"><label>Reprogramar para (fecha)</label>
         <input type="date" id="eSuspendDate" style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.92rem;padding:9px 12px;outline:none;width:100%;margin-bottom:10px;">
       </div>
-      <button class="mbtn mbtn-suspend" id="eSuspendBtn" onclick="suspendMatch()" style="width:100%;margin-bottom:6px;">Suspender y reprogramar</button>
-      <button class="mbtn mbtn-restore" id="eRestoreBtn" onclick="restoreMatch()" style="width:100%;display:none;margin-bottom:6px;">Restaurar fecha original</button>
+      <button class="mbtn mbtn-suspend" id="eSuspendBtn" onclick="suspendMatch()" style="width:100%;margin-bottom:6px;">Reprogramar (con cascada)</button>
+      <button class="mbtn mbtn-restore" id="eRestoreBtn" onclick="restoreMatch()" style="width:100%;display:none;margin-bottom:6px;">Restaurar fecha original (deshace cascada)</button>
     </div>
     <div class="modal-btns" style="margin-top:16px;">
       <button class="mbtn mbtn-cancel" onclick="closeEditModal()">Cancelar</button>
@@ -798,6 +799,10 @@ onSnapshot(CAL_DOC, snap => {
     results   = data.results   || {};
     edits     = data.edits     || {};
     suspended = data.suspended || {};
+    // Migrar datos viejos: si no tiene campo 'manual', es manual (formato anterior)
+    Object.keys(suspended).forEach(k => {
+      if(suspended[k].manual === undefined) suspended[k].manual = true;
+    });
     // sync to localStorage as backup
     localStorage.setItem('ts_results',   JSON.stringify(results));
     localStorage.setItem('ts_edits',     JSON.stringify(edits));
@@ -844,6 +849,22 @@ function weekLabel(wk){
   const start = new Date(wk+'T12:00:00');
   const end = new Date(start); end.setDate(start.getDate()+6);
   return `Semana del ${start.getDate()} al ${end.getDate()} de ${MONTHS[end.getMonth()]}`;
+}
+
+// Días de liga por competencia (0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb)
+const LEAGUE_DAYS = {
+  'VPN':   [1, 3],         // Lunes, Miércoles
+  'VPUG':  [1, 2, 3, 4],   // Lunes a Jueves
+  '11x11': [2, 4],          // Martes, Jueves
+};
+
+// Siguiente día de liga a partir de una fecha
+function nextLeagueDay(dateStr, league){
+  const days = LEAGUE_DAYS[league];
+  if(!days) return dateStr;
+  const dt = new Date(dateStr + 'T12:00:00');
+  do { dt.setDate(dt.getDate() + 1); } while(!days.includes(dt.getDay()));
+  return dt.toISOString().slice(0,10);
 }
 
 function getResult(id){
@@ -908,7 +929,8 @@ function render(){
       dayIds.forEach(i=>{
         const m = getMatch(i);
         const isSuspended = !!suspended[i];
-        const isRescheduled = isSuspended; // same match, now showing at new date
+        const isManualSuspend = isSuspended && suspended[i].manual;
+        const isCascaded = isSuspended && !suspended[i].manual;
         const outcome = outcomeFor(i);
         const score = scoreDisplay(i);
         const hide = currentFilter!=='all' && m.league!==currentFilter;
@@ -943,9 +965,11 @@ function render(){
             <div class="match-time">${m.time}</div>
           `;
         } else {
-          const suspBadge = isRescheduled
+          const suspBadge = isManualSuspend
             ? `<span class="rescheduled-badge">🔄 Reprogramado</span>`
-            : '';
+            : isCascaded
+              ? `<span class="rescheduled-badge" style="background:rgba(138,180,248,.12);color:#8ab4f8;border-color:rgba(138,180,248,.3)">↪️ Desplazado</span>`
+              : '';
 
           card.innerHTML = `
             <div class="match-bar bar-${leagueClass}"></div>
@@ -1062,16 +1086,35 @@ function openEditModal(id){
 
   // Suspend section
   const isSusp = !!suspended[id];
-  document.getElementById('eSuspendBtn').style.display = isSusp ? 'none' : 'block';
-  document.getElementById('eRestoreBtn').style.display = isSusp ? 'block' : 'none';
+  const isManual = isSusp && suspended[id].manual;
+  const isCascaded = isSusp && !suspended[id].manual;
 
-  // Default reschedule date: next Monday
+  // Mostrar/ocultar botones según estado
+  document.getElementById('eSuspendBtn').style.display = isSusp ? 'none' : 'block';
+  document.getElementById('eRestoreBtn').style.display = isManual ? 'block' : 'none';
+
+  // Info de cascada
+  let cascadeInfo = document.getElementById('eCascadeInfo');
+  if(!cascadeInfo){
+    cascadeInfo = document.createElement('div');
+    cascadeInfo.id = 'eCascadeInfo';
+    cascadeInfo.style.cssText = 'font-size:.78rem;color:var(--muted2);padding:8px 10px;border-radius:8px;background:rgba(138,180,248,.08);border:1px solid rgba(138,180,248,.2);margin-bottom:10px;text-align:left;';
+    document.getElementById('eSuspendBtn').parentNode.insertBefore(cascadeInfo, document.getElementById('eSuspendBtn'));
+  }
+  if(isCascaded){
+    const sourceId = suspended[id].cascadeFrom;
+    const sourceMatch = RAW[sourceId];
+    cascadeInfo.innerHTML = `↪️ Este partido fue desplazado automáticamente por la reprogramación de <b>${sourceMatch.rival}</b>. Para restaurarlo, restaurá ese partido.`;
+    cascadeInfo.style.display = 'block';
+  } else {
+    cascadeInfo.style.display = 'none';
+  }
+
+  // Fecha sugerida: siguiente día de liga
   if(!isSusp){
-    const orig = new Date(m.date + 'T12:00:00');
-    const daysUntilNextMon = (8 - orig.getDay()) % 7 || 7;
-    const nextDate = new Date(orig);
-    nextDate.setDate(orig.getDate() + daysUntilNextMon);
-    document.getElementById('eSuspendDate').value = nextDate.toISOString().slice(0,10);
+    const league = RAW[id].league;
+    const suggested = nextLeagueDay(m.date, league);
+    document.getElementById('eSuspendDate').value = suggested;
   } else {
     document.getElementById('eSuspendDate').value = suspended[id].newDate;
   }
@@ -1101,22 +1144,62 @@ function saveEdit(){
   render();
 }
 
-// ── SUSPEND / RESTORE ─────────────────────────────────────────────────────────
+// ── SUSPEND / RESTORE (con cascada) ──────────────────────────────────────────
 function suspendMatch(){
   const newDate = document.getElementById('eSuspendDate').value;
   if(!newDate){ alert('Elegí una fecha para reprogramar'); return; }
-  const orig = getMatch(editingId).date; // current effective date before suspend
-  suspended[editingId] = { originalDate: RAW[editingId].date, newDate };
+
+  const match = RAW[editingId];
+  const league = match.league;
+
+  // 1. Guardar la suspensión manual
+  suspended[editingId] = { originalDate: match.date, newDate, manual: true };
+
+  // 2. Buscar todos los partidos PENDIENTES de esa liga en la fecha destino o después
+  const toShift = [];
+  RAW.forEach((m, i) => {
+    if(i === editingId) return;
+    if(m.free) return;
+    if(m.league !== league) return;
+    if(getResult(i)) return; // ya jugado, no se mueve
+    const currentDate = suspended[i] ? suspended[i].newDate : m.date;
+    if(currentDate >= newDate) toShift.push({ id: i, date: currentDate });
+  });
+
+  // 3. Ordenar por fecha
+  toShift.sort((a, b) => a.date.localeCompare(b.date));
+
+  // 4. Cascada: cada partido se corre al siguiente día de liga
+  toShift.forEach(item => {
+    // No pisar suspensiones manuales de otros partidos
+    if(suspended[item.id] && suspended[item.id].manual) return;
+    const shifted = nextLeagueDay(item.date, league);
+    suspended[item.id] = { originalDate: RAW[item.id].date, newDate: shifted, manual: false, cascadeFrom: editingId };
+  });
+
   saveState();
   closeEditModal();
   render();
+  showToast(`Partido reprogramado · ${toShift.length} partido${toShift.length!==1?'s':''} desplazado${toShift.length!==1?'s':''}`, 'success');
 }
+
 function restoreMatch(){
   if(!suspended[editingId]) return;
+
+  // Borrar esta suspensión
   delete suspended[editingId];
+
+  // Borrar todas las suspensiones en cascada que venían de esta
+  Object.keys(suspended).forEach(k => {
+    if(suspended[k].cascadeFrom == editingId && !suspended[k].manual){
+      delete suspended[k];
+    }
+  });
+
   saveState();
   closeEditModal();
   render();
+  showToast('Partido restaurado a fecha original', 'success');
 }
 
 // Close on backdrop
@@ -1175,7 +1258,7 @@ window.clearRes       = clearRes;
 window.openEditModal  = openEditModal;
 window.closeEditModal = closeEditModal;
 window.saveEdit       = saveEdit;
-window.toggleHome     = toggleHome;
+window.setHome        = setHome;
 window.suspendMatch   = suspendMatch;
 window.restoreMatch   = restoreMatch;
 window.saveToFirebase = saveToFirebase;
