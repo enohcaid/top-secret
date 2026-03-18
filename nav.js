@@ -54,9 +54,14 @@ const TS_NAV_PAGES = [
   });
   nav.appendChild(links);
 
-  // Insert as first body child
-  document.addEventListener('DOMContentLoaded', () => {
+  // Insert immediately (script is at end of body)
+  if (document.body) {
     document.body.insertBefore(nav, document.body.firstChild);
     document.body.style.paddingTop = '60px';
-  });
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.insertBefore(nav, document.body.firstChild);
+      document.body.style.paddingTop = '60px';
+    });
+  }
 })();
