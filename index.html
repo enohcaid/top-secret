@@ -36,47 +36,6 @@ body{
   overflow-x:hidden;
 }
 
-/* ─── NAV ─── */
-nav{
-  position:fixed;top:0;left:0;right:0;
-  z-index:100;
-  background:rgba(10,11,14,.92);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  height:60px;
-  display:flex;align-items:center;
-  padding:0 28px;
-  gap:0;
-}
-.nav-logo{
-  display:flex;align-items:center;gap:10px;
-  text-decoration:none;
-  margin-right:auto;
-}
-.nav-logo img{
-  width:34px;height:34px;
-  object-fit:contain;
-  filter:drop-shadow(0 0 6px rgba(200,168,75,.4));
-}
-.nav-logo span{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:1.15rem;font-weight:800;
-  letter-spacing:.08em;
-  color:var(--text);
-}
-.nav-logo span b{color:var(--gold);}
-.nav-links{display:flex;gap:2px;}
-.nav-links a{
-  padding:8px 14px;
-  border-radius:8px;
-  text-decoration:none;
-  font-size:.82rem;font-weight:600;
-  letter-spacing:.04em;
-  color:var(--muted);
-  transition:all .18s;
-}
-.nav-links a:hover{color:var(--text);background:var(--border);}
-.nav-links a.active{color:var(--gold);background:var(--gold-dim);}
 
 /* ─── HERO ─── */
 .hero{
@@ -312,23 +271,32 @@ footer span{color:var(--gold);}
   .nav-links a{padding:8px 10px;font-size:.76rem;}
   .quick-stats{grid-template-columns:repeat(2,1fr);}
 }
+
+/* ─── SECTION CARDS ─── */
+.section-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:22px 20px;
+  transition:transform .18s,border-color .18s,box-shadow .18s;
+  cursor:pointer;height:100%;
+}
+.section-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.4);}
+.sc-gold{border-top:3px solid var(--gold);}
+.sc-gold:hover{border-color:var(--gold);}
+.sc-vpn{border-top:3px solid var(--vpn);}
+.sc-vpn:hover{border-color:var(--vpn);}
+.sc-vpug{border-top:3px solid var(--vpug);}
+.sc-vpug:hover{border-color:var(--vpug);}
+.sc-e11{border-top:3px solid var(--e11);}
+.sc-e11:hover{border-color:var(--e11);}
+.sc-icon{font-size:1.6rem;margin-bottom:8px;}
+.sc-name{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:.05em;color:var(--text);margin-bottom:4px;}
+.sc-desc{font-size:.78rem;color:var(--muted);line-height:1.4;}
+
 </style>
 </head>
 <body>
 
-<nav>
-  <a class="nav-logo" href="index.html">
-    <img src="Top-Secret.png" id="navLogo" alt="TS">
-    <span>TOP <b>SECRET</b></span>
-  </a>
-  <div class="nav-links">
-    <a href="index.html" class="active">Inicio</a>
-    <a href="plantilla.html">Plantel</a>
-    <a href="calendario.html">Calendario</a>
-    <a href="estadisticas.html">Estadísticas</a>
-    <a href="posiciones.html">Posiciones</a>
-  </div>
-</nav>
+<script src="nav.js"></script>
 
 <!-- HERO -->
 <section class="hero">
@@ -346,8 +314,9 @@ footer span{color:var(--gold);}
       Seguí todos los partidos, resultados y estadísticas de la temporada 2026.
     </p>
     <div class="hero-ctas">
-      <a href="calendario.html" class="btn-primary">Ver Calendario</a>
-      <a href="plantilla.html" class="btn-secondary">Conocer el Equipo</a>
+      <a href="convocatoria.html" class="btn-primary">⚽ Convocatoria</a>
+      <a href="calendario.html" class="btn-secondary">Ver Calendario</a>
+      <a href="plantilla.html" class="btn-secondary">El Equipo</a>
     </div>
   </div>
 </section>
@@ -362,6 +331,42 @@ footer span{color:var(--gold);}
   <div class="section-title">Próximos <span>Partidos</span></div>
   <div class="section-sub">Los siguientes compromisos del equipo</div>
   <div class="upcoming-list" id="upcomingList"></div>
+</section>
+
+<!-- SECCIONES -->
+<section class="section">
+  <div class="section-title">Secciones <span>del Club</span></div>
+  <div class="section-sub">Accedé a toda la información del equipo</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+    <a href="convocatoria.html" style="text-decoration:none">
+      <div class="section-card sc-gold">
+        <div class="sc-icon">⚽</div>
+        <div class="sc-name">Convocatoria</div>
+        <div class="sc-desc">Disponibilidad diaria y armado del equipo</div>
+      </div>
+    </a>
+    <a href="calendario.html" style="text-decoration:none">
+      <div class="section-card sc-vpn">
+        <div class="sc-icon">📅</div>
+        <div class="sc-name">Calendario</div>
+        <div class="sc-desc">Todos los partidos de la temporada</div>
+      </div>
+    </a>
+    <a href="estadisticas.html" style="text-decoration:none">
+      <div class="section-card sc-vpug">
+        <div class="sc-icon">📊</div>
+        <div class="sc-name">Estadísticas</div>
+        <div class="sc-desc">Rendimiento de jugadores y resultados</div>
+      </div>
+    </a>
+    <a href="plantilla.html" style="text-decoration:none">
+      <div class="section-card sc-e11">
+        <div class="sc-icon">👥</div>
+        <div class="sc-name">Plantel</div>
+        <div class="sc-desc">Todos los jugadores del equipo</div>
+      </div>
+    </a>
+  </div>
 </section>
 
 <!-- LIGAS -->
