@@ -548,6 +548,30 @@ body{
 
 body{padding-top:60px;}
 @media(max-width:600px){
+
+.week-strip-wrap{position:sticky;top:60px;z-index:50;background:rgba(10,11,14,.97);border-bottom:1px solid #1e2230;padding:10px 24px 8px;}
+.week-strip{display:flex;flex-direction:row;gap:5px;overflow-x:auto;scrollbar-width:none;max-width:860px;margin:0 auto;}
+.week-strip::-webkit-scrollbar{display:none;}
+.day-pill{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 9px;border-radius:8px;cursor:pointer;border:1px solid transparent;min-width:42px;transition:all .15s;user-select:none;}
+.day-pill:hover{border-color:#2a2f42;}
+.day-pill.past{opacity:.35;}
+.day-pill.today{background:#c8a84b;border-color:#c8a84b;}
+.day-pill.has-match{border-color:#1e2230;}
+.dp-dow{font-family:'Barlow Condensed',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;color:#525974;text-transform:uppercase;}
+.dp-num{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;color:#f0f2f8;}
+.dp-dots{display:flex;gap:2px;justify-content:center;margin-top:1px;}
+.dp-dot{width:4px;height:4px;border-radius:50%;}
+.day-pill.today .dp-dow,.day-pill.today .dp-num{color:#000;}
+.today-card-outer{max-width:860px;margin:12px auto 0;padding:0 24px;}
+.today-card{background:rgba(200,168,75,.07);border:1px solid rgba(200,168,75,.3);border-radius:12px;padding:12px 16px;}
+.today-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.today-card-title{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#c8a84b;}
+.today-match-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.today-match-row:last-child{border-bottom:none;}
+.tmr-time{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:#c8a84b;min-width:50px;}
+.tmr-rival{font-size:.9rem;font-weight:700;color:#f0f2f8;flex:1;}
+.jornada-badge{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.06em;color:#525974;background:#1e2230;padding:1px 6px;border-radius:4px;}
+
 </style>
 </head>
 <body>
@@ -592,7 +616,7 @@ body{padding-top:60px;}
 </div>
 
 <!-- TODAY CARD -->
-<div id="todayCard" style="max-width:860px;margin:0 auto;padding:0 24px;display:none;">
+<div id="todayCard" class="today-card-outer" style="display:none;">
   <div class="today-card">
     <div class="today-card-head">
       <span class="today-card-title" id="todayCardTitle">Hoy</span>
@@ -957,8 +981,6 @@ function renderWeekStrip() {
     if (isToday) todayPill = pill;
   });
 
-  // Scroll strip to today
-  if (todayPill) setTimeout(() => todayPill.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' }), 100);
 }
 
 // ── TODAY CARD ────────────────────────────────────────────────────────────────
@@ -1105,8 +1127,6 @@ function render(){
   updateStats();
   renderWeekStrip();
   renderTodayCard();
-  // Scroll to today on first render
-  setTimeout(()=>{ const t=document.querySelector('.day[data-date="' + new Date().toISOString().slice(0,10) + '"]'); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }, 200);
 }
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
