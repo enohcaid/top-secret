@@ -537,34 +537,21 @@ body{
 }
 
 /* ─── SITE NAV ─── */
-.sitenav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(10,11,14,.95);backdrop-filter:blur(12px);border-bottom:1px solid #1e2230;height:60px;display:flex;align-items:center;padding:0 28px;}
-.sitenav .sn-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto;}
-.sitenav .sn-logo img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(200,168,75,.4));}
-.sitenav .sn-logo span{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;letter-spacing:.08em;color:#f0f2f8;}
-.sitenav .sn-logo span b{color:#c8a84b;}
-.sitenav .sn-links{display:flex;gap:2px;}
-.sitenav .sn-links a{padding:8px 14px;border-radius:8px;text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:#8890a8;transition:all .18s;}
-.sitenav .sn-links a:hover{color:#f0f2f8;background:#1e2230;}
-.sitenav .sn-links a.active{color:#c8a84b;background:rgba(200,168,75,.15);}
+
+
+
+
+
+
+
+
+
 body{padding-top:60px;}
-@media(max-width:600px){.sitenav{padding:0 14px;}.sitenav .sn-links a{padding:7px 9px;font-size:.74rem;}}
+@media(max-width:600px){
 </style>
-<script src="nav.js"></script>
 </head>
 <body>
-<nav class="sitenav">
-  <a class="sn-logo" href="index.html">
-    <img src="Top-Secret.png" alt="TS">
-    <span>TOP <b>SECRET</b></span>
-  </a>
-  <div class="sn-links">
-    <a href="index.html">Inicio</a>
-    <a href="plantilla.html">Plantel</a>
-    <a href="calendario.html" class="active">Calendario</a>
-    <a href="estadisticas.html">Estadísticas</a>
-    <a href="posiciones.html">Posiciones</a>
-  </div>
-</nav>
+
 
 
 <div class="masthead">
@@ -597,6 +584,24 @@ body{padding-top:60px;}
     <button class="fbtn" onclick="saveToFirebase()" id="btnSave" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar cambios para todos">☁️ Guardar</button>
   </div>
 </div>
+
+
+<!-- WEEK STRIP -->
+<div class="week-strip-wrap" id="weekStripWrap">
+  <div class="week-strip" id="weekStrip"></div>
+</div>
+
+<!-- TODAY CARD -->
+<div id="todayCard" style="max-width:860px;margin:0 auto;padding:0 24px;display:none;">
+  <div class="today-card">
+    <div class="today-card-head">
+      <span class="today-card-title" id="todayCardTitle">Hoy</span>
+      <span style="font-size:.72rem;color:var(--muted2)" id="todayMatchCount"></span>
+    </div>
+    <div id="todayMatchList"></div>
+  </div>
+</div>
+
 
 <div class="calendar" id="cal"></div>
 
@@ -898,6 +903,97 @@ function scoreDisplay(id){
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
+
+// ── JORNADA NUMBERS ───────────────────────────────────────────────────────────
+function getJornada(matchIndex) {
+  // Count how many non-free matches of same league came before this one (by effective date)
+  const m = getMatch(matchIndex);
+  if (m.free) return null;
+  let count = 0;
+  for (let i = 0; i < RAW.length; i++) {
+    const other = getMatch(i);
+    if (other.free || other.league !== m.league) continue;
+    if (other.date < m.date || (other.date === m.date && i < matchIndex)) count++;
+  }
+  return count + 1;
+}
+
+// ── WEEK STRIP ────────────────────────────────────────────────────────────────
+function renderWeekStrip() {
+  const strip = document.getElementById('weekStrip');
+  if (!strip) return;
+  const today = new Date().toISOString().slice(0,10);
+  const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+  // Get all unique match dates
+  const matchDates = new Set();
+  RAW.forEach((_,i) => { const m = getMatch(i); if (!m.free) matchDates.add(m.date); });
+  const sorted = [...matchDates].sort();
+
+  strip.innerHTML = '';
+  let todayPill = null;
+
+  sorted.forEach(date => {
+    const dt = new Date(date + 'T12:00:00');
+    const pill = document.createElement('div');
+    const isPast  = date < today;
+    const isToday = date === today;
+    // get league colors for dots
+    const leagues = [...new Set(
+      RAW.map((_,i) => getMatch(i)).filter(m => m.date === date && !m.free).map(m => m.league)
+    )];
+    const dotColors = {'VPN':'#f5c518','VPUG':'#3ecf8e','11x11':'#e8502e'};
+    pill.className = 'day-pill' + (isPast?' past':'') + (isToday?' today':'') + (leagues.length?' has-match':'');
+    pill.innerHTML = `
+      <span class="dp-dow">${DAYS_SHORT[dt.getDay()]}</span>
+      <span class="dp-num">${dt.getDate()}</span>
+      ${leagues.length ? `<div class="dp-dots">${leagues.map(l=>`<div class="dp-dot" style="background:${isToday?'#000':dotColors[l]||'#888'}"></div>`).join('')}</div>` : ''}
+    `;
+    pill.onclick = () => {
+      const target = document.querySelector(`.day[data-date="${date}"]`);
+      if (target) target.scrollIntoView({ behavior:'smooth', block:'start' });
+    };
+    strip.appendChild(pill);
+    if (isToday) todayPill = pill;
+  });
+
+  // Scroll strip to today
+  if (todayPill) setTimeout(() => todayPill.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' }), 100);
+}
+
+// ── TODAY CARD ────────────────────────────────────────────────────────────────
+function renderTodayCard() {
+  const today = new Date().toISOString().slice(0,10);
+  const todayMatches = RAW.map((_,i)=>({m:getMatch(i),i}))
+    .filter(({m}) => m.date === today && !m.free)
+    .sort((a,b) => a.m.time.localeCompare(b.m.time));
+
+  const wrap = document.getElementById('todayCard');
+  if (!wrap) return;
+
+  const D = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const M = ['Enero','Feb','Marzo','Abril','Mayo','Junio','Julio','Agosto','Sep','Oct','Nov','Dic'];
+  const dt = new Date(today + 'T12:00:00');
+  document.getElementById('todayCardTitle').textContent = `Hoy · ${D[dt.getDay()]} ${dt.getDate()} de ${M[dt.getMonth()]}`;
+  document.getElementById('todayMatchCount').textContent = todayMatches.length + (todayMatches.length===1?' partido':' partidos');
+
+  if (todayMatches.length === 0) { wrap.style.display='none'; return; }
+  wrap.style.display='block';
+
+  const leagueCls = {VPN:'vpn',VPUG:'vpug','11x11':'e11'};
+  document.getElementById('todayMatchList').innerHTML = todayMatches.map(({m,i}) => {
+    const jornada = getJornada(i);
+    const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
+    return `<div class="today-match-row">
+      <span class="tmr-time">${m.time}</span>
+      <span class="tmr-rival">${m.rival}</span>
+      <span class="tmr-jornada">J${jornada}</span>
+      <span class="league-badge badge-${leagueCls[m.league]}" style="font-size:.6rem">${m.league}</span>
+      <span class="loc" style="font-size:.68rem">${loc}</span>
+    </div>`;
+  }).join('');
+}
+
 function render(){
   const cal = document.getElementById('cal');
   cal.innerHTML = '';
@@ -924,6 +1020,7 @@ function render(){
       const dayIds = days[date];
       const dDiv = document.createElement('div');
       dDiv.className='day';
+      dDiv.dataset.date=date;
       dDiv.innerHTML=`<div class="day-label">${fmtDate(date)}</div>`;
 
       dayIds.sort((a,b)=>getMatch(a).time.localeCompare(getMatch(b).time));
@@ -978,6 +1075,7 @@ function render(){
             <div class="match-body">
               <div class="rival">${m.rival}</div>
               <div class="meta">
+                <span class="jornada-badge">J${getJornada(i)}</span>
                 <span class="league-badge badge-${leagueClass}">${m.league}</span>
                 <span class="loc">${locLabel}</span>
                 ${suspBadge}
@@ -1005,6 +1103,10 @@ function render(){
   });
 
   updateStats();
+  renderWeekStrip();
+  renderTodayCard();
+  // Scroll to today on first render
+  setTimeout(()=>{ const t=document.querySelector('.day[data-date="' + new Date().toISOString().slice(0,10) + '"]'); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }, 200);
 }
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
@@ -1268,5 +1370,6 @@ window.saveToFirebase = saveToFirebase;
 // render() is called by onSnapshot when Firebase data loads
 </script>
 
+<script src="nav.js"></script>
 </body>
 </html>
