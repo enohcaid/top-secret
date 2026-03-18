@@ -8,6 +8,7 @@ const TS_NAV_PAGES = [
   { label:'Calendario',    url:'calendario.html',    icon:'📅' },
   { label:'Estadísticas',  url:'estadisticas.html',  icon:'📊' },
   { label:'Convocatoria',  url:'convocatoria.html',  icon:'⚽' },
+  { label:'Posiciones',    url:'posiciones.html',    icon:'🏆' },
 ];
 
 (function() {
