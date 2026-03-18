@@ -38,7 +38,7 @@ const TS_NAV_PAGES = [
   const logo = document.createElement('a');
   logo.className = 'ts-logo';
   logo.href = 'index.html';
-  logo.innerHTML = '<img src="TopSecret.png" alt="TS"><span>TOP <b>SECRET</b></span>';
+  logo.innerHTML = '<img src="Top-Secret.png" alt="TS"><span>TOP <b>SECRET</b></span>';
   nav.appendChild(logo);
 
   const links = document.createElement('div');
