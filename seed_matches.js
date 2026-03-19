@@ -5,7 +5,7 @@
 const SEED_MATCHES = [
 
   // ── VPUG ──────────────────────────────────
-  {rival:'Suda', league:'VPUG', date:'2025-03-02', match_result:'✓', uploadedAt:'2025-03-02T00:00:00.000Z', notes:'',
+  {rival:'Suda', league:'VPUG', date:'2025-03-02', match_result:'2-0', uploadedAt:'2025-03-02T00:00:00.000Z', notes:'',
   team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
   players:[
     {name:'Lautavester7',   matched:'Lautavester7',   rating:7.8, goals:1, assists:1, passes:21,  pass_accuracy:90, distance_km:18.4, sprints:null, tackles:1,  interceptions:null},
@@ -37,7 +37,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:6.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'La Unión', league:'VPUG', date:'2025-03-04', match_result:'✓', uploadedAt:'2025-03-04T00:00:00.000Z', notes:'',
+  {rival:'La Unión', league:'VPUG', date:'2025-03-04', match_result:'8-1', uploadedAt:'2025-03-04T00:00:00.000Z', notes:'',
   team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
   players:[
     {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.2,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -281,7 +281,7 @@ const SEED_MATCHES = [
 
   // ── VPN ──────────────────────────────────────────────────────────────
   // Fecha 5 - All Boys - 16 Mar (Local, 2-1, Victoria)
-  {rival:'All Boys', league:'VPN', date:'2026-03-16', match_result:'✓', uploadedAt:'2026-03-16T00:00:00.000Z', notes:'',
+  {rival:'All Boys', league:'VPN', date:'2026-03-16', match_result:'2-1', uploadedAt:'2026-03-16T00:00:00.000Z', notes:'',
   team_stats:{posesion:66,tiros:4,tiros_arco:null,goles_esperados:2.0,pases:212,precision_pases:86,entradas:15,entradas_exito:5,intercepciones:null,paradas:1,faltas:2,fuera_juego:5,corneres:1,regates_exito:null,precision_tiro:50},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.8, goals:0, assists:1, passes:22,  pass_accuracy:86,  distance_km:null, sprints:null, tackles:1,  interceptions:null},
@@ -298,7 +298,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 6 - Ferro eSp - 16 Mar (Visita, 0-0, Empate)
-  {rival:'FERRO', league:'VPN', date:'2026-03-16', match_result:'=', uploadedAt:'2026-03-16T00:00:00.000Z', notes:'',
+  {rival:'FERRO', league:'VPN', date:'2026-03-16', match_result:'0-0', uploadedAt:'2026-03-16T00:00:00.000Z', notes:'',
   team_stats:{posesion:58,tiros:1,tiros_arco:1,goles_esperados:0.6,pases:208,precision_pases:82,entradas:27,entradas_exito:6,intercepciones:null,paradas:3,faltas:0,fuera_juego:1,corneres:0,regates_exito:null,precision_tiro:100},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:25,  pass_accuracy:88,  distance_km:null, sprints:null, tackles:3,  interceptions:null},
@@ -315,7 +315,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 7 - La ResaKa - 18 Mar (Local, 2-1, Victoria)
-  {rival:'La Resaca', league:'VPN', date:'2026-03-18', match_result:'✓', uploadedAt:'2026-03-18T00:00:00.000Z', notes:'',
+  {rival:'La Resaca', league:'VPN', date:'2026-03-18', match_result:'2-1', uploadedAt:'2026-03-18T00:00:00.000Z', notes:'',
   team_stats:{posesion:50,tiros:2,tiros_arco:2,goles_esperados:1.2,pases:180,precision_pases:84,entradas:19,entradas_exito:4,intercepciones:null,paradas:3,faltas:0,fuera_juego:2,corneres:2,regates_exito:null,precision_tiro:100},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:24,  pass_accuracy:83,  distance_km:19.3, sprints:null, tackles:0,  interceptions:null},
@@ -332,7 +332,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 8 - Alte Brown - 18 Mar (Visita, 5-0, Victoria)
-  {rival:'Almirante Brown eSport', league:'VPN', date:'2026-03-18', match_result:'✓', uploadedAt:'2026-03-18T00:00:00.000Z', notes:'',
+  {rival:'Almirante Brown eSport', league:'VPN', date:'2026-03-18', match_result:'5-0', uploadedAt:'2026-03-18T00:00:00.000Z', notes:'',
   team_stats:{posesion:59,tiros:11,tiros_arco:null,goles_esperados:5.7,pases:196,precision_pases:90,entradas:23,entradas_exito:6,intercepciones:null,paradas:2,faltas:1,fuera_juego:3,corneres:2,regates_exito:null,precision_tiro:73},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:27,  pass_accuracy:81,  distance_km:18.5, sprints:null, tackles:1,  interceptions:null},
@@ -350,7 +350,7 @@ const SEED_MATCHES = [
 
   // ── 11x11 ─────────────────────────────────────────────────────────────
   // Fecha 9 - Dep Ballester - 17 Mar (Visita, 2-2, Empate)
-  {rival:'Deportivo Ballester', league:'11x11', date:'2026-03-17', match_result:'=', uploadedAt:'2026-03-17T00:00:00.000Z', notes:'',
+  {rival:'Deportivo Ballester', league:'11x11', date:'2026-03-17', match_result:'2-2', uploadedAt:'2026-03-17T00:00:00.000Z', notes:'',
   team_stats:{posesion:58,tiros:12,tiros_arco:null,goles_esperados:4.3,pases:196,precision_pases:78,entradas:20,entradas_exito:7,intercepciones:null,paradas:2,faltas:0,fuera_juego:3,corneres:5,regates_exito:null,precision_tiro:33},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.7, goals:0, assists:1, passes:26,  pass_accuracy:77,  distance_km:18.8, sprints:null, tackles:1,  interceptions:null},
@@ -367,7 +367,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 10 - Olimpo eSports - 17 Mar (Local, 2-1, Victoria)
-  {rival:'Olimpo Esports', league:'11x11', date:'2026-03-17', match_result:'✓', uploadedAt:'2026-03-17T00:00:00.000Z', notes:'',
+  {rival:'Olimpo Esports', league:'11x11', date:'2026-03-17', match_result:'2-1', uploadedAt:'2026-03-17T00:00:00.000Z', notes:'',
   team_stats:{posesion:61,tiros:5,tiros_arco:3,goles_esperados:1.4,pases:199,precision_pases:84,entradas:18,entradas_exito:4,intercepciones:null,paradas:3,faltas:1,fuera_juego:0,corneres:0,regates_exito:null,precision_tiro:60},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.9, goals:0, assists:0, passes:37,  pass_accuracy:70,  distance_km:18.3, sprints:null, tackles:1,  interceptions:null},
