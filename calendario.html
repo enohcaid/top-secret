@@ -586,7 +586,7 @@ body{padding-top:60px;}
 
 <!-- Stats -->
 <div class="stats" id="statsBar">
-  <div class="stat-card"><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Partidos totales</div></div>
+  <div class="stat-card"><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Pendientes</div></div>
   <div class="stat-card"><div class="stat-val" style="color:var(--win)" id="sWin">0</div><div class="stat-lbl">Victorias</div></div>
   <div class="stat-card"><div class="stat-val" style="color:var(--draw)" id="sDraw">0</div><div class="stat-lbl">Empates</div></div>
   <div class="stat-card"><div class="stat-val" style="color:var(--loss)" id="sLoss">0</div><div class="stat-lbl">Derrotas</div></div>
@@ -1139,7 +1139,7 @@ function updateStats(){
     const o = outcomeFor(i);
     if(o){ played++; if(o==='win') win++; else if(o==='loss') loss++; else draw++; }
   });
-  document.getElementById('sTotal').textContent=total;
+  document.getElementById('sTotal').textContent=total-played;
   document.getElementById('sWin').textContent=win;
   document.getElementById('sDraw').textContent=draw;
   document.getElementById('sLoss').textContent=loss;
