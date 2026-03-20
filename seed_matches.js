@@ -384,6 +384,41 @@ const SEED_MATCHES = [
   ]},
 
 
+  // Fecha 11 - Acosta Beef - 19 Mar (Visita, 6-0, Victoria)
+  {rival:'Acosta Beef Esports', league:'11x11', date:'2026-03-19', match_result:'6-0', uploadedAt:'2026-03-19T00:00:00.000Z', notes:'',
+  team_stats:{posesion:61,tiros:12,tiros_arco:null,goles_esperados:5.8,pases:225,precision_pases:86,entradas:16,entradas_exito:2,intercepciones:null,paradas:2,faltas:2,fuera_juego:0,corneres:3,regates_exito:null,precision_tiro:67},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:8.4, goals:0, assists:1, passes:37,  pass_accuracy:78,  distance_km:19.3, sprints:null, tackles:0,  interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:7.3, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:10.0,goals:4, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'ED',  rating:8.6, goals:2, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:8.4, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32-DaniStone',  matched:'RS32-DaniStone',  played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',        matched:'Huber236',        played_pos:'DFC', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'DFD', rating:9.0, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 12 - IACC Cantera - 19 Mar (Local, 2-1, Victoria)
+  {rival:'IACC Cantera', league:'11x11', date:'2026-03-19', match_result:'2-1', uploadedAt:'2026-03-19T00:00:00.000Z', notes:'',
+  team_stats:{posesion:71,tiros:10,tiros_arco:7,goles_esperados:5.1,pases:239,precision_pases:91,entradas:27,entradas_exito:4,intercepciones:null,paradas:5,faltas:3,fuera_juego:0,corneres:4,regates_exito:null,precision_tiro:70},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.6, goals:0, assists:1, passes:21,  pass_accuracy:95,  distance_km:18.4, sprints:null, tackles:0,  interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:7.7, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'ED',  rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:8.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32-DaniStone',  matched:'RS32-DaniStone',  played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:8.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DFC', rating:7.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'DFD', rating:7.5, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+
 ];
 
 
