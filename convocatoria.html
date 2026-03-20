@@ -137,6 +137,22 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);padding:10px 22px;border-radius:10px;font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:600;opacity:0;transition:all .28s;z-index:9999;pointer-events:none;white-space:nowrap;background:#1a2e20;color:var(--green);border:1px solid var(--green);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.info{background:#141820;color:var(--muted2);border-color:var(--border2);}
+
+.stoken.selected{box-shadow:0 0 0 3px var(--yellow),0 0 16px rgba(245,197,24,.4);transform:scale(1.12);}
+.pitch-hint.selecting{color:var(--yellow);opacity:1;}
+.pcard.assignable{border-left-color:var(--yellow);cursor:pointer;}
+.pcard.assignable:hover{background:rgba(245,197,24,.08);}
+.assign-banner{
+  display:none;
+  background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.35);
+  border-radius:8px;padding:8px 14px;margin-bottom:10px;
+  font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:.06em;color:var(--yellow);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.assign-banner.hidden{display:none!important;}
+.assign-cancel{font-size:.7rem;opacity:.7;cursor:pointer;padding:2px 8px;border:1px solid currentColor;border-radius:4px;}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -437,6 +453,7 @@ let alwaysPresent = [];
 let lineup        = { formation:'4-3-3', slots:{} };
 let published     = false;
 let currentPlayer = null;
+let selectedSlotKey = null;
 let _saving       = false;
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -555,7 +572,14 @@ function renderList() {
         setTimeout(()=>card.style.opacity='.4',0);
       });
       card.addEventListener('dragend',()=>card.style.opacity='');
-      card.addEventListener('click',()=>openStatusModal(p.name));
+      card.addEventListener('click',()=>{
+        if(selectedSlotKey){
+          assignPlayerToSelectedSlot(p.name);
+        } else {
+          openStatusModal(p.name);
+        }
+      });
+      if(selectedSlotKey) card.classList.add('assignable');
       // Number
       const pnum=document.createElement('div');
       pnum.className='pnum'; pnum.textContent=p.num;
@@ -634,6 +658,7 @@ function renderPitch() {
     }
     el.appendChild(tok); el.appendChild(lbl);
     el.addEventListener('click',()=>handleSlotClick(s.key));
+    if(s.key===selectedSlotKey) tok.classList.add('selected');
     el.addEventListener('dragover',e=>{e.preventDefault();tok.classList.add('drag-over');});
     el.addEventListener('dragleave',()=>tok.classList.remove('drag-over'));
     el.addEventListener('drop',e=>{
@@ -651,8 +676,23 @@ function selectFormation(f){
   lineup={formation:f,slots:{}};
   saveDay(); render();
 }
-function handleSlotClick(key){
-  if(lineup.slots[key]){ delete lineup.slots[key]; saveDay(); render(); }
+function handleSlotClick(key) {
+  if (selectedSlotKey) {
+    // A slot is already selected — swap or assign
+    if (selectedSlotKey === key) { cancelSlotSelect(); return; }
+    // Move assignment from selectedSlotKey to this key
+    const player = lineup.slots[selectedSlotKey];
+    const existing = lineup.slots[key];
+    if (player) { lineup.slots[key] = player; delete lineup.slots[selectedSlotKey]; }
+    if (existing) lineup.slots[selectedSlotKey] = existing;
+    cancelSlotSelect(); saveDay(); render();
+  } else if (lineup.slots[key]) {
+    // Slot is filled: select it for reassignment
+    selectSlot(key);
+  } else {
+    // Empty slot: select it
+    selectSlot(key);
+  }
 }
 function dropOnSlot(key,name){
   Object.keys(lineup.slots).forEach(k=>{ if(lineup.slots[k]===name) delete lineup.slots[k]; });
@@ -917,6 +957,41 @@ window.togglePublish = async function(){
   btn.disabled = false;
 };
 
+
+
+window.cancelSlotSelect = function() {
+  selectedSlotKey = null;
+  document.getElementById('assignBanner').classList.add('hidden');
+  document.querySelector('.pitch-hint')?.classList.remove('selecting');
+  render();
+};
+
+function selectSlot(key) {
+  if (selectedSlotKey === key) {
+    cancelSlotSelect();
+    return;
+  }
+  selectedSlotKey = key;
+  const slot = FORMATIONS[lineup.formation]?.find(s => s.key === key);
+  const label = slot ? slot.l : key;
+  document.getElementById('assignBanner').classList.remove('hidden');
+  document.getElementById('assignBannerText').textContent = '🎯 Asignando a ' + label + ' — tocá un jugador';
+  document.querySelector('.pitch-hint')?.classList.add('selecting');
+  render();
+}
+
+function assignPlayerToSelectedSlot(playerName) {
+  if (!selectedSlotKey) return false;
+  // Remove player from any other slot first
+  Object.keys(lineup.slots).forEach(k => {
+    if (lineup.slots[k] === playerName) delete lineup.slots[k];
+  });
+  lineup.slots[selectedSlotKey] = playerName;
+  cancelSlotSelect();
+  saveDay();
+  render();
+  return true;
+}
 
 window.autoLineup = function() {
   lineup.formation = '4-3-3';
