@@ -311,8 +311,8 @@ function computeTops() {
   });
   const entries = Object.entries(stats);
   return {
-    goals:   entries.sort((a,b)=>b[1].goals-a[1].goals).slice(0,3),
-    assists: entries.sort((a,b)=>b[1].assists-a[1].assists).slice(0,3),
+    goals:   [...entries].sort((a,b)=>b[1].goals-a[1].goals).slice(0,3),
+    assists: [...entries].sort((a,b)=>b[1].assists-a[1].assists).slice(0,3),
     rating:  entries.filter(([,v])=>v.ratings.length>=3).sort((a,b)=>b[1].avg_rating-a[1].avg_rating).slice(0,3),
   };
 }
