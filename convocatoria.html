@@ -195,6 +195,10 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 
   <!-- RIGHT: PITCH -->
   <div class="right-col">
+    <div id="assignBanner" style="display:none;background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.35);border-radius:8px;padding:8px 14px;margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;color:var(--yellow);align-items:center;justify-content:space-between;gap:10px;">
+      <span id="assignBannerText">Seleccioná un jugador</span>
+      <span onclick="window.cancelSlotSelect()" style="font-size:.7rem;opacity:.7;cursor:pointer;padding:2px 8px;border:1px solid currentColor;border-radius:4px;">✕</span>
+    </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
     <div class="fbar" id="fbar" style="margin-bottom:0;"></div>
     <button class="fbtn" id="autoBtn" onclick="autoLineup()" style="background:rgba(245,197,24,.12);border-color:rgba(245,197,24,.4);color:var(--yellow);letter-spacing:.05em;">⚡ Auto</button>
@@ -961,7 +965,7 @@ window.togglePublish = async function(){
 
 window.cancelSlotSelect = function() {
   selectedSlotKey = null;
-  document.getElementById('assignBanner').classList.add('hidden');
+  document.getElementById('assignBanner').style.display='none';
   document.querySelector('.pitch-hint')?.classList.remove('selecting');
   render();
 };
@@ -974,7 +978,7 @@ function selectSlot(key) {
   selectedSlotKey = key;
   const slot = FORMATIONS[lineup.formation]?.find(s => s.key === key);
   const label = slot ? slot.l : key;
-  document.getElementById('assignBanner').classList.remove('hidden');
+  document.getElementById('assignBanner').style.display='flex';
   document.getElementById('assignBannerText').textContent = '🎯 Asignando a ' + label + ' — tocá un jugador';
   document.querySelector('.pitch-hint')?.classList.add('selecting');
   render();
@@ -993,6 +997,8 @@ function assignPlayerToSelectedSlot(playerName) {
   return true;
 }
 
+window.selectSlot = selectSlot;
+window.assignPlayerToSelectedSlot = assignPlayerToSelectedSlot;
 window.autoLineup = function() {
   lineup.formation = '4-3-3';
   lineup.slots = {
