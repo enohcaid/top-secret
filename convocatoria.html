@@ -682,17 +682,22 @@ function selectFormation(f){
 }
 function handleSlotClick(key) {
   if (selectedSlotKey) {
-    // A slot is already selected — swap or assign
-    if (selectedSlotKey === key) { cancelSlotSelect(); return; }
-    // Move assignment from selectedSlotKey to this key
-    const player = lineup.slots[selectedSlotKey];
-    const existing = lineup.slots[key];
-    if (player) { lineup.slots[key] = player; delete lineup.slots[selectedSlotKey]; }
-    if (existing) lineup.slots[selectedSlotKey] = existing;
-    cancelSlotSelect(); saveDay(); render();
+    if (selectedSlotKey === key) {
+      // Tap same slot again → remove player
+      delete lineup.slots[key];
+      cancelSlotSelect(); saveDay(); render();
+    } else {
+      // Swap or assign
+      const player = lineup.slots[selectedSlotKey];
+      const existing = lineup.slots[key];
+      if (player) { lineup.slots[key] = player; delete lineup.slots[selectedSlotKey]; }
+      if (existing) lineup.slots[selectedSlotKey] = existing;
+      cancelSlotSelect(); saveDay(); render();
+    }
   } else if (lineup.slots[key]) {
-    // Slot is filled: select it for reassignment
+    // Filled slot: select it (tap again to remove, or pick another slot/player)
     selectSlot(key);
+    showToast('Tocá otro puesto para mover, o tocá este de nuevo para quitar', 'info');
   } else {
     // Empty slot: select it
     selectSlot(key);
