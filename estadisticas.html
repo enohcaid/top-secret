@@ -244,17 +244,17 @@ footer span{color:var(--gold);}
 .modal-chart-wrap{margin-top:4px;}
 
 /* ── TEAM STATS HERO ── */
-.ts-hero{background:linear-gradient(135deg,rgba(200,168,75,.12) 0%,rgba(200,168,75,.04) 60%,transparent 100%);border:1px solid rgba(200,168,75,.25);border-radius:16px 16px 0 0;padding:22px 24px 16px;border-bottom:none;}
+.ts-hero{grid-column:1/-1;background:linear-gradient(135deg,rgba(200,168,75,.12) 0%,rgba(200,168,75,.04) 60%,transparent 100%);border:1px solid rgba(200,168,75,.25);border-radius:16px 16px 0 0;padding:22px 24px 16px;border-bottom:none;}
 .ts-hero-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);}
 .ts-hero-sub{font-size:.75rem;color:var(--muted2);margin-top:3px;}
-.ts-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:none;border-bottom:none;}
+.ts-kpi-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:0;background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:none;border-bottom:none;}
 .ts-kpi{padding:18px 16px;text-align:center;border-right:1px solid var(--border);}
 .ts-kpi:last-child{border-right:none;}
 .ts-kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:900;line-height:1;}
 .ts-kpi-unit{font-size:1.2rem;font-weight:700;}
 .ts-kpi-lbl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-top:4px;}
 .ts-kpi-accent{background:rgba(245,197,24,.04);}
-.ts-charts-row{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:1px solid var(--border);border-bottom:none;}
+.ts-charts-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:1px solid var(--border);border-bottom:none;}
 .ts-chart-block{padding:20px 16px;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;}
 .ts-chart-block:last-child{border-right:none;}
 .ts-chart-title{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;text-align:center;}
@@ -282,7 +282,7 @@ footer span{color:var(--gold);}
 .ts-axis-btn .ax-val{font-family:"Barlow Condensed",sans-serif;font-weight:900;color:var(--gold);}
 .ts-axis-detail{padding:6px 8px 2px;display:none;}
 .ts-axis-detail.open{display:block;}
-.ts-bars-section{background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:1px solid var(--border);border-radius:0 0 16px 16px;padding:18px 24px 20px;margin-bottom:20px;}
+.ts-bars-section{grid-column:1/-1;background:var(--card);border:1px solid rgba(200,168,75,.25);border-top:1px solid var(--border);border-radius:0 0 16px 16px;padding:18px 24px 20px;margin-bottom:20px;}
 .ts-bars-title{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;}
 .ts-bars-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 32px;}
 .ts2-row{display:flex;align-items:center;gap:10px;}
@@ -347,6 +347,17 @@ footer span{color:var(--gold);}
 .pcard-more{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);text-align:center;}
 .btn-more{background:none;border:1px solid var(--border2);color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:5px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
 .btn-more:hover{border-color:var(--gold);color:var(--gold);}
+
+
+.rank-rows{padding:8px 0;}
+.rank-row{display:grid;grid-template-columns:28px 1fr 120px 48px auto;align-items:center;gap:8px;padding:6px 16px;}
+.rank-row:not(:last-child){border-bottom:1px solid var(--border);}
+.rank-num{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:var(--muted2);text-align:center;}
+.rank-name{font-size:.88rem;font-weight:700;color:var(--text);}
+.rank-bar-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.rank-bar{height:100%;border-radius:3px;}
+.rank-val{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;text-align:right;}
+.rank-extra{font-size:.65rem;color:var(--muted2);text-align:right;white-space:nowrap;}
 
 </style>
 </head>
@@ -1504,6 +1515,8 @@ function renderSeason(){
     const paradas       = +(tsSum('paradas')/n).toFixed(1);
     const faltas        = +(tsSum('faltas')/n).toFixed(1);
     const corneres      = +(tsSum('corneres')/n).toFixed(1);
+    const totalEntr     = tsSum('entradas');
+    const pctTackles    = totalEntr>0 ? Math.round(tsSum('entradas_exito')/totalEntr*100) : null;
 
     // Barras de stats secundarias
     const barStats = [
@@ -1514,6 +1527,8 @@ function renderSeason(){
       {lbl:'Paradas del arco',   val:paradas,   pct:Math.min(100,paradas/5*100),        color:'var(--muted)', unit:''},
       {lbl:'Córneres',           val:corneres,  pct:Math.min(100,corneres/8*100),       color:'var(--muted)', unit:''},
       {lbl:'Faltas cometidas',   val:faltas,    pct:Math.min(100,faltas/10*100),        color:'var(--loss)',  unit:''},
+      // Presión defensiva
+      ...(tsSum('entradas')>0 ? [{lbl:'Éxito en tackles',  val:Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), pct:Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), color:'#7c6fff', unit:'%'}] : []),
     ].filter(s=>s.val!=null);
 
     const barHTML = barStats.map(s =>
@@ -1538,6 +1553,7 @@ function renderSeason(){
         (tirosArcoPP!=null ? '<div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--win)">'+ tirosArcoPP +'</div><div class="ts-kpi-lbl">Al arco / partido</div></div>' : '') +
         (precTiro!=null ? '<div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--win)">'  + precTiro  + '<span class="ts-kpi-unit">%</span></div><div class="ts-kpi-lbl">Precisión de tiro</div></div>' : '') +
         (xg!=null       ? '<div class="ts-kpi ts-kpi-accent"><div class="ts-kpi-val" style="color:var(--draw)">' + xg + '</div><div class="ts-kpi-lbl">xG / partido</div></div>' : '') +
+        (pctTackles!=null ? '<div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--vpug)">' + pctTackles + '<span class="ts-kpi-unit">%</span></div><div class="ts-kpi-lbl">Éxito tackles</div></div>' : '') +
       '</div>' +
       // ── Fila 2: Torta posesión + Donut tiro + Radar ──
       '<div class="ts-charts-row">' +
@@ -1569,11 +1585,153 @@ function renderSeason(){
       '</div>';
   }
 
+    // ── Nuevos bloques combinados ──────────────────────────────
+  // Impacto ofensivo = (goles + asistencias) / partidos
+  const impactoBlock = (()=>{
+    const posC = i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const sorted = [...players]
+      .filter(p=>p.games>=3 && (p.goals+p.assists)>0)
+      .map(p=>({...p, impact:+((p.goals+p.assists)/p.games).toFixed(2)}))
+      .sort((a,b)=>b.impact-a.impact).slice(0,6);
+    const maxV = sorted[0]?.impact || 1;
+    return `<div class="season-block">
+      <div class="sb-header"><span class="sb-icon">🔥</span><h3>Impacto ofensivo</h3></div>
+      <table class="rank-table">${sorted.map((p,i)=>`<tr>
+        <td class="rank-pos ${posC(i)}">${i+1}</td>
+        <td><div class="rank-name">${p.name}</div>
+          <div class="rank-bar-wrap"><div class="rank-bar-track">
+            <div class="rank-bar-fill" style="width:${Math.round(p.impact/maxV*100)}%;background:var(--loss)"></div>
+          </div></div></td>
+        <td><div class="rank-val" style="color:var(--loss)">${p.impact}</div>
+            <div class="rank-sub">${p.goals}⚽ ${p.assists}🎯 · ${p.games}PJ</div></td>
+      </tr>`).join('')}</table>
+    </div>`;
+  })();
+const consistBlock = (()=>{
+    const posC = i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const sorted = [...players]
+      .filter(p=>p.ratings.length>=4)
+      .map(p=>{
+        const mean = avg(p.ratings);
+        const std  = +Math.sqrt(p.ratings.reduce((s,r)=>s+(r-mean)**2,0)/p.ratings.length).toFixed(2);
+        return {...p, std, meanR:+(mean||0).toFixed(2)};
+      })
+      .sort((a,b)=>a.std-b.std).slice(0,6);
+    const maxStd = Math.max(...sorted.map(p=>p.std)) || 1;
+    return `<div class="season-block">
+      <div class="sb-header"><span class="sb-icon">📐</span><h3>Consistencia</h3></div>
+      <table class="rank-table">${sorted.map((p,i)=>`<tr>
+        <td class="rank-pos ${posC(i)}">${i+1}</td>
+        <td><div class="rank-name">${p.name}</div>
+          <div class="rank-bar-wrap"><div class="rank-bar-track">
+            <div class="rank-bar-fill" style="width:${Math.round((1-p.std/maxStd)*100)}%;background:var(--gold)"></div>
+          </div></div></td>
+        <td><div class="rank-val" style="color:var(--gold)">±${p.std}</div>
+            <div class="rank-sub">avg ${p.meanR} · ${p.ratings.length}PJ</div></td>
+      </tr>`).join('')}</table>
+    </div>`;
+  })();
+const eficienciaBlock = tsMatches.length>=3 ? (()=>{
+    const scored_real = matches.reduce((s,m)=>{
+      if(!m.match_result) return s;
+      const pts = m.match_result.split('-');
+      const ts  = m.isHome===false ? +pts[1] : +pts[0];
+      return s + (isNaN(ts)?0:ts);
+    },0);
+    const xg_total = +tsMatches.reduce((s,m)=>s+(m.team_stats.goles_esperados||0),0).toFixed(1);
+    const pj_res   = matches.filter(m=>m.match_result).length;
+    const gpp      = +(scored_real/pj_res).toFixed(1);
+    const xgpp     = +(xg_total/tsMatches.length).toFixed(1);
+    const ratio    = +(scored_real/xg_total).toFixed(2);
+    const barMax   = Math.max(scored_real, xg_total);
+    return `<div class="season-block">
+      <div class="sb-header"><span class="sb-icon">⚡</span><h3>Eficiencia goleadora</h3></div>
+      <div class="ts-kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:0">
+        <div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--win)">${gpp}</div><div class="ts-kpi-lbl">Goles / partido</div></div>
+        <div class="ts-kpi"><div class="ts-kpi-val" style="color:var(--muted2)">${xgpp}</div><div class="ts-kpi-lbl">xG / partido</div></div>
+        <div class="ts-kpi ts-kpi-accent"><div class="ts-kpi-val" style="color:${ratio>=1?'var(--win)':'var(--loss)'}">${ratio}x</div><div class="ts-kpi-lbl">Ratio G/xG</div></div>
+      </div>
+      <table class="rank-table" style="margin-top:4px">
+        <tr><td class="rank-sub" style="padding:8px 16px;width:120px">Goles reales</td>
+            <td><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:${Math.round(scored_real/barMax*100)}%;background:var(--win)"></div></div></div></td>
+            <td><div class="rank-val" style="color:var(--win)">${scored_real}</div></td></tr>
+        <tr><td class="rank-sub" style="padding:8px 16px">xG total</td>
+            <td><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:${Math.round(xg_total/barMax*100)}%;background:var(--muted2)"></div></div></div></td>
+            <td><div class="rank-val" style="color:var(--muted2)">${xg_total}</div></td></tr>
+      </table>
+    </div>`;
+  })() : '';
+
+
+const ligaBlock = (()=>{
+    const ligas = ['VPN','VPUG','11x11'];
+    const lColors = {'VPN':'var(--vpn)','VPUG':'var(--vpug)','11x11':'var(--e11)'};
+    const lMatches = liga => matches.filter(m=>m.league===liga);
+    const lPlayed  = liga => lMatches(liga).filter(m=>m.match_result);
+    const lWins    = liga => lPlayed(liga).filter(m=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; const r=m.isHome===false?+p[0]:+p[1]; return ts>r; }).length;
+    const lGF      = liga => lPlayed(liga).reduce((s,m)=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; return s+(isNaN(ts)?0:ts); },0);
+    const lAvgRat  = liga => { const rs=lMatches(liga).flatMap(m=>(m.players||[]).map(p=>p.rating).filter(v=>v!=null)); return rs.length?+(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(2):null; };
+    return `<div class="season-block full">
+      <div class="sb-header"><span class="sb-icon">🏆</span><h3>Rendimiento por liga</h3></div>
+      <table class="rank-table">${ligas.map(lg=>{
+        const pl=lPlayed(lg).length, w=lWins(lg), gf=lGF(lg), ar=lAvgRat(lg);
+        const pts=w*3+(lPlayed(lg).filter(m=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; const r=m.isHome===false?+p[0]:+p[1]; return ts===r; }).length);
+        const lPosesion = liga => {
+          const vals = lMatches(liga).filter(m=>m.team_stats&&m.team_stats.posesion!=null).map(m=>m.team_stats.posesion);
+          return vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(0) : null;
+        };
+        const draws_count = lPlayed(lg).filter(m=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; const r=m.isHome===false?+p[0]:+p[1]; return ts===r; }).length;
+        const pos = lPosesion(lg);
+        return `<tr>
+          <td><span class="league-badge badge-${lg==='VPN'?'vpn':lg==='VPUG'?'vpug':'e11'}">${lg}</span></td>
+          <td><div class="rank-name">${w}V ${draws_count}E ${pl-w-draws_count}D · ${pl} jugados</div>
+            <div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:${pl?Math.round(w/pl*100):0}%;background:${lColors[lg]}"></div></div></div></td>
+          <td><div class="rank-val" style="color:${lColors[lg]}">${pts}pts</div>
+              <div class="rank-sub">${gf} goles · ${pos!=null?pos+'% pos':'—'} · avg ${ar??'—'}</div></td>
+        </tr>`;
+      }).join('')}</table>
+    </div>`;
+  })();
+
+  // ── Posesión por liga ──────────────────────────────────────
+  const posLigaBlock = (()=>{
+    const ligas = ['VPN','VPUG','11x11'];
+    const lColors = {'VPN':'var(--vpn)','VPUG':'var(--vpug)','11x11':'var(--e11)'};
+    const rows = ligas.map(lg=>{
+      const lm = matches.filter(m=>m.league===lg && m.team_stats && m.team_stats.posesion!=null);
+      if(!lm.length) return null;
+      const avgPos = +(lm.reduce((s,m)=>s+m.team_stats.posesion,0)/lm.length).toFixed(1);
+      const avgEntr = lm.reduce((s,m)=>s+(m.team_stats.entradas||0),0)/lm.length;
+      const avgEntrOk = lm.reduce((s,m)=>s+(m.team_stats.entradas_exito||0),0)/lm.length;
+      const tackPct = avgEntr>0 ? Math.round(avgEntrOk/avgEntr*100) : null;
+      const avgPar = +(lm.reduce((s,m)=>s+(m.team_stats.paradas||0),0)/lm.length).toFixed(1);
+      return {lg, avgPos, tackPct, avgPar, pj:lm.length};
+    }).filter(Boolean);
+    if(!rows.length) return '';
+    return `<div class="season-block full">
+      <div class="sb-header"><span class="sb-icon">🎮</span><h3>Control del juego por liga</h3></div>
+      <table class="rank-table">${rows.map(r=>`<tr>
+        <td><span class="league-badge badge-${r.lg==='VPN'?'vpn':r.lg==='VPUG'?'vpug':'e11'}">${r.lg}</span></td>
+        <td><div class="rank-name">Posesión</div>
+          <div class="rank-bar-wrap"><div class="rank-bar-track">
+            <div class="rank-bar-fill" style="width:${r.avgPos}%;background:${lColors[r.lg]}"></div>
+          </div></div></td>
+        <td><div class="rank-val" style="color:${lColors[r.lg]}">${r.avgPos}%</div>
+            <div class="rank-sub">${r.tackPct!=null?'Tackles '+r.tackPct+'%':''} · ${r.avgPar} paradas · ${r.pj}PJ</div></td>
+      </tr>`).join('')}</table>
+    </div>`;
+  })();
+
   grid.innerHTML =
     teamStatsBlock +
     rankBlock('Goleadores','⚽', players, p=>p.goals,    'goles',    'var(--win)',  p=>`${p.assists} asist · ${p.games} PJ`, 'chartGoals') +
     rankBlock('Rating',    '⭐', players, p=>avg(p.ratings), 'prom', 'var(--gold)', p=>`${p.games} partidos`, 'chartRating') +
     rankBlock('Asistencias','🎯', players, p=>p.assists,  'asist.',   'var(--vpug)', p=>`${p.goals} goles`) +
+    impactoBlock +
+    consistBlock +
+    eficienciaBlock +
+    ligaBlock +
+    posLigaBlock +
     trendBlock +
     resultsHTML;
 
