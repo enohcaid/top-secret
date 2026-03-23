@@ -1214,8 +1214,14 @@ function openEditModal(id){
   const isCascaded = isSusp && !suspended[id].manual;
 
   // Mostrar/ocultar botones según estado
-  document.getElementById('eSuspendBtn').style.display = isSusp ? 'none' : 'block';
-  document.getElementById('eRestoreBtn').style.display = isManual ? 'block' : 'none';
+  // eSuspendBtn: show when NOT suspended (can reschedule)
+  // For cascaded: show "Reprogramar" so they can manually fix the date
+  document.getElementById('eSuspendBtn').style.display = (isSusp && !isCascaded) ? 'none' : 'block';
+  // eRestoreBtn: show for manual suspensions AND cascaded ones
+  document.getElementById('eRestoreBtn').style.display = isSusp ? 'block' : 'none';
+  document.getElementById('eRestoreBtn').textContent = isCascaded
+    ? 'Restaurar fecha del desplazamiento'
+    : 'Restaurar fecha original (deshace cascada)';
 
   // Info de cascada
   let cascadeInfo = document.getElementById('eCascadeInfo');
@@ -1228,7 +1234,7 @@ function openEditModal(id){
   if(isCascaded){
     const sourceId = suspended[id].cascadeFrom;
     const sourceMatch = RAW[sourceId];
-    cascadeInfo.innerHTML = `↪️ Este partido fue desplazado automáticamente por la reprogramación de <b>${sourceMatch.rival}</b>. Para restaurarlo, restaurá ese partido.`;
+    cascadeInfo.innerHTML = `↪️ Desplazado automáticamente por reprogramación de <b>${sourceMatch.rival}</b>. Podés reprogramarlo a otra fecha o restaurarlo.`;
     cascadeInfo.style.display = 'block';
   } else {
     cascadeInfo.style.display = 'none';
@@ -1309,21 +1315,35 @@ function suspendMatch(){
 
 function restoreMatch(){
   if(!suspended[editingId]) return;
+  const isCascaded = !suspended[editingId].manual;
 
-  // Borrar esta suspensión
-  delete suspended[editingId];
-
-  // Borrar todas las suspensiones en cascada que venían de esta
-  Object.keys(suspended).forEach(k => {
-    if(suspended[k].cascadeFrom == editingId && !suspended[k].manual){
-      delete suspended[k];
-    }
-  });
-
-  saveState();
-  closeEditModal();
-  render();
-  showToast('Partido restaurado a fecha original', 'success');
+  if(isCascaded){
+    // For cascaded: just delete the individual suspension, keep it as cascade
+    // Actually restore means go back to the cascade-assigned date (which IS newDate)
+    // User wants to remove any manual override and keep the cascade date
+    // Best: convert to manual suspension at current newDate so it becomes editable
+    suspended[editingId] = {
+      originalDate: suspended[editingId].originalDate,
+      newDate: suspended[editingId].newDate,
+      manual: true
+    };
+    saveState();
+    closeEditModal();
+    render();
+    showToast('Partido fijado en ' + suspended[editingId].newDate + ' (ya no depende de cascada)', 'success');
+  } else {
+    // Manual: remove suspension and all its cascades
+    delete suspended[editingId];
+    Object.keys(suspended).forEach(k => {
+      if(suspended[k].cascadeFrom == editingId && !suspended[k].manual){
+        delete suspended[k];
+      }
+    });
+    saveState();
+    closeEditModal();
+    render();
+    showToast('Partido restaurado a fecha original', 'success');
+  }
 }
 
 // Close on backdrop
