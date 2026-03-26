@@ -473,6 +473,58 @@ const SEED_MATCHES = [
   ]},
 
 
+
+  // Fecha 9 - Sub21 CF - 25 Mar (Local, 1-1, Empate)
+  {rival:'Sub21 CF', league:'VPN', date:'2026-03-25', match_result:'1-1', uploadedAt:'2026-03-25T00:00:00.000Z', notes:'',
+  team_stats:{posesion:60,tiros:3,tiros_arco:null,goles_esperados:0.9,pases:206,precision_pases:83,entradas:19,entradas_exito:6,intercepciones:null,paradas:2,faltas:0,fuera_juego:0,corneres:2,regates_exito:87,precision_tiro:33},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.7, goals:0, assists:1, passes:22, pass_accuracy:73, distance_km:18.6, sprints:null, tackles:1, interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.7, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'ED',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23', matched:'Alexiisraiies23', played_pos:'DFC', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DFD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 10 - Parke Avellane - 25 Mar (Local, 3-1, Victoria)
+  {rival:'Parke Avellane', league:'VPN', date:'2026-03-25', match_result:'3-1', uploadedAt:'2026-03-25T01:00:00.000Z', notes:'',
+  team_stats:{posesion:52,tiros:4,tiros_arco:null,goles_esperados:2.6,pases:189,precision_pases:79,entradas:24,entradas_exito:3,intercepciones:null,paradas:1,faltas:1,fuera_juego:0,corneres:1,regates_exito:92,precision_tiro:75},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:27, pass_accuracy:81, distance_km:18.9, sprints:null, tackles:1, interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:7.1, goals:0, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:8.1, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'ED',  rating:6.7, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:8.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23', matched:'Alexiisraiies23', played_pos:'DFC', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DFD', rating:7.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 10 VPUG - Olimpo eSports - 25 Mar (Visita, 0-1, Derrota)
+  {rival:'Olimpo eSports', league:'VPUG', date:'2026-03-25', match_result:'0-1', uploadedAt:'2026-03-25T02:00:00.000Z', notes:'',
+  team_stats:{posesion:55,tiros:2,tiros_arco:null,goles_esperados:0.5,pases:203,precision_pases:81,entradas:19,entradas_exito:4,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:1,regates_exito:93,precision_tiro:50},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:26, pass_accuracy:69, distance_km:19.4, sprints:null, tackles:0, interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:5.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'ED',  rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'MCD', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23', matched:'Alexiisraiies23', played_pos:'DFC', rating:8.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DFD', rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
