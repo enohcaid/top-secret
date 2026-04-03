@@ -207,7 +207,10 @@ async function loadVPN(){
   try{
     const r=await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-table');
     const j=await r.json();
-    const data=j.map(t=>({
+    // El proxy puede devolver el array directamente o dentro de una propiedad
+    const arr=Array.isArray(j)?j:(j.data||j.table||j.standings||j.teams||null);
+    if(!arr||!Array.isArray(arr)||!arr.length) throw new Error('Formato de respuesta inesperado');
+    const data=arr.map(t=>({
       name:t.team.name, abbr:t.team.short_name||t.team.name.slice(0,3),
       logo:t.team.logoSmallUrl,
       gp:t.gp, w:t.gw, d:t.gt, l:t.gl,
@@ -275,6 +278,12 @@ async function loadVPUG(){
 loadVPN();
 loadE11();
 loadVPUG();
+
+// Auto-refresh cada 3 minutos
+const REFRESH_MS = 3 * 60 * 1000;
+setInterval(loadVPN,  REFRESH_MS);
+setInterval(loadE11,  REFRESH_MS);
+setInterval(loadVPUG, REFRESH_MS);
 </script>
 <script src="nav.js"></script>
 </body>
