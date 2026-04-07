@@ -371,18 +371,32 @@ function renderTops(){
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
+// ── Helpers para SEED_MATCHES ──────────────────────────────────────────────
+function parseSeedResult(m){
+  if(!m.match_result) return null;
+  const p = String(m.match_result).match(/^(\d+)\s*[-]\s*(\d+)$/);
+  return p ? {ts:+p[1], ri:+p[2]} : null;
+}
+function getSeedResult(m){
+  const s = parseSeedResult(m);
+  if(!s) return null;
+  if(s.ts > s.ri) return 'W';
+  if(s.ts < s.ri) return 'L';
+  return 'D';
+}
+
 function renderAll(results={}, edits={}, suspended={}){
-  const MATCHES = buildMatches(results, edits, suspended);
-  const played  = MATCHES.filter(m=>m.result&&!m.free);
-  const wins    = played.filter(m=>getResult(m)==='W').length;
-  const draws   = played.filter(m=>getResult(m)==='D').length;
-  const losses  = played.filter(m=>getResult(m)==='L').length;
-  const gf      = played.reduce((s,m)=>s+(m.isHome?m.result[0]:m.result[1]),0);
-  const pts     = wins*3+draws;
+  // ── Stats y ligas: siempre desde SEED_MATCHES (actualizado) ──
+  const seedPlayed = SEED_MATCHES.filter(m => m.match_result);
+  const wins   = seedPlayed.filter(m=>getSeedResult(m)==='W').length;
+  const draws  = seedPlayed.filter(m=>getSeedResult(m)==='D').length;
+  const losses = seedPlayed.filter(m=>getSeedResult(m)==='L').length;
+  const gf     = seedPlayed.reduce((s,m)=>{ const r=parseSeedResult(m); return s+(r?r.ts:0); },0);
+  const pts    = wins*3+draws;
 
   // Quick stats
   document.getElementById('quickStats').innerHTML = `
-    <div class="qs-card"><div class="qs-val gold">${played.length}</div><div class="qs-lbl">Jugados</div></div>
+    <div class="qs-card"><div class="qs-val gold">${seedPlayed.length}</div><div class="qs-lbl">Jugados</div></div>
     <div class="qs-card"><div class="qs-val green">${wins}</div><div class="qs-lbl">Victorias</div></div>
     <div class="qs-card"><div class="qs-val yellow">${draws}</div><div class="qs-lbl">Empates</div></div>
     <div class="qs-card"><div class="qs-val red">${losses}</div><div class="qs-lbl">Derrotas</div></div>
@@ -390,20 +404,18 @@ function renderAll(results={}, edits={}, suspended={}){
     <div class="qs-card"><div class="qs-val gold">${pts}</div><div class="qs-lbl">Puntos</div></div>
   `;
 
-  // Leagues
+  // Ligas — desde SEED_MATCHES
   const leagueInfo = {
     VPN:    {name:'VPN',   cls:'vpn',  days:'Lun / Mié'},
     VPUG:   {name:'VPUG',  cls:'vpug', days:'Lun – Jue'},
     '11x11':{name:'11x11', cls:'e11',  days:'Mar / Jue'},
   };
   document.getElementById('leaguesGrid').innerHTML = ['VPN','VPUG','11x11'].map(lg=>{
-    const lm  = MATCHES.filter(m=>m.league===lg&&!m.free);
-    const lp  = lm.filter(m=>m.result);
-    const lg_ = lp.filter(m=>getResult(m)==='W').length;
-    const le  = lp.filter(m=>getResult(m)==='D').length;
-    const ll  = lp.filter(m=>getResult(m)==='L').length;
-    const lpts= lg_*3+le;
-    const pending = lm.filter(m=>!m.result).length;
+    const lp   = seedPlayed.filter(m=>m.league===lg);
+    const lg_  = lp.filter(m=>getSeedResult(m)==='W').length;
+    const le   = lp.filter(m=>getSeedResult(m)==='D').length;
+    const ll   = lp.filter(m=>getSeedResult(m)==='L').length;
+    const lpts = lg_*3+le;
     const info = leagueInfo[lg];
     return `
     <div class="league-card ${info.cls}">
@@ -418,11 +430,12 @@ function renderAll(results={}, edits={}, suspended={}){
         <div class="rec-sep">·</div>
         <div class="rec p"><div class="val">${ll}</div><div class="lbl">P</div></div>
       </div>
-      <div class="lc-days">${info.days} · ${lp.length} jugados · ${pending} pendientes</div>
+      <div class="lc-days">${info.days} · ${lp.length} jugados</div>
     </div>`;
   }).join('');
 
-  // Upcoming
+  // ── Próximos partidos: desde RAW + Firestore ──
+  const MATCHES = buildMatches(results, edits, suspended);
   const today = new Date().toISOString().split('T')[0];
   const upcoming = MATCHES
     .filter(m=>!m.free&&!m.result&&m.date>=today)
