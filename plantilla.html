@@ -100,8 +100,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 
 /* LEFT */
 .mleft{padding:16px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:11px;}
-.face-frame{border-radius:10px;border:1px solid var(--border2);overflow:hidden;background:var(--card);height:152px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.face-frame img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.face-frame{border-radius:10px;border:1px solid var(--border2);overflow:hidden;background:var(--card);height:152px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.face-crop{position:relative;width:100%;height:100%;overflow:hidden;}
+.face-crop img{position:absolute;width:437.8px;height:246.2px;left:-223.6px;top:-47.1px;}
 .face-init{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;color:var(--muted2);}
 .info-block{display:flex;flex-direction:column;}
 .irow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
@@ -146,6 +147,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 
 /* RIGHT — body figure */
 .mright{display:flex;align-items:flex-start;justify-content:center;padding:14px 8px;background:rgba(154,163,187,.02);}
+.body-crop{position:relative;width:88px;height:480px;overflow:hidden;border-radius:6px;}
+.body-crop img{position:absolute;width:1116.6px;height:628.1px;left:-240.6px;top:-84.5px;}
+.body-svg-fallback{display:flex;align-items:flex-start;justify-content:center;}
 
 /* LEGEND */
 .pos-legend{max-width:980px;margin:0 auto 20px;padding:0 24px;display:flex;gap:18px;flex-wrap:wrap;}
@@ -226,6 +230,9 @@ footer span{color:var(--sv);}
       <!-- IZQUIERDA: cara + info + medallas -->
       <div class="mleft">
         <div class="face-frame" id="m-face-wrap">
+          <div class="face-crop" id="m-face-crop" style="display:none">
+            <img id="m-face-img" src="" alt="">
+          </div>
           <div class="face-init" id="m-face-init">J</div>
         </div>
         <div class="info-block">
@@ -271,28 +278,33 @@ footer span{color:var(--sv);}
 
       <!-- DERECHA: cuerpo completo -->
       <div class="mright">
-        <svg id="m-body" width="88" height="480" viewBox="0 0 88 480">
-          <circle cx="44" cy="42" r="36" fill="#2a3050"/>
-          <ellipse cx="44" cy="38" rx="21" ry="24" fill="#3a4060"/>
-          <rect x="26" y="22" width="36" height="14" rx="7" fill="#9aa3bb" opacity=".2"/>
-          <circle cx="34" cy="40" r="6" id="ey-l" fill="#b0b8c8"/>
-          <circle cx="54" cy="40" r="6" id="ey-r" fill="#b0b8c8"/>
-          <circle cx="34" cy="40" r="2.8" fill="#090a0e"/>
-          <circle cx="54" cy="40" r="2.8" fill="#090a0e"/>
-          <path d="M35 52 Q44 57 53 52" fill="none" stroke="#9aa3bb" stroke-width="2"/>
-          <rect x="16" y="80" width="56" height="118" rx="11" fill="#1e2a50" id="kit-body"/>
-          <rect x="16" y="80" width="56" height="9" rx="4" fill="#9aa3bb" opacity=".12"/>
-          <rect x="29" y="80" width="30" height="32" fill="#18203a" opacity=".45"/>
-          <text x="44" y="103" text-anchor="middle" font-size="17" font-weight="900" fill="#b0b8c8" font-family="sans-serif" id="kit-num">6</text>
-          <rect x="2" y="80" width="16" height="80" rx="8" fill="#1e2a50" id="arm-l"/>
-          <rect x="70" y="80" width="16" height="80" rx="8" fill="#1e2a50" id="arm-r"/>
-          <rect x="22" y="196" width="19" height="100" rx="9" fill="#18203e" id="leg-l"/>
-          <rect x="47" y="196" width="19" height="100" rx="9" fill="#18203e" id="leg-r"/>
-          <rect x="18" y="278" width="26" height="15" rx="7" fill="#9aa3bb" opacity=".3" id="sock-l"/>
-          <rect x="44" y="278" width="26" height="15" rx="7" fill="#9aa3bb" opacity=".3" id="sock-r"/>
-          <ellipse cx="30" cy="308" rx="18" ry="9" fill="#181820" id="boot-l"/>
-          <ellipse cx="58" cy="308" rx="18" ry="9" fill="#181820" id="boot-r"/>
-        </svg>
+        <div class="body-crop" id="m-body-crop" style="display:none">
+          <img id="m-body-img" src="" alt="">
+        </div>
+        <div class="body-svg-fallback" id="m-body-fallback">
+          <svg id="m-body" width="88" height="480" viewBox="0 0 88 480">
+            <circle cx="44" cy="42" r="36" fill="#2a3050"/>
+            <ellipse cx="44" cy="38" rx="21" ry="24" fill="#3a4060"/>
+            <rect x="26" y="22" width="36" height="14" rx="7" fill="#9aa3bb" opacity=".2"/>
+            <circle cx="34" cy="40" r="6" fill="#b0b8c8"/>
+            <circle cx="54" cy="40" r="6" fill="#b0b8c8"/>
+            <circle cx="34" cy="40" r="2.8" fill="#090a0e"/>
+            <circle cx="54" cy="40" r="2.8" fill="#090a0e"/>
+            <path d="M35 52 Q44 57 53 52" fill="none" stroke="#9aa3bb" stroke-width="2"/>
+            <rect x="16" y="80" width="56" height="118" rx="11" fill="#1e2a50" id="kit-body"/>
+            <rect x="16" y="80" width="56" height="9" rx="4" fill="#9aa3bb" opacity=".12"/>
+            <rect x="29" y="80" width="30" height="32" fill="#18203a" opacity=".45"/>
+            <text x="44" y="103" text-anchor="middle" font-size="17" font-weight="900" fill="#b0b8c8" font-family="sans-serif" id="kit-num">6</text>
+            <rect x="2" y="80" width="16" height="80" rx="8" fill="#1e2a50" id="arm-l"/>
+            <rect x="70" y="80" width="16" height="80" rx="8" fill="#1e2a50" id="arm-r"/>
+            <rect x="22" y="196" width="19" height="100" rx="9" fill="#18203e" id="leg-l"/>
+            <rect x="47" y="196" width="19" height="100" rx="9" fill="#18203e" id="leg-r"/>
+            <rect x="18" y="278" width="26" height="15" rx="7" fill="#9aa3bb" opacity=".3" id="sock-l"/>
+            <rect x="44" y="278" width="26" height="15" rx="7" fill="#9aa3bb" opacity=".3" id="sock-r"/>
+            <ellipse cx="30" cy="308" rx="18" ry="9" fill="#181820" id="boot-l"/>
+            <ellipse cx="58" cy="308" rx="18" ry="9" fill="#181820" id="boot-r"/>
+          </svg>
+        </div>
       </div>
 
     </div>
@@ -435,20 +447,36 @@ function openModal(p, st, medals) {
   document.getElementById('m-arq').textContent = p.arq;
   document.getElementById('m-inspo').textContent = p.inspo || '';
 
-  // Face photo
-  const fw = document.getElementById('m-face-wrap');
-  const fi = document.getElementById('m-face-init');
+  // Face photo — crop to face region of SVG
+  const faceCrop = document.getElementById('m-face-crop');
+  const faceInit = document.getElementById('m-face-init');
+  const faceImg  = document.getElementById('m-face-img');
+  const bodyCrop = document.getElementById('m-body-crop');
+  const bodyFallback = document.getElementById('m-body-fallback');
+  const bodyImg  = document.getElementById('m-body-img');
+
   if (p.photo) {
-    fi.style.display = 'none';
-    let img = fw.querySelector('img');
-    if (!img) { img = document.createElement('img'); fw.appendChild(img); }
-    img.src = p.photo; img.alt = p.key;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;';
+    faceImg.src = p.photo;
+    bodyImg.src = p.photo;
+    faceCrop.style.display = 'block';
+    faceInit.style.display = 'none';
+    bodyCrop.style.display = 'block';
+    bodyFallback.style.display = 'none';
   } else {
-    fi.style.display = '';
-    fi.textContent = p.key.charAt(0).toUpperCase();
-    const img = fw.querySelector('img');
-    if (img) img.remove();
+    faceCrop.style.display = 'none';
+    faceInit.style.display = '';
+    faceInit.textContent = p.key.charAt(0).toUpperCase();
+    bodyCrop.style.display = 'none';
+    bodyFallback.style.display = 'flex';
+    const kb = document.getElementById('kit-body');
+    const al = document.getElementById('arm-l');
+    const ar = document.getElementById('arm-r');
+    const kc = KIT_COLORS[p.pos] || KIT_COLORS.MED;
+    if(kb) kb.setAttribute('fill', kc);
+    if(al) al.setAttribute('fill', kc);
+    if(ar) ar.setAttribute('fill', kc);
+    const kn = document.getElementById('kit-num');
+    if(kn) kn.textContent = p.num;
   }
 
   // Rendimiento
@@ -471,10 +499,6 @@ function openModal(p, st, medals) {
   document.getElementById('m-total').textContent = p.total;
   document.getElementById('m-tbar').style.width = Math.round(p.total/396*100) + '%';
 
-  // Kit color
-  const kc = KIT_COLORS[p.pos] || KIT_COLORS.MED;
-  ['kit-body','arm-l','arm-r'].forEach(id => document.getElementById(id)?.setAttribute('fill', kc));
-  document.getElementById('kit-num').textContent = p.num;
 
   // Medals
   const ml = document.getElementById('m-medals');
