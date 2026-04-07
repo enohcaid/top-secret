@@ -62,7 +62,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 .pcard.hidden{display:none;}
 
 .pcard-avatar{width:68px;height:68px;border-radius:50%;border:2px solid var(--border2);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--card2);margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:900;color:var(--muted2);flex-shrink:0;}
-.pcard-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.pcard-avatar{overflow:hidden;position:relative;}
+.av-crop{position:relative;width:100%;height:100%;overflow:hidden;}
+.av-crop img{position:absolute;}
 .pcard.POR .pcard-avatar{border-color:rgba(200,207,80,.45);color:var(--POR);}
 .pcard.DEF .pcard-avatar{border-color:rgba(122,154,184,.45);color:var(--DEF);}
 .pcard.MED .pcard-avatar{border-color:rgba(154,163,187,.45);color:var(--MED);}
@@ -96,7 +98,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 .mclose:hover{color:var(--text);border-color:var(--sv);}
 
 /* MODAL BODY — 3 columns */
-.mbody{display:grid;grid-template-columns:196px 1fr 96px;min-height:480px;}
+.mbody{display:grid;grid-template-columns:196px 1fr 170px;min-height:480px;}
 
 /* LEFT */
 .mleft{padding:16px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:11px;}
@@ -147,8 +149,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 
 /* RIGHT — body figure */
 .mright{display:flex;align-items:flex-start;justify-content:center;padding:14px 8px;background:rgba(154,163,187,.02);}
-.body-crop{position:relative;width:88px;height:480px;overflow:hidden;border-radius:6px;}
-.body-crop img{position:absolute;width:1116.6px;height:628.1px;left:-240.6px;top:-84.5px;}
+.body-crop{position:relative;width:150px;height:480px;overflow:hidden;border-radius:6px;}
+.body-crop img{position:absolute;}
 .body-svg-fallback{display:flex;align-items:flex-start;justify-content:center;}
 
 /* LEGEND */
@@ -318,6 +320,21 @@ footer span{color:var(--sv);}
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
 
+/* ─── PER-PLAYER CROP DATA (computed from SVG clip paths) ─── */
+const CROP_DATA = {
+  'Agubostero7':    {face:{iW:436.9,iH:245.7,oX:199.5,oY:49.8}, av:{iW:195.4,iH:109.9,oX:92.0,oY:22.3}, body:{iW:1076.6,iH:605.6,oX:187.1,oY:60.6}},
+  'Alexiisraiies23':{face:{iW:437.8,iH:246.2,oX:204.2,oY:47.1}, av:{iW:195.8,iH:110.2,oX:94.0,oY:21.1}, body:{iW:1098.9,iH:618.1,oX:179.5,oY:61.8}},
+  'BlackPanther-CG':{face:{iW:437.8,iH:246.2,oX:207.1,oY:47.1}, av:{iW:195.8,iH:110.2,oX:95.3,oY:21.1}, body:{iW:1167.6,iH:656.8,oX:226.2,oY:88.4}},
+  'CipriMancini':   {face:{iW:437.8,iH:246.2,oX:232.0,oY:47.1}, av:{iW:195.8,iH:110.2,oX:106.5,oY:21.1},body:{iW:1090.2,iH:613.2,oX:243.4,oY:66.6}},
+  'Guiidow':        {face:{iW:437.8,iH:246.2,oX:229.6,oY:47.1}, av:{iW:195.8,iH:110.2,oX:105.4,oY:21.1},body:{iW:1171.5,iH:659.0,oX:259.8,oY:89.5}},
+  'Juan_Martinez4': {face:{iW:362.4,iH:203.8,oX:152.0,oY:25.9}, av:{iW:162.1,iH:91.2,oX:70.7,oY:11.6},  body:{iW:1068.3,iH:600.9,oX:142.0,oY:60.8}},
+  'Lautavester7':   {face:{iW:437.8,iH:246.2,oX:238.1,oY:47.1}, av:{iW:195.8,iH:110.2,oX:109.2,oY:21.1},body:{iW:1204.2,iH:677.4,oX:276.6,oY:98.7}},
+  'Woolfyboyzx2':   {face:{iW:437.8,iH:246.2,oX:217.7,oY:47.1}, av:{iW:195.8,iH:110.2,oX:100.1,oY:21.1},body:{iW:1114.8,iH:627.1,oX:209.1,oY:84.4}},
+  'Zurdo-_CABJ12':  {face:{iW:437.8,iH:246.2,oX:212.9,oY:47.1}, av:{iW:195.8,iH:110.2,oX:97.9,oY:21.1}, body:{iW:1083.4,iH:609.4,oX:178.2,oY:68.5}},
+  'cansitrGd22_':   {face:{iW:437.8,iH:246.2,oX:213.2,oY:47.1}, av:{iW:195.8,iH:110.2,oX:98.1,oY:21.1}, body:{iW:1088.5,iH:612.3,oX:183.9,oY:65.8}},
+  'zPibu__':        {face:{iW:437.8,iH:246.2,oX:211.7,oY:47.1}, av:{iW:195.8,iH:110.2,oX:97.4,oY:21.1}, body:{iW:976.3,iH:549.2,oX:169.4,oY:34.6}},
+};
+
 /* ─── ROSTER ─── */
 const ROSTER = [
   {key:'Woolfyboyzx2',   pos:'POR', posn:'Portero',          num:'1',  nvl:'88',  arq:'Paragoles', inspo:'Oliver Kahn', build:'Octopus',
@@ -415,13 +432,14 @@ function renderGrid(allStats, rankings, filter) {
     card.className = 'pcard ' + p.pos;
     card.onclick = () => openModal(p, st, rankings[p.key]||[]);
 
-    const avatarHtml = p.photo
-      ? `<img src="${p.photo}" alt="${p.key}">`
+    const cd = p.photo ? CROP_DATA[p.key] : null;
+    const avatarHtml = cd
+      ? `<div class="av-crop"><img src="${p.photo}" style="width:${cd.av.iW}px;height:${cd.av.iH}px;left:-${cd.av.oX}px;top:-${cd.av.oY}px;"></div>`
       : p.key.charAt(0).toUpperCase();
 
     card.innerHTML = `
       <div class="pcard-avatar" style="position:relative">
-        ${p.photo ? `<img src="${p.photo}" alt="${p.key}">` : p.key.charAt(0).toUpperCase()}
+        ${avatarHtml}
         <div class="pcard-num">${p.num}</div>
       </div>
       <div class="pcard-name">${p.key}</div>
@@ -454,10 +472,13 @@ function openModal(p, st, medals) {
   const bodyCrop = document.getElementById('m-body-crop');
   const bodyFallback = document.getElementById('m-body-fallback');
   const bodyImg  = document.getElementById('m-body-img');
+  const cd = p.photo ? CROP_DATA[p.key] : null;
 
-  if (p.photo) {
+  if (p.photo && cd) {
     faceImg.src = p.photo;
+    faceImg.style.cssText = `width:${cd.face.iW}px;height:${cd.face.iH}px;left:-${cd.face.oX}px;top:-${cd.face.oY}px;`;
     bodyImg.src = p.photo;
+    bodyImg.style.cssText = `width:${cd.body.iW}px;height:${cd.body.iH}px;left:-${cd.body.oX}px;top:-${cd.body.oY}px;`;
     faceCrop.style.display = 'block';
     faceInit.style.display = 'none';
     bodyCrop.style.display = 'block';
