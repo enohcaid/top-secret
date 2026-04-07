@@ -212,83 +212,70 @@ const db  = getFirestore(app);
 const CAL_DOC = doc(db, 'calendario', 'estado');
 
 const RAW = [
-  {date:'2026-03-02',time:'22:30',league:'VPUG', rival:'Suda eSports',        isHome:true,  result:[2,0]},
-  {date:'2026-03-03',time:'22:30',league:'VPUG', rival:'Team Valhalla',       isHome:false, result:[0,5]},
+  // ══ SEMANA 2-5 MARZO ══
+  {date:'2026-03-02',time:'22:30',league:'VPUG', rival:'Suda eSports',       isHome:true,  result:[2,0]},
+  {date:'2026-03-03',time:'22:30',league:'VPUG', rival:'Team Valhalla',      isHome:false, result:[0,5]},
   {date:'2026-03-03',time:'23:00',league:'11x11',rival:'Instituto Reserva',   isHome:false, result:[0,3]},
   {date:'2026-03-03',time:'23:30',league:'11x11',rival:'Los Picantes Esports',isHome:true,  result:[7,0]},
-  {date:'2026-03-04',time:'22:30',league:'VPUG', rival:'La Unión FC',         isHome:true,  result:[8,1]},
-  {date:'2026-03-05',time:'22:30',league:'VPUG', rival:'Ferro eSports',       isHome:false, result:[0,1]},
+  {date:'2026-03-04',time:'22:30',league:'VPUG', rival:'La Unión FC',        isHome:true,  result:[8,1]},
+  {date:'2026-03-05',time:'22:30',league:'VPUG', rival:'Ferro eSports',      isHome:false, result:[0,1]},
   {date:'2026-03-05',time:'23:00',league:'11x11',rival:'Talleres Cantera',    isHome:true,  result:[6,0]},
   {date:'2026-03-05',time:'23:30',league:'11x11',rival:'Instituto Senior',    isHome:true,  result:[6,0]},
-  {date:'2026-03-09',time:'23:00',league:'VPN',  rival:'Los Lesionados',      isHome:true,  result:null},
-  {date:'2026-03-09',time:'23:30',league:'VPN',  rival:'Olimpo Esports',      isHome:false, result:null},
-  {date:'2026-03-10',time:'23:00',league:'11x11',rival:'Talleres Reserva',    isHome:true,  result:null},
+  // ══ SEMANA 9-12 MARZO ══
+  {date:'2026-03-09',time:'23:00',league:'VPN',  rival:'Los Lesionados',    isHome:true,  result:null},
+  {date:'2026-03-09',time:'23:30',league:'VPN',  rival:'Olimpo Esports',     isHome:false, result:null},
+  {date:'2026-03-10',time:'23:00',league:'11x11',rival:'Talleres Reserva',   isHome:true,  result:null},
   {date:'2026-03-10',time:'23:30',league:'11x11',rival:'Estudiantes Río Cuarto',isHome:true,result:null},
-  {date:'2026-03-11',time:'23:00',league:'VPN',  rival:'Suda Esports',        isHome:true,  result:null},
-  {date:'2026-03-11',time:'23:30',league:'VPN',  rival:'4BDOMIFL4NES',        isHome:false, result:null},
-  {date:'2026-03-12',time:'23:00',league:'11x11',rival:'Escuela Vieja',       isHome:false, result:null},
-  {date:'2026-03-12',time:'23:30',league:'11x11',rival:'Team Valhalla',       isHome:false, result:null},
-  {date:'2026-03-09',time:'22:30',league:'VPUG', rival:'I.A.C.C Cantera',     isHome:true,  result:null},
-  {date:'2026-03-16',time:'23:00',league:'VPN',  rival:'All Boys',            isHome:true,  result:null},
-  {date:'2026-03-16',time:'23:30',league:'VPN',  rival:'FERRO',               isHome:false, result:null},
-  {date:'2026-03-10',time:'22:30',league:'VPUG', rival:'Evermeet Rising',     isHome:false, result:null},
-  {date:'2026-03-17',time:'23:00',league:'11x11',rival:'Deportivo Ballester', isHome:false, result:null},
-  {date:'2026-03-17',time:'23:30',league:'11x11',rival:'Olimpo Esports',      isHome:true,  result:null},
-  {date:'2026-03-11',time:'22:30',league:'VPUG', rival:'Team Ceniza',         isHome:true,  result:null},
-  {date:'2026-03-18',time:'23:00',league:'VPN',  rival:'La Resaca',           isHome:true,  result:null},
+  {date:'2026-03-11',time:'23:00',league:'VPN',  rival:'Suda Esports',       isHome:true,  result:null},
+  {date:'2026-03-11',time:'23:30',league:'VPN',  rival:'4BDOMIFL4NES',       isHome:false, result:null},
+  {date:'2026-03-12',time:'23:00',league:'11x11',rival:'Escuela Vieja',      isHome:false, result:null},
+  {date:'2026-03-12',time:'23:30',league:'11x11',rival:'Team Valhalla',      isHome:false, result:null},
+  // ══ SEMANA 16-19 MARZO ══
+  {date:'2026-03-09',time:'22:30',league:'VPUG', rival:'I.A.C.C Cantera',    isHome:true,  result:null},
+  {date:'2026-03-16',time:'23:00',league:'VPN',  rival:'All Boys',           isHome:true,  result:null},
+  {date:'2026-03-16',time:'23:30',league:'VPN',  rival:'FERRO',              isHome:false, result:null},
+  {date:'2026-03-10',time:'22:30',league:'VPUG', rival:'Evermeet Rising',    isHome:false, result:null},
+  {date:'2026-03-17',time:'23:00',league:'11x11',rival:'Deportivo Ballester',isHome:false, result:null},
+  {date:'2026-03-17',time:'23:30',league:'11x11',rival:'Olimpo Esports',     isHome:true,  result:null},
+  {date:'2026-03-11',time:'22:30',league:'VPUG', rival:'Team Ceniza',    isHome:true,  result:null},
+  {date:'2026-03-18',time:'23:00',league:'VPN',  rival:'La Resaca',          isHome:true,  result:null},
   {date:'2026-03-18',time:'23:30',league:'VPN',  rival:'Almirante Brown eSport',isHome:false,result:null},
-  {date:'2026-03-12',time:'22:30',league:'VPUG', rival:'Real Marcianos FC',   isHome:false, result:null},
-  {date:'2026-03-19',time:'23:00',league:'11x11',rival:'Acosta Beef Esports', isHome:false, result:null},
-  {date:'2026-03-19',time:'23:30',league:'11x11',rival:'IACC Cantera',        isHome:false, result:null},
-  {date:'2026-03-23',time:'23:00',league:'VPN',  rival:'FECHA LIBRE',         isHome:null,  result:null, free:true},
-  {date:'2026-03-23',time:'23:30',league:'VPN',  rival:'FECHA LIBRE',         isHome:null,  result:null, free:true},
-  {date:'2026-03-16',time:'22:30',league:'VPUG', rival:'Germinal eSports',    isHome:true,  result:null},
-  {date:'2026-03-24',time:'23:00',league:'11x11',rival:'Altoke Perro',        isHome:false, result:null},
-  {date:'2026-03-24',time:'23:30',league:'11x11',rival:'All Boys',            isHome:true,  result:null},
-  {date:'2026-03-17',time:'22:30',league:'VPUG', rival:'Olimpo eSports',      isHome:true,  result:null},
-  {date:'2026-03-25',time:'23:00',league:'VPN',  rival:'SUB 21CF',            isHome:true,  result:null},
-  {date:'2026-03-25',time:'23:30',league:'VPN',  rival:'Parke Avellaneda',    isHome:true,  result:null},
-  {date:'2026-03-18',time:'22:30',league:'VPUG', rival:'DeLa Nada FC',        isHome:false, result:null},
-  {date:'2026-03-26',time:'23:00',league:'11x11',rival:'ROKA56',              isHome:false, result:null},
-  {date:'2026-03-26',time:'23:30',league:'11x11',rival:'Cambaceres',          isHome:true,  result:null},
-  {date:'2026-03-19',time:'22:30',league:'VPUG', rival:'Villa Dalmine eSp',   isHome:true,  result:null},
+  {date:'2026-03-12',time:'22:30',league:'VPUG', rival:'Real Marcianos FC',  isHome:false, result:null},
+  {date:'2026-03-19',time:'23:00',league:'11x11',rival:'Acosta Beef Esports',isHome:false, result:null},
+  {date:'2026-03-19',time:'23:30',league:'11x11',rival:'IACC Cantera',       isHome:false, result:null},
+  // ══ SEMANA 23-26 MARZO ══
+  {date:'2026-03-23',time:'23:00',league:'VPN',  rival:'FECHA LIBRE',       isHome:null, result:null, free:true},
+  {date:'2026-03-23',time:'23:30',league:'VPN',  rival:'FECHA LIBRE',       isHome:null, result:null, free:true},
+  {date:'2026-03-16',time:'22:30',league:'VPUG', rival:'Germinal eSports',   isHome:true,  result:null},
+  {date:'2026-03-24',time:'23:00',league:'11x11',rival:'Altoke Perro',       isHome:false, result:null},
+  {date:'2026-03-24',time:'23:30',league:'11x11',rival:'All Boys',           isHome:true,  result:null},
+  {date:'2026-03-17',time:'22:30',league:'VPUG', rival:'Olimpo eSports',     isHome:true,  result:null},
+  {date:'2026-03-25',time:'23:00',league:'VPN',  rival:'SUB 21CF',           isHome:true,  result:null},
+  {date:'2026-03-25',time:'23:30',league:'VPN',  rival:'Parke Avellaneda',   isHome:true,  result:null},
+  {date:'2026-03-18',time:'22:30',league:'VPUG', rival:'DeLa Nada FC',       isHome:false, result:null},
+  {date:'2026-03-26',time:'23:00',league:'11x11',rival:'ROKA56',             isHome:false, result:null},
+  {date:'2026-03-26',time:'23:30',league:'11x11',rival:'Cambaceres',         isHome:true,  result:null},
+  // ══ SEMANA 30 MAR - 2 ABR ══
+  {date:'2026-03-19',time:'22:30',league:'VPUG', rival:'Villa Dalmine eSp',  isHome:true,  result:null},
   {date:'2026-03-30',time:'23:00',league:'VPN',  rival:'Nueva Chicago eSports',isHome:false,result:null},
-  {date:'2026-03-30',time:'23:30',league:'VPN',  rival:'Instituto Reserva',   isHome:false, result:null},
-  {date:'2026-03-23',time:'22:30',league:'VPUG', rival:'Evermeet Rising',     isHome:true,  result:null},
-  {date:'2026-03-31',time:'23:00',league:'11x11',rival:'Acosta Beef Esports', isHome:true,  result:null},
-  {date:'2026-03-31',time:'23:30',league:'11x11',rival:'Deportivo Español',   isHome:false, result:null},
-  {date:'2026-03-24',time:'22:30',league:'VPUG', rival:'La Unión FC',         isHome:false, result:null},
-  {date:'2026-04-01',time:'23:00',league:'VPN',  rival:'Villa Crespo FC',     isHome:true,  result:null},
-  {date:'2026-04-01',time:'23:30',league:'VPN',  rival:'CARP jr',             isHome:false, result:null},
-  {date:'2026-03-25',time:'22:30',league:'VPUG', rival:'Ferro eSports',       isHome:true,  result:null},
-  {date:'2026-04-02',time:'23:00',league:'11x11',rival:'All Boys',            isHome:false, result:null},
-  {date:'2026-04-02',time:'23:30',league:'11x11',rival:'Olimpo Esports',      isHome:false, result:null},
-  {date:'2026-03-26',time:'22:30',league:'VPUG', rival:'Suda eSports',        isHome:false, result:null},
-  {date:'2026-04-06',time:'23:00',league:'VPN',  rival:'Excursionistas',      isHome:true,  result:null},
-  {date:'2026-04-06',time:'23:30',league:'VPN',  rival:'Los Lesionados',      isHome:false, result:null},
-  {date:'2026-03-30',time:'22:30',league:'VPUG', rival:'Team Valhalla',       isHome:true,  result:null},
-  {date:'2026-04-07',time:'23:00',league:'11x11',rival:'Los Picantes Esports',isHome:false, result:null},
-  {date:'2026-04-07',time:'23:30',league:'11x11',rival:'Instituto Reserva',   isHome:true,  result:null},
-  {date:'2026-03-31',time:'22:30',league:'VPUG', rival:'I.A.C.C Cantera',     isHome:false, result:null},
-  {date:'2026-04-08',time:'23:00',league:'VPN',  rival:'Olimpo Esports',      isHome:true,  result:null},
-  {date:'2026-04-08',time:'23:30',league:'VPN',  rival:'Suda Esports',        isHome:false, result:null},
-  {date:'2026-04-01',time:'22:30',league:'VPUG', rival:'Germinal eSports',    isHome:false, result:null},
-  {date:'2026-04-09',time:'23:00',league:'11x11',rival:'Talleres Cantera',    isHome:false, result:null},
-  {date:'2026-04-09',time:'23:30',league:'11x11',rival:'Instituto Senior',    isHome:false, result:null},
-  {date:'2026-04-02',time:'22:30',league:'VPUG', rival:'Real Marcianos FC',   isHome:true,  result:null},
-  {date:'2026-04-13',time:'23:00',league:'VPN',  rival:'4BDOMIFL4NES',        isHome:true,  result:null},
-  {date:'2026-04-13',time:'23:30',league:'VPN',  rival:'All Boys',            isHome:false, result:null},
-  {date:'2026-04-06',time:'22:30',league:'VPUG', rival:'Team Ceniza',         isHome:false, result:null},
-  {date:'2026-04-14',time:'23:00',league:'11x11',rival:'Talleres Reserva',    isHome:false, result:null},
-  {date:'2026-04-14',time:'23:30',league:'11x11',rival:'Estudiantes Río Cuarto',isHome:false,result:null},
-  {date:'2026-04-07',time:'22:30',league:'VPUG', rival:'DeLa Nada FC',        isHome:true,  result:null},
-  {date:'2026-04-15',time:'23:00',league:'VPN',  rival:'FERRO',               isHome:true,  result:null},
-  {date:'2026-04-15',time:'23:30',league:'VPN',  rival:'La Resaca',           isHome:false, result:null},
-  {date:'2026-04-08',time:'22:30',league:'VPUG', rival:'Villa Dalmine eSp',   isHome:false, result:null},
-  {date:'2026-04-16',time:'23:00',league:'11x11',rival:'Escuela Vieja',       isHome:true,  result:null},
-  {date:'2026-04-16',time:'23:30',league:'11x11',rival:'Team Valhalla',       isHome:true,  result:null},
+  {date:'2026-03-30',time:'23:30',league:'VPN',  rival:'Instituto Reserva',  isHome:false, result:null},
+  {date:'2026-03-23',time:'22:30',league:'VPUG', rival:'Atletico Titan',     isHome:false, result:null},
+  {date:'2026-03-31',time:'23:00',league:'11x11',rival:'4BDOMIFL4NES',       isHome:true,  result:null},
+  {date:'2026-03-31',time:'23:30',league:'11x11',rival:'Camioneros Esports', isHome:true,  result:null},
+  {date:'2026-03-24',time:'22:30',league:'VPUG', rival:'Belgrano eSports',   isHome:true,  result:null},
+  {date:'2026-04-01',time:'23:00',league:'VPN',  rival:'Team Caniza',        isHome:false, result:null},
+  {date:'2026-04-01',time:'23:30',league:'VPN',  rival:'Instituto Cantera',  isHome:true,  result:null},
+  {date:'2026-03-25',time:'22:30',league:'VPUG', rival:'Almirante Brown eSp',isHome:false, result:null},
+  {date:'2026-04-02',time:'23:00',league:'11x11',rival:'Sub 21 CF',          isHome:false, result:null},
+  {date:'2026-04-02',time:'23:30',league:'11x11',rival:'Ferro',              isHome:false, result:null},
+  // ══ SEMANA 6-9 ABR ══
+  {date:'2026-04-06',time:'23:00',league:'VPN',  rival:'Infinitx',           isHome:false, result:null},
+  {date:'2026-04-06',time:'23:30',league:'VPN',  rival:'Lirico FC',          isHome:true,  result:null},
+  {date:'2026-04-02',time:'23:50',league:'11x11',rival:'Suda ESP',           isHome:false, result:null},
+  {date:'2026-04-08',time:'23:00',league:'VPN',  rival:'Deportivo Ballester',isHome:false, result:null},
+  {date:'2026-04-08',time:'23:30',league:'VPN',  rival:'Villa Dalmine Esports',isHome:false,result:null},
+  {date:'2026-04-08',time:'23:50',league:'VPN',  rival:'Camioneros eSports', isHome:false, result:null},
 ];
-
 
 // ── TOPS: calculado dinámicamente desde seed_matches.js ──────────────────────
 import { SEED_MATCHES } from './seed_matches.js';
@@ -360,21 +347,14 @@ const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 function buildMatches(results={}, edits={}, suspended={}){
+  // Idéntico a getMatch() de calendario.html
+  // Firestore serializa claves como strings
   return RAW.map((m,i)=>{
-    const base=Object.assign({},m);
-    // Edits pueden incluir cambios de fecha/hora (reprogramaciones)
-    if(edits[i])     Object.assign(base,edits[i]);
-    if(edits[String(i)]) Object.assign(base,edits[String(i)]);
-    // Suspended: reprogramación guardada como {newDate, newTime}
-    const susp = suspended[i] || suspended[String(i)];
-    if(susp){
-      if(susp.newDate) base.date = susp.newDate;
-      if(susp.newTime) base.time = susp.newTime;
-      if(susp.newRival) base.rival = susp.newRival;
-    }
-    // Resultado del partido
-    const res = results[i] || results[String(i)];
-    if(res) base.result = res;
+    const base = Object.assign({}, m);
+    const sid  = String(i);
+    if(edits[sid])     Object.assign(base, edits[sid]);
+    if(suspended[sid]) base.date = suspended[sid].newDate;
+    if(results[sid])   base.result = results[sid];
     return base;
   });
 }
