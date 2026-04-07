@@ -362,9 +362,19 @@ const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov
 function buildMatches(results={}, edits={}, suspended={}){
   return RAW.map((m,i)=>{
     const base=Object.assign({},m);
+    // Edits pueden incluir cambios de fecha/hora (reprogramaciones)
     if(edits[i])     Object.assign(base,edits[i]);
-    if(suspended[i]) base.date=suspended[i].newDate;
-    if(results[i])   base.result=results[i];
+    if(edits[String(i)]) Object.assign(base,edits[String(i)]);
+    // Suspended: reprogramación guardada como {newDate, newTime}
+    const susp = suspended[i] || suspended[String(i)];
+    if(susp){
+      if(susp.newDate) base.date = susp.newDate;
+      if(susp.newTime) base.time = susp.newTime;
+      if(susp.newRival) base.rival = susp.newRival;
+    }
+    // Resultado del partido
+    const res = results[i] || results[String(i)];
+    if(res) base.result = res;
     return base;
   });
 }
@@ -414,7 +424,7 @@ function getSeedResult(m){
   return 'D';
 }
 
-function renderAll(results={}, edits={}, suspended={}){
+function renderAll(results={}, edits={}, suspended={}, fixtureOverride=null){
   // ── Stats y ligas: siempre desde SEED_MATCHES (actualizado) ──
   const seedPlayed = SEED_MATCHES.filter(m => m.match_result);
   const wins   = seedPlayed.filter(m=>getSeedResult(m)==='W').length;
@@ -463,8 +473,13 @@ function renderAll(results={}, edits={}, suspended={}){
     </div>`;
   }).join('');
 
-  // ── Próximos partidos: desde RAW + Firestore ──
-  const MATCHES = buildMatches(results, edits, suspended);
+  // ── Próximos partidos ──
+  // Prioridad: fixture completo guardado por el calendario en Firestore,
+  // luego buildMatches aplicando edits/suspended sobre el RAW local
+  const MATCHES = (fixtureOverride && fixtureOverride.length)
+    ? fixtureOverride
+    : buildMatches(results, edits, suspended);
+
   const today = new Date().toISOString().split('T')[0];
   const upcoming = MATCHES
     .filter(m=>!m.free&&!m.result&&m.date>=today)
@@ -489,7 +504,9 @@ renderTops();
 renderAll();
 onSnapshot(CAL_DOC, snap=>{
   const d = snap.exists() ? snap.data() : {};
-  renderAll(d.results||{}, d.edits||{}, d.suspended||{});
+  // Buscar el fixture completo bajo cualquier nombre que use calendario.html
+  const fixture = d.partidos || d.fixture || d.matches || d.schedule || null;
+  renderAll(d.results||{}, d.edits||{}, d.suspended||{}, fixture);
 });
 </script>
 <script src="nav.js"></script>
