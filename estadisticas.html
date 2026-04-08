@@ -2886,71 +2886,126 @@ async function ceaFetch(path) {
   }
 }
 
+// Plataformas a probar en orden
+const CEA_PLATFORMS_ORDER = ['common-gen5', 'ps4', 'pc'];
+const CEA_CLUB_NAME = 'Top Secret';   // nombre de búsqueda
+
+function ceaSetStatus(msg) {
+  const el = document.getElementById('ceaMain');
+  el.innerHTML = `<div class="cea-loading"><div class="spinner"></div><div style="font-size:.85rem">${msg}</div></div>`;
+}
+
 async function ceaLoad() {
   const el = document.getElementById('ceaMain');
-  el.innerHTML = `<div class="cea-loading"><div class="spinner"></div><div style="font-size:.85rem">Conectando con Worker proxy...</div></div>`;
+  ceaSetStatus('Conectando con Worker proxy...');
 
-  // Primero diagnosticamos qué está fallando
+  // 1 — verificar que el Worker tiene la ruta /ea
   const diagnosis = await ceaDiagnoseWorker();
+  if (diagnosis !== 'ok') { el.innerHTML = ceaErrorHTML(diagnosis); return; }
 
-  if (diagnosis !== 'ok') {
-    el.innerHTML = ceaErrorHTML(diagnosis);
-    return;
+  ceaSetStatus('Worker OK · Buscando club en EA Sports...');
+
+  // 2 — buscar el club por nombre para confirmar el ID real de EA
+  let resolvedId   = CEA_CLUB_ID;
+  let resolvedPlat = ceaPlatform;
+  let foundViaSearch = false;
+
+  const platforms = ceaPlatform === 'common-gen5'
+    ? CEA_PLATFORMS_ORDER
+    : [ceaPlatform, ...CEA_PLATFORMS_ORDER.filter(p => p !== ceaPlatform)];
+
+  for (const plat of platforms) {
+    try {
+      const searchPath = `clubs/search?platform=${plat}&clubName=${encodeURIComponent(CEA_CLUB_NAME)}`;
+      const results = await ceaFetch(searchPath);
+      if (results && results.error) continue;
+      const list = Array.isArray(results) ? results : (results?.clubs || []);
+      // Buscar coincidencia exacta o la que contenga nuestro ID
+      const match = list.find(c =>
+        String(c.clubId) === String(CEA_CLUB_ID) ||
+        (c.name || '').toLowerCase().includes('top secret')
+      );
+      if (match) {
+        resolvedId   = String(match.clubId);
+        resolvedPlat = plat;
+        foundViaSearch = true;
+        console.log(`[ClubEA] Club encontrado: ID=${resolvedId} plat=${resolvedPlat}`, match);
+        break;
+      }
+    } catch(e) {
+      console.warn('[ClubEA] search failed on', plat, e.message);
+    }
   }
 
-  el.innerHTML = `<div class="cea-loading"><div class="spinner"></div><div style="font-size:.85rem">Worker conectado · Cargando stats de EA Sports...</div></div>`;
+  if (!foundViaSearch) {
+    // No encontramos via búsqueda — igual intentamos con el ID hardcodeado en cada plataforma
+    console.warn('[ClubEA] Club no encontrado por nombre, usando ID hardcodeado:', resolvedId);
+  }
 
+  ceaSetStatus(foundViaSearch
+    ? `Club encontrado (ID ${resolvedId} · ${resolvedPlat}) · Cargando stats...`
+    : `Usando ID ${resolvedId} · Intentando cargar stats...`
+  );
+
+  // 3 — cargar los 3 endpoints en paralelo
   try {
     const [overallRes, membersRes, matchesRes] = await Promise.allSettled([
-      ceaFetch(`clubs/overallStats?platform=${ceaPlatform}&clubIds=${CEA_CLUB_ID}`),
-      ceaFetch(`clubs/members/stats?platform=${ceaPlatform}&clubId=${CEA_CLUB_ID}`),
-      ceaFetch(`clubs/matches?matchType=gameType9&platform=${ceaPlatform}&clubIds=${CEA_CLUB_ID}`)
+      ceaFetch(`clubs/overallStats?platform=${resolvedPlat}&clubIds=${resolvedId}`),
+      ceaFetch(`clubs/members/stats?platform=${resolvedPlat}&clubId=${resolvedId}`),
+      ceaFetch(`clubs/matches?matchType=gameType9&platform=${resolvedPlat}&clubIds=${resolvedId}`)
     ]);
 
-    const overall = overallRes.status === 'fulfilled' ? overallRes.value : null;
-    const members = membersRes.status === 'fulfilled' ? membersRes.value : null;
-    const matches = matchesRes.status === 'fulfilled' ? matchesRes.value : null;
+    const overall = overallRes.status === 'fulfilled' && !overallRes.value?.error ? overallRes.value : null;
+    const members = membersRes.status === 'fulfilled' && !membersRes.value?.error ? membersRes.value : null;
+    const matches = matchesRes.status === 'fulfilled' && !matchesRes.value?.error ? matchesRes.value : null;
 
     console.log('[ClubEA] overall:', overall, '| members:', members, '| matches:', matches);
 
     if (!overall && !members && !matches) {
-      // Worker responde pero EA devuelve vacío — posible bloqueo o club ID incorrecto
-      el.innerHTML = ceaErrorHTML('ea-blocked');
+      // Mostrar detalles del error para diagnosticar
+      const preview = [overallRes, membersRes, matchesRes]
+        .filter(r => r.status === 'fulfilled')
+        .map(r => r.value?.preview || r.value?.error || '')
+        .filter(Boolean)[0] || 'Sin respuesta';
+      el.innerHTML = ceaErrorHTML('ea-blocked', preview, resolvedId, resolvedPlat);
       return;
     }
-    ceaRender(overall, members, matches);
+    ceaRender(overall, members, matches, resolvedId, resolvedPlat);
   } catch(e) {
     console.warn('[ClubEA] load error:', e);
-    el.innerHTML = ceaErrorHTML('ea-blocked');
+    el.innerHTML = ceaErrorHTML('ea-blocked', e.message, resolvedId, resolvedPlat);
   }
 }
 
-function ceaErrorHTML(type) {
+function ceaErrorHTML(type, eaPreview='', resolvedId='', resolvedPlat='') {
+  const debugBlock = eaPreview ? `
+    <details style="margin-top:16px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto;">
+      <summary style="cursor:pointer;font-size:.75rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;">🔍 Detalle técnico del error</summary>
+      <pre style="margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:.68rem;color:var(--muted);overflow-x:auto;white-space:pre-wrap;word-break:break-all;">${eaPreview}</pre>
+    </details>` : '';
+
   const msgs = {
     'no-ea-route': {
       icon:'🔧',
       title:'Worker sin ruta <code>/ea</code>',
-      body:`Tu Worker está en línea pero <strong>todavía no tiene la ruta <code>/ea</code></strong> deployada.
-        <br><br>Reemplazá el archivo de tu Worker con el <strong>worker.js</strong> que te generé anteriormente y ejecutá:
-        <br><br><code style="background:var(--bg);padding:4px 10px;border-radius:5px;display:inline-block;margin:4px 0">wrangler deploy</code>
-        <br><br>Después recargá esta página y los datos aparecerán automáticamente.`,
+      body:`Tu Worker está en línea pero todavía no tiene la ruta <code>/ea</code> deployada.
+        Reemplazá el archivo del Worker con el <strong>worker.js</strong> que te generé y hacé deploy desde el panel de Cloudflare.`,
     },
     'unreachable': {
       icon:'📡',
       title:'Worker no responde',
-      body:`No se pudo conectar con el Worker en <code>${WORKER_URL}</code>.
-       Verificá que esté deployado y activo en tu panel de Cloudflare.`,
+      body:`No se pudo conectar con <code>${WORKER_URL}</code>. Verificá que el Worker esté activo en Cloudflare.`,
     },
     'ea-blocked': {
       icon:'🛡️',
-      title:'EA Sports bloqueó la solicitud',
-      body:`El Worker responde bien, pero EA Sports rechazó la petición.
-        Esto puede pasar cuando:<br>
-        <ul style="margin:8px 0 0 16px;line-height:1.8">
-          <li>El Worker no tiene los headers correctos (actualizá con el <strong>worker.js</strong> nuevo)</li>
-          <li>El Club ID <strong>${CEA_CLUB_ID}</strong> no existe en la plataforma seleccionada</li>
-          <li>EA tiene una caída temporal de la API (intentá más tarde)</li>
-        </ul>`,
+      title:'EA Sports rechazó la solicitud',
+      body:`El Worker está bien, pero EA devolvió un error.
+        <br><br>
+        <strong>Club ID probado:</strong> <code>${resolvedId||CEA_CLUB_ID}</code> &nbsp;·&nbsp;
+        <strong>Plataforma:</strong> <code>${resolvedPlat||ceaPlatform}</code>
+        <br><br>
+        Esto suele pasar porque EA bloquea IPs de datacenter (incluso Cloudflare) o el club no existe en esa plataforma.
+        <br>Podés intentar cambiar de plataforma arriba o abrir PROCLUBS.IO para verificar el ID real.`,
     },
   };
   const m = msgs[type] || msgs['ea-blocked'];
@@ -2959,9 +3014,15 @@ function ceaErrorHTML(type) {
       <div class="cea-err-icon">${m.icon}</div>
       <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:10px;">${m.title}</h3>
       <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto;">${m.body}</p>
-      <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">
-        ↗ Ver Top Secret FC en PROCLUBS.IO mientras tanto
-      </a>
+      ${debugBlock}
+      <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">
+          ↗ Ver Top Secret FC en PROCLUBS.IO
+        </a>
+        <button onclick="ceaLoaded=false;ceaLoad()" class="cea-link-badge" style="background:none;cursor:pointer;border:1px solid var(--gold);">
+          🔄 Reintentar
+        </button>
+      </div>
     </div>`;
 }
 
@@ -2990,7 +3051,7 @@ function ceaNormalizeMembers(raw) {
     .filter(m => m.gamesPlayed > 0);
 }
 
-function ceaRender(overall, members, matches) {
+function ceaRender(overall, members, matches, resolvedId, resolvedPlat) {
   const el = document.getElementById('ceaMain');
 
   // ── Parseo overall ────────────────────────────────────────────
