@@ -223,6 +223,7 @@ footer span{color:var(--gold);}
 .cea-kpi-lbl{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-top:4px;}
 .cea-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 .cea-grid.full{grid-template-columns:1fr;}
+.cea-grid-full{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;}
 @media(max-width:700px){.cea-grid{grid-template-columns:1fr;}}
 .cea-block{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
 .cea-block-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
@@ -2852,23 +2853,53 @@ function ceaSetPlatform(p, btn) {
   ceaLoad();
 }
 
-async function ceaFetch(path) {
-  // Intenta vía Worker proxy primero (evita CORS), luego directo
-  const proxyUrl = `${WORKER_URL}/ea?path=${encodeURIComponent(path)}`;
-  const directUrl = `https://proclubs.ea.com/api/fc/${path}`;
+// ── Diagnóstico del Worker ──────────────────────────────────────
+// Retorna: 'ok' | 'no-ea-route' | 'unreachable'
+async function ceaDiagnoseWorker() {
   try {
-    const r = await fetch(proxyUrl, {headers:{'Accept':'application/json'}});
-    if (r.ok) return r.json();
-  } catch(_) {}
-  // Fallback directo
-  const r2 = await fetch(directUrl, {headers:{'Accept':'application/json'}});
-  if (!r2.ok) throw new Error(`HTTP ${r2.status}`);
-  return r2.json();
+    const r = await fetch(`${WORKER_URL}/ea?path=ping`, {signal: AbortSignal.timeout(5000)});
+    // Si el Worker responde (cualquier código), la ruta /ea existe
+    // Si recibe 403 (path no permitido) también confirma que la ruta existe
+    if (r.status === 404 || r.status === 0) return 'no-ea-route';
+    return 'ok';
+  } catch(_) {
+    return 'unreachable';
+  }
+}
+
+// ── Fetch con proxy Worker + fallback directo ───────────────────
+async function ceaFetch(path) {
+  const proxyUrl = `${WORKER_URL}/ea?path=${encodeURIComponent(path)}`;
+  try {
+    const r = await fetch(proxyUrl, {
+      headers:{'Accept':'application/json'},
+      signal: AbortSignal.timeout(8000)
+    });
+    if (r.ok) {
+      const txt = await r.text();
+      if (txt && txt.trim().startsWith('[') || txt.trim().startsWith('{')) return JSON.parse(txt);
+    }
+    throw new Error(`Worker proxy status: ${r.status}`);
+  } catch(err) {
+    console.warn('[ceaFetch proxy failed]', path, err.message);
+    throw err; // no intentamos directo — EA bloquea requests de servidor sin el proxy correcto
+  }
 }
 
 async function ceaLoad() {
   const el = document.getElementById('ceaMain');
-  el.innerHTML = `<div class="cea-loading"><div class="spinner"></div><div style="font-size:.85rem">Cargando estadísticas desde EA Sports...</div></div>`;
+  el.innerHTML = `<div class="cea-loading"><div class="spinner"></div><div style="font-size:.85rem">Conectando con Worker proxy...</div></div>`;
+
+  // Primero diagnosticamos qué está fallando
+  const diagnosis = await ceaDiagnoseWorker();
+
+  if (diagnosis !== 'ok') {
+    el.innerHTML = ceaErrorHTML(diagnosis);
+    return;
+  }
+
+  el.innerHTML = `<div class="cea-loading"><div class="spinner"></div><div style="font-size:.85rem">Worker conectado · Cargando stats de EA Sports...</div></div>`;
+
   try {
     const [overallRes, membersRes, matchesRes] = await Promise.allSettled([
       ceaFetch(`clubs/overallStats?platform=${ceaPlatform}&clubIds=${CEA_CLUB_ID}`),
@@ -2880,90 +2911,110 @@ async function ceaLoad() {
     const members = membersRes.status === 'fulfilled' ? membersRes.value : null;
     const matches = matchesRes.status === 'fulfilled' ? matchesRes.value : null;
 
-    if (!overall && !members && !matches) throw new Error('No data from any endpoint');
+    console.log('[ClubEA] overall:', overall, '| members:', members, '| matches:', matches);
+
+    if (!overall && !members && !matches) {
+      // Worker responde pero EA devuelve vacío — posible bloqueo o club ID incorrecto
+      el.innerHTML = ceaErrorHTML('ea-blocked');
+      return;
+    }
     ceaRender(overall, members, matches);
   } catch(e) {
-    console.warn('Club EA load error:', e);
-    el.innerHTML = `
-      <div class="cea-error">
-        <div class="cea-err-icon">⚠️</div>
-        <p style="margin-bottom:6px;">No se pudo obtener data de EA Sports.</p>
-        <p style="margin-bottom:16px;color:var(--muted);font-size:.8rem">
-          Asegurate de que el Worker tenga la ruta <code style="background:var(--card2);padding:1px 6px;border-radius:3px">/ea</code> habilitada 
-          (ver instrucciones de deploy más abajo) y que el Club ID sea correcto.
-        </p>
-        <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge" style="margin-bottom:24px;display:inline-flex">
-          ↗ Ver Top Secret FC en PROCLUBS.IO
-        </a>
-        <div style="text-align:left;padding:16px;background:var(--card2);border-radius:10px;font-size:.78rem;color:var(--muted2);max-width:560px;margin:0 auto;">
-          <strong style="color:var(--gold);display:block;margin-bottom:10px;font-size:.85rem">📋 Cómo activar el proxy en tu Worker</strong>
-          <p style="margin-bottom:8px;">Agregá este bloque al switch de rutas de tu Cloudflare Worker y hacé redeploy:</p>
-          <pre style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;overflow-x:auto;line-height:1.5;color:var(--text);font-size:.72rem;">// Ruta: /ea  — proxy para EA Sports API
-if (url.pathname === '/ea') {
-  const eaPath = url.searchParams.get('path') || '';
-  const eaUrl  = 'https://proclubs.ea.com/api/fc/' + eaPath;
-  const resp   = await fetch(eaUrl, {
-    headers: {
-      'Accept': 'application/json',
-      'Referer': 'https://www.ea.com/',
-      'Origin': 'https://www.ea.com'
-    }
-  });
-  const data = await resp.text();
-  return new Response(data, {
-    status: resp.status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=120'
-    }
-  });
-}</pre>
-          <p style="margin-top:10px;">Después hacé <code style="background:var(--bg);padding:1px 5px;border-radius:3px">wrangler deploy</code> y recargá esta página.</p>
-        </div>
-      </div>`;
+    console.warn('[ClubEA] load error:', e);
+    el.innerHTML = ceaErrorHTML('ea-blocked');
   }
 }
 
-function ceaStaticFallback() {
-  // Datos manuales actualizados desde proclubs.io/club/16051 — actualizar cuando cambien
+function ceaErrorHTML(type) {
+  const msgs = {
+    'no-ea-route': {
+      icon:'🔧',
+      title:'Worker sin ruta <code>/ea</code>',
+      body:`Tu Worker está en línea pero <strong>todavía no tiene la ruta <code>/ea</code></strong> deployada.
+        <br><br>Reemplazá el archivo de tu Worker con el <strong>worker.js</strong> que te generé anteriormente y ejecutá:
+        <br><br><code style="background:var(--bg);padding:4px 10px;border-radius:5px;display:inline-block;margin:4px 0">wrangler deploy</code>
+        <br><br>Después recargá esta página y los datos aparecerán automáticamente.`,
+    },
+    'unreachable': {
+      icon:'📡',
+      title:'Worker no responde',
+      body:`No se pudo conectar con el Worker en <code>${WORKER_URL}</code>.
+       Verificá que esté deployado y activo en tu panel de Cloudflare.`,
+    },
+    'ea-blocked': {
+      icon:'🛡️',
+      title:'EA Sports bloqueó la solicitud',
+      body:`El Worker responde bien, pero EA Sports rechazó la petición.
+        Esto puede pasar cuando:<br>
+        <ul style="margin:8px 0 0 16px;line-height:1.8">
+          <li>El Worker no tiene los headers correctos (actualizá con el <strong>worker.js</strong> nuevo)</li>
+          <li>El Club ID <strong>${CEA_CLUB_ID}</strong> no existe en la plataforma seleccionada</li>
+          <li>EA tiene una caída temporal de la API (intentá más tarde)</li>
+        </ul>`,
+    },
+  };
+  const m = msgs[type] || msgs['ea-blocked'];
   return `
-    <div class="cea-stat-row" style="padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
-      <span>Plataforma</span><span style="font-weight:700;color:var(--text)">Current Gen</span>
-    </div>
-    <div class="cea-stat-row" style="padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
-      <span>Club ID en EA</span><span style="font-weight:700;color:var(--text)">16051</span>
-    </div>
-    <div style="margin-top:10px;font-size:.7rem;color:var(--muted2);font-style:italic;">
-      Para ver datos completos en tiempo real, visitá 
-      <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" style="color:var(--gold)">proclubs.io/club/${CEA_CLUB_ID}</a>
+    <div class="cea-error">
+      <div class="cea-err-icon">${m.icon}</div>
+      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:10px;">${m.title}</h3>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto;">${m.body}</p>
+      <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">
+        ↗ Ver Top Secret FC en PROCLUBS.IO mientras tanto
+      </a>
     </div>`;
+}
+
+// ── Helpers de parseo ──────────────────────────────────────────
+function ceaInt(v)   { return parseInt(v) || 0; }
+function ceaFloat(v) { return parseFloat(v) || 0; }
+
+// Normaliza la respuesta de miembros: objeto-clave o array → array uniforme
+function ceaNormalizeMembers(raw) {
+  if (!raw) return [];
+  const list = Array.isArray(raw) ? raw : Object.values(raw);
+  return list
+    .filter(m => m && typeof m === 'object')
+    .map(m => ({
+      name:        m.name || m.proName || m.clubMemberLevel || 'Jugador',
+      goals:       ceaInt(m.goals),
+      assists:     ceaInt(m.assists),
+      gamesPlayed: ceaInt(m.gamesPlayed || m.games),
+      motm:        ceaInt(m.manOfTheMatch || m.motm),
+      rating:      ceaFloat(m.rating || m.avgRating || m.ratingAve),
+      cleanSheets: ceaInt(m.cleanSheetsDef || m.cleanSheetsGk || m.cs),
+      tackles:     ceaInt(m.tacklesMade || m.tackles),
+      saves:       ceaInt(m.shotsSavedGkPerGame || m.saves),
+      pos:         m.favoritePosition || m.pos || '',
+    }))
+    .filter(m => m.gamesPlayed > 0);
 }
 
 function ceaRender(overall, members, matches) {
   const el = document.getElementById('ceaMain');
-  const d = overall ? (Array.isArray(overall) ? overall[0] : overall) : null;
-  const clubData = d?.clubInfo || d || {};
 
-  // KPIs
-  const pj  = parseInt(d?.gamesPlayed||d?.games||0);
-  const wins = parseInt(d?.wins||0);
-  const draws= parseInt(d?.ties||d?.draws||0);
-  const loss = parseInt(d?.losses||0);
-  const gf   = parseInt(d?.goals||d?.goalsFor||0);
-  const ga   = parseInt(d?.goalsAgainst||0);
-  const cs   = parseInt(d?.cleanSheets||0);
-  const wr   = pj>0 ? ((wins/pj)*100).toFixed(1) : '—';
+  // ── Parseo overall ────────────────────────────────────────────
+  const d   = overall ? (Array.isArray(overall) ? overall[0] : overall) : null;
+  const pj  = ceaInt(d?.gamesPlayed || d?.games);
+  const wins = ceaInt(d?.wins);
+  const draws= ceaInt(d?.ties || d?.draws);
+  const loss = ceaInt(d?.losses);
+  const gf   = ceaInt(d?.goals || d?.goalsFor);
+  const ga   = ceaInt(d?.goalsAgainst);
+  const cs   = ceaInt(d?.cleanSheets);
   const gd   = gf - ga;
-  const skillRating = d?.skillRating||d?.skill_rating||'—';
+  const wr   = pj > 0 ? ((wins / pj) * 100).toFixed(1) : 0;
+  const sr   = d?.skillRating || d?.skill_rating || '—';
+  const clubName = d?.clubName || d?.name || 'Top Secret FC';
 
+  // ── KPIs ──────────────────────────────────────────────────────
   const kpis = [
-    {lbl:'Partidos',  val:pj,    color:'var(--text)'},
-    {lbl:'Victorias', val:wins,  color:'var(--win)'},
-    {lbl:'Empates',   val:draws, color:'var(--draw)'},
-    {lbl:'Derrotas',  val:loss,  color:'var(--loss)'},
-    {lbl:'Win Rate',  val:pj>0?wr+'%':'—', color:'var(--gold)'},
-    {lbl:'Skill Rating', val:skillRating, color:'var(--gold2)'},
+    { lbl:'Partidos',   val: pj   || '—',        color:'var(--text)' },
+    { lbl:'Victorias',  val: wins || '—',         color:'var(--win)'  },
+    { lbl:'Empates',    val: draws|| '—',         color:'var(--draw)' },
+    { lbl:'Derrotas',   val: loss || '—',         color:'var(--loss)' },
+    { lbl:'Win Rate',   val: pj ? wr+'%' : '—',  color:'var(--gold)' },
+    { lbl:'Skill Rating', val: sr,                color:'var(--gold2)'},
   ];
   const kpiHTML = kpis.map(k=>`
     <div class="cea-kpi">
@@ -2971,155 +3022,169 @@ function ceaRender(overall, members, matches) {
       <div class="cea-kpi-lbl">${k.lbl}</div>
     </div>`).join('');
 
-  // WDL bar
-  const wdlBar = pj > 0 ? `
+  // ── Bloque rendimiento general ────────────────────────────────
+  const wdlTotal = wins + draws + loss || 1;
+  const wdlBar = d ? `
     <div class="cea-block">
-      <div class="cea-block-head"><h3>🏟️ Rendimiento General</h3><span class="cea-src">EA Sports API</span></div>
-      <div style="padding:16px;">
-        <div style="display:flex;gap:4px;height:10px;border-radius:5px;overflow:hidden;margin-bottom:10px;">
-          <div style="flex:${wins};background:var(--win);"></div>
-          <div style="flex:${draws};background:var(--draw);"></div>
-          <div style="flex:${loss};background:var(--loss);"></div>
+      <div class="cea-block-head"><h3>🏟️ Rendimiento General</h3>
+        <span class="cea-src">EA Sports</span>
+        <button onclick="ceaLoad()" style="margin-left:auto;background:none;border:1px solid var(--border2);color:var(--muted);font-size:.7rem;padding:3px 10px;border-radius:5px;cursor:pointer;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">↺ Actualizar</button>
+      </div>
+      <div style="padding:16px 18px;">
+        <div style="display:flex;gap:3px;height:12px;border-radius:6px;overflow:hidden;margin-bottom:8px;">
+          <div style="flex:${wins};background:var(--win);min-width:${wins?2:0}px"></div>
+          <div style="flex:${draws};background:var(--draw);min-width:${draws?2:0}px"></div>
+          <div style="flex:${loss};background:var(--loss);min-width:${loss?2:0}px"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:.75rem;">
-          <span style="color:var(--win);font-weight:700;">✔ ${wins} V</span>
+        <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:16px;">
+          <span style="color:var(--win);font-weight:700;">✔ ${wins} V &nbsp;${pj?((wins/pj*100).toFixed(0)):'0'}%</span>
           <span style="color:var(--draw);font-weight:700;">— ${draws} E</span>
-          <span style="color:var(--loss);font-weight:700;">✖ ${loss} D</span>
+          <span style="color:var(--loss);font-weight:700;">✖ ${loss} D &nbsp;${pj?((loss/pj*100).toFixed(0)):'0'}%</span>
         </div>
-        <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           ${[
-            {lbl:'Goles a favor', val:gf, c:'var(--win)'},
-            {lbl:'Goles en contra', val:ga, c:'var(--loss)'},
-            {lbl:'Diferencia de gol', val:(gd>=0?'+':'')+gd, c:gd>=0?'var(--win)':'var(--loss)'},
-            {lbl:'Clean sheets', val:cs, c:'var(--muted)'},
+            {lbl:'Goles a favor',      val:gf,  c:'var(--win)' },
+            {lbl:'Goles en contra',    val:ga,  c:'var(--loss)'},
+            {lbl:'Diferencia de gol',  val:(gd>=0?'+':'')+gd, c:gd>=0?'var(--win)':'var(--loss)'},
+            {lbl:'Clean sheets',       val:cs,  c:'var(--text)'},
+            {lbl:'Goles por partido',  val:pj?(gf/pj).toFixed(2):'—', c:'var(--muted)'},
+            {lbl:'Recibidos por PJ',   val:pj?(ga/pj).toFixed(2):'—', c:'var(--muted)'},
           ].map(s=>`
-            <div class="cea-stat-row" style="background:var(--card2);border-radius:8px;padding:10px 12px;flex-direction:column;align-items:flex-start;gap:2px;">
-              <span class="cea-stat-lbl" style="font-size:.65rem;">${s.lbl}</span>
-              <span class="cea-stat-val" style="color:${s.c};font-size:1.4rem;">${s.val}</span>
+            <div style="background:var(--card2);border-radius:8px;padding:10px 12px;">
+              <div style="font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px;">${s.lbl}</div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;color:${s.c}">${s.val}</div>
             </div>`).join('')}
         </div>
       </div>
     </div>` : '';
 
-  // Members table
-  let membersHTML = '';
-  if (members) {
-    const memberList = Array.isArray(members) ? members : Object.values(members);
-    const sorted = memberList
-      .filter(m => m && (m.goals||m.gamesPlayed))
-      .sort((a,b) => (parseInt(b.goals)||0)-(parseInt(a.goals)||0))
-      .slice(0, 12);
+  // ── Miembros ──────────────────────────────────────────────────
+  const memberArr = ceaNormalizeMembers(members);
 
-    const maxG = sorted.reduce((m,p)=>Math.max(m,parseInt(p.goals)||0), 1);
+  // Top goleadores
+  const byGoals   = [...memberArr].sort((a,b)=>b.goals-a.goals).slice(0,12);
+  const maxG = byGoals.reduce((m,p)=>Math.max(m,p.goals),1);
 
-    membersHTML = `
-      <div class="cea-block">
-        <div class="cea-block-head"><h3>⚽ Top Goleadores</h3><span class="cea-src">EA Sports</span></div>
-        <div>
-        ${sorted.map((p,i)=>{
-          const nm = p.name||p.proName||p.clubMemberLevel||'Jugador';
-          const g  = parseInt(p.goals)||0;
-          const a  = parseInt(p.assists)||0;
-          const pj2= parseInt(p.gamesPlayed)||0;
-          const ra = p.manOfTheMatch||'';
-          const cls= i===0?'g1':i===1?'g2':i===2?'g3':'';
-          return `<div class="cea-row">
-            <div class="cea-rank ${cls}">${i+1}</div>
-            <div>
-              <div class="cea-pname">${nm}</div>
-              <div class="cea-bar-wrap"><div class="cea-bar" style="width:${Math.round(g/maxG*100)}%"></div></div>
-            </div>
-            <div style="font-size:.72rem;color:var(--muted2);text-align:center">${a} Ast · ${pj2} PJ</div>
-            <div class="cea-val" style="color:var(--win)">${g}</div>
-          </div>`;
-        }).join('')}
-        </div>
-      </div>`;
-  }
+  const goalRows = byGoals.map((p,i)=>{
+    const cls = i===0?'g1':i===1?'g2':i===2?'g3':'';
+    const pct = Math.round(p.goals/maxG*100);
+    const motmBadge = p.motm > 0 ? `<span style="font-size:.6rem;background:rgba(200,168,75,.15);color:var(--gold);padding:1px 5px;border-radius:3px;margin-left:4px;">🏅${p.motm}</span>` : '';
+    return `<div class="cea-row">
+      <div class="cea-rank ${cls}">${i+1}</div>
+      <div>
+        <div class="cea-pname">${p.name}${motmBadge}</div>
+        <div class="cea-bar-wrap"><div class="cea-bar" style="width:${pct}%;background:var(--win)"></div></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted2);text-align:right;line-height:1.4">${p.assists}🅰️<br>${p.gamesPlayed} PJ</div>
+      <div class="cea-val" style="color:var(--win)">${p.goals}</div>
+    </div>`;
+  }).join('');
 
-  // Assists table
-  let assistsHTML = '';
-  if (members) {
-    const memberList = Array.isArray(members) ? members : Object.values(members);
-    const sorted = memberList
-      .filter(m => m && (m.assists||m.gamesPlayed))
-      .sort((a,b) => (parseInt(b.assists)||0)-(parseInt(a.assists)||0))
-      .slice(0, 12);
-    const maxA = sorted.reduce((m,p)=>Math.max(m,parseInt(p.assists)||0), 1);
+  const goalsBlock = memberArr.length ? `
+    <div class="cea-block">
+      <div class="cea-block-head"><h3>⚽ Top Goleadores</h3><span class="cea-src">EA Sports</span></div>
+      <div>${goalRows || '<div style="padding:20px;text-align:center;color:var(--muted2);font-size:.82rem">Sin datos</div>'}</div>
+    </div>` : '';
 
-    assistsHTML = `
-      <div class="cea-block">
-        <div class="cea-block-head"><h3>🅰️ Top Asistidores</h3><span class="cea-src">EA Sports</span></div>
-        <div>
-        ${sorted.map((p,i)=>{
-          const nm = p.name||p.proName||'Jugador';
-          const a  = parseInt(p.assists)||0;
-          const g  = parseInt(p.goals)||0;
-          const pj2= parseInt(p.gamesPlayed)||0;
-          const cls= i===0?'g1':i===1?'g2':i===2?'g3':'';
-          return `<div class="cea-row">
-            <div class="cea-rank ${cls}">${i+1}</div>
-            <div>
-              <div class="cea-pname">${nm}</div>
-              <div class="cea-bar-wrap"><div class="cea-bar" style="width:${Math.round(a/maxA*100)};background:var(--vpug)%"></div></div>
-            </div>
-            <div style="font-size:.72rem;color:var(--muted2);text-align:center">${g} Gol · ${pj2} PJ</div>
-            <div class="cea-val" style="color:var(--vpug)">${a}</div>
-          </div>`;
-        }).join('')}
-        </div>
-      </div>`;
-  }
+  // Top asistidores
+  const byAssists = [...memberArr].sort((a,b)=>b.assists-a.assists).slice(0,12);
+  const maxA = byAssists.reduce((m,p)=>Math.max(m,p.assists),1);
 
-  // Matches
-  let matchHTML = '';
+  const assistRows = byAssists.map((p,i)=>{
+    const cls = i===0?'g1':i===1?'g2':i===2?'g3':'';
+    const pct = Math.round(p.assists/maxA*100);
+    return `<div class="cea-row">
+      <div class="cea-rank ${cls}">${i+1}</div>
+      <div>
+        <div class="cea-pname">${p.name}</div>
+        <div class="cea-bar-wrap"><div class="cea-bar" style="width:${pct}%;background:var(--vpug)"></div></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted2);text-align:right;line-height:1.4">${p.goals}⚽<br>${p.gamesPlayed} PJ</div>
+      <div class="cea-val" style="color:var(--vpug)">${p.assists}</div>
+    </div>`;
+  }).join('');
+
+  const assistsBlock = memberArr.length ? `
+    <div class="cea-block">
+      <div class="cea-block-head"><h3>🅰️ Top Asistidores</h3><span class="cea-src">EA Sports</span></div>
+      <div>${assistRows || '<div style="padding:20px;text-align:center;color:var(--muted2);font-size:.82rem">Sin datos</div>'}</div>
+    </div>` : '';
+
+  // Top rating
+  const byRating = [...memberArr].filter(p=>p.rating>0&&p.gamesPlayed>=3).sort((a,b)=>b.rating-a.rating).slice(0,10);
+  const ratingBlock = byRating.length ? `
+    <div class="cea-block">
+      <div class="cea-block-head"><h3>⭐ Rating Promedio</h3><span class="cea-src">EA Sports (mín. 3 PJ)</span></div>
+      <div>
+      ${byRating.map((p,i)=>{
+        const cls = i===0?'g1':i===1?'g2':i===2?'g3':'';
+        const rc  = p.rating>=8?'var(--win)':p.rating>=6.5?'var(--gold)':'var(--loss)';
+        return `<div class="cea-row" style="grid-template-columns:28px 1fr 60px 56px">
+          <div class="cea-rank ${cls}">${i+1}</div>
+          <div>
+            <div class="cea-pname">${p.name}</div>
+            <div style="font-size:.65rem;color:var(--muted2)">${p.gamesPlayed} PJ · ${p.goals}⚽ ${p.assists}🅰️</div>
+          </div>
+          <div style="font-size:.65rem;color:var(--muted2);text-align:right">${p.motm} MOTM</div>
+          <div class="cea-val" style="color:${rc}">${p.rating.toFixed(1)}</div>
+        </div>`;
+      }).join('')}
+      </div>
+    </div>` : '';
+
+  // ── Últimos partidos ──────────────────────────────────────────
+  let matchesBlock = '';
   if (matches) {
-    const matchList = Array.isArray(matches) ? matches : (matches.matches || matches.data || []);
-    const recent = matchList.slice(0, 10);
+    const raw = Array.isArray(matches) ? matches : (matches.matches || matches.data || []);
+    const recent = raw.slice(0, 10);
     if (recent.length > 0) {
-      matchHTML = `
+      const rows = recent.map(m => {
+        const clubs   = m.clubs || {};
+        const myKey   = Object.keys(clubs).find(k => k === CEA_CLUB_ID) || Object.keys(clubs)[0] || '';
+        const oppKey  = Object.keys(clubs).find(k => k !== myKey) || '';
+        const myCl    = clubs[myKey]  || {};
+        const oppCl   = clubs[oppKey] || {};
+        const myG     = ceaInt(myCl.goals);
+        const opG     = ceaInt(oppCl.goals);
+        const rival   = oppCl.details?.name || oppCl.clubName || oppCl.name || 'Rival';
+        const result  = myG > opG ? 'w' : myG === opG ? 'd' : 'l';
+        const score   = `${myG}–${opG}`;
+        const ts      = m.timestamp
+          ? new Date(ceaInt(m.timestamp) * 1000).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit'})
+          : '—';
+        const motm    = m.man_of_the_match || m.motm || '';
+        return `<div class="cea-match-row" style="grid-template-columns:52px 1fr auto auto">
+          <span class="cea-match-score ${result}" style="font-size:1.25rem">${score}</span>
+          <div>
+            <div class="cea-match-rival">vs ${rival}</div>
+            <div class="cea-match-date">${ts}${motm?` · MOTM: ${motm}`:''}</div>
+          </div>
+          <span class="wld-badge ${result}" style="align-self:center">${result==='w'?'V':result==='d'?'E':'D'}</span>
+        </div>`;
+      }).join('');
+      matchesBlock = `
         <div class="cea-block" style="grid-column:1/-1">
           <div class="cea-block-head"><h3>📅 Últimos Partidos</h3><span class="cea-src">EA Sports</span></div>
-          <div>
-          ${recent.map(m=>{
-            const clubs = m.clubs || {};
-            const clubKeys = Object.keys(clubs);
-            const myKey = clubKeys.find(k=>k===CEA_CLUB_ID)||clubKeys[0];
-            const oppKey = clubKeys.find(k=>k!==CEA_CLUB_ID)||clubKeys[1];
-            const myCl  = clubs[myKey]||{};
-            const oppCl = clubs[oppKey]||{};
-            const myG   = parseInt(myCl.goals||0);
-            const opG   = parseInt(oppCl.goals||0);
-            const rival = oppCl.details?.name || oppCl.name || 'Rival';
-            const result= myG>opG?'w':myG===opG?'d':'l';
-            const score = `${myG} - ${opG}`;
-            const ts    = m.timestamp ? new Date(m.timestamp*1000).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) : '—';
-            return `<div class="cea-match-row">
-              <span class="cea-match-score ${result}">${score}</span>
-              <div>
-                <div class="cea-match-rival">vs ${rival}</div>
-                <div class="cea-match-date">${ts}</div>
-              </div>
-              <span class="wld-badge ${result}">${result==='w'?'V':result==='d'?'E':'D'}</span>
-            </div>`;
-          }).join('')}
-          </div>
+          <div>${rows}</div>
         </div>`;
     }
   }
 
+  // ── Ensamble final ────────────────────────────────────────────
   el.innerHTML = `
     <div class="cea-kpi-row">${kpiHTML}</div>
     <div class="cea-grid">
       ${wdlBar}
-      ${membersHTML}
+      ${goalsBlock}
     </div>
     <div class="cea-grid">
-      ${assistsHTML}
-      ${matchHTML}
+      ${assistsBlock}
+      ${ratingBlock}
     </div>
-    <div style="text-align:center;padding:16px 0;">
+    ${matchesBlock ? `<div class="cea-grid cea-grid-full">${matchesBlock}</div>` : ''}
+    <div style="text-align:center;padding:20px 0 4px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;">
       <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">↗ Ver perfil completo en PROCLUBS.IO</a>
+      <button onclick="ceaLoad()" style="background:none;border:1px solid var(--border2);color:var(--muted);font-size:.78rem;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">↺ Actualizar datos</button>
     </div>`;
 }
 
