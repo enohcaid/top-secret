@@ -2963,7 +2963,6 @@ async function ceaLoad() {
     console.log('[ClubEA] overall:', overall, '| members:', members, '| matches:', matches);
 
     if (!overall && !members && !matches) {
-      // Mostrar detalles del error para diagnosticar
       const preview = [overallRes, membersRes, matchesRes]
         .filter(r => r.status === 'fulfilled')
         .map(r => r.value?.preview || r.value?.error || '')
@@ -2971,7 +2970,25 @@ async function ceaLoad() {
       el.innerHTML = ceaErrorHTML('ea-blocked', preview, resolvedId, resolvedPlat);
       return;
     }
-    ceaRender(overall, members, matches, resolvedId, resolvedPlat);
+
+    // ── DEBUG: mostrar estructura cruda de members para diagnosticar ──
+    // (se puede quitar cuando la tabla funcione bien)
+    const membersRaw = membersRes.status === 'fulfilled' ? membersRes.value : null;
+    if (membersRaw) {
+      const debugStr = JSON.stringify(membersRaw, null, 2).slice(0, 2000);
+      const debugEl = document.createElement('details');
+      debugEl.style.cssText = 'margin-bottom:12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.7rem;color:var(--muted2)';
+      debugEl.innerHTML = `<summary style="cursor:pointer;font-weight:700;color:var(--gold)">🔍 Debug: estructura cruda de members (click para ver)</summary>
+        <pre style="margin-top:8px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;font-size:.65rem;color:var(--muted);max-height:300px;overflow-y:auto">${debugStr}</pre>`;
+      el.innerHTML = '';
+      el.appendChild(debugEl);
+      // Luego renderea el resto normal
+      const tempDiv = document.createElement('div');
+      el.appendChild(tempDiv);
+      ceaRenderInto(tempDiv, overall, members, matches, resolvedId, resolvedPlat);
+    } else {
+      ceaRenderInto(el, overall, members, matches, resolvedId, resolvedPlat);
+    }
   } catch(e) {
     console.warn('[ClubEA] load error:', e);
     el.innerHTML = ceaErrorHTML('ea-blocked', e.message, resolvedId, resolvedPlat);
@@ -3158,8 +3175,8 @@ function ceaRenderPlayerTable() {
     rows || `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted2)">Sin datos de jugadores</td></tr>`;
 }
 
-function ceaRender(overall, members, matches, resolvedId, resolvedPlat) {
-  const el = document.getElementById('ceaMain');
+function ceaRenderInto(container, overall, members, matches, resolvedId, resolvedPlat) {
+  const el = container;
   const myId = String(resolvedId || CEA_CLUB_ID);
 
   // ── Overall ────────────────────────────────────────────────────
