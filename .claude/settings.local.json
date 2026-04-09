@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -d /d/proyectos/top-secret/*/)",
+      "Bash(git -C /d/proyectos/top-secret log --oneline)",
+      "Bash(wc:*)",
+      "Bash(git -C /d/proyectos/top-secret remote -v)",
+      "Bash(git -C /d/proyectos/top-secret log -1 --pretty=fuller)"
+    ]
+  }
+}
