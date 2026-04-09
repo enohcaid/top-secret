@@ -624,7 +624,20 @@ function renderList() {
       const av=document.createElement('div');
       av.className='pavatar';
       av.setAttribute('data-player',p.name);
-      if(p.img){
+      if(p.photo){
+        const crop=CROP_DATA[p.name];
+        if(crop){
+          av.innerHTML=`<img src="${p.photo}" style="position:absolute;width:${crop.av.iW}px;height:${crop.av.iH}px;left:-${crop.av.oX}px;top:-${crop.av.oY}px;border-radius:0;">`;
+        } else {
+          av.textContent='';
+          av.style.background='transparent';
+          const img=document.createElement('img');
+          img.src=p.photo;
+          img.alt=p.name;
+          img.style.cssText='width:100%;height:100%;object-fit:cover;';
+          av.appendChild(img);
+        }
+      } else if(p.img){
         av.textContent='';
         av.style.background='transparent';
         const img=document.createElement('img');
@@ -693,7 +706,22 @@ function renderPitch() {
     const lbl=document.createElement('div'); lbl.className='slabel';
     if(player){
       tok.className='stoken filled';
-      if(player.img){
+      if(player.photo){
+        const crop=CROP_DATA[player.name];
+        if(crop){
+          tok.innerHTML=`<img src="${player.photo}" style="position:absolute;width:${crop.av.iW}px;height:${crop.av.iH}px;left:-${crop.av.oX}px;top:-${crop.av.oY}px;border-radius:0;">`;
+        } else {
+          tok.textContent='';
+          tok.style.background='transparent';
+          const img=document.createElement('img');
+          img.src=player.photo;
+          img.alt=player.name;
+          img.style.cssText='width:100%;height:100%;object-fit:cover;';
+          tok.appendChild(img);
+        }
+        const num=document.createElement('div'); num.className='snum'; num.textContent=player.num;
+        tok.appendChild(num);
+      } else if(player.img){
         tok.textContent='';
         tok.style.background='transparent';
         const img=document.createElement('img');
