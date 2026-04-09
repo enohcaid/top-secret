@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<!-- v2026-04-09-PLAYERS-FIX -->
+<!-- v2026-04-09-SVG-FIX -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Top Secret FC · Convocatoria</title>
 <link rel="icon" href="data:," />
@@ -293,7 +296,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 <div id="toast" class="toast"></div>
 
 <script>
-  console.log('🔧 BEFORE module - inline script running');
+  console.log('convocatoria v2026-04-09-SVG-FIX');
 </script>
 
 <script type="module">
@@ -318,7 +321,6 @@ const META_DOC= doc(db, 'convocatoria', '_meta');
 const CAL_DOC = doc(db, 'calendario', 'estado');
 
 // ── CALENDARIO RAW ────────────────────────────────────────────────────────────
-console.log('🔧 convocatoria.html script loaded - v' + new Date().toISOString());
 /* ─── CROP DATA para SVG ─── */
 window.CROP_DATA = {
   'Agubostero7':    {av:{iW:120.8,iH:67.9,oX:56.9,oY:13.8}},
@@ -639,13 +641,10 @@ function renderList() {
       av.setAttribute('data-player',p.name);
       if(p.photo){
         const crop=CROP_DATA[p.name];
-        console.log(`[${p.name}] Has photo: ${p.photo}, Crop data:`, crop, 'CROP_DATA keys:', Object.keys(CROP_DATA));
         if(crop){
           const c=crop.av;
-          console.log(`[${p.name}] Using crop - width:${c.iW}, height:${c.iH}, left:-${c.oX}, top:-${c.oY}`);
           av.innerHTML=`<div class="av-crop"><img class="svg-crop" src="${p.photo}" style="width:${c.iW}px;height:${c.iH}px;left:-${c.oX}px;top:-${c.oY}px;"></div>`;
         } else {
-          console.log(`[${p.name}] No crop data, rendering photo without crop`);
           av.textContent='';
           av.style.background='transparent';
           const img=document.createElement('img');
@@ -655,7 +654,6 @@ function renderList() {
           av.appendChild(img);
         }
       } else if(p.img){
-        console.log(`[${p.name}] No photo field, using img field`);
         av.textContent='';
         av.style.background='transparent';
         const img=document.createElement('img');
@@ -664,9 +662,8 @@ function renderList() {
         img.style.cssText='width:100%;height:100%;object-fit:cover;';
         av.appendChild(img);
       } else {
-        console.log(`[${p.name}] No photo or img, using initials`);
         av.style.background=getPosColor(p.pos);
-        av.textContent=getInitials(p.name); 
+        av.textContent=getInitials(p.name);
       }
       // Info
       const info=document.createElement('div'); info.className='pinfo';
