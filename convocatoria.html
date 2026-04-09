@@ -759,6 +759,14 @@ function renderPitch() {
         tok.style.color='#000'; tok.textContent=player.num; 
       }
       lbl.textContent=player.name;
+      tok.draggable=true;
+      tok.addEventListener('dragstart',e=>{
+        e.dataTransfer.setData('playerName',player.name);
+        e.dataTransfer.setData('fromSlot',s.key);
+        e.dataTransfer.effectAllowed='move';
+        setTimeout(()=>tok.style.opacity='.4',0);
+      });
+      tok.addEventListener('dragend',()=>tok.style.opacity='');
     } else {
       tok.className='stoken empty'; tok.textContent=s.l;
       lbl.textContent=s.l; lbl.style.color='rgba(255,255,255,.2)';
@@ -771,7 +779,17 @@ function renderPitch() {
     el.addEventListener('drop',e=>{
       e.preventDefault(); tok.classList.remove('drag-over');
       const pName=e.dataTransfer.getData('playerName');
-      if(pName) dropOnSlot(s.key,pName);
+      const fromSlot=e.dataTransfer.getData('fromSlot');
+      if(fromSlot && fromSlot!==s.key){
+        // swap between pitch slots
+        const displaced=lineup.slots[s.key];
+        lineup.slots[s.key]=pName;
+        if(displaced) lineup.slots[fromSlot]=displaced;
+        else delete lineup.slots[fromSlot];
+        saveDay(); render();
+      } else if(pName){
+        dropOnSlot(s.key,pName);
+      }
     });
     pitch.appendChild(el);
   });
