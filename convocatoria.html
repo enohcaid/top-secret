@@ -633,6 +633,7 @@ function renderList() {
       av.setAttribute('data-player',p.name);
       if(p.photo){
         const crop=CROP_DATA[p.name];
+        console.log('Rendering photo for', p.name, 'crop:', crop);
         if(crop){
           const c=crop.av;
           av.innerHTML=`<div class="av-crop"><img class="svg-crop" src="${p.photo}" style="width:${c.iW}px;height:${c.iH}px;left:-${c.oX}px;top:-${c.oY}px;"></div>`;
