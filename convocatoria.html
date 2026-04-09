@@ -292,6 +292,10 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 
 <div id="toast" class="toast"></div>
 
+<script>
+  console.log('🔧 BEFORE module - inline script running');
+</script>
+
 <script type="module">
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot, getDoc }
