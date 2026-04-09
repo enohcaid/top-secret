@@ -623,20 +623,14 @@ function renderList() {
       const av=document.createElement('div');
       av.className='pavatar';
       av.setAttribute('data-player',p.name);
-      if(p.photo||p.img){
-        if(p.photo && CROP_DATA[p.name]){
-          const crop=CROP_DATA[p.name].av;
-          av.innerHTML=`<img src="${p.photo}" style="position:absolute;width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;border-radius:0;">`;
-          av.style.background='transparent';
-        } else {
-          av.textContent='';
-          av.style.background='transparent';
-          const img=document.createElement('img');
-          img.src=p.img||p.photo;
-          img.alt=p.name;
-          img.style.cssText='width:100%;height:100%;object-fit:cover;';
-          av.appendChild(img);
-        }
+      if(p.img){
+        av.textContent='';
+        av.style.background='transparent';
+        const img=document.createElement('img');
+        img.src=p.img;
+        img.alt=p.name;
+        img.style.cssText='width:100%;height:100%;object-fit:cover;';
+        av.appendChild(img);
       } else { 
         av.style.background=getPosColor(p.pos);
         av.textContent=getInitials(p.name); 
@@ -698,18 +692,14 @@ function renderPitch() {
     const lbl=document.createElement('div'); lbl.className='slabel';
     if(player){
       tok.className='stoken filled';
-      if(player.photo||player.img){
+      if(player.img){
+        tok.textContent='';
         tok.style.background='transparent';
-        if(player.photo && CROP_DATA[player.name]){
-          const crop=CROP_DATA[player.name].av;
-          tok.innerHTML=`<img src="${player.photo}" style="position:absolute;width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;border-radius:0;">`;
-        } else {
-          const img=document.createElement('img');
-          img.src=player.img||player.photo;
-          img.alt=player.name;
-          img.style.cssText='width:100%;height:100%;object-fit:cover;';
-          tok.appendChild(img);
-        }
+        const img=document.createElement('img');
+        img.src=player.img;
+        img.alt=player.name;
+        img.style.cssText='width:100%;height:100%;object-fit:cover;';
+        tok.appendChild(img);
         const num=document.createElement('div'); num.className='snum'; num.textContent=player.num;
         tok.appendChild(num);
       } else { 
