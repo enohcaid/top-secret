@@ -631,6 +631,7 @@ function renderList() {
           const img=document.createElement('img');
           img.src=p.img||p.photo;
           img.alt=p.name;
+          img.style.cssText='width:100%;height:100%;object-fit:cover;';
           av.appendChild(img);
         }
       } else { av.textContent=getInitials(p.name); }
@@ -699,6 +700,7 @@ function renderPitch() {
           const img=document.createElement('img');
           img.src=player.img||player.photo;
           img.alt=player.name;
+          img.style.cssText='width:100%;height:100%;object-fit:cover;';
           tok.appendChild(img);
         }
         const num=document.createElement('div'); num.className='snum'; num.textContent=player.num;
