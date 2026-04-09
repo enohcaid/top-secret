@@ -621,20 +621,26 @@ function renderList() {
       pnum.className='pnum'; pnum.textContent=p.num;
       // Avatar
       const av=document.createElement('div');
-      av.className='pavatar'; av.style.background=getPosColor(p.pos);
+      av.className='pavatar';
       av.setAttribute('data-player',p.name);
       if(p.photo||p.img){
         if(p.photo && CROP_DATA[p.name]){
           const crop=CROP_DATA[p.name].av;
           av.innerHTML=`<img src="${p.photo}" style="position:absolute;width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;border-radius:0;">`;
+          av.style.background='transparent';
         } else {
+          av.textContent='';
+          av.style.background='transparent';
           const img=document.createElement('img');
           img.src=p.img||p.photo;
           img.alt=p.name;
           img.style.cssText='width:100%;height:100%;object-fit:cover;';
           av.appendChild(img);
         }
-      } else { av.textContent=getInitials(p.name); }
+      } else { 
+        av.style.background=getPosColor(p.pos);
+        av.textContent=getInitials(p.name); 
+      }
       // Info
       const info=document.createElement('div'); info.className='pinfo';
       const nm=document.createElement('div'); nm.className='pname';
@@ -691,8 +697,9 @@ function renderPitch() {
     const tok=document.createElement('div');
     const lbl=document.createElement('div'); lbl.className='slabel';
     if(player){
-      tok.className='stoken filled'; tok.style.background=getPosColor(player.pos);
+      tok.className='stoken filled';
       if(player.photo||player.img){
+        tok.style.background='transparent';
         if(player.photo && CROP_DATA[player.name]){
           const crop=CROP_DATA[player.name].av;
           tok.innerHTML=`<img src="${player.photo}" style="position:absolute;width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;border-radius:0;">`;
@@ -705,7 +712,10 @@ function renderPitch() {
         }
         const num=document.createElement('div'); num.className='snum'; num.textContent=player.num;
         tok.appendChild(num);
-      } else { tok.style.color='#000'; tok.textContent=player.num; }
+      } else { 
+        tok.style.background=getPosColor(player.pos);
+        tok.style.color='#000'; tok.textContent=player.num; 
+      }
       lbl.textContent=player.name;
     } else {
       tok.className='stoken empty'; tok.textContent=s.l;
