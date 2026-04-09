@@ -714,6 +714,8 @@ function renderFbar() {
 function renderPitch() {
   const pitch=document.getElementById('pitch'); if(!pitch) return;
   pitch.querySelectorAll('.slot').forEach(el=>el.remove());
+  const stW=Math.min(80,Math.max(54,window.innerWidth*0.055));
+  const stScale=stW/42;
   const slots=FORMATIONS[lineup.formation]||FORMATIONS['4-3-3'];
   slots.forEach(s=>{
     const assigned=lineup.slots[s.key];
@@ -728,7 +730,9 @@ function renderPitch() {
         const crop=CROP_DATA[player.name];
         if(crop){
           const c=crop.av;
-          tok.innerHTML=`<div class="av-crop"><img src="${player.photo}" style="width:${c.iW}px;height:${c.iH}px;left:-${c.oX}px;top:-${c.oY}px;"></div>`;
+          const iW=(c.iW*stScale).toFixed(1),iH=(c.iH*stScale).toFixed(1);
+          const oX=(c.oX*stScale).toFixed(1),oY=(c.oY*stScale).toFixed(1);
+          tok.innerHTML=`<div class="av-crop"><img src="${player.photo}" style="width:${iW}px;height:${iH}px;left:-${oX}px;top:-${oY}px;"></div>`;
         } else {
           tok.textContent='';
           tok.style.background='transparent';
