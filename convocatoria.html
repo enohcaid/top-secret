@@ -633,11 +633,13 @@ function renderList() {
       av.setAttribute('data-player',p.name);
       if(p.photo){
         const crop=CROP_DATA[p.name];
-        console.log('Rendering photo for', p.name, 'crop:', crop);
+        console.log(`[${p.name}] Has photo: ${p.photo}, Crop data:`, crop, 'CROP_DATA keys:', Object.keys(CROP_DATA));
         if(crop){
           const c=crop.av;
+          console.log(`[${p.name}] Using crop - width:${c.iW}, height:${c.iH}, left:-${c.oX}, top:-${c.oY}`);
           av.innerHTML=`<div class="av-crop"><img class="svg-crop" src="${p.photo}" style="width:${c.iW}px;height:${c.iH}px;left:-${c.oX}px;top:-${c.oY}px;"></div>`;
         } else {
+          console.log(`[${p.name}] No crop data, rendering photo without crop`);
           av.textContent='';
           av.style.background='transparent';
           const img=document.createElement('img');
@@ -647,6 +649,7 @@ function renderList() {
           av.appendChild(img);
         }
       } else if(p.img){
+        console.log(`[${p.name}] No photo field, using img field`);
         av.textContent='';
         av.style.background='transparent';
         const img=document.createElement('img');
@@ -654,7 +657,8 @@ function renderList() {
         img.alt=p.name;
         img.style.cssText='width:100%;height:100%;object-fit:cover;';
         av.appendChild(img);
-      } else { 
+      } else {
+        console.log(`[${p.name}] No photo or img, using initials`);
         av.style.background=getPosColor(p.pos);
         av.textContent=getInitials(p.name); 
       }
