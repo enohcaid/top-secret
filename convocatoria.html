@@ -68,6 +68,11 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .pavatar[data-player="Agubostero7"] img.svg-crop{left:-19.7px;top:-4.8px;}
 .pavatar[data-player="zPibu__"] img.svg-crop{left:-20.8px;top:-4.5px;}
 .pavatar[data-player="Juan_Martinez4"] img.svg-crop{left:-15.1px;top:-2.5px;}
+.pavatar[data-player="BlackPanther-CG"] img.svg-crop{left:-58.9px;top:-13px;}
+.pavatar[data-player="CipriMancini"] img.svg-crop{left:-65.8px;top:-13px;}
+.pavatar[data-player="Guiidow"] img.svg-crop{left:-65.1px;top:-13px;}
+.pavatar[data-player="Lautavester7"] img.svg-crop{left:-67.5px;top:-13px;}
+.pavatar[data-player="cansitrGd22_"] img.svg-crop{left:-60.6px;top:-13px;}
 .pinfo{flex:1;min-width:0;}
 .pname{font-size:.88rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .psub{display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;}
@@ -630,7 +635,7 @@ function renderList() {
         const crop=CROP_DATA[p.name];
         if(crop){
           const c=crop.av;
-          av.innerHTML=`<div class="av-crop"><img src="${p.photo}" style="width:${c.iW}px;height:${c.iH}px;left:-${c.oX}px;top:-${c.oY}px;"></div>`;
+          av.innerHTML=`<div class="av-crop"><img class="svg-crop" src="${p.photo}" style="width:${c.iW}px;height:${c.iH}px;left:-${c.oX}px;top:-${c.oY}px;"></div>`;
         } else {
           av.textContent='';
           av.style.background='transparent';
