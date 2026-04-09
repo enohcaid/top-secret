@@ -629,7 +629,7 @@ function renderList() {
           av.innerHTML=`<img src="${p.photo}" style="position:absolute;width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;border-radius:0;">`;
         } else {
           const img=document.createElement('img');
-          img.src=p.photo||p.img;
+          img.src=p.img||p.photo;
           img.alt=p.name;
           av.appendChild(img);
         }
@@ -697,7 +697,7 @@ function renderPitch() {
           tok.innerHTML=`<img src="${player.photo}" style="position:absolute;width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;border-radius:0;">`;
         } else {
           const img=document.createElement('img');
-          img.src=player.photo||player.img;
+          img.src=player.img||player.photo;
           img.alt=player.name;
           tok.appendChild(img);
         }
