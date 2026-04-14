@@ -41,6 +41,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.92
 .page-title span{color:var(--sv2);}
 .page-sub{font-size:.88rem;color:var(--muted2);margin-top:10px;}
 
+/* SEASON BAR */
+.season-bar{max-width:980px;margin:0 auto 28px;padding:0 24px;display:flex;gap:8px;}
+.season-pill{padding:7px 20px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:all .18s;}
+.season-pill:hover{border-color:var(--sv);color:var(--sv);}
+.season-pill.active{background:var(--svd);border-color:var(--sv);color:var(--sv);}
+
 /* FILTER */
 .pos-filter{max-width:980px;margin:0 auto 32px;padding:0 24px;display:flex;gap:8px;flex-wrap:wrap;}
 .pfbtn{padding:7px 16px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:'Barlow',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;}
@@ -197,29 +203,44 @@ footer span{color:var(--sv);}
 </nav>
 
 <div class="page-header">
-  <div class="page-eyebrow">TEMPORADA 2026</div>
+  <div class="page-eyebrow">TEMPORADA 1 · 2026</div>
   <h1 class="page-title">EL <span>PLANTEL</span></h1>
   <p class="page-sub">15 jugadores · Top Secret Football Club</p>
 </div>
 
-<div class="pos-filter">
-  <button class="pfbtn active" onclick="filterPos('all',this)">Todos</button>
-  <button class="pfbtn" onclick="filterPos('POR',this)">Portero</button>
-  <button class="pfbtn" onclick="filterPos('DEF',this)">Defensa</button>
-  <button class="pfbtn" onclick="filterPos('LAT',this)">Lateral</button>
-  <button class="pfbtn" onclick="filterPos('MED',this)">Mediocampista</button>
-  <button class="pfbtn" onclick="filterPos('DEL',this)">Delantero</button>
+<div class="season-bar">
+  <button class="season-pill active" onclick="switchPlantillaSeason(1,this)">T1 · 2026</button>
+  <button class="season-pill" onclick="switchPlantillaSeason(2,this)">T2 · 2026</button>
 </div>
 
-<div class="pos-legend">
-  <div class="pos-leg"><div class="pos-dot POR"></div>Portero</div>
-  <div class="pos-leg"><div class="pos-dot DEF"></div>Defensa</div>
-  <div class="pos-leg"><div class="pos-dot MED"></div>Mediocampista</div>
-  <div class="pos-leg"><div class="pos-dot LAT"></div>Lateral</div>
-  <div class="pos-leg"><div class="pos-dot DEL"></div>Delantero</div>
+<div id="t1Content">
+  <div class="pos-filter">
+    <button class="pfbtn active" onclick="filterPos('all',this)">Todos</button>
+    <button class="pfbtn" onclick="filterPos('POR',this)">Portero</button>
+    <button class="pfbtn" onclick="filterPos('DEF',this)">Defensa</button>
+    <button class="pfbtn" onclick="filterPos('LAT',this)">Lateral</button>
+    <button class="pfbtn" onclick="filterPos('MED',this)">Mediocampista</button>
+    <button class="pfbtn" onclick="filterPos('DEL',this)">Delantero</button>
+  </div>
+
+  <div class="pos-legend">
+    <div class="pos-leg"><div class="pos-dot POR"></div>Portero</div>
+    <div class="pos-leg"><div class="pos-dot DEF"></div>Defensa</div>
+    <div class="pos-leg"><div class="pos-dot MED"></div>Mediocampista</div>
+    <div class="pos-leg"><div class="pos-dot LAT"></div>Lateral</div>
+    <div class="pos-leg"><div class="pos-dot DEL"></div>Delantero</div>
+  </div>
+
+  <div class="squad-grid" id="squadGrid"></div>
 </div>
 
-<div class="squad-grid" id="squadGrid"></div>
+<div id="t2Soon" style="display:none;max-width:980px;margin:0 auto;padding:0 24px 80px;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:64px 32px;text-align:center;">
+    <div style="font-size:2.4rem;margin-bottom:16px;opacity:.18;">⚽</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;letter-spacing:.12em;color:var(--sv);margin-bottom:8px;">PRÓXIMAMENTE</div>
+    <div style="font-size:.85rem;color:var(--muted2);">El plantel de Temporada 2 · 2026 se anunciará pronto.<br>Habrá bajas e incorporaciones.</div>
+  </div>
+</div>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeIfBg(event)">
@@ -320,7 +341,7 @@ footer span{color:var(--sv);}
 </div>
 
 <footer>
-  <span>Top Secret FC</span> · Plantel 2026
+  <span>Top Secret FC</span> · Temporada 1 · 2026
 </footer>
 
 <script type="module">
@@ -546,6 +567,15 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 function closeIfBg(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
 window.closeModal = closeModal;
 window.closeIfBg = closeIfBg;
+
+/* ─── SEASON SWITCH ─── */
+function switchPlantillaSeason(n, btn) {
+  document.querySelectorAll('.season-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('t1Content').style.display = n === 1 ? '' : 'none';
+  document.getElementById('t2Soon').style.display    = n === 2 ? '' : 'none';
+}
+window.switchPlantillaSeason = switchPlantillaSeason;
 
 /* ─── FILTER ─── */
 function filterPos(pos, btn) {
