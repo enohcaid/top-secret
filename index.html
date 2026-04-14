@@ -129,6 +129,24 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 
 footer{border-top:1px solid var(--border);padding:24px;text-align:center;font-size:.75rem;color:var(--muted2);}
 footer span{color:var(--gold);}
+
+/* ─── SEASON SELECTOR ─── */
+.season-bar{display:flex;align-items:center;gap:8px;margin-bottom:40px;flex-wrap:wrap;}
+.season-lbl{font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-right:4px;}
+.season-pill{padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;transition:all .18s;}
+.season-pill:hover{border-color:var(--gold);color:var(--text);}
+.season-pill.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.season-pill .pill-badge{font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;letter-spacing:.06em;}
+.season-pill.active .pill-badge{background:var(--gold);color:#000;}
+.season-pill:not(.active) .pill-badge{background:var(--border2);color:var(--muted2);}
+
+/* ─── T2 PRÓXIMAMENTE ─── */
+.t2-soon{display:none;padding:60px 20px;text-align:center;}
+.t2-soon-ico{font-size:3rem;margin-bottom:16px;}
+.t2-soon-title{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;letter-spacing:.04em;color:var(--text);margin-bottom:8px;}
+.t2-soon-title span{color:var(--gold);}
+.t2-soon-sub{font-size:.9rem;color:var(--muted);line-height:1.6;}
+.t2-soon-badge{display:inline-block;margin-top:20px;padding:6px 18px;border-radius:20px;border:1px solid var(--border2);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);}
 </style>
 <link rel="icon" type="image/png" href="Top-Secret.png">
 </head>
@@ -138,7 +156,7 @@ footer span{color:var(--gold);}
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow">Football Club · Temporada 2026</div>
+    <div class="hero-eyebrow">Football Club · Temporada 1 · 2026</div>
     <img src="Top-Secret.png" class="hero-shield" alt="Top Secret FC">
     <h1 class="hero-title">
       <span class="line1">TOP</span>
@@ -155,6 +173,21 @@ footer span{color:var(--gold);}
 </section>
 
 <div class="page-wrap">
+
+  <!-- SEASON SELECTOR -->
+  <div class="season-bar">
+    <span class="season-lbl">Temporada</span>
+    <button class="season-pill active" onclick="switchSeason(1,this)">T1 · 2026 <span class="pill-badge">FINALIZADA</span></button>
+    <button class="season-pill" onclick="switchSeason(2,this)">T2 · 2026 <span class="pill-badge">PRÓXIMAMENTE</span></button>
+  </div>
+
+  <!-- T2 PRÓXIMAMENTE -->
+  <div class="t2-soon" id="t2Soon">
+    <div class="t2-soon-ico">🏆</div>
+    <div class="t2-soon-title">Temporada <span>2 · 2026</span></div>
+    <div class="t2-soon-sub">La nueva temporada está por comenzar.<br>Pronto vas a ver fixture, estadísticas y posiciones acá.</div>
+    <div class="t2-soon-badge">Próximamente</div>
+  </div>
 
   <!-- QUICK STATS -->
   <div class="qs-grid" id="quickStats"></div>
@@ -194,7 +227,7 @@ footer span{color:var(--gold);}
 
 </div>
 
-<footer><p>Top Secret <span>Football Club</span> · Temporada 2026</p></footer>
+<footer><p>Top Secret <span>Football Club</span> · Temporada 1 · 2026</p></footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -490,6 +523,21 @@ onSnapshot(CAL_DOC, snap=>{
   const fixture = d.partidos || d.fixture || d.matches || d.schedule || null;
   renderAll(d.results||{}, d.edits||{}, d.suspended||{}, fixture);
 });
+
+function switchSeason(n, btn){
+  document.querySelectorAll('.season-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const t1Content = ['quickStats','leaguesGrid','topsGrid','upcomingList'];
+  const t2 = document.getElementById('t2Soon');
+  if(n===1){
+    t1Content.forEach(id=>{ const el=document.getElementById(id); if(el)el.closest('.page-wrap > *') && (el.style.display=''); });
+    document.querySelectorAll('.page-wrap .sec-head, .page-wrap .sections-grid, .page-wrap .qs-grid, .page-wrap .leagues-grid, .page-wrap .tops-grid, .page-wrap .upcoming-list').forEach(el=>el.style.display='');
+    t2.style.display='none';
+  } else {
+    document.querySelectorAll('.page-wrap .sec-head, .page-wrap .sections-grid, .page-wrap .qs-grid, .page-wrap .leagues-grid, .page-wrap .tops-grid, .page-wrap .upcoming-list').forEach(el=>el.style.display='none');
+    t2.style.display='block';
+  }
+}
 </script>
 <script src="nav.js"></script>
 </body>
