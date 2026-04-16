@@ -45,15 +45,13 @@ body {
   text-decoration: none; margin-right: auto;
 }
 .tb-brand img { height: 80px; width: 120px; object-fit: contain; }
-.tb-brand span {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.1rem; font-weight: 900;
-  letter-spacing: .12em; color: var(--white); text-transform: uppercase;
-}
-.tb-badges { display: flex; align-items: center; gap: 40px; }
-.tb-badges img { width: auto; object-fit: contain; opacity: .95; }
-.tb-badges img[alt="EA FC 26"] { height: 100px; }
-.tb-badges img[alt="Clubs Pro"] { height: 90px; }
+.tb-brand-name{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;letter-spacing:.14em;color:var(--white);text-transform:uppercase;}
+.tb-brand-name span{color:var(--gold);}
+.tb-logos{display:flex;align-items:center;gap:40px;margin-right:60px;}
+.tb-logos img{width:auto;object-fit:contain;opacity:.95;}
+.tb-logos img[alt="EA FC 26"]{height:100px;}
+.tb-logos img[alt="Clubs Pro"]{height:90px;}
+.tb-sep{width:1px;height:22px;background:rgba(255,255,255,.12);}
 
 /* ── SIDEBAR IZQ ── */
 .sidebar-left {
@@ -240,10 +238,11 @@ footer span { color: var(--gold); }
 <!-- TOPBAR -->
 <header class="topbar">
   <a class="tb-brand" href="index.html">
-    <img src="logos/Top Secret white.png" alt="Top Secret FC">
-    <span>Top Secret FC</span>
+    <img src="logos/Top Secret white.png" alt="TSFC">
+    <span class="tb-brand-name">TOP <span>SECRET</span> FC</span>
   </a>
-  <div class="tb-badges">
+  <div class="tb-logos">
+    <div class="tb-sep"></div>
     <img src="logos/Logo EA FC26.png" alt="EA FC 26">
     <img src="logos/Clubs Pro Badge.png" alt="Clubs Pro">
   </div>
