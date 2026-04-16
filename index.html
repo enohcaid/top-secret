@@ -112,18 +112,24 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 
 /* ── TOP PERFORMERS ── */
 .tops-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.top-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:0 0 6px 6px;padding:0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s;}
-.top-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.1);}
-.top-avatar{width:100%;aspect-ratio:3/2;overflow:hidden;flex-shrink:0;background:var(--black);position:relative;}
-.top-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(1.6) translateY(-8%);transform-origin:top center;}
-.top-avatar-init{font-family:'Barlow Condensed',sans-serif;font-size:2.5rem;font-weight:900;color:var(--gold);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.top-card-body{padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.top-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:0 0 6px 6px;overflow:hidden;}
+.top-card-head{padding:12px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.top-card-icon{font-size:1rem;}
+.top-card-title{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--black);}
+.top-entry{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);}
+.top-entry:last-child{border-bottom:none;}
+.top-entry:hover{background:var(--gray);}
+.top-rank{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:900;width:20px;text-align:center;flex-shrink:0;}
+.top-rank.gold{color:var(--gold);}
+.top-rank.silver{color:#999;}
+.top-rank.bronze{color:#a07040;}
+.top-av{width:32px;height:32px;border-radius:6px;overflow:hidden;background:var(--black);flex-shrink:0;position:relative;}
+.top-av img{width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(1.8) translateY(-8%);}
+.top-av-init{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:900;color:var(--gold);}
 .top-info{flex:1;min-width:0;}
-.top-name{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.top-pos{font-size:.68rem;font-weight:600;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
-.top-stat{display:flex;align-items:baseline;gap:3px;margin-top:8px;}
-.top-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;color:var(--gold);line-height:1;}
-.top-stat-label{font-size:.65rem;font-weight:700;color:var(--mid2);letter-spacing:.06em;text-transform:uppercase;}
+.top-name{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:800;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.top-sub{font-size:.65rem;color:var(--mid);margin-top:1px;}
+.top-val{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:900;color:var(--gold);white-space:nowrap;}
 
 /* ── RECENT RESULTS ── */
 .results-list{display:flex;flex-direction:column;gap:8px;}
@@ -310,7 +316,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   <!-- TOP PERFORMERS — filled by JS -->
   <section class="section alt">
     <div class="section-header">
-      <h2 class="section-title" id="top-section-title">Top Goleadores</h2>
+      <h2 class="section-title">Top Jugadores</h2>
       <div class="section-line"></div>
       <span class="section-badge">T1 2026</span>
     </div>
@@ -440,46 +446,45 @@ document.getElementById('sq-rat').textContent   = avgRating;
 document.getElementById('sq-eff').textContent   = eff + '% efectividad';
 document.getElementById('sq-gpg').textContent   = gpg + ' por partido';
 
-/* ── FIND TOP SCORERS & ASSISTERS ── */
+/* ── BUILD TOP 3 RANKINGS ── */
 const keys = Object.keys(playerStats);
-const topG = keys.filter(k=>playerStats[k].g>0).sort((a,b)=>playerStats[b].g-playerStats[a].g).slice(0,3);
-const topA = keys.filter(k=>playerStats[k].a>0).sort((a,b)=>playerStats[b].a-playerStats[a].a);
-const topRat = keys.filter(k=>playerStats[k].pj>=3).sort((a,b)=>playerStats[b].avgRating-playerStats[a].avgRating);
+const top3G   = keys.filter(k=>playerStats[k].g>0).sort((a,b)=>playerStats[b].g-playerStats[a].g).slice(0,3);
+const top3A   = keys.filter(k=>playerStats[k].a>0).sort((a,b)=>playerStats[b].a-playerStats[a].a).slice(0,3);
+const top3Rat = keys.filter(k=>playerStats[k].pj>=3).sort((a,b)=>playerStats[b].avgRating-playerStats[a].avgRating).slice(0,3);
 
-/* pick top scorer, top assister (not already in scorers), best rating (not already picked) */
-const performers = [];
-if (topG[0]) performers.push({key:topG[0], val:playerStats[topG[0]].g, label:'goles'});
-const topAFilt = topA.filter(k => !performers.map(p=>p.key).includes(k));
-if (topAFilt[0]) performers.push({key:topAFilt[0], val:playerStats[topAFilt[0]].a, label:'asistencias'});
-const topRatFilt = topRat.filter(k => !performers.map(p=>p.key).includes(k));
-if (topRatFilt[0]) performers.push({key:topRatFilt[0], val:playerStats[topRatFilt[0]].avgRating, label:'rating prom.'});
+const rankClasses = ['gold','silver','bronze'];
+const rankNums    = ['1','2','3'];
+
+function buildTopCard(title, players, valFn, suffix) {
+  const entries = players.map((k, i) => {
+    const pj = playerStats[k].pj;
+    const v  = valFn(k);
+    const dispV = typeof v === 'number' && v % 1 !== 0 ? v.toFixed(2) : v;
+    return `<div class="top-entry">
+      <span class="top-rank ${rankClasses[i]}">${rankNums[i]}</span>
+      <div class="top-av">
+        <img src="${brazosPath(k)}" alt="${k}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="top-av-init" style="display:none">${k.charAt(0).toUpperCase()}</div>
+      </div>
+      <div class="top-info">
+        <div class="top-name">${k}</div>
+        <div class="top-sub">${ROSTER_POSN[k]||''} · ${pj} PJ</div>
+      </div>
+      <div class="top-val">${dispV}${suffix}</div>
+    </div>`;
+  }).join('');
+  return `<div class="top-card">
+    <div class="top-card-head"><span class="top-card-title">${title}</span></div>
+    ${entries}
+  </div>`;
+}
 
 /* ── FILL TOP PERFORMERS ── */
 const topsGrid = document.getElementById('tops-grid');
-topsGrid.innerHTML = '';
-performers.forEach(perf => {
-  const posn = ROSTER_POSN[perf.key] || '';
-  const num  = ROSTER_NUM[perf.key]  || '';
-  const card = document.createElement('div');
-  card.className = 'top-card';
-  card.innerHTML = `
-    <div class="top-avatar">
-      <img src="${brazosPath(perf.key)}" alt="${perf.key}"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="top-avatar-init" style="display:none">${perf.key.charAt(0).toUpperCase()}</div>
-    </div>
-    <div class="top-card-body">
-      <div class="top-info">
-        <div class="top-name">${perf.key}</div>
-        <div class="top-pos">${posn}${num ? ' · #'+num : ''}</div>
-        <div class="top-stat">
-          <span class="top-stat-num">${perf.val}</span>
-          <span class="top-stat-label">${perf.label}</span>
-        </div>
-      </div>
-    </div>`;
-  topsGrid.appendChild(card);
-});
+topsGrid.innerHTML =
+  buildTopCard('⚽ Goleadores',  top3G,   k => playerStats[k].g,          '') +
+  buildTopCard('🅰️ Asistencias', top3A,   k => playerStats[k].a,          '') +
+  buildTopCard('⭐ Calificación', top3Rat, k => playerStats[k].avgRating,  '★');
 
 /* ── RECENT RESULTS (last 5) ── */
 const leagueStyle = {
