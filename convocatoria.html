@@ -129,13 +129,13 @@ html,body{height:100%;} body{background:var(--gray);color:#1a1a1a;font-family:'B
 
 /* ── PITCH TOKEN VARS ── */
 :root{
-  --tok-w: 72px;
-  --tok-h: 52px;
+  --tok-w: 144px;
+  --tok-h: 103px;
   --photo-scale: 3.6;
   --photo-y: -5%;
-  --bar-h: 11px;
-  --num-size: 0.68rem;
-  --name-size: 0.44rem;
+  --bar-h: 21px;
+  --num-size: 1.35rem;
+  --name-size: 0.86rem;
   --bar-gap: 5px;
   --bar-pad: 2px 5px 2px 4px;
 }
@@ -146,7 +146,7 @@ html,body{height:100%;} body{background:var(--gray);color:#1a1a1a;font-family:'B
 .pitch-svg line,.pitch-svg rect,.pitch-svg circle,.pitch-svg path{stroke:rgba(60,90,60,.25)!important;}
 .slot{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent;}
 .stoken{width:var(--tok-w);height:var(--tok-h);border-radius:0;border:none;box-shadow:none;transition:transform .14s;position:relative;overflow:hidden;background:transparent;}
-.stoken.empty{background:rgba(0,0,0,.06);border:1.5px dashed rgba(0,0,0,.18)!important;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:rgba(0,0,0,.3);font-size:clamp(.42rem,.48vw,.62rem);letter-spacing:.04em;text-align:center;}
+.stoken.empty{width:calc(var(--tok-w)*0.5);height:calc(var(--tok-h)*0.5);background:rgba(0,0,0,.06);border:1.5px dashed rgba(0,0,0,.18)!important;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:rgba(0,0,0,.3);font-size:clamp(.42rem,.48vw,.62rem);letter-spacing:.04em;text-align:center;}
 .stoken.filled{}
 .slot:hover .stoken{transform:scale(1.08);}
 .stoken.drag-over{outline:2px solid var(--gold);transform:scale(1.08);}
@@ -180,6 +180,8 @@ html,body{height:100%;} body{background:var(--gray);color:#1a1a1a;font-family:'B
 .sopts{display:flex;flex-direction:column;gap:7px;}
 .sopt{width:100%;padding:12px 14px;text-align:left;font-family:'Barlow',sans-serif;font-size:.88rem;font-weight:600;background:#0f1117;border:1px solid #252a38;color:#dde1ec;border-radius:9px;cursor:pointer;transition:all .14s;}
 .sopt:hover{border-color:#8b92aa;background:#13161e;}
+.sopt-always{border-color:rgba(74,158,255,.35)!important;color:#4a9eff!important;}
+.sopt-always:hover{border-color:#4a9eff!important;background:rgba(74,158,255,.08)!important;}
 .modal-input{width:100%;background:#0a0b0e;border:1px solid #252a38;border-radius:8px;color:#dde1ec;font-family:'Barlow',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;margin-bottom:12px;}
 .modal-input:focus{border-color:var(--gold);}
 .mbtns{display:flex;gap:8px;margin-top:4px;}
@@ -321,7 +323,7 @@ html,body{height:100%;} body{background:var(--gray);color:#1a1a1a;font-family:'B
     <div class="mph" id="mph"></div>
     <div class="sopts">
       <button class="sopt" onclick="confirmStatus('green')">🟢 Presente hoy</button>
-      <button class="sopt" onclick="confirmStatus('green_always')">🌿 Siempre presente <span style="font-size:.72rem;color:#525974;font-weight:400">(todos los días)</span></button>
+      <button class="sopt sopt-always" onclick="confirmStatus('green_always')">🔵 Siempre presente <span style="font-size:.72rem;color:#4a9eff;font-weight:400">(todos los días)</span></button>
       <button class="sopt" onclick="confirmStatus('yellow')">🟡 Llego tarde…</button>
       <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
       <button class="sopt" onclick="confirmStatus('black')">⚫ Ausente varios días…</button>
@@ -638,7 +640,7 @@ function renderFbar() {
 function renderPitch() {
   const pitch = document.getElementById('pitch');
   pitch.querySelectorAll('.slot').forEach(el => el.remove());
-  const stW = Math.min(38, Math.max(25, window.innerWidth * 0.025));
+  const stW = Math.min(76, Math.max(50, window.innerWidth * 0.05));
   const stScale = stW / 42;
   const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
 
