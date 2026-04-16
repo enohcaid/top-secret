@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Top Secret FC · El Plantel</title>
-<link rel="icon" href="Top-Secret.png">
+<link rel="icon" href="../Top-Secret.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -17,7 +17,6 @@
   --gold2:   #E8C97A;
   --mid:     #888888;
   --border:  #E5E5E0;
-  --red:     #e03050;
   --panel-w: 380px;
 }
 
@@ -40,22 +39,20 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   position: fixed; top: 0; left: 0; right: 0; z-index: 300;
   height: 64px; background: var(--black);
   border-bottom: 3px solid var(--gold);
-  display: flex; align-items: center; padding: 0 24px 0 16px; gap: 0;
+  display: flex; align-items: center; padding: 0 24px; gap: 0;
 }
 .tb-brand {
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; gap: 12px;
   text-decoration: none; margin-right: auto;
 }
-.tb-brand img { height: 80px; width: 120px; object-fit: contain; }
+.tb-brand img { height: 36px; object-fit: contain; }
 .tb-brand span {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.1rem; font-weight: 900;
   letter-spacing: .12em; color: var(--white); text-transform: uppercase;
 }
-.tb-badges { display: flex; align-items: center; gap: 40px; }
-.tb-badges img { width: auto; object-fit: contain; opacity: .95; }
-.tb-badges img[alt="EA FC 26"] { height: 100px; }
-.tb-badges img[alt="Clubs Pro"] { height: 90px; }
+.tb-badges { display: flex; align-items: center; gap: 10px; }
+.tb-badges img { height: 56px; object-fit: contain; opacity: .95; }
 
 /* ── SIDEBAR IZQ ── */
 .sidebar-left {
@@ -170,21 +167,29 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   overflow: hidden;
   background: var(--black);
 }
+
+/* gradient overlay */
 .card-img-wrap::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0; height: 45%;
   background: linear-gradient(to top, rgba(0,0,0,.9) 0%, transparent 100%);
   pointer-events: none; z-index: 3;
 }
+
+/* brazos — zoomed to waist-up */
 .img-brazos {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover; object-position: top center;
+  object-fit: cover;
+  object-position: top center;
+  /* Zoom in: scale from top so waist-up fills the frame */
   transform: scale(1.65) translateY(-8%);
   transform-origin: top center;
   z-index: 1;
   will-change: transform, opacity;
 }
+
+/* frente — hidden by default */
 .img-frente {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
@@ -220,6 +225,8 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   font-size: .6rem; font-weight: 700; letter-spacing: .1em;
   border: 1px solid var(--border); color: var(--mid); background: var(--gray);
 }
+
+/* pos colors */
 .player-card[data-pos="POR"] .pos-badge { border-color: #b8c050; color: #5a7010; background: rgba(184,192,80,.08); }
 .player-card[data-pos="DEF"] .pos-badge { border-color: #6a9ab8; color: #1a5a80; background: rgba(106,154,184,.08); }
 .player-card[data-pos="LAT"] .pos-badge { border-color: #5a7aaa; color: #1a4878; background: rgba(90,122,170,.08); }
@@ -269,6 +276,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   overflow-x: hidden;
 }
 
+/* panel photo section */
 .pp-photo-wrap {
   position: relative;
   width: 100%; height: 340px;
@@ -307,6 +315,8 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   font-size: .8rem; transition: all .15s;
 }
 .pp-close:hover { background: rgba(201,168,76,.2); color: var(--white); border-color: var(--gold); }
+
+/* panel identity */
 .pp-identity {
   position: absolute; bottom: 16px; left: 18px; z-index: 3;
 }
@@ -329,10 +339,13 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 }
 .pp-posn { font-size: .72rem; color: rgba(255,255,255,.5); margin-top: 3px; letter-spacing: .06em; }
 
+/* panel body */
 .pp-body {
   padding: 20px 20px 32px;
   display: flex; flex-direction: column; gap: 20px;
 }
+
+/* kpi row */
 .pp-kpis {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
 }
@@ -350,19 +363,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   text-transform: uppercase; color: rgba(255,255,255,.4); margin-top: 3px;
 }
 
-.pp-rend-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
-}
-.pp-rend-item { text-align: center; }
-.pp-rend-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.2rem; font-weight: 900; color: rgba(201,168,76,.85); line-height: 1;
-}
-.pp-rend-lbl {
-  font-size: .58rem; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 3px;
-}
-
+/* stats section */
 .pp-section-title {
   font-size: .65rem; font-weight: 700; letter-spacing: .18em;
   text-transform: uppercase; color: rgba(255,255,255,.3);
@@ -383,13 +384,15 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 }
 .pp-stat-fill {
   height: 100%; background: var(--gold); border-radius: 2px;
-  transform-origin: left;
+  transform-origin: left; /* GSAP will animate scaleX from 0 */
 }
 .pp-stat-val {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: .9rem; font-weight: 800; color: var(--white);
   width: 28px; text-align: right; flex-shrink: 0;
 }
+
+/* total row */
 .pp-total {
   display: flex; align-items: center; gap: 10px;
   padding-top: 12px; border-top: 1px solid rgba(255,255,255,.07);
@@ -411,41 +414,6 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   height: 100%; background: var(--gold); border-radius: 2px;
   transform-origin: left;
 }
-
-/* medals */
-.pp-medal-row {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
-}
-.pp-medal {
-  width: 20px; height: 20px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .72rem; font-weight: 900; flex-shrink: 0;
-}
-.pp-medal.m1 { background: #c9a227; color: #5a3800; }
-.pp-medal.m2 { background: #8a96aa; color: #1a2040; }
-.pp-medal.m3 { background: #a07038; color: #3a1800; }
-.pp-medal-lbl {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: .88rem; font-weight: 700; color: rgba(255,255,255,.8);
-  flex: 1;
-}
-.pp-medal-val {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: .88rem; font-weight: 700; color: var(--gold);
-}
-
-/* download button */
-.pp-dl-btn {
-  width: 100%; padding: 10px 14px;
-  background: transparent; border: 1px solid rgba(201,168,76,.3);
-  border-radius: 6px; color: rgba(201,168,76,.7);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: .82rem; font-weight: 700; letter-spacing: .08em;
-  cursor: pointer; transition: all .18s;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-}
-.pp-dl-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,.07); }
-.pp-dl-btn:active { opacity: .7; }
 
 /* ── T2 PLACEHOLDER ── */
 .t2-soon { max-width: 1100px; margin: 0 auto; padding: 0 32px 80px; display: none; }
@@ -469,17 +437,6 @@ footer {
   margin-left: -64px; margin-right: -48px;
 }
 footer span { color: var(--gold); }
-
-@media(max-width:640px){
-  body { margin-left: 0; margin-right: 0; padding-top: 64px; }
-  body.panel-open { margin-right: 0; }
-  .sidebar-left { display: none; }
-  .sidebar-right { display: none; }
-  .squad-grid { grid-template-columns: repeat(auto-fill,minmax(150px,1fr)); padding: 0 16px 60px; }
-  .page-header { padding: 24px 16px 16px; }
-  .season-bar, .pos-filter { padding: 0 16px; }
-  #player-panel { right: 0; width: 100%; }
-}
 </style>
 </head>
 <body>
@@ -487,12 +444,12 @@ footer span { color: var(--gold); }
 <!-- TOPBAR -->
 <header class="topbar">
   <a class="tb-brand" href="index.html">
-    <img src="logos/Top Secret white.png" alt="Top Secret FC">
+    <img src="../logos/Top Secret white.png" alt="Top Secret FC">
     <span>Top Secret FC</span>
   </a>
   <div class="tb-badges">
-    <img src="logos/Logo EA FC26.png" alt="EA FC 26">
-    <img src="logos/Clubs Pro Badge.png" alt="Clubs Pro">
+    <img src="../logos/Logo EA FC26.png" alt="EA FC 26">
+    <img src="../logos/Clubs Pro Badge.png" alt="Clubs Pro">
   </div>
 </header>
 
@@ -567,8 +524,10 @@ footer span { color: var(--gold); }
 
 <!-- PLAYER PANEL -->
 <div id="player-panel">
+  <!-- photo section -->
   <div class="pp-photo-wrap" id="pp-photo-wrap">
     <button class="pp-close" onclick="closePanel()">✕</button>
+    <!-- filled by JS -->
     <div class="pp-photo-grad"></div>
     <div class="pp-identity">
       <div class="pp-badge" id="pp-badge">MED</div>
@@ -578,11 +537,12 @@ footer span { color: var(--gold); }
     </div>
   </div>
 
+  <!-- body -->
   <div class="pp-body">
-    <!-- Static KPIs -->
+    <!-- KPIs -->
     <div class="pp-kpis">
       <div class="pp-kpi">
-        <div class="pp-kpi-val" id="pk-nvl">—</div>
+        <div class="pp-kpi-val" id="pk-nvl">82</div>
         <div class="pp-kpi-lbl">Nivel</div>
       </div>
       <div class="pp-kpi">
@@ -590,185 +550,110 @@ footer span { color: var(--gold); }
         <div class="pp-kpi-lbl">Partidos</div>
       </div>
       <div class="pp-kpi">
-        <div class="pp-kpi-val" id="pk-total">—</div>
+        <div class="pp-kpi-val" id="pk-total">350</div>
         <div class="pp-kpi-lbl">Score</div>
       </div>
     </div>
 
-    <!-- Live rendimiento -->
-    <div id="pp-rend-wrap">
-      <div class="pp-section-title">Rendimiento · Temporada</div>
-      <div class="pp-rend-grid">
-        <div class="pp-rend-item">
-          <div class="pp-rend-val" id="pk-g">—</div>
-          <div class="pp-rend-lbl">Goles</div>
-        </div>
-        <div class="pp-rend-item">
-          <div class="pp-rend-val" id="pk-a">—</div>
-          <div class="pp-rend-lbl">Asist.</div>
-        </div>
-        <div class="pp-rend-item">
-          <div class="pp-rend-val" id="pk-rat">—</div>
-          <div class="pp-rend-lbl">Rating</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats base -->
+    <!-- stats base -->
     <div>
       <div class="pp-section-title">Stats Base</div>
       <div id="pp-stats-bars"></div>
       <div class="pp-total">
         <span class="pp-total-lbl">Total</span>
-        <span class="pp-total-val" id="pk-total-val">—</span>
+        <span class="pp-total-val" id="pk-total-val">350</span>
         <div class="pp-total-track">
           <div class="pp-total-fill" id="pk-total-bar" style="width:0%"></div>
         </div>
       </div>
     </div>
 
-    <!-- Build / Arquetipo -->
+    <!-- build / arq -->
     <div style="padding-top:4px;border-top:1px solid rgba(255,255,255,.07);">
       <div class="pp-section-title" style="margin-bottom:8px;">Perfil</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:4px;padding:6px 12px;">
           <div style="font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px;">Build</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;color:var(--gold)" id="pk-build">—</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;color:var(--gold)" id="pk-build">Maestro</div>
         </div>
         <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:6px 12px;">
           <div style="font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px;">Arquetipo</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;color:var(--white)" id="pk-arq">—</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;color:var(--white)" id="pk-arq">Objetivo</div>
         </div>
       </div>
     </div>
-
-    <!-- Medals -->
-    <div id="pp-medals-wrap" style="padding-top:4px;border-top:1px solid rgba(255,255,255,.07);">
-      <div class="pp-section-title" style="margin-bottom:10px;">Ranking · Top 3</div>
-      <div id="pp-medals"></div>
-    </div>
-
-    <!-- Download button -->
-    <button class="pp-dl-btn" id="pp-dl-btn" onclick="downloadGraphics()">
-      ⬇ Descargar gráficas del jugador
-    </button>
   </div>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <span>Top Secret FC</span> · Temporada 1 · 2026
+  <span>Top Secret FC</span> · Temporada 1 · 2026 · Preview Redesign
 </footer>
 
-<script type="module">
-import { SEED_MATCHES } from './seed_matches.js';
-
-/* ─── ROSTER ─── */
+<script>
+/* ─────────────────────────────────────────────────
+   ROSTER
+   · brazos/frente se derivan automáticamente del key:
+     ../Renders/[key]/Brazos.png  y  ../Renders/[key]/Frente.png
+   · svg: ruta al SVG de fallback (null = sin SVG)
+   · svgOverride: para casos donde el nombre del SVG
+     no coincide con el key (ej: Buraa07 → Buraa7.svg)
+───────────────────────────────────────────────── */
 const ROSTER = [
-  {key:'Woolfyboyzx2',    pos:'POR', posn:'Portero',         num:'1',  nvl:'88',  arq:'Paragoles', build:'Octopus',
-   stats:[{l:'ACE',v:80},{l:'APO',v:99},{l:'MPO',v:99},{l:'RPO',v:99}], total:377, photo:true},
-  {key:'Zurdo-_CABJ12',   pos:'DEF', posn:'Defensa central', num:'13', nvl:'85',  arq:'Precursor', build:'Janitor',
-   stats:[{l:'COM',v:80},{l:'PLA',v:75},{l:'PDE',v:88},{l:'EFR',v:90}], total:333, photo:true},
-  {key:'Agubostero7',     pos:'DEF', posn:'Defensa central', num:'31', nvl:'84',  arq:'Jefe',      build:'Capitano',
-   stats:[{l:'FUE',v:97},{l:'AGR',v:92},{l:'CAB',v:91},{l:'BAR',v:92}], total:372, photo:true},
-  {key:'Alexiisraiies23', pos:'DEF', posn:'Defensa central', num:'3',  nvl:'88',  arq:'Jefe',      build:'Capitano',
-   stats:[{l:'FUE',v:99},{l:'AGR',v:99},{l:'CAB',v:99},{l:'BAR',v:75}], total:372, photo:true},
-  {key:'RS32-DaniStone',  pos:'MED', posn:'Mediocampista',   num:'8',  nvl:'67',  arq:'Precursor', build:'Progressor+',
-   stats:[{l:'COM',v:90},{l:'PLA',v:90},{l:'PDE',v:90},{l:'EFR',v:92}], total:362},
-  {key:'Juan_Martinez4',  pos:'MED', posn:'Mediocampista',   num:'6',  nvl:'MÁX', arq:'Objetivo',  build:'Roamer',
-   stats:[{l:'SAL',v:90},{l:'FUE',v:90},{l:'CAB',v:80},{l:'TIR',v:75}], total:335, photo:true},
-  {key:'CipriMancini',    pos:'MED', posn:'Mediocampista',   num:'32', nvl:'82',  arq:'Objetivo',  build:'Maestro',
-   stats:[{l:'COM',v:90},{l:'VIS',v:87},{l:'CBA',v:88},{l:'PLA',v:85}], total:350, photo:true},
-  {key:'Buraa07',         pos:'MED', posn:'Mediocampista',   num:'12', nvl:'61',  arq:'Precursor', build:'Janitor',
-   stats:[{l:'COM',v:75},{l:'PLA',v:90},{l:'PDE',v:81},{l:'EFR',v:83}], total:329,
-   folderOverride:'Buraa7', photo:true},
-  {key:'Guiidow',         pos:'MED', posn:'Mediocampista',   num:'20', nvl:'71',  arq:'Precursor', build:'Roamer',
-   stats:[{l:'SAL',v:92},{l:'FUE',v:92},{l:'CAB',v:80},{l:'TIR',v:75}], total:339, photo:true},
-  {key:'Huber236',        pos:'LAT', posn:'Lateral',         num:'95', nvl:'80',  arq:'Precursor', build:'Spark+',
-   stats:[{l:'ACE',v:95},{l:'AGI',v:92},{l:'CBA',v:90},{l:'REG',v:90}], total:367},
-  {key:'zPibu__',         pos:'LAT', posn:'Lateral',         num:'30', nvl:'87',  arq:'Objetivo',  build:'Runner',
-   stats:[{l:'SAL',v:96},{l:'FUE',v:94},{l:'CAB',v:85},{l:'TIR',v:75}], total:350, photo:true},
-  {key:'BlackPanther-CG', pos:'DEL', posn:'Delantero',       num:'11', nvl:'MÁX', arq:'Objetivo',  build:'Magician+',
-   stats:[{l:'ACE',v:95},{l:'BAL',v:85},{l:'DEF',v:95},{l:'CUR',v:85}], total:360, photo:true},
-  {key:'cansitrGd22_',    pos:'DEL', posn:'Delantero',       num:'22', nvl:'MÁX', arq:'Objetivo',  build:'Target',
-   stats:[{l:'SAL',v:96},{l:'FUE',v:98},{l:'CAB',v:82},{l:'TIR',v:99}], total:375, photo:true},
-  {key:'Lautavester7',    pos:'DEL', posn:'Delantero',       num:'7',  nvl:'MÁX', arq:'Objetivo',  build:'Target+',
-   stats:[{l:'SAL',v:96},{l:'FUE',v:98},{l:'CAB',v:86},{l:'TIR',v:96}], total:376, photo:true},
-  {key:'Lucasmati_akd',   pos:'DEL', posn:'Delantero',       num:'9',  nvl:'64',  arq:'Objetivo',  build:'—',
-   stats:[{l:'SAL',v:85},{l:'FUE',v:88},{l:'CAB',v:82},{l:'TIR',v:90}], total:345, photo:true},
+  { key:'Woolfyboyzx2',    pos:'POR', posn:'Portero',          num:'1',  nvl:'88',  build:'Octopus',    arq:'Paragoles',
+    stats:[{l:'ACE',v:80},{l:'APO',v:99},{l:'MPO',v:99},{l:'RPO',v:99}], total:377 },
+  { key:'Zurdo-_CABJ12',   pos:'DEF', posn:'Defensa central',  num:'13',  nvl:'85',  build:'Janitor',    arq:'Precursor',
+    stats:[{l:'COM',v:80},{l:'PLA',v:75},{l:'PDE',v:88},{l:'EFR',v:90}], total:333 },
+  { key:'Agubostero7',     pos:'DEF', posn:'Defensa central',  num:'31', nvl:'84',  build:'Capitano',   arq:'Jefe',
+    stats:[{l:'FUE',v:97},{l:'AGR',v:92},{l:'CAB',v:91},{l:'BAR',v:92}], total:372 },
+  { key:'Alexiisraiies23', pos:'DEF', posn:'Defensa central',  num:'3',  nvl:'88',  build:'Capitano',   arq:'Jefe',
+    stats:[{l:'FUE',v:99},{l:'AGR',v:99},{l:'CAB',v:99},{l:'BAR',v:75}], total:372 },
+  { key:'RS32-DaniStone',  pos:'MED', posn:'Mediocampista',    num:'8',  nvl:'67',  build:'Progressor+',arq:'Precursor',
+    stats:[{l:'COM',v:90},{l:'PLA',v:90},{l:'PDE',v:90},{l:'EFR',v:92}], total:362 },
+  { key:'Juan_Martinez4',  pos:'MED', posn:'Mediocampista',    num:'6',  nvl:'MÁX', build:'Roamer',     arq:'Objetivo',
+    stats:[{l:'SAL',v:90},{l:'FUE',v:90},{l:'CAB',v:80},{l:'TIR',v:75}], total:335 },
+  { key:'CipriMancini',    pos:'MED', posn:'Mediocampista',    num:'32', nvl:'82',  build:'Maestro',    arq:'Objetivo',
+    stats:[{l:'COM',v:90},{l:'VIS',v:87},{l:'CBA',v:88},{l:'PLA',v:85}], total:350 },
+  { key:'Buraa07',         pos:'MED', posn:'Mediocampista',    num:'12',  nvl:'61',  build:'Janitor',    arq:'Precursor',
+    stats:[{l:'COM',v:75},{l:'PLA',v:90},{l:'PDE',v:81},{l:'EFR',v:83}], total:329,
+    folderOverride:'Buraa7', svgOverride:'../Renders/Buraa7.svg' },
+  { key:'Guiidow',         pos:'MED', posn:'Mediocampista',    num:'20', nvl:'71',  build:'Roamer',     arq:'Precursor',
+    stats:[{l:'SAL',v:92},{l:'FUE',v:92},{l:'CAB',v:80},{l:'TIR',v:75}], total:339 },
+  { key:'Huber236',        pos:'LAT', posn:'Lateral',          num:'95', nvl:'80',  build:'Spark+',     arq:'Precursor',
+    stats:[{l:'ACE',v:95},{l:'AGI',v:92},{l:'CBA',v:90},{l:'REG',v:90}], total:367 },
+  { key:'zPibu__',         pos:'LAT', posn:'Lateral',          num:'30', nvl:'87',  build:'Runner',     arq:'Objetivo',
+    stats:[{l:'SAL',v:96},{l:'FUE',v:94},{l:'CAB',v:85},{l:'TIR',v:75}], total:350 },
+  { key:'BlackPanther-CG', pos:'DEL', posn:'Delantero',        num:'11', nvl:'MÁX', build:'Magician+',  arq:'Objetivo',
+    stats:[{l:'ACE',v:95},{l:'BAL',v:85},{l:'DEF',v:95},{l:'CUR',v:85}], total:360 },
+  { key:'cansitrGd22_',    pos:'DEL', posn:'Delantero',        num:'22', nvl:'MÁX', build:'Target',     arq:'Objetivo',
+    stats:[{l:'SAL',v:96},{l:'FUE',v:98},{l:'CAB',v:82},{l:'TIR',v:99}], total:375 },
+  { key:'Lautavester7',    pos:'DEL', posn:'Delantero',        num:'7',  nvl:'MÁX', build:'Target+',    arq:'Objetivo',
+    stats:[{l:'SAL',v:96},{l:'FUE',v:98},{l:'CAB',v:86},{l:'TIR',v:96}], total:376 },
+  { key:'Lucasmati_akd',   pos:'DEL', posn:'Delantero',        num:'9',  nvl:'64',  build:'—',          arq:'Objetivo',
+    stats:[{l:'SAL',v:85},{l:'FUE',v:88},{l:'CAB',v:82},{l:'TIR',v:90}], total:345 },
 ];
-const ROSTER_KEYS = ROSTER.map(r => r.key);
 
-/* ─── PATHS ─── */
+/* rutas derivadas del key — no hardcodear nunca */
 function renderFolder(p) { return p.folderOverride || p.key; }
-function brazosPath(p)   { return `Renders/${renderFolder(p)}/Brazos.png`; }
-function frontePath(p)   { return `Renders/${renderFolder(p)}/Frente.png`; }
-function svgPath(p)      { return `Renders/${p.key}.svg`; }
+function brazosPath(p) { return `../Renders/${renderFolder(p)}/Brazos.png`; }
+function frontePath(p) { return `../Renders/${renderFolder(p)}/Frente.png`; }
+function svgPath(p)    { return p.svgOverride || `../Renders/${p.key}.svg`; }
 
-/* ─── COMPUTE STATS ─── */
-function computePlayerStats(matches) {
-  const s = {};
-  matches.forEach(m => {
-    m.players.forEach(pl => {
-      const k = pl.matched || pl.name;
-      if (!s[k]) s[k] = {pj:0, g:0, a:0, ratings:[]};
-      s[k].pj++;
-      s[k].g += (pl.goals || 0);
-      s[k].a += (pl.assists || 0);
-      if (pl.rating != null) s[k].ratings.push(pl.rating);
-    });
-  });
-  Object.keys(s).forEach(k => {
-    const p = s[k];
-    p.ga = p.g + p.a;
-    p.avgRating = p.ratings.length ? +(p.ratings.reduce((a,b)=>a+b,0)/p.ratings.length).toFixed(2) : 0;
-    p.maxRating = p.ratings.length ? Math.max(...p.ratings) : 0;
-  });
-  return s;
-}
-
-/* ─── COMPUTE RANKINGS ─── */
-function computeRankings(allStats) {
-  const cats = [
-    {key:'g',         label:'Goles',        fn:x=>x.g},
-    {key:'a',         label:'Asistencias',  fn:x=>x.a},
-    {key:'ga',        label:'G + A',         fn:x=>x.ga},
-    {key:'avgRating', label:'Rating prom.',  fn:x=>x.avgRating, fmt:v=>v.toFixed(2)},
-    {key:'pj',        label:'Regularidad',  fn:x=>x.pj},
-    {key:'maxRating', label:'Rating máx.',  fn:x=>x.maxRating, fmt:v=>v.toFixed(1)},
-  ];
-  const rankings = {};
-  cats.forEach(cat => {
-    const candidates = ROSTER_KEYS
-      .filter(k => allStats[k] && allStats[k].pj > 0)
-      .map(k => ({key:k, val: cat.fn(allStats[k])}))
-      .filter(x => x.val > 0)
-      .sort((a,b) => b.val - a.val);
-    candidates.slice(0,3).forEach((item, i) => {
-      if (!rankings[item.key]) rankings[item.key] = [];
-      const dispVal = cat.fmt ? cat.fmt(item.val) : item.val;
-      rankings[item.key].push({medal:i+1, label:cat.label, val:dispVal});
-    });
-  });
-  return rankings;
-}
-
-/* ─── INIT DATA ─── */
-const allStats = computePlayerStats(SEED_MATCHES);
-const allRankings = computeRankings(allStats);
-
-/* ─── STATE ─── */
+/* ─────────────────────────────────────────────────
+   BUILD CARDS
+───────────────────────────────────────────────── */
 let currentFilter = 'all';
 let selectedCard  = null;
-let _currentPlayer = null;
 
-/* ─── BUILD CARD ─── */
 function buildCard(p) {
   const card = document.createElement('div');
   card.className = 'player-card';
   card.dataset.pos = p.pos;
   card.dataset.key = p.key;
 
+  /* Siempre intentamos cargar las PNGs.
+     onerror en brazos → muestra el placeholder.
+     onerror en frente → lo oculta (deshabilita el hover swap). */
   const ph = `<div class="card-placeholder" style="display:none">
     <img class="ph-svg-bg" src="${svgPath(p)}" alt="" onerror="this.style.display='none'">
     <div class="ph-num">#${p.num}</div>
@@ -793,6 +678,7 @@ function buildCard(p) {
       <div class="cf-right"><span class="pos-badge">${p.pos}</span></div>
     </div>`;
 
+  /* GSAP hover — el swap solo actúa si frente cargó bien */
   const brazos = card.querySelector('.img-brazos');
   const frente = card.querySelector('.img-frente');
 
@@ -810,6 +696,8 @@ function buildCard(p) {
       gsap.to(frente, {opacity: 0, duration: 0.4, ease: 'power2.inOut'});
     }
   });
+
+  /* click → panel */
   card.addEventListener('click', () => {
     gsap.to(card, {scale: 0.97, duration: 0.08, yoyo: true, repeat: 1, ease: 'power1.inOut',
       onComplete: () => openPanel(p, card)
@@ -819,19 +707,25 @@ function buildCard(p) {
   return card;
 }
 
-/* ─── RENDER GRID ─── */
+/* ─────────────────────────────────────────────────
+   RENDER GRID
+───────────────────────────────────────────────── */
 function renderGrid(filter) {
   currentFilter = filter;
   const grid = document.getElementById('squadGrid');
   grid.innerHTML = '';
   const visible = ROSTER.filter(p => filter === 'all' || p.pos === filter);
   visible.forEach(p => grid.appendChild(buildCard(p)));
+
+  /* stagger entrance */
   gsap.from(grid.querySelectorAll('.player-card'), {
     opacity: 0, y: 28, duration: 0.45, stagger: 0.045, ease: 'power2.out'
   });
 }
 
-/* ─── FILTER ─── */
+/* ─────────────────────────────────────────────────
+   POSITION FILTER
+───────────────────────────────────────────────── */
 function filterPos(pos, btn) {
   document.querySelectorAll('.pfbtn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -839,9 +733,10 @@ function filterPos(pos, btn) {
   if (wasOpen) closePanel(false);
   renderGrid(pos);
 }
-window.filterPos = filterPos;
 
-/* ─── SEASON SWITCH ─── */
+/* ─────────────────────────────────────────────────
+   SEASON SWITCH
+───────────────────────────────────────────────── */
 function switchSeason(n, btn) {
   document.querySelectorAll('.season-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -850,20 +745,21 @@ function switchSeason(n, btn) {
   if (n === 1) { t1.style.display = ''; t2.style.display = 'none'; }
   else         { t1.style.display = 'none'; t2.style.display = 'block'; closePanel(false); }
 }
-window.switchSeason = switchSeason;
 
-/* ─── OPEN PANEL ─── */
+/* ─────────────────────────────────────────────────
+   PANEL OPEN / CLOSE
+───────────────────────────────────────────────── */
 function openPanel(p, card) {
-  _currentPlayer = p;
-
+  /* highlight selected card */
   if (selectedCard) selectedCard.classList.remove('selected');
   selectedCard = card;
   card.classList.add('selected');
 
-  /* photo */
+  /* fill panel content — intenta brazos PNG, fallback a SVG/placeholder */
   const photoWrap = document.getElementById('pp-photo-wrap');
   photoWrap.querySelectorAll('.pp-photo,.pp-photo-placeholder').forEach(el => el.remove());
 
+  /* siempre intenta el brazos PNG; si falla, muestra SVG placeholder */
   const img = document.createElement('img');
   img.className = 'pp-photo';
   img.alt = p.key;
@@ -879,26 +775,21 @@ function openPanel(p, card) {
   img.src = brazosPath(p);
   photoWrap.insertBefore(img, photoWrap.firstChild);
 
-  /* identity */
-  document.getElementById('pp-badge').textContent = p.pos;
-  document.getElementById('pp-num').textContent   = '#' + p.num;
-  document.getElementById('pp-name').textContent  = p.key;
-  document.getElementById('pp-posn').textContent  = p.posn;
-
-  /* KPIs */
-  const st = allStats[p.key] || {pj:0, g:0, a:0, avgRating:0, maxRating:0};
-  document.getElementById('pk-nvl').textContent   = p.nvl;
-  document.getElementById('pk-pj').textContent    = st.pj || '—';
-  document.getElementById('pk-total').textContent = p.total;
-
-  /* rendimiento */
-  document.getElementById('pk-g').textContent   = st.pj ? st.g : '—';
-  document.getElementById('pk-a').textContent   = st.pj ? st.a : '—';
-  document.getElementById('pk-rat').textContent = st.pj ? st.avgRating.toFixed(2) : '—';
+  document.getElementById('pp-badge').textContent  = p.pos;
+  document.getElementById('pp-num').textContent    = '#' + p.num;
+  document.getElementById('pp-name').textContent   = p.key;
+  document.getElementById('pp-posn').textContent   = p.posn;
+  document.getElementById('pk-nvl').textContent    = p.nvl;
+  document.getElementById('pk-total').textContent  = p.total;
+  document.getElementById('pk-pj').textContent     = '—';
+  document.getElementById('pk-total-val').textContent = p.total;
+  document.getElementById('pk-build').textContent  = p.build;
+  document.getElementById('pk-arq').textContent    = p.arq;
 
   /* stat bars */
   const barsEl = document.getElementById('pp-stats-bars');
   barsEl.innerHTML = '';
+  const maxV = Math.max(...p.stats.map(s => s.v));
   p.stats.forEach(s => {
     const row = document.createElement('div');
     row.className = 'pp-stat-row';
@@ -908,97 +799,71 @@ function openPanel(p, card) {
       <span class="pp-stat-val">${s.v}</span>`;
     barsEl.appendChild(row);
   });
-  document.getElementById('pk-total-val').textContent = p.total;
-  document.getElementById('pk-total-bar').style.width = Math.min(100, p.total / 400 * 100) + '%';
 
-  /* perfil */
-  document.getElementById('pk-build').textContent = p.build;
-  document.getElementById('pk-arq').textContent   = p.arq;
-
-  /* medals */
-  const medals = allRankings[p.key] || [];
-  const mc = ['m1','m2','m3'];
-  const medalsEl = document.getElementById('pp-medals');
-  medalsEl.innerHTML = medals.length
-    ? medals.map(m => `<div class="pp-medal-row">
-        <div class="pp-medal ${mc[m.medal-1]}">${m.medal}</div>
-        <span class="pp-medal-lbl">${m.label}</span>
-        <span class="pp-medal-val">${m.val}</span>
-      </div>`).join('')
-    : `<div style="font-size:.75rem;color:rgba(255,255,255,.3)">Sin medallas esta temporada</div>`;
-
-  /* download button visibility */
-  const dlBtn = document.getElementById('pp-dl-btn');
-  dlBtn.style.display = 'flex';
+  /* total bar */
+  const maxTotal = 400;
+  document.getElementById('pk-total-bar').style.width = Math.min(100, p.total / maxTotal * 100) + '%';
 
   /* show panel */
-  const panel    = document.getElementById('player-panel');
+  const panel = document.getElementById('player-panel');
   const backdrop = document.getElementById('panel-backdrop');
   panel.style.display = 'flex';
   backdrop.style.display = 'block';
   document.body.classList.add('panel-open');
 
-  gsap.fromTo(panel, {x:'100%'}, {x:'0%', duration:0.5, ease:'power3.out'});
-  gsap.fromTo(backdrop, {opacity:0}, {opacity:1, duration:0.3});
+  gsap.fromTo(panel,
+    {x: '100%'},
+    {x: '0%', duration: 0.5, ease: 'power3.out'}
+  );
+  gsap.fromTo(backdrop, {opacity: 0}, {opacity: 1, duration: 0.3});
 
-  /* animate bars */
-  const fills  = panel.querySelectorAll('.pp-stat-fill, .pp-total-fill');
+  /* animate stat bars */
+  const fills = panel.querySelectorAll('.pp-stat-fill, .pp-total-fill');
   const widths = Array.from(fills).map(el => el.style.width);
   fills.forEach(el => { el.style.width = '0%'; });
-  gsap.to(fills, {width:(i)=>widths[i], duration:0.6, ease:'power2.out', delay:0.35, stagger:0.06});
-  gsap.from('.pp-kpi', {opacity:0, y:12, duration:0.4, stagger:0.07, delay:0.3, ease:'power2.out'});
+  gsap.to(fills, {
+    width: (i) => widths[i],
+    duration: 0.6, ease: 'power2.out', delay: 0.35, stagger: 0.06
+  });
+
+  /* animate kpis */
+  gsap.from('.pp-kpi', {opacity: 0, y: 12, duration: 0.4, stagger: 0.07, delay: 0.3, ease: 'power2.out'});
 }
 
-/* ─── CLOSE PANEL ─── */
 function closePanel(animate = true) {
   const panel    = document.getElementById('player-panel');
   const backdrop = document.getElementById('panel-backdrop');
   if (selectedCard) { selectedCard.classList.remove('selected'); selectedCard = null; }
   document.body.classList.remove('panel-open');
+
   if (!animate) {
     panel.style.display = 'none';
     backdrop.style.display = 'none';
     return;
   }
-  gsap.to(panel,    {x:'100%', duration:0.38, ease:'power2.in', onComplete:()=>{ panel.style.display='none'; }});
-  gsap.to(backdrop, {opacity:0, duration:0.28, onComplete:()=>{ backdrop.style.display='none'; }});
+  gsap.to(panel,    {x: '100%', duration: 0.38, ease: 'power2.in', onComplete: () => { panel.style.display = 'none'; }});
+  gsap.to(backdrop, {opacity: 0, duration: 0.28, onComplete: () => { backdrop.style.display = 'none'; }});
 }
-window.closePanel = closePanel;
+
+/* close on Escape */
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
-/* ─── DOWNLOAD GRAPHICS ─── */
-function downloadGraphics() {
-  const p = _currentPlayer;
-  if (!p) return;
-  const folder = p.folderOverride || p.key;
-  const files = [
-    {name: 'Portada.png', path: `Renders/${folder}/Portada.png`},
-  ];
-  if (p.photo) {
-    files.push({name: 'Foto de perfil.png', path: `Renders/${folder}/Foto de perfil.png`});
-  }
-  files.forEach(f => {
-    const a = document.createElement('a');
-    a.href = f.path;
-    a.download = f.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
-}
-window.downloadGraphics = downloadGraphics;
+/* ─────────────────────────────────────────────────
+   PAGE LOAD ANIMATIONS
+───────────────────────────────────────────────── */
+gsap.set('.ph-eyebrow, .ph-title, .ph-sub', {opacity: 0, y: 18});
+gsap.set('.season-bar', {opacity: 0, y: 12});
+gsap.set('.pos-filter', {opacity: 0, y: 10});
 
-/* ─── PAGE LOAD ANIMATIONS ─── */
-gsap.set('.ph-eyebrow, .ph-title, .ph-sub', {opacity:0, y:18});
-gsap.set('.season-bar', {opacity:0, y:12});
-gsap.set('.pos-filter', {opacity:0, y:10});
-gsap.to('.ph-eyebrow', {opacity:1, y:0, duration:0.5, ease:'power2.out', delay:0.05});
-gsap.to('.ph-title',   {opacity:1, y:0, duration:0.6, ease:'power3.out', delay:0.12});
-gsap.to('.ph-sub',     {opacity:1, y:0, duration:0.5, ease:'power2.out', delay:0.2});
-gsap.to('.season-bar', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0.28});
-gsap.to('.pos-filter', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0.34});
+gsap.to('.ph-eyebrow', {opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.05});
+gsap.to('.ph-title',   {opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.12});
+gsap.to('.ph-sub',     {opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.2});
+gsap.to('.season-bar', {opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.28});
+gsap.to('.pos-filter', {opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.34});
 
-/* ─── INIT ─── */
+/* ─────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────── */
 renderGrid('all');
 </script>
 </body>

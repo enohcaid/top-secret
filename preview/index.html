@@ -3,14 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Top Secret FC · Inicio</title>
-<link rel="icon" href="Top-Secret.png">
+<title>Top Secret FC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
 :root{
-  --black:#111111; --white:#FFFFFF; --gray:#F5F5F0;
+  --black:#111111; --white:#FFFFFF; --gray:#F5F5F0; --gray2:#EBEBЕ6;
   --gold:#C9A84C; --gold2:#E8C97A; --gold-dim:rgba(201,168,76,.12);
   --mid:#888888; --mid2:#AAAAAA; --border:#E5E5E0;
   --text:#111111; --text2:#444444;
@@ -22,19 +20,20 @@
 html{scroll-behavior:smooth;}
 body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding-left:var(--sb-left);padding-right:var(--sb-right);padding-top:var(--topbar);}
 
-/* ── TOPBAR ── */
+/* ── TOPBAR ───────────────────────────────────────── */
 .topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar);background:var(--black);border-bottom:3px solid var(--gold);z-index:200;display:flex;align-items:center;padding:0 16px 0 16px;gap:0;}
 .tb-brand{display:flex;align-items:center;gap:14px;text-decoration:none;margin-right:auto;}
 .tb-brand img{height:80px;width:120px;object-fit:contain;}
 .tb-brand-name{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;letter-spacing:.14em;color:var(--white);text-transform:uppercase;}
 .tb-brand-name span{color:var(--gold);}
 .tb-logos{display:flex;align-items:center;gap:40px;margin-right:60px;}
-.tb-logos img{width:auto;object-fit:contain;opacity:.95;}
+.tb-logos img{width:auto;object-fit:contain;opacity:.95;transition:opacity .2s;}
+.tb-logos img:hover{opacity:1;}
 .tb-logos img[alt="EA FC 26"]{height:100px;}
 .tb-logos img[alt="Clubs Pro"]{height:90px;}
 .tb-sep{width:1px;height:22px;background:rgba(255,255,255,.12);}
 
-/* ── SIDEBAR IZQUIERDA ── */
+/* ── SIDEBAR IZQUIERDA ────────────────────────────── */
 .sb-left{position:fixed;top:var(--topbar);left:0;width:var(--sb-left);height:calc(100vh - var(--topbar));background:var(--black);border-right:1px solid rgba(201,168,76,.15);z-index:150;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;overflow:hidden;}
 .sb-nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;width:44px;height:44px;border-radius:8px;text-decoration:none;color:rgba(255,255,255,.35);transition:all .2s;gap:3px;cursor:pointer;}
 .sb-nav-item svg{width:18px;height:18px;flex-shrink:0;}
@@ -43,17 +42,17 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .sb-nav-item.active{background:var(--gold-dim);color:var(--gold);}
 .sb-divider{width:28px;height:1px;background:rgba(255,255,255,.08);margin:6px 0;}
 
-/* ── SIDEBAR DERECHA ── */
+/* ── SIDEBAR DERECHA ──────────────────────────────── */
 .sb-right{position:fixed;top:var(--topbar);right:0;width:var(--sb-right);height:calc(100vh - var(--topbar));background:var(--white);border-left:1px solid var(--border);z-index:150;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:10px;}
 .social-item{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;color:var(--mid2);text-decoration:none;transition:all .2s;border:1px solid transparent;}
 .social-item:hover{color:var(--black);border-color:var(--border);}
 .social-item svg{width:16px;height:16px;}
 
-/* ── MAIN ── */
+/* ── MAIN CONTENT ─────────────────────────────────── */
 .main{min-height:calc(100vh - var(--topbar));}
 
-/* ── HERO ── */
-.hero{background:var(--black);padding:64px 40px;display:flex;align-items:center;justify-content:space-between;gap:40px;min-height:420px;position:relative;overflow:hidden;}
+/* ── HERO ─────────────────────────────────────────── */
+.hero{background:var(--black);padding:64px 40px 64px;display:flex;align-items:center;justify-content:space-between;gap:40px;min-height:420px;position:relative;overflow:hidden;}
 .hero::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(201,168,76,.04));pointer-events:none;}
 .hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
 .hero-lines::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);}
@@ -79,23 +78,24 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .hero-dots{display:flex;align-items:center;gap:5px;}
 .hero-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:all .3s ease;}
 .hero-dot.active{width:20px;border-radius:3px;background:var(--gold);}
+@keyframes heroFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
 
-/* ── SECTION ── */
-.section{padding:40px 40px;}
+/* ── SECTION ──────────────────────────────────────── */
+.section{padding:40px 40px;background:var(--white);}
 .section.alt{background:var(--gray);}
 .section-header{display:flex;align-items:baseline;gap:14px;margin-bottom:28px;}
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--black);}
 .section-line{flex:1;height:1px;background:var(--border);}
 .section-badge{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);border:1px solid var(--border);padding:3px 8px;border-radius:3px;}
 
-/* ── STATS GRID ── */
+/* ── STATS GRID ───────────────────────────────────── */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
 .stat-card{background:var(--white);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:20px 20px 16px;}
 .stat-num{font-family:'Barlow Condensed',sans-serif;font-size:3rem;font-weight:900;color:var(--black);line-height:1;letter-spacing:-.02em;}
 .stat-label{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);margin-top:4px;}
 .stat-sub{font-size:.72rem;color:var(--mid2);margin-top:6px;}
 
-/* ── LEAGUE CARDS ── */
+/* ── LEAGUE CARDS ─────────────────────────────────── */
 .leagues-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .league-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:22px 22px 20px;position:relative;overflow:hidden;transition:border-color .2s;}
 .league-card:hover{border-color:var(--gold);}
@@ -110,7 +110,7 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .final-badge{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
 .active-badge{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;}
 
-/* ── TOP PERFORMERS ── */
+/* ── TOP PERFORMERS ───────────────────────────────── */
 .tops-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .top-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:0 0 6px 6px;padding:0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s;}
 .top-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.1);}
@@ -119,15 +119,17 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .top-avatar-init{font-family:'Barlow Condensed',sans-serif;font-size:2.5rem;font-weight:900;color:var(--gold);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
 .top-card-body{padding:14px 16px;display:flex;align-items:center;gap:12px;}
 .top-info{flex:1;min-width:0;}
+.top-info{flex:1;min-width:0;}
 .top-name{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .top-pos{font-size:.68rem;font-weight:600;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
 .top-stat{display:flex;align-items:baseline;gap:3px;margin-top:8px;}
 .top-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;color:var(--gold);line-height:1;}
 .top-stat-label{font-size:.65rem;font-weight:700;color:var(--mid2);letter-spacing:.06em;text-transform:uppercase;}
 
-/* ── RECENT RESULTS ── */
+/* ── RECENT RESULTS ───────────────────────────────── */
 .results-list{display:flex;flex-direction:column;gap:8px;}
-.result-row{background:var(--white);border:1px solid var(--border);border-radius:5px;padding:12px 16px;display:flex;align-items:center;gap:12px;}
+.result-row{background:var(--white);border:1px solid var(--border);border-radius:5px;padding:12px 16px;display:flex;align-items:center;gap:12px;transition:border-color .2s;}
+.result-row:hover{border-color:var(--border);}
 .result-pill{width:32px;height:20px;border-radius:3px;font-size:.65rem;font-weight:800;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-transform:uppercase;}
 .pill-w{background:#f0fdf4;color:#15803d;}
 .pill-d{background:#fffbeb;color:#b45309;}
@@ -137,7 +139,7 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .result-score{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;letter-spacing:.06em;color:var(--black);}
 .result-date{font-size:.68rem;color:var(--mid2);}
 
-/* ── NAV GRID ── */
+/* ── NAV SECTION GRID ─────────────────────────────── */
 .nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 .nav-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:22px 18px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;transition:all .2s;}
 .nav-card:hover{border-color:var(--gold);background:var(--gray);}
@@ -147,19 +149,18 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .nav-card-desc{font-size:.75rem;color:var(--mid);}
 .nav-card-arrow{margin-top:auto;font-size:1.1rem;color:var(--gold);}
 
-/* ── FOOTER ── */
+/* ── FOOTER ───────────────────────────────────────── */
 footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;}
 .footer-brand{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);}
 .footer-brand strong{color:var(--gold);}
 .footer-copy{font-size:.72rem;color:rgba(255,255,255,.3);letter-spacing:.06em;}
 
 @media(max-width:880px){
-  body{padding-left:0;padding-right:0;}
-  .sb-left,.sb-right{display:none;}
   .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .leagues-grid,.tops-grid{grid-template-columns:1fr;}
+  .leagues-grid{grid-template-columns:1fr;}
+  .tops-grid{grid-template-columns:1fr;}
   .nav-grid{grid-template-columns:repeat(2,1fr);}
-  .hero{padding:40px 24px;flex-direction:column;}
+  .hero{padding:40px 24px;}
   .hero-visual{display:none;}
   .section{padding:28px 20px;}
 }
@@ -170,13 +171,13 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
 <!-- TOPBAR -->
 <header class="topbar">
   <a class="tb-brand" href="index.html">
-    <img src="logos/Top Secret white.png" alt="TSFC">
+    <img src="../logos/Top Secret white.png" alt="TSFC">
     <span class="tb-brand-name">TOP <span>SECRET</span> FC</span>
   </a>
   <div class="tb-logos">
     <div class="tb-sep"></div>
-    <img src="logos/Logo EA FC26.png" alt="EA FC 26">
-    <img src="logos/Clubs Pro Badge.png" alt="Clubs Pro">
+    <img src="../logos/Logo EA FC26.png" alt="EA FC 26">
+    <img src="../logos/Clubs Pro Badge.png" alt="Clubs Pro">
   </div>
 </header>
 
@@ -200,6 +201,10 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     <span>Equipo</span>
   </a>
   <div class="sb-divider"></div>
+  <a class="sb-nav-item" href="#" title="Logros">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8,21 12,21 16,21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M7 4h10l2 5a7 7 0 01-14 0l2-5z"/><path d="M5 9H3a2 2 0 000 4h2"/><path d="M19 9h2a2 2 0 010 4h-2"/></svg>
+    <span>Logros</span>
+  </a>
   <a class="sb-nav-item" href="convocatoria.html" title="Convocatoria">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 12l3 3 5-5"/></svg>
     <span>Conv.</span>
@@ -213,6 +218,9 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   </a>
   <a class="social-item" href="#" title="X (Twitter)">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+  </a>
+  <a class="social-item" href="#" title="TikTok">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.15 8.15 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
   </a>
   <a class="social-item" href="#" title="YouTube">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.97C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.41a2.78 2.78 0 001.95-1.97A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75,15.02 15.5,12 9.75,8.98 9.75,15.02" fill="currentColor" stroke="none"/></svg>
@@ -236,7 +244,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       </div>
     </div>
     <div class="hero-visual">
-      <img class="hero-photo" id="hero-img-a" src="logos/festejo.png" alt="Top Secret FC">
+      <img class="hero-photo" id="hero-img-a" src="../logos/festejo.png" alt="Top Secret FC">
       <img class="hero-photo" id="hero-img-b" alt="Top Secret FC" style="opacity:0">
       <div class="hero-photo-fade"></div>
       <div class="hero-slider-ui">
@@ -247,18 +255,34 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     </div>
   </section>
 
-  <!-- QUICK STATS — filled by JS -->
+  <!-- QUICK STATS -->
   <section class="section alt">
     <div class="section-header">
       <h2 class="section-title">Temporada 1 · 2026</h2>
       <div class="section-line"></div>
       <span class="section-badge">Resumen</span>
     </div>
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card"><div class="stat-num" id="sq-pj">—</div><div class="stat-label">Partidos jugados</div><div class="stat-sub" id="sq-pj-sub">VPN + VPUG + 11x11</div></div>
-      <div class="stat-card"><div class="stat-num" id="sq-wins">—</div><div class="stat-label">Victorias</div><div class="stat-sub" id="sq-eff">—% efectividad</div></div>
-      <div class="stat-card"><div class="stat-num" id="sq-goals">—</div><div class="stat-label">Goles a favor</div><div class="stat-sub" id="sq-gpg">— por partido</div></div>
-      <div class="stat-card"><div class="stat-num" id="sq-rat">—</div><div class="stat-label">Rating promedio</div><div class="stat-sub" id="sq-rat-sub">—</div></div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">50</div>
+        <div class="stat-label">Partidos jugados</div>
+        <div class="stat-sub">VPN + VPUG + 11x11</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">33</div>
+        <div class="stat-label">Victorias</div>
+        <div class="stat-sub">66% de efectividad</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">110</div>
+        <div class="stat-label">Goles a favor</div>
+        <div class="stat-sub">2.2 por partido</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">7.3</div>
+        <div class="stat-label">Rating promedio</div>
+        <div class="stat-sub">Mejor: cansitrGd22_</div>
+      </div>
     </div>
   </section>
 
@@ -270,14 +294,18 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       <span class="section-badge">T1 2026</span>
     </div>
     <div class="leagues-grid">
+      <!-- VPN -->
       <div class="league-card">
         <div class="lc-accent" style="background:var(--vpn)"></div>
         <div class="lc-tag" style="color:var(--vpn)">VPN</div>
         <div class="lc-name">Virtual Pro Network</div>
-        <div class="lc-pos"><div class="lc-pos-num">—</div></div>
+        <div class="lc-pos">
+          <div class="lc-pos-num">—</div>
+        </div>
         <div class="lc-pts">Temporada 1 en curso</div>
-        <span class="lc-badge active-badge">19 fechas jugadas</span>
+        <span class="lc-badge" style="background:rgba(245,197,24,.1);color:#b45309;border:1px solid rgba(245,197,24,.3);">19 fechas jugadas</span>
       </div>
+      <!-- VPUG -->
       <div class="league-card">
         <div class="lc-accent" style="background:var(--vpug)"></div>
         <div class="lc-tag" style="color:var(--vpug)">VPUG</div>
@@ -289,6 +317,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
         <div class="lc-pts">19 pts · 6V 1E 1D · 8 PJ</div>
         <span class="lc-badge final-badge">Final T1</span>
       </div>
+      <!-- 11x11 -->
       <div class="league-card">
         <div class="lc-accent" style="background:var(--e11)"></div>
         <div class="lc-tag" style="color:var(--e11)">11x11</div>
@@ -303,24 +332,98 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     </div>
   </section>
 
-  <!-- TOP PERFORMERS — filled by JS -->
+  <!-- TOP PERFORMERS -->
   <section class="section alt">
     <div class="section-header">
-      <h2 class="section-title" id="top-section-title">Top Goleadores</h2>
+      <h2 class="section-title">Top Goleadores</h2>
       <div class="section-line"></div>
       <span class="section-badge">T1 2026</span>
     </div>
-    <div class="tops-grid" id="tops-grid"></div>
+    <div class="tops-grid">
+      <!-- cansitrGd22_ — intenta Brazos.png, fallback SVG -->
+      <div class="top-card">
+        <div class="top-avatar">
+          <img src="../Renders/cansitrGd22_/Brazos.png" alt="cansitrGd22_"
+            onerror="this.src='../Renders/cansitrGd22_.svg'">
+        </div>
+        <div class="top-card-body">
+          <div class="top-info">
+            <div class="top-name">cansitrGd22_</div>
+            <div class="top-pos">Delantero · #22</div>
+            <div class="top-stat">
+              <span class="top-stat-num">32</span>
+              <span class="top-stat-label">goles</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Lautavester7 — intenta Brazos.png, fallback SVG -->
+      <div class="top-card">
+        <div class="top-avatar">
+          <img src="../Renders/Lautavester7/Brazos.png" alt="Lautavester7"
+            onerror="this.src='../Renders/Lautavester7.svg'">
+        </div>
+        <div class="top-card-body">
+          <div class="top-info">
+            <div class="top-name">Lautavester7</div>
+            <div class="top-pos">Delantero · #7</div>
+            <div class="top-stat">
+              <span class="top-stat-num">27</span>
+              <span class="top-stat-label">goles</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Juan_Martinez4 — intenta Brazos.png, fallback SVG -->
+      <div class="top-card">
+        <div class="top-avatar">
+          <img src="../Renders/Juan_Martinez4/Brazos.png" alt="Juan_Martinez4"
+            onerror="this.src='../Renders/Juan_Martinez4.svg'">
+        </div>
+        <div class="top-card-body">
+          <div class="top-info">
+            <div class="top-name">Juan_Martinez4</div>
+            <div class="top-pos">Mediocampista · #6</div>
+            <div class="top-stat">
+              <span class="top-stat-num">11</span>
+              <span class="top-stat-label">asistencias</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- ÚLTIMOS RESULTADOS — filled by JS -->
+  <!-- ÚLTIMOS RESULTADOS -->
   <section class="section">
     <div class="section-header">
       <h2 class="section-title">Últimos Resultados</h2>
       <div class="section-line"></div>
       <a class="section-badge" href="estadisticas.html" style="text-decoration:none;color:var(--gold);">Ver todos →</a>
     </div>
-    <div class="results-list" id="results-list"></div>
+    <div class="results-list">
+      <div class="result-row">
+        <span class="result-pill pill-d">E</span>
+        <span class="result-league" style="background:rgba(245,197,24,.1);color:#b45309;">VPN</span>
+        <span class="result-rival">Dalmine Esports</span>
+        <span class="result-score">3 – 3</span>
+        <span class="result-date">14 Abr</span>
+      </div>
+      <div class="result-row">
+        <span class="result-pill pill-w">V</span>
+        <span class="result-league" style="background:rgba(245,197,24,.1);color:#b45309;">VPN</span>
+        <span class="result-rival">Camioneros eSp</span>
+        <span class="result-score">2 – 1</span>
+        <span class="result-date">14 Abr</span>
+      </div>
+      <div class="result-row">
+        <span class="result-pill pill-w">V</span>
+        <span class="result-league" style="background:rgba(245,197,24,.1);color:#b45309;">VPN</span>
+        <span class="result-rival">Dep Ballester</span>
+        <span class="result-score">3 – 2</span>
+        <span class="result-date">14 Abr</span>
+      </div>
+    </div>
   </section>
 
   <!-- NAVEGACIÓN -->
@@ -365,179 +468,47 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   <span class="footer-copy">EA FC Clubs Pro · Buenos Aires · Argentina</span>
 </footer>
 
-<script type="module">
-import { SEED_MATCHES } from './seed_matches.js';
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* ── PAGE LOAD ── */
+gsap.set('.hero-content > *', {opacity: 0, y: 24});
+gsap.set('.hero-visual', {opacity: 0, x: 30});
+gsap.set('.stat-card, .league-card, .top-card, .result-row, .nav-card', {opacity: 0, y: 22});
 
-/* ── PLAYER FOLDER MAP (for Brazos.png paths) ── */
-const FOLDER_OVERRIDE = { 'Buraa07': 'Buraa7' };
-const ROSTER_POSN = {
-  'Woolfyboyzx2':'Portero','Zurdo-_CABJ12':'Defensa','Agubostero7':'Defensa',
-  'Alexiisraiies23':'Defensa','RS32-DaniStone':'Mediocampista','Juan_Martinez4':'Mediocampista',
-  'CipriMancini':'Mediocampista','Buraa07':'Mediocampista','Guiidow':'Mediocampista',
-  'Huber236':'Lateral','zPibu__':'Lateral','BlackPanther-CG':'Delantero',
-  'cansitrGd22_':'Delantero','Lautavester7':'Delantero','Lucasmati_akd':'Delantero',
-};
-const ROSTER_NUM = {
-  'Woolfyboyzx2':'1','Zurdo-_CABJ12':'13','Agubostero7':'31','Alexiisraiies23':'3',
-  'RS32-DaniStone':'8','Juan_Martinez4':'6','CipriMancini':'32','Buraa07':'12',
-  'Guiidow':'20','Huber236':'95','zPibu__':'30','BlackPanther-CG':'11',
-  'cansitrGd22_':'22','Lautavester7':'7','Lucasmati_akd':'9',
-};
-
-function brazosPath(key) {
-  const folder = FOLDER_OVERRIDE[key] || key;
-  return `Renders/${folder}/Brazos.png`;
-}
-
-/* ── COMPUTE AGGREGATE STATS ── */
-let totalGoals = 0, totalWins = 0, totalDraws = 0;
-const allRatings = [];
-const playerStats = {};
-
-function parseScore(s) {
-  if (!s) return [0,0];
-  const p = String(s).split('-').map(Number);
-  return [p[0]||0, p[1]||0];
-}
-function matchOutcome(s) {
-  const [gf, gc] = parseScore(s);
-  return gf > gc ? 'win' : (gf === gc ? 'draw' : 'loss');
-}
-
-SEED_MATCHES.forEach(m => {
-  const outcome = matchOutcome(m.match_result);
-  if (outcome === 'win') totalWins++;
-  else if (outcome === 'draw') totalDraws++;
-  totalGoals += parseScore(m.match_result)[0];
-  m.players.forEach(p => {
-    const k = p.matched || p.name;
-    if (!playerStats[k]) playerStats[k] = {pj:0,g:0,a:0,ratings:[]};
-    playerStats[k].pj++;
-    playerStats[k].g += (p.goals||0);
-    playerStats[k].a += (p.assists||0);
-    if (p.rating != null) { playerStats[k].ratings.push(p.rating); allRatings.push(p.rating); }
-  });
+gsap.to('.hero-content > *', {
+  opacity: 1, y: 0, duration: 0.7, stagger: 0.12,
+  ease: 'power3.out', delay: 0.1
 });
-Object.keys(playerStats).forEach(k => {
-  const p = playerStats[k];
-  p.avgRating = p.ratings.length ? +(p.ratings.reduce((a,b)=>a+b,0)/p.ratings.length).toFixed(2) : 0;
+gsap.to('.hero-visual', {
+  opacity: 1, x: 0, duration: 0.9, ease: 'power3.out', delay: 0.15
 });
 
-const totalGames = SEED_MATCHES.length;
-const avgRating  = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(2) : '—';
-const eff        = totalGames ? Math.round(totalWins/totalGames*100) : 0;
-const gpg        = totalGames ? (totalGoals/totalGames).toFixed(1) : '—';
-
-/* ── FILL QUICK STATS ── */
-document.getElementById('sq-pj').textContent    = totalGames;
-document.getElementById('sq-wins').textContent  = totalWins;
-document.getElementById('sq-goals').textContent = totalGoals;
-document.getElementById('sq-rat').textContent   = avgRating;
-document.getElementById('sq-eff').textContent   = eff + '% efectividad';
-document.getElementById('sq-gpg').textContent   = gpg + ' por partido';
-
-/* ── FIND TOP SCORERS & ASSISTERS ── */
-const keys = Object.keys(playerStats);
-const topG = keys.filter(k=>playerStats[k].g>0).sort((a,b)=>playerStats[b].g-playerStats[a].g).slice(0,3);
-const topA = keys.filter(k=>playerStats[k].a>0).sort((a,b)=>playerStats[b].a-playerStats[a].a);
-const topRat = keys.filter(k=>playerStats[k].pj>=3).sort((a,b)=>playerStats[b].avgRating-playerStats[a].avgRating);
-
-/* pick top scorer, top assister (not already in scorers), best rating (not already picked) */
-const performers = [];
-if (topG[0]) performers.push({key:topG[0], val:playerStats[topG[0]].g, label:'goles'});
-const topAFilt = topA.filter(k => !performers.map(p=>p.key).includes(k));
-if (topAFilt[0]) performers.push({key:topAFilt[0], val:playerStats[topAFilt[0]].a, label:'asistencias'});
-const topRatFilt = topRat.filter(k => !performers.map(p=>p.key).includes(k));
-if (topRatFilt[0]) performers.push({key:topRatFilt[0], val:playerStats[topRatFilt[0]].avgRating, label:'rating prom.'});
-
-/* ── FILL TOP PERFORMERS ── */
-const topsGrid = document.getElementById('tops-grid');
-topsGrid.innerHTML = '';
-performers.forEach(perf => {
-  const posn = ROSTER_POSN[perf.key] || '';
-  const num  = ROSTER_NUM[perf.key]  || '';
-  const card = document.createElement('div');
-  card.className = 'top-card';
-  card.innerHTML = `
-    <div class="top-avatar">
-      <img src="${brazosPath(perf.key)}" alt="${perf.key}"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="top-avatar-init" style="display:none">${perf.key.charAt(0).toUpperCase()}</div>
-    </div>
-    <div class="top-card-body">
-      <div class="top-info">
-        <div class="top-name">${perf.key}</div>
-        <div class="top-pos">${posn}${num ? ' · #'+num : ''}</div>
-        <div class="top-stat">
-          <span class="top-stat-num">${perf.val}</span>
-          <span class="top-stat-label">${perf.label}</span>
-        </div>
-      </div>
-    </div>`;
-  topsGrid.appendChild(card);
-});
-
-/* ── RECENT RESULTS (last 5) ── */
-const leagueStyle = {
-  VPN:  'background:rgba(245,197,24,.1);color:#b45309;',
-  VPUG: 'background:rgba(62,207,142,.1);color:#047857;',
-  '11x11': 'background:rgba(74,158,255,.1);color:#1d4ed8;',
-};
-const pillClass = {win:'pill-w', draw:'pill-d', loss:'pill-l'};
-const pillLabel = {win:'V', draw:'E', loss:'D'};
-const M_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-const last5 = [...SEED_MATCHES].reverse().slice(0,5);
-const resList = document.getElementById('results-list');
-resList.innerHTML = '';
-last5.forEach(m => {
-  const dt   = m.date ? new Date(m.date+'T12:00:00') : null;
-  const dateStr = dt ? dt.getDate() + ' ' + M_NAMES[dt.getMonth()] : '';
-  const league = m.league || '';
-  const lStyle = leagueStyle[league] || 'background:#eee;color:#555;';
-  const row = document.createElement('div');
-  row.className = 'result-row';
-  const outcome = matchOutcome(m.match_result);
-  const parts = parseScore(m.match_result);
-  const scoreStr = `${parts[0]} – ${parts[1]}`;
-  row.innerHTML = `
-    <span class="result-pill ${pillClass[outcome]||'pill-d'}">${pillLabel[outcome]||'E'}</span>
-    <span class="result-league" style="${lStyle}">${league}</span>
-    <span class="result-rival">${m.rival || '—'}</span>
-    <span class="result-score">${scoreStr}</span>
-    <span class="result-date">${dateStr}</span>`;
-  resList.appendChild(row);
-});
-
-/* ── ANIMATIONS ── */
-gsap.set('.hero-content > *', {opacity:0, y:24});
-gsap.set('.hero-visual',       {opacity:0, x:30});
-gsap.set('.stat-card, .league-card, .top-card, .result-row, .nav-card', {opacity:0, y:22});
-
-gsap.to('.hero-content > *', {opacity:1, y:0, duration:0.7, stagger:0.12, ease:'power3.out', delay:0.1});
-gsap.to('.hero-visual',       {opacity:1, x:0, duration:0.9, ease:'power3.out', delay:0.15});
-
-gsap.set('.hero-line', {scaleX:0, transformOrigin:'left'});
-gsap.to('.hero-line',  {scaleX:1, duration:0.6, ease:'power3.out', delay:0.6});
-
-const io = new IntersectionObserver(entries => {
+/* ── SCROLL REVEAL ── */
+const io = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (!e.isIntersecting) return;
-    gsap.to(e.target, {opacity:1, y:0, duration:0.5, ease:'power2.out'});
+    gsap.to(e.target, {opacity: 1, y: 0, duration: 0.5, ease: 'power2.out'});
     io.unobserve(e.target);
   });
-}, {threshold:0.12});
-document.querySelectorAll('.stat-card, .league-card, .top-card, .result-row, .nav-card').forEach(el=>io.observe(el));
+}, {threshold: 0.12});
 
-gsap.set('.section-title', {opacity:0, x:-16});
-const io2 = new IntersectionObserver(entries => {
+document.querySelectorAll('.stat-card, .league-card, .top-card, .result-row, .nav-card')
+  .forEach(el => io.observe(el));
+
+/* ── SECTION TITLES ── */
+gsap.set('.section-title', {opacity: 0, x: -16});
+const io2 = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (!e.isIntersecting) return;
-    gsap.to(e.target, {opacity:1, x:0, duration:0.55, ease:'power2.out'});
+    gsap.to(e.target, {opacity: 1, x: 0, duration: 0.55, ease: 'power2.out'});
     io2.unobserve(e.target);
   });
-}, {threshold:0.1});
-document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
+}, {threshold: 0.1});
+document.querySelectorAll('.section-title').forEach(el => io2.observe(el));
+
+/* ── GOLD LINE HERO ── */
+gsap.set('.hero-line', {scaleX: 0, transformOrigin: 'left'});
+gsap.to('.hero-line', {scaleX: 1, duration: 0.6, ease: 'power3.out', delay: 0.6});
 
 /* ── HERO SLIDESHOW ── */
 (async function() {
@@ -545,19 +516,23 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   const imgB   = document.getElementById('hero-img-b');
   const dotsEl = document.getElementById('hero-dots');
 
+  /* Auto-detect: festejo.png → festejo 2.png → festejo 3.png … hasta que falle */
   const images = [];
   function probe(n) {
     return new Promise(resolve => {
       const img = new Image();
-      img.src = n === 1 ? 'logos/festejo.png' : `logos/festejo ${n}.png`;
+      img.src = n === 1 ? '../logos/festejo.png' : `../logos/festejo ${n}.png`;
       img.onload  = () => { images.push(img.src); resolve(true); };
       img.onerror = () => resolve(false);
     });
   }
-  for (let i = 1; i <= 20; i++) { if (!await probe(i)) break; }
+  for (let i = 1; i <= 20; i++) {
+    if (!await probe(i)) break;
+  }
 
-  if (images.length <= 1) return;
+  if (images.length <= 1) return; /* solo una imagen → nada que rotar */
 
+  /* Dots */
   images.forEach((_, i) => {
     const dot = document.createElement('span');
     dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
@@ -565,34 +540,150 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
     dotsEl.appendChild(dot);
   });
 
-  let current = 0, activeEl = imgA, inactiveEl = imgB;
-  let timer = null, animating = false;
+  let current    = 0;
+  let activeEl   = imgA;
+  let inactiveEl = imgB;
+  let timer      = null;
+  let animating  = false;
 
   function updateDots() {
-    dotsEl.querySelectorAll('.hero-dot').forEach((d,i) => d.classList.toggle('active', i===current));
+    dotsEl.querySelectorAll('.hero-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
   }
+
   function goTo(idx) {
     if (animating) return;
     idx = ((idx % images.length) + images.length) % images.length;
     if (idx === current) { startTimer(); return; }
     animating = true;
     clearTimeout(timer);
+
     inactiveEl.src = images[idx];
-    gsap.set(inactiveEl, {opacity:0});
-    gsap.to(inactiveEl, {opacity:1, duration:0.8, ease:'power2.inOut'});
-    gsap.to(activeEl,   {opacity:0, duration:0.8, ease:'power2.inOut',
-      onComplete:() => {
-        current = idx; updateDots();
+    gsap.set(inactiveEl, { opacity: 0 });
+    gsap.to(inactiveEl, { opacity: 1, duration: 0.8, ease: 'power2.inOut' });
+    gsap.to(activeEl,   { opacity: 0, duration: 0.8, ease: 'power2.inOut',
+      onComplete: () => {
+        current = idx;
+        updateDots();
         [activeEl, inactiveEl] = [inactiveEl, activeEl];
-        animating = false; startTimer();
+        animating = false;
+        startTimer();
       }
     });
   }
-  function startTimer() { clearTimeout(timer); timer = setTimeout(()=>goTo(current+1), 3000); }
 
-  document.getElementById('hero-prev').addEventListener('click', ()=>goTo(current-1));
-  document.getElementById('hero-next').addEventListener('click', ()=>goTo(current+1));
+  function startTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(() => goTo(current + 1), 3000);
+  }
+
+  document.getElementById('hero-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('hero-next').addEventListener('click', () => goTo(current + 1));
+
   startTimer();
+})();
+</script>
+<!-- ══ BRAND LOGO SIZE EDITOR (preview only) ══ -->
+<div id="logo-editor" style="
+  position:fixed; bottom:24px; right:64px; z-index:9999;
+  background:#1a1c22; border:1px solid rgba(201,168,76,.5);
+  border-radius:12px; padding:16px 18px; width:260px;
+  font-family:'Barlow',sans-serif; font-size:13px; color:#dde1ec;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#c9a84c;">Editor Logo Club</span>
+    <button onclick="document.getElementById('logo-editor').style.display='none'" style="background:none;border:none;color:#555;cursor:pointer;font-size:1rem;line-height:1;padding:0;">✕</button>
+  </div>
+
+  <!-- Height -->
+  <div style="margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="color:#aaa;font-size:.78rem;">Alto (height)</span>
+      <span id="brand-h-val" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#c9a84c;font-size:.9rem;">34px</span>
+    </div>
+    <input type="range" id="brand-h-slider" min="16" max="80" value="34" step="1"
+      style="width:100%;accent-color:#c9a84c;cursor:pointer;"
+      oninput="updateBrand('h', this.value)">
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#555;margin-top:2px;"><span>16</span><span>80</span></div>
+  </div>
+
+  <!-- Width -->
+  <div style="margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="color:#aaa;font-size:.78rem;">Ancho (width)</span>
+      <span id="brand-w-val" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#c9a84c;font-size:.9rem;">34px</span>
+    </div>
+    <input type="range" id="brand-w-slider" min="16" max="120" value="34" step="1"
+      style="width:100%;accent-color:#c9a84c;cursor:pointer;"
+      oninput="updateBrand('w', this.value)">
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#555;margin-top:2px;"><span>16</span><span>120</span></div>
+  </div>
+
+  <!-- Gap entre logo y nombre -->
+  <div style="margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="color:#aaa;font-size:.78rem;">Gap logo ↔ nombre</span>
+      <span id="brand-g-val" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#c9a84c;font-size:.9rem;">10px</span>
+    </div>
+    <input type="range" id="brand-g-slider" min="4" max="40" value="10" step="1"
+      style="width:100%;accent-color:#c9a84c;cursor:pointer;"
+      oninput="updateBrand('g', this.value)">
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#555;margin-top:2px;"><span>4</span><span>40</span></div>
+  </div>
+
+  <!-- Posición izquierda -->
+  <div style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="color:#aaa;font-size:.78rem;">Posición izquierda</span>
+      <span id="brand-l-val" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#c9a84c;font-size:.9rem;">0px</span>
+    </div>
+    <input type="range" id="brand-l-slider" min="-64" max="64" value="0" step="1"
+      style="width:100%;accent-color:#c9a84c;cursor:pointer;"
+      oninput="updateBrand('l', this.value)">
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#555;margin-top:2px;"><span>← −64</span><span>+64 →</span></div>
+  </div>
+
+  <div style="font-size:.7rem;color:#555;border-top:1px solid #2a2e3a;padding-top:10px;line-height:1.8;">
+    Valores actuales:<br>
+    <span style="color:#888;">h:</span> <b id="brand-h-out" style="color:#e8c97a;">34px</b> &nbsp;
+    <span style="color:#888;">w:</span> <b id="brand-w-out" style="color:#e8c97a;">34px</b> &nbsp;
+    <span style="color:#888;">gap:</span> <b id="brand-g-out" style="color:#e8c97a;">10px</b> &nbsp;
+    <span style="color:#888;">left:</span> <b id="brand-l-out" style="color:#e8c97a;">0px</b>
+  </div>
+</div>
+
+<script>
+(function(){
+  const brandImg  = document.querySelector('.tb-brand img');
+  const tbBrand   = document.querySelector('.tb-brand');
+  const topbar    = document.querySelector('.topbar');
+  const basePadL  = 80; // valor original del padding-left del topbar
+
+  window.updateBrand = function(prop, val) {
+    const px = val + 'px';
+    if (prop === 'h') {
+      brandImg.style.height = px;
+      brandImg.style.width  = 'auto';
+      document.getElementById('brand-h-val').textContent = px;
+      document.getElementById('brand-h-out').textContent = px;
+    } else if (prop === 'w') {
+      brandImg.style.width  = px;
+      document.getElementById('brand-w-val').textContent = px;
+      document.getElementById('brand-w-out').textContent = px;
+    } else if (prop === 'g') {
+      tbBrand.style.gap = px;
+      document.getElementById('brand-g-val').textContent = px;
+      document.getElementById('brand-g-out').textContent = px;
+    } else if (prop === 'l') {
+      // Ajusta el padding-left del topbar: base 80px + offset
+      const newPad = Math.max(0, basePadL + parseInt(val));
+      topbar.style.paddingLeft = newPad + 'px';
+      document.getElementById('brand-l-val').textContent = (val >= 0 ? '+' : '') + val + 'px';
+      document.getElementById('brand-l-out').textContent = newPad + 'px (pad)';
+    }
+  };
 })();
 </script>
 </body>

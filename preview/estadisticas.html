@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Secret FC · Estadísticas</title>
+<link rel="icon" href="../Top-Secret.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black:  #111111;
+  --white:  #FFFFFF;
+  --gray:   #F5F5F0;
+  --gold:   #C9A84C;
+  --gold2:  #E8C97A;
+  --mid:    #888888;
+  --border: #E5E5E0;
+  --win:    #2a9d5c;
+  --draw:   #d4a017;
+  --loss:   #c0392b;
+  --vpn:    #d4a017;
+  --vpug:   #2a9d5c;
+  --e11:    #2563eb;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  margin-left: 64px;
+  margin-right: 48px;
+  padding-top: 64px;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 64px; background: var(--black);
+  border-bottom: 3px solid var(--gold);
+  display: flex; align-items: center; padding: 0 24px; gap: 0;
+}
+.tb-brand {
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none; margin-right: auto;
+}
+.tb-brand img { height: 36px; object-fit: contain; }
+.tb-brand span {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem; font-weight: 900;
+  letter-spacing: .12em; color: var(--white); text-transform: uppercase;
+}
+.tb-badges { display: flex; align-items: center; gap: 10px; }
+.tb-badges img { height: 56px; object-fit: contain; opacity: .95; }
+
+/* ── SIDEBAR IZQ ── */
+.sidebar-left {
+  position: fixed; top: 64px; left: 0; z-index: 100;
+  width: 64px; height: calc(100vh - 64px);
+  background: var(--black); border-right: 1px solid #222;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 0; gap: 4px;
+}
+.sl-link {
+  width: 44px; height: 44px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; color: #666;
+  transition: background .15s, color .15s; position: relative;
+}
+.sl-link:hover { background: #222; color: #aaa; }
+.sl-link.active { background: rgba(201,168,76,.12); color: var(--gold); }
+.sl-link svg { width: 22px; height: 22px; }
+.sl-tip {
+  position: absolute; left: 54px; top: 50%; transform: translateY(-50%);
+  background: #222; color: #fff; font-size: .7rem; font-weight: 600;
+  letter-spacing: .06em; white-space: nowrap; padding: 4px 10px; border-radius: 6px;
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+}
+.sl-link:hover .sl-tip { opacity: 1; }
+
+/* ── SIDEBAR DER ── */
+.sidebar-right {
+  position: fixed; top: 64px; right: 0; z-index: 100;
+  width: 48px; height: calc(100vh - 64px);
+  background: var(--white); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 0; gap: 8px;
+}
+.sr-icon {
+  width: 32px; height: 32px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; color: var(--mid);
+  transition: color .15s; font-size: .75rem; font-weight: 700; letter-spacing: .06em;
+}
+.sr-icon:hover { color: var(--black); }
+
+/* ── PAGE HEADER ── */
+.page-header { max-width: 1100px; margin: 0 auto; padding: 56px 32px 24px; }
+.ph-eyebrow {
+  font-size: .7rem; font-weight: 700; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+}
+.ph-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-weight: 900; line-height: .9; letter-spacing: -.01em;
+  text-transform: uppercase; color: var(--black);
+}
+.ph-title span { color: var(--gold); }
+.ph-sub { font-size: .85rem; color: var(--mid); margin-top: 10px; }
+
+/* ── WRAP ── */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px 80px; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 0; margin-bottom: 36px;
+  border-bottom: 2px solid var(--border);
+}
+.tab {
+  padding: 10px 24px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem; font-weight: 700; letter-spacing: .08em;
+  color: var(--mid); background: none; border: none;
+  cursor: pointer; border-bottom: 3px solid transparent;
+  margin-bottom: -2px; transition: all .18s; white-space: nowrap;
+}
+.tab:hover { color: var(--black); }
+.tab.active { color: var(--black); border-bottom-color: var(--gold); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* league accent on tab */
+.tab[data-league="vpn"].active   { color: var(--vpn);  border-bottom-color: var(--vpn);  }
+.tab[data-league="vpug"].active  { color: var(--vpug); border-bottom-color: var(--vpug); }
+.tab[data-league="e11"].active   { color: var(--e11);  border-bottom-color: var(--e11);  }
+
+/* ── KPI ROW ── */
+.kpi-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 28px;
+}
+.kpi {
+  background: var(--gray); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px; padding: 18px 20px;
+}
+.kpi-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.4rem; font-weight: 900; line-height: 1;
+  color: var(--black);
+}
+.kpi-lbl {
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--mid); margin-top: 4px;
+}
+
+/* ── SECTION GRID ── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.stat-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+.stat-grid.full { grid-template-columns: 1fr; }
+
+/* ── STAT BLOCK ── */
+.stat-block {
+  background: var(--gray); border: 1px solid var(--border);
+  border-top: 3px solid var(--border); border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+.stat-block.gold { border-top-color: var(--gold); }
+.stat-block.vpn  { border-top-color: var(--vpn); }
+.stat-block.vpug { border-top-color: var(--vpug); }
+.stat-block.e11  { border-top-color: var(--e11); }
+
+.sb-head {
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+  background: var(--white);
+  display: flex; align-items: center; gap: 8px;
+}
+.sb-head h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .88rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--black);
+}
+
+/* ── RANKING ROWS ── */
+.rank-row {
+  display: grid; grid-template-columns: 28px 1fr auto;
+  align-items: center; gap: 10px;
+  padding: 10px 18px; border-bottom: 1px solid var(--border);
+  background: var(--white);
+}
+.rank-row:last-child { border-bottom: none; }
+.rank-row:hover { background: #fafaf6; }
+.rk-pos {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem; font-weight: 900; color: var(--mid);
+  text-align: center;
+}
+.rk-pos.p1 { color: var(--gold); }
+.rk-pos.p2 { color: #888; }
+.rk-pos.p3 { color: #a07040; }
+.rk-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .9rem; font-weight: 700; color: var(--black);
+}
+.rk-sub {
+  font-size: .68rem; color: var(--mid); margin-top: 2px;
+}
+.rk-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.rk-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; }
+.rk-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem; font-weight: 900; text-align: right;
+  white-space: nowrap; color: var(--black);
+}
+
+/* ── RESULTS LIST ── */
+.result-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+  background: var(--white);
+}
+.result-row:last-child { border-bottom: none; }
+.result-row:hover { background: #fafaf6; }
+.res-pill {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .8rem; font-weight: 900; flex-shrink: 0;
+}
+.res-pill.W { background: rgba(42,157,92,.12); color: var(--win); }
+.res-pill.D { background: rgba(212,160,23,.12); color: var(--draw); }
+.res-pill.L { background: rgba(192,57,43,.12);  color: var(--loss); }
+.res-info { flex: 1; min-width: 0; }
+.res-rival {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .92rem; font-weight: 700; color: var(--black);
+}
+.res-date { font-size: .68rem; color: var(--mid); margin-top: 2px; }
+.res-score {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem; font-weight: 900;
+  color: var(--black); text-align: right;
+}
+.res-league {
+  font-size: .62rem; font-weight: 700; letter-spacing: .08em;
+  padding: 2px 7px; border-radius: 4px; flex-shrink: 0;
+}
+.res-league.vpn  { background: rgba(212,160,23,.1);  color: var(--vpn);  }
+.res-league.vpug { background: rgba(42,157,92,.1);   color: var(--vpug); }
+.res-league.e11  { background: rgba(37,99,235,.1);   color: var(--e11);  }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--black); color: #555;
+  text-align: center; padding: 28px 24px;
+  font-size: .75rem; letter-spacing: .1em;
+  margin-left: -64px; margin-right: -48px;
+}
+footer span { color: var(--gold); }
+
+@media (max-width: 700px) {
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .stat-grid, .stat-grid.triple { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="tb-brand" href="index.html">
+    <img src="../logos/Top Secret white.png" alt="Top Secret FC">
+    <span>Top Secret FC</span>
+  </a>
+  <div class="tb-badges">
+    <img src="../logos/Logo EA FC26.png" alt="EA FC 26">
+    <img src="../logos/Clubs Pro Badge.png" alt="Clubs Pro">
+  </div>
+</header>
+
+<!-- SIDEBAR IZQ -->
+<nav class="sidebar-left">
+  <a class="sl-link" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="sl-tip">Inicio</span>
+  </a>
+  <a class="sl-link" href="plantilla.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span class="sl-tip">Plantel</span>
+  </a>
+  <a class="sl-link active" href="estadisticas.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="sl-tip">Estadísticas</span>
+  </a>
+  <a class="sl-link" href="posiciones.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span class="sl-tip">Posiciones</span>
+  </a>
+  <a class="sl-link" href="convocatoria.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 12l3 3 5-5"/></svg>
+    <span class="sl-tip">Conv.</span>
+  </a>
+</nav>
+
+<!-- SIDEBAR DER -->
+<aside class="sidebar-right">
+  <a class="sr-icon" href="#" title="Instagram">IG</a>
+  <a class="sr-icon" href="#" title="Twitter/X">X</a>
+  <a class="sr-icon" href="#" title="YouTube">YT</a>
+</aside>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="ph-eyebrow">Temporada 1 · 2026</div>
+  <h1 class="ph-title">Esta<span>dísticas</span></h1>
+  <p class="ph-sub">Rendimiento individual y colectivo · Top Secret FC</p>
+</div>
+
+<div class="wrap">
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" data-league="all" onclick="switchTab('all', this)">General</button>
+    <button class="tab" data-league="vpn"  onclick="switchTab('vpn', this)">VPN</button>
+    <button class="tab" data-league="vpug" onclick="switchTab('vpug', this)">VPUG</button>
+    <button class="tab" data-league="e11"  onclick="switchTab('e11', this)">11x11</button>
+  </div>
+
+  <!-- ══════════════ GENERAL ══════════════ -->
+  <div class="tab-pane active" id="pane-all">
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-val">26</div><div class="kpi-lbl">Partidos</div></div>
+      <div class="kpi"><div class="kpi-val">14</div><div class="kpi-lbl">Victorias</div></div>
+      <div class="kpi"><div class="kpi-val">48</div><div class="kpi-lbl">Goles</div></div>
+      <div class="kpi"><div class="kpi-val">6.87</div><div class="kpi-lbl">Rating prom.</div></div>
+    </div>
+
+    <!-- Top scorers + Top assists -->
+    <div class="stat-grid">
+      <div class="stat-block gold">
+        <div class="sb-head"><h3>Goleadores</h3></div>
+        <div class="rank-row">
+          <div class="rk-pos p1">1</div>
+          <div><div class="rk-name">cansitrGd22_</div><div class="rk-sub">DEL · 20 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:100%"></div></div></div>
+          <div class="rk-val">12</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p2">2</div>
+          <div><div class="rk-name">Lautavester7</div><div class="rk-sub">DEL · 19 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:75%"></div></div></div>
+          <div class="rk-val">9</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p3">3</div>
+          <div><div class="rk-name">BlackPanther-CG</div><div class="rk-sub">DEL · 18 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:58%"></div></div></div>
+          <div class="rk-val">7</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">4</div>
+          <div><div class="rk-name">Juan_Martinez4</div><div class="rk-sub">MED · 21 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:42%"></div></div></div>
+          <div class="rk-val">5</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">5</div>
+          <div><div class="rk-name">CipriMancini</div><div class="rk-sub">MED · 18 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:33%"></div></div></div>
+          <div class="rk-val">4</div>
+        </div>
+      </div>
+
+      <div class="stat-block gold">
+        <div class="sb-head"><h3>Asistidores</h3></div>
+        <div class="rank-row">
+          <div class="rk-pos p1">1</div>
+          <div><div class="rk-name">Juan_Martinez4</div><div class="rk-sub">MED · 21 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:100%"></div></div></div>
+          <div class="rk-val">11</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p2">2</div>
+          <div><div class="rk-name">CipriMancini</div><div class="rk-sub">MED · 18 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:73%"></div></div></div>
+          <div class="rk-val">8</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p3">3</div>
+          <div><div class="rk-name">Guiidow</div><div class="rk-sub">MED · 17 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:55%"></div></div></div>
+          <div class="rk-val">6</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">4</div>
+          <div><div class="rk-name">zPibu__</div><div class="rk-sub">LAT · 16 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:36%"></div></div></div>
+          <div class="rk-val">4</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">5</div>
+          <div><div class="rk-name">Lautavester7</div><div class="rk-sub">DEL · 19 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:27%"></div></div></div>
+          <div class="rk-val">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating promedio -->
+    <div class="stat-grid">
+      <div class="stat-block gold">
+        <div class="sb-head"><h3>Rating promedio</h3></div>
+        <div class="rank-row">
+          <div class="rk-pos p1">1</div>
+          <div><div class="rk-name">Juan_Martinez4</div><div class="rk-sub">MED · 21 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:100%"></div></div></div>
+          <div class="rk-val">7.52</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p2">2</div>
+          <div><div class="rk-name">cansitrGd22_</div><div class="rk-sub">DEL · 20 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:90%"></div></div></div>
+          <div class="rk-val">7.31</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p3">3</div>
+          <div><div class="rk-name">CipriMancini</div><div class="rk-sub">MED · 18 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:82%"></div></div></div>
+          <div class="rk-val">7.18</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">4</div>
+          <div><div class="rk-name">Lautavester7</div><div class="rk-sub">DEL · 19 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:74%"></div></div></div>
+          <div class="rk-val">7.04</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">5</div>
+          <div><div class="rk-name">Woolfyboyzx2</div><div class="rk-sub">POR · 22 PJ</div><div class="rk-bar"><div class="rk-bar-fill" style="width:66%"></div></div></div>
+          <div class="rk-val">6.89</div>
+        </div>
+      </div>
+
+      <div class="stat-block gold">
+        <div class="sb-head"><h3>Regularidad (PJ)</h3></div>
+        <div class="rank-row">
+          <div class="rk-pos p1">1</div>
+          <div><div class="rk-name">Juan_Martinez4</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:100%"></div></div></div>
+          <div class="rk-val">21</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p2">2</div>
+          <div><div class="rk-name">Woolfyboyzx2</div><div class="rk-sub">POR</div><div class="rk-bar"><div class="rk-bar-fill" style="width:95%"></div></div></div>
+          <div class="rk-val">20</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos p3">3</div>
+          <div><div class="rk-name">cansitrGd22_</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:90%"></div></div></div>
+          <div class="rk-val">19</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">4</div>
+          <div><div class="rk-name">Lautavester7</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:86%"></div></div></div>
+          <div class="rk-val">18</div>
+        </div>
+        <div class="rank-row">
+          <div class="rk-pos">5</div>
+          <div><div class="rk-name">CipriMancini</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:81%"></div></div></div>
+          <div class="rk-val">17</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados recientes -->
+    <div class="stat-grid full">
+      <div class="stat-block gold">
+        <div class="sb-head"><h3>Resultados recientes</h3></div>
+        <div class="result-row">
+          <div class="res-pill W">V</div>
+          <div class="res-info"><div class="res-rival">Dalmine FC</div><div class="res-date">14 Abr 2026</div></div>
+          <span class="res-league vpn">VPN</span>
+          <div class="res-score">2 – 1</div>
+        </div>
+        <div class="result-row">
+          <div class="res-pill W">V</div>
+          <div class="res-info"><div class="res-rival">Camioneros FC</div><div class="res-date">14 Abr 2026</div></div>
+          <span class="res-league vpn">VPN</span>
+          <div class="res-score">3 – 0</div>
+        </div>
+        <div class="result-row">
+          <div class="res-pill W">V</div>
+          <div class="res-info"><div class="res-rival">Dep. Ballester</div><div class="res-date">14 Abr 2026</div></div>
+          <span class="res-league vpn">VPN</span>
+          <div class="res-score">1 – 0</div>
+        </div>
+        <div class="result-row">
+          <div class="res-pill L">D</div>
+          <div class="res-info"><div class="res-rival">FC Rincón</div><div class="res-date">10 Abr 2026</div></div>
+          <span class="res-league vpug">VPUG</span>
+          <div class="res-score">1 – 2</div>
+        </div>
+        <div class="result-row">
+          <div class="res-pill W">V</div>
+          <div class="res-info"><div class="res-rival">Los Pumas FC</div><div class="res-date">08 Abr 2026</div></div>
+          <span class="res-league e11">11x11</span>
+          <div class="res-score">4 – 1</div>
+        </div>
+        <div class="result-row">
+          <div class="res-pill D">E</div>
+          <div class="res-info"><div class="res-rival">Atletico Sur</div><div class="res-date">05 Abr 2026</div></div>
+          <span class="res-league vpn">VPN</span>
+          <div class="res-score">1 – 1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ VPN ══════════════ -->
+  <div class="tab-pane" id="pane-vpn">
+    <div class="kpi-row">
+      <div class="kpi" style="border-left-color:var(--vpn)"><div class="kpi-val">12</div><div class="kpi-lbl">Partidos VPN</div></div>
+      <div class="kpi" style="border-left-color:var(--vpn)"><div class="kpi-val">7</div><div class="kpi-lbl">Victorias</div></div>
+      <div class="kpi" style="border-left-color:var(--vpn)"><div class="kpi-val">21</div><div class="kpi-lbl">Goles</div></div>
+      <div class="kpi" style="border-left-color:var(--vpn)"><div class="kpi-val">6.94</div><div class="kpi-lbl">Rating prom.</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-block vpn">
+        <div class="sb-head"><h3>Goleadores VPN</h3></div>
+        <div class="rank-row"><div class="rk-pos p1">1</div><div><div class="rk-name">cansitrGd22_</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:100%;background:var(--vpn)"></div></div></div><div class="rk-val">6</div></div>
+        <div class="rank-row"><div class="rk-pos p2">2</div><div><div class="rk-name">Lautavester7</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:67%;background:var(--vpn)"></div></div></div><div class="rk-val">4</div></div>
+        <div class="rank-row"><div class="rk-pos p3">3</div><div><div class="rk-name">BlackPanther-CG</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:50%;background:var(--vpn)"></div></div></div><div class="rk-val">3</div></div>
+        <div class="rank-row"><div class="rk-pos">4</div><div><div class="rk-name">Juan_Martinez4</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:33%;background:var(--vpn)"></div></div></div><div class="rk-val">2</div></div>
+        <div class="rank-row"><div class="rk-pos">5</div><div><div class="rk-name">CipriMancini</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:17%;background:var(--vpn)"></div></div></div><div class="rk-val">1</div></div>
+      </div>
+      <div class="stat-block vpn">
+        <div class="sb-head"><h3>Resultados VPN</h3></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Dalmine FC</div><div class="res-date">14 Abr</div></div><div class="res-score">2–1</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Camioneros FC</div><div class="res-date">14 Abr</div></div><div class="res-score">3–0</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Dep. Ballester</div><div class="res-date">14 Abr</div></div><div class="res-score">1–0</div></div>
+        <div class="result-row"><div class="res-pill D">E</div><div class="res-info"><div class="res-rival">Atletico Sur</div><div class="res-date">05 Abr</div></div><div class="res-score">1–1</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">River Virtual</div><div class="res-date">01 Abr</div></div><div class="res-score">2–0</div></div>
+        <div class="result-row"><div class="res-pill L">D</div><div class="res-info"><div class="res-rival">Boca Pro</div><div class="res-date">25 Mar</div></div><div class="res-score">0–1</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ VPUG ══════════════ -->
+  <div class="tab-pane" id="pane-vpug">
+    <div class="kpi-row">
+      <div class="kpi" style="border-left-color:var(--vpug)"><div class="kpi-val">8</div><div class="kpi-lbl">Partidos VPUG</div></div>
+      <div class="kpi" style="border-left-color:var(--vpug)"><div class="kpi-val">4</div><div class="kpi-lbl">Victorias</div></div>
+      <div class="kpi" style="border-left-color:var(--vpug)"><div class="kpi-val">14</div><div class="kpi-lbl">Goles</div></div>
+      <div class="kpi" style="border-left-color:var(--vpug)"><div class="kpi-val">6.78</div><div class="kpi-lbl">Rating prom.</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-block vpug">
+        <div class="sb-head"><h3>Goleadores VPUG</h3></div>
+        <div class="rank-row"><div class="rk-pos p1">1</div><div><div class="rk-name">cansitrGd22_</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:100%;background:var(--vpug)"></div></div></div><div class="rk-val">4</div></div>
+        <div class="rank-row"><div class="rk-pos p2">2</div><div><div class="rk-name">Lautavester7</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:75%;background:var(--vpug)"></div></div></div><div class="rk-val">3</div></div>
+        <div class="rank-row"><div class="rk-pos p3">3</div><div><div class="rk-name">CipriMancini</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:50%;background:var(--vpug)"></div></div></div><div class="rk-val">2</div></div>
+        <div class="rank-row"><div class="rk-pos">4</div><div><div class="rk-name">Juan_Martinez4</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:25%;background:var(--vpug)"></div></div></div><div class="rk-val">1</div></div>
+        <div class="rank-row"><div class="rk-pos">5</div><div><div class="rk-name">BlackPanther-CG</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:25%;background:var(--vpug)"></div></div></div><div class="rk-val">1</div></div>
+      </div>
+      <div class="stat-block vpug">
+        <div class="sb-head"><h3>Resultados VPUG</h3></div>
+        <div class="result-row"><div class="res-pill L">D</div><div class="res-info"><div class="res-rival">FC Rincón</div><div class="res-date">10 Abr</div></div><div class="res-score">1–2</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Espartanos</div><div class="res-date">03 Abr</div></div><div class="res-score">2–1</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Guaraní Pro</div><div class="res-date">27 Mar</div></div><div class="res-score">3–0</div></div>
+        <div class="result-row"><div class="res-pill D">E</div><div class="res-info"><div class="res-rival">Tigre FC</div><div class="res-date">20 Mar</div></div><div class="res-score">1–1</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Cruz del Sur</div><div class="res-date">13 Mar</div></div><div class="res-score">2–0</div></div>
+        <div class="result-row"><div class="res-pill L">D</div><div class="res-info"><div class="res-rival">San Lorenzo Pro</div><div class="res-date">06 Mar</div></div><div class="res-score">0–2</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 11x11 ══════════════ -->
+  <div class="tab-pane" id="pane-e11">
+    <div class="kpi-row">
+      <div class="kpi" style="border-left-color:var(--e11)"><div class="kpi-val">6</div><div class="kpi-lbl">Partidos 11x11</div></div>
+      <div class="kpi" style="border-left-color:var(--e11)"><div class="kpi-val">3</div><div class="kpi-lbl">Victorias</div></div>
+      <div class="kpi" style="border-left-color:var(--e11)"><div class="kpi-val">13</div><div class="kpi-lbl">Goles</div></div>
+      <div class="kpi" style="border-left-color:var(--e11)"><div class="kpi-val">6.91</div><div class="kpi-lbl">Rating prom.</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-block e11">
+        <div class="sb-head"><h3>Goleadores 11x11</h3></div>
+        <div class="rank-row"><div class="rk-pos p1">1</div><div><div class="rk-name">cansitrGd22_</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:100%;background:var(--e11)"></div></div></div><div class="rk-val">5</div></div>
+        <div class="rank-row"><div class="rk-pos p2">2</div><div><div class="rk-name">BlackPanther-CG</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:60%;background:var(--e11)"></div></div></div><div class="rk-val">3</div></div>
+        <div class="rank-row"><div class="rk-pos p3">3</div><div><div class="rk-name">Lautavester7</div><div class="rk-sub">DEL</div><div class="rk-bar"><div class="rk-bar-fill" style="width:40%;background:var(--e11)"></div></div></div><div class="rk-val">2</div></div>
+        <div class="rank-row"><div class="rk-pos">4</div><div><div class="rk-name">Juan_Martinez4</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:40%;background:var(--e11)"></div></div></div><div class="rk-val">2</div></div>
+        <div class="rank-row"><div class="rk-pos">5</div><div><div class="rk-name">CipriMancini</div><div class="rk-sub">MED</div><div class="rk-bar"><div class="rk-bar-fill" style="width:20%;background:var(--e11)"></div></div></div><div class="rk-val">1</div></div>
+      </div>
+      <div class="stat-block e11">
+        <div class="sb-head"><h3>Resultados 11x11</h3></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Los Pumas FC</div><div class="res-date">08 Abr</div></div><div class="res-score">4–1</div></div>
+        <div class="result-row"><div class="res-pill D">E</div><div class="res-info"><div class="res-rival">Pampa Warriors</div><div class="res-date">01 Abr</div></div><div class="res-score">2–2</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Delta FC</div><div class="res-date">25 Mar</div></div><div class="res-score">3–1</div></div>
+        <div class="result-row"><div class="res-pill L">D</div><div class="res-info"><div class="res-rival">Gauchos E-Sports</div><div class="res-date">18 Mar</div></div><div class="res-score">1–3</div></div>
+        <div class="result-row"><div class="res-pill W">V</div><div class="res-info"><div class="res-rival">Racing Virtual</div><div class="res-date">11 Mar</div></div><div class="res-score">2–0</div></div>
+        <div class="result-row"><div class="res-pill L">D</div><div class="res-info"><div class="res-rival">Independiente Pro</div><div class="res-date">04 Mar</div></div><div class="res-score">0–1</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>Top Secret FC</span> · Temporada 1 · 2026 · Preview Redesign
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const pane = document.getElementById('pane-' + id);
+  pane.classList.add('active');
+  gsap.from(pane.querySelectorAll('.stat-block, .kpi'), {
+    opacity: 0, y: 20, duration: 0.4, stagger: 0.06, ease: 'power2.out'
+  });
+}
+
+/* page load */
+gsap.set('.ph-eyebrow, .ph-title, .ph-sub', {opacity:0, y:16});
+gsap.to('.ph-eyebrow', {opacity:1, y:0, duration:0.5, ease:'power2.out', delay:0.05});
+gsap.to('.ph-title',   {opacity:1, y:0, duration:0.6, ease:'power3.out', delay:0.12});
+gsap.to('.ph-sub',     {opacity:1, y:0, duration:0.5, ease:'power2.out', delay:0.2});
+gsap.set('.kpi, .stat-block', {opacity:0, y:22});
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    gsap.to(e.target, {opacity:1, y:0, duration:0.45, ease:'power2.out'});
+    io.unobserve(e.target);
+  });
+}, {threshold:0.1});
+document.querySelectorAll('.kpi, .stat-block').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
