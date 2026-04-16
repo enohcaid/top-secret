@@ -935,7 +935,7 @@ function drawShareFooter(c2d, FW, FH, FOOTER, S) {
 /* ─── Build share canvas ─── */
 async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
   const slots  = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
-  const tokW   = Math.round(FW * 0.175);
+  const tokW   = Math.round(FW * 0.28);
   const tokH   = Math.round(tokW * (103/144));
   const barH   = Math.round(tokH * 0.22);
   const photoH = tokH - barH;
