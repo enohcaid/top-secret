@@ -706,6 +706,7 @@ body{padding-top:64px;}
     <button class="fbtn" onclick="filter('VPN',this)">VPN</button>
     <button class="fbtn vpug" onclick="filter('VPUG',this)">VPUG</button>
     <button class="fbtn e11" onclick="filter('11x11',this)">11x11</button>
+    <button class="fbtn" onclick="openAddModal()" style="border-color:var(--gold);color:var(--gold);font-size:1rem;padding:4px 14px;" title="Agregar partido o entrenamiento">＋</button>
     <button class="fbtn" onclick="saveToFirebase()" id="btnSave" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar cambios para todos">☁️ Guardar</button>
   </div>
 </div>
@@ -729,6 +730,66 @@ body{padding-top:64px;}
 
 
 <div class="calendar" id="cal"></div>
+
+<!-- Add Match Modal -->
+<div class="overlay" id="addOverlay">
+  <div class="modal modal-edit" style="width:min(400px,94vw);">
+    <h3 style="margin-bottom:18px;">＋ Agregar entrada</h3>
+    <div class="field">
+      <label>Tipo</label>
+      <div class="toggle-row" id="addTypeRow">
+        <button class="toggle-opt active" id="addTypePartido" onclick="setAddType('partido')">⚽ Partido</button>
+        <button class="toggle-opt" id="addTypeEntrenamiento" onclick="setAddType('entrenamiento')">🏃 Entrenamiento</button>
+        <button class="toggle-opt" id="addTypeOtro" onclick="setAddType('otro')">📋 Otro</button>
+      </div>
+    </div>
+    <div class="field" id="addLeagueField">
+      <label>Liga</label>
+      <select id="addLeague">
+        <option value="VPN">VPN</option>
+        <option value="VPUG">VPUG</option>
+        <option value="11x11">11x11</option>
+      </select>
+    </div>
+    <div class="field" id="addRivalField">
+      <label>Rival</label>
+      <input type="text" id="addRival" placeholder="Nombre del rival">
+    </div>
+    <div class="field" id="addInstanciaField">
+      <label>Instancia</label>
+      <select id="addInstancia">
+        <option value="Fase Regular">Fase Regular</option>
+        <option value="Playoff">Playoff</option>
+        <option value="Copa">Copa</option>
+        <option value="Amistoso">Amistoso</option>
+        <option value="">— Sin especificar —</option>
+      </select>
+    </div>
+    <div class="field" id="addNotesField" style="display:none">
+      <label>Descripción</label>
+      <input type="text" id="addNotes" placeholder="Ej: Entrenamiento táctico">
+    </div>
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="addDate" style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.92rem;padding:9px 12px;outline:none;width:100%;">
+    </div>
+    <div class="field">
+      <label>Hora</label>
+      <input type="time" id="addTime" step="60" value="22:30">
+    </div>
+    <div class="field" id="addHomeField">
+      <label>Condición</label>
+      <div class="toggle-row">
+        <button class="toggle-opt active" id="addHomeBtn" onclick="setAddHome(true)">🏠 Local</button>
+        <button class="toggle-opt" id="addAwayBtn" onclick="setAddHome(false)">✈️ Visita</button>
+      </div>
+    </div>
+    <div class="modal-btns" style="margin-top:18px;">
+      <button class="mbtn mbtn-cancel" onclick="closeAddModal()">Cancelar</button>
+      <button class="mbtn mbtn-save" onclick="saveAdd()">Agregar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Edit Modal -->
 <div class="overlay" id="editOverlay">
@@ -901,9 +962,13 @@ const RAW = [
 let results    = JSON.parse(localStorage.getItem('ts_results')   ||'{}');
 let edits      = JSON.parse(localStorage.getItem('ts_edits')     ||'{}');
 let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}'); // id -> {originalDate, newDate}
+let custom     = JSON.parse(localStorage.getItem('ts_custom')    ||'[]'); // custom matches added via UI
 let currentFilter = 'all';
 let editingId = null;
 let editHomeVal = true;
+// add modal state
+let addType = 'partido';
+let addHomeVal = true;
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -931,12 +996,14 @@ onSnapshot(CAL_DOC, snap => {
     results   = data.results   || {};
     edits     = data.edits     || {};
     suspended = data.suspended || {};
+    custom    = data.custom    || [];
     // Migrar datos viejos: si no tiene campo 'manual', es manual (formato anterior)
     Object.keys(suspended).forEach(k => {
       if(suspended[k].manual === undefined) suspended[k].manual = true;
     });
     // sync to localStorage as backup
     localStorage.setItem('ts_results',   JSON.stringify(results));
+    localStorage.setItem('ts_custom',    JSON.stringify(custom));
     localStorage.setItem('ts_edits',     JSON.stringify(edits));
     localStorage.setItem('ts_suspended', JSON.stringify(suspended));
   }
@@ -949,9 +1016,10 @@ async function saveState(){
   localStorage.setItem('ts_results',   JSON.stringify(results));
   localStorage.setItem('ts_edits',     JSON.stringify(edits));
   localStorage.setItem('ts_suspended', JSON.stringify(suspended));
+  localStorage.setItem('ts_custom',    JSON.stringify(custom));
   // Save to Firebase
   try {
-    await setDoc(CAL_DOC, { results, edits, suspended }, { merge: true });
+    await setDoc(CAL_DOC, { results, edits, suspended, custom }, { merge: true });
   } catch(e){ console.warn('Firebase write error:', e); }
 }
 
@@ -961,6 +1029,14 @@ function getMatch(i){
   if(edits[i])     Object.assign(base, edits[i]);
   if(suspended[i]) base.date = suspended[i].newDate;
   return base;
+}
+
+// Unified getter: integer = RAW entry, 'c0' string = custom entry
+function getAnyMatch(id){
+  if(typeof id === 'string' && id.startsWith('c')){
+    return custom[parseInt(id.slice(1))];
+  }
+  return getMatch(id);
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -1122,6 +1198,7 @@ function render(){
   cal.innerHTML = '';
 
   // Group by week then by date (using effective match data)
+  // Keys: integers = RAW index, strings like 'c0' = custom entries
   const weeks = {};
   RAW.forEach((_, i) => {
     const m = getMatch(i);
@@ -1129,11 +1206,16 @@ function render(){
     if(!weeks[wk]) weeks[wk]=[];
     weeks[wk].push(i);
   });
+  custom.forEach((m, ci) => {
+    const wk = weekKey(m.date);
+    if(!weeks[wk]) weeks[wk]=[];
+    weeks[wk].push('c'+ci);
+  });
 
   Object.keys(weeks).sort().forEach(wk=>{
     const ids = weeks[wk];
     const days = {};
-    ids.forEach(i=>{ const d=getMatch(i).date; if(!days[d]) days[d]=[]; days[d].push(i); });
+    ids.forEach(id=>{ const d=getAnyMatch(id).date; if(!days[d]) days[d]=[]; days[d].push(id); });
 
     const wDiv = document.createElement('div');
     wDiv.className='week';
@@ -1146,9 +1228,65 @@ function render(){
       dDiv.dataset.date=date;
       dDiv.innerHTML=`<div class="day-label">${fmtDate(date)}</div>`;
 
-      dayIds.sort((a,b)=>getMatch(a).time.localeCompare(getMatch(b).time));
+      dayIds.sort((a,b)=>(getAnyMatch(a).time||'').localeCompare(getAnyMatch(b).time||''));
 
-      dayIds.forEach(i=>{
+      dayIds.forEach(id=>{
+        const isCustom = typeof id === 'string';
+
+        // ── CUSTOM ENTRY ────────────────────────────────────────────────
+        if(isCustom){
+          const ci = parseInt(id.slice(1));
+          const m = custom[ci];
+          const card = document.createElement('div');
+
+          if(m.tipo === 'entrenamiento' || m.tipo === 'otro'){
+            const icon = m.tipo === 'entrenamiento' ? '🏃' : '📋';
+            const label = m.tipo === 'entrenamiento' ? 'Entrenamiento' : 'Otro';
+            card.className = 'match custom-entry';
+            card.dataset.league = 'custom';
+            card.innerHTML = `
+              <div class="match-bar" style="background:#888;opacity:.4"></div>
+              <div class="match-body">
+                <div class="rival"><span style="margin-right:5px">${icon}</span>${label}${m.notes?' — '+m.notes:''}</div>
+                <div class="meta">
+                  <span class="jornada-badge" style="background:rgba(136,136,136,.12);color:#888;border-color:rgba(136,136,136,.3)">${label}</span>
+                </div>
+              </div>
+              <div class="match-time">${m.time||''}</div>
+              <div class="card-actions">
+                <button class="act-btn" title="Eliminar" onclick="deleteCustom(${ci})" style="color:#c0392b">🗑️</button>
+              </div>
+            `;
+          } else {
+            // Custom partido
+            const leagueClass = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league]||'';
+            const locLabel = m.isHome ? '🏠 Local' : '✈️ Visita';
+            const hide = currentFilter!=='all' && m.league!==currentFilter;
+            card.className = 'match custom-entry' + (hide?' hidden':'');
+            card.dataset.league = m.league||'';
+            card.innerHTML = `
+              <div class="match-bar bar-${leagueClass}"></div>
+              <div class="match-body">
+                <div class="rival">${m.rival||'—'}</div>
+                <div class="meta">
+                  <span class="jornada-badge" style="background:rgba(201,168,76,.12);color:var(--gold);border-color:rgba(201,168,76,.3)">+ Agregado</span>
+                  ${m.league?`<span class="league-badge badge-${leagueClass}">${m.league}</span>`:''}
+                  <span class="loc">${locLabel}</span>
+                  ${m.instancia?`<span class="loc" style="color:var(--muted2)">${m.instancia}</span>`:''}
+                </div>
+              </div>
+              <div class="match-time">${m.time||''}</div>
+              <div class="card-actions">
+                <button class="act-btn" title="Eliminar" onclick="deleteCustom(${ci})" style="color:#c0392b">🗑️</button>
+              </div>
+            `;
+          }
+          dDiv.appendChild(card);
+          return;
+        }
+
+        // ── RAW MATCH ENTRY ─────────────────────────────────────────────
+        const i = id;
         const m = getMatch(i);
         const isSuspended = !!suspended[i];
         const isManualSuspend = isSuspended && suspended[i].manual;
@@ -1447,6 +1585,74 @@ function restoreMatch(){
   }
 }
 
+// ── ADD MODAL ─────────────────────────────────────────────────────────────────
+function openAddModal(){
+  addType = 'partido';
+  addHomeVal = true;
+  refreshAddType();
+  refreshAddHome();
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('addDate').value = today;
+  document.getElementById('addTime').value = '22:30';
+  document.getElementById('addRival').value = '';
+  document.getElementById('addNotes').value = '';
+  document.getElementById('addOverlay').classList.add('open');
+}
+function closeAddModal(){
+  document.getElementById('addOverlay').classList.remove('open');
+}
+function setAddType(t){
+  addType = t;
+  refreshAddType();
+}
+function refreshAddType(){
+  document.getElementById('addTypePartido').classList.toggle('active', addType==='partido');
+  document.getElementById('addTypeEntrenamiento').classList.toggle('active', addType==='entrenamiento');
+  document.getElementById('addTypeOtro').classList.toggle('active', addType==='otro');
+  const isPartido = addType === 'partido';
+  document.getElementById('addLeagueField').style.display    = isPartido ? '' : 'none';
+  document.getElementById('addRivalField').style.display     = isPartido ? '' : 'none';
+  document.getElementById('addInstanciaField').style.display = isPartido ? '' : 'none';
+  document.getElementById('addHomeField').style.display      = isPartido ? '' : 'none';
+  document.getElementById('addNotesField').style.display     = !isPartido ? '' : 'none';
+}
+function setAddHome(val){
+  addHomeVal = val;
+  refreshAddHome();
+}
+function refreshAddHome(){
+  document.getElementById('addHomeBtn').classList.toggle('active', addHomeVal===true);
+  document.getElementById('addAwayBtn').classList.toggle('active', addHomeVal===false);
+}
+function saveAdd(){
+  const date = document.getElementById('addDate').value;
+  if(!date){ alert('Elegí una fecha'); return; }
+  const time = document.getElementById('addTime').value || '22:30';
+  const entry = { tipo: addType, date, time };
+  if(addType === 'partido'){
+    const rival = document.getElementById('addRival').value.trim();
+    if(!rival){ alert('Ingresá el nombre del rival'); return; }
+    entry.rival    = rival;
+    entry.league   = document.getElementById('addLeague').value;
+    entry.instancia= document.getElementById('addInstancia').value;
+    entry.isHome   = addHomeVal;
+  } else {
+    entry.notes = document.getElementById('addNotes').value.trim();
+  }
+  custom.push(entry);
+  saveState();
+  closeAddModal();
+  render();
+  showToast('✓ Evento agregado', 'success');
+}
+function deleteCustom(ci){
+  if(!confirm('¿Eliminar este evento?')) return;
+  custom.splice(ci, 1);
+  saveState();
+  render();
+  showToast('Evento eliminado', 'success');
+}
+
 // Close on backdrop
 document.getElementById('overlay').addEventListener('click',function(e){
   if(e.target===this) closeModal();
@@ -1454,7 +1660,10 @@ document.getElementById('overlay').addEventListener('click',function(e){
 document.getElementById('editOverlay').addEventListener('click',function(e){
   if(e.target===this) closeEditModal();
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeEditModal(); } });
+document.getElementById('addOverlay').addEventListener('click',function(e){
+  if(e.target===this) closeAddModal();
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeEditModal(); closeAddModal(); } });
 
 // ── SAVE TO FIREBASE ──────────────────────────────────────────────────────────
 async function saveToFirebase(){
@@ -1507,6 +1716,12 @@ window.setHome        = setHome;
 window.suspendMatch   = suspendMatch;
 window.restoreMatch   = restoreMatch;
 window.saveToFirebase = saveToFirebase;
+window.openAddModal   = openAddModal;
+window.closeAddModal  = closeAddModal;
+window.setAddType     = setAddType;
+window.setAddHome     = setAddHome;
+window.saveAdd        = saveAdd;
+window.deleteCustom   = deleteCustom;
 
 // render() is called by onSnapshot when Firebase data loads
 </script>
