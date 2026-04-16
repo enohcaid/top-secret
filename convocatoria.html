@@ -132,13 +132,13 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 
 /* ── PITCH TOKEN VARS ── */
 :root{
-  --tok-w: 144px;
-  --tok-h: 103px;
-  --photo-scale: 3.6;
-  --photo-y: -5%;
-  --bar-h: 21px;
-  --num-size: 1.35rem;
-  --name-size: 0.86rem;
+  --tok-w: 102px;
+  --tok-h: 108px;
+  --photo-scale: 3.5;
+  --photo-y: -7%;
+  --bar-h: 17px;
+  --num-size: 2rem;
+  --name-size: 0.8rem;
   --bar-gap: 5px;
   --bar-pad: 2px 5px 2px 4px;
 }
@@ -156,7 +156,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .stoken.selected{outline:2.5px solid var(--gold);box-shadow:0 0 14px rgba(201,168,76,.45);transform:scale(1.1);}
 .stoken-bar{position:absolute;bottom:0;left:0;right:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:var(--bar-h);}
 .stoken-num{position:absolute;left:4px;bottom:calc(var(--bar-h) + 3px);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:var(--num-size);color:var(--gold);line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:3;}
-.stoken-cap{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:#1a90d9;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.62rem;color:#fff;z-index:3;line-height:1;}
+.stoken-cap{position:absolute;bottom:calc(var(--bar-h) + 3px);right:4px;width:24px;height:24px;border-radius:50%;background:#1a90d9;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.78rem;color:#fff;z-index:3;line-height:1;}
 .stoken-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:var(--name-size);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;letter-spacing:.01em;text-transform:uppercase;text-align:center;width:100%;padding:0 4px;}
 .slabel{display:none;}
 .pitch-hint{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.35);text-align:center;margin-top:8px;transition:color .2s;}
@@ -186,6 +186,9 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .sopt:hover{border-color:#8b92aa;background:#13161e;}
 .sopt-always{border-color:rgba(74,158,255,.35)!important;color:#4a9eff!important;}
 .sopt-always:hover{border-color:#4a9eff!important;background:rgba(74,158,255,.08)!important;}
+.sopt-captain{border-color:rgba(26,144,217,.35)!important;color:#1a90d9!important;}
+.sopt-captain:hover{border-color:#1a90d9!important;background:rgba(26,144,217,.08)!important;}
+.sopt-captain.is-captain{border-color:#1a90d9!important;background:rgba(26,144,217,.18)!important;color:#fff!important;}
 .modal-input{width:100%;background:#0a0b0e;border:1px solid #252a38;border-radius:8px;color:#dde1ec;font-family:'Barlow',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;margin-bottom:12px;}
 .modal-input:focus{border-color:var(--gold);}
 .mbtns{display:flex;gap:8px;margin-top:4px;}
@@ -333,6 +336,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
       <button class="sopt" onclick="confirmStatus('yellow')">🟡 Llego tarde…</button>
       <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
       <button class="sopt" onclick="confirmStatus('black')">⚫ Ausente varios días…</button>
+      <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()">🅱️ Asignar como capitán</button>
     </div>
     <button class="mbtn mbtn-cancel" onclick="closeModal('statusOverlay')" style="width:100%;margin-top:10px">Cancelar</button>
   </div>
@@ -380,7 +384,7 @@ const PLAYERS = [
   { name:'Agubostero7',     pos:'DFD', num:31, folder:'Agubostero7'    },
   { name:'Huber236',        pos:'LD',  num:95, folder:'Huber236'       },
   { name:'zPibu__',         pos:'LI',  num:30, folder:'zPibu__'        },
-  { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4', captain:true },
+  { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4' },
   { name:'RS32-DaniStone',  pos:'MCI', num:8,  folder:'RS32-DaniStone' },
   { name:'CipriMancini',    pos:'MVD', num:32, folder:'CipriMancini'   },
   { name:'Buraa07',         pos:'MVI', num:12, folder:'Buraa7'         },
@@ -459,6 +463,7 @@ const LS_META = 'conv_meta';
 
 let availability = {};
 let alwaysPresent = [];
+let captain = null;
 let lineup = { formation:'4-3-3', slots:{} };
 let currentPlayer = null;
 let selectedSlotKey = null;
@@ -473,8 +478,8 @@ function loadState() {
   try {
     const m = JSON.parse(localStorage.getItem(LS_META) || '{}');
     alwaysPresent = m.alwaysPresent || [];
+    captain = m.captain || null;
   } catch(e) {}
-  // Apply alwaysPresent
   alwaysPresent.forEach(name => {
     if (!availability[name] || availability[name].status !== 'red')
       availability[name] = { status:'green' };
@@ -484,7 +489,7 @@ function saveDay() {
   localStorage.setItem(LS_KEY, JSON.stringify({ availability, lineup }));
 }
 function saveMeta() {
-  localStorage.setItem(LS_META, JSON.stringify({ alwaysPresent }));
+  localStorage.setItem(LS_META, JSON.stringify({ alwaysPresent, captain }));
 }
 
 /* ─── STATUS ─── */
@@ -677,7 +682,7 @@ function renderPitch() {
         const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
         tok.appendChild(numEl);
         // Badge capitán
-        if (player.captain) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
+        if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
         // Barra inferior solo con nombre
         const bar = document.createElement('div'); bar.className = 'stoken-bar';
         const nameEl = document.createElement('span'); nameEl.className = 'stoken-name'; nameEl.textContent = player.name;
@@ -706,7 +711,7 @@ function renderPitch() {
           }
           const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
           tok.appendChild(numEl);
-          if (player.captain) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
+          if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
           const bar = document.createElement('div'); bar.className = 'stoken-bar';
           const nameEl = document.createElement('span'); nameEl.className = 'stoken-name'; nameEl.textContent = player.name;
           bar.appendChild(nameEl);
@@ -838,7 +843,22 @@ function openStatusModal(name) {
   txt.appendChild(nm); txt.appendChild(sub);
   if (note) { const nd = document.createElement('div'); nd.style.cssText = 'font-size:.7rem;color:var(--yellow);font-weight:600;margin-top:2px;'; nd.textContent = note; txt.appendChild(nd); }
   mph.appendChild(av); mph.appendChild(txt);
+  // Actualizar botón capitán
+  const capBtn = document.getElementById('captainBtn');
+  if (captain === name) {
+    capBtn.textContent = '🅱️ Quitar capitanía';
+    capBtn.classList.add('is-captain');
+  } else {
+    capBtn.textContent = '🅱️ Asignar como capitán';
+    capBtn.classList.remove('is-captain');
+  }
   document.getElementById('statusOverlay').classList.add('open');
+}
+
+function toggleCaptain() {
+  captain = (captain === currentPlayer) ? null : currentPlayer;
+  saveMeta(); closeModal('statusOverlay'); render();
+  showToast(captain ? captain + ' es el capitán 🅱️' : 'Capitanía removida');
 }
 
 function confirmStatus(status) {
