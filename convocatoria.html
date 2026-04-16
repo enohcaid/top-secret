@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2026-04-09-SVG-FIX -->
+<!-- v2026-04-16 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -123,7 +123,7 @@ body{background:var(--white);color:var(--black);font-family:'Barlow',sans-serif;
 .sdot.sy{background:#b8900a;box-shadow:0 0 0 2px rgba(184,144,10,.3);}
 .sdot.sr{background:#b03018;box-shadow:0 0 0 2px rgba(176,48,24,.25);}
 .sdot.sb{background:#2a2f3f;border:1px solid #444;}
-.sdot.sp{background:transparent;border:1.5px solid rgba(255,255,255,.2);}
+.sdot.sp{background:transparent;border:1.5px solid var(--border2);}
 
 /* ─── FORMATION BAR ─── */
 .fbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
@@ -214,6 +214,10 @@ body{background:var(--white);color:var(--black);font-family:'Barlow',sans-serif;
 .assign-banner.hidden{display:none!important;}
 .assign-cancel{font-size:.7rem;opacity:.7;cursor:pointer;padding:2px 8px;border:1px solid currentColor;border-radius:4px;}
 
+footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;margin-left:-64px;margin-right:-48px;}
+.footer-brand{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+.footer-brand strong{color:var(--gold);}
+.footer-copy{font-size:.72rem;color:rgba(255,255,255,.3);letter-spacing:.06em;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="icon" type="image/png" href="Top-Secret.png">
@@ -802,7 +806,7 @@ function renderFbar() {
 function renderPitch() {
   const pitch=document.getElementById('pitch'); if(!pitch) return;
   pitch.querySelectorAll('.slot').forEach(el=>el.remove());
-  const stW=Math.min(80,Math.max(54,window.innerWidth*0.055));
+  const stW=Math.min(52,Math.max(36,window.innerWidth*0.035));
   const stScale=stW/42;
   const slots=FORMATIONS[lineup.formation]||FORMATIONS['4-3-3'];
   slots.forEach(s=>{
@@ -1241,8 +1245,9 @@ window.autoLineup = function() {
 
 render(); // initial render without Firebase
 </script>
-<footer style="background:#111;color:#555;text-align:center;padding:28px 24px;font-size:.75rem;letter-spacing:.1em;margin-left:-64px;margin-right:-48px;">
-  <span style="color:var(--gold)">Top Secret FC</span> · Temporada 1 · 2026
+<footer>
+  <span class="footer-brand"><strong>Top Secret FC</strong> · Temporada 2 · 2026</span>
+  <span class="footer-copy">EA FC Clubs Pro · Buenos Aires · Argentina</span>
 </footer>
 </body>
 </html>
