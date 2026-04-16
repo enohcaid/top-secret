@@ -441,12 +441,12 @@ document.getElementById('sq-gpg').textContent   = gpg + ' por partido';
 
 /* ── BUILD TOP 3 RANKINGS ── */
 const keys = Object.keys(playerStats);
-const top3G   = keys.filter(k=>playerStats[k].g>0).sort((a,b)=>playerStats[b].g-playerStats[a].g).slice(0,3);
-const top3A   = keys.filter(k=>playerStats[k].a>0).sort((a,b)=>playerStats[b].a-playerStats[a].a).slice(0,3);
-const top3Rat = keys.filter(k=>playerStats[k].pj>=3).sort((a,b)=>playerStats[b].avgRating-playerStats[a].avgRating).slice(0,3);
+const top3G   = keys.filter(k=>playerStats[k].g>0).sort((a,b)=>playerStats[b].g-playerStats[a].g).slice(0,5);
+const top3A   = keys.filter(k=>playerStats[k].a>0).sort((a,b)=>playerStats[b].a-playerStats[a].a).slice(0,5);
+const top3Rat = keys.filter(k=>playerStats[k].pj>=3).sort((a,b)=>playerStats[b].avgRating-playerStats[a].avgRating).slice(0,5);
 
-const rankClasses = ['gold','silver','bronze'];
-const rankNums    = ['1','2','3'];
+const rankClasses = ['gold','silver','bronze','',''];
+const rankNums    = ['1','2','3','4','5'];
 
 function buildTopCard(title, players, valFn, suffix) {
   const entries = players.map((k, i) => {
