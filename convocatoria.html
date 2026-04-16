@@ -129,13 +129,13 @@ html,body{height:100%;} body{background:var(--gray);color:#1a1a1a;font-family:'B
 
 /* ── PITCH TOKEN VARS ── */
 :root{
-  --tok-w: 144px;
-  --tok-h: 103px;
+  --tok-w: 72px;
+  --tok-h: 52px;
   --photo-scale: 3.6;
   --photo-y: -5%;
-  --bar-h: 21px;
-  --num-size: 1.35rem;
-  --name-size: 0.86rem;
+  --bar-h: 11px;
+  --num-size: 0.68rem;
+  --name-size: 0.44rem;
   --bar-gap: 5px;
   --bar-pad: 2px 5px 2px 4px;
 }
@@ -638,7 +638,7 @@ function renderFbar() {
 function renderPitch() {
   const pitch = document.getElementById('pitch');
   pitch.querySelectorAll('.slot').forEach(el => el.remove());
-  const stW = Math.min(76, Math.max(50, window.innerWidth * 0.05));
+  const stW = Math.min(38, Math.max(25, window.innerWidth * 0.025));
   const stScale = stW / 42;
   const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
 
