@@ -128,23 +128,26 @@ body {
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 
-/* ── FINAL BADGE ── */
-.final-notice {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--gray); border: 1px solid var(--border);
-  border-radius: 8px; padding: 12px 18px;
-  margin-bottom: 20px;
+/* ── LOADING / ERROR ── */
+.loading-state {
+  padding: 48px 0; text-align: center;
+  font-size: .85rem; color: var(--mid);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
 }
-.final-badge {
-  display: inline-block; padding: 3px 10px; border-radius: 4px;
-  font-size: .65rem; font-weight: 900; letter-spacing: .12em;
-  text-transform: uppercase; flex-shrink: 0;
+.loading-state::before {
+  content: ''; display: inline-block; width: 18px; height: 18px;
+  border: 2px solid var(--border); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin .7s linear infinite;
 }
-.final-badge.vpn  { background: rgba(212,160,23,.12);  color: var(--vpn);  border: 1px solid rgba(212,160,23,.3); }
-.final-badge.vpug { background: rgba(42,157,92,.12);   color: var(--vpug); border: 1px solid rgba(42,157,92,.3); }
-.final-badge.e11  { background: rgba(37,99,235,.12);   color: var(--e11);  border: 1px solid rgba(37,99,235,.3); }
-.final-text { font-size: .82rem; color: var(--mid); }
-.final-text strong { color: var(--black); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-state {
+  padding: 32px 0; text-align: center; font-size: .85rem; color: var(--mid);
+}
+.error-state button {
+  margin-left: 8px; padding: 4px 14px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border); background: transparent; font-size: .8rem;
+  color: var(--gold); border-color: var(--gold);
+}
 
 /* ── TABLE ── */
 .standings-table {
@@ -283,9 +286,9 @@ footer span { color: var(--gold); }
 
 <!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="ph-eyebrow">Temporada 1 · 2026</div>
+  <div class="ph-eyebrow">Temporada 2 · 2026</div>
   <h1 class="ph-title">Posi<span>ciones</span></h1>
-  <p class="ph-sub">Tabla de posiciones finales · VPN · VPUG · 11x11</p>
+  <p class="ph-sub">Tabla de posiciones en vivo · VPN · VPUG · 11x11</p>
 </div>
 
 <div class="wrap">
@@ -298,20 +301,16 @@ footer span { color: var(--gold); }
 
   <!-- ══════════ VPN ══════════ -->
   <div class="tab-pane active" id="pane-vpn">
-    <div class="final-notice">
-      <span class="final-badge vpn">FINAL T1</span>
-      <span class="final-text"><strong>Temporada 1 Finalizada</strong> · Liga VPN Argentina · Tabla estática final</span>
-    </div>
-    <table class="standings-table" id="vpn-table"></table>
+    <div class="loading-state" id="vpn-loading">Cargando tabla VPN…</div>
+    <table class="standings-table" id="vpn-table" style="display:none"></table>
+    <div class="error-state" id="vpn-error" style="display:none">Error al cargar. <button onclick="initTables()">Reintentar</button></div>
   </div>
 
   <!-- ══════════ VPUG ══════════ -->
   <div class="tab-pane" id="pane-vpug">
-    <div class="final-notice">
-      <span class="final-badge vpug">FINAL T1</span>
-      <span class="final-text"><strong>Temporada 1 Finalizada</strong> · Liga VPUG · Tabla estática final</span>
-    </div>
-    <table class="standings-table" id="vpug-table"></table>
+    <div class="loading-state" id="vpug-loading">Cargando tabla VPUG…</div>
+    <table class="standings-table" id="vpug-table" style="display:none"></table>
+    <div class="error-state" id="vpug-error" style="display:none">Error al cargar. <button onclick="initTables()">Reintentar</button></div>
     <div class="zone-legend">
       <div class="zl-item"><span class="zone-dot" style="background:#2563eb"></span>Clasificado a Playoff</div>
       <div class="zl-item"><span class="zone-dot" style="background:var(--vpug)"></span>Clasificado directo</div>
@@ -321,11 +320,9 @@ footer span { color: var(--gold); }
 
   <!-- ══════════ 11x11 ══════════ -->
   <div class="tab-pane" id="pane-e11">
-    <div class="final-notice">
-      <span class="final-badge e11">FINAL T1</span>
-      <span class="final-text"><strong>Temporada 1 Finalizada</strong> · Liga Virtual Pro Gaming 11x11 · Tabla estática final</span>
-    </div>
-    <table class="standings-table" id="e11-table"></table>
+    <div class="loading-state" id="e11-loading">Cargando tabla 11x11…</div>
+    <table class="standings-table" id="e11-table" style="display:none"></table>
+    <div class="error-state" id="e11-error" style="display:none">Error al cargar. <button onclick="initTables()">Reintentar</button></div>
     <div class="zone-legend">
       <div class="zl-item"><span class="zone-dot" style="background:#c9a84c"></span>Ascenso / Playoff</div>
       <div class="zl-item"><span class="zone-dot" style="background:#c0392b"></span>Descenso</div>
@@ -335,7 +332,7 @@ footer span { color: var(--gold); }
 
 <!-- FOOTER -->
 <footer>
-  <span>Top Secret FC</span> · Temporada 1 · 2026
+  <span>Top Secret FC</span> · Temporada 2 · 2026
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -348,18 +345,10 @@ window.addEventListener('DOMContentLoaded', () => {
   gsap.to('.ph-sub',     {opacity:1, y:0, duration:0.5, ease:'power2.out', delay:0.2});
 });
 
-/* ── DATA ── */
-
-const VPN_DATA = [
-  {name:'Top Secret', abbr:'TOP', gp:12, w:7, d:2, l:3, gf:21, gc:13, gd:8,  pts:23, us:true},
-  {name:'River Virtual',    abbr:'RIV', gp:12, w:7, d:1, l:4, gf:19, gc:15, gd:4,  pts:22},
-  {name:'Boca Pro',         abbr:'BOC', gp:12, w:6, d:3, l:3, gf:18, gc:11, gd:7,  pts:21},
-  {name:'Atletico Sur',     abbr:'ATS', gp:12, w:5, d:4, l:3, gf:14, gc:12, gd:2,  pts:19},
-  {name:'Dalmine FC',       abbr:'DAL', gp:12, w:5, d:2, l:5, gf:16, gc:17, gd:-1, pts:17},
-  {name:'Camioneros FC',    abbr:'CAM', gp:12, w:4, d:4, l:4, gf:12, gc:14, gd:-2, pts:16},
-  {name:'Dep. Ballester',   abbr:'BAL', gp:12, w:4, d:2, l:6, gf:11, gc:16, gd:-5, pts:14},
-  {name:'FC Rincón',        abbr:'FCR', gp:12, w:3, d:2, l:7, gf:9,  gc:18, gd:-9, pts:11},
-];
+/* ── PROXY ENDPOINTS ── */
+const VPN_URL  = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-table';
+const VPUG_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/vpug-table';
+const E11_URL  = 'https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2';
 
 const VPUG_DATA = [
   {name:'Villa Dalmine eSp',  abbr:'VDE', gp:8, w:7, d:1, l:0, gf:15, gc:4,  gd:11,  pts:22, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWPzqBjj1QCR6oNHIq.png?alt=media&token=1&m=1772317663374'},
@@ -405,9 +394,52 @@ const E11_DATA = [
   {name:'Team Valhalla',         abbr:'VAL', gp:21, w:2,  d:2, l:17, gf:19, gc:55, gd:-36, pts:8,  logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_a0feb073-7b6d-4eef-95d4-7377635fc2f2/smThumb'},
 ];
 
+/* ── NORMALIZERS ── */
+function normVPN(raw) {
+  // API returns [{team:{name,short_name,logoSmallUrl,...}, gp, gw, gt, gl, gf, gc, gd, pts}, ...]
+  return raw
+    .map(e => ({
+      name: e.team.name,
+      abbr: e.team.short_name || e.team.name.slice(0,3).toUpperCase(),
+      logo: e.team.logoSmallUrl || e.team.logoUrl || null,
+      gp: e.gp, w: e.gw, d: e.gt, l: e.gl, gf: e.gf, gc: e.gc, gd: e.gd, pts: e.pts,
+      us: /top.?secret/i.test(e.team.name)
+    }))
+    .sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+}
+
+function normVPUG(raw) {
+  // Proxy already returns [{name, logo, gp, w, d, l, gf, gc, gd, pts}, ...] sorted
+  return raw.map(e => ({
+    ...e,
+    abbr: e.abbr || e.name.slice(0,3).toUpperCase(),
+    us: /top.?secret/i.test(e.name)
+  }));
+}
+
+function normE11(raw) {
+  // API: [{name, acronym/short_name, logo, gp/gamesPlayed, w/wins, d/ties, l/losses, gf, gc, gd, pts/points}, ...]
+  const pick = (o, ...keys) => { for (const k of keys) if (o[k] !== undefined) return o[k]; return 0; };
+  return raw.map(e => ({
+    name: e.name || e.team_name || '',
+    abbr: e.acronym || e.short_name || (e.name||'').slice(0,3).toUpperCase(),
+    logo: e.logo || e.logoUrl || e.logoSmallUrl || null,
+    gp: pick(e,'gp','gamesPlayed','games_played'),
+    w:  pick(e,'w','wins','gw'),
+    d:  pick(e,'d','ties','gt','draws'),
+    l:  pick(e,'l','losses','gl'),
+    gf: pick(e,'gf','goalsFor','goals_for'),
+    gc: pick(e,'gc','goalsAgainst','goals_against'),
+    gd: pick(e,'gd','goalDifference','goal_difference'),
+    pts: pick(e,'pts','points'),
+    us: /top.?secret/i.test(e.name || '')
+  }));
+}
+
 /* ── RENDER TABLE ── */
 function renderTable(tableId, data, accentColor) {
   const table = document.getElementById(tableId);
+  table.style.display = '';
   table.innerHTML = `
     <thead>
       <tr>
@@ -457,6 +489,14 @@ function renderTable(tableId, data, accentColor) {
   });
 }
 
+function showLoading(league, show) {
+  document.getElementById(league + '-loading').style.display = show ? '' : 'none';
+}
+function showError(league, show) {
+  document.getElementById(league + '-error').style.display = show ? '' : 'none';
+  if (show) document.getElementById(league + '-table').style.display = 'none';
+}
+
 /* ── TAB SWITCH ── */
 function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -467,13 +507,35 @@ function switchTab(id, btn) {
   gsap.fromTo(rows, {opacity:0, x:-8}, {opacity:1, x:0, duration:0.35, stagger:0.02, ease:'power2.out'});
 }
 
-/* ── INIT ── */
-renderTable('vpn-table',  VPN_DATA,  'var(--vpn)');
-renderTable('vpug-table', VPUG_DATA, 'var(--vpug)');
-renderTable('e11-table',  E11_DATA,  'var(--e11)');
+/* ── FETCH & INIT ── */
+async function fetchLeague(url, norm, tableId, accentColor, leagueKey) {
+  showLoading(leagueKey, true);
+  showError(leagueKey, false);
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const raw = await r.json();
+    if (!Array.isArray(raw) || raw.length === 0) throw new Error('empty');
+    const data = norm(raw);
+    showLoading(leagueKey, false);
+    renderTable(tableId, data, accentColor);
+    if (leagueKey === 'vpn') {
+      gsap.to('#vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.025, ease:'power1.out', delay:0.1});
+    }
+  } catch(e) {
+    console.warn(leagueKey + ' fetch error:', e);
+    showLoading(leagueKey, false);
+    showError(leagueKey, true);
+  }
+}
 
-/* animate VPN rows (active tab) */
-gsap.to('#vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.025, ease:'power1.out', delay:0.2});
+async function initTables() {
+  fetchLeague(VPN_URL,  normVPN,  'vpn-table',  'var(--vpn)',  'vpn');
+  fetchLeague(VPUG_URL, normVPUG, 'vpug-table', 'var(--vpug)', 'vpug');
+  fetchLeague(E11_URL,  normE11,  'e11-table',  'var(--e11)',  'e11');
+}
+
+initTables();
 </script>
 </body>
 </html>
