@@ -155,7 +155,8 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .stoken.drag-over{outline:2px solid var(--gold);transform:scale(1.08);}
 .stoken.selected{outline:2.5px solid var(--gold);box-shadow:0 0 14px rgba(201,168,76,.45);transform:scale(1.1);}
 .stoken-bar{position:absolute;bottom:0;left:0;right:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:var(--bar-h);}
-.stoken-num{position:absolute;left:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:var(--num-size);color:var(--gold);line-height:1;}
+.stoken-num{position:absolute;left:4px;bottom:calc(var(--bar-h) + 3px);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:var(--num-size);color:var(--gold);line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:3;}
+.stoken-cap{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:#1a90d9;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.62rem;color:#fff;z-index:3;line-height:1;}
 .stoken-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:var(--name-size);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;letter-spacing:.01em;text-transform:uppercase;text-align:center;width:100%;padding:0 4px;}
 .slabel{display:none;}
 .pitch-hint{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.35);text-align:center;margin-top:8px;transition:color .2s;}
@@ -379,7 +380,7 @@ const PLAYERS = [
   { name:'Agubostero7',     pos:'DFD', num:31, folder:'Agubostero7'    },
   { name:'Huber236',        pos:'LD',  num:95, folder:'Huber236'       },
   { name:'zPibu__',         pos:'LI',  num:30, folder:'zPibu__'        },
-  { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4' },
+  { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4', captain:true },
   { name:'RS32-DaniStone',  pos:'MCI', num:8,  folder:'RS32-DaniStone' },
   { name:'CipriMancini',    pos:'MVD', num:32, folder:'CipriMancini'   },
   { name:'Buraa07',         pos:'MVI', num:12, folder:'Buraa7'         },
@@ -669,14 +670,18 @@ function renderPitch() {
         tok.innerHTML = '';
         const img = document.createElement('img');
         img.src = src;
-        // chest-up: scale up and push down a little so torso enters frame
         img.className = 'tok-photo';
         img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(var(--photo-scale)) translateY(var(--photo-y));transform-origin:top center;';
         tok.appendChild(img);
-        const bar = document.createElement('div'); bar.className = 'stoken-bar';
+        // Número sobre la foto (izquierda)
         const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
+        tok.appendChild(numEl);
+        // Badge capitán
+        if (player.captain) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
+        // Barra inferior solo con nombre
+        const bar = document.createElement('div'); bar.className = 'stoken-bar';
         const nameEl = document.createElement('span'); nameEl.className = 'stoken-name'; nameEl.textContent = player.name;
-        bar.appendChild(numEl); bar.appendChild(nameEl);
+        bar.appendChild(nameEl);
         tok.appendChild(bar);
       }
 
@@ -699,10 +704,12 @@ function renderPitch() {
             img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
             tok.appendChild(img);
           }
-          const bar = document.createElement('div'); bar.className = 'stoken-bar';
           const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
+          tok.appendChild(numEl);
+          if (player.captain) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
+          const bar = document.createElement('div'); bar.className = 'stoken-bar';
           const nameEl = document.createElement('span'); nameEl.className = 'stoken-name'; nameEl.textContent = player.name;
-          bar.appendChild(numEl); bar.appendChild(nameEl);
+          bar.appendChild(nameEl);
           tok.appendChild(bar);
         };
         brazos.src = brazosPath(player);
@@ -1138,6 +1145,92 @@ render();
 /* ─── Animate after render ─── */
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
 gsap.to('.kpi-card', { opacity:1, y:0, duration:0.45, stagger:0.07, ease:'power2.out', delay:0.3 });
+</script>
+
+<!-- ── TOKEN EDITOR ── -->
+<style>
+#tok-editor{position:fixed;bottom:20px;right:60px;z-index:9999;background:#111;border:1px solid #C9A84C;border-radius:10px;padding:14px 16px;width:260px;font-family:'Barlow',sans-serif;font-size:.78rem;color:#ccc;box-shadow:0 4px 24px rgba(0,0,0,.5);}
+#tok-editor h4{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.1em;color:#C9A84C;margin-bottom:10px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;}
+#tok-editor h4 button{font-size:.65rem;padding:2px 8px;border-radius:4px;border:1px solid #555;background:transparent;color:#aaa;cursor:pointer;}
+#tok-editor h4 button:hover{border-color:#C9A84C;color:#C9A84C;}
+.te-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;}
+.te-row label{flex:1;color:#aaa;font-size:.72rem;}
+.te-row input[type=range]{flex:2;accent-color:#C9A84C;cursor:pointer;}
+.te-row span{width:44px;text-align:right;font-size:.72rem;color:#C9A84C;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
+#te-copy{width:100%;margin-top:10px;padding:7px;border-radius:6px;border:1px solid #C9A84C;background:rgba(201,168,76,.1);color:#C9A84C;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.08em;font-size:.78rem;cursor:pointer;}
+#te-copy:hover{background:#C9A84C;color:#111;}
+#te-toggle{position:fixed;bottom:20px;right:16px;z-index:9999;width:36px;height:36px;border-radius:8px;background:#111;border:1px solid #C9A84C;color:#C9A84C;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+</style>
+
+<button id="te-toggle" title="Editor de tokens" onclick="document.getElementById('tok-editor').style.display=document.getElementById('tok-editor').style.display==='none'?'block':'none'">✏️</button>
+
+<div id="tok-editor">
+<h4>Token Editor <button onclick="teCopy()">Copiar CSS</button></h4>
+<div class="te-row"><label>Ancho token</label><input type="range" id="te-tok-w" min="60" max="220" step="2" oninput="teApply()"><span id="te-tok-w-v"></span></div>
+<div class="te-row"><label>Alto token</label><input type="range" id="te-tok-h" min="40" max="160" step="2" oninput="teApply()"><span id="te-tok-h-v"></span></div>
+<div class="te-row"><label>Zoom foto</label><input type="range" id="te-scale" min="1" max="6" step="0.1" oninput="teApply()"><span id="te-scale-v"></span></div>
+<div class="te-row"><label>Foto Y offset</label><input type="range" id="te-py" min="-40" max="40" step="1" oninput="teApply()"><span id="te-py-v"></span></div>
+<div class="te-row"><label>Alto barra</label><input type="range" id="te-bar-h" min="12" max="40" step="1" oninput="teApply()"><span id="te-bar-h-v"></span></div>
+<div class="te-row"><label>Tamaño num.</label><input type="range" id="te-num" min="0.4" max="2" step="0.05" oninput="teApply()"><span id="te-num-v"></span></div>
+<div class="te-row"><label>Tamaño nombre</label><input type="range" id="te-name" min="0.3" max="1.2" step="0.05" oninput="teApply()"><span id="te-name-v"></span></div>
+<div class="te-row"><label>Tamaño badge C</label><input type="range" id="te-cap" min="10" max="32" step="1" oninput="teApply()"><span id="te-cap-v"></span></div>
+<button id="te-copy" onclick="teCopy()">📋 Copiar valores CSS</button>
+</div>
+
+<script>
+(function(){
+  const root = document.documentElement;
+  const get = id => document.getElementById(id);
+
+  const vars = [
+    { id:'te-tok-w',  prop:'--tok-w',      init:144, unit:'px',  vId:'te-tok-w-v' },
+    { id:'te-tok-h',  prop:'--tok-h',      init:103, unit:'px',  vId:'te-tok-h-v' },
+    { id:'te-scale',  prop:'--photo-scale',init:3.6, unit:'',    vId:'te-scale-v'  },
+    { id:'te-py',     prop:'--photo-y',    init:-5,  unit:'%',   vId:'te-py-v'     },
+    { id:'te-bar-h',  prop:'--bar-h',      init:21,  unit:'px',  vId:'te-bar-h-v'  },
+    { id:'te-num',    prop:'--num-size',   init:1.35,unit:'rem', vId:'te-num-v'    },
+    { id:'te-name',   prop:'--name-size',  init:0.86,unit:'rem', vId:'te-name-v'   },
+  ];
+
+  // Badge C size (direct DOM)
+  let capSize = 18;
+
+  function teApply() {
+    vars.forEach(v => {
+      const val = parseFloat(get(v.id).value);
+      root.style.setProperty(v.prop, val + v.unit);
+      get(v.vId).textContent = val + v.unit;
+    });
+    capSize = parseInt(get('te-cap').value);
+    get('te-cap-v').textContent = capSize + 'px';
+    document.querySelectorAll('.stoken-cap').forEach(el => {
+      el.style.width = capSize + 'px';
+      el.style.height = capSize + 'px';
+      el.style.fontSize = Math.round(capSize * 0.52) + 'px';
+    });
+    render();
+  }
+
+  function teInit() {
+    vars.forEach(v => {
+      const cur = getComputedStyle(root).getPropertyValue(v.prop).trim();
+      const num = parseFloat(cur) || v.init;
+      get(v.id).value = num;
+      get(v.vId).textContent = num + v.unit;
+    });
+    get('te-cap').value = capSize;
+    get('te-cap-v').textContent = capSize + 'px';
+  }
+
+  window.teApply = teApply;
+  window.teCopy = function() {
+    const lines = vars.map(v => `  ${v.prop}: ${get(v.vId).textContent};`).join('\n');
+    const full = `:root {\n${lines}\n}`;
+    navigator.clipboard.writeText(full).then(() => { get('te-copy').textContent = '✅ Copiado!'; setTimeout(()=>get('te-copy').textContent='📋 Copiar valores CSS',2000); });
+  };
+
+  setTimeout(teInit, 100);
+})();
 </script>
 </body>
 </html>
