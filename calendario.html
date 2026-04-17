@@ -413,6 +413,81 @@ footer span{color:var(--gold);}
 /* ─── HIDDEN ─── */
 .match.hidden{display:none;}
 
+/* ─── SEASON SELECTOR ─── */
+.season-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.sbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
+.sbtn:hover{border-color:var(--mid);color:var(--black);}
+.sbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
+
+/* ─── LOCK / ADMIN ─── */
+.btn-lock{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
+.btn-lock:hover{border-color:var(--mid);color:var(--black);}
+.btn-lock.unlocked{border-color:var(--win);color:var(--win);}
+/* Admin-only elements hidden when body.locked */
+.admin-el{display:inline-flex !important;}
+body.locked .admin-el{display:none !important;}
+body.locked .result-box.pending{cursor:default;}
+
+/* ─── NEXT MATCH CARD ─── */
+.next-match-outer{max-width:1100px;margin:8px auto 0;padding:0 32px;}
+.next-match-card{display:flex;align-items:center;gap:14px;padding:11px 16px;border-radius:10px;border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.04);}
+.nm-countdown{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;color:var(--gold);min-width:72px;letter-spacing:.04em;white-space:nowrap;}
+.nm-rival{font-size:.92rem;font-weight:700;color:var(--black);}
+.nm-meta{font-size:.7rem;color:var(--mid);margin-top:2px;}
+
+/* ─── PER-LEAGUE STATS ─── */
+.stats-perleague{max-width:1100px;margin:0 auto 20px;padding:0 32px;display:flex;gap:10px;flex-wrap:wrap;}
+.lsc{flex:1;min-width:140px;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.lsc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.lsc-badge{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.1em;padding:2px 8px;border-radius:4px;}
+.lsc-badge.vpn{background:var(--vpn-bg);color:var(--vpn);}
+.lsc-badge.vpug{background:var(--vpug-bg);color:var(--vpug);}
+.lsc-badge.e11{background:var(--e11-bg);color:var(--e11);}
+.lsc-wdl{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;color:var(--mid);}
+.lsc-l5{display:flex;gap:3px;margin-bottom:5px;}
+.l5p{width:15px;height:15px;border-radius:3px;font-size:.55rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;}
+.l5p.w{background:var(--win);}
+.l5p.d{background:var(--draw);}
+.l5p.l{background:var(--loss);}
+.l5p.p{background:var(--border);}
+.lsc-streak{font-size:.68rem;color:var(--mid);font-weight:600;letter-spacing:.04em;}
+.lsc-global{display:flex;flex-direction:column;justify-content:center;gap:6px;}
+.lscg-item{display:flex;flex-direction:column;}
+.lscg-val{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;color:var(--black);line-height:1;}
+.lscg-lbl{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);}
+
+/* ─── STATS PANEL OVERLAY ─── */
+.sp-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.sp-overlay.open{display:flex;}
+.sp-panel{background:#fff;border-radius:16px;width:min(640px,96vw);max-height:88vh;overflow-y:auto;padding:26px 24px;}
+.sp-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+.sp-title{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;color:var(--black);letter-spacing:-.01em;line-height:1;}
+.sp-meta-txt{font-size:.75rem;color:var(--mid);margin-top:4px;}
+.sp-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--mid);padding:0;}
+.sp-score-box{text-align:center;padding:14px;background:var(--gray);border-radius:10px;margin-bottom:18px;}
+.sp-score{font-family:'Barlow Condensed',sans-serif;font-size:3rem;font-weight:900;line-height:1;letter-spacing:.08em;}
+.sp-score.win{color:var(--win);}
+.sp-score.loss{color:var(--loss);}
+.sp-score.draw{color:var(--draw);}
+.sp-score-sub{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-top:4px;}
+.sp-sec{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.sp-table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:.82rem;}
+.sp-table th{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);padding:5px 8px;border-bottom:2px solid var(--border);text-align:center;}
+.sp-table th.left{text-align:left;}
+.sp-table td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--border);}
+.sp-table td.left{text-align:left;font-weight:600;color:var(--black);}
+.sp-table tr:last-child td{border-bottom:none;}
+.sp-table tr:hover td{background:var(--gray);}
+.sp-rat{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;}
+.sp-rat.hi{color:var(--win);}
+.sp-rat.mi{color:var(--draw);}
+.sp-rat.lo{color:var(--loss);}
+.sp-teamrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.sp-ts{background:var(--gray);border-radius:8px;padding:9px;text-align:center;}
+.sp-ts-v{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:var(--black);}
+.sp-ts-l{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);margin-top:2px;}
+.sp-no-data{text-align:center;padding:28px;color:var(--mid);font-size:.84rem;}
+
 /* ─── SUSPENDED ─── */
 .match.suspended{
   opacity:.45;
@@ -684,13 +759,27 @@ body{padding-top:64px;}
 </div>
 <!-- /masthead hidden -->
 
-<!-- Stats -->
-<div class="stats" id="statsBar">
-  <div class="stat-card"><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Pendientes</div></div>
-  <div class="stat-card"><div class="stat-val" style="color:var(--win)" id="sWin">0</div><div class="stat-lbl">Victorias</div></div>
-  <div class="stat-card"><div class="stat-val" style="color:var(--draw)" id="sDraw">0</div><div class="stat-lbl">Empates</div></div>
-  <div class="stat-card"><div class="stat-val" style="color:var(--loss)" id="sLoss">0</div><div class="stat-lbl">Derrotas</div></div>
-  <div class="stat-card"><div class="stat-val" id="sPlayed">0</div><div class="stat-lbl">Jugados</div></div>
+<!-- Stats por liga -->
+<div class="stats-perleague" id="statsBar">
+  <div class="lsc" id="lsc-vpn">
+    <div class="lsc-head"><span class="lsc-badge vpn">VPN</span><span class="lsc-wdl" id="lscw-vpn">— — —</span></div>
+    <div class="lsc-l5" id="lscl5-vpn"></div>
+    <div class="lsc-streak" id="lscst-vpn"></div>
+  </div>
+  <div class="lsc" id="lsc-vpug">
+    <div class="lsc-head"><span class="lsc-badge vpug">VPUG</span><span class="lsc-wdl" id="lscw-vpug">— — —</span></div>
+    <div class="lsc-l5" id="lscl5-vpug"></div>
+    <div class="lsc-streak" id="lscst-vpug"></div>
+  </div>
+  <div class="lsc" id="lsc-e11">
+    <div class="lsc-head"><span class="lsc-badge e11">11x11</span><span class="lsc-wdl" id="lscw-e11">— — —</span></div>
+    <div class="lsc-l5" id="lscl5-e11"></div>
+    <div class="lsc-streak" id="lscst-e11"></div>
+  </div>
+  <div class="lsc lsc-global">
+    <div class="lscg-item"><div class="lscg-val" id="lscg-played">0</div><div class="lscg-lbl">Jugados</div></div>
+    <div class="lscg-item"><div class="lscg-val" id="lscg-pending">0</div><div class="lscg-lbl">Pendientes</div></div>
+  </div>
 </div>
 
 <!-- Controls -->
@@ -700,13 +789,25 @@ body{padding-top:64px;}
     <div class="leg"><span class="leg-dot vpug"></span>VPUG · Lun-Jue</div>
     <div class="leg"><span class="leg-dot e11"></span>11x11 · Mar/Jue</div>
   </div>
-  <div class="filter-btns">
-    <button class="fbtn active" onclick="filter('all',this)">Todos</button>
-    <button class="fbtn" onclick="filter('VPN',this)">VPN</button>
-    <button class="fbtn vpug" onclick="filter('VPUG',this)">VPUG</button>
-    <button class="fbtn e11" onclick="filter('11x11',this)">11x11</button>
-    <button class="fbtn" onclick="openAddModal()" style="border-color:var(--gold);color:var(--gold);font-size:1rem;padding:4px 14px;" title="Agregar partido o entrenamiento">＋</button>
-    <button class="fbtn" onclick="saveToFirebase()" id="btnSave" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar cambios para todos">☁️ Guardar</button>
+  <div class="filter-btns" style="gap:6px;flex-wrap:wrap;align-items:center;">
+    <!-- Temporada -->
+    <div class="season-btns" style="margin-right:4px;">
+      <button class="sbtn active" id="sbtn-all" onclick="setSeason('all',this)">Todo</button>
+      <button class="sbtn" id="sbtn-t1"  onclick="setSeason('t1',this)">T1</button>
+      <button class="sbtn" id="sbtn-t2"  onclick="setSeason('t2',this)">T2</button>
+    </div>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
+    <!-- Liga -->
+    <button class="fbtn active" id="fball"  onclick="filter('all',this)">Todos</button>
+    <button class="fbtn"        id="fvpn"   onclick="filter('VPN',this)">VPN</button>
+    <button class="fbtn vpug"   id="fvpug"  onclick="filter('VPUG',this)">VPUG</button>
+    <button class="fbtn e11"    id="fe11"   onclick="filter('11x11',this)">11x11</button>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
+    <!-- Admin-only actions -->
+    <button class="fbtn admin-el" onclick="openAddModal()" style="border-color:var(--gold);color:var(--gold);font-size:1rem;padding:4px 14px;" title="Agregar partido o entrenamiento">＋</button>
+    <button class="fbtn admin-el" onclick="saveToFirebase()" id="btnSave" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar cambios para todos">☁️ Guardar</button>
+    <!-- Lock toggle -->
+    <button class="btn-lock" id="btnLock" onclick="toggleAdmin()" title="Modo administrador">🔒 Admin</button>
   </div>
 </div>
 
@@ -727,8 +828,37 @@ body{padding-top:64px;}
   </div>
 </div>
 
+<!-- PRÓXIMO PARTIDO -->
+<div id="nextMatchOuter" class="next-match-outer" style="display:none;">
+  <div class="next-match-card">
+    <span class="nm-countdown" id="nmCountdown">—</span>
+    <div style="flex:1;min-width:0;">
+      <div class="nm-rival" id="nmRival">—</div>
+      <div class="nm-meta" id="nmMeta"></div>
+    </div>
+    <span id="nmBadge"></span>
+  </div>
+</div>
 
 <div class="calendar" id="cal"></div>
+
+<!-- STATS PANEL OVERLAY -->
+<div class="sp-overlay" id="spOverlay" onclick="if(event.target===this)closeStatsPanel()">
+  <div class="sp-panel" id="spPanel">
+    <div class="sp-head">
+      <div>
+        <div class="sp-title" id="spTitle">—</div>
+        <div class="sp-meta-txt" id="spMeta"></div>
+      </div>
+      <button class="sp-close" onclick="closeStatsPanel()">✕</button>
+    </div>
+    <div class="sp-score-box">
+      <div class="sp-score" id="spScore">— – —</div>
+      <div class="sp-score-sub" id="spOutcome"></div>
+    </div>
+    <div id="spBody"></div>
+  </div>
+</div>
 
 <!-- Add Match Modal -->
 <div class="overlay" id="addOverlay">
@@ -843,6 +973,7 @@ body{padding-top:64px;}
   </div>
 </div>
 
+<script src="seed_matches.js"></script>
 <script type="module">
 // ── MATCH DATA ────────────────────────────────────────────────────────────────
 // location: 'L'=Local (Top Secret primero), 'V'=Visitante (rival primero)
@@ -963,11 +1094,18 @@ let edits      = JSON.parse(localStorage.getItem('ts_edits')     ||'{}');
 let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}'); // id -> {originalDate, newDate}
 let custom     = JSON.parse(localStorage.getItem('ts_custom')    ||'[]'); // custom matches added via UI
 let currentFilter = 'all';
+let currentSeason = 'all';    // 'all' | 't1' | 't2'
+let isAdminMode   = false;
 let editingId = null;
 let editHomeVal = true;
 // add modal state
 let addType = 'partido';
 let addHomeVal = true;
+
+// T1/T2 season boundary: matches on or before this date are T1
+const T1_CUTOFF  = '2026-04-30';
+// Admin PIN (change here to customize)
+const ADMIN_PIN  = '1906';
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -1100,6 +1238,164 @@ function scoreDisplay(id){
   const [h,a] = r;
   if(m.isHome) return `${h} – ${a}`;
   return `${a} – ${h}`;
+}
+
+// ── SEASON / VISIBILITY ───────────────────────────────────────────────────────
+function matchSeason(dateStr){
+  return dateStr <= T1_CUTOFF ? 't1' : 't2';
+}
+function shouldHide(dateStr, league){
+  const seasonHide = currentSeason !== 'all' && matchSeason(dateStr) !== currentSeason;
+  const leagueHide = currentFilter !== 'all' && league !== currentFilter;
+  return seasonHide || leagueHide;
+}
+function setSeason(s, btn){
+  currentSeason = s;
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // re-apply to existing cards
+  document.querySelectorAll('.match[data-id]').forEach(card=>{
+    const m = getAnyMatch(card.dataset.id.startsWith('c') ? card.dataset.id : parseInt(card.dataset.id));
+    if(!m) return;
+    if(shouldHide(m.date, m.league||card.dataset.league)) card.classList.add('hidden');
+    else card.classList.remove('hidden');
+  });
+  renderNextMatch();
+}
+
+// ── ADMIN MODE ────────────────────────────────────────────────────────────────
+function toggleAdmin(){
+  if(isAdminMode){
+    isAdminMode = false;
+    document.body.classList.add('locked');
+    document.getElementById('btnLock').classList.remove('unlocked');
+    document.getElementById('btnLock').textContent = '🔒 Admin';
+    showToast('Modo admin desactivado', 'error');
+  } else {
+    const pin = prompt('PIN de administrador:');
+    if(pin === null) return;
+    if(pin !== ADMIN_PIN){ showToast('PIN incorrecto', 'error'); return; }
+    isAdminMode = true;
+    document.body.classList.remove('locked');
+    document.getElementById('btnLock').classList.add('unlocked');
+    document.getElementById('btnLock').textContent = '🔓 Admin';
+    showToast('Modo admin activado', 'success');
+  }
+}
+
+// ── NEXT MATCH ────────────────────────────────────────────────────────────────
+function renderNextMatch(){
+  const today = new Date().toISOString().slice(0,10);
+  let next = null;
+  for(let i=0; i<RAW.length; i++){
+    const m = getMatch(i);
+    if(m.free) continue;
+    if(shouldHide(m.date, m.league)) continue;
+    if(m.date < today) continue;
+    if(getResult(i)) continue;
+    next = { id:i, m };
+    break;
+  }
+  const outer = document.getElementById('nextMatchOuter');
+  if(!next){ outer.style.display='none'; return; }
+  outer.style.display='';
+
+  const { m } = next;
+  const dt = new Date(m.date+'T12:00:00');
+  const todayDt = new Date(today+'T12:00:00');
+  const diff = Math.round((dt-todayDt)/(1000*60*60*24));
+  const countdown = diff === 0 ? `Hoy · ${m.time}` :
+                    diff === 1 ? `Mañana · ${m.time}` :
+                    `En ${diff} días`;
+  const leagueKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league];
+  document.getElementById('nmCountdown').textContent = countdown;
+  document.getElementById('nmRival').textContent = m.rival;
+  document.getElementById('nmMeta').textContent =
+    `${fmtDate(m.date)} · ${m.isHome ? '🏠 Local' : '✈️ Visita'}`;
+  document.getElementById('nmBadge').innerHTML =
+    `<span class="league-badge badge-${leagueKey}">${m.league}</span>`;
+}
+
+// ── STATS PANEL ───────────────────────────────────────────────────────────────
+function handleResultClick(id){
+  if(!isAdminMode){
+    const r = getResult(id);
+    if(r) openStatsPanel(id);
+    else showToast('🔒 Activá el modo admin para cargar resultados', 'error');
+    return;
+  }
+  openModal(id);
+}
+
+function findSeedMatch(id){
+  if(typeof window.SEED_MATCHES === 'undefined') return null;
+  const m = getMatch(id);
+  return SEED_MATCHES.find(s => {
+    if(s.date !== m.date) return false;
+    const ra = (s.rival||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    const rb = (m.rival||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    return ra.slice(0,5) === rb.slice(0,5) || ra.includes(rb.slice(0,5)) || rb.includes(ra.slice(0,5));
+  });
+}
+
+function openStatsPanel(id){
+  const m     = getMatch(id);
+  const r     = getResult(id);
+  const out   = outcomeFor(id);
+  const score = scoreDisplay(id);
+  const seed  = findSeedMatch(id);
+  const leagueCls = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league];
+
+  document.getElementById('spTitle').textContent = m.rival;
+  document.getElementById('spMeta').textContent  =
+    `${fmtDate(m.date)} · ${m.time} · ${m.league} · ${m.isHome?'Local':'Visita'}`;
+  const scoreEl = document.getElementById('spScore');
+  scoreEl.textContent = score || '— – —';
+  scoreEl.className = 'sp-score' + (out ? ' '+out : '');
+  document.getElementById('spOutcome').textContent =
+    out ? {win:'Victoria',loss:'Derrota',draw:'Empate'}[out] : '';
+
+  const body = document.getElementById('spBody');
+  if(!seed || !seed.players || !seed.players.length){
+    body.innerHTML = `<div class="sp-no-data">No hay estadísticas detalladas para este partido.</div>`;
+  } else {
+    const ts = seed.team_stats || {};
+    const teamHtml = `
+      <div class="sp-sec">Estadísticas del equipo</div>
+      <div class="sp-teamrow">
+        <div class="sp-ts"><div class="sp-ts-v">${ts.possession||'—'}%</div><div class="sp-ts-l">Posesión</div></div>
+        <div class="sp-ts"><div class="sp-ts-v">${ts.shots||'—'}</div><div class="sp-ts-l">Remates</div></div>
+        <div class="sp-ts"><div class="sp-ts-v">${ts.distance_km ? ts.distance_km+'km' : '—'}</div><div class="sp-ts-l">Distancia</div></div>
+      </div>`;
+
+    const sorted = [...seed.players].sort((a,b)=>(b.rating||0)-(a.rating||0));
+    const rows = sorted.map(p=>{
+      const rat = p.rating || 0;
+      const ratCls = rat >= 8 ? 'hi' : rat >= 6.5 ? 'mi' : 'lo';
+      return `<tr>
+        <td class="left">${p.name}</td>
+        <td><span class="sp-rat ${ratCls}">${rat ? rat.toFixed(1) : '—'}</span></td>
+        <td>${p.goals||0}</td>
+        <td>${p.assists||0}</td>
+        <td>${p.passes||'—'}</td>
+        <td>${p.tackles||'—'}</td>
+      </tr>`;
+    }).join('');
+
+    body.innerHTML = teamHtml + `
+      <div class="sp-sec">Jugadores</div>
+      <table class="sp-table">
+        <thead><tr>
+          <th class="left">Jugador</th><th>Rating</th><th>⚽</th><th>🅰️</th><th>Pases</th><th>Tackles</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+  document.getElementById('spOverlay').classList.add('open');
+}
+
+function closeStatsPanel(){
+  document.getElementById('spOverlay').classList.remove('open');
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
@@ -1243,6 +1539,7 @@ function render(){
             const label = m.tipo === 'entrenamiento' ? 'Entrenamiento' : 'Otro';
             card.className = 'match custom-entry';
             card.dataset.league = 'custom';
+            card.dataset.id = 'c'+ci;
             card.innerHTML = `
               <div class="match-bar" style="background:#888;opacity:.4"></div>
               <div class="match-body">
@@ -1260,9 +1557,10 @@ function render(){
             // Custom partido
             const leagueClass = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league]||'';
             const locLabel = m.isHome ? '🏠 Local' : '✈️ Visita';
-            const hide = currentFilter!=='all' && m.league!==currentFilter;
+            const hide = shouldHide(m.date, m.league);
             card.className = 'match custom-entry' + (hide?' hidden':'');
             card.dataset.league = m.league||'';
+            card.dataset.id = 'c'+ci;
             card.innerHTML = `
               <div class="match-bar bar-${leagueClass}"></div>
               <div class="match-body">
@@ -1292,7 +1590,7 @@ function render(){
         const isCascaded = isSuspended && !suspended[i].manual;
         const outcome = outcomeFor(i);
         const score = scoreDisplay(i);
-        const hide = currentFilter!=='all' && m.league!==currentFilter;
+        const hide = shouldHide(m.date, m.league);
 
         const leagueClass = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league];
         const locLabel = m.isHome ? '🏠 Local' : '✈️ Visita';
@@ -1342,11 +1640,11 @@ function render(){
               </div>
             </div>
             <div class="match-time">${m.time}</div>
-            <div class="card-actions">
+            <div class="card-actions admin-el">
               <button class="act-btn edit-btn" title="Editar partido" onclick="openEditModal(${i})">✏️</button>
             </div>
             <div class="result-cell">
-              <div class="result-box ${resultClass}" onclick="openModal(${i})">
+              <div class="result-box ${resultClass}" onclick="handleResultClick(${i})">
                 <div class="result-score">${resultContent}</div>
                 ${resultLabel?`<div class="result-label">${resultLabel}</div>`:''}
               </div>
@@ -1365,23 +1663,63 @@ function render(){
   updateStats();
   renderWeekStrip();
   renderTodayCard();
+  renderNextMatch();
 }
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
 function updateStats(){
-  let total=0,win=0,loss=0,draw=0,played=0;
-  RAW.forEach((m,i)=>{
-    const eff = getMatch(i);
-    if(eff.free) return;
-    total++;
-    const o = outcomeFor(i);
-    if(o){ played++; if(o==='win') win++; else if(o==='loss') loss++; else draw++; }
+  const leagues = ['VPN','VPUG','11x11'];
+  const keys    = {VPN:'vpn',VPUG:'vpug','11x11':'e11'};
+  let totalPlayed=0, totalPending=0;
+
+  leagues.forEach(lg=>{
+    const results_lg = [];
+    RAW.forEach((_, i)=>{
+      const m = getMatch(i);
+      if(m.free || m.league !== lg) return;
+      const o = outcomeFor(i);
+      results_lg.push({ date:m.date, outcome:o });
+    });
+    results_lg.sort((a,b)=>a.date.localeCompare(b.date));
+
+    let w=0,d=0,l=0,pending=0;
+    results_lg.forEach(r=>{
+      if(r.outcome==='win') w++;
+      else if(r.outcome==='draw') d++;
+      else if(r.outcome==='loss') l++;
+      else pending++;
+    });
+    totalPlayed  += w+d+l;
+    totalPending += pending;
+
+    const key = keys[lg];
+    document.getElementById('lscw-'+key).textContent = `${w}V ${d}E ${l}D`;
+
+    // Last 5 played
+    const played_lg = results_lg.filter(r=>r.outcome);
+    const last5 = played_lg.slice(-5);
+    const l5el  = document.getElementById('lscl5-'+key);
+    l5el.innerHTML = last5.map(r=>
+      `<div class="l5p ${r.outcome==='win'?'w':r.outcome==='draw'?'d':'l'}" title="${r.outcome}">${r.outcome==='win'?'V':r.outcome==='draw'?'E':'D'}</div>`
+    ).join('') + Array(Math.max(0,5-last5.length)).fill('<div class="l5p p">·</div>').join('');
+
+    // Streak
+    let streak=0, streakType=null;
+    for(let i=played_lg.length-1;i>=0;i--){
+      if(!streakType){ streakType=played_lg[i].outcome; streak=1; }
+      else if(played_lg[i].outcome===streakType) streak++;
+      else break;
+    }
+    const stEl = document.getElementById('lscst-'+key);
+    if(streakType && streak>1){
+      const label = streakType==='win'?'racha ganadora':streakType==='draw'?'empates seguidos':'derrotas seguidas';
+      stEl.textContent = `${streak} ${label}`;
+      stEl.style.color = streakType==='win'?'var(--win)':streakType==='loss'?'var(--loss)':'var(--draw)';
+    } else { stEl.textContent=''; }
   });
-  document.getElementById('sTotal').textContent=total-played;
-  document.getElementById('sWin').textContent=win;
-  document.getElementById('sDraw').textContent=draw;
-  document.getElementById('sLoss').textContent=loss;
-  document.getElementById('sPlayed').textContent=played;
+
+  document.getElementById('lscg-played').textContent  = totalPlayed;
+  document.getElementById('lscg-pending').textContent = totalPending;
 }
 
 // ── FILTER ────────────────────────────────────────────────────────────────────
@@ -1389,10 +1727,14 @@ function filter(league, btn){
   currentFilter = league;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.querySelectorAll('.match').forEach(card=>{
-    if(league==='all' || card.dataset.league===league) card.classList.remove('hidden');
-    else card.classList.add('hidden');
+  document.querySelectorAll('.match[data-id]').forEach(card=>{
+    const rawId = card.dataset.id;
+    const m = getAnyMatch(rawId.startsWith('c') ? rawId : parseInt(rawId));
+    if(!m){ card.classList.remove('hidden'); return; }
+    if(shouldHide(m.date, m.league||card.dataset.league)) card.classList.add('hidden');
+    else card.classList.remove('hidden');
   });
+  renderNextMatch();
 }
 
 // ── MODAL (resultado) ─────────────────────────────────────────────────────────
@@ -1704,6 +2046,11 @@ function showToast(msg, type='success'){
 
 // ── EXPONER FUNCIONES AL SCOPE GLOBAL (necesario para type="module") ──────────
 window.filter         = filter;
+window.setSeason      = setSeason;
+window.toggleAdmin    = toggleAdmin;
+window.handleResultClick = handleResultClick;
+window.openStatsPanel = openStatsPanel;
+window.closeStatsPanel= closeStatsPanel;
 window.openModal      = openModal;
 window.closeModal     = closeModal;
 window.saveRes        = saveRes;
@@ -1721,6 +2068,9 @@ window.setAddType     = setAddType;
 window.setAddHome     = setAddHome;
 window.saveAdd        = saveAdd;
 window.deleteCustom   = deleteCustom;
+
+// Start in locked mode
+document.body.classList.add('locked');
 
 // render() is called by onSnapshot when Firebase data loads
 </script>
