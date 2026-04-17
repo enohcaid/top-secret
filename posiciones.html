@@ -220,6 +220,52 @@ td.left { text-align: left; }
 }
 .zl-item { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--mid); }
 
+/* ── SEASON SELECTOR ── */
+.season-sel { display:flex; gap:8px; margin-bottom:28px; }
+.season-btn {
+  padding:8px 22px; border-radius:24px; cursor:pointer; transition:all .2s;
+  font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:.08em;
+  border:2px solid var(--border); background:transparent; color:var(--mid);
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+}
+.season-btn .sb-label { font-size:.95rem; }
+.season-btn .sb-sub   { font-size:.6rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; }
+.season-btn:hover { border-color:#bbb; color:var(--black); }
+.season-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,.07); }
+
+/* ── PRÓXIMAMENTE ── */
+.prox-wrap { padding:64px 0; text-align:center; }
+.prox-badge {
+  display:inline-block; padding:5px 16px; border-radius:20px;
+  background:rgba(201,168,76,.1); border:1px solid rgba(201,168,76,.3);
+  font-size:.65rem; font-weight:700; letter-spacing:.18em; color:var(--gold);
+  text-transform:uppercase; margin-bottom:20px;
+}
+.prox-title {
+  font-family:'Barlow Condensed',sans-serif; font-size:3rem; font-weight:900;
+  letter-spacing:-.01em; color:var(--black); text-transform:uppercase; line-height:1;
+  margin-bottom:10px;
+}
+.prox-sub { font-size:.88rem; color:var(--mid); max-width:420px; margin:0 auto; }
+.prox-tables { margin-top:40px; opacity:.35; pointer-events:none; }
+
+/* ── T1 BADGE ── */
+.t1-badge {
+  display:inline-flex; align-items:center; gap:6px; padding:3px 10px;
+  border-radius:4px; background:rgba(201,168,76,.1);
+  font-size:.62rem; font-weight:700; letter-spacing:.12em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:16px;
+}
+
+/* ── VPN NOTE ── */
+.vpn-note {
+  padding:32px 24px; background:var(--gray); border-radius:8px;
+  border:1px solid var(--border); text-align:center;
+}
+.vpn-note h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; font-weight:800; color:var(--black); margin-bottom:8px; }
+.vpn-note p  { font-size:.85rem; color:var(--mid); line-height:1.5; }
+.vpn-note strong { color:var(--gold); }
+
 /* ── TABLE ROWS ANIMATION ── */
 tbody tr { opacity: 0; }
 
@@ -285,53 +331,82 @@ footer span { color: var(--gold); }
 
 <!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="ph-eyebrow">Temporada 2 · 2026</div>
+  <div class="ph-eyebrow">Ligas · 2026</div>
   <h1 class="ph-title">Posi<span>ciones</span></h1>
-  <p class="ph-sub">Tabla de posiciones en vivo · VPN · VPUG · 11x11</p>
+  <p class="ph-sub">Tabla de posiciones · VPN · VPUG · 11x11</p>
 </div>
 
 <div class="wrap">
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" data-league="vpn"  onclick="switchTab('vpn', this)">VPN</button>
-    <button class="tab"        data-league="vpug" onclick="switchTab('vpug', this)">VPUG</button>
-    <button class="tab"        data-league="e11"  onclick="switchTab('e11', this)">11x11</button>
+  <!-- SEASON SELECTOR -->
+  <div class="season-sel">
+    <button class="season-btn active" id="sbtn-t1" onclick="switchSeason('t1',this)">
+      <span class="sb-label">T1 2026</span>
+      <span class="sb-sub">Finalizada</span>
+    </button>
+    <button class="season-btn" id="sbtn-t2" onclick="switchSeason('t2',this)">
+      <span class="sb-label">T2 2026</span>
+      <span class="sb-sub">Próximamente</span>
+    </button>
   </div>
 
-  <!-- ══════════ VPN ══════════ -->
-  <div class="tab-pane active" id="pane-vpn">
-    <div class="loading-state" id="vpn-loading">Cargando tabla VPN…</div>
-    <table class="standings-table" id="vpn-table" style="display:none"></table>
-    <div class="error-state" id="vpn-error" style="display:none">Error al cargar. <button onclick="initTables()">Reintentar</button></div>
-  </div>
+  <!-- ════════════ TEMPORADA 1 ════════════ -->
+  <div id="s-t1">
+    <div class="t1-badge">✓ TEMPORADA 1 · FINAL</div>
+    <div class="tabs">
+      <button class="tab active" data-league="vpn"  onclick="switchTab('vpn','t1',this)">VPN</button>
+      <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t1',this)">VPUG</button>
+      <button class="tab"        data-league="e11"  onclick="switchTab('e11','t1',this)">11x11</button>
+    </div>
 
-  <!-- ══════════ VPUG ══════════ -->
-  <div class="tab-pane" id="pane-vpug">
-    <div class="loading-state" id="vpug-loading">Cargando tabla VPUG…</div>
-    <table class="standings-table" id="vpug-table" style="display:none"></table>
-    <div class="error-state" id="vpug-error" style="display:none">Error al cargar. <button onclick="initTables()">Reintentar</button></div>
-    <div class="zone-legend">
-      <div class="zl-item"><span class="zone-dot" style="background:#2563eb"></span>Clasificado a Playoff</div>
-      <div class="zl-item"><span class="zone-dot" style="background:var(--vpug)"></span>Clasificado directo</div>
-      <div class="zl-item"><span class="zone-dot" style="background:#c0392b"></span>Descenso</div>
+    <!-- VPN T1 -->
+    <div class="tab-pane active" id="t1-pane-vpn">
+      <div class="vpn-note">
+        <h3>Tabla T1 no disponible</h3>
+        <p>Top Secret FC cerró la Temporada 1 en <strong>3° lugar · 41 pts</strong><br>(12V · 5E · 2D · 19 PJ)</p>
+      </div>
+    </div>
+
+    <!-- VPUG T1 -->
+    <div class="tab-pane" id="t1-pane-vpug">
+      <table class="standings-table" id="t1-vpug-table"></table>
+      <div class="zone-legend" style="margin-top:16px">
+        <div class="zl-item"><span class="zone-dot" style="background:#2563eb"></span>Clasificado a Playoff</div>
+        <div class="zl-item"><span class="zone-dot" style="background:var(--vpug)"></span>Clasificado directo</div>
+        <div class="zl-item"><span class="zone-dot" style="background:#c0392b"></span>Descenso</div>
+      </div>
+    </div>
+
+    <!-- 11x11 T1 -->
+    <div class="tab-pane" id="t1-pane-e11">
+      <table class="standings-table" id="t1-e11-table"></table>
+      <div class="zone-legend" style="margin-top:16px">
+        <div class="zl-item"><span class="zone-dot" style="background:#c9a84c"></span>Ascenso / Playoff</div>
+        <div class="zl-item"><span class="zone-dot" style="background:#c0392b"></span>Descenso</div>
+      </div>
     </div>
   </div>
 
-  <!-- ══════════ 11x11 ══════════ -->
-  <div class="tab-pane" id="pane-e11">
-    <div class="loading-state" id="e11-loading">Cargando tabla 11x11…</div>
-    <table class="standings-table" id="e11-table" style="display:none"></table>
-    <div class="error-state" id="e11-error" style="display:none">Error al cargar. <button onclick="initTables()">Reintentar</button></div>
-    <div class="zone-legend">
-      <div class="zl-item"><span class="zone-dot" style="background:#c9a84c"></span>Ascenso / Playoff</div>
-      <div class="zl-item"><span class="zone-dot" style="background:#c0392b"></span>Descenso</div>
+  <!-- ════════════ TEMPORADA 2 ════════════ -->
+  <div id="s-t2" style="display:none">
+    <div class="prox-wrap">
+      <div class="prox-badge">Temporada 2 · 2026</div>
+      <div class="prox-title">Próximamente</div>
+      <p class="prox-sub">La Temporada 2 todavía no ha comenzado. Las tablas se actualizarán cuando arranque la competencia.</p>
+    </div>
+    <div class="prox-tables">
+      <div class="tabs">
+        <button class="tab active" style="pointer-events:none">VPN</button>
+        <button class="tab" style="pointer-events:none">VPUG</button>
+        <button class="tab" style="pointer-events:none">11x11</button>
+      </div>
+      <table class="standings-table" id="t2-empty-table"></table>
     </div>
   </div>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <span>Top Secret FC</span> · Temporada 2 · 2026
+  <span>Top Secret FC</span> · 2026
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -369,28 +444,28 @@ const VPUG_DATA = [
 ];
 
 const E11_DATA = [
-  {name:'Talleres Reserva',      abbr:'TAL', gp:21, w:16, d:2, l:3,  gf:52, gc:14, gd:38,  pts:50, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_d43ea012-c933-42e3-b016-d4fa20affbe6/smThumb'},
-  {name:'4BDOMIFL4NES',          abbr:'ABD', gp:21, w:16, d:2, l:3,  gf:46, gc:16, gd:30,  pts:50, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_d926fffb-49b9-44a2-8230-f2a44400927e/smThumb'},
-  {name:'Olimpo Esports',        abbr:'OLI', gp:21, w:15, d:3, l:3,  gf:51, gc:18, gd:33,  pts:48, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_b993e784-2fac-4459-bc68-db298ab57240/smThumb'},
-  {name:'Sub 21 CF',             abbr:'Sub', gp:21, w:15, d:1, l:5,  gf:43, gc:24, gd:19,  pts:46, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_eaba7052-0cc9-4e41-8565-1a30736c24d9/smThumb'},
-  {name:'Ferro',                 abbr:'FER', gp:21, w:13, d:5, l:3,  gf:39, gc:16, gd:23,  pts:44, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_1c583c95-59d3-4e79-9682-4d87ea41d8fe/smThumb'},
-  {name:'Roka56',                abbr:'ROK', gp:21, w:13, d:2, l:6,  gf:44, gc:22, gd:22,  pts:41, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/smThumb'},
-  {name:'Cambaceres',            abbr:'CAM', gp:21, w:12, d:5, l:4,  gf:30, gc:18, gd:12,  pts:41, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_0418078a-b62c-4e2e-9656-6ace007d73f7/smThumb'},
-  {name:'Escuela Vieja',         abbr:'ESV', gp:21, w:13, d:1, l:7,  gf:46, gc:22, gd:24,  pts:40, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_c2e3ac55-e66a-455e-95c8-ccaaef52db28/smThumb'},
-  {name:'Camioneros Esports',    abbr:'CAM', gp:21, w:11, d:6, l:4,  gf:45, gc:22, gd:23,  pts:39, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_e5ab2259-7ae3-47ce-a6c7-bc479b7bff72/smThumb'},
-  {name:'Top Secret',            abbr:'TOP', gp:21, w:12, d:2, l:7,  gf:54, gc:23, gd:31,  pts:38, us:true, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_fdad592e-b51e-49c8-a6f0-7a4516541c6a/smThumb'},
-  {name:'IACC Cantera',          abbr:'IAC', gp:21, w:8,  d:6, l:7,  gf:29, gc:22, gd:7,   pts:30, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/smThumb'},
-  {name:'All Boys',              abbr:'ALB', gp:21, w:6,  d:6, l:9,  gf:22, gc:28, gd:-6,  pts:24, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_9d643667-da1a-4878-923c-88713acb1625/smThumb'},
-  {name:'Suda eSp',              abbr:'SUD', gp:21, w:6,  d:4, l:11, gf:28, gc:37, gd:-9,  pts:22, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_60ab2610-29da-4c4d-8734-9b2f736cf168/smThumb'},
-  {name:'Deportivo Ballester',   abbr:'BAL', gp:21, w:6,  d:4, l:11, gf:30, gc:45, gd:-15, pts:22, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/smThumb'},
-  {name:'Instituto Reserva',     abbr:'INS', gp:21, w:6,  d:3, l:12, gf:27, gc:34, gd:-7,  pts:21, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/smThumb'},
-  {name:'Estudiantes Río Cuarto',abbr:'AAE', gp:21, w:6,  d:2, l:13, gf:25, gc:38, gd:-13, pts:20, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_64a4d356-c11a-48ad-9a09-9358066d4e4a/smThumb'},
-  {name:'Altoke Perro',          abbr:'ATP', gp:21, w:5,  d:5, l:11, gf:17, gc:38, gd:-21, pts:20, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_7e8994de-82a6-412a-8e55-c3a3306a1f2a/smThumb'},
-  {name:'Los Picantes Esports',  abbr:'LP',  gp:21, w:5,  d:2, l:14, gf:17, gc:48, gd:-31, pts:17, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f47091ff-af62-4f7f-bdb4-9aba143c3bef/smThumb'},
-  {name:'Talleres Cantera',      abbr:'TAL', gp:21, w:4,  d:2, l:15, gf:14, gc:47, gd:-33, pts:14, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f5083ff6-2864-446b-8b33-d79b6e427b67/smThumb'},
-  {name:'Instituto Senior',      abbr:'INS', gp:21, w:2,  d:6, l:13, gf:14, gc:47, gd:-33, pts:12, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/smThumb'},
-  {name:'Acosta Beef Esports',   abbr:'XXL', gp:21, w:3,  d:1, l:17, gf:20, gc:78, gd:-58, pts:10, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/422609e3-a369-46cf-1094-879a0a822800/smThumb'},
-  {name:'Team Valhalla',         abbr:'VAL', gp:21, w:2,  d:2, l:17, gf:19, gc:55, gd:-36, pts:8,  logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_a0feb073-7b6d-4eef-95d4-7377635fc2f2/smThumb'},
+  {name:'Talleres Reserva',      abbr:'TAL', gp:21, w:16, d:2, l:3,  gf:52, gc:14, gd:38,  pts:50, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_d43ea012-c933-42e3-b016-d4fa20affbe6/public'},
+  {name:'4BDOMIFL4NES',          abbr:'ABD', gp:21, w:16, d:2, l:3,  gf:46, gc:16, gd:30,  pts:50, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_d926fffb-49b9-44a2-8230-f2a44400927e/public'},
+  {name:'Olimpo Esports',        abbr:'OLI', gp:21, w:15, d:3, l:3,  gf:51, gc:18, gd:33,  pts:48, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_b993e784-2fac-4459-bc68-db298ab57240/public'},
+  {name:'Sub 21 CF',             abbr:'Sub', gp:21, w:15, d:1, l:5,  gf:43, gc:24, gd:19,  pts:46, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_eaba7052-0cc9-4e41-8565-1a30736c24d9/public'},
+  {name:'Ferro',                 abbr:'FER', gp:21, w:13, d:5, l:3,  gf:39, gc:16, gd:23,  pts:44, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_1c583c95-59d3-4e79-9682-4d87ea41d8fe/public'},
+  {name:'Roka56',                abbr:'ROK', gp:21, w:13, d:2, l:6,  gf:44, gc:22, gd:22,  pts:41, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/public'},
+  {name:'Cambaceres',            abbr:'CAM', gp:21, w:12, d:5, l:4,  gf:30, gc:18, gd:12,  pts:41, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_0418078a-b62c-4e2e-9656-6ace007d73f7/public'},
+  {name:'Escuela Vieja',         abbr:'ESV', gp:21, w:13, d:1, l:7,  gf:46, gc:22, gd:24,  pts:40, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_c2e3ac55-e66a-455e-95c8-ccaaef52db28/public'},
+  {name:'Camioneros Esports',    abbr:'CAM', gp:21, w:11, d:6, l:4,  gf:45, gc:22, gd:23,  pts:39, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_e5ab2259-7ae3-47ce-a6c7-bc479b7bff72/public'},
+  {name:'Top Secret',            abbr:'TOP', gp:21, w:12, d:2, l:7,  gf:54, gc:23, gd:31,  pts:38, us:true, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_fdad592e-b51e-49c8-a6f0-7a4516541c6a/public'},
+  {name:'IACC Cantera',          abbr:'IAC', gp:21, w:8,  d:6, l:7,  gf:29, gc:22, gd:7,   pts:30, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/public'},
+  {name:'All Boys',              abbr:'ALB', gp:21, w:6,  d:6, l:9,  gf:22, gc:28, gd:-6,  pts:24, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_9d643667-da1a-4878-923c-88713acb1625/public'},
+  {name:'Suda eSp',              abbr:'SUD', gp:21, w:6,  d:4, l:11, gf:28, gc:37, gd:-9,  pts:22, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_60ab2610-29da-4c4d-8734-9b2f736cf168/public'},
+  {name:'Deportivo Ballester',   abbr:'BAL', gp:21, w:6,  d:4, l:11, gf:30, gc:45, gd:-15, pts:22, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public'},
+  {name:'Instituto Reserva',     abbr:'INS', gp:21, w:6,  d:3, l:12, gf:27, gc:34, gd:-7,  pts:21, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/public'},
+  {name:'Estudiantes Río Cuarto',abbr:'AAE', gp:21, w:6,  d:2, l:13, gf:25, gc:38, gd:-13, pts:20, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_64a4d356-c11a-48ad-9a09-9358066d4e4a/public'},
+  {name:'Altoke Perro',          abbr:'ATP', gp:21, w:5,  d:5, l:11, gf:17, gc:38, gd:-21, pts:20, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_7e8994de-82a6-412a-8e55-c3a3306a1f2a/public'},
+  {name:'Los Picantes Esports',  abbr:'LP',  gp:21, w:5,  d:2, l:14, gf:17, gc:48, gd:-31, pts:17, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f47091ff-af62-4f7f-bdb4-9aba143c3bef/public'},
+  {name:'Talleres Cantera',      abbr:'TAL', gp:21, w:4,  d:2, l:15, gf:14, gc:47, gd:-33, pts:14, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f5083ff6-2864-446b-8b33-d79b6e427b67/public'},
+  {name:'Instituto Senior',      abbr:'INS', gp:21, w:2,  d:6, l:13, gf:14, gc:47, gd:-33, pts:12, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/public'},
+  {name:'Acosta Beef Esports',   abbr:'XXL', gp:21, w:3,  d:1, l:17, gf:20, gc:78, gd:-58, pts:10, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/422609e3-a369-46cf-1094-879a0a822800/public'},
+  {name:'Team Valhalla',         abbr:'VAL', gp:21, w:2,  d:2, l:17, gf:19, gc:55, gd:-36, pts:8,  logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_a0feb073-7b6d-4eef-95d4-7377635fc2f2/public'},
 ];
 
 /* ── NORMALIZERS ── */
@@ -488,53 +563,67 @@ function renderTable(tableId, data, accentColor) {
   });
 }
 
-function showLoading(league, show) {
-  document.getElementById(league + '-loading').style.display = show ? '' : 'none';
-}
-function showError(league, show) {
-  document.getElementById(league + '-error').style.display = show ? '' : 'none';
-  if (show) document.getElementById(league + '-table').style.display = 'none';
-}
-
-/* ── TAB SWITCH ── */
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+/* ── SEASON SWITCH ── */
+function switchSeason(season, btn) {
+  document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('pane-' + id).classList.add('active');
-  const rows = document.querySelectorAll('#' + id + '-table tbody tr');
-  gsap.fromTo(rows, {opacity:0, x:-8}, {opacity:1, x:0, duration:0.35, stagger:0.02, ease:'power2.out'});
+  document.getElementById('s-t1').style.display = season === 't1' ? '' : 'none';
+  document.getElementById('s-t2').style.display = season === 't2' ? '' : 'none';
 }
 
-/* ── FETCH & INIT ── */
-async function fetchLeague(url, norm, tableId, accentColor, leagueKey) {
-  showLoading(leagueKey, true);
-  showError(leagueKey, false);
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const raw = await r.json();
-    if (!Array.isArray(raw) || raw.length === 0) throw new Error('empty');
-    const data = norm(raw);
-    showLoading(leagueKey, false);
-    renderTable(tableId, data, accentColor);
-    if (leagueKey === 'vpn') {
-      gsap.to('#vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.025, ease:'power1.out', delay:0.1});
-    }
-  } catch(e) {
-    console.warn(leagueKey + ' fetch error:', e);
-    showLoading(leagueKey, false);
-    showError(leagueKey, true);
-  }
+/* ── TAB SWITCH (per season) ── */
+function switchTab(id, season, btn) {
+  const container = document.getElementById('s-' + season);
+  container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const pane = document.getElementById(season + '-pane-' + id);
+  if (pane) pane.classList.add('active');
+  const tableId = season + '-' + id + '-table';
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  if (rows.length) gsap.fromTo(rows, {opacity:0, x:-8}, {opacity:1, x:0, duration:0.35, stagger:0.02, ease:'power2.out'});
 }
 
-async function initTables() {
-  fetchLeague(VPN_URL,  normVPN,  'vpn-table',  'var(--vpn)',  'vpn');
-  fetchLeague(VPUG_URL, normVPUG, 'vpug-table', 'var(--vpug)', 'vpug');
-  fetchLeague(E11_URL,  normE11,  'e11-table',  'var(--e11)',  'e11');
+/* ── RENDER T1 STATIC TABLES ── */
+function renderT1() {
+  renderTable('t1-vpug-table', VPUG_DATA.map((t,i)=>({...t})), 'var(--vpug)');
+  renderTable('t1-e11-table',  E11_DATA.map((t,i)=>({...t})),  'var(--e11)');
+  // animate first visible table (vpug is hidden on start, vpn pane is active)
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#t1-vpug-table tbody tr, #t1-e11-table tbody tr');
+    gsap.set(rows, {opacity:1});
+  }, 100);
 }
 
-initTables();
+/* ── RENDER EMPTY T2 TABLE ── */
+function renderT2Empty() {
+  const table = document.getElementById('t2-empty-table');
+  table.innerHTML = `
+    <thead><tr>
+      <th style="width:36px">#</th>
+      <th class="left" style="min-width:160px">Equipo</th>
+      <th>PJ</th><th>V</th><th>E</th><th>D</th>
+      <th>GF</th><th>GC</th><th>DG</th>
+      <th style="color:var(--gold)">PTS</th>
+    </tr></thead>
+    <tbody>
+      ${Array.from({length:6}, (_,i)=>`
+        <tr style="opacity:.25">
+          <td><div class="td-pos">${i+1}</div></td>
+          <td class="left"><div class="td-team">
+            <div class="td-logo" style="background:var(--border)"></div>
+            <span class="td-name" style="color:var(--border)">—</span>
+          </div></td>
+          <td>0</td><td>0</td><td>0</td><td>0</td>
+          <td>0</td><td>0</td><td>0</td>
+          <td><strong class="td-pts">0</strong></td>
+        </tr>`).join('')}
+    </tbody>`;
+}
+
+/* ── INIT ── */
+renderT1();
+renderT2Empty();
 </script>
 </body>
 </html>
