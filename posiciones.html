@@ -257,14 +257,6 @@ td.left { text-align: left; }
   color:var(--gold); text-transform:uppercase; margin-bottom:16px;
 }
 
-/* ── VPN NOTE ── */
-.vpn-note {
-  padding:32px 24px; background:var(--gray); border-radius:8px;
-  border:1px solid var(--border); text-align:center;
-}
-.vpn-note h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; font-weight:800; color:var(--black); margin-bottom:8px; }
-.vpn-note p  { font-size:.85rem; color:var(--mid); line-height:1.5; }
-.vpn-note strong { color:var(--gold); }
 
 /* ── TABLE ROWS ANIMATION ── */
 tbody tr { opacity: 0; }
@@ -360,10 +352,7 @@ footer span { color: var(--gold); }
 
     <!-- VPN T1 -->
     <div class="tab-pane active" id="t1-pane-vpn">
-      <div class="vpn-note">
-        <h3>Tabla T1 no disponible</h3>
-        <p>Top Secret FC cerró la Temporada 1 en <strong>3° lugar · 41 pts</strong><br>(12V · 5E · 2D · 19 PJ)</p>
-      </div>
+      <table class="standings-table" id="t1-vpn-table"></table>
     </div>
 
     <!-- VPUG T1 -->
@@ -441,6 +430,29 @@ const VPUG_DATA = [
   {name:'Team Valhalla',      abbr:'VAL', gp:8, w:1, d:1, l:6, gf:7,  gc:25, gd:-18, pts:4,  logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmeeQ3bJdE1ZjjH5amD.png?alt=media&token=1&m=1772390729940'},
   {name:'Almirante Brown eSp',abbr:'ALM', gp:8, w:1, d:0, l:7, gf:6,  gc:16, gd:-10, pts:3,  logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWPyWKU7Oymp2eMZkG.png?alt=media&token=1&m=1772317689432'},
   {name:'Ferro eSports',      abbr:'FER', gp:8, w:0, d:0, l:8, gf:0,  gc:8,  gd:-8,  pts:0,  logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWQ6Q3bwb1rc3039Hj.png?alt=media&token=1&m=1772317337506'},
+];
+
+const VPN_T1_DATA = [
+  {name:"Nueva Chicago eSports",   abbr:"NCH", gp:19, w:13, d:4, l:2,  gf:42, gc:16, gd:26,  pts:43, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/633176c7c630787658d1ed70a4ffba42_thumb.png"},
+  {name:"FERRO",                   abbr:"FCO", gp:19, w:13, d:4, l:2,  gf:27, gc:12, gd:15,  pts:43, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/6cd7e7c07697de8ec9e0e6cb4767972f_thumb.png"},
+  {name:"TOP Secret",              abbr:"TOP", gp:19, w:12, d:5, l:2,  gf:46, gc:18, gd:28,  pts:41, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/a2a3f8adaad49ef85faa99771d647716_thumb.png", us:true},
+  {name:"Olimpo Esports",          abbr:"OLI", gp:19, w:12, d:5, l:2,  gf:42, gc:18, gd:24,  pts:41, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/1c05434106f1182ef03e973e41c4faa5_thumb.png"},
+  {name:"InfinitX",                abbr:"INF", gp:19, w:12, d:3, l:4,  gf:38, gc:9,  gd:29,  pts:39, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/fb3abd33372047f8f95ffdf1b85c9440_thumb.png"},
+  {name:"Instituto Reserva",       abbr:"ACC", gp:19, w:12, d:3, l:4,  gf:31, gc:19, gd:12,  pts:39, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/ceb0395a176d64ce6375847dfc59fa8a_thumb.png"},
+  {name:"4BDOMIFL4NES",            abbr:"4BD", gp:19, w:10, d:7, l:2,  gf:30, gc:23, gd:7,   pts:37, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/4e9bc65c234dd420e7ccc42198214697_thumb.png"},
+  {name:"Camioneros eSports",      abbr:"CAM", gp:19, w:10, d:5, l:4,  gf:33, gc:19, gd:14,  pts:35, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/0d45131e2603593e52d54abc7a979f44_thumb.png"},
+  {name:"Parke Avellane",          abbr:"Pke", gp:19, w:10, d:4, l:5,  gf:41, gc:20, gd:21,  pts:34, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/588dc5e55fcd21fa4196b426cc89cb0c_thumb.png"},
+  {name:"SUB 21CF",                abbr:"SUB", gp:19, w:9,  d:5, l:5,  gf:31, gc:20, gd:11,  pts:32, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/5bc60aad3e9b33ab6594760eda698f84_thumb.png"},
+  {name:"Villa Dalmine Esports",   abbr:"VDE", gp:19, w:6,  d:6, l:7,  gf:20, gc:20, gd:0,   pts:24, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/bbf2edffc3530734e828c16da3c8d5d4_thumb.png"},
+  {name:"Suda Esports",            abbr:"SUE", gp:19, w:7,  d:3, l:9,  gf:32, gc:34, gd:-2,  pts:24, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/eb1b645942c28338527e707562bdb40f_thumb.png"},
+  {name:"All Boys",                abbr:"ALB", gp:19, w:6,  d:3, l:10, gf:27, gc:59, gd:-32, pts:21, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/e9dca9b4358d6ca8230688227442d9f1_thumb.png"},
+  {name:"Los Lesionados",          abbr:"Les", gp:19, w:6,  d:1, l:12, gf:17, gc:32, gd:-15, pts:19, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/e15b97a117c1691c69f2edeab8839d5a_thumb.png"},
+  {name:"Deportivo Ballester",     abbr:"DBe", gp:19, w:6,  d:0, l:13, gf:26, gc:40, gd:-14, pts:18, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/62cae8af8c2f2059f96ed7f78625fd78_thumb.png"},
+  {name:"Instituto Cantera",       abbr:"INS", gp:19, w:5,  d:2, l:12, gf:16, gc:31, gd:-15, pts:17, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/67004976dd4706b30d022daedba9e066_thumb.png"},
+  {name:"Lirico FC",               abbr:"LFC", gp:19, w:5,  d:1, l:13, gf:19, gc:46, gd:-27, pts:16, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/56091e46d57317f912b07fc45b0aae53_thumb.png"},
+  {name:"La ResaKa",               abbr:"RsK", gp:19, w:2,  d:5, l:12, gf:21, gc:45, gd:-24, pts:11, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/fc81dad1a3f07d8a6b64e21f30f0704c_thumb.png"},
+  {name:"Almirante Brown eSport",  abbr:"ALM", gp:19, w:1,  d:0, l:18, gf:9,  gc:48, gd:-39, pts:3,  logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/d73c1f44aee85a6730f0143baff406a4_thumb.png"},
+  {name:"Team Ceniza",             abbr:"TCE", gp:19, w:0,  d:0, l:19, gf:0,  gc:19, gd:-19, pts:0,  logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/bb1cd50452b4d3b0f28a7415c1ba73e2_thumb.png"},
 ];
 
 const E11_DATA = [
@@ -586,13 +598,14 @@ function switchTab(id, season, btn) {
 
 /* ── RENDER T1 STATIC TABLES ── */
 function renderT1() {
-  renderTable('t1-vpug-table', VPUG_DATA.map((t,i)=>({...t})), 'var(--vpug)');
-  renderTable('t1-e11-table',  E11_DATA.map((t,i)=>({...t})),  'var(--e11)');
-  // animate first visible table (vpug is hidden on start, vpn pane is active)
+  renderTable('t1-vpn-table',  VPN_T1_DATA, 'var(--vpn)');
+  renderTable('t1-vpug-table', VPUG_DATA,   'var(--vpug)');
+  renderTable('t1-e11-table',  E11_DATA,    'var(--e11)');
+  // Animate active pane (vpn); others will animate on tab switch
+  gsap.to('#t1-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
   setTimeout(() => {
-    const rows = document.querySelectorAll('#t1-vpug-table tbody tr, #t1-e11-table tbody tr');
-    gsap.set(rows, {opacity:1});
-  }, 100);
+    document.querySelectorAll('#t1-vpug-table tbody tr, #t1-e11-table tbody tr').forEach(r => r.style.opacity = '1');
+  }, 50);
 }
 
 /* ── RENDER EMPTY T2 TABLE ── */
