@@ -438,6 +438,22 @@ footer span{color:#C9A84C;}
 .rank-val{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;text-align:right;}
 .rank-extra{font-size:.65rem;color:var(--muted2);text-align:right;white-space:nowrap;}
 
+@media(max-width:640px){
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .season-grid{grid-template-columns:1fr;}
+  .rank-rows{padding:4px 0;}
+  .rank-row{grid-template-columns:24px 1fr 80px 40px;padding:6px 12px;}
+  .rank-extra{display:none;}
+  .player-cards-grid{grid-template-columns:1fr;}
+  .match-meta{grid-template-columns:1fr 1fr;}
+  .section-wrap{padding:0 12px;}
+  .sec-head{padding:20px 12px 12px;}
+  .history-wrap{overflow-x:auto;}
+  .history-table{min-width:560px;}
+  .league-filter{padding:10px 0 4px;}
+  .filter-bar{padding:8px 0;}
+}
+
 </style>
 </head>
 <body>
@@ -3516,5 +3532,6 @@ function switchStatsSeason(n){
 }
 
 </script>
+<script src="mobile-nav.js"></script>
 </body>
 </html>

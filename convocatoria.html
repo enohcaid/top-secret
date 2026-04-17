@@ -207,6 +207,17 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .av-photo{width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(1.65) translateY(-8%);transform-origin:top center;}
 .av-crop-wrap{position:relative;width:100%;height:100%;overflow:hidden;}
 .av-crop-wrap img{position:absolute;}
+
+@media(max-width:640px){
+  .main{padding:16px 12px 80px;}
+  .kpi-bar{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+  .page-header{padding:16px 12px 12px;}
+  .fbar{margin-bottom:8px;}
+  .pcard{padding:8px 10px;}
+  .pnum{font-size:1.2rem;min-width:24px;}
+  .section-row{flex-direction:column;gap:4px;}
+  .toast{bottom:72px;}
+}
 </style>
 </head>
 <body>
@@ -1239,6 +1250,6 @@ render();
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
 gsap.to('.kpi-card', { opacity:1, y:0, duration:0.45, stagger:0.07, ease:'power2.out', delay:0.3 });
 </script>
-
+<script src="mobile-nav.js"></script>
 </body>
 </html>

@@ -654,10 +654,22 @@ body.locked .result-box.pending{cursor:default;}
   .result-box{min-width:54px;padding:5px 8px;}
   .result-score{font-size:1.1rem;}
 }
+@media(max-width:640px){
+  .week-strip-wrap{padding:8px 12px 6px;}
+  .today-card-outer{padding:0 12px;}
+  .next-match-outer{padding:0 12px;}
+  .controls{padding:0 12px;}
+  .stats-perleague{padding:0 12px;gap:8px;}
+  .lsc{min-width:130px;}
+  .cal-outer{padding:0;}
+  .week-header{padding:10px 12px 6px;}
+  .day-matches{padding:0 12px 12px;}
+  .page-header{padding:20px 12px 12px;}
+  .sp-panel{width:100vw;min-height:50vh;border-radius:16px 16px 0 0;align-self:flex-end;max-height:90vh;}
+  .sp-overlay{align-items:flex-end;padding:0;}
+}
 
 /* ─── SITE NAV ─── */
-
-
 
 
 
@@ -2097,5 +2109,6 @@ document.body.classList.add('locked');
 <footer>
   <span>Top Secret FC</span> · Temporada 1 · 2026
 </footer>
+<script src="mobile-nav.js"></script>
 </body>
 </html>

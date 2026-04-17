@@ -167,6 +167,15 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   .hero-visual{display:none;}
   .section{padding:28px 20px;}
 }
+@media(max-width:640px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .hero{padding:28px 16px;}
+  .hero-title{font-size:clamp(44px,12vw,72px);}
+  .hero-cta{flex-direction:column;align-items:flex-start;}
+  .section{padding:20px 16px;}
+  .nav-grid{grid-template-columns:1fr 1fr;}
+  footer{flex-direction:column;gap:8px;padding:20px 16px;text-align:center;}
+}
 </style>
 </head>
 <body>
@@ -597,5 +606,6 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   startTimer();
 })();
 </script>
+<script src="mobile-nav.js"></script>
 </body>
 </html>
