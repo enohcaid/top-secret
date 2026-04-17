@@ -6,6 +6,8 @@
 <title>Top Secret FC · Convocatoria</title>
 <link rel="icon" type="image/png" href="Top-Secret.png">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -456,52 +458,100 @@ const POS_LABEL = {
 };
 function getPosLabel(pos){ return POS_LABEL[pos] || pos; }
 
-/* ─── STATE (localStorage) ─── */
-const TODAY = new Date().toISOString().slice(0,10);
-const LS_KEY = 'conv_' + TODAY;
-const LS_META = 'conv_meta';
+/* ─── FIREBASE ─── */
+const FB_CONFIG = {
+  apiKey: "AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M",
+  authDomain: "top-secret-fc.firebaseapp.com",
+  projectId: "top-secret-fc",
+  storageBucket: "top-secret-fc.firebasestorage.app",
+  messagingSenderId: "303110190986",
+  appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
+};
+let _db = null, CONV_DOC = null;
+try {
+  if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+  _db = firebase.firestore();
+  CONV_DOC = _db.collection('convocatoria').doc('state');
+} catch(e) { console.warn('Firebase init error:', e); }
 
-let availability = {};
-let alwaysPresent = [];
-let captain = null;
-let lineup = { formation:'4-3-3', slots:{} };
-let currentPlayer = null;
+/* ─── STATE ─── */
+const TODAY = new Date().toISOString().slice(0,10);
+const LS_BACKUP = 'conv_backup';
+
+let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
+let dailyOverrides  = {};   // { name: {status, day, note?} } — alwaysPresent daily overrides
+let alwaysPresent   = [];   // players always present unless overridden
+let captain         = null;
+let lineup          = { formation:'4-3-3', slots:{} };
+let currentPlayer   = null;
 let selectedSlotKey = null;
+
+/* ─── APPLY DATA (from Firestore or backup) ─── */
+function applyData(data) {
+  availability    = data.availability    || {};
+  dailyOverrides  = data.dailyOverrides  || {};
+  alwaysPresent   = data.alwaysPresent   || [];
+  captain         = data.captain         || null;
+  lineup          = data.lineup          || { formation:'4-3-3', slots:{} };
+}
 
 /* ─── LOAD STATE ─── */
 function loadState() {
+  // 1. Load localStorage backup for immediate render
   try {
-    const d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    availability = d.availability || {};
-    lineup = d.lineup || { formation:'4-3-3', slots:{} };
+    const bk = JSON.parse(localStorage.getItem(LS_BACKUP) || '{}');
+    if (Object.keys(bk).length) applyData(bk);
   } catch(e) {}
-  try {
-    const m = JSON.parse(localStorage.getItem(LS_META) || '{}');
-    alwaysPresent = m.alwaysPresent || [];
-    captain = m.captain || null;
-  } catch(e) {}
-  alwaysPresent.forEach(name => {
-    if (!availability[name] || availability[name].status !== 'red')
-      availability[name] = { status:'green' };
-  });
+
+  // 2. Subscribe to Firestore for real-time shared state
+  if (CONV_DOC) {
+    CONV_DOC.onSnapshot(snap => {
+      if (snap.exists) {
+        applyData(snap.data());
+        try { localStorage.setItem(LS_BACKUP, JSON.stringify(snap.data())); } catch(e) {}
+      } else {
+        saveState(); // first user — seed the document
+      }
+      render();
+    }, err => console.warn('Firestore listen error:', err));
+  }
 }
-function saveDay() {
-  localStorage.setItem(LS_KEY, JSON.stringify({ availability, lineup }));
-}
-function saveMeta() {
-  localStorage.setItem(LS_META, JSON.stringify({ alwaysPresent, captain }));
+
+/* ─── SAVE STATE ─── */
+function saveState() {
+  const data = { availability, dailyOverrides, alwaysPresent, captain, lineup };
+  try { localStorage.setItem(LS_BACKUP, JSON.stringify(data)); } catch(e) {}
+  if (CONV_DOC) {
+    CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
+  }
 }
 
 /* ─── STATUS ─── */
 function getStatus(name) {
+  // Vacation (black) check: takes priority for everyone
   const a = availability[name];
-  if (!a) return 'pending';
-  if (a.status === 'black' && a.returnDate) {
-    if (a.returnDate <= TODAY) { delete availability[name]; saveDay(); return 'pending'; }
+  if (a && a.status === 'black' && a.returnDate) {
+    if (a.returnDate > TODAY) return 'black';   // still on vacation
+    delete availability[name]; saveState();      // vacation ended
   }
-  return a.status || 'pending';
+  // alwaysPresent: check daily override, else green
+  if (alwaysPresent.includes(name)) {
+    const ov = dailyOverrides[name];
+    if (ov && ov.day === TODAY) return ov.status;
+    return 'green';
+  }
+  if (!a || !a.status) return 'pending';
+  return a.status;
 }
 const dotCls = { green:'sg', yellow:'sy', red:'sr', black:'sb', pending:'sp' };
+function getNote(name) {
+  // alwaysPresent daily overrides carry their own note (e.g. "Llega ~21:30")
+  if (alwaysPresent.includes(name)) {
+    const ov = dailyOverrides[name];
+    if (ov && ov.day === TODAY && ov.note) return ov.note;
+  }
+  return availability[name]?.note || '';
+}
 
 /* ─── PHOTO HELPERS ─── */
 function brazosPath(p)  { return `Renders/${p.folder || p.name}/Brazos.png`; }
@@ -566,7 +616,7 @@ function renderPlayers() {
 
     gp.forEach(p => {
       const st = getStatus(p.name);
-      const note = availability[p.name]?.note || '';
+      const note = getNote(p.name);
       const always = alwaysPresent.includes(p.name);
       const pitched = onPitch.has(p.name);
 
@@ -750,7 +800,7 @@ function render() {
 function selectFormation(f) {
   if (f === lineup.formation) return;
   lineup = { formation:f, slots:{} };
-  saveDay(); render();
+  saveState(); render();
   showToast('Formación ' + f);
 }
 
@@ -759,13 +809,13 @@ function handleSlotClick(key) {
   if (selectedSlotKey) {
     if (selectedSlotKey === key) {
       delete lineup.slots[key];
-      cancelSlotSelect(); saveDay(); render();
+      cancelSlotSelect(); saveState(); render();
     } else {
       const player = lineup.slots[selectedSlotKey];
       const existing = lineup.slots[key];
       if (player) { lineup.slots[key] = player; delete lineup.slots[selectedSlotKey]; }
       if (existing) lineup.slots[selectedSlotKey] = existing;
-      cancelSlotSelect(); saveDay(); render();
+      cancelSlotSelect(); saveState(); render();
     }
   } else if (lineup.slots[key]) {
     selectSlot(key);
@@ -778,7 +828,7 @@ function handleSlotClick(key) {
 function dropOnSlot(key, name) {
   Object.keys(lineup.slots).forEach(k => { if (lineup.slots[k] === name) delete lineup.slots[k]; });
   lineup.slots[key] = name;
-  saveDay(); render();
+  saveState(); render();
 }
 
 /* ─── SLOT SELECT ─── */
@@ -804,7 +854,7 @@ function assignPlayerToSelectedSlot(name) {
   if (!selectedSlotKey) return;
   Object.keys(lineup.slots).forEach(k => { if (lineup.slots[k] === name) delete lineup.slots[k]; });
   lineup.slots[selectedSlotKey] = name;
-  cancelSlotSelect(); saveDay(); render();
+  cancelSlotSelect(); saveState(); render();
 }
 
 /* ─── AUTO LINEUP ─── */
@@ -815,14 +865,14 @@ function autoLineup() {
     'CB2':'Zurdo-_CABJ12','LB':'zPibu__','RM':'Guiidow','CM':'Juan_Martinez4',
     'LM':'CipriMancini','RW':'BlackPanther-CG','CF':'cansitrGd22_','LW':'Lautavester7',
   };
-  saveDay(); render();
+  saveState(); render();
   showToast('Alineación cargada ⚡');
 }
 
 /* ─── CLEAR LINEUP ─── */
 function clearLineup() {
   lineup.slots = {};
-  saveDay(); render();
+  saveState(); render();
   showToast('Formación limpiada');
 }
 
@@ -839,7 +889,7 @@ function openStatusModal(name) {
   const stIcon = {green:'🟢',yellow:'🟡',red:'🔴',black:'⚫',pending:'⬜'}[st] || '⬜';
   const sub = document.createElement('div'); sub.className = 'mph-sub';
   sub.textContent = getPosLabel(p.pos) + ' · #' + p.num + ' · ' + stIcon;
-  const note = availability[p.name]?.note || '';
+  const note = getNote(p.name);
   txt.appendChild(nm); txt.appendChild(sub);
   if (note) { const nd = document.createElement('div'); nd.style.cssText = 'font-size:.7rem;color:var(--yellow);font-weight:600;margin-top:2px;'; nd.textContent = note; txt.appendChild(nd); }
   mph.appendChild(av); mph.appendChild(txt);
@@ -857,7 +907,7 @@ function openStatusModal(name) {
 
 function toggleCaptain() {
   captain = (captain === currentPlayer) ? null : currentPlayer;
-  saveMeta(); closeModal('statusOverlay'); render();
+  saveState(); closeModal('statusOverlay'); render();
   showToast(captain ? captain + ' es el capitán 🅱️' : 'Capitanía removida');
 }
 
@@ -866,36 +916,49 @@ function confirmStatus(status) {
   closeModal('statusOverlay');
   if (status === 'yellow') { document.getElementById('lateOverlay').classList.add('open'); return; }
   if (status === 'black')  { document.getElementById('blackOverlay').classList.add('open'); return; }
-  let realStatus = status;
+
   if (status === 'green_always') {
     if (!alwaysPresent.includes(name)) alwaysPresent.push(name);
-    realStatus = 'green'; saveMeta();
-  } else {
-    alwaysPresent = alwaysPresent.filter(n => n !== name); saveMeta();
+    delete dailyOverrides[name];  // clear any daily override
+    delete availability[name];    // remove from regular availability
+    saveState();
+    render(); showToast(name + ' → Siempre presente');
+    return;
   }
-  availability[name] = { status: realStatus };
-  render(); showToast(name + ' → ' + (realStatus === 'green' ? 'Presente' : 'Ausente'));
-  saveDay();
+
+  if (alwaysPresent.includes(name)) {
+    // Daily override only — alwaysPresent stays intact; resets automatically next day
+    dailyOverrides[name] = { status, day: TODAY };
+  } else {
+    availability[name] = { status };
+  }
+  saveState();
+  render(); showToast(name + ' → ' + (status === 'green' ? 'Presente' : 'Ausente'));
 }
 
 function saveLateTime() {
   const time = document.getElementById('lateTimeInput').value; if (!time) return;
-  alwaysPresent = alwaysPresent.filter(n => n !== currentPlayer); saveMeta();
-  availability[currentPlayer] = { status:'yellow', note:'Llega ~'+time };
+  if (alwaysPresent.includes(currentPlayer)) {
+    dailyOverrides[currentPlayer] = { status:'yellow', note:'Llega ~'+time, day: TODAY };
+  } else {
+    availability[currentPlayer] = { status:'yellow', note:'Llega ~'+time };
+  }
+  saveState();
   closeModal('lateOverlay'); render();
   showToast(currentPlayer + ' → Tarde (~' + time + ')');
-  saveDay();
 }
 
 function saveBlackDate() {
   const date = document.getElementById('blackDateInput').value; if (!date) return;
-  alwaysPresent = alwaysPresent.filter(n => n !== currentPlayer); saveMeta();
   const d = new Date(date + 'T12:00:00');
   const fmt = d.getDate() + '/' + (d.getMonth() + 1);
+  // Vacation stored in availability for everyone — returnDate check handles expiry
   availability[currentPlayer] = { status:'black', returnDate:date, note:'Vuelve '+fmt };
+  // For alwaysPresent players, also clear any conflicting daily override
+  delete dailyOverrides[currentPlayer];
+  saveState();
   closeModal('blackOverlay'); render();
   showToast(currentPlayer + ' → Ausente hasta ' + fmt);
-  saveDay();
 }
 
 /* ─── MODALS ─── */
