@@ -973,8 +973,8 @@ body{padding-top:64px;}
   </div>
 </div>
 
-<script src="seed_matches.js"></script>
 <script type="module">
+import { SEED_MATCHES } from './seed_matches.js';
 // ── MATCH DATA ────────────────────────────────────────────────────────────────
 // location: 'L'=Local (Top Secret primero), 'V'=Visitante (rival primero)
 // result: null=pending, [homeGoals, awayGoals] (desde perspectiva del partido, no del equipo)
@@ -1328,7 +1328,7 @@ function handleResultClick(id){
 }
 
 function findSeedMatch(id){
-  if(typeof window.SEED_MATCHES === 'undefined') return null;
+  if(!SEED_MATCHES || !SEED_MATCHES.length) return null;
   const m = getMatch(id);
   return SEED_MATCHES.find(s => {
     if(s.date !== m.date) return false;
