@@ -269,6 +269,19 @@ footer {
   margin-left: -64px; margin-right: -48px;
 }
 footer span { color: var(--gold); }
+
+@media(max-width:640px){
+  .page-header{ padding:20px 12px 12px; }
+  .wrap{ padding:0 12px 80px; }
+  .season-sel{ flex-wrap:wrap; gap:6px; }
+  .tabs{ overflow-x:auto; scrollbar-width:none; gap:0; }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab{ padding:10px 16px; font-size:.78rem; white-space:nowrap; flex-shrink:0; }
+  .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  table{ min-width:480px; }
+  .prox-wrap{ padding:32px 0; }
+  .zl-grid{ flex-direction:column; gap:8px; }
+}
 </style>
 </head>
 <body>
@@ -352,12 +365,12 @@ footer span { color: var(--gold); }
 
     <!-- VPN T1 -->
     <div class="tab-pane active" id="t1-pane-vpn">
-      <table class="standings-table" id="t1-vpn-table"></table>
+      <div class="table-wrap"><table class="standings-table" id="t1-vpn-table"></table></div>
     </div>
 
     <!-- VPUG T1 -->
     <div class="tab-pane" id="t1-pane-vpug">
-      <table class="standings-table" id="t1-vpug-table"></table>
+      <div class="table-wrap"><table class="standings-table" id="t1-vpug-table"></table></div>
       <div class="zone-legend" style="margin-top:16px">
         <div class="zl-item"><span class="zone-dot" style="background:#2563eb"></span>Clasificado a Playoff</div>
         <div class="zl-item"><span class="zone-dot" style="background:var(--vpug)"></span>Clasificado directo</div>
@@ -367,7 +380,7 @@ footer span { color: var(--gold); }
 
     <!-- 11x11 T1 -->
     <div class="tab-pane" id="t1-pane-e11">
-      <table class="standings-table" id="t1-e11-table"></table>
+      <div class="table-wrap"><table class="standings-table" id="t1-e11-table"></table></div>
       <div class="zone-legend" style="margin-top:16px">
         <div class="zl-item"><span class="zone-dot" style="background:#c9a84c"></span>Ascenso / Playoff</div>
         <div class="zl-item"><span class="zone-dot" style="background:#c0392b"></span>Descenso</div>
@@ -388,7 +401,7 @@ footer span { color: var(--gold); }
         <button class="tab" style="pointer-events:none">VPUG</button>
         <button class="tab" style="pointer-events:none">11x11</button>
       </div>
-      <table class="standings-table" id="t2-empty-table"></table>
+      <div class="table-wrap"><table class="standings-table" id="t2-empty-table"></table></div>
     </div>
   </div>
 </div>
@@ -638,5 +651,6 @@ function renderT2Empty() {
 renderT1();
 renderT2Empty();
 </script>
+<script src="mobile-nav.js"></script>
 </body>
 </html>
