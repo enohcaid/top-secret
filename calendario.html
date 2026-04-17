@@ -1081,10 +1081,10 @@ const RAW = [
   // Mar 7 Abr
   {date:'2026-04-02',time:'23:50',league:'11x11',rival:'Suda ESP',           isHome:false, result:null},
 
-  // Mié 8 Abr
-  {date:'2026-04-08',time:'23:00',league:'VPN',  rival:'Deportivo Ballester',isHome:false, result:null},
-  {date:'2026-04-08',time:'23:30',league:'VPN',  rival:'Villa Dalmine Esports',isHome:false,result:null},
-  {date:'2026-04-08',time:'23:50',league:'VPN',  rival:'Camioneros eSports', isHome:false, result:null},
+  // Mar 14 Abr
+  {date:'2026-04-14',time:'23:00',league:'VPN',  rival:'Dep Ballester',      isHome:false, result:null},
+  {date:'2026-04-14',time:'23:30',league:'VPN',  rival:'Dalmine Esports',    isHome:false, result:null},
+  {date:'2026-04-14',time:'23:50',league:'VPN',  rival:'Camioneros eSp',     isHome:false, result:null},
 
 ];
 
@@ -1327,15 +1327,34 @@ function handleResultClick(id){
   openModal(id);
 }
 
+function rivalMatch(a, b){
+  const ra = (a||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const rb = (b||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(!ra || !rb) return false;
+  if(ra === rb) return true;
+  if(ra.includes(rb) || rb.includes(ra)) return true;
+  const short = ra.length < rb.length ? ra : rb;
+  const long  = ra.length < rb.length ? rb : ra;
+  // prefix-4 or suffix-4 of shorter string in longer
+  return long.includes(short.slice(0,4)) || long.includes(short.slice(-4));
+}
 function findSeedMatch(id){
   if(!SEED_MATCHES || !SEED_MATCHES.length) return null;
   const m = getMatch(id);
-  return SEED_MATCHES.find(s => {
-    if(s.date !== m.date) return false;
-    const ra = (s.rival||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-    const rb = (m.rival||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-    return ra.slice(0,5) === rb.slice(0,5) || ra.includes(rb.slice(0,5)) || rb.includes(ra.slice(0,5));
-  });
+  const mmdd = m.date.slice(5); // MM-DD
+  // 1st pass: exact date + league + rival
+  let hit = SEED_MATCHES.find(s =>
+    s.date === m.date && s.league === m.league && rivalMatch(s.rival, m.rival)
+  );
+  // 2nd pass: ignore year (handles seed entries with wrong year)
+  if(!hit) hit = SEED_MATCHES.find(s =>
+    s.date.slice(5) === mmdd && s.league === m.league && rivalMatch(s.rival, m.rival)
+  );
+  // 3rd pass: league + rival only (last resort, handles date discrepancies)
+  if(!hit) hit = SEED_MATCHES.find(s =>
+    s.league === m.league && rivalMatch(s.rival, m.rival)
+  );
+  return hit || null;
 }
 
 function openStatsPanel(id){
@@ -1363,9 +1382,9 @@ function openStatsPanel(id){
     const teamHtml = `
       <div class="sp-sec">Estadísticas del equipo</div>
       <div class="sp-teamrow">
-        <div class="sp-ts"><div class="sp-ts-v">${ts.possession||'—'}%</div><div class="sp-ts-l">Posesión</div></div>
-        <div class="sp-ts"><div class="sp-ts-v">${ts.shots||'—'}</div><div class="sp-ts-l">Remates</div></div>
-        <div class="sp-ts"><div class="sp-ts-v">${ts.distance_km ? ts.distance_km+'km' : '—'}</div><div class="sp-ts-l">Distancia</div></div>
+        <div class="sp-ts"><div class="sp-ts-v">${ts.posesion||ts.possession||'—'}%</div><div class="sp-ts-l">Posesión</div></div>
+        <div class="sp-ts"><div class="sp-ts-v">${ts.tiros||ts.shots||'—'}</div><div class="sp-ts-l">Remates</div></div>
+        <div class="sp-ts"><div class="sp-ts-v">${ts.pases||ts.passes||'—'}</div><div class="sp-ts-l">Pases</div></div>
       </div>`;
 
     const sorted = [...seed.players].sort((a,b)=>(b.rating||0)-(a.rating||0));
