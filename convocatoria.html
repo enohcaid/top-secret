@@ -99,12 +99,12 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .pcard.always{border-left-color:#4a9eff;}
 .pcard.yellow{border-left-color:var(--yellow);}
 .pcard.red{border-left-color:var(--red);opacity:.6;}
-.pcard.black{border-left-color:#8b5cf6;opacity:.6;}
+.pcard.black{border-left-color:#f97316;opacity:.6;}
 .pcard.green .pnum{color:var(--green);}
 .pcard.always .pnum{color:#4a9eff;}
 .pcard.yellow .pnum{color:var(--yellow);}
 .pcard.red .pnum{color:var(--red);}
-.pcard.black .pnum{color:#8b5cf6;}
+.pcard.black .pnum{color:#f97316;}
 .pcard.assignable{border-left-color:var(--gold);cursor:pointer;background:rgba(201,168,76,.06);}
 .pnum{font-family:'Barlow Condensed',sans-serif;font-size:1.45rem;font-weight:800;line-height:1;color:var(--mid);min-width:28px;text-align:center;flex-shrink:0;}
 .pavatar{width:46px;height:46px;border-radius:6px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);background:var(--gray);position:relative;}
@@ -119,7 +119,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .sdot.sa{background:#2563eb;box-shadow:0 0 0 2px rgba(74,158,255,.25);}
 .sdot.sy{background:#b8900a;box-shadow:0 0 0 2px rgba(184,144,10,.25);}
 .sdot.sr{background:#b03018;box-shadow:0 0 0 2px rgba(176,48,24,.2);}
-.sdot.sb{background:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,.25);}
+.sdot.sb{background:#f97316;box-shadow:0 0 0 2px rgba(249,115,22,.25);}
 .sdot.sp{background:transparent;border:1.5px solid var(--border);}
 .on-pitch{font-size:.56rem;color:var(--green);font-weight:700;letter-spacing:.04em;}
 
@@ -338,7 +338,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
       <button class="sopt sopt-always" onclick="confirmStatus('green_always')">🔵 Siempre presente <span style="font-size:.72rem;color:#4a9eff;font-weight:400">(todos los días)</span></button>
       <button class="sopt" onclick="confirmStatus('yellow')">🟡 Llego tarde…</button>
       <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
-      <button class="sopt" onclick="confirmStatus('black')">🟣 Ausente varios días…</button>
+      <button class="sopt" onclick="confirmStatus('black')">🟠 Ausente varios días…</button>
       <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()">🅱️ Asignar como capitán</button>
     </div>
     <button class="mbtn mbtn-cancel" onclick="closeModal('statusOverlay')" style="width:100%;margin-top:10px">Cancelar</button>
@@ -887,7 +887,7 @@ function openStatusModal(name) {
   const txt = document.createElement('div');
   const nm = document.createElement('div'); nm.className = 'mph-name'; nm.textContent = p.name;
   const st = getStatus(p.name);
-  const stIcon = {green:'🟢',yellow:'🟡',red:'🔴',black:'🟣',pending:'⬜'}[st] || '⬜';
+  const stIcon = {green:'🟢',yellow:'🟡',red:'🔴',black:'🟠',pending:'⬜'}[st] || '⬜';
   const sub = document.createElement('div'); sub.className = 'mph-sub';
   sub.textContent = getPosLabel(p.pos) + ' · #' + p.num + ' · ' + stIcon;
   const note = getNote(p.name);
