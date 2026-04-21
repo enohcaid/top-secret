@@ -1194,6 +1194,7 @@ function getAnyMatch(id){
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 const DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function getToday(){ return new Date().toLocaleDateString('sv',{timeZone:'America/Argentina/Buenos_Aires'}); }
 
 function fmtDate(d){
   const dt = new Date(d+'T12:00:00');
@@ -1300,7 +1301,7 @@ function toggleAdmin(){
 
 // ── NEXT MATCH ────────────────────────────────────────────────────────────────
 function renderNextMatch(){
-  const today = new Date().toISOString().slice(0,10);
+  const today = getToday();
   let next = null;
   for(let i=0; i<RAW.length; i++){
     const m = getMatch(i);
@@ -1452,7 +1453,7 @@ function getJornada(matchIndex) {
 function renderWeekStrip() {
   const strip = document.getElementById('weekStrip');
   if (!strip) return;
-  const today = new Date().toISOString().slice(0,10);
+  const today = getToday();
   const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
   // Get all unique match dates (RAW + custom)
@@ -1493,7 +1494,7 @@ function renderWeekStrip() {
 
 // ── TODAY CARD ────────────────────────────────────────────────────────────────
 function renderTodayCard() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = getToday();
 
   // RAW matches for today
   const rawToday = RAW.map((_,i)=>({m:getMatch(i), id:i, isCustom:false}))
@@ -1540,7 +1541,7 @@ function renderTodayCard() {
 function render(){
   const cal = document.getElementById('cal');
   cal.innerHTML = '';
-  const today = new Date().toISOString().slice(0,10);
+  const today = getToday();
 
   // Build matches-by-date index
   const matchesByDate = {};
@@ -1565,20 +1566,26 @@ function render(){
   let dt = new Date(today+'T12:00:00');
   while(dt.toISOString().slice(0,10) <= horizon){ allDates.add(dt.toISOString().slice(0,10)); dt.setDate(dt.getDate()+1); }
 
-  // Group by week
-  const weeks = {};
+  // Group by week — split upcoming (today+) from past
+  const upcomingWeeks = {}, pastWeeks = {};
   [...allDates].sort().forEach(date => {
     const wk = weekKey(date);
-    if(!weeks[wk]) weeks[wk] = [];
-    weeks[wk].push(date);
+    if(date >= today){
+      if(!upcomingWeeks[wk]) upcomingWeeks[wk] = [];
+      upcomingWeeks[wk].push(date);
+    } else {
+      if(!pastWeeks[wk]) pastWeeks[wk] = [];
+      pastWeeks[wk].push(date);
+    }
   });
 
-  Object.keys(weeks).sort().forEach(wk=>{
+  // Render helper
+  function renderWeekBlock(wk, dates){
     const wDiv = document.createElement('div');
     wDiv.className='week';
     wDiv.innerHTML=`<div class="week-title">${weekLabel(wk)}</div>`;
 
-    weeks[wk].sort().forEach(date=>{
+    dates.sort().forEach(date=>{
       const dayIds = (matchesByDate[date] || []);
       const isToday = date === today;
       const dDiv = document.createElement('div');
@@ -1729,33 +1736,24 @@ function render(){
 
       wDiv.appendChild(dDiv);
     }); // end dates forEach
-
     cal.appendChild(wDiv);
-  }); // end weeks forEach
+  } // end renderWeekBlock
+
+  // Upcoming first (today → horizon), then past history below
+  Object.keys(upcomingWeeks).sort().forEach(wk => renderWeekBlock(wk, upcomingWeeks[wk]));
+
+  if(Object.keys(pastWeeks).length){
+    const sep = document.createElement('div');
+    sep.style.cssText = 'font-family:"Barlow Condensed",sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);padding:24px 2px 8px;border-top:1px solid var(--border);margin-top:8px;';
+    sep.textContent = 'Historial';
+    cal.appendChild(sep);
+    Object.keys(pastWeeks).sort().reverse().forEach(wk => renderWeekBlock(wk, pastWeeks[wk]));
+  }
 
   updateStats();
   renderWeekStrip();
   renderTodayCard();
   renderNextMatch();
-  if (!_scrolledToToday) { _scrolledToToday = true; scrollToToday(); }
-}
-
-let _scrolledToToday = false;
-function scrollToToday() {
-  const today = new Date().toISOString().slice(0,10);
-  setTimeout(() => {
-    const dayDiv = document.querySelector(`.day[data-date="${today}"]`);
-    if (dayDiv) { dayDiv.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
-    // No section for today — scroll to next upcoming unpplayed match
-    const cards = [...document.querySelectorAll('.match:not(.hidden):not(.free-day)')];
-    const upcoming = cards.find(c => {
-      const id = c.dataset.id;
-      if (!id) return false;
-      const m = id.startsWith('c') ? custom[parseInt(id.slice(1))] : getMatch(parseInt(id));
-      return m && m.date >= today;
-    });
-    if (upcoming) upcoming.closest('.day')?.scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 200);
 }
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
@@ -2024,7 +2022,7 @@ function openAddModal(){
   addHomeVal = true;
   refreshAddType();
   refreshAddHome();
-  const today = new Date().toISOString().slice(0,10);
+  const today = getToday();
   document.getElementById('addDate').value = today;
   document.getElementById('addTime').value = '22:30';
   document.getElementById('addRival').value = '';
