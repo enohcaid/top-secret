@@ -1229,14 +1229,15 @@ function nextLeagueDay(dateStr, league){
 }
 
 function getResult(id){
-  const m = RAW[id];
   if(results[id]) return results[id];
-  if(m.result) return m.result;
+  if(typeof id === 'string') return null; // custom matches: no pre-set result
+  const m = RAW[id];
+  if(m && m.result) return m.result;
   return null;
 }
 
 function outcomeFor(id){
-  const m = getMatch(id);
+  const m = getAnyMatch(id);
   const r = getResult(id);
   if(!r) return null;
   const [h,a] = r;
@@ -1248,7 +1249,7 @@ function outcomeFor(id){
 }
 
 function scoreDisplay(id){
-  const m = getMatch(id);
+  const m = getAnyMatch(id);
   const r = getResult(id);
   if(!r) return null;
   const [h,a] = r;
@@ -1374,7 +1375,7 @@ function findSeedMatch(id){
 }
 
 function openStatsPanel(id){
-  const m     = getMatch(id);
+  const m     = getAnyMatch(typeof id === 'string' ? id : parseInt(id));
   const r     = getResult(id);
   const out   = outcomeFor(id);
   const score = scoreDisplay(id);
@@ -1638,6 +1639,14 @@ function render(){
             const leagueClass = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league]||'';
             const locLabel = m.isHome ? '🏠 Local' : '✈️ Visita';
             const hide = shouldHide(m.date, m.league);
+            const cOutcome = outcomeFor('c'+ci);
+            const cScore   = scoreDisplay('c'+ci);
+            let cResClass = 'pending', cResContent = '· · ·', cResLabel = '';
+            if(cOutcome){
+              cResClass   = cOutcome + ' final';
+              cResContent = cScore;
+              cResLabel   = {win:'Victoria',loss:'Derrota',draw:'Empate'}[cOutcome];
+            }
             card.className = 'match custom-entry' + (hide?' hidden':'');
             card.dataset.league = m.league||'';
             card.dataset.id = 'c'+ci;
@@ -1653,8 +1662,14 @@ function render(){
                 </div>
               </div>
               <div class="match-time">${m.time||''}</div>
-              <div class="card-actions">
+              <div class="card-actions admin-el">
                 <button class="act-btn" title="Eliminar" onclick="deleteCustom(${ci})" style="color:#c0392b">🗑️</button>
+              </div>
+              <div class="result-cell">
+                <div class="result-box ${cResClass}" onclick="handleResultClick('c${ci}')">
+                  <div class="result-score">${cResContent}</div>
+                  ${cResLabel?`<div class="result-label">${cResLabel}</div>`:''}
+                </div>
               </div>
             `;
           }
@@ -1830,7 +1845,7 @@ function filter(league, btn){
 // ── MODAL (resultado) ─────────────────────────────────────────────────────────
 function openModal(id){
   editingId = id;
-  const m = getMatch(id);
+  const m = getAnyMatch(typeof id === 'string' ? id : parseInt(id));
   const r = getResult(id);
   document.getElementById('mTitle').textContent = m.rival;
   document.getElementById('mSub').textContent = `${fmtDate(m.date)} · ${m.time} · ${m.league}`;
@@ -1850,7 +1865,7 @@ function closeModal(){
   editingId=null;
 }
 function saveRes(){
-  const m = getMatch(editingId);
+  const m = getAnyMatch(typeof editingId === 'string' ? editingId : parseInt(editingId));
   const myG = parseInt(document.getElementById('mHome').value);
   const opG = parseInt(document.getElementById('mAway').value);
   if(isNaN(myG)||isNaN(opG)) return;
