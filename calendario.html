@@ -203,6 +203,9 @@ footer span{color:var(--gold);}
   margin-bottom:6px;
   margin-left:2px;
 }
+.day-label.day-label-today{color:var(--black);font-size:.85rem;}
+.today-inline-badge{display:inline-block;background:var(--gold);color:#fff;font-size:.6rem;font-weight:900;letter-spacing:.1em;padding:2px 7px;border-radius:20px;vertical-align:middle;margin-left:6px;}
+.empty-day-card{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;color:var(--border2,#ccc);padding:7px 10px;}
 
 /* ─── MATCH CARD ─── */
 .match{
@@ -1513,8 +1516,11 @@ function renderTodayCard() {
   document.getElementById('todayCardTitle').textContent = `Hoy · ${D[dt.getDay()]} ${dt.getDate()} de ${M[dt.getMonth()]}`;
   document.getElementById('todayMatchCount').textContent = todayMatches.length + (todayMatches.length===1?' partido':' partidos');
 
-  if (todayMatches.length === 0) { wrap.style.display='none'; return; }
   wrap.style.display='block';
+  if (todayMatches.length === 0) {
+    document.getElementById('todayMatchList').innerHTML = `<div style="font-size:.82rem;color:var(--mid);padding:4px 0;font-style:italic;">Sin partidos hoy</div>`;
+    return;
+  }
 
   const leagueCls = {VPN:'vpn',VPUG:'vpug','11x11':'e11'};
   document.getElementById('todayMatchList').innerHTML = todayMatches.map(({m, id, isCustom}) => {
@@ -1534,37 +1540,61 @@ function renderTodayCard() {
 function render(){
   const cal = document.getElementById('cal');
   cal.innerHTML = '';
+  const today = new Date().toISOString().slice(0,10);
 
-  // Group by week then by date (using effective match data)
-  // Keys: integers = RAW index, strings like 'c0' = custom entries
-  const weeks = {};
+  // Build matches-by-date index
+  const matchesByDate = {};
   RAW.forEach((_, i) => {
     const m = getMatch(i);
-    const wk = weekKey(m.date);
-    if(!weeks[wk]) weeks[wk]=[];
-    weeks[wk].push(i);
+    if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
+    matchesByDate[m.date].push(i);
   });
   custom.forEach((m, ci) => {
-    const wk = weekKey(m.date);
-    if(!weeks[wk]) weeks[wk]=[];
-    weeks[wk].push('c'+ci);
+    if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
+    matchesByDate[m.date].push('c'+ci);
+  });
+
+  // Date range: past → only match days; today forward → every day through horizon
+  const allDates = new Set(Object.keys(matchesByDate).filter(d => d < today));
+  const lastMatchDate = Object.keys(matchesByDate).sort().slice(-1)[0] || today;
+  const horizonMs = Math.max(
+    new Date(today+'T12:00:00').getTime() + 45*24*60*60*1000,
+    new Date(lastMatchDate+'T12:00:00').getTime()
+  );
+  const horizon = new Date(horizonMs).toISOString().slice(0,10);
+  let dt = new Date(today+'T12:00:00');
+  while(dt.toISOString().slice(0,10) <= horizon){ allDates.add(dt.toISOString().slice(0,10)); dt.setDate(dt.getDate()+1); }
+
+  // Group by week
+  const weeks = {};
+  [...allDates].sort().forEach(date => {
+    const wk = weekKey(date);
+    if(!weeks[wk]) weeks[wk] = [];
+    weeks[wk].push(date);
   });
 
   Object.keys(weeks).sort().forEach(wk=>{
-    const ids = weeks[wk];
-    const days = {};
-    ids.forEach(id=>{ const d=getAnyMatch(id).date; if(!days[d]) days[d]=[]; days[d].push(id); });
-
     const wDiv = document.createElement('div');
     wDiv.className='week';
     wDiv.innerHTML=`<div class="week-title">${weekLabel(wk)}</div>`;
 
-    Object.keys(days).sort().forEach(date=>{
-      const dayIds = days[date];
+    weeks[wk].sort().forEach(date=>{
+      const dayIds = (matchesByDate[date] || []);
+      const isToday = date === today;
       const dDiv = document.createElement('div');
       dDiv.className='day';
       dDiv.dataset.date=date;
-      dDiv.innerHTML=`<div class="day-label">${fmtDate(date)}</div>`;
+      dDiv.innerHTML=`<div class="day-label${isToday?' day-label-today':''}">${fmtDate(date)}${isToday?'<span class="today-inline-badge">HOY</span>':''}</div>`;
+
+      if(dayIds.length === 0){
+        // Empty day (only future days reach here)
+        const empty = document.createElement('div');
+        empty.className = 'empty-day-card';
+        empty.textContent = '— Sin partidos';
+        dDiv.appendChild(empty);
+        wDiv.appendChild(dDiv);
+        return;
+      }
 
       dayIds.sort((a,b)=>(getAnyMatch(a).time||'').localeCompare(getAnyMatch(b).time||''));
 
@@ -1698,10 +1728,10 @@ function render(){
       });
 
       wDiv.appendChild(dDiv);
-    });
+    }); // end dates forEach
 
     cal.appendChild(wDiv);
-  });
+  }); // end weeks forEach
 
   updateStats();
   renderWeekStrip();
