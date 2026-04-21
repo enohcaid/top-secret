@@ -208,6 +208,17 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .av-crop-wrap{position:relative;width:100%;height:100%;overflow:hidden;}
 .av-crop-wrap img{position:absolute;}
 
+/* ── TODAY MATCHES PANEL ── */
+.today-matches-panel{background:rgba(201,168,76,.06);border:1.5px solid rgba(201,168,76,.35);border-radius:10px;padding:12px 16px;margin-bottom:20px;}
+.tmp-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.2);}
+.tmp-title{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+.tmp-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);}
+.tmp-row:last-child{border-bottom:none;}
+.tmp-time{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:var(--gold);min-width:50px;}
+.tmp-rival{font-size:.9rem;font-weight:700;flex:1;}
+.tmp-badge{font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.06em;}
+.tmp-loc{font-size:.85rem;}
+
 @media(max-width:640px){
   .main{padding:16px 12px 80px;}
   .kpi-bar{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
@@ -285,6 +296,15 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
     <div class="kpi-card k-yellow"><div class="kpi-val" id="sY">0</div><div class="kpi-lbl">Tarde</div></div>
     <div class="kpi-card k-red"><div class="kpi-val" id="sR">0</div><div class="kpi-lbl">Ausentes</div></div>
     <div class="kpi-card k-mid"><div class="kpi-val" id="sP">0</div><div class="kpi-lbl">Sin confirmar</div></div>
+  </div>
+
+  <!-- TODAY MATCHES PANEL -->
+  <div id="todayMatchesPanel" class="today-matches-panel" style="display:none;">
+    <div class="tmp-head">
+      <span>⚽</span>
+      <span class="tmp-title">Partidos hoy</span>
+    </div>
+    <div class="tmp-list"></div>
   </div>
 
   <!-- SECTION HEADERS -->
@@ -479,15 +499,46 @@ const FB_CONFIG = {
   messagingSenderId: "303110190986",
   appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
 };
-let _db = null, CONV_DOC = null;
+let _db = null, CONV_DOC = null, CAL_DOC_CONV = null;
 try {
   if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
   _db = firebase.firestore();
-  CONV_DOC = _db.collection('convocatoria').doc('state');
+  CONV_DOC     = _db.collection('convocatoria').doc('state');
+  CAL_DOC_CONV = _db.collection('calendario').doc('estado');
 } catch(e) { console.warn('Firebase init error:', e); }
 
+/* ─── CALENDAR MATCHES (today) ─── */
+let calCustom = [];
+if (CAL_DOC_CONV) {
+  CAL_DOC_CONV.onSnapshot(snap => {
+    if (snap.exists) calCustom = snap.data().custom || [];
+    renderTodayMatchesPanel();
+  }, () => {});
+}
+function getTodayMatches() {
+  return calCustom
+    .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'))
+    .sort((a,b) => (a.time||'').localeCompare(b.time||''));
+}
+function renderTodayMatchesPanel() {
+  const wrap = document.getElementById('todayMatchesPanel');
+  if (!wrap) return;
+  const matches = getTodayMatches();
+  if (!matches.length) { wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  const lc = {VPN:'#f5c518',VPUG:'#3ecf8e','11x11':'#4a9eff'};
+  wrap.querySelector('.tmp-list').innerHTML = matches.map(m => `
+    <div class="tmp-row">
+      <span class="tmp-time">${m.time||'—'}</span>
+      <span class="tmp-rival">${m.rival||'—'}</span>
+      ${m.league ? `<span class="tmp-badge" style="background:${lc[m.league]||'#888'}22;color:${lc[m.league]||'#888'};border:1px solid ${lc[m.league]||'#888'}55">${m.league}</span>` : ''}
+      <span class="tmp-loc">${m.isHome?'🏠':'✈️'}</span>
+    </div>`).join('');
+}
+
 /* ─── STATE ─── */
-const TODAY = new Date().toISOString().slice(0,10);
+// Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
+const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
 const LS_BACKUP = 'conv_backup';
 
 let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
@@ -497,14 +548,37 @@ let captain         = null;
 let lineup          = { formation:'4-3-3', slots:{} };
 let currentPlayer   = null;
 let selectedSlotKey = null;
+let _savedResetDate = '';
 
 /* ─── APPLY DATA (from Firestore or backup) ─── */
 function applyData(data) {
-  availability    = data.availability    || {};
-  dailyOverrides  = data.dailyOverrides  || {};
-  alwaysPresent   = data.alwaysPresent   || [];
-  captain         = data.captain         || null;
-  lineup          = data.lineup          || { formation:'4-3-3', slots:{} };
+  _savedResetDate = data.resetDate      || '';
+  availability    = data.availability   || {};
+  dailyOverrides  = data.dailyOverrides || {};
+  alwaysPresent   = data.alwaysPresent  || [];
+  captain         = data.captain        || null;
+  lineup          = data.lineup         || { formation:'4-3-3', slots:{} };
+}
+
+/* ─── DAILY RESET (midnight GMT-3) ─── */
+function checkDailyReset() {
+  if (_savedResetDate === TODAY) return;
+  // New day — clear daily statuses but preserve ongoing vacations (black with future returnDate)
+  Object.keys(availability).forEach(name => {
+    const a = availability[name];
+    if (a.status === 'black' && a.returnDate && a.returnDate > TODAY) return;
+    delete availability[name];
+  });
+  // dailyOverrides expire naturally (checked against TODAY in getStatus), but clean them anyway
+  dailyOverrides = {};
+  saveState();
+}
+
+function scheduleMidnightReset() {
+  const now = new Date();
+  const ar  = new Date(now.toLocaleString('en-US', {timeZone:'America/Argentina/Buenos_Aires'}));
+  const midnight = new Date(ar); midnight.setHours(24, 0, 0, 500);
+  setTimeout(() => window.location.reload(), midnight - ar);
 }
 
 /* ─── LOAD STATE ─── */
@@ -520,6 +594,7 @@ function loadState() {
     CONV_DOC.onSnapshot(snap => {
       if (snap.exists) {
         applyData(snap.data());
+        checkDailyReset(); // clears availability if new day (saves state internally if reset needed)
         try { localStorage.setItem(LS_BACKUP, JSON.stringify(snap.data())); } catch(e) {}
       } else {
         saveState(); // first user — seed the document
@@ -531,7 +606,7 @@ function loadState() {
 
 /* ─── SAVE STATE ─── */
 function saveState() {
-  const data = { availability, dailyOverrides, alwaysPresent, captain, lineup };
+  const data = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
   try { localStorage.setItem(LS_BACKUP, JSON.stringify(data)); } catch(e) {}
   if (CONV_DOC) {
     CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
@@ -997,8 +1072,17 @@ function buildWhatsAppMessage() {
   let msg = '⚽ *TOP SECRET FC*\n';
   msg += '📅 ' + dayStr + '\n';
   msg += '─────────────────\n';
-  msg += '*22:30hs ADENTRO* 🔥\n\n';
-  msg += '_Sin partidos hoy_\n';
+  const matches = getTodayMatches();
+  if (matches.length) {
+    msg += '*PARTIDOS HOY* 🔥\n';
+    matches.forEach(m => {
+      msg += `🆚 *${m.rival||'—'}* · ${m.time||''}hs`;
+      if (m.league) msg += ` · ${m.league}`;
+      msg += m.isHome ? ' · 🏠 Local\n' : ' · ✈️ Visita\n';
+    });
+  } else {
+    msg += '_Sin partidos hoy_\n';
+  }
   return msg;
 }
 
@@ -1245,6 +1329,7 @@ gsap.set('.kpi-card', { opacity:0, y:14 });
 loadState();
 renderDateTag();
 render();
+scheduleMidnightReset();
 
 /* ─── Animate after render ─── */
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
