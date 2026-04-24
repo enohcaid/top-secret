@@ -976,9 +976,44 @@ function getPillVal(groupId) {
 
 /* ── Seed: VPN 2da División Playoffs T1 2026 ── */
 async function seedVPNPlayoffsTorneo() {
+  const SEED_MATCHES_DATA = {
+    elim: [
+      {
+        rival: 'Camioneros eSports',
+        date: '2026-04-20',
+        goalsFor: 2,
+        goalsAgainst: 0,
+        legs: [
+          { date: '2026-04-20', home: false, goalsFor: 1, goalsAgainst: 0 },
+          { date: '2026-04-20', home: true,  goalsFor: 1, goalsAgainst: 0 }
+        ]
+      },
+      {
+        rival: '4BDOMIFL4NES',
+        date: '2026-04-22',
+        goalsFor: 5,
+        goalsAgainst: 0,
+        legs: [
+          { date: '2026-04-22', home: false, goalsFor: 3, goalsAgainst: 0 },
+          { date: '2026-04-22', home: true,  goalsFor: 2, goalsAgainst: 0 }
+        ]
+      },
+      {
+        rival: 'InfinitX',
+        date: '2026-04-27',
+        legs: [
+          { date: '2026-04-27', home: false },
+          { date: null,         home: true  }
+        ]
+      }
+    ]
+  };
   try {
     const snap = await TORNEO_COL.where('name', '==', 'VPN 2da División Playoffs (T1 2026)').limit(1).get();
-    if (!snap.empty) return; // already exists
+    if (!snap.empty) {
+      await snap.docs[0].ref.update({ matches: SEED_MATCHES_DATA });
+      return;
+    }
     await TORNEO_COL.add({
       name: 'VPN 2da División Playoffs (T1 2026)',
       league: 'VPN',
@@ -987,38 +1022,7 @@ async function seedVPNPlayoffsTorneo() {
       groupMatchCount: 0,
       url: 'https://www.virtualpronetwork.com/web/app/league/2127/playoffs',
       createdAt: Date.now(),
-      matches: {
-        elim: [
-          {
-            rival: 'Camioneros eSports',
-            date: '2026-04-20',
-            goalsFor: 2,
-            goalsAgainst: 0,
-            legs: [
-              { date: '2026-04-20', home: false, goalsFor: 1, goalsAgainst: 0 },
-              { date: '2026-04-20', home: true,  goalsFor: 1, goalsAgainst: 0 }
-            ]
-          },
-          {
-            rival: '4BDOMIFL4NES',
-            date: '2026-04-22',
-            goalsFor: 5,
-            goalsAgainst: 0,
-            legs: [
-              { date: '2026-04-22', home: false, goalsFor: 2, goalsAgainst: 0 },
-              { date: '2026-04-22', home: true,  goalsFor: 3, goalsAgainst: 0 }
-            ]
-          },
-          {
-            rival: 'InfinitX',
-            date: '2026-04-27',
-            legs: [
-              { date: '2026-04-27', home: false },
-              { date: null,         home: true  }
-            ]
-          }
-        ]
-      }
+      matches: SEED_MATCHES_DATA
     });
   } catch(e) {
     console.warn('seedVPNPlayoffs error:', e.message);
