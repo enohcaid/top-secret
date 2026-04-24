@@ -389,6 +389,21 @@ footer span { color: var(--gold); }
 .tr-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);padding:10px 22px;border-radius:10px;font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:600;opacity:0;transition:all .28s;z-index:9999;pointer-events:none;white-space:nowrap;background:rgba(17,17,17,.95);color:var(--gold);border:1px solid var(--gold);}
 .tr-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* URL scraping states */
+.tr-url-wrap{position:relative;}
+.tr-url-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:6px;background:var(--gold);color:#000;border:none;cursor:pointer;transition:opacity .15s;}
+.tr-url-btn:hover{opacity:.85;}
+.tr-url-btn:disabled{opacity:.4;cursor:not-allowed;}
+.tr-scraping{display:none;align-items:center;gap:8px;font-size:.75rem;color:#8b92aa;padding:8px 4px;}
+.tr-scraping.show{display:flex;}
+.tr-scraping-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:tdot .9s ease-in-out infinite;}
+.tr-scraping-dot:nth-child(2){animation-delay:.15s;}
+.tr-scraping-dot:nth-child(3){animation-delay:.3s;}
+@keyframes tdot{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+.tr-extracted{display:none;padding:10px 12px;background:rgba(62,207,142,.07);border:1px solid rgba(62,207,142,.25);border-radius:8px;font-size:.75rem;color:#3ecf8e;margin-bottom:4px;}
+.tr-extracted.show{display:block;}
+.tr-field-auto .tr-label::after{content:' · auto';color:#3ecf8e;font-size:.6rem;}
+
 @media(max-width:640px){
   .bracket-timeline{gap:0;}
   .bt-node{font-size:.62rem;padding:4px 10px;}
@@ -545,43 +560,59 @@ footer span { color: var(--gold); }
 <div class="tr-overlay" id="addTorneoOverlay" onclick="if(event.target===this)closeAddTorneoModal()">
   <div class="tr-modal">
     <h3>🏆 Nuevo Torneo</h3>
+
+    <!-- STEP 1: URL -->
     <div class="tr-field">
-      <div class="tr-label">Nombre del torneo</div>
-      <input class="tr-input" id="trName" placeholder="Ej: VPN 2da Div — Playoffs T1">
+      <div class="tr-label">URL del torneo</div>
+      <div class="tr-url-wrap">
+        <input class="tr-input" id="trUrl" type="url" placeholder="https://virtualpronetwork.com/..." style="padding-right:80px"
+          oninput="onTrUrlInput()" onpaste="setTimeout(()=>onTrUrlInput(),50)">
+        <button class="tr-url-btn" id="trUrlBtn" onclick="scrapeTorneoUrl()" disabled>Analizar</button>
+      </div>
+      <div class="tr-scraping" id="trScraping">
+        <div class="tr-scraping-dot"></div><div class="tr-scraping-dot"></div><div class="tr-scraping-dot"></div>
+        <span id="trScrapingText">Analizando torneo con IA...</span>
+      </div>
+      <div class="tr-extracted" id="trExtracted"></div>
     </div>
-    <div class="tr-field">
-      <div class="tr-label">URL del torneo (opcional)</div>
-      <input class="tr-input" id="trUrl" type="url" placeholder="https://...">
-    </div>
-    <div class="tr-field">
-      <div class="tr-label">Liga</div>
-      <div class="tr-pills" id="trLeaguePills">
-        <button class="tr-pill active" data-val="VPN" onclick="selectPill(this,'trLeaguePills')">VPN</button>
-        <button class="tr-pill" data-val="VPUG" onclick="selectPill(this,'trLeaguePills')">VPUG</button>
-        <button class="tr-pill" data-val="11x11" onclick="selectPill(this,'trLeaguePills')">11x11</button>
-        <button class="tr-pill" data-val="otro" onclick="selectPill(this,'trLeaguePills')">Otro</button>
+
+    <!-- STEP 2: Fields (shown after scrape or can be filled manually) -->
+    <div id="trFields">
+      <div class="tr-field" id="trFieldName">
+        <div class="tr-label">Nombre del torneo</div>
+        <input class="tr-input" id="trName" placeholder="Ej: VPN 2da Div — Playoffs T1">
+      </div>
+      <div class="tr-field">
+        <div class="tr-label">Liga</div>
+        <div class="tr-pills" id="trLeaguePills">
+          <button class="tr-pill active" data-val="VPN" onclick="selectPill(this,'trLeaguePills')">VPN</button>
+          <button class="tr-pill" data-val="VPUG" onclick="selectPill(this,'trLeaguePills')">VPUG</button>
+          <button class="tr-pill" data-val="11x11" onclick="selectPill(this,'trLeaguePills')">11x11</button>
+          <button class="tr-pill" data-val="otro" onclick="selectPill(this,'trLeaguePills')">Otro</button>
+        </div>
+      </div>
+      <div class="tr-field">
+        <div class="tr-label">Formato</div>
+        <div class="tr-pills" id="trTypePills">
+          <button class="tr-pill active" data-val="elimination" onclick="selectPill(this,'trTypePills');toggleGroupFields()">Solo Eliminación</button>
+          <button class="tr-pill" data-val="groups" onclick="selectPill(this,'trTypePills');toggleGroupFields()">Grupos + Eliminación</button>
+        </div>
+      </div>
+      <div class="tr-field" id="trGroupFields" style="display:none">
+        <div class="tr-label">Partidos en fase de grupos</div>
+        <input class="tr-input" id="trGroupMatchCount" type="number" min="1" max="20" placeholder="Ej: 4" style="max-width:100px">
+      </div>
+      <div class="tr-field">
+        <div class="tr-label">Rondas eliminatorias</div>
+        <div class="tr-pills" id="trRoundsPills">
+          <button class="tr-pill" data-val="1" onclick="selectPill(this,'trRoundsPills')">Solo Final</button>
+          <button class="tr-pill active" data-val="2" onclick="selectPill(this,'trRoundsPills')">Semi + Final</button>
+          <button class="tr-pill" data-val="3" onclick="selectPill(this,'trRoundsPills')">Cuartos+Semi+Final</button>
+          <button class="tr-pill" data-val="4" onclick="selectPill(this,'trRoundsPills')">Octavos→Final</button>
+        </div>
       </div>
     </div>
-    <div class="tr-field">
-      <div class="tr-label">Formato</div>
-      <div class="tr-pills" id="trTypePills">
-        <button class="tr-pill active" data-val="elimination" onclick="selectPill(this,'trTypePills');toggleGroupFields()">Solo Eliminación</button>
-        <button class="tr-pill" data-val="groups" onclick="selectPill(this,'trTypePills');toggleGroupFields()">Grupos + Eliminación</button>
-      </div>
-    </div>
-    <div class="tr-field" id="trGroupFields" style="display:none">
-      <div class="tr-label">Partidos en fase de grupos</div>
-      <input class="tr-input" id="trGroupMatchCount" type="number" min="1" max="12" placeholder="Ej: 4" style="max-width:100px">
-    </div>
-    <div class="tr-field">
-      <div class="tr-label">Rondas eliminatorias</div>
-      <div class="tr-pills" id="trRoundsPills">
-        <button class="tr-pill" data-val="1" onclick="selectPill(this,'trRoundsPills')">Solo Final</button>
-        <button class="tr-pill active" data-val="2" onclick="selectPill(this,'trRoundsPills')">Semi + Final</button>
-        <button class="tr-pill" data-val="3" onclick="selectPill(this,'trRoundsPills')">Cuartos+Semi+Final</button>
-        <button class="tr-pill" data-val="4" onclick="selectPill(this,'trRoundsPills')">Octavos→Final</button>
-      </div>
-    </div>
+
     <div class="tr-btns">
       <button class="tr-btn tr-btn-cancel" onclick="closeAddTorneoModal()">Cancelar</button>
       <button class="tr-btn tr-btn-save" onclick="createTorneo()">Crear torneo</button>
@@ -661,8 +692,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── PROXY ENDPOINTS ── */
-const VPN_URL  = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-table';
-const VPUG_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/vpug-table';
+const WORKER_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+const VPN_URL  = WORKER_BASE + '/vpn-table';
+const VPUG_URL = WORKER_BASE + '/vpug-table';
 const E11_URL  = 'https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2';
 
 const VPUG_DATA = [
@@ -1164,6 +1196,185 @@ function formatDate(d) {
   return `${parseInt(day)} ${months[parseInt(mo)-1]}`;
 }
 
+/* ── URL input handler ── */
+function onTrUrlInput() {
+  const val = document.getElementById('trUrl').value.trim();
+  const btn = document.getElementById('trUrlBtn');
+  btn.disabled = !val || !val.startsWith('http');
+}
+
+/* ── Scrape & analyze torneo URL ── */
+let _scrapedTorneoData = null;
+
+async function scrapeTorneoUrl() {
+  const rawUrl = document.getElementById('trUrl').value.trim();
+  if (!rawUrl) return;
+
+  const scrapingEl = document.getElementById('trScraping');
+  const extractedEl = document.getElementById('trExtracted');
+  const urlBtn = document.getElementById('trUrlBtn');
+
+  scrapingEl.classList.add('show');
+  extractedEl.classList.remove('show');
+  urlBtn.disabled = true;
+  document.getElementById('trScrapingText').textContent = 'Obteniendo datos del torneo...';
+
+  let fetchedData = null;
+  try {
+    const r = await fetch(`${WORKER_BASE}/fetch-url?url=${encodeURIComponent(rawUrl)}`);
+    fetchedData = await r.json();
+  } catch(e) {
+    showToast('Error al conectar con el proxy: ' + e.message);
+    scrapingEl.classList.remove('show');
+    urlBtn.disabled = false;
+    return;
+  }
+
+  document.getElementById('trScrapingText').textContent = 'Analizando con IA...';
+
+  // Build context string for Gemini
+  let contextParts = [`URL analizada: ${rawUrl}`];
+
+  if (fetchedData.vpnApi) {
+    fetchedData.vpnApi.forEach(ep => {
+      if (ep.body && ep.status === 200) {
+        contextParts.push(`\n--- VPN API: ${ep.url} ---\n${ep.body.slice(0, 8000)}`);
+      }
+    });
+  }
+  if (fetchedData.vpugBracket) {
+    contextParts.push(`\n--- VPUG Bracket API ---\n${fetchedData.vpugBracket.slice(0, 8000)}`);
+  }
+  if (fetchedData.html) {
+    // Extract JSON-like data embedded in the HTML (common in SPAs)
+    const jsonMatches = fetchedData.html.match(/(\{[^{}]{50,}\}|\[[^\[\]]{50,}\])/g) || [];
+    const relevantJson = jsonMatches.slice(0, 10).join('\n').slice(0, 6000);
+    if (relevantJson) contextParts.push(`\n--- Datos embebidos en la página ---\n${relevantJson}`);
+    // Also include a stripped version of the HTML text
+    const stripped = fetchedData.html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 4000);
+    if (stripped) contextParts.push(`\n--- Texto visible de la página ---\n${stripped}`);
+  }
+
+  const context = contextParts.join('\n');
+
+  const prompt = `Sos un asistente para Top Secret FC, un club de fútbol virtual argentino. Te doy datos extraídos de la URL de un torneo/copa/playoff.
+Tu tarea es extraer la MAYOR CANTIDAD posible de información estructurada.
+
+TOP SECRET FC es el equipo del usuario. Cuando veas "TOP Secret", "Top Secret", "TS" en una llave de bracket, ese es el equipo del usuario.
+
+DATOS:
+${context}
+
+Devolvé ÚNICAMENTE JSON válido (sin markdown, sin explicaciones):
+{
+  "name": "Nombre completo del torneo",
+  "league": "VPN" | "VPUG" | "11x11" | "otro",
+  "type": "elimination" | "groups",
+  "rounds": 1 | 2 | 3 | 4,
+  "groupMatchCount": número de partidos en fase de grupos (solo si type="groups", si no: 0),
+  "groups": [
+    {
+      "name": "Grupo A",
+      "matches": [
+        {"rival": "Nombre del rival", "date": "YYYY-MM-DD o null", "time": "HH:MM o null", "home": true|false, "goalsFor": número o null, "goalsAgainst": número o null}
+      ]
+    }
+  ],
+  "elim": [
+    {"rival": "nombre o null si TBD", "date": "YYYY-MM-DD o null", "time": "HH:MM o null", "home": true|false, "goalsFor": número o null, "goalsAgainst": número o null}
+  ],
+  "confidence": "high" | "medium" | "low",
+  "notes": "qué pudo y qué no pudo extraer"
+}
+
+REGLAS:
+- "rounds" = número de rondas eliminatorias (1=solo final, 2=semi+final, 3=cuartos+semi+final, 4=octavos→final)
+- El array "elim" siempre tiene exactamente "rounds" elementos, en orden desde la ronda más temprana hasta la final
+- Si el torneo es "solo eliminación", type="elimination" y groups=[]
+- Si hay fase de grupos, type="groups" y incluí los matches de grupos en "groups"
+- Para los rivales de Top Secret en el bracket: identificá cuál es el rival en cada ronda
+- Si un rival aún no está definido (TBD): rival=null
+- Si no podés determinar local/visita, asumí home=false
+- Si no hay fecha disponible, date=null
+- Si no hay resultado aún, goalsFor=null y goalsAgainst=null
+- Si ves resultados en el bracket (ej: "3-1"), asignálos al partido correspondiente
+- Para VPN/VPUG: la liga es evidente por el dominio. Si es virtualpronetwork.com → "VPN", si es virtualprogaming.com → "VPUG"
+`;
+
+  try {
+    const geminiResp = await fetch(`${VPN_URL.replace('/vpn-table', '')}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 2000 }
+      })
+    });
+    const geminiData = await geminiResp.json();
+    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!text) throw new Error('Respuesta vacía de Gemini');
+
+    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    _scrapedTorneoData = parsed;
+    applyScrapedData(parsed);
+
+    const confLabel = parsed.confidence === 'high' ? '✓ Datos extraídos con alta confianza' :
+                      parsed.confidence === 'medium' ? '~ Datos extraídos parcialmente' :
+                      '⚠ Pocos datos extraídos — revisá los campos';
+    extractedEl.textContent = confLabel + (parsed.notes ? ' · ' + parsed.notes : '');
+    extractedEl.classList.add('show');
+
+  } catch(e) {
+    showToast('Error al analizar: ' + e.message);
+  }
+
+  scrapingEl.classList.remove('show');
+  urlBtn.disabled = false;
+}
+
+function applyScrapedData(d) {
+  if (d.name) document.getElementById('trName').value = d.name;
+
+  // League
+  if (d.league) {
+    const leagueVal = d.league.toLowerCase().includes('vpug') ? 'VPUG' :
+                      d.league.toLowerCase().includes('vpn')  ? 'VPN'  :
+                      d.league.toLowerCase().includes('11x11') ? '11x11' : 'otro';
+    document.querySelectorAll('#trLeaguePills .tr-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.val === leagueVal);
+    });
+  }
+
+  // Type
+  const type = d.type === 'groups' ? 'groups' : 'elimination';
+  document.querySelectorAll('#trTypePills .tr-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.val === type);
+  });
+  document.getElementById('trGroupFields').style.display = type === 'groups' ? '' : 'none';
+
+  if (type === 'groups' && d.groupMatchCount) {
+    document.getElementById('trGroupMatchCount').value = d.groupMatchCount;
+  }
+
+  // Rounds
+  const rounds = Math.min(Math.max(parseInt(d.rounds) || 2, 1), 4).toString();
+  document.querySelectorAll('#trRoundsPills .tr-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.val === rounds);
+  });
+
+  // Mark auto-filled fields
+  ['trFieldName'].forEach(id => {
+    const f = document.getElementById(id);
+    if (f) f.classList.add('tr-field-auto');
+  });
+}
+
 /* ── Create torneo ── */
 async function createTorneo() {
   const name = document.getElementById('trName').value.trim();
@@ -1174,19 +1385,45 @@ async function createTorneo() {
   const groupMatchCount = type === 'groups' ? (parseInt(document.getElementById('trGroupMatchCount').value) || 3) : 0;
   const url = document.getElementById('trUrl').value.trim() || null;
 
-  // Build initial matches structure
+  // Build matches structure — use scraped data if available, else empty
+  const scraped = _scrapedTorneoData;
   const matches = {};
-  if (type === 'groups') {
-    // Single group by default; user can edit to add more
-    const gMatches = Array.from({length: groupMatchCount}, () => ({}));
-    matches.groups = [{name: 'Grupo A', matches: gMatches}];
-  }
-  const numElim = rounds;
-  matches.elim = Array.from({length: numElim}, () => ({}));
 
-  const doc = {name, url, league, type, rounds, groupMatchCount, matches, createdAt: Date.now()};
+  if (type === 'groups') {
+    if (scraped?.groups?.length) {
+      matches.groups = scraped.groups.map(g => ({
+        name: g.name || 'Grupo A',
+        matches: (g.matches || []).map(m => ({
+          rival: m.rival || null,
+          date:  m.date  || null,
+          time:  m.time  || null,
+          home:  m.home  ?? false,
+          ...(m.goalsFor != null ? { goalsFor: m.goalsFor, goalsAgainst: m.goalsAgainst } : {})
+        }))
+      }));
+    } else {
+      const gMatches = Array.from({length: groupMatchCount}, () => ({}));
+      matches.groups = [{name: 'Grupo A', matches: gMatches}];
+    }
+  }
+
+  if (scraped?.elim?.length) {
+    matches.elim = scraped.elim.slice(0, rounds).map(m => ({
+      rival: m.rival || null,
+      date:  m.date  || null,
+      time:  m.time  || null,
+      home:  m.home  ?? false,
+      ...(m.goalsFor != null ? { goalsFor: m.goalsFor, goalsAgainst: m.goalsAgainst } : {})
+    }));
+    // Pad to rounds length
+    while (matches.elim.length < rounds) matches.elim.push({});
+  } else {
+    matches.elim = Array.from({length: rounds}, () => ({}));
+  }
+
+  const docData = {name, url, league, type, rounds, groupMatchCount, matches, createdAt: Date.now()};
   try {
-    await TORNEO_COL.add(doc);
+    await TORNEO_COL.add(docData);
     closeAddTorneoModal();
     showToast('Torneo creado ✓');
     await renderTorneos();
@@ -1200,10 +1437,20 @@ function openAddTorneoModal() {
   document.getElementById('trUrl').value = '';
   document.getElementById('trGroupMatchCount').value = '';
   document.getElementById('trGroupFields').style.display = 'none';
+  document.getElementById('trExtracted').classList.remove('show');
+  document.getElementById('trScraping').classList.remove('show');
+  document.getElementById('trUrlBtn').disabled = true;
+  document.getElementById('trFieldName').classList.remove('tr-field-auto');
+  _scrapedTorneoData = null;
+  // Reset pills to defaults
+  document.querySelectorAll('#trLeaguePills .tr-pill').forEach((p,i) => p.classList.toggle('active', i===0));
+  document.querySelectorAll('#trTypePills .tr-pill').forEach((p,i) => p.classList.toggle('active', i===0));
+  document.querySelectorAll('#trRoundsPills .tr-pill').forEach((p,i) => p.classList.toggle('active', i===1));
   document.getElementById('addTorneoOverlay').classList.add('open');
 }
 function closeAddTorneoModal() {
   document.getElementById('addTorneoOverlay').classList.remove('open');
+  _scrapedTorneoData = null;
 }
 
 /* ── Delete torneo ── */
