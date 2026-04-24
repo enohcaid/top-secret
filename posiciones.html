@@ -1285,23 +1285,51 @@ REGLAS:
 - Si no hay dato disponible: null
 `;
 
+  const geminiBody = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
+  });
+
+  let geminiData = null;
+  const maxRetries = 3;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    if (attempt > 0) {
+      const waitSec = attempt * 20;
+      document.getElementById('trScrapingText').textContent = `Límite de API — reintentando en ${waitSec}s...`;
+      await new Promise(r => setTimeout(r, waitSec * 1000));
+      document.getElementById('trScrapingText').textContent = 'Analizando con IA...';
+    }
+    try {
+      const resp = await fetch(WORKER_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: geminiBody
+      });
+      geminiData = await resp.json();
+      if (resp.status === 429) {
+        geminiData = null; // force retry
+        continue;
+      }
+      break;
+    } catch(e) {
+      if (attempt === maxRetries - 1) {
+        showToast('Error de red: ' + e.message);
+        scrapingEl.classList.remove('show');
+        urlBtn.disabled = false;
+        return;
+      }
+    }
+  }
+
   try {
-    const geminiResp = await fetch(WORKER_BASE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
-      })
-    });
-    const geminiData = await geminiResp.json();
+    if (!geminiData) throw new Error('Límite de API alcanzado — esperá un minuto y volvé a intentar');
     if (geminiData.error) throw new Error(geminiData.error.message || 'Error de API');
     const finishReason = geminiData.candidates?.[0]?.finishReason;
     if (finishReason && finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
       throw new Error('Gemini bloqueó la respuesta: ' + finishReason);
     }
     const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!text) throw new Error('Respuesta vacía — puede que la URL no tenga datos accesibles');
+    if (!text) throw new Error('Sin datos accesibles en esa URL — completá los campos manualmente');
 
     const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
     _scrapedTorneoData = parsed;
