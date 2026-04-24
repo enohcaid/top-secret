@@ -1246,79 +1246,62 @@ async function scrapeTorneoUrl() {
     contextParts.push(`\n--- VPUG Bracket API ---\n${fetchedData.vpugBracket.slice(0, 8000)}`);
   }
   if (fetchedData.html) {
-    // Extract JSON-like data embedded in the HTML (common in SPAs)
-    const jsonMatches = fetchedData.html.match(/(\{[^{}]{50,}\}|\[[^\[\]]{50,}\])/g) || [];
-    const relevantJson = jsonMatches.slice(0, 10).join('\n').slice(0, 6000);
-    if (relevantJson) contextParts.push(`\n--- Datos embebidos en la página ---\n${relevantJson}`);
-    // Also include a stripped version of the HTML text
-    const stripped = fetchedData.html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 4000);
-    if (stripped) contextParts.push(`\n--- Texto visible de la página ---\n${stripped}`);
+    // Strip scripts/styles first, then extract text (safe, no catastrophic backtracking)
+    const noScripts = fetchedData.html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '');
+    // Pull out quoted JSON strings embedded in JS (window.__STATE__, etc.)
+    const jsonStrings = [];
+    const jsonRe = /["'](\{.{20,500}\}|\[.{20,500}\])["']/g;
+    let m; let jsCount = 0;
+    while ((m = jsonRe.exec(noScripts)) !== null && jsCount++ < 20) {
+      try { JSON.parse(m[1]); jsonStrings.push(m[1]); } catch(e) {}
+    }
+    if (jsonStrings.length) contextParts.push(`\n--- JSON embebido ---\n${jsonStrings.join('\n').slice(0, 4000)}`);
+    // Visible text
+    const stripped = noScripts.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 3000);
+    if (stripped) contextParts.push(`\n--- Texto visible ---\n${stripped}`);
   }
 
-  const context = contextParts.join('\n');
+  // Hard cap total context to avoid Gemini token overflow
+  const context = contextParts.join('\n').slice(0, 18000);
 
-  const prompt = `Sos un asistente para Top Secret FC, un club de fútbol virtual argentino. Te doy datos extraídos de la URL de un torneo/copa/playoff.
-Tu tarea es extraer la MAYOR CANTIDAD posible de información estructurada.
-
-TOP SECRET FC es el equipo del usuario. Cuando veas "TOP Secret", "Top Secret", "TS" en una llave de bracket, ese es el equipo del usuario.
+  const prompt = `Sos un asistente para Top Secret FC, un club de fútbol virtual argentino. Te doy datos de la URL de un torneo.
+TOP SECRET FC es el equipo del usuario. "TOP Secret", "Top Secret", "TS" en un bracket = el equipo del usuario.
 
 DATOS:
 ${context}
 
-Devolvé ÚNICAMENTE JSON válido (sin markdown, sin explicaciones):
-{
-  "name": "Nombre completo del torneo",
-  "league": "VPN" | "VPUG" | "11x11" | "otro",
-  "type": "elimination" | "groups",
-  "rounds": 1 | 2 | 3 | 4,
-  "groupMatchCount": número de partidos en fase de grupos (solo si type="groups", si no: 0),
-  "groups": [
-    {
-      "name": "Grupo A",
-      "matches": [
-        {"rival": "Nombre del rival", "date": "YYYY-MM-DD o null", "time": "HH:MM o null", "home": true|false, "goalsFor": número o null, "goalsAgainst": número o null}
-      ]
-    }
-  ],
-  "elim": [
-    {"rival": "nombre o null si TBD", "date": "YYYY-MM-DD o null", "time": "HH:MM o null", "home": true|false, "goalsFor": número o null, "goalsAgainst": número o null}
-  ],
-  "confidence": "high" | "medium" | "low",
-  "notes": "qué pudo y qué no pudo extraer"
-}
+Devolvé ÚNICAMENTE JSON válido (sin markdown):
+{"name":"nombre del torneo","league":"VPN","type":"elimination","rounds":2,"groupMatchCount":0,"groups":[],"elim":[{"rival":null,"date":null,"time":null,"home":false,"goalsFor":null,"goalsAgainst":null}],"confidence":"low","notes":""}
 
 REGLAS:
-- "rounds" = número de rondas eliminatorias (1=solo final, 2=semi+final, 3=cuartos+semi+final, 4=octavos→final)
-- El array "elim" siempre tiene exactamente "rounds" elementos, en orden desde la ronda más temprana hasta la final
-- Si el torneo es "solo eliminación", type="elimination" y groups=[]
-- Si hay fase de grupos, type="groups" y incluí los matches de grupos en "groups"
-- Para los rivales de Top Secret en el bracket: identificá cuál es el rival en cada ronda
-- Si un rival aún no está definido (TBD): rival=null
-- Si no podés determinar local/visita, asumí home=false
-- Si no hay fecha disponible, date=null
-- Si no hay resultado aún, goalsFor=null y goalsAgainst=null
-- Si ves resultados en el bracket (ej: "3-1"), asignálos al partido correspondiente
-- Para VPN/VPUG: la liga es evidente por el dominio. Si es virtualpronetwork.com → "VPN", si es virtualprogaming.com → "VPUG"
+- league: "VPN" si es virtualpronetwork.com, "VPUG" si es virtualprogaming.com, "11x11" o "otro" según corresponda
+- type: "elimination" o "groups" (si hay fase de grupos antes del bracket)
+- rounds: 1=solo final, 2=semi+final, 3=cuartos+semi+final, 4=octavos→final
+- elim: exactamente "rounds" objetos, orden cronológico (primer round primero, final último)
+- rival: nombre del equipo rival de Top Secret. null si TBD
+- Si ves resultados (ej "3-1"), cargalos en goalsFor/goalsAgainst según corresponda a Top Secret
+- Si no hay dato disponible: null
 `;
 
   try {
-    const geminiResp = await fetch(`${VPN_URL.replace('/vpn-table', '')}`, {
+    const geminiResp = await fetch(WORKER_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 2000 }
+        generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
       })
     });
     const geminiData = await geminiResp.json();
+    if (geminiData.error) throw new Error(geminiData.error.message || 'Error de API');
+    const finishReason = geminiData.candidates?.[0]?.finishReason;
+    if (finishReason && finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+      throw new Error('Gemini bloqueó la respuesta: ' + finishReason);
+    }
     const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!text) throw new Error('Respuesta vacía de Gemini');
+    if (!text) throw new Error('Respuesta vacía — puede que la URL no tenga datos accesibles');
 
     const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
     _scrapedTorneoData = parsed;
