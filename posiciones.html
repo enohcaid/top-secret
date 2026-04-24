@@ -354,16 +354,8 @@ footer span { color: var(--gold); }
 .no-torneos{padding:48px 24px;text-align:center;color:var(--mid);}
 .no-torneos-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:8px;color:var(--black);}
 
-/* Admin controls */
-.add-torneo-btn{display:none;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 18px;border-radius:20px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .15s;}
-.add-torneo-btn:hover{background:var(--gold);color:#fff;}
-.add-torneo-btn.visible{display:inline-block;}
-.tr-lock-btn{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
-.tr-lock-btn.unlocked{border-color:var(--gold);color:var(--gold);}
-.del-torneo-btn{display:none;font-size:.72rem;padding:4px 10px;border-radius:6px;border:1px solid rgba(232,80,46,.3);color:#e8502e;background:transparent;cursor:pointer;}
-.torneo-admin-mode .del-torneo-btn{display:inline-block;}
-.torneo-admin-mode .trc-edit-btn{display:inline-block;}
-.trc-edit-btn{display:none;}
+.del-torneo-btn{font-size:.72rem;padding:4px 10px;border-radius:6px;border:1px solid rgba(232,80,46,.3);color:#e8502e;background:transparent;cursor:pointer;}
+.trc-edit-btn{}
 
 /* Torneo modals */
 .tr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:300;align-items:flex-end;justify-content:center;}
@@ -526,10 +518,6 @@ footer span { color: var(--gold); }
   <div id="s-torneos" style="display:none">
     <div class="torneo-topbar">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);">Copas · Playoffs · Torneos</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="add-torneo-btn" id="addTorneoBtn" onclick="openAddTorneoModal()">+ Nuevo torneo</button>
-        <button class="tr-lock-btn" id="trLockBtn" onclick="toggleTorneoAdmin()">🔒 Admin</button>
-      </div>
     </div>
     <div class="torneo-tabs" id="torneoTabs"></div>
     <div id="torneoPanes"></div>
