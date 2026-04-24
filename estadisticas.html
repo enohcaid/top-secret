@@ -3644,7 +3644,18 @@ function switchStatsSeason(n){
     }
     elimLabels.forEach((lbl, i) => {
       const m = elimRounds[i] || {};
-      rows += tetMatchRowHtml(t, 'elim', i, 0, m, lbl);
+      if (m.legs && m.legs.length) {
+        // ida y vuelta: render each leg separately
+        rows += `<div class="tet-round-label" style="font-size:.7rem;opacity:.7;margin-top:4px">${lbl} — ${m.rival || 'Por definir'}</div>`;
+        m.legs.forEach((leg, li) => {
+          const legLabel = li === 0 ? 'Ida' : 'Vuelta';
+          const legM = { rival: m.rival, date: leg.date, home: leg.home,
+            ...(leg.goalsFor !== undefined ? { goalsFor: leg.goalsFor, goalsAgainst: leg.goalsAgainst } : {}) };
+          rows += tetMatchRowHtml(t, 'elim', i, 0, legM, `${lbl} — ${legLabel}`, li);
+        });
+      } else {
+        rows += tetMatchRowHtml(t, 'elim', i, 0, m, lbl);
+      }
     });
 
     if (!rows) rows = `<div class="tet-no-match">Este torneo no tiene partidos configurados.</div>`;
@@ -3659,21 +3670,23 @@ function switchStatsSeason(n){
     </div>`;
   }
 
-  function tetMatchRowHtml(t, phase, phaseIdx, matchIdx, m, roundLabel) {
+  function tetMatchRowHtml(t, phase, phaseIdx, matchIdx, m, roundLabel, legIdx) {
     const hasRival = !!m.rival;
     const rival = m.rival || (roundLabel || 'Partido por definir');
     const date  = m.date  ? tetFmtDate(m.date) : '';
-    const loc   = m.home==='1'||m.home===true ? '🏠 Local' : (m.rival?'✈️ Visita':'');
+    const loc   = m.home==='1'||m.home===true ? '🏠 Local' : (m.home===false||m.home==='0' ? '✈️ Visita' : (m.rival?'✈️ Visita':''));
     const meta  = [date, loc].filter(Boolean).join(' · ');
     const hasResult = m.goalsFor !== undefined;
     const score = hasResult ? m.goalsFor + ' – ' + m.goalsAgainst : '';
+    const legKey = legIdx !== undefined ? `-leg${legIdx}` : '';
     const alreadySaved = cloudMatches.some(c =>
-      c.rival === m.rival && c.date === m.date && c.league === t.league
+      c.rival === m.rival && c.date === m.date && c.league === t.league &&
+      (legIdx === undefined || c.legIdx === legIdx)
     );
-    const panelId = `tetpanel-${t.id}-${phase}-${phaseIdx}-${matchIdx}`;
+    const panelId = `tetpanel-${t.id}-${phase}-${phaseIdx}-${matchIdx}${legKey}`;
     const btnClass = alreadySaved ? 'tet-upload-btn loaded' : 'tet-upload-btn';
     const btnLabel = alreadySaved ? '✓ Cargado' : '+ Stats';
-    const ctx = JSON.stringify({torneoId:t.id, phase, phaseIdx, matchIdx, rival:m.rival||'', league:t.league||'', date:m.date||''});
+    const ctx = JSON.stringify({torneoId:t.id, phase, phaseIdx, matchIdx, legIdx, rival:m.rival||'', league:t.league||'', date:m.date||''});
 
     return `<div class="tet-match-row">
       <div>
@@ -3719,7 +3732,8 @@ function switchStatsSeason(n){
     const rival = ctx.rival || 'Por definir';
     const league = ctx.league || '';
     const date = ctx.date || '';
-    return `<div class="tet-panel-title">Cargar estadísticas · ${rival} ${date?'— '+tetFmtDate(date):''}</div>
+    const legSuffix = ctx.legIdx !== undefined ? (ctx.legIdx === 0 ? ' · Ida' : ' · Vuelta') : '';
+    return `<div class="tet-panel-title">Cargar estadísticas · ${rival}${legSuffix} ${date?'— '+tetFmtDate(date):''}</div>
     <div class="match-meta" style="grid-template-columns:1fr 1fr 1fr 1fr">
       <div class="meta-group"><label>Rival</label><input type="text" id="tetRival" value="${rival.replace(/"/g,'&quot;')}"></div>
       <div class="meta-group"><label>Liga</label>
@@ -3890,7 +3904,10 @@ Devolvé ÚNICAMENTE JSON válido sin markdown:
     panel.querySelector('#tetBtnAnalyze').disabled = false;
 
     if (mergedPlayers.length) {
-      _tetPending = {rival, league, date, uploadedAt:new Date().toISOString(), players:mergedPlayers, match_result:matchResult, notes:'', ...(mergedTeamStats?{team_stats:mergedTeamStats}:{})};
+      const legIdx = _tetPanelCtx?.legIdx;
+      _tetPending = {rival, league, date, uploadedAt:new Date().toISOString(), players:mergedPlayers, match_result:matchResult, notes:'',
+        ...(legIdx !== undefined ? {legIdx} : {}),
+        ...(mergedTeamStats?{team_stats:mergedTeamStats}:{})};
       tetRenderPreview(panel, _tetPending);
     } else {
       showToast('No se pudo extraer estadísticas.','error');
