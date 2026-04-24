@@ -3,7 +3,7 @@
 // Proxy a Google Gemini API (GRATIS) + KV storage + EA Sports proxy
 // ═══════════════════════════════════════════════════════════════
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const CORS_HEADERS = {
