@@ -1455,8 +1455,19 @@ function closeAddTorneoModal() {
 
 /* ── Delete torneo ── */
 async function deleteTorneo(id) {
-  if (!confirm('¿Eliminar este torneo? Esta acción no se puede deshacer.')) return;
+  if (!confirm('¿Eliminar este torneo? Se borrarán también los partidos en el calendario.')) return;
   try {
+    // Remove calendar entries synced from this torneo
+    const calSnap = await CAL_DOC_T.get();
+    if (calSnap.exists) {
+      const data = calSnap.data();
+      const custom = (data.custom || []).filter(c => {
+        if (c.source !== 'torneo') return true;
+        // calId format: 'tr-{torneoId}-...'
+        return !c.calId || !c.calId.startsWith('tr-' + id + '-');
+      });
+      await CAL_DOC_T.set({ custom }, { merge: true });
+    }
     await TORNEO_COL.doc(id).delete();
     showToast('Torneo eliminado');
     await renderTorneos();
