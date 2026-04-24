@@ -7,6 +7,8 @@
 <link rel="icon" href="Top-Secret.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --bg:#FFFFFF;--card:#F5F5F0;--card2:#EBEBEB;
@@ -216,6 +218,37 @@ canvas.chart{width:100%;display:block;}
 .toast.error{border-color:rgba(232,80,46,.4);color:var(--loss);}
 footer{background:#111111;color:#666;border-top:none;padding:28px 24px;text-align:center;font-size:.78rem;margin-left:-64px;margin-right:-48px;}
 footer span{color:#C9A84C;}
+
+/* ── TORNEOS TAB (estadísticas) ── */
+.tet-list{display:flex;flex-direction:column;gap:14px;}
+.tet-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.tet-card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;}
+.tet-card-head:hover{background:var(--card2);}
+.tet-card-name{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;flex:1;}
+.tet-league-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.08em;text-transform:uppercase;}
+.tet-league-badge.vpn{background:rgba(212,160,23,.15);color:var(--vpn);}
+.tet-league-badge.vpug{background:rgba(42,157,92,.15);color:var(--vpug);}
+.tet-league-badge.e11{background:rgba(37,99,235,.15);color:var(--e11);}
+.tet-league-badge.otro{background:rgba(136,136,136,.15);color:var(--muted);}
+.tet-toggle{font-size:.85rem;color:var(--muted);transition:transform .2s;}
+.tet-card.open .tet-toggle{transform:rotate(180deg);}
+.tet-matches{display:none;flex-direction:column;}
+.tet-card.open .tet-matches{display:flex;}
+.tet-match-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--border);}
+.tet-match-row:last-child{border-bottom:none;}
+.tet-match-rival{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;}
+.tet-match-meta{font-size:.72rem;color:var(--muted2);margin-top:2px;}
+.tet-upload-btn{font-size:.72rem;padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .14s;white-space:nowrap;}
+.tet-upload-btn:hover{border-color:var(--gold);color:var(--gold);}
+.tet-upload-btn.loaded{border-color:rgba(62,207,142,.4);color:var(--win);}
+.tet-panel{display:none;padding:16px 18px;background:var(--bg);border-top:1px solid var(--border);}
+.tet-panel.open{display:block;}
+.tet-panel-title{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+.tet-no-match{font-size:.8rem;color:var(--muted);padding:12px;font-style:italic;}
+.tet-empty{padding:48px 24px;text-align:center;color:var(--muted2);}
+.tet-empty-title{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:6px;color:var(--muted);}
+.tet-round-label{font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);padding:6px 18px 2px;background:var(--card);}
+@media(max-width:600px){.tet-match-row{grid-template-columns:1fr;gap:6px;}.tet-upload-btn{width:100%;}}
 
 /* ── CLUB EA ── */
 .cea-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:14px;}
@@ -529,7 +562,7 @@ footer span{color:#C9A84C;}
     <button class="tab" onclick="switchTab('players',this)">👤 Por Jugador</button>
     <button class="tab" onclick="switchTab('history',this)">📋 Historial</button>
     <button class="tab" onclick="switchTab('clubea',this)">🌐 Club EA</button>
-    
+    <button class="tab" onclick="switchTab('torneos',this)">🏆 Torneos</button>
   </div>
 
   <!-- ── TAB TEMPORADA ── -->
@@ -662,6 +695,11 @@ footer span{color:#C9A84C;}
   </div>
 
   <!-- ── TAB CLUB EA ── -->
+  <!-- ── TAB TORNEOS ── -->
+  <div class="tab-content" id="tab-torneos">
+    <div id="tetList"><div class="tet-empty"><div class="tet-empty-title">Cargando torneos...</div></div></div>
+  </div>
+
   <div class="tab-content" id="tab-clubea">
     <div class="cea-header">
       <div class="cea-badge">🕵️</div>
@@ -3530,6 +3568,378 @@ function switchStatsSeason(n){
     soon.style.display='block';content.style.display='none';
   }
 }
+
+// ════════════════════════════════════════════
+// TORNEOS — Firebase + Gemini AI
+// ════════════════════════════════════════════
+(function(){
+  const _FB_CFG = {
+    apiKey:'AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M',
+    authDomain:'top-secret-fc.firebaseapp.com',
+    projectId:'top-secret-fc',
+    storageBucket:'top-secret-fc.firebasestorage.app',
+    messagingSenderId:'303110190986',
+    appId:'1:303110190986:web:6a5987dfff32af49a4fa73'
+  };
+  if (!firebase.apps.length) firebase.initializeApp(_FB_CFG);
+  const _db = firebase.firestore();
+  const TORNEO_COL = _db.collection('torneos');
+
+  let _tetTorneos   = [];
+  let _tetPanelCtx  = null;   // {torneoId, phase, phaseIdx, matchIdx, rival, league, date}
+  let _tetImgQueue  = [];
+  let _tetPending   = null;
+
+  /* ── Patch switchTab to load torneos ── */
+  const _prevSwitch = window.switchTab;
+  window.switchTab = function(id, btn) {
+    _prevSwitch(id, btn);
+    if (id === 'torneos') tetLoad();
+  };
+
+  /* ── Load & render torneos ── */
+  async function tetLoad() {
+    const el = document.getElementById('tetList');
+    el.innerHTML = '<div class="tet-empty"><div class="tet-empty-title">Cargando...</div></div>';
+    try {
+      const snap = await TORNEO_COL.orderBy('createdAt','asc').get();
+      _tetTorneos = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    } catch(e) {
+      el.innerHTML = '<div class="tet-empty"><div class="tet-empty-title">Error al cargar torneos</div><div>' + e.message + '</div></div>';
+      return;
+    }
+    if (!_tetTorneos.length) {
+      el.innerHTML = '<div class="tet-empty"><div class="tet-empty-title">Sin torneos</div><div>Creá torneos desde la página de Posiciones.</div></div>';
+      return;
+    }
+    el.innerHTML = '<div class="tet-list">' + _tetTorneos.map(t => tetCardHtml(t)).join('') + '</div>';
+  }
+
+  function tetCardHtml(t) {
+    const leagueClass = (t.league||'otro').toLowerCase().replace('11x11','e11');
+    const matches = t.matches || {};
+    const groups  = matches.groups  || [];
+    const elimRounds = matches.elim || [];
+    const numElim = parseInt(t.rounds) || 2;
+
+    let rows = '';
+
+    if (t.type === 'groups' && groups.length) {
+      groups.forEach((g, gi) => {
+        rows += `<div class="tet-round-label">${g.name || 'Grupo '+(gi+1)} — Fase de Grupos</div>`;
+        (g.matches||[]).forEach((m, mi) => {
+          rows += tetMatchRowHtml(t, 'group', gi, mi, m);
+        });
+      });
+    }
+
+    const elimLabels = [];
+    if (numElim >= 4) elimLabels.push('Octavos de Final');
+    if (numElim >= 3) elimLabels.push('Cuartos de Final');
+    if (numElim >= 2) elimLabels.push('Semifinal');
+    elimLabels.push('Final');
+
+    if (elimLabels.length > 1) {
+      rows += `<div class="tet-round-label">Fase Eliminatoria</div>`;
+    }
+    elimLabels.forEach((lbl, i) => {
+      const m = elimRounds[i] || {};
+      rows += tetMatchRowHtml(t, 'elim', i, 0, m, lbl);
+    });
+
+    if (!rows) rows = `<div class="tet-no-match">Este torneo no tiene partidos configurados.</div>`;
+
+    return `<div class="tet-card" id="tetcard-${t.id}">
+      <div class="tet-card-head" onclick="tetToggle('${t.id}')">
+        <span class="tet-card-name">${t.name}</span>
+        <span class="tet-league-badge ${leagueClass}">${t.league||'Torneo'}</span>
+        <span class="tet-toggle">▼</span>
+      </div>
+      <div class="tet-matches">${rows}</div>
+    </div>`;
+  }
+
+  function tetMatchRowHtml(t, phase, phaseIdx, matchIdx, m, roundLabel) {
+    const hasRival = !!m.rival;
+    const rival = m.rival || (roundLabel || 'Partido por definir');
+    const date  = m.date  ? tetFmtDate(m.date) : '';
+    const loc   = m.home==='1'||m.home===true ? '🏠 Local' : (m.rival?'✈️ Visita':'');
+    const meta  = [date, loc].filter(Boolean).join(' · ');
+    const hasResult = m.goalsFor !== undefined;
+    const score = hasResult ? m.goalsFor + ' – ' + m.goalsAgainst : '';
+    const alreadySaved = cloudMatches.some(c =>
+      c.rival === m.rival && c.date === m.date && c.league === t.league
+    );
+    const panelId = `tetpanel-${t.id}-${phase}-${phaseIdx}-${matchIdx}`;
+    const btnClass = alreadySaved ? 'tet-upload-btn loaded' : 'tet-upload-btn';
+    const btnLabel = alreadySaved ? '✓ Cargado' : '+ Stats';
+    const ctx = JSON.stringify({torneoId:t.id, phase, phaseIdx, matchIdx, rival:m.rival||'', league:t.league||'', date:m.date||''});
+
+    return `<div class="tet-match-row">
+      <div>
+        <div class="tet-match-rival">${hasRival ? 'vs ' + rival : '<span style="color:var(--muted2);font-style:italic">'+rival+'</span>'}</div>
+        <div class="tet-match-meta">${meta}${score?' · '+score:''}</div>
+      </div>
+      <button class="${btnClass}" onclick="tetOpenPanel('${panelId}',${ctx.replace(/"/g,"'")})">${btnLabel}</button>
+    </div>
+    <div class="tet-panel" id="${panelId}"></div>`;
+  }
+
+  function tetFmtDate(d) {
+    if (!d) return '';
+    const [y,mo,day] = d.split('-');
+    const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    return `${parseInt(day)} ${months[parseInt(mo)-1]}`;
+  }
+
+  window.tetToggle = function(id) {
+    document.getElementById('tetcard-'+id).classList.toggle('open');
+  };
+
+  window.tetOpenPanel = function(panelId, ctx) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    if (panel.classList.contains('open')) {
+      panel.classList.remove('open');
+      return;
+    }
+    // close others
+    document.querySelectorAll('.tet-panel.open').forEach(p => {
+      if (p.id !== panelId) { p.classList.remove('open'); p.innerHTML=''; }
+    });
+    _tetPanelCtx = ctx;
+    _tetImgQueue = [];
+    _tetPending  = null;
+    panel.innerHTML = tetPanelHtml(ctx);
+    panel.classList.add('open');
+    tetBindPanel(panel, ctx);
+  };
+
+  function tetPanelHtml(ctx) {
+    const rival = ctx.rival || 'Por definir';
+    const league = ctx.league || '';
+    const date = ctx.date || '';
+    return `<div class="tet-panel-title">Cargar estadísticas · ${rival} ${date?'— '+tetFmtDate(date):''}</div>
+    <div class="match-meta" style="grid-template-columns:1fr 1fr 1fr 1fr">
+      <div class="meta-group"><label>Rival</label><input type="text" id="tetRival" value="${rival.replace(/"/g,'&quot;')}"></div>
+      <div class="meta-group"><label>Liga</label>
+        <select id="tetLeague">
+          <option value="VPN"${league==='VPN'?' selected':''}>VPN</option>
+          <option value="VPUG"${league==='VPUG'?' selected':''}>VPUG</option>
+          <option value="11x11"${league==='11x11'?' selected':''}>11x11</option>
+          <option value="otro"${!['VPN','VPUG','11x11'].includes(league)?' selected':''}>Otro</option>
+        </select>
+      </div>
+      <div class="meta-group"><label>Resultado</label><input type="text" id="tetResult" placeholder="Ej: 3-1"></div>
+      <div class="meta-group"><label>Fecha</label><input type="date" id="tetDate" value="${date}"></div>
+    </div>
+    <div class="upload-area" id="tetUploadArea" style="padding:28px 24px;margin-bottom:12px">
+      <span class="upload-icon" style="font-size:2rem">📸</span>
+      <div class="upload-title" style="font-size:1.1rem">Arrastrá o hacé clic</div>
+      <div class="upload-sub">Capturas del reporte post-partido</div>
+      <input type="file" id="tetFileInput" accept="image/*" multiple>
+    </div>
+    <div class="img-queue" id="tetImgQueue" style="gap:8px;flex-wrap:wrap"></div>
+    <button class="btn-analyze" id="tetBtnAnalyze" style="margin-top:10px" disabled>
+      <span>🤖</span> <span id="tetAnalyzeLabel">Analizar con IA</span>
+    </button>
+    <div class="analyzing-state" id="tetAnalyzing" style="margin-top:12px">
+      <div class="spinner"></div>
+      <div class="analyzing-text" id="tetAnalyzingText">Analizando...</div>
+    </div>
+    <div class="result-card" id="tetResultCard" style="margin-top:12px">
+      <div class="result-header">
+        <h3>Extraído — <span id="tetResultTitle"></span></h3>
+        <div>
+          <button class="btn-discard" onclick="tetDiscard()">✕ Descartar</button>
+          <button class="btn-save" onclick="tetSave()">☁ Guardar</button>
+        </div>
+      </div>
+      <div class="stats-table-wrap">
+        <table class="stats-table">
+          <thead><tr><th>Jugador</th><th>Rating</th><th>Goles</th><th>Asist.</th>
+          <th>Pases</th><th>Prec.%</th><th>Dist. km</th><th>Sprints</th>
+          <th>Tackles</th><th>Interc.</th></tr></thead>
+          <tbody id="tetResultBody"></tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  function tetBindPanel(panel) {
+    const fileInput = panel.querySelector('#tetFileInput');
+    fileInput.addEventListener('change', e => tetAddFiles(e.target.files, panel));
+    const uploadArea = panel.querySelector('#tetUploadArea');
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag'));
+    uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag'); tetAddFiles(e.dataTransfer.files, panel); });
+    panel.querySelector('#tetBtnAnalyze').addEventListener('click', () => tetAnalyze(panel));
+  }
+
+  function tetAddFiles(files, panel) {
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const b64 = e.target.result.split(',')[1];
+        _tetImgQueue.push({ file, base64: b64, mediaType: file.type, status: 'pending' });
+        tetRenderQueue(panel);
+        panel.querySelector('#tetBtnAnalyze').disabled = false;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function tetRenderQueue(panel) {
+    const el = panel.querySelector('#tetImgQueue');
+    if (!_tetImgQueue.length) { el.classList.remove('show'); return; }
+    el.classList.add('show');
+    const icons = { pending:'⏳', analyzing:'🔄', done:'✓', error:'✗' };
+    el.innerHTML = _tetImgQueue.map((img, i) => `<div class="img-thumb ${img.status}">
+      <img src="data:${img.mediaType};base64,${img.base64}" alt="">
+      <div class="thumb-status">${icons[img.status]||''}</div>
+      <button class="thumb-remove" onclick="tetRemoveImg(${i})">✕</button>
+    </div>`).join('');
+  }
+
+  window.tetRemoveImg = function(i) {
+    _tetImgQueue.splice(i, 1);
+    const panel = document.querySelector('.tet-panel.open');
+    if (panel) tetRenderQueue(panel);
+  };
+
+  async function tetAnalyze(panel) {
+    const pending = _tetImgQueue.filter(i => i.status === 'pending');
+    if (!pending.length) return;
+    const rival  = panel.querySelector('#tetRival').value.trim() || 'Desconocido';
+    const league = panel.querySelector('#tetLeague').value || '?';
+    const date   = panel.querySelector('#tetDate').value || new Date().toISOString().split('T')[0];
+    const result = panel.querySelector('#tetResult').value.trim() || null;
+
+    panel.querySelector('#tetBtnAnalyze').disabled = true;
+    panel.querySelector('#tetAnalyzing').classList.add('show');
+    panel.querySelector('#tetResultCard').classList.remove('show');
+
+    const rosterList = ROSTER.map(p=>`- ${p.name} (${p.pos})`).join('\n');
+    const prompt = `Sos un analista de datos de EA FC / FIFA. Se te envía una captura de estadísticas post-partido del equipo "Top Secret FC".
+
+PLANTEL OFICIAL (nombre exacto · posición):
+${rosterList}
+
+REGLAS DE IDENTIFICACIÓN DE JUGADORES:
+- "Lautavester7" → Lautavester7
+- "T. cansitrGD22" o "cansitr" → cansitrGd22_
+- "BlackPanther" o "Black" → BlackPanther-CG
+- "ciprimancini" o "Cipri" → CipriMancini
+- "J. Martinez" o "Martinez" → Juan_Martinez4
+- "O. Pibu" o "Pibu" → zPibu__
+- "Agubostero7" → Agubostero7
+- "Alexisraies2" o "Alexis" → Alexiisraiies23
+- "ZurdoCABJ" o "Zurdo" → Zurdo-_CABJ12
+- "Woolfyboyzx2" → Woolfyboyzx2
+- "Buraa" o "Bura" → Buraa07
+- "DaniStone" o "RS32" → RS32-DaniStone
+- "Huber" → Huber236
+- "Lucasmati" o "Lucas" → Lucasmati_akd
+
+Devolvé ÚNICAMENTE JSON válido sin markdown:
+{"players":[{"name":"apodo","matched":"nombre exacto","played_pos":"MCD","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"team_stats":{"posesion":62,"tiros":13,"tiros_arco":9,"goles_esperados":null,"pases":208,"precision_pases":88,"entradas":null,"intercepciones":18,"paradas":null,"faltas":null,"corneres":null,"regates_exito":null,"precision_tiro":null},"match_result":"6-0","notes":""}`;
+
+    let mergedPlayers=[], matchResult=result, mergedTeamStats=null;
+
+    for (let i=0; i<_tetImgQueue.length; i++) {
+      const img = _tetImgQueue[i];
+      if (img.status !== 'pending') continue;
+      img.status = 'analyzing'; tetRenderQueue(panel);
+      panel.querySelector('#tetAnalyzingText').innerHTML = `Analizando imagen ${i+1} de ${_tetImgQueue.length}...<br><b>Extrayendo estadísticas</b>`;
+      try {
+        const resp = await fetch(WORKER_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({contents:[{parts:[
+            {inline_data:{mime_type:img.mediaType||'image/jpeg', data:img.base64}},
+            {text:prompt}
+          ]}], generationConfig:{temperature:0.1, maxOutputTokens:1500}})
+        });
+        const data = await resp.json();
+        if (data.error) throw new Error(data.error.message||'API error');
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (!text) throw new Error('Respuesta vacía');
+        const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+        img.status = 'done'; img.result = parsed;
+        (parsed.players||[]).forEach(p => {
+          const key = (p.matched||p.name||'').toLowerCase();
+          const ex  = mergedPlayers.find(ep => (ep.matched||ep.name||'').toLowerCase()===key);
+          if (ex) {
+            ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions','played_pos'].forEach(f=>{
+              if(ex[f]===null&&p[f]!=null) ex[f]=p[f];
+            });
+          } else { mergedPlayers.push({...p}); }
+        });
+        if (!matchResult && parsed.match_result) matchResult = parsed.match_result;
+        if (parsed.team_stats) {
+          if (!mergedTeamStats) mergedTeamStats = parsed.team_stats;
+          else Object.keys(parsed.team_stats).forEach(k=>{if(mergedTeamStats[k]==null&&parsed.team_stats[k]!=null) mergedTeamStats[k]=parsed.team_stats[k];});
+        }
+      } catch(err) {
+        img.status = 'error';
+        showToast('Error imagen '+(i+1)+': '+err.message,'error');
+      }
+      tetRenderQueue(panel);
+    }
+
+    panel.querySelector('#tetAnalyzing').classList.remove('show');
+    panel.querySelector('#tetBtnAnalyze').disabled = false;
+
+    if (mergedPlayers.length) {
+      _tetPending = {rival, league, date, uploadedAt:new Date().toISOString(), players:mergedPlayers, match_result:matchResult, notes:'', ...(mergedTeamStats?{team_stats:mergedTeamStats}:{})};
+      tetRenderPreview(panel, _tetPending);
+    } else {
+      showToast('No se pudo extraer estadísticas.','error');
+    }
+  }
+
+  function tetRenderPreview(panel, data) {
+    panel.querySelector('#tetResultTitle').textContent = `vs ${data.rival} · ${data.league} · ${tetFmtDate(data.date)}${data.match_result?' · '+data.match_result:''}`;
+    panel.querySelector('#tetResultBody').innerHTML = (data.players||[]).map(p => {
+      const r=p.rating, rc=r===null?'':r>=8?'high':r>=6.5?'mid':'low';
+      const v=x=>x!=null?`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${x}</span>`:'—';
+      return `<tr>
+        <td class="player-cell">${p.matched||p.name}${p.matched&&p.matched!==p.name?'<br><small style="color:var(--muted2);font-size:.7rem">'+p.name+'</small>':''}</td>
+        <td>${r!==null?`<span class="rating-pill ${rc}">${r}</span>`:'—'}</td>
+        <td>${v(p.goals)}</td><td>${v(p.assists)}</td><td>${v(p.passes)}</td>
+        <td>${p.pass_accuracy!=null?v(p.pass_accuracy+'%'):'—'}</td>
+        <td>${v(p.distance_km)}</td><td>${v(p.sprints)}</td>
+        <td>${v(p.tackles)}</td><td>${v(p.interceptions)}</td>
+      </tr>`;
+    }).join('');
+    panel.querySelector('#tetResultCard').classList.add('show');
+  }
+
+  window.tetDiscard = function() {
+    _tetPending = null;
+    const panel = document.querySelector('.tet-panel.open');
+    if (panel) panel.querySelector('#tetResultCard').classList.remove('show');
+  };
+
+  window.tetSave = async function() {
+    if (!_tetPending) return;
+    cloudMatches.push(_tetPending);
+    const ok = await cloudSave(cloudMatches);
+    if (ok) {
+      showToast('✓ Partido de torneo guardado','success');
+      _tetPending = null;
+      const panel = document.querySelector('.tet-panel.open');
+      if (panel) {
+        panel.querySelector('#tetResultCard').classList.remove('show');
+        panel.classList.remove('open');
+        panel.innerHTML = '';
+      }
+      await tetLoad();
+    } else {
+      showToast('Error al guardar','error');
+    }
+  };
+
+})(); // end IIFE
 
 </script>
 <script src="mobile-nav.js"></script>
