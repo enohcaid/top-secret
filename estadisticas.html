@@ -697,7 +697,10 @@ footer span{color:#C9A84C;}
   <!-- ── TAB CLUB EA ── -->
   <!-- ── TAB TORNEOS ── -->
   <div class="tab-content" id="tab-torneos">
-    <div id="tetList"><div class="tet-empty"><div class="tet-empty-title">Cargando torneos...</div></div></div>
+    <div class="league-filter" id="tetTorneoFilter" style="display:none"></div>
+    <div class="kpi-row" id="tetKpiRow"></div>
+    <div class="season-grid" id="tetSeasonGrid"></div>
+    <div id="tetUploadSection" style="margin-top:24px"></div>
   </div>
 
   <div class="tab-content" id="tab-clubea">
@@ -3573,6 +3576,7 @@ function switchStatsSeason(n){
 // TORNEOS — Firebase + Gemini AI
 // ════════════════════════════════════════════
 (function(){
+  /* ── Firebase init (shared with rest of app) ── */
   const _FB_CFG = {
     apiKey:'AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M',
     authDomain:'top-secret-fc.firebaseapp.com',
@@ -3586,112 +3590,236 @@ function switchStatsSeason(n){
   const TORNEO_COL = _db.collection('torneos');
 
   let _tetTorneos   = [];
-  let _tetPanelCtx  = null;   // {torneoId, phase, phaseIdx, matchIdx, rival, league, date}
+  let _tetActiveTorneo = null;
+  let _tetPanelCtx  = null;
   let _tetImgQueue  = [];
   let _tetPending   = null;
 
-  /* ── Patch switchTab to load torneos ── */
+  /* ── Patch switchTab ── */
   const _prevSwitch = window.switchTab;
   window.switchTab = function(id, btn) {
     _prevSwitch(id, btn);
     if (id === 'torneos') tetLoad();
   };
 
-  /* ── Load & render torneos ── */
+  /* ── Load torneos ── */
   async function tetLoad() {
-    const el = document.getElementById('tetList');
-    el.innerHTML = '<div class="tet-empty"><div class="tet-empty-title">Cargando...</div></div>';
     try {
       const snap = await TORNEO_COL.orderBy('createdAt','asc').get();
       _tetTorneos = snap.docs.map(d => ({id:d.id, ...d.data()}));
     } catch(e) {
-      el.innerHTML = '<div class="tet-empty"><div class="tet-empty-title">Error al cargar torneos</div><div>' + e.message + '</div></div>';
+      document.getElementById('tetKpiRow').innerHTML = '';
+      document.getElementById('tetSeasonGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠</div><div class="empty-title">Error al cargar torneos</div><div class="empty-sub">${e.message}</div></div>`;
       return;
     }
     if (!_tetTorneos.length) {
-      el.innerHTML = '<div class="tet-empty"><div class="tet-empty-title">Sin torneos</div><div>Creá torneos desde la página de Posiciones.</div></div>';
+      document.getElementById('tetSeasonGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏆</div><div class="empty-title">Sin torneos</div><div class="empty-sub">Creá torneos desde la página de Posiciones.</div></div>`;
       return;
     }
-    el.innerHTML = '<div class="tet-list">' + _tetTorneos.map(t => tetCardHtml(t)).join('') + '</div>';
+    if (!_tetActiveTorneo || !_tetTorneos.find(t => t.id === _tetActiveTorneo)) {
+      _tetActiveTorneo = _tetTorneos[0].id;
+    }
+    renderTorneoPills();
+    renderTorneoStats(_tetTorneos.find(t => t.id === _tetActiveTorneo));
   }
 
-  function tetCardHtml(t) {
-    const leagueClass = (t.league||'otro').toLowerCase().replace('11x11','e11');
-    const matches = t.matches || {};
-    const groups  = matches.groups  || [];
-    const elimRounds = matches.elim || [];
-    const numElim = parseInt(t.rounds) || 2;
+  function renderTorneoPills() {
+    const row = document.getElementById('tetTorneoFilter');
+    if (_tetTorneos.length <= 1) { row.style.display = 'none'; return; }
+    row.style.display = '';
+    row.innerHTML = '<label>Torneo:</label>' + _tetTorneos.map(t =>
+      `<button class="lbtn${t.id === _tetActiveTorneo ? ' active' : ''}" onclick="tetSelectTorneo('${t.id}',this)">${t.name}</button>`
+    ).join('');
+  }
 
-    let rows = '';
+  window.tetSelectTorneo = function(id) {
+    _tetActiveTorneo = id;
+    renderTorneoPills();
+    renderTorneoStats(_tetTorneos.find(t => t.id === id));
+  };
 
-    if (t.type === 'groups' && groups.length) {
-      groups.forEach((g, gi) => {
-        rows += `<div class="tet-round-label">${g.name || 'Grupo '+(gi+1)} — Fase de Grupos</div>`;
-        (g.matches||[]).forEach((m, mi) => {
-          rows += tetMatchRowHtml(t, 'group', gi, mi, m);
+  /* ── Main stats renderer (Temporada-style) ── */
+  function renderTorneoStats(torneo) {
+    if (!torneo) return;
+    const kpiRow  = document.getElementById('tetKpiRow');
+    const grid    = document.getElementById('tetSeasonGrid');
+    const upload  = document.getElementById('tetUploadSection');
+
+    // All matches (seed + cloud) tagged with this torneo
+    const allM = loadMatches();
+    const matches = allM.filter(m => m.torneo === torneo.name);
+
+    // ── KPIs ──
+    if (!matches.length) {
+      kpiRow.innerHTML = '';
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📊</div><div class="empty-title">Sin estadísticas cargadas</div><div class="empty-sub">Usá la sección de carga abajo para agregar datos.</div></div>`;
+    } else {
+      const wins    = matches.filter(m => wldClass(m.match_result) === 'win').length;
+      const draws   = matches.filter(m => wldClass(m.match_result) === 'draw').length;
+      const losses  = matches.filter(m => wldClass(m.match_result) === 'loss').length;
+      const scored  = matches.reduce((s,m) => { const sc = parseScore(m.match_result); return s + (sc ? sc.own : 0); }, 0);
+      const concede = matches.reduce((s,m) => { const sc = parseScore(m.match_result); return s + (sc ? sc.rival : 0); }, 0);
+      const allRatings = matches.flatMap(m => (m.players||[]).map(p => p.rating).filter(v => v != null));
+      const teamAvgR = avg(allRatings);
+
+      kpiRow.innerHTML = [
+        {val: matches.length, lbl: 'Partidos', color: 'var(--gold)'},
+        {val: scored + ':' + concede, lbl: 'Goles F/C', color: 'var(--win)'},
+        {val: wins + '-' + draws + '-' + losses, lbl: 'V · E · D', color: wins > losses ? 'var(--win)' : losses > wins ? 'var(--loss)' : 'var(--draw)'},
+        {val: teamAvgR != null ? teamAvgR.toFixed(1) : '—', lbl: 'Rating Prom.', color: vrColor(teamAvgR)},
+      ].map(k => `<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`).join('');
+
+      // Player aggregate
+      const pm = {};
+      ROSTER.forEach(p => { pm[p.name] = {name:p.name, pos:p.pos, games:0, goals:0, assists:0, ratings:[], distances:[]}; });
+      matches.forEach(m => {
+        (m.players||[]).forEach(p => {
+          const key = (p.matched||'').toLowerCase();
+          const entry = Object.values(pm).find(r => r.name.toLowerCase() === key);
+          if (!entry) return;
+          entry.games++;
+          entry.goals    += p.goals || 0;
+          entry.assists  += p.assists || 0;
+          if (p.rating != null)      entry.ratings.push(p.rating);
+          if (p.distance_km != null) entry.distances.push(p.distance_km);
         });
       });
+      const players = Object.values(pm).filter(p => p.games > 0);
+
+      function rankBlock(title, icon, rows, valFn, valLabel, color, subFn) {
+        const sorted = [...rows].filter(p => valFn(p) != null && valFn(p) > 0).sort((a,b) => valFn(b) - valFn(a)).slice(0, 6);
+        if (!sorted.length) return '';
+        const maxV = valFn(sorted[0]) || 1;
+        const posC = i => i===0?'gold':i===1?'silver':i===2?'bronze':'';
+        return `<div class="season-block">
+          <div class="sb-header"><span class="sb-icon">${icon}</span><h3>${title}</h3></div>
+          <table class="rank-table">${sorted.map((p,i) => `<tr>
+            <td class="rank-pos ${posC(i)}">${i+1}</td>
+            <td><div class="rank-name">${p.name}</div>
+              <div class="rank-bar-wrap"><div class="rank-bar-track">
+                <div class="rank-bar-fill" style="width:${Math.round(valFn(p)/maxV*100)}%;background:${color}"></div>
+              </div></div></td>
+            <td><div class="rank-val" style="color:${color}">${typeof valFn(p)==='number'&&!Number.isInteger(valFn(p))?valFn(p).toFixed(1):valFn(p)}</div>
+                <div class="rank-sub">${subFn ? subFn(p) : valLabel}</div></td>
+          </tr>`).join('')}</table>
+        </div>`;
+      }
+
+      // Team stats bars
+      const tsMatches = matches.filter(m => m.team_stats);
+      let teamStatsBlock = '';
+      if (tsMatches.length) {
+        const ts = tsMatches.map(m => m.team_stats);
+        const n = tsMatches.length;
+        const tsAvg = key => { const v = ts.map(t => t[key]).filter(v => v != null); return v.length ? +(v.reduce((s,x) => s+x, 0) / v.length).toFixed(1) : null; };
+        const tsSum = key => ts.reduce((s,t) => s + (t[key]||0), 0);
+        const barStats = [
+          {lbl:'Posesión promedio',   val: tsAvg('posesion'),       pct: tsAvg('posesion'),                             color:'var(--gold)',  unit:'%'},
+          {lbl:'Tiros / partido',     val: +(tsSum('tiros')/n).toFixed(1), pct: Math.min(100, tsSum('tiros')/n/15*100), color:'var(--win)',   unit:''},
+          {lbl:'Pases / partido',     val: +(tsSum('pases')/n).toFixed(0), pct: Math.min(100, tsSum('pases')/n/300*100),color:'#4a9eff',     unit:''},
+          {lbl:'Precisión de pases',  val: tsAvg('precision_pases'), pct: tsAvg('precision_pases'),                     color:'#4a9eff',     unit:'%'},
+          {lbl:'Regates con éxito',   val: tsAvg('regates_exito'),   pct: tsAvg('regates_exito'),                       color:'var(--gold)', unit:'%'},
+          {lbl:'Paradas del arco',    val: +(tsSum('paradas')/n).toFixed(1), pct: Math.min(100, tsSum('paradas')/n/6*100), color:'var(--muted)', unit:''},
+          {lbl:'Faltas cometidas',    val: +(tsSum('faltas')/n).toFixed(1),  pct: Math.min(100, tsSum('faltas')/n/10*100), color:'var(--loss)',  unit:''},
+          ...(tsSum('entradas') > 0 ? [{lbl:'Éxito en tackles', val: Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), pct: Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), color:'#7c6fff', unit:'%'}] : []),
+        ].filter(s => s.val != null);
+        if (barStats.length) {
+          teamStatsBlock = `<div class="season-block full">
+            <div class="sb-header"><span class="sb-icon">🎮</span><h3>Estadísticas del equipo</h3></div>
+            <div class="ts-bars-grid">${barStats.map(s =>
+              `<div class="ts2-row"><span class="ts2-lbl">${s.lbl}</span>
+               <div class="ts2-track"><div class="ts2-fill" style="width:${s.pct}%;background:${s.color}"></div></div>
+               <span class="ts2-val" style="color:${s.color}">${s.val}${s.unit}</span></div>`
+            ).join('')}</div>
+          </div>`;
+        }
+      }
+
+      // Results
+      const resultsHTML = `<div class="season-block full">
+        <div class="sb-header"><span class="sb-icon">📅</span><h3>Resultados</h3></div>
+        <div class="results-list">
+          ${[...matches].reverse().map(m => {
+            const wl = wldClass(m.match_result), lbl = wldLabel(m.match_result);
+            const note = m.notes ? `<span style="font-size:.65rem;color:var(--muted2);margin-left:6px">${m.notes}</span>` : '';
+            return `<div class="result-row">
+              <div>
+                <div class="res-rival">vs ${m.rival}${lbl ? ` <span class="wld-badge ${wl}">${lbl}</span>` : ''}${note}</div>
+                <div class="res-date">${formatDate(m.date)}</div>
+              </div>
+              <span class="res-league ${leagueClass(m.league)}">${m.league}</span>
+              <span class="res-score ${wl}">${m.match_result||'✓'}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+
+      grid.innerHTML =
+        teamStatsBlock +
+        rankBlock('Goleadores',  '⚽', players, p => p.goals,       'goles',  'var(--win)',  p => `${p.assists} asist · ${p.games} PJ`) +
+        rankBlock('Rating',      '⭐', players, p => avg(p.ratings), 'prom',   'var(--gold)', p => `${p.games} partidos`) +
+        rankBlock('Asistencias', '🎯', players, p => p.assists,      'asist.', 'var(--vpug)', p => `${p.goals} goles`) +
+        resultsHTML;
     }
 
+    // ── Upload section ──
+    upload.innerHTML = buildUploadSection(torneo);
+  }
+
+  /* ── Upload section (match list with + Stats buttons) ── */
+  function buildUploadSection(torneo) {
+    const tBrk = torneo.matches || {};
+    const elimRounds = tBrk.elim || [];
+    const numElim = parseInt(torneo.rounds) || 2;
     const elimLabels = [];
     if (numElim >= 4) elimLabels.push('Octavos de Final');
     if (numElim >= 3) elimLabels.push('Cuartos de Final');
     if (numElim >= 2) elimLabels.push('Semifinal');
     elimLabels.push('Final');
 
-    if (elimLabels.length > 1) {
-      rows += `<div class="tet-round-label">Fase Eliminatoria</div>`;
-    }
+    let rows = '';
     elimLabels.forEach((lbl, i) => {
       const m = elimRounds[i] || {};
       if (m.legs && m.legs.length) {
-        // ida y vuelta: render each leg separately
-        rows += `<div class="tet-round-label" style="font-size:.7rem;opacity:.7;margin-top:4px">${lbl} — ${m.rival || 'Por definir'}</div>`;
+        rows += `<div class="tet-round-label">${lbl} — ${m.rival || 'Por definir'}</div>`;
         m.legs.forEach((leg, li) => {
           const legLabel = li === 0 ? 'Ida' : 'Vuelta';
           const legM = { rival: m.rival, date: leg.date, home: leg.home,
             ...(leg.goalsFor !== undefined ? { goalsFor: leg.goalsFor, goalsAgainst: leg.goalsAgainst } : {}) };
-          rows += tetMatchRowHtml(t, 'elim', i, 0, legM, `${lbl} — ${legLabel}`, li);
+          rows += tetMatchRowHtml(torneo, 'elim', i, 0, legM, `${lbl} — ${legLabel}`, li);
         });
       } else {
-        rows += tetMatchRowHtml(t, 'elim', i, 0, m, lbl);
+        rows += `<div class="tet-round-label">${lbl}</div>`;
+        rows += tetMatchRowHtml(torneo, 'elim', i, 0, m, lbl);
       }
     });
 
-    if (!rows) rows = `<div class="tet-no-match">Este torneo no tiene partidos configurados.</div>`;
-
-    return `<div class="tet-card" id="tetcard-${t.id}">
-      <div class="tet-card-head" onclick="tetToggle('${t.id}')">
-        <span class="tet-card-name">${t.name}</span>
-        <span class="tet-league-badge ${leagueClass}">${t.league||'Torneo'}</span>
-        <span class="tet-toggle">▼</span>
-      </div>
-      <div class="tet-matches">${rows}</div>
+    return `<div class="season-block full">
+      <div class="sb-header"><span class="sb-icon">📸</span><h3>Cargar estadísticas</h3></div>
+      <div>${rows || '<div class="tet-no-match">Sin partidos configurados</div>'}</div>
     </div>`;
   }
 
   function tetMatchRowHtml(t, phase, phaseIdx, matchIdx, m, roundLabel, legIdx) {
-    const hasRival = !!m.rival;
-    const rival = m.rival || (roundLabel || 'Partido por definir');
-    const date  = m.date  ? tetFmtDate(m.date) : '';
-    const loc   = m.home==='1'||m.home===true ? '🏠 Local' : (m.home===false||m.home==='0' ? '✈️ Visita' : (m.rival?'✈️ Visita':''));
+    const rival = m.rival || roundLabel || 'Por definir';
+    const date  = m.date ? tetFmtDate(m.date) : '';
+    const loc   = m.home === true || m.home === '1' ? '🏠 Local' : (m.home === false || m.home === '0' ? '✈️ Visita' : (m.rival ? '✈️ Visita' : ''));
     const meta  = [date, loc].filter(Boolean).join(' · ');
-    const hasResult = m.goalsFor !== undefined;
-    const score = hasResult ? m.goalsFor + ' – ' + m.goalsAgainst : '';
+    const score = m.goalsFor !== undefined ? m.goalsFor + ' – ' + m.goalsAgainst : '';
     const legKey = legIdx !== undefined ? `-leg${legIdx}` : '';
-    const alreadySaved = cloudMatches.some(c =>
-      c.rival === m.rival && c.date === m.date && c.league === t.league &&
+    const alreadySaved = loadMatches().some(c =>
+      c.torneo === t.name && c.rival === m.rival && c.date === m.date &&
       (legIdx === undefined || c.legIdx === legIdx)
     );
     const panelId = `tetpanel-${t.id}-${phase}-${phaseIdx}-${matchIdx}${legKey}`;
     const btnClass = alreadySaved ? 'tet-upload-btn loaded' : 'tet-upload-btn';
     const btnLabel = alreadySaved ? '✓ Cargado' : '+ Stats';
-    const ctx = JSON.stringify({torneoId:t.id, phase, phaseIdx, matchIdx, legIdx, rival:m.rival||'', league:t.league||'', date:m.date||''});
+    const ctx = JSON.stringify({torneoId:t.id, torneoName:t.name, phase, phaseIdx, matchIdx, legIdx, rival:m.rival||'', league:t.league||'', date:m.date||''});
 
     return `<div class="tet-match-row">
       <div>
-        <div class="tet-match-rival">${hasRival ? 'vs ' + rival : '<span style="color:var(--muted2);font-style:italic">'+rival+'</span>'}</div>
-        <div class="tet-match-meta">${meta}${score?' · '+score:''}</div>
+        <div class="tet-match-rival">vs ${rival}</div>
+        <div class="tet-match-meta">${meta}${score ? ' · ' + score : ''}</div>
       </div>
       <button class="${btnClass}" onclick="tetOpenPanel('${panelId}',${ctx.replace(/"/g,"'")})">${btnLabel}</button>
     </div>
@@ -3700,32 +3828,22 @@ function switchStatsSeason(n){
 
   function tetFmtDate(d) {
     if (!d) return '';
-    const [y,mo,day] = d.split('-');
-    const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const [,mo,day] = d.split('-');
+    const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     return `${parseInt(day)} ${months[parseInt(mo)-1]}`;
   }
-
-  window.tetToggle = function(id) {
-    document.getElementById('tetcard-'+id).classList.toggle('open');
-  };
 
   window.tetOpenPanel = function(panelId, ctx) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
-    if (panel.classList.contains('open')) {
-      panel.classList.remove('open');
-      return;
-    }
-    // close others
-    document.querySelectorAll('.tet-panel.open').forEach(p => {
-      if (p.id !== panelId) { p.classList.remove('open'); p.innerHTML=''; }
-    });
+    if (panel.classList.contains('open')) { panel.classList.remove('open'); return; }
+    document.querySelectorAll('.tet-panel.open').forEach(p => { if (p.id !== panelId) { p.classList.remove('open'); p.innerHTML=''; } });
     _tetPanelCtx = ctx;
     _tetImgQueue = [];
     _tetPending  = null;
     panel.innerHTML = tetPanelHtml(ctx);
     panel.classList.add('open');
-    tetBindPanel(panel, ctx);
+    tetBindPanel(panel);
   };
 
   function tetPanelHtml(ctx) {
@@ -3733,7 +3851,7 @@ function switchStatsSeason(n){
     const league = ctx.league || '';
     const date = ctx.date || '';
     const legSuffix = ctx.legIdx !== undefined ? (ctx.legIdx === 0 ? ' · Ida' : ' · Vuelta') : '';
-    return `<div class="tet-panel-title">Cargar estadísticas · ${rival}${legSuffix} ${date?'— '+tetFmtDate(date):''}</div>
+    return `<div class="tet-panel-title">Cargar estadísticas · ${rival}${legSuffix}${date?' — '+tetFmtDate(date):''}</div>
     <div class="match-meta" style="grid-template-columns:1fr 1fr 1fr 1fr">
       <div class="meta-group"><label>Rival</label><input type="text" id="tetRival" value="${rival.replace(/"/g,'&quot;')}"></div>
       <div class="meta-group"><label>Liga</label>
@@ -3744,7 +3862,7 @@ function switchStatsSeason(n){
           <option value="otro"${!['VPN','VPUG','11x11'].includes(league)?' selected':''}>Otro</option>
         </select>
       </div>
-      <div class="meta-group"><label>Resultado</label><input type="text" id="tetResult" placeholder="Ej: 3-1"></div>
+      <div class="meta-group"><label>Resultado</label><input type="text" id="tetResult" placeholder="Ej: 1-0"></div>
       <div class="meta-group"><label>Fecha</label><input type="date" id="tetDate" value="${date}"></div>
     </div>
     <div class="upload-area" id="tetUploadArea" style="padding:28px 24px;margin-bottom:12px">
@@ -3755,11 +3873,10 @@ function switchStatsSeason(n){
     </div>
     <div class="img-queue" id="tetImgQueue" style="gap:8px;flex-wrap:wrap"></div>
     <button class="btn-analyze" id="tetBtnAnalyze" style="margin-top:10px" disabled>
-      <span>🤖</span> <span id="tetAnalyzeLabel">Analizar con IA</span>
+      <span>🤖</span> <span>Analizar con IA</span>
     </button>
     <div class="analyzing-state" id="tetAnalyzing" style="margin-top:12px">
-      <div class="spinner"></div>
-      <div class="analyzing-text" id="tetAnalyzingText">Analizando...</div>
+      <div class="spinner"></div><div class="analyzing-text" id="tetAnalyzingText">Analizando...</div>
     </div>
     <div class="result-card" id="tetResultCard" style="margin-top:12px">
       <div class="result-header">
@@ -3781,12 +3898,11 @@ function switchStatsSeason(n){
   }
 
   function tetBindPanel(panel) {
-    const fileInput = panel.querySelector('#tetFileInput');
-    fileInput.addEventListener('change', e => tetAddFiles(e.target.files, panel));
-    const uploadArea = panel.querySelector('#tetUploadArea');
-    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag'); });
-    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag'));
-    uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('drag'); tetAddFiles(e.dataTransfer.files, panel); });
+    panel.querySelector('#tetFileInput').addEventListener('change', e => tetAddFiles(e.target.files, panel));
+    const ua = panel.querySelector('#tetUploadArea');
+    ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag'); });
+    ua.addEventListener('dragleave', () => ua.classList.remove('drag'));
+    ua.addEventListener('drop', e => { e.preventDefault(); ua.classList.remove('drag'); tetAddFiles(e.dataTransfer.files, panel); });
     panel.querySelector('#tetBtnAnalyze').addEventListener('click', () => tetAnalyze(panel));
   }
 
@@ -3794,8 +3910,7 @@ function switchStatsSeason(n){
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       reader.onload = e => {
-        const b64 = e.target.result.split(',')[1];
-        _tetImgQueue.push({ file, base64: b64, mediaType: file.type, status: 'pending' });
+        _tetImgQueue.push({ file, base64: e.target.result.split(',')[1], mediaType: file.type, status: 'pending' });
         tetRenderQueue(panel);
         panel.querySelector('#tetBtnAnalyze').disabled = false;
       };
@@ -3822,8 +3937,7 @@ function switchStatsSeason(n){
   };
 
   async function tetAnalyze(panel) {
-    const pending = _tetImgQueue.filter(i => i.status === 'pending');
-    if (!pending.length) return;
+    if (!_tetImgQueue.filter(i => i.status === 'pending').length) return;
     const rival  = panel.querySelector('#tetRival').value.trim() || 'Desconocido';
     const league = panel.querySelector('#tetLeague').value || '?';
     const date   = panel.querySelector('#tetDate').value || new Date().toISOString().split('T')[0];
@@ -3833,38 +3947,25 @@ function switchStatsSeason(n){
     panel.querySelector('#tetAnalyzing').classList.add('show');
     panel.querySelector('#tetResultCard').classList.remove('show');
 
-    const rosterList = ROSTER.map(p=>`- ${p.name} (${p.pos})`).join('\n');
+    const rosterList = ROSTER.map(p => `- ${p.name} (${p.pos})`).join('\n');
     const prompt = `Sos un analista de datos de EA FC / FIFA. Se te envía una captura de estadísticas post-partido del equipo "Top Secret FC".
-
 PLANTEL OFICIAL (nombre exacto · posición):
 ${rosterList}
-
-REGLAS DE IDENTIFICACIÓN DE JUGADORES:
-- "Lautavester7" → Lautavester7
-- "T. cansitrGD22" o "cansitr" → cansitrGd22_
-- "BlackPanther" o "Black" → BlackPanther-CG
-- "ciprimancini" o "Cipri" → CipriMancini
-- "J. Martinez" o "Martinez" → Juan_Martinez4
-- "O. Pibu" o "Pibu" → zPibu__
-- "Agubostero7" → Agubostero7
-- "Alexisraies2" o "Alexis" → Alexiisraiies23
-- "ZurdoCABJ" o "Zurdo" → Zurdo-_CABJ12
-- "Woolfyboyzx2" → Woolfyboyzx2
-- "Buraa" o "Bura" → Buraa07
-- "DaniStone" o "RS32" → RS32-DaniStone
-- "Huber" → Huber236
-- "Lucasmati" o "Lucas" → Lucasmati_akd
-
+REGLAS:
+- "Lautavester7" → Lautavester7 | "cansitr" → cansitrGd22_ | "BlackPanther" → BlackPanther-CG
+- "ciprimancini" → CipriMancini | "J. Martinez" → Juan_Martinez4 | "Pibu" → zPibu__
+- "Agubostero7" → Agubostero7 | "Alexisraies2" → Alexiisraiies23 | "ZurdoCABJ" → Zurdo-_CABJ12
+- "Lucasmati" → Lucasmati_akd | "Buraa" → Buraa07 | "DaniStone" → RS32-DaniStone
 Devolvé ÚNICAMENTE JSON válido sin markdown:
-{"players":[{"name":"apodo","matched":"nombre exacto","played_pos":"MCD","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"team_stats":{"posesion":62,"tiros":13,"tiros_arco":9,"goles_esperados":null,"pases":208,"precision_pases":88,"entradas":null,"intercepciones":18,"paradas":null,"faltas":null,"corneres":null,"regates_exito":null,"precision_tiro":null},"match_result":"6-0","notes":""}`;
+{"players":[{"name":"apodo","matched":"nombre exacto","played_pos":"MCD","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"team_stats":{"posesion":62,"tiros":13,"goles_esperados":null,"pases":208,"precision_pases":88,"entradas":null,"entradas_exito":null,"paradas":null,"faltas":null,"corneres":null,"regates_exito":null},"match_result":"1-0","notes":""}`;
 
-    let mergedPlayers=[], matchResult=result, mergedTeamStats=null;
+    let mergedPlayers = [], matchResult = result, mergedTeamStats = null;
 
-    for (let i=0; i<_tetImgQueue.length; i++) {
+    for (let i = 0; i < _tetImgQueue.length; i++) {
       const img = _tetImgQueue[i];
       if (img.status !== 'pending') continue;
       img.status = 'analyzing'; tetRenderQueue(panel);
-      panel.querySelector('#tetAnalyzingText').innerHTML = `Analizando imagen ${i+1} de ${_tetImgQueue.length}...<br><b>Extrayendo estadísticas</b>`;
+      panel.querySelector('#tetAnalyzingText').innerHTML = `Analizando imagen ${i+1} de ${_tetImgQueue.length}...`;
       try {
         const resp = await fetch(WORKER_URL, {
           method:'POST', headers:{'Content-Type':'application/json'},
@@ -3881,21 +3982,18 @@ Devolvé ÚNICAMENTE JSON válido sin markdown:
         img.status = 'done'; img.result = parsed;
         (parsed.players||[]).forEach(p => {
           const key = (p.matched||p.name||'').toLowerCase();
-          const ex  = mergedPlayers.find(ep => (ep.matched||ep.name||'').toLowerCase()===key);
-          if (ex) {
-            ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions','played_pos'].forEach(f=>{
-              if(ex[f]===null&&p[f]!=null) ex[f]=p[f];
-            });
-          } else { mergedPlayers.push({...p}); }
+          const ex = mergedPlayers.find(ep => (ep.matched||ep.name||'').toLowerCase() === key);
+          if (ex) { ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions','played_pos'].forEach(f => { if (ex[f]===null && p[f]!=null) ex[f]=p[f]; }); }
+          else mergedPlayers.push({...p});
         });
         if (!matchResult && parsed.match_result) matchResult = parsed.match_result;
         if (parsed.team_stats) {
           if (!mergedTeamStats) mergedTeamStats = parsed.team_stats;
-          else Object.keys(parsed.team_stats).forEach(k=>{if(mergedTeamStats[k]==null&&parsed.team_stats[k]!=null) mergedTeamStats[k]=parsed.team_stats[k];});
+          else Object.keys(parsed.team_stats).forEach(k => { if (mergedTeamStats[k]==null && parsed.team_stats[k]!=null) mergedTeamStats[k]=parsed.team_stats[k]; });
         }
       } catch(err) {
         img.status = 'error';
-        showToast('Error imagen '+(i+1)+': '+err.message,'error');
+        showToast('Error imagen '+(i+1)+': '+err.message, 'error');
       }
       tetRenderQueue(panel);
     }
@@ -3905,20 +4003,23 @@ Devolvé ÚNICAMENTE JSON válido sin markdown:
 
     if (mergedPlayers.length) {
       const legIdx = _tetPanelCtx?.legIdx;
-      _tetPending = {rival, league, date, uploadedAt:new Date().toISOString(), players:mergedPlayers, match_result:matchResult, notes:'',
+      const torneoName = _tetPanelCtx?.torneoName || '';
+      _tetPending = {rival, league, date, uploadedAt: new Date().toISOString(),
+        players: mergedPlayers, match_result: matchResult, notes: _tetPanelCtx?.phase ? _tetPanelCtx.phase+' '+(_tetPanelCtx.legIdx===0?'Ida':'Vuelta') : '',
+        torneo: torneoName,
         ...(legIdx !== undefined ? {legIdx} : {}),
-        ...(mergedTeamStats?{team_stats:mergedTeamStats}:{})};
+        ...(mergedTeamStats ? {team_stats: mergedTeamStats} : {})};
       tetRenderPreview(panel, _tetPending);
     } else {
-      showToast('No se pudo extraer estadísticas.','error');
+      showToast('No se pudo extraer estadísticas.', 'error');
     }
   }
 
   function tetRenderPreview(panel, data) {
     panel.querySelector('#tetResultTitle').textContent = `vs ${data.rival} · ${data.league} · ${tetFmtDate(data.date)}${data.match_result?' · '+data.match_result:''}`;
     panel.querySelector('#tetResultBody').innerHTML = (data.players||[]).map(p => {
-      const r=p.rating, rc=r===null?'':r>=8?'high':r>=6.5?'mid':'low';
-      const v=x=>x!=null?`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${x}</span>`:'—';
+      const r = p.rating, rc = r===null?'':r>=8?'high':r>=6.5?'mid':'low';
+      const v = x => x != null ? `<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${x}</span>` : '—';
       return `<tr>
         <td class="player-cell">${p.matched||p.name}${p.matched&&p.matched!==p.name?'<br><small style="color:var(--muted2);font-size:.7rem">'+p.name+'</small>':''}</td>
         <td>${r!==null?`<span class="rating-pill ${rc}">${r}</span>`:'—'}</td>
@@ -3942,17 +4043,14 @@ Devolvé ÚNICAMENTE JSON válido sin markdown:
     cloudMatches.push(_tetPending);
     const ok = await cloudSave(cloudMatches);
     if (ok) {
-      showToast('✓ Partido de torneo guardado','success');
+      showToast('✓ Partido de torneo guardado', 'success');
       _tetPending = null;
       const panel = document.querySelector('.tet-panel.open');
-      if (panel) {
-        panel.querySelector('#tetResultCard').classList.remove('show');
-        panel.classList.remove('open');
-        panel.innerHTML = '';
-      }
-      await tetLoad();
+      if (panel) { panel.querySelector('#tetResultCard').classList.remove('show'); panel.classList.remove('open'); panel.innerHTML=''; }
+      const t = _tetTorneos.find(x => x.id === _tetActiveTorneo);
+      if (t) renderTorneoStats(t);
     } else {
-      showToast('Error al guardar','error');
+      showToast('Error al guardar', 'error');
     }
   };
 
