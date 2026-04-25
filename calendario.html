@@ -1706,7 +1706,8 @@ function buildMonthCard(year, month, mbd, today) {
       const scoreHtml = score
         ? `<span class="mmi-score">${score}</span>`
         : `<span class="mmi-pending">Pendiente</span>`;
-      const clickAttr = m.free ? 'class="month-match-item no-click"' : `class="month-match-item${outCls}" onclick="openStatsPanel(${JSON.stringify(id)})"`;
+      const idJs = typeof id === 'string' ? `'${id}'` : String(id);
+      const clickAttr = m.free ? 'class="month-match-item no-click"' : `class="month-match-item${outCls}" onclick="openStatsPanel(${idJs})"`;
       return `<div ${clickAttr}>
         <span class="mmi-date">${dayLabel}</span>
         <span class="nh-lbadge ${lgKey}">${m.league||'—'}</span>
