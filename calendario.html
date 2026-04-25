@@ -450,7 +450,10 @@ body.locked .result-box.pending{cursor:default;}
 .nh-cdown-num{font-family:'Barlow Condensed',sans-serif;font-size:4.5rem;font-weight:900;color:var(--gold);line-height:.9;}
 .nh-cdown-lbl{font-size:.58rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(201,168,76,.6);margin-top:5px;}
 .nh-eyebrow{font-size:.6rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
-.nh-rival-name{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;color:#fff;letter-spacing:-.01em;line-height:1;margin-bottom:10px;}
+.nh-match-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.nh-match-row:last-child{margin-bottom:0;}
+.nh-rival-name{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;color:#fff;letter-spacing:-.01em;line-height:1;}
+.nh-match-row .nh-rival-name{font-size:1.9rem;margin-bottom:0;}
 .nh-meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .nh-lbadge{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.1em;padding:3px 10px;border-radius:5px;}
 .nh-lbadge.vpn{background:var(--vpn-bg);color:var(--vpn);}
@@ -466,6 +469,12 @@ body.locked .result-box.pending{cursor:default;}
 
 /* ─── MONTH CARD ─── */
 .month-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.month-card.compact{background:transparent;border-color:transparent;border-radius:8px;opacity:.45;}
+.month-card.compact .month-title-row{padding:6px 10px;justify-content:center;gap:6px;}
+.month-card.compact .month-name-lbl{font-size:.8rem;letter-spacing:.05em;}
+.month-card.compact .month-year-lbl{display:none;}
+.month-card.compact .month-cal-grid{display:none;}
+.month-card.compact .month-season-band{display:none;}
 .month-season-band{font-size:.57rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;padding:4px 12px;border-bottom:1px solid;}
 .month-title-row{display:flex;align-items:baseline;justify-content:space-between;padding:10px 12px 4px;}
 .month-name-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--black);}
@@ -493,6 +502,7 @@ body.locked .result-box.pending{cursor:default;}
   .next-hero-wrap,.cal-header-row{padding:0 16px;}
   .nh-card,.nh-waiting{padding:20px 24px;gap:18px;}
   .nh-rival-name{font-size:2rem;}
+  .nh-match-row .nh-rival-name{font-size:1.5rem;}
   .nh-cdown-num{font-size:3.5rem;}
 }
 
@@ -1610,27 +1620,29 @@ function renderNextHero() {
     </div>`;
     return;
   }
-  const {m, id} = upcoming[0];
+  const nextDate = upcoming[0].m.date;
+  const dayMatches = upcoming.filter(x => x.m.date === nextDate);
   const todayDt = new Date(today+'T12:00:00');
-  const matchDt = new Date(m.date+'T12:00:00');
+  const matchDt = new Date(nextDate+'T12:00:00');
   const diff = Math.round((matchDt - todayDt)/(1000*60*60*24));
   const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MESES_C = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const dateLabel = `${DIAS[matchDt.getDay()]} ${matchDt.getDate()} ${MESES_C[matchDt.getMonth()]}`;
-  const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
-  const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
   const cdown = diff === 0
     ? `<div class="nh-cdown"><div class="nh-cdown-num" style="font-size:2rem">HOY</div></div>`
     : `<div class="nh-cdown"><div class="nh-cdown-num">${diff}</div><div class="nh-cdown-lbl">${diff===1?'Día':'Días'}</div></div>`;
-  hero.innerHTML = `<div class="nh-card">${cdown}<div>
-    <div class="nh-eyebrow">Próximo partido</div>
-    <div class="nh-rival-name">vs ${m.rival}</div>
-    <div class="nh-meta-row">
+  const matchRows = dayMatches.map(({m}) => {
+    const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
+    const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
+    return `<div class="nh-match-row">
       ${m.league?`<span class="nh-lbadge ${lgKey}">${m.league}</span>`:''}
-      <span class="nh-meta-txt">${dateLabel}</span>
-      ${m.time?`<span class="nh-meta-txt">· ${m.time}</span>`:''}
-      <span class="nh-meta-txt">· ${loc}</span>
-    </div>
+      <span class="nh-rival-name">vs ${m.rival}</span>
+      <span class="nh-meta-txt">${m.time?'· '+m.time:''} · ${loc}</span>
+    </div>`;
+  }).join('');
+  hero.innerHTML = `<div class="nh-card">${cdown}<div>
+    <div class="nh-eyebrow">${dayMatches.length > 1 ? `${dayMatches.length} partidos · ` : 'Próximo partido · '}${dateLabel}</div>
+    ${matchRows}
   </div></div>`;
 }
 
@@ -1689,9 +1701,14 @@ function buildMonthCard(year, month, mbd, today) {
     if (ids.length > 3) chips += `<div class="match-chip chip-more">+${ids.length-3}</div>`;
     cellsHtml += `<div class="cal-cell${isToday?' cal-today':''}"><div class="cal-num">${d}</div>${chips}</div>`;
   }
+  // Check if this month has any matches
+  const hasMatches = Array.from({length: daysInMonth}, (_,i) => {
+    const ds = `${year}-${moStr}-${String(i+1).padStart(2,'0')}`;
+    return (mbd[ds]||[]).length > 0;
+  }).some(Boolean);
   const MO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const div = document.createElement('div');
-  div.className = 'month-card';
+  div.className = 'month-card' + (hasMatches ? '' : ' compact');
   div.innerHTML = `
     ${season?`<div class="month-season-band" style="background:${season.bg};color:${season.color};border-color:${season.color}">${season.label}</div>`:''}
     <div class="month-title-row"><span class="month-name-lbl">${MO[month]}</span><span class="month-year-lbl">${year}</span></div>
