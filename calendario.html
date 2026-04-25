@@ -431,6 +431,71 @@ footer span{color:var(--gold);}
 body.locked .admin-el{display:none !important;}
 body.locked .result-box.pending{cursor:default;}
 
+/* ─── NEW CAL CONTROLS ─── */
+.cal-header-row{max-width:1100px;margin:16px auto 0;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.cal-legend-new{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.cln-item{display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);}
+.cln-dot{width:8px;height:8px;border-radius:50%;}
+.cln-dot.vpn{background:var(--vpn);}
+.cln-dot.vpug{background:var(--vpug);}
+.cln-dot.e11{background:var(--e11);}
+.cal-admin-btns{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* ─── NEXT HERO ─── */
+.next-hero-wrap{max-width:1100px;margin:20px auto 0;padding:0 32px;}
+.nh-card{background:var(--black);border-radius:16px;padding:28px 36px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:28px;position:relative;overflow:hidden;}
+.nh-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:var(--gold);}
+.nh-waiting{background:var(--gray);border:1px solid var(--border);border-radius:16px;padding:28px 36px;display:flex;align-items:center;gap:20px;}
+.nh-cdown{display:flex;flex-direction:column;align-items:center;min-width:80px;}
+.nh-cdown-num{font-family:'Barlow Condensed',sans-serif;font-size:4.5rem;font-weight:900;color:var(--gold);line-height:.9;}
+.nh-cdown-lbl{font-size:.58rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(201,168,76,.6);margin-top:5px;}
+.nh-eyebrow{font-size:.6rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.nh-rival-name{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;color:#fff;letter-spacing:-.01em;line-height:1;margin-bottom:10px;}
+.nh-meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.nh-lbadge{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.1em;padding:3px 10px;border-radius:5px;}
+.nh-lbadge.vpn{background:var(--vpn-bg);color:var(--vpn);}
+.nh-lbadge.vpug{background:var(--vpug-bg);color:var(--vpug);}
+.nh-lbadge.e11{background:var(--e11-bg);color:var(--e11);}
+.nh-meta-txt{font-size:.78rem;color:#888;}
+.nh-w-icon{font-size:2.4rem;opacity:.3;}
+.nh-w-title{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:800;color:var(--black);margin-bottom:6px;}
+.nh-w-sub{font-size:.8rem;color:var(--mid);}
+
+/* ─── YEAR GRID ─── */
+.year-grid{max-width:1100px;margin:20px auto 0;padding:0 32px 80px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+
+/* ─── MONTH CARD ─── */
+.month-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.month-season-band{font-size:.57rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;padding:4px 12px;border-bottom:1px solid;}
+.month-title-row{display:flex;align-items:baseline;justify-content:space-between;padding:10px 12px 4px;}
+.month-name-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--black);}
+.month-year-lbl{font-size:.65rem;color:var(--mid);}
+.month-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 6px 10px;gap:0;}
+.cal-dow{font-size:.53rem;font-weight:700;text-align:center;color:var(--mid);padding:2px 0 3px;text-transform:uppercase;}
+.cal-cell{min-height:26px;padding:1px 0;position:relative;}
+.cal-num{font-size:.63rem;text-align:center;color:var(--muted2);padding:1px 0;line-height:1.3;}
+.cal-today .cal-num{color:var(--gold);font-weight:800;}
+.cal-today{border-radius:4px;background:rgba(201,168,76,.07);}
+/* ─── MATCH CHIPS ─── */
+.match-chip{font-family:'Barlow Condensed',sans-serif;font-size:.54rem;font-weight:700;padding:1px 3px;border-radius:3px;margin-bottom:1px;display:block;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:filter .15s;line-height:1.55;}
+.match-chip:hover{filter:brightness(1.15);}
+.chip-vpn{background:var(--vpn-bg);color:var(--vpn);}
+.chip-vpug{background:var(--vpug-bg);color:var(--vpug);}
+.chip-e11{background:var(--e11-bg);color:var(--e11);}
+.chip-played{opacity:.5;}
+.chip-loss-played{text-decoration:line-through;opacity:.45;}
+.chip-more{background:var(--gray);color:var(--mid);text-align:center;}
+.chip-free{background:rgba(0,0,0,.04);color:var(--mid);font-style:italic;cursor:default;}
+
+@media(max-width:900px){.year-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){
+  .year-grid{grid-template-columns:1fr;padding:0 16px 60px;}
+  .next-hero-wrap,.cal-header-row{padding:0 16px;}
+  .nh-card,.nh-waiting{padding:20px 24px;gap:18px;}
+  .nh-rival-name{font-size:2rem;}
+  .nh-cdown-num{font-size:3.5rem;}
+}
+
 /* ─── NEXT MATCH CARD ─── */
 .next-match-outer{max-width:1100px;margin:8px auto 0;padding:0 32px;}
 .next-match-card{display:flex;align-items:center;gap:14px;padding:11px 16px;border-radius:10px;border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.04);}
@@ -761,9 +826,9 @@ body{padding-top:64px;}
 
 <!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="ph-eyebrow">Temporada 1 · 2026</div>
+  <div class="ph-eyebrow">2026</div>
   <h1 class="ph-title">Calen<span>dario</span></h1>
-  <p class="ph-sub">Calendario unificado · VPN · VPUG · 11x11 · Finalizada</p>
+  <p class="ph-sub">Calendario unificado · VPN · VPUG · 11x11</p>
 </div>
 
 <!-- placeholder para el div.masthead original que se elimina -->
@@ -774,8 +839,25 @@ body{padding-top:64px;}
 </div>
 <!-- /masthead hidden -->
 
-<!-- Stats por liga -->
-<div class="stats-perleague" id="statsBar">
+<!-- CAL CONTROLS -->
+<div class="cal-header-row">
+  <div class="cal-legend-new">
+    <span class="cln-item"><span class="cln-dot vpn"></span>VPN · L/X</span>
+    <span class="cln-item"><span class="cln-dot vpug"></span>VPUG · L–J</span>
+    <span class="cln-item"><span class="cln-dot e11"></span>11x11 · M/J</span>
+  </div>
+  <div class="cal-admin-btns">
+    <button class="fbtn admin-el" onclick="openAddModal()" style="border-color:var(--gold);color:var(--gold);font-size:1rem;padding:4px 14px;" title="Agregar partido">＋</button>
+    <button class="fbtn admin-el" id="btnSave" onclick="saveToFirebase()" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar">☁ Guardar</button>
+    <button class="btn-lock" id="btnLock" onclick="toggleAdmin()">🔒 Admin</button>
+  </div>
+</div>
+
+<!-- PRÓXIMO PARTIDO HERO -->
+<div class="next-hero-wrap"><div id="nextHero"></div></div>
+
+<!-- STATS POR LIGA (compacto) -->
+<div class="stats-perleague" id="statsBar" style="max-width:1100px;margin:20px auto 0;padding:0 32px;">
   <div class="lsc" id="lsc-vpn">
     <div class="lsc-head"><span class="lsc-badge vpn">VPN</span><span class="lsc-wdl" id="lscw-vpn">— — —</span></div>
     <div class="lsc-l5" id="lscl5-vpn"></div>
@@ -797,65 +879,14 @@ body{padding-top:64px;}
   </div>
 </div>
 
-<!-- Controls -->
-<div class="controls">
-  <div class="legend">
-    <div class="leg"><span class="leg-dot vpn"></span>VPN · Lun/Mié</div>
-    <div class="leg"><span class="leg-dot vpug"></span>VPUG · Lun-Jue</div>
-    <div class="leg"><span class="leg-dot e11"></span>11x11 · Mar/Jue</div>
-  </div>
-  <div class="filter-btns" style="gap:6px;flex-wrap:wrap;align-items:center;">
-    <!-- Temporada -->
-    <div class="season-btns" style="margin-right:4px;">
-      <button class="sbtn active" id="sbtn-all" onclick="setSeason('all',this)">Todo</button>
-      <button class="sbtn" id="sbtn-t1"  onclick="setSeason('t1',this)">T1</button>
-      <button class="sbtn" id="sbtn-t2"  onclick="setSeason('t2',this)">T2</button>
-    </div>
-    <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
-    <!-- Liga -->
-    <button class="fbtn active" id="fball"  onclick="filter('all',this)">Todos</button>
-    <button class="fbtn"        id="fvpn"   onclick="filter('VPN',this)">VPN</button>
-    <button class="fbtn vpug"   id="fvpug"  onclick="filter('VPUG',this)">VPUG</button>
-    <button class="fbtn e11"    id="fe11"   onclick="filter('11x11',this)">11x11</button>
-    <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
-    <!-- Admin-only actions -->
-    <button class="fbtn admin-el" onclick="openAddModal()" style="border-color:var(--gold);color:var(--gold);font-size:1rem;padding:4px 14px;" title="Agregar partido o entrenamiento">＋</button>
-    <button class="fbtn admin-el" onclick="saveToFirebase()" id="btnSave" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar cambios para todos">☁️ Guardar</button>
-    <!-- Lock toggle -->
-    <button class="btn-lock" id="btnLock" onclick="toggleAdmin()" title="Modo administrador">🔒 Admin</button>
-  </div>
-</div>
+<!-- YEAR GRID -->
+<div id="yearGrid" class="year-grid"></div>
 
-
-<!-- WEEK STRIP -->
-<div class="week-strip-wrap" id="weekStripWrap">
-  <div class="week-strip" id="weekStrip"></div>
-</div>
-
-<!-- TODAY CARD -->
-<div id="todayCard" class="today-card-outer" style="display:none;">
-  <div class="today-card">
-    <div class="today-card-head">
-      <span class="today-card-title" id="todayCardTitle">Hoy</span>
-      <span style="font-size:.72rem;color:var(--muted2)" id="todayMatchCount"></span>
-    </div>
-    <div id="todayMatchList"></div>
-  </div>
-</div>
-
-<!-- PRÓXIMO PARTIDO -->
-<div id="nextMatchOuter" class="next-match-outer" style="display:none;">
-  <div class="next-match-card">
-    <span class="nm-countdown" id="nmCountdown">—</span>
-    <div style="flex:1;min-width:0;">
-      <div class="nm-rival" id="nmRival">—</div>
-      <div class="nm-meta" id="nmMeta"></div>
-    </div>
-    <span id="nmBadge"></span>
-  </div>
-</div>
-
-<div class="calendar" id="cal"></div>
+<!-- Hidden compat elements for existing JS functions -->
+<div id="nextMatchOuter" style="display:none;"><span id="nmCountdown"></span><div><div id="nmRival"></div><div id="nmMeta"></div></div><span id="nmBadge"></span></div>
+<div id="weekStripWrap" style="display:none;"><div id="weekStrip"></div></div>
+<div id="todayCard" style="display:none;"><div class="today-card"><div class="today-card-head"><span class="today-card-title" id="todayCardTitle"></span><span id="todayMatchCount"></span></div><div id="todayMatchList"></div></div></div>
+<div id="cal" style="display:none;"></div>
 
 <!-- STATS PANEL OVERLAY -->
 <div class="sp-overlay" id="spOverlay" onclick="if(event.target===this)closeStatsPanel()">
@@ -1539,7 +1570,147 @@ function renderTodayCard() {
   }).join('');
 }
 
+/* ── SEASON DEFINITIONS ──────────────────────────────────────────────────── */
+const SEASON_RANGES = [
+  { id:'t1', label:'T1 · Temporada 1', color:'#C9A84C', bg:'rgba(201,168,76,.09)', months:['2026-03','2026-04'] },
+];
+
+function abbrevRival(rival) {
+  if (!rival) return '?';
+  const s = rival.replace(/\s*(eSports|Esports|Esport|eSp|FC|CF|Reserva|Cantera|Esp)\s*/gi,' ').trim().replace(/\s+/g,' ');
+  const words = s.split(' ');
+  if (words[0].length >= 5) return words[0].slice(0,5).toUpperCase();
+  return (words[0]+(words[1]?words[1].slice(0,3):'')).slice(0,6).toUpperCase();
+}
+
+function renderNextHero() {
+  const today = getToday();
+  const hero = document.getElementById('nextHero');
+  if (!hero) return;
+  const upcoming = [];
+  RAW.forEach((_, i) => {
+    const m = getMatch(i);
+    if (m.free || m.date < today || getResult(i)) return;
+    upcoming.push({m, id: i});
+  });
+  custom.forEach((m, ci) => {
+    if (m.date < today || (m.tipo && m.tipo !== 'partido')) return;
+    upcoming.push({m, id: 'c'+ci});
+  });
+  upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || (a.m.time||'').localeCompare(b.m.time||''));
+
+  if (!upcoming.length) {
+    hero.innerHTML = `<div class="nh-waiting">
+      <span class="nh-w-icon">⏳</span>
+      <div>
+        <div class="nh-eyebrow" style="color:var(--gold)">Próxima temporada</div>
+        <div class="nh-w-title">Esperando el próximo fixture</div>
+        <div class="nh-w-sub">Temporada 1 finalizada · Aguardando el calendario T2</div>
+      </div>
+    </div>`;
+    return;
+  }
+  const {m, id} = upcoming[0];
+  const todayDt = new Date(today+'T12:00:00');
+  const matchDt = new Date(m.date+'T12:00:00');
+  const diff = Math.round((matchDt - todayDt)/(1000*60*60*24));
+  const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MESES_C = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const dateLabel = `${DIAS[matchDt.getDay()]} ${matchDt.getDate()} ${MESES_C[matchDt.getMonth()]}`;
+  const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
+  const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
+  const cdown = diff === 0
+    ? `<div class="nh-cdown"><div class="nh-cdown-num" style="font-size:2rem">HOY</div></div>`
+    : `<div class="nh-cdown"><div class="nh-cdown-num">${diff}</div><div class="nh-cdown-lbl">${diff===1?'Día':'Días'}</div></div>`;
+  hero.innerHTML = `<div class="nh-card">${cdown}<div>
+    <div class="nh-eyebrow">Próximo partido</div>
+    <div class="nh-rival-name">vs ${m.rival}</div>
+    <div class="nh-meta-row">
+      ${m.league?`<span class="nh-lbadge ${lgKey}">${m.league}</span>`:''}
+      <span class="nh-meta-txt">${dateLabel}</span>
+      ${m.time?`<span class="nh-meta-txt">· ${m.time}</span>`:''}
+      <span class="nh-meta-txt">· ${loc}</span>
+    </div>
+  </div></div>`;
+}
+
+function renderYearGrid() {
+  const grid = document.getElementById('yearGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const today = getToday();
+  const year = parseInt(today.slice(0,4));
+  const mbd = {};
+  RAW.forEach((_, i) => {
+    const m = getMatch(i);
+    if (!mbd[m.date]) mbd[m.date] = [];
+    mbd[m.date].push(i);
+  });
+  custom.forEach((m, ci) => {
+    if (!mbd[m.date]) mbd[m.date] = [];
+    mbd[m.date].push('c'+ci);
+  });
+  for (let mo = 0; mo < 12; mo++) grid.appendChild(buildMonthCard(year, mo, mbd, today));
+}
+
+function buildMonthCard(year, month, mbd, today) {
+  const moStr = String(month+1).padStart(2,'0');
+  const moKey = `${year}-${moStr}`;
+  const season = SEASON_RANGES.find(s => s.months.includes(moKey));
+  const firstDt = new Date(`${year}-${moStr}-01T12:00:00`);
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  let startDow = firstDt.getDay()-1; if (startDow < 0) startDow = 6;
+  let cellsHtml = '';
+  for (let i = 0; i < startDow; i++) cellsHtml += `<div class="cal-cell empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${moStr}-${String(d).padStart(2,'0')}`;
+    const isToday = ds === today;
+    const isPast = ds < today;
+    const ids = (mbd[ds]||[]).slice().sort((a,b) => {
+      const ma = getAnyMatch(typeof a==='string'?a:parseInt(a));
+      const mb2 = getAnyMatch(typeof b==='string'?b:parseInt(b));
+      return (ma.time||'').localeCompare(mb2.time||'');
+    });
+    let chips = '';
+    ids.slice(0,3).forEach(id => {
+      const nid = typeof id==='string' ? id : parseInt(id);
+      const m = getAnyMatch(nid);
+      const outcome = outcomeFor(nid);
+      const result = getResult(nid);
+      const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league]||'';
+      const abbr = m.free ? 'LIBRE' : abbrevRival(m.rival);
+      const score = result ? scoreDisplay(nid) : null;
+      const tip = `vs ${m.rival||'?'}${score?' · '+score:' · Pendiente'}${m.league?' · '+m.league:''}${m.time?' · '+m.time:''}`;
+      const playedCls = isPast && outcome ? (outcome==='loss'?' chip-loss-played':' chip-played') : '';
+      const freeCls = m.free ? ' chip-free' : '';
+      const click = !m.free ? `onclick="openStatsPanel(${JSON.stringify(nid)})"` : '';
+      chips += `<div class="match-chip chip-${lgKey}${playedCls}${freeCls}" title="${tip}" ${click}>${abbr}</div>`;
+    });
+    if (ids.length > 3) chips += `<div class="match-chip chip-more">+${ids.length-3}</div>`;
+    cellsHtml += `<div class="cal-cell${isToday?' cal-today':''}"><div class="cal-num">${d}</div>${chips}</div>`;
+  }
+  const MO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const div = document.createElement('div');
+  div.className = 'month-card';
+  div.innerHTML = `
+    ${season?`<div class="month-season-band" style="background:${season.bg};color:${season.color};border-color:${season.color}">${season.label}</div>`:''}
+    <div class="month-title-row"><span class="month-name-lbl">${MO[month]}</span><span class="month-year-lbl">${year}</span></div>
+    <div class="month-cal-grid">
+      <div class="cal-dow">L</div><div class="cal-dow">M</div><div class="cal-dow">X</div>
+      <div class="cal-dow">J</div><div class="cal-dow">V</div><div class="cal-dow">S</div>
+      <div class="cal-dow">D</div>${cellsHtml}
+    </div>`;
+  return div;
+}
+
 function render(){
+  renderNextHero();
+  renderYearGrid();
+  updateStats();
+  // (legacy functions kept below for admin compat — not called from here)
+}
+
+function render_legacy_unused(){
   const cal = document.getElementById('cal');
   cal.innerHTML = '';
   const today = getToday();
