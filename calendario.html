@@ -1402,7 +1402,8 @@ function rivalMatch(a, b){
 }
 function findSeedMatch(id){
   if(!SEED_MATCHES || !SEED_MATCHES.length) return null;
-  const m = getMatch(id);
+  const m = getAnyMatch(typeof id === 'string' ? id : parseInt(id));
+  if(!m || !m.date) return null;
   const mmdd = m.date.slice(5); // MM-DD
   // 1st pass: exact date + league + rival
   let hit = SEED_MATCHES.find(s =>
