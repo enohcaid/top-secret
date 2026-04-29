@@ -1448,7 +1448,7 @@ function openStatsPanel(id){
   const r     = getResult(id);
   const out   = outcomeFor(id);
   const score = scoreDisplay(id);
-  const seed  = findSeedMatch(id);
+  const seed  = r ? findSeedMatch(id) : null;
   const leagueCls = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league];
 
   document.getElementById('spTitle').textContent = m.rival;
@@ -1461,7 +1461,9 @@ function openStatsPanel(id){
     out ? {win:'Victoria',loss:'Derrota',draw:'Empate'}[out] : '';
 
   const body = document.getElementById('spBody');
-  if(!seed || !seed.players || !seed.players.length){
+  if(!r){
+    body.innerHTML = `<div class="sp-no-data">Resultado no cargado — las estadísticas aparecen una vez confirmado el marcador.</div>`;
+  } else if(!seed || !seed.players || !seed.players.length){
     body.innerHTML = `<div class="sp-no-data">No hay estadísticas detalladas para este partido.</div>`;
   } else {
     const ts = seed.team_stats || {};
