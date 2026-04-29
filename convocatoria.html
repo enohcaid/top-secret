@@ -1041,7 +1041,9 @@ function saveBlackDate() {
   const fmt = d.getDate() + '/' + (d.getMonth() + 1);
   // Vacation stored in availability for everyone — returnDate check handles expiry
   availability[currentPlayer] = { status:'black', returnDate:date, note:'Vuelve '+fmt };
-  // For alwaysPresent players, also clear any conflicting daily override
+  // Remove from alwaysPresent so "siempre disponible" set later takes precedence at reset
+  const _apIdx = alwaysPresent.indexOf(currentPlayer);
+  if (_apIdx !== -1) alwaysPresent.splice(_apIdx, 1);
   delete dailyOverrides[currentPlayer];
   saveState();
   closeModal('blackOverlay'); render();
