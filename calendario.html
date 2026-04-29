@@ -1435,13 +1435,9 @@ function findSeedMatch(id){
   if(!hit) hit = allSeeds.find(s =>
     s.date.slice(5) === mmdd && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
-  // 3rd pass: same year + league + rival (reduces false matches vs full league+rival fallback)
+  // 3rd pass: same year + league + rival
   if(!hit) hit = allSeeds.find(s =>
     s.date.slice(0,4) === m.date.slice(0,4) && s.league === m.league && rivalMatch(s.rival, m.rival)
-  );
-  // 4th pass: league + rival only (last resort)
-  if(!hit) hit = allSeeds.find(s =>
-    s.league === m.league && rivalMatch(s.rival, m.rival)
   );
   return hit || null;
 }
@@ -2445,8 +2441,9 @@ window.openAddModal   = openAddModal;
 window.closeAddModal  = closeAddModal;
 window.setAddType     = setAddType;
 window.setAddHome     = setAddHome;
-window.saveAdd        = saveAdd;
-window.deleteCustom   = deleteCustom;
+window.saveAdd          = saveAdd;
+window.deleteCustom     = deleteCustom;
+window.editCurrentMatch = editCurrentMatch;
 
 // Start in locked mode
 document.body.classList.add('locked');
