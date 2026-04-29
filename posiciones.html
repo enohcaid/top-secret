@@ -1337,7 +1337,7 @@ async function saveMatchEdit() {
 
   try {
     await TORNEO_COL.doc(_editCtx.torneoId).update({ matches });
-    if (date && rival) await syncMatchToCalendar(_editCtx.torneoId, m);
+    if (date && rival) await syncToCalendar(_editCtx.torneoId, m);
     closeEditMatchModal();
     showToast('Partido actualizado ✓');
     await renderTorneos();
@@ -1384,7 +1384,7 @@ async function saveResult() {
 
   try {
     await TORNEO_COL.doc(_resultCtx.torneoId).update({ matches });
-    await syncResultToCalendar(_resultCtx.torneoId, m);
+    await syncToCalendar(_resultCtx.torneoId, m);
     closeResultModal();
     showToast('Resultado guardado ✓');
     await renderTorneos();
@@ -1406,36 +1406,12 @@ async function clearResult() {
 
   try {
     await TORNEO_COL.doc(_resultCtx.torneoId).update({ matches });
-    await syncResultToCalendar(_resultCtx.torneoId, matchForSync, true);
+    await syncToCalendar(_resultCtx.torneoId, matchForSync, true);
     closeResultModal();
     showToast('Resultado borrado');
     await renderTorneos();
   } catch(e) {
     showToast('Error: ' + e.message);
-  }
-}
-
-async function syncResultToCalendar(torneoId, match, clear = false) {
-  if (!match.date || !match.rival) return;
-  const calId = 'tr-' + torneoId + '-' + match.date + '-' + (match.rival||'').replace(/\s+/g,'');
-  try {
-    const snap = await CAL_DOC_T.get();
-    const data = snap.exists ? snap.data() : {};
-    const custom = data.custom || [];
-    const results = Object.assign({}, data.results || {});
-    const calIdx = custom.findIndex(c => c.calId === calId);
-    if (calIdx < 0) return; // no calendar entry for this match yet
-    const calKey = 'c' + calIdx;
-    const isHome = match.home === '1' || match.home === true || match.isHome === true;
-    if (clear) {
-      delete results[calKey];
-    } else {
-      const gf = match.goalsFor, ga = match.goalsAgainst;
-      results[calKey] = isHome ? [gf, ga] : [ga, gf];
-    }
-    await CAL_DOC_T.set({ results }, { merge: true });
-  } catch(e) {
-    console.warn('syncResultToCalendar error:', e);
   }
 }
 
@@ -1461,17 +1437,20 @@ function getMatchFromCtxMutable(matches, ctx) {
   return matches.elim[ctx.phaseIdx];
 }
 
-/* ── Calendar sync ── */
-async function syncMatchToCalendar(torneoId, match) {
+/* ── Calendar sync (unified: creates/updates entry + writes result in one step) ── */
+async function syncToCalendar(torneoId, match, clearResult = false) {
   if (!match.date || !match.rival) return;
   try {
     const snap = await CAL_DOC_T.get();
     const data = snap.exists ? snap.data() : {};
     const custom = data.custom ? [...data.custom] : [];
+    const results = Object.assign({}, data.results || {});
     const t = _torneos.find(x => x.id === torneoId);
     const torneoName = t ? t.name : 'Torneo';
-    const calId = 'tr-' + torneoId + '-' + (match.date || '') + '-' + (match.rival||'').replace(/\s+/g,'');
-    const existing = custom.findIndex(c => c.calId === calId);
+    const calId = 'tr-' + torneoId + '-' + match.date + '-' + (match.rival||'').replace(/\s+/g,'');
+
+    // Create or update calendar entry
+    let calIdx = custom.findIndex(c => c.calId === calId);
     const entry = {
       calId,
       rival:  match.rival,
@@ -1482,11 +1461,23 @@ async function syncMatchToCalendar(torneoId, match) {
       notes:  torneoName,
       source: 'torneo'
     };
-    if (existing >= 0) custom[existing] = entry;
-    else custom.push(entry);
-    await CAL_DOC_T.set({ custom }, { merge: true });
+    if (calIdx >= 0) custom[calIdx] = entry;
+    else { custom.push(entry); calIdx = custom.length - 1; }
+
+    // Sync result
+    const calKey = 'c' + calIdx;
+    const isHome = match.home === '1' || match.home === true;
+    if (clearResult) {
+      delete results[calKey];
+    } else if (match.goalsFor !== undefined && match.goalsAgainst !== undefined) {
+      results[calKey] = isHome
+        ? [match.goalsFor,     match.goalsAgainst]
+        : [match.goalsAgainst, match.goalsFor];
+    }
+
+    await CAL_DOC_T.set({ custom, results }, { merge: true });
   } catch(e) {
-    console.warn('syncMatchToCalendar error:', e);
+    console.warn('syncToCalendar error:', e);
   }
 }
 </script>
