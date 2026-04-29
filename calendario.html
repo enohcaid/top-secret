@@ -917,6 +917,9 @@ body{padding-top:64px;}
       <div class="sp-score-sub" id="spOutcome"></div>
     </div>
     <div id="spBody"></div>
+    <div id="spEditBar" style="display:none;padding:12px 16px;border-top:1px solid var(--border);">
+      <button onclick="editCurrentMatch()" style="width:100%;padding:10px;background:var(--gold);color:#000;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;">✏️ Editar resultado</button>
+    </div>
   </div>
 </div>
 
@@ -1165,9 +1168,24 @@ const T1_CUTOFF  = '2026-04-30';
 // Admin PIN (change here to customize)
 const ADMIN_PIN  = '8189';
 
+// Worker KV — same endpoint as estadisticas.html, for cloud-uploaded match stats
+const WORKER_URL_CAL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+const KV_KEY_CAL     = 'ts_matches_v1';
+let cloudSeedMatches = []; // populated on load
+let currentStatsId   = null; // id of the match currently open in the stats panel
+
+async function fetchCloudSeedMatches() {
+  try {
+    const r = await fetch(`${WORKER_URL_CAL}/kv?key=${KV_KEY_CAL}`);
+    if (!r.ok) return;
+    const data = await r.json();
+    cloudSeedMatches = Array.isArray(data) ? data : [];
+  } catch(e) { /* silently ignore — stats panel falls back to local data */ }
+}
+
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M",
@@ -1227,9 +1245,14 @@ function getMatch(i){
 }
 
 // Unified getter: integer = RAW entry, 'c0' string = custom entry
+// Normalizes 'home' → 'isHome' for entries synced from posiciones-torneos
 function getAnyMatch(id){
   if(typeof id === 'string' && id.startsWith('c')){
-    return custom[parseInt(id.slice(1))];
+    const entry = custom[parseInt(id.slice(1))];
+    if(entry && entry.isHome === undefined && entry.home !== undefined){
+      return Object.assign({}, entry, {isHome: entry.home});
+    }
+    return entry;
   }
   return getMatch(id);
 }
@@ -1399,26 +1422,32 @@ function rivalMatch(a, b){
   return long.includes(short.slice(0,4)) || long.includes(short.slice(-4));
 }
 function findSeedMatch(id){
-  if(!SEED_MATCHES || !SEED_MATCHES.length) return null;
+  const allSeeds = [...(SEED_MATCHES||[]), ...cloudSeedMatches];
+  if(!allSeeds.length) return null;
   const m = getAnyMatch(typeof id === 'string' ? id : parseInt(id));
   if(!m || !m.date) return null;
   const mmdd = m.date.slice(5); // MM-DD
   // 1st pass: exact date + league + rival
-  let hit = SEED_MATCHES.find(s =>
+  let hit = allSeeds.find(s =>
     s.date === m.date && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
   // 2nd pass: ignore year (handles seed entries with wrong year)
-  if(!hit) hit = SEED_MATCHES.find(s =>
+  if(!hit) hit = allSeeds.find(s =>
     s.date.slice(5) === mmdd && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
-  // 3rd pass: league + rival only (last resort, handles date discrepancies)
-  if(!hit) hit = SEED_MATCHES.find(s =>
+  // 3rd pass: same year + league + rival (reduces false matches vs full league+rival fallback)
+  if(!hit) hit = allSeeds.find(s =>
+    s.date.slice(0,4) === m.date.slice(0,4) && s.league === m.league && rivalMatch(s.rival, m.rival)
+  );
+  // 4th pass: league + rival only (last resort)
+  if(!hit) hit = allSeeds.find(s =>
     s.league === m.league && rivalMatch(s.rival, m.rival)
   );
   return hit || null;
 }
 
 function openStatsPanel(id){
+  currentStatsId = id;
   const m     = getAnyMatch(typeof id === 'string' ? id : parseInt(id));
   const r     = getResult(id);
   const out   = outcomeFor(id);
@@ -1471,11 +1500,17 @@ function openStatsPanel(id){
         <tbody>${rows}</tbody>
       </table>`;
   }
+  document.getElementById('spEditBar').style.display = isAdminMode ? '' : 'none';
   document.getElementById('spOverlay').classList.add('open');
 }
 
 function closeStatsPanel(){
   document.getElementById('spOverlay').classList.remove('open');
+}
+
+function editCurrentMatch(){
+  closeStatsPanel();
+  if(currentStatsId !== null) openModal(currentStatsId);
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
@@ -2071,7 +2106,7 @@ function closeModal(){
   document.getElementById('overlay').classList.remove('open');
   editingId=null;
 }
-function saveRes(){
+async function saveRes(){
   const m = getAnyMatch(typeof editingId === 'string' ? editingId : parseInt(editingId));
   const myG = parseInt(document.getElementById('mHome').value);
   const opG = parseInt(document.getElementById('mAway').value);
@@ -2082,12 +2117,44 @@ function saveRes(){
   saveState();
   closeModal();
   render();
+  // Sync to torneo if this is a tournament match
+  if(m.source === 'torneo' && m.calId){
+    syncCalResultToTorneo(m.calId, myG, opG);
+  }
 }
-function clearRes(){
+async function clearRes(){
+  const m = getAnyMatch(typeof editingId === 'string' ? editingId : parseInt(editingId));
   delete results[editingId];
   saveState();
   closeModal();
   render();
+  if(m && m.source === 'torneo' && m.calId){
+    syncCalResultToTorneo(m.calId, null, null);
+  }
+}
+
+async function syncCalResultToTorneo(calId, myGoals, opGoals){
+  try {
+    const parts = calId.match(/^tr-([^-]+)-(\d{4}-\d{2}-\d{2})-(.*)$/);
+    if(!parts) return;
+    const [, torneoId, date, rivalKey] = parts;
+    const torneoRef = doc(db, 'torneos', torneoId);
+    const snap = await getDoc(torneoRef);
+    if(!snap.exists()) return;
+    const t = snap.data();
+    const matches = JSON.parse(JSON.stringify(t.matches || {}));
+    let found = false;
+    const applyToMatch = mm => {
+      if((mm.rival||'').replace(/\s+/g,'') === rivalKey && mm.date === date){
+        if(myGoals === null){ delete mm.goalsFor; delete mm.goalsAgainst; }
+        else { mm.goalsFor = myGoals; mm.goalsAgainst = opGoals; }
+        found = true;
+      }
+    };
+    (matches.groups||[]).forEach(g => (g.matches||[]).forEach(applyToMatch));
+    (matches.elim||[]).forEach(applyToMatch);
+    if(found) await updateDoc(torneoRef, { matches });
+  } catch(e){ console.warn('syncCalResultToTorneo error:', e); }
 }
 
 // ── EDIT MODAL ────────────────────────────────────────────────────────────────
@@ -2385,6 +2452,8 @@ window.deleteCustom   = deleteCustom;
 document.body.classList.add('locked');
 
 // render() is called by onSnapshot when Firebase data loads
+// Fetch cloud match stats in the background so the stats panel is complete
+fetchCloudSeedMatches();
 </script>
 
 <footer>
