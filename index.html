@@ -151,6 +151,27 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .nav-card-desc{font-size:.75rem;color:var(--mid);}
 .nav-card-arrow{margin-top:auto;font-size:1.1rem;color:var(--gold);}
 
+/* ── ASCENSO ── */
+.ascenso-strip{background:var(--black);border-top:1px solid rgba(201,168,76,.2);border-bottom:1px solid rgba(201,168,76,.2);padding:28px 40px;display:flex;align-items:center;gap:32px;position:relative;overflow:hidden;}
+.ascenso-strip::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 60% 50%,rgba(201,168,76,.06) 0%,transparent 70%);pointer-events:none;}
+.ascenso-left{flex:1;z-index:1;}
+.ascenso-eyebrow{font-size:.68rem;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.ascenso-headline{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;text-transform:uppercase;color:var(--white);line-height:1.05;letter-spacing:.02em;margin-bottom:10px;}
+.ascenso-headline span{color:var(--gold);}
+.ascenso-desc{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.6;max-width:480px;}
+.ascenso-right{flex-shrink:0;display:flex;align-items:center;gap:16px;z-index:1;}
+.ascenso-score-box{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:6px;padding:16px 28px;text-align:center;}
+.ascenso-score-label{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;}
+.ascenso-score-num{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-.01em;}
+.ascenso-score-sub{font-size:.62rem;color:rgba(255,255,255,.35);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+.ascenso-photo{width:180px;height:120px;border-radius:6px;overflow:hidden;border:1px solid rgba(201,168,76,.2);flex-shrink:0;}
+.ascenso-photo img{width:100%;height:100%;object-fit:cover;object-position:center;}
+@media(max-width:880px){
+  .ascenso-strip{flex-direction:column;padding:24px 20px;gap:20px;}
+  .ascenso-right{width:100%;justify-content:center;}
+  .ascenso-photo{display:none;}
+}
+
 /* ── FOOTER ── */
 footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;}
 .footer-brand{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);}
@@ -235,7 +256,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   <section class="hero">
     <div class="hero-lines"></div>
     <div class="hero-content">
-      <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">T1 · 2026 · Finalizada</span></div>
+      <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">ASCENDIDOS · Primera División VPN · 2026</span></div>
       <h1 class="hero-title">TOP<br><span class="hero-title-accent">SECRET</span><br>FC</h1>
       <div class="hero-line"></div>
       <p class="hero-sub">EA FC Clubs Pro · Buenos Aires · Argentina</p>
@@ -256,12 +277,31 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     </div>
   </section>
 
+  <!-- ASCENSO -->
+  <section class="ascenso-strip">
+    <div class="ascenso-left">
+      <div class="ascenso-eyebrow">VPN · Temporada 1 · 2026</div>
+      <div class="ascenso-headline">¡Ascendidos a<br><span>Primera División!</span></div>
+      <p class="ascenso-desc">Top Secret FC logró el ascenso a la Primera División de VPN al vencer a Comunicaciones eSports por un global de 3–2 en el partido de promoción. Una campaña histórica.</p>
+    </div>
+    <div class="ascenso-right">
+      <div class="ascenso-photo">
+        <img src="logos/Festejo Ascenso.png" alt="Festejo ascenso" onerror="this.src='logos/festejo.png'">
+      </div>
+      <div class="ascenso-score-box">
+        <div class="ascenso-score-label">Global · Final Promoción</div>
+        <div class="ascenso-score-num">3–2</div>
+        <div class="ascenso-score-sub">vs Comunicaciones eSports</div>
+      </div>
+    </div>
+  </section>
+
   <!-- QUICK STATS — filled by JS -->
   <section class="section alt">
     <div class="section-header">
       <h2 class="section-title">Temporada 1 · 2026</h2>
       <div class="section-line"></div>
-      <span class="section-badge">Resumen</span>
+      <span class="section-badge" style="color:var(--gold);border-color:rgba(201,168,76,.35);">Ascenso Logrado</span>
     </div>
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card"><div class="stat-num" id="sq-pj">—</div><div class="stat-label">Partidos jugados</div><div class="stat-sub" id="sq-pj-sub">VPN + VPUG + 11x11</div></div>
@@ -279,16 +319,16 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       <span class="section-badge">T1 2026</span>
     </div>
     <div class="leagues-grid">
-      <div class="league-card">
-        <div class="lc-accent" style="background:var(--vpn)"></div>
-        <div class="lc-tag" style="color:var(--vpn)">VPN</div>
+      <div class="league-card" style="border-color:rgba(201,168,76,.4);">
+        <div class="lc-accent" style="background:var(--gold)"></div>
+        <div class="lc-tag" style="color:var(--gold)">VPN · ASCENSO</div>
         <div class="lc-name">Virtual Pro Network</div>
         <div class="lc-pos">
-          <div class="lc-pos-num">3°</div>
-          <div class="lc-pos-suf">lugar</div>
+          <div class="lc-pos-num" style="color:var(--gold)">1ra</div>
+          <div class="lc-pos-suf" style="color:var(--gold)">División</div>
         </div>
-        <div class="lc-pts">41 pts · 12V 5E 2D · 19 PJ</div>
-        <span class="lc-badge final-badge">Final T1</span>
+        <div class="lc-pts">Regular: 3° · 41 pts · 12V 5E 2D</div>
+        <span class="lc-badge final-badge" style="background:rgba(201,168,76,.18);color:var(--gold);border-color:rgba(201,168,76,.5);">ASCENDIDOS T1 2026</span>
       </div>
       <div class="league-card">
         <div class="lc-accent" style="background:var(--vpug)"></div>
@@ -373,7 +413,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
 
 <!-- FOOTER -->
 <footer>
-  <span class="footer-brand"><strong>Top Secret FC</strong> · Temporada 1 · 2026</span>
+  <span class="footer-brand"><strong>Top Secret FC</strong> · Ascendidos a Primera División · VPN T1 2026</span>
   <span class="footer-copy">EA FC Clubs Pro · Buenos Aires · Argentina</span>
 </footer>
 

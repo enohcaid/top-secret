@@ -831,7 +831,7 @@ const SEED_MATCHES = [
   ]},
 
   // Playoffs VPN T1 - Semifinal Vuelta vs 4BDOMIFL4NES - 22 Abr (Local, 2-0, Victoria)
-  {rival:'4BDOMIFL4NES', league:'VPN', date:'2026-04-22', match_result:'2-0', uploadedAt:'2026-04-22T01:00:00.000Z', notes:'Semifinal · Vuelta (Local)', torneo:'VPN 2da División Playoffs (T1 2026)',
+  {rival:'4BDOMIFL4NES', league:'VPN', date:'2026-04-22', match_result:'2-0', uploadedAt:'2026-04-22T01:00:00.000Z', notes:'Semifinal · Vuelta (Local)', isHome:true, torneo:'VPN 2da División Playoffs (T1 2026)',
   team_stats:{posesion:51,tiros:4,tiros_arco:null,goles_esperados:1.1,pases:161,precision_pases:82,entradas:35,entradas_exito:10,intercepciones:21,paradas:1,faltas:2,fuera_juego:1,corneres:1,regates_exito:88,precision_tiro:50},
   players:[
     {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:7.0, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -845,6 +845,76 @@ const SEED_MATCHES = [
     {name:'Alexiisraiies23', matched:'Alexiisraiies23', played_pos:'DCD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'LD',  rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'POR', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // ── VPN PLAYOFFS — Final de Promoción vs InfinitX ─────────────────────
+  // Ida (Visita): InfinitX 0-1 TS — 27 Abr
+  {rival:'InfinitX', league:'VPN', date:'2026-04-27', match_result:'1-0', uploadedAt:'2026-04-27T00:00:00.000Z', notes:'Final Promoción · Ida (Visita)', isHome:false, torneo:'VPN 2da División Playoffs (T1 2026)',
+  team_stats:{posesion:66,tiros:6,tiros_arco:null,goles_esperados:null,pases:214,precision_pases:null,entradas:14,entradas_exito:3,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lucasmati_akd',   matched:'Lucasmati_akd',   played_pos:'ED',  rating:7.2, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:8.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DCI', rating:8.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DFC', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa07',         matched:'Buraa07',         played_pos:'DFD', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'POR', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Vuelta (Local): TS 1-3 InfinitX — 27 Abr
+  {rival:'InfinitX', league:'VPN', date:'2026-04-27', match_result:'1-3', uploadedAt:'2026-04-27T01:00:00.000Z', notes:'Final Promoción · Vuelta (Local)', isHome:true, torneo:'VPN 2da División Playoffs (T1 2026)',
+  team_stats:{posesion:64,tiros:6,tiros_arco:null,goles_esperados:null,pases:227,precision_pases:null,entradas:16,entradas_exito:3,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:6.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lucasmati_akd',   matched:'Lucasmati_akd',   played_pos:'ED',  rating:7.5, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:9.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DCI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23', matched:'Alexiisraiies23', played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DFD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'POR', rating:4.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // ── VPN PLAYOFFS — Final de Promoción vs Comunicaciones eSports ────────
+  // Ida (Local): TS 1-1 Comunicaciones — 29 Abr
+  {rival:'Comunicaciones eSports', league:'VPN', date:'2026-04-29', match_result:'1-1', uploadedAt:'2026-04-29T00:00:00.000Z', notes:'Final Promoción · Ida (Local)', isHome:true, torneo:'VPN 2da División Playoffs (T1 2026)',
+  team_stats:{posesion:55,tiros:6,tiros_arco:null,goles_esperados:null,pases:179,precision_pases:null,entradas:26,entradas_exito:11,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lucasmati_akd',   matched:'Lucasmati_akd',   played_pos:'ED',  rating:7.0, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'MCD', rating:7.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23', matched:'Alexiisraiies23', played_pos:'DFC', rating:8.6, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DFD', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'POR', rating:5.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Vuelta (Visita): Comunicaciones 1-2 TS — 29 Abr
+  {rival:'Comunicaciones eSports', league:'VPN', date:'2026-04-29', match_result:'2-1', uploadedAt:'2026-04-29T01:00:00.000Z', notes:'Final Promoción · Vuelta (Visita)', isHome:false, torneo:'VPN 2da División Playoffs (T1 2026)',
+  team_stats:{posesion:62,tiros:13,tiros_arco:null,goles_esperados:null,pases:221,precision_pases:null,entradas:14,entradas_exito:4,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[
+    {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:8.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:8.0, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'cansitrGd22_',    matched:'cansitrGd22_',    played_pos:'DC',  rating:6.1, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lucasmati_akd',   matched:'Lucasmati_akd',   played_pos:'ED',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'CipriMancini',    matched:'CipriMancini',    played_pos:'MCI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',         matched:'Guiidow',         played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'zPibu__',         matched:'zPibu__',         played_pos:'DFI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexiisraiies23', matched:'Alexiisraiies23', played_pos:'DFC', rating:8.5, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DFD', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'POR', rating:5.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
 ];

@@ -25,7 +25,11 @@ const TS_NAV_PAGES = [
     #ts-nav .ts-links a{padding:7px 12px;border-radius:8px;text-decoration:none;font-size:.8rem;font-weight:600;letter-spacing:.04em;color:#8890a8;transition:all .15s;white-space:nowrap;}
     #ts-nav .ts-links a:hover{color:#f0f2f8;background:#1e2230;}
     #ts-nav .ts-links a.ts-active{color:#c8a84b;background:rgba(200,168,75,.12);}
+    #ts-nav .ts-promo-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.35);border-radius:4px;padding:3px 9px;margin-left:12px;flex-shrink:0;}
+    #ts-nav .ts-promo-badge span:first-child{width:5px;height:5px;border-radius:50%;background:#c8a84b;display:inline-block;}
+    #ts-nav .ts-promo-badge span:last-child{font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#c8a84b;}
     @media(max-width:640px){
+      #ts-nav .ts-promo-badge{display:none;}
       #ts-nav .ts-links a{padding:6px 8px;font-size:.72rem;}
       #ts-nav .ts-logo span{display:none;}
     }
@@ -40,6 +44,11 @@ const TS_NAV_PAGES = [
   logo.href = 'index.html';
   logo.innerHTML = '<img src="Top-Secret.png" alt="TS"><span>TOP <b>SECRET</b></span>';
   nav.appendChild(logo);
+
+  const promoBadge = document.createElement('div');
+  promoBadge.className = 'ts-promo-badge';
+  promoBadge.innerHTML = '<span></span><span>1ra División VPN</span>';
+  nav.appendChild(promoBadge);
 
   const links = document.createElement('div');
   links.className = 'ts-links';
