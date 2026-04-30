@@ -51,32 +51,32 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .main{min-height:calc(100vh - var(--topbar));}
 
 /* ── HERO ── */
-.hero{background:var(--black);padding:64px 40px;display:flex;align-items:center;justify-content:space-between;gap:40px;min-height:420px;position:relative;overflow:hidden;}
+.hero{background:var(--black);padding:18px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:130px;position:relative;overflow:hidden;}
 .hero::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(201,168,76,.04));pointer-events:none;}
 .hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
 .hero-lines::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);}
 .hero-content{flex:1;z-index:1;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:5px 12px;margin-bottom:20px;}
-.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
-.hero-badge-text{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
-.hero-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(56px,8vw,96px);font-weight:900;line-height:.9;letter-spacing:-.01em;color:var(--white);text-transform:uppercase;margin-bottom:16px;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:3px 10px;margin-bottom:10px;}
+.hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
+.hero-badge-text{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
+.hero-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(22px,3vw,38px);font-weight:900;line-height:.9;letter-spacing:-.01em;color:var(--white);text-transform:uppercase;margin-bottom:8px;}
 .hero-title-accent{color:var(--gold);}
-.hero-line{width:64px;height:3px;background:var(--gold);margin-bottom:20px;}
-.hero-sub{font-size:13px;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
-.hero-cta{display:flex;gap:10px;margin-top:28px;}
-.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:var(--black);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 22px;border-radius:4px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;}
+.hero-line{width:36px;height:2px;background:var(--gold);margin-bottom:10px;}
+.hero-sub{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
+.hero-cta{display:flex;gap:8px;margin-top:12px;}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:var(--black);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:4px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;}
 .btn-primary:hover{background:var(--gold2);}
-.btn-ghost{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 22px;border-radius:4px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:4px;cursor:pointer;text-decoration:none;transition:all .2s;}
 .btn-ghost:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
-.hero-visual{flex-shrink:0;z-index:1;width:900px;align-self:stretch;position:relative;overflow:hidden;margin:-64px -40px -64px 0;background:var(--black);}
+.hero-visual{flex-shrink:0;z-index:1;width:300px;align-self:stretch;position:relative;overflow:hidden;margin:-18px -40px -18px 0;background:var(--black);}
 .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;}
 .hero-photo-fade{position:absolute;inset:0;background:linear-gradient(to right,var(--black) 0%,rgba(17,17,17,.35) 28%,transparent 100%);z-index:2;}
-.hero-slider-ui{position:absolute;bottom:18px;right:18px;display:flex;align-items:center;gap:8px;z-index:3;}
-.hero-nav-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.4rem;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s,border-color .2s;}
+.hero-slider-ui{position:absolute;bottom:10px;right:10px;display:flex;align-items:center;gap:6px;z-index:3;}
+.hero-nav-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:1.1rem;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s,border-color .2s;}
 .hero-nav-btn:hover{background:rgba(201,168,76,.35);border-color:var(--gold);}
-.hero-dots{display:flex;align-items:center;gap:5px;}
-.hero-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:all .3s ease;}
-.hero-dot.active{width:20px;border-radius:3px;background:var(--gold);}
+.hero-dots{display:flex;align-items:center;gap:4px;}
+.hero-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:all .3s ease;}
+.hero-dot.active{width:14px;border-radius:3px;background:var(--gold);}
 
 /* ── SECTION ── */
 .section{padding:40px 40px;}
@@ -152,24 +152,26 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .nav-card-arrow{margin-top:auto;font-size:1.1rem;color:var(--gold);}
 
 /* ── ASCENSO ── */
-.ascenso-strip{background:var(--black);border-top:1px solid rgba(201,168,76,.2);border-bottom:1px solid rgba(201,168,76,.2);padding:28px 40px;display:flex;align-items:center;gap:32px;position:relative;overflow:hidden;}
-.ascenso-strip::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 60% 50%,rgba(201,168,76,.06) 0%,transparent 70%);pointer-events:none;}
-.ascenso-left{flex:1;z-index:1;}
-.ascenso-eyebrow{font-size:.68rem;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
-.ascenso-headline{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;text-transform:uppercase;color:var(--white);line-height:1.05;letter-spacing:.02em;margin-bottom:10px;}
+.ascenso-strip{background:var(--black);border-top:1px solid rgba(201,168,76,.2);border-bottom:1px solid rgba(201,168,76,.2);display:flex;align-items:stretch;position:relative;overflow:hidden;min-height:480px;}
+.ascenso-left{flex:1;z-index:1;padding:64px 56px;display:flex;flex-direction:column;justify-content:center;}
+.ascenso-eyebrow{font-size:.7rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.ascenso-headline{font-family:'Barlow Condensed',sans-serif;font-size:clamp(3rem,6vw,5.2rem);font-weight:900;text-transform:uppercase;color:var(--white);line-height:.97;letter-spacing:.01em;margin-bottom:18px;}
 .ascenso-headline span{color:var(--gold);}
-.ascenso-desc{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.6;max-width:480px;}
-.ascenso-right{flex-shrink:0;display:flex;align-items:center;gap:16px;z-index:1;}
-.ascenso-score-box{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:6px;padding:16px 28px;text-align:center;}
-.ascenso-score-label{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;}
-.ascenso-score-num{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-.01em;}
-.ascenso-score-sub{font-size:.62rem;color:rgba(255,255,255,.35);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
-.ascenso-photo{width:180px;height:120px;border-radius:6px;overflow:hidden;border:1px solid rgba(201,168,76,.2);flex-shrink:0;}
-.ascenso-photo img{width:100%;height:100%;object-fit:cover;object-position:center;}
+.ascenso-desc{font-size:.95rem;color:rgba(255,255,255,.55);line-height:1.65;max-width:500px;margin-bottom:32px;}
+.ascenso-score-box{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:6px;padding:20px 36px;text-align:center;display:inline-block;margin-bottom:20px;}
+.ascenso-score-label{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;}
+.ascenso-score-num{font-family:'Barlow Condensed',sans-serif;font-size:4rem;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-.02em;}
+.ascenso-score-sub{font-size:.65rem;color:rgba(255,255,255,.35);margin-top:6px;letter-spacing:.08em;text-transform:uppercase;}
+.ascenso-dl-btn{display:inline-flex;align-items:center;gap:7px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:10px 20px;border-radius:4px;text-decoration:none;transition:all .2s;width:fit-content;}
+.ascenso-dl-btn:hover{background:rgba(201,168,76,.2);border-color:var(--gold);}
+.ascenso-photo-wrap{width:55%;position:relative;flex-shrink:0;overflow:hidden;}
+.ascenso-photo-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+.ascenso-photo-fade{position:absolute;inset:0;background:linear-gradient(to right,var(--black) 0%,rgba(17,17,17,.45) 30%,transparent 58%);z-index:1;pointer-events:none;}
 @media(max-width:880px){
-  .ascenso-strip{flex-direction:column;padding:24px 20px;gap:20px;}
-  .ascenso-right{width:100%;justify-content:center;}
-  .ascenso-photo{display:none;}
+  .ascenso-strip{flex-direction:column;min-height:auto;}
+  .ascenso-left{padding:32px 20px;}
+  .ascenso-photo-wrap{width:100%;height:260px;position:relative;}
+  .ascenso-photo-fade{background:linear-gradient(to bottom,transparent 55%,var(--black) 100%);}
 }
 
 /* ── FOOTER ── */
@@ -184,15 +186,16 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .leagues-grid,.tops-grid{grid-template-columns:1fr;}
   .nav-grid{grid-template-columns:repeat(2,1fr);}
-  .hero{padding:40px 24px;flex-direction:column;}
-  .hero-visual{display:none;}
+  .hero{padding:14px 20px;flex-direction:row;}
+  .hero-visual{width:140px;margin:-14px -20px -14px 0;}
   .section{padding:28px 20px;}
 }
 @media(max-width:640px){
   .stats-grid{grid-template-columns:1fr 1fr;}
-  .hero{padding:28px 16px;}
-  .hero-title{font-size:clamp(44px,12vw,72px);}
-  .hero-cta{flex-direction:column;align-items:flex-start;}
+  .hero{padding:12px 16px;}
+  .hero-title{font-size:clamp(20px,5vw,30px);}
+  .hero-visual{display:none;}
+  .hero-cta{flex-direction:column;align-items:flex-start;gap:6px;}
   .section{padding:20px 16px;}
   .nav-grid{grid-template-columns:1fr 1fr;}
   footer{flex-direction:column;gap:8px;padding:20px 16px;text-align:center;}
@@ -283,16 +286,16 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       <div class="ascenso-eyebrow">VPN · Temporada 1 · 2026</div>
       <div class="ascenso-headline">¡Ascendidos a<br><span>Primera División!</span></div>
       <p class="ascenso-desc">Top Secret FC logró el ascenso a la Primera División de VPN al vencer a Comunicaciones eSports por un global de 3–2 en el partido de promoción. Una campaña histórica.</p>
-    </div>
-    <div class="ascenso-right">
-      <div class="ascenso-photo">
-        <img src="logos/Festejo Ascenso.png" alt="Festejo ascenso" onerror="this.src='logos/festejo.png'">
-      </div>
       <div class="ascenso-score-box">
         <div class="ascenso-score-label">Global · Final Promoción</div>
         <div class="ascenso-score-num">3–2</div>
         <div class="ascenso-score-sub">vs Comunicaciones eSports</div>
       </div>
+      <a class="ascenso-dl-btn" href="logos/Festejo Ascenso.png" download="Top Secret FC - Ascenso Primera División.png">↓ Descargar foto del festejo</a>
+    </div>
+    <div class="ascenso-photo-wrap">
+      <img src="logos/Festejo Ascenso.png" alt="Festejo ascenso" onerror="this.src='logos/festejo.png'">
+      <div class="ascenso-photo-fade"></div>
     </div>
   </section>
 
