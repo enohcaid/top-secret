@@ -636,7 +636,7 @@ function renderPlayers() {
       const pitched = onPitch.has(p.name);
 
       const card = document.createElement('div');
-      card.className = 'pcard ' + (always ? 'always' : st);
+      card.className = 'pcard ' + (always && st === 'green' ? 'always' : st);
       card.draggable = true;
       card.addEventListener('dragstart', e => {
         e.dataTransfer.setData('playerName', p.name);
@@ -674,7 +674,7 @@ function renderPlayers() {
 
       // Dot
       const dot = document.createElement('span');
-      dot.className = 'sdot ' + (always ? 'sa' : (dotCls[st] || 'sp'));
+      dot.className = 'sdot ' + (always && st === 'green' ? 'sa' : (dotCls[st] || 'sp'));
 
       card.appendChild(pnum); card.appendChild(av); card.appendChild(info); card.appendChild(dot);
       el.appendChild(card);
