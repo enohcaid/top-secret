@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noticias — Top Secret FC</title>
+  <link rel="icon" href="Top-Secret.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:  #111111;
+      --white:  #FFFFFF;
+      --gray:   #F5F5F0;
+      --gold:   #C9A84C;
+      --gold2:  #E8C97A;
+      --mid:    #888888;
+      --border: #E5E5E0;
+    }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--white);
+      color: var(--black);
+      padding-left: 64px;
+      padding-right: 48px;
+      padding-top: 64px;
+      min-height: 100vh;
+    }
+
+    /* ── Page wrapper ── */
+    .page-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      margin-bottom: 40px;
+    }
+    .page-header h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      line-height: 1;
+    }
+    .page-header h1 span { color: var(--gold); }
+    .page-header p {
+      margin-top: 8px;
+      color: var(--mid);
+      font-size: .9rem;
+    }
+
+    /* ── Featured card ── */
+    .featured-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--black);
+      border-radius: 4px;
+      overflow: hidden;
+      min-height: 420px;
+      margin-bottom: 56px;
+      position: relative;
+    }
+    @media (max-width: 760px) {
+      .featured-card { grid-template-columns: 1fr; }
+      .featured-photo { min-height: 260px; order: -1; }
+    }
+    .featured-text {
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 2;
+    }
+    .featured-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .pill-pinned {
+      background: var(--gold);
+      color: var(--black);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 2px;
+    }
+    .pill-cat {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.4);
+    }
+    .featured-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #FFFFFF;
+      line-height: 1.05;
+      margin-bottom: 16px;
+    }
+    .featured-date {
+      font-size: .8rem;
+      color: rgba(255,255,255,.35);
+      margin-bottom: 20px;
+    }
+    .featured-excerpt {
+      font-size: .95rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,.7);
+      margin-bottom: 32px;
+    }
+    .featured-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .85rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 10px 22px;
+      border-radius: 3px;
+      transition: background .15s;
+    }
+    .btn-primary:hover { background: var(--gold2); }
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.2);
+      cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 10px 22px;
+      border-radius: 3px;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+    .featured-photo {
+      position: relative;
+      overflow: hidden;
+    }
+    .featured-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .featured-photo-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, #111111 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    /* ── Section heading ── */
+    .section-heading {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--black);
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .section-heading span { color: var(--gold); }
+
+    /* ── News grid ── */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .news-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .news-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+    .news-card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      background: var(--gray);
+    }
+    .news-card-body { padding: 18px 20px; }
+    .news-card-cat {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .news-card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .news-card-date {
+      font-size: .75rem;
+      color: var(--mid);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--mid);
+    }
+    .empty-state p { font-size: .95rem; }
+
+    /* ── Modal overlay ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(4px);
+      overflow-y: auto;
+      padding: 40px 20px;
+    }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+
+    /* ── Article modal ── */
+    .article-modal {
+      background: var(--white);
+      border-radius: 6px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 760px;
+      position: relative;
+    }
+    .article-modal-img {
+      width: 100%;
+      max-height: 380px;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .article-modal-body { padding: 36px 40px 48px; }
+    .article-modal-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .article-modal-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      line-height: 1.05;
+      margin-bottom: 8px;
+    }
+    .article-modal-date {
+      font-size: .8rem;
+      color: var(--mid);
+      margin-bottom: 28px;
+    }
+    .article-modal-content p {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    .article-modal-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    /* ── Share modal ── */
+    .share-modal {
+      background: var(--white);
+      border-radius: 6px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 560px;
+      position: relative;
+    }
+    .share-modal-header {
+      background: var(--black);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .share-modal-header h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #fff;
+    }
+    .share-modal-header h2 span { color: var(--gold); }
+    .share-modal-body { padding: 24px; }
+
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      background: #111;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .canvas-wrap canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .canvas-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: var(--gold);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .share-caption-label {
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 8px;
+    }
+    .share-caption {
+      width: 100%;
+      min-height: 100px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'Barlow', sans-serif;
+      font-size: .88rem;
+      line-height: 1.5;
+      color: var(--black);
+      resize: vertical;
+      margin-bottom: 16px;
+    }
+    .share-caption:focus { outline: none; border-color: var(--gold); }
+
+    .share-platforms {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .share-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      border-radius: 4px;
+      padding: 10px 6px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--black);
+    }
+    .share-btn:hover { border-color: var(--gold); background: #fffdf5; }
+    .share-btn svg { width: 22px; height: 22px; }
+    .share-btn-download { grid-column: span 2; flex-direction: row; gap: 8px; padding: 12px; }
+    .share-btn-copy { flex-direction: row; gap: 6px; }
+    .share-footer-row { display: flex; gap: 8px; }
+    .share-footer-row .share-btn { flex: 1; }
+  </style>
+</head>
+<body>
+
+<script src="layout.js"></script>
+
+<div class="page-wrap">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1>Noti<span>cias</span></h1>
+    <p>Novedades y comunicados del club</p>
+  </div>
+
+  <!-- Featured card injected by JS -->
+  <div id="featured-slot"></div>
+
+  <!-- Regular news -->
+  <div id="other-news-wrap" style="display:none">
+    <div class="section-heading">Más <span>Noticias</span></div>
+    <div class="news-grid" id="news-grid"></div>
+  </div>
+
+</div>
+
+<!-- Article modal -->
+<div class="modal-overlay" id="article-overlay">
+  <div class="article-modal" id="article-modal">
+    <button class="modal-close" onclick="closeArticle()">✕</button>
+    <img class="article-modal-img" id="am-img" src="" alt="">
+    <div class="article-modal-body">
+      <div class="article-modal-eyebrow" id="am-eyebrow"></div>
+      <h2 class="article-modal-title" id="am-title"></h2>
+      <div class="article-modal-date" id="am-date"></div>
+      <div class="article-modal-content" id="am-content"></div>
+      <div class="article-modal-actions" id="am-actions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Share modal -->
+<div class="modal-overlay" id="share-overlay">
+  <div class="share-modal" id="share-modal">
+    <div class="share-modal-header">
+      <h2>Compartir <span>Noticia</span></h2>
+      <button class="modal-close" style="position:static;background:rgba(255,255,255,.1);" onclick="closeShare()">✕</button>
+    </div>
+    <div class="share-modal-body">
+      <div class="canvas-wrap">
+        <canvas id="share-canvas" width="1080" height="1080"></canvas>
+        <div class="canvas-loading" id="canvas-loading">Generando imagen…</div>
+      </div>
+      <div class="share-caption-label">Texto para la publicación</div>
+      <textarea class="share-caption" id="share-caption"></textarea>
+      <div class="share-platforms">
+        <button class="share-btn" onclick="shareWA()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </button>
+        <button class="share-btn" onclick="shareX()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X / Twitter
+        </button>
+        <button class="share-btn" onclick="shareFB()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </button>
+      </div>
+      <div class="share-footer-row">
+        <button class="share-btn share-btn-download" onclick="downloadImg()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar imagen
+        </button>
+        <button class="share-btn share-btn-copy" onclick="copyCaption()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar texto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="mobile-nav.js"></script>
+<script>
+// ── NEWS DATA ────────────────────────────────────────────────────────────────
+const NOTICIAS = [
+  {
+    id: 'ascenso-primera-2025',
+    pinned: true,
+    category: 'Histórico',
+    title: 'Ascendimos a Primera División',
+    date: '2025-05-03',
+    dateLabel: '3 de mayo de 2025',
+    excerpt: 'Top Secret FC logró el ascenso a la Primera División de la VPN tras una campaña histórica. Un hito que marca el inicio de una nueva era para el club.',
+    image: 'logos/Festejo Ascenso.png',
+    body: [
+      'Top Secret FC escribió una de las páginas más importantes de su historia al coronarse campeón y obtener el ascenso a la Primera División de la VPN.',
+      'Fue una temporada de entrega, trabajo y colectivo. El equipo demostró carácter en los momentos clave y supo imponerse ante rivales de mucho nivel para hacerse merecedor de este logro.',
+      'El festejo no tardó en llegar. Los jugadores celebraron el hito con la alegría y la emoción que merece un logro de esta magnitud. Las imágenes del festejo quedaron grabadas en la memoria del club.',
+      'A partir de esta temporada, Top Secret FC competirá en la élite del fútbol virtual argentino. El desafío es enorme, pero la base está construida: un plantel comprometido, una identidad clara y una hinchada que acompaña.',
+      '¡Arriba Top Secret FC! ¡Primera División!',
+    ],
+    shareCaption: '🏆 ¡ASCENDIMOS A PRIMERA DIVISIÓN! 🏆\n\nTop Secret FC acaba de lograr uno de los hitos más importantes de su historia. Campaña perfecta, equipo comprometido, resultado histórico.\n\n¡A la Primera División de la VPN! 🖤⭐\n\n#TopSecretFC #VPN #PrimeraDivision #Ascenso #EAFCClubsPro',
+  },
+];
+
+// ── SHARE STATE ──────────────────────────────────────────────────────────────
+let _shareNews = null;
+const BASE_URL = 'https://enohcaid.github.io/top-secret/noticias.html';
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function formatDate(iso) {
+  // Returns label if stored, otherwise format ISO
+  const n = NOTICIAS.find(x => x.date === iso);
+  if (n && n.dateLabel) return n.dateLabel;
+  const [y, m, d] = iso.split('-').map(Number);
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${d} de ${months[m - 1]} de ${y}`;
+}
+
+function renderFeatured(n) {
+  const slot = document.getElementById('featured-slot');
+  slot.innerHTML = `
+    <div class="featured-card">
+      <div class="featured-text">
+        <div class="featured-eyebrow">
+          <span class="pill-pinned">📌 Fijado</span>
+          <span class="pill-cat">${n.category}</span>
+        </div>
+        <h2 class="featured-title">${n.title}</h2>
+        <div class="featured-date">${n.dateLabel || formatDate(n.date)}</div>
+        <p class="featured-excerpt">${n.excerpt}</p>
+        <div class="featured-actions">
+          <button class="btn-primary" onclick="openArticle('${n.id}')">Leer noticia</button>
+          <button class="btn-secondary" onclick="openShare('${n.id}')">Compartir</button>
+        </div>
+      </div>
+      <div class="featured-photo">
+        <img src="${n.image}" alt="${n.title}" onerror="this.parentElement.style.background='#1a1a1a'">
+        <div class="featured-photo-gradient"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderGrid(items) {
+  if (!items.length) return;
+  const wrap = document.getElementById('other-news-wrap');
+  const grid = document.getElementById('news-grid');
+  wrap.style.display = 'block';
+  grid.innerHTML = items.map(n => `
+    <div class="news-card" onclick="openArticle('${n.id}')">
+      <img class="news-card-img" src="${n.image}" alt="${n.title}" onerror="this.style.background='var(--gray)'">
+      <div class="news-card-body">
+        <div class="news-card-cat">${n.category}</div>
+        <div class="news-card-title">${n.title}</div>
+        <div class="news-card-date">${n.dateLabel || formatDate(n.date)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function init() {
+  const pinned = NOTICIAS.find(n => n.pinned);
+  if (pinned) renderFeatured(pinned);
+  const rest = NOTICIAS.filter(n => !n.pinned);
+  renderGrid(rest);
+}
+
+// ── ARTICLE MODAL ─────────────────────────────────────────────────────────────
+function openArticle(id) {
+  const n = NOTICIAS.find(x => x.id === id);
+  if (!n) return;
+  document.getElementById('am-img').src = n.image;
+  document.getElementById('am-img').alt = n.title;
+  document.getElementById('am-eyebrow').innerHTML = `
+    <span class="pill-pinned" style="${n.pinned ? '' : 'display:none'}">${n.pinned ? '📌 Fijado' : ''}</span>
+    <span class="pill-cat">${n.category}</span>
+  `;
+  document.getElementById('am-title').textContent = n.title;
+  document.getElementById('am-date').textContent = n.dateLabel || formatDate(n.date);
+  document.getElementById('am-content').innerHTML = n.body.map(p => `<p>${p}</p>`).join('');
+  document.getElementById('am-actions').innerHTML = `
+    <button class="btn-primary" onclick="closeArticle(); openShare('${n.id}')">Compartir</button>
+  `;
+  document.getElementById('article-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArticle() {
+  document.getElementById('article-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── SHARE MODAL ──────────────────────────────────────────────────────────────
+function openShare(id) {
+  const n = NOTICIAS.find(x => x.id === id);
+  if (!n) return;
+  _shareNews = n;
+  document.getElementById('share-caption').value = n.shareCaption || `${n.title}\n\n${BASE_URL}`;
+  document.getElementById('canvas-loading').style.display = 'flex';
+  document.getElementById('share-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  buildShareCanvas(n);
+}
+
+function closeShare() {
+  document.getElementById('share-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _shareNews = null;
+}
+
+// ── CANVAS GENERATOR ─────────────────────────────────────────────────────────
+function titleFontSize(title) {
+  if (title.length <= 30) return 82;
+  if (title.length <= 50) return 68;
+  return 56;
+}
+
+function wrapText(ctx, text, x, y, maxW, lineH) {
+  const words = text.split(' ');
+  let line = '';
+  let cy = y;
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, x, cy);
+      cy += lineH;
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) { ctx.fillText(line, x, cy); cy += lineH; }
+  return cy;
+}
+
+async function buildShareCanvas(n) {
+  const canvas = document.getElementById('share-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1080;
+
+  // Background
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(0, 0, W, H);
+
+  // Load & draw photo (top 62%)
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  await new Promise(resolve => {
+    img.onload = resolve;
+    img.onerror = resolve;
+    img.src = n.image;
+  });
+
+  const photoH = Math.round(H * 0.62);
+  if (img.naturalWidth) {
+    // Cover-fit to width, crop to photoH
+    const scale = Math.max(W / img.naturalWidth, photoH / img.naturalHeight);
+    const sw = W / scale, sh = photoH / scale;
+    const sx = (img.naturalWidth - sw) / 2;
+    const sy = 0;
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, photoH);
+  }
+
+  // Gradient overlay (photo area)
+  const grad = ctx.createLinearGradient(0, H * 0.28, 0, photoH);
+  grad.addColorStop(0, 'rgba(17,17,17,0)');
+  grad.addColorStop(1, 'rgba(17,17,17,1)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, H * 0.28, W, photoH - H * 0.28);
+
+  // Top gold bar
+  ctx.fillStyle = '#C9A84C';
+  ctx.fillRect(0, 0, W, 10);
+
+  // Ensure fonts loaded
+  await document.fonts.load('900 82px "Barlow Condensed"');
+  await document.fonts.load('700 36px "Barlow Condensed"');
+  await document.fonts.load('500 28px Barlow');
+
+  const PAD = 64;
+  let y = photoH - 20;
+
+  // Category pill
+  ctx.font = '800 26px "Barlow Condensed"';
+  ctx.letterSpacing = '3px';
+  const catText = n.category.toUpperCase();
+  const catW = ctx.measureText(catText).width + 32;
+  ctx.fillStyle = '#C9A84C';
+  ctx.beginPath();
+  ctx.roundRect(PAD, y - 34, catW, 36, 4);
+  ctx.fill();
+  ctx.fillStyle = '#111111';
+  ctx.fillText(catText, PAD + 16, y - 10);
+  y += 24;
+  ctx.letterSpacing = '0px';
+
+  // Title
+  const fs = titleFontSize(n.title);
+  ctx.font = `900 ${fs}px "Barlow Condensed"`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textBaseline = 'top';
+  y = wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.05);
+  y += 14;
+
+  // Date
+  ctx.font = '500 28px Barlow';
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillText(n.dateLabel || n.date, PAD, y);
+  y += 56;
+
+  // Rule
+  ctx.fillStyle = 'rgba(201,168,76,0.45)';
+  ctx.fillRect(PAD, H - 112, W - PAD * 2, 1);
+
+  // Club name
+  ctx.font = '900 44px "Barlow Condensed"';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('TOP SECRET FC', PAD, H - 72);
+
+  // League
+  ctx.font = '700 28px "Barlow Condensed"';
+  ctx.fillStyle = '#C9A84C';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('PRIMERA DIVISIÓN · VPN', PAD, H - 36);
+  ctx.letterSpacing = '0px';
+
+  // Stars right
+  ctx.font = '700 28px "Barlow Condensed"';
+  ctx.fillStyle = 'rgba(201,168,76,0.6)';
+  ctx.textAlign = 'right';
+  ctx.fillText('★ ★ ★', W - PAD, H - 36);
+  ctx.textAlign = 'left';
+
+  document.getElementById('canvas-loading').style.display = 'none';
+}
+
+// ── SHARE ACTIONS ────────────────────────────────────────────────────────────
+function getCaption() {
+  return document.getElementById('share-caption').value;
+}
+
+function shareWA() {
+  const text = encodeURIComponent(getCaption() + '\n' + BASE_URL);
+  window.open('https://wa.me/?text=' + text, '_blank');
+}
+
+function shareX() {
+  const text = encodeURIComponent(getCaption());
+  window.open('https://x.com/intent/tweet?text=' + text + '&url=' + encodeURIComponent(BASE_URL), '_blank');
+}
+
+function shareFB() {
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(BASE_URL), '_blank');
+}
+
+function downloadImg() {
+  const canvas = document.getElementById('share-canvas');
+  const link = document.createElement('a');
+  link.download = 'top-secret-fc-noticia.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+async function webShareAction() {
+  const canvas = document.getElementById('share-canvas');
+  try {
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const file = new File([blob], 'top-secret-fc.png', { type: 'image/png' });
+    await navigator.share({
+      title: _shareNews ? _shareNews.title : 'Top Secret FC',
+      text: getCaption(),
+      files: [file],
+    });
+  } catch (e) {
+    downloadImg();
+  }
+}
+
+function copyCaption() {
+  const txt = getCaption();
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    btn.innerHTML = btn.innerHTML.replace('Copiar texto', '¡Copiado!');
+    setTimeout(() => { btn.innerHTML = orig; }, 1800);
+  });
+}
+
+// ── CLOSE ON BACKDROP ────────────────────────────────────────────────────────
+document.getElementById('article-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeArticle();
+});
+document.getElementById('share-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeShare();
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
