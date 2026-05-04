@@ -467,7 +467,6 @@ function renderTodayMatchesPanel() {
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
 const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
-const LS_BACKUP = 'conv_backup';
 
 let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
 let dailyOverrides  = {};   // { name: {status, day, note?} } — alwaysPresent daily overrides
@@ -511,19 +510,11 @@ function scheduleMidnightReset() {
 
 /* ─── LOAD STATE ─── */
 function loadState() {
-  // 1. Load localStorage backup for immediate render
-  try {
-    const bk = JSON.parse(localStorage.getItem(LS_BACKUP) || '{}');
-    if (Object.keys(bk).length) applyData(bk);
-  } catch(e) {}
-
-  // 2. Subscribe to Firestore for real-time shared state
   if (CONV_DOC) {
     CONV_DOC.onSnapshot(snap => {
       if (snap.exists) {
         applyData(snap.data());
-        checkDailyReset(); // clears availability if new day (saves state internally if reset needed)
-        try { localStorage.setItem(LS_BACKUP, JSON.stringify(snap.data())); } catch(e) {}
+        checkDailyReset();
       } else {
         saveState(); // first user — seed the document
       }
@@ -535,7 +526,6 @@ function loadState() {
 /* ─── SAVE STATE ─── */
 function saveState() {
   const data = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
-  try { localStorage.setItem(LS_BACKUP, JSON.stringify(data)); } catch(e) {}
   if (CONV_DOC) {
     CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
   }
