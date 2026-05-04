@@ -443,6 +443,7 @@
 </head>
 <body>
 
+<script src="noticias-data.js"></script>
 <script src="layout.js"></script>
 
 <div class="page-wrap">
@@ -523,27 +524,7 @@
 
 <script src="mobile-nav.js"></script>
 <script>
-// ── NEWS DATA ────────────────────────────────────────────────────────────────
-const NOTICIAS = [
-  {
-    id: 'ascenso-primera-2025',
-    pinned: true,
-    category: 'Histórico',
-    title: 'Ascendimos a Primera División',
-    date: '2025-05-03',
-    dateLabel: '3 de mayo de 2025',
-    excerpt: 'Top Secret FC logró el ascenso a la Primera División de la VPN tras una campaña histórica. Un hito que marca el inicio de una nueva era para el club.',
-    image: 'logos/Festejo Ascenso.png',
-    body: [
-      'Top Secret FC escribió una de las páginas más importantes de su historia al coronarse campeón y obtener el ascenso a la Primera División de la VPN.',
-      'Fue una temporada de entrega, trabajo y colectivo. El equipo demostró carácter en los momentos clave y supo imponerse ante rivales de mucho nivel para hacerse merecedor de este logro.',
-      'El festejo no tardó en llegar. Los jugadores celebraron el hito con la alegría y la emoción que merece un logro de esta magnitud. Las imágenes del festejo quedaron grabadas en la memoria del club.',
-      'A partir de esta temporada, Top Secret FC competirá en la élite del fútbol virtual argentino. El desafío es enorme, pero la base está construida: un plantel comprometido, una identidad clara y una hinchada que acompaña.',
-      '¡Arriba Top Secret FC! ¡Primera División!',
-    ],
-    shareCaption: '🏆 ¡ASCENDIMOS A PRIMERA DIVISIÓN! 🏆\n\nTop Secret FC acaba de lograr uno de los hitos más importantes de su historia. Campaña perfecta, equipo comprometido, resultado histórico.\n\n¡A la Primera División de la VPN! 🖤⭐\n\n#TopSecretFC #VPN #PrimeraDivision #Ascenso #EAFCClubsPro',
-  },
-];
+// NOTICIAS data is loaded from noticias-data.js
 
 // ── SHARE STATE ──────────────────────────────────────────────────────────────
 let _shareNews = null;
