@@ -1111,16 +1111,47 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
 
   /* helper: silueta para slots vacíos */
   function drawSilhouette(tx, ty) {
-    const cx = tx + tokW / 2;
-    const headR = Math.round(tokW * 0.17);
-    const headY = ty + Math.round(photoH * 0.28);
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
-    ctx.beginPath(); ctx.arc(cx, headY, headR, 0, Math.PI * 2); ctx.fill();
     ctx.save();
     ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+
+    const cx = tx + tokW / 2;
+    const headR    = tokW * 0.152;
+    const headCY   = ty + photoH * 0.21;
+    const neckHW   = headR * 0.38;
+    const neckBotY = headCY + headR * 0.78;
+    const shoulderHW = tokW * 0.38;
+    const shoulderY  = neckBotY + headR * 0.52;
+    const waistY   = ty + photoH * 0.70;
+    const hipHW    = tokW * 0.33;
+    const botY     = ty + photoH + 2;
+
+    // head
     ctx.beginPath();
-    ctx.ellipse(cx, headY + headR * 1.3 + photoH * 0.28, tokW * 0.38, photoH * 0.42, 0, 0, Math.PI * 2);
+    ctx.arc(cx, headCY, headR, 0, Math.PI * 2);
     ctx.fill();
+
+    // neck + torso con bezier
+    ctx.beginPath();
+    ctx.moveTo(cx - neckHW, neckBotY);
+    // izquierda: cuello → hombro → cintura → cadera
+    ctx.bezierCurveTo(cx - neckHW,     shoulderY - headR * 0.35,
+                      cx - shoulderHW, shoulderY,
+                      cx - shoulderHW, shoulderY + headR * 0.45);
+    ctx.bezierCurveTo(cx - shoulderHW, waistY - headR * 0.3,
+                      cx - hipHW * 0.82, waistY,
+                      cx - hipHW,      botY);
+    ctx.lineTo(cx + hipHW, botY);
+    // derecha: cadera → cintura → hombro → cuello
+    ctx.bezierCurveTo(cx + hipHW * 0.82, waistY,
+                      cx + shoulderHW, waistY - headR * 0.3,
+                      cx + shoulderHW, shoulderY + headR * 0.45);
+    ctx.bezierCurveTo(cx + shoulderHW, shoulderY,
+                      cx + neckHW,     shoulderY - headR * 0.35,
+                      cx + neckHW,     neckBotY);
+    ctx.closePath();
+    ctx.fill();
+
     ctx.restore();
   }
 
