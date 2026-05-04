@@ -1111,11 +1111,10 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
 
   /* helper: silueta para slots vacíos */
   function drawSilhouette(tx, ty) {
-    ctx.fillStyle = '#181b24'; ctx.fillRect(tx, ty, tokW, photoH);
     const cx = tx + tokW / 2;
     const headR = Math.round(tokW * 0.17);
     const headY = ty + Math.round(photoH * 0.28);
-    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
     ctx.beginPath(); ctx.arc(cx, headY, headR, 0, Math.PI * 2); ctx.fill();
     ctx.save();
     ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
@@ -1134,7 +1133,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
       if (!player) {
         drawSilhouette(tx, ty);
-        drawBar(tx, ty, { name: s.l, num: '' });
+        drawBar(tx, ty, { name: 'PRUEBA', num: '' });
         return resolve();
       }
       function drawPhoto(img) {
@@ -1175,7 +1174,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       const assigned = lineup.slots[s.key];
       const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
       if (player) { drawPlaceholder(tx, ty, player); drawBar(tx, ty, player); }
-      else { drawSilhouette(tx, ty); drawBar(tx, ty, { name: s.l, num: '' }); }
+      else { drawSilhouette(tx, ty); drawBar(tx, ty, { name: 'PRUEBA', num: '' }); }
     });
   }
 
