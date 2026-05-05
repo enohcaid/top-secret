@@ -11,12 +11,12 @@ export const RESULT_IMAGES = {
 // Cada entrada aplica a fechas >= `from` hasta la siguiente entrada.
 // Cuando agregues fotos a temp2, descomentá y completá el primer bloque.
 export const RESULT_IMAGES_PERIODS = [
-  // {
-  //   from: '2026-05-06',
-  //   win:  ['logos/temp2/victoria/foto1.png'],
-  //   draw: ['logos/temp2/empate/foto1.png'],
-  //   loss: ['logos/temp2/derrota/foto1.png'],
-  // },
+  {
+    from: '2026-05-10',
+    win:  [], // agregar rutas cuando haya fotos en logos/temp2/victoria/
+    draw: [], // agregar rutas cuando haya fotos en logos/temp2/empate/
+    loss: [], // agregar rutas cuando haya fotos en logos/temp2/derrota/
+  },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
