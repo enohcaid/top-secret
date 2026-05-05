@@ -132,19 +132,18 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .ns-label{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);}
 .ns-viewall{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);text-decoration:none;transition:color .15s;}
 .ns-viewall:hover{color:var(--gold);}
-.ns-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
-.ns-col{padding:20px 24px 24px 0;cursor:pointer;transition:opacity .15s;}
-.ns-col:hover{opacity:.82;}
-.ns-col:last-child{padding:20px 0 24px 24px;border-left:1px solid rgba(255,255,255,.07);}
-.ns-col-img{width:100%;height:auto;display:block;border-radius:3px;background:#1a1a1a;margin-bottom:14px;}
-.ns-col-meta{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.ns-single{display:grid;grid-template-columns:38% 1fr;cursor:pointer;transition:opacity .15s;min-height:180px;}
+.ns-single:hover{opacity:.85;}
+.ns-single-img{width:100%;height:100%;object-fit:cover;display:block;background:#1a1a1a;min-height:180px;}
+.ns-single-body{padding:24px 28px;display:flex;flex-direction:column;justify-content:center;}
+.ns-single-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .ns-col-pin{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:2px;padding:2px 6px;}
 .ns-col-cat{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.4);}
-.ns-col-title{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;text-transform:uppercase;color:#fff;line-height:1.1;margin-bottom:8px;}
-.ns-col-excerpt{font-size:.8rem;color:rgba(255,255,255,.48);line-height:1.55;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.ns-col-date{font-size:.7rem;color:rgba(255,255,255,.26);}
-@media(max-width:880px){.news-strip{padding:0 20px;}.ns-col-img{height:110px;}}
-@media(max-width:640px){.ns-grid{grid-template-columns:1fr;}.ns-col:last-child{padding:0 0 20px;border-left:none;border-top:1px solid rgba(255,255,255,.07);}}
+.ns-single-title{font-family:'Barlow Condensed',sans-serif;font-size:1.45rem;font-weight:900;text-transform:uppercase;color:#fff;line-height:1.08;margin-bottom:10px;}
+.ns-single-excerpt{font-size:.82rem;color:rgba(255,255,255,.48);line-height:1.55;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.ns-single-date{font-size:.7rem;color:rgba(255,255,255,.28);}
+@media(max-width:880px){.news-strip{padding:0 20px;}}
+@media(max-width:640px){.ns-single{grid-template-columns:1fr;}.ns-single-img{min-height:140px;height:140px;}}
 
 /* ── FOOTER ── */
 footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;}
@@ -210,10 +209,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       <span class="ns-label">Últimas Noticias</span>
       <a href="noticias.html" class="ns-viewall">Ver todas →</a>
     </div>
-    <div class="ns-grid">
-      <div class="ns-col" id="ns-recent" onclick="window.location.href='noticias.html'"></div>
-      <div class="ns-col" id="ns-pinned" onclick="window.location.href='noticias.html'"></div>
-    </div>
+    <div id="ns-single" class="ns-single" onclick="window.location.href='noticias.html'"></div>
   </section>
 
   <!-- QUICK STATS — filled by JS -->
@@ -320,7 +316,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
         <div class="nav-card-desc">VPN · VPUG · 11x11 · Tablas T1</div>
         <div class="nav-card-arrow">→</div>
       </a>
-      <a class="nav-card" href="convocatoria.html">
+      <a class="nav-card" href="convo.html">
         <div class="nav-card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--gold)"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 12l3 3 5-5"/></svg></div>
         <div class="nav-card-title">Convocatoria</div>
         <div class="nav-card-desc">Disponibilidad · Armado de equipo</div>
@@ -338,36 +334,10 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
 </footer>
 
 <script src="noticias-data.js"></script>
-<script>
-// ── NEWS STRIP ───────────────────────────────────────────────────────────────
-(function () {
-  if (typeof NOTICIAS === 'undefined') return;
-
-  const sorted  = [...NOTICIAS].sort((a, b) => b.date.localeCompare(a.date));
-  const pinned  = sorted.find(n => n.pinned) || sorted[0];
-  const recent  = sorted.find(n => !n.pinned) || sorted[0];
-
-  function cardHTML(n, isPin) {
-    return `
-      <img class="ns-col-img" src="${n.image}" alt="${n.title}" onerror="this.style.display='none'">
-      <div class="ns-col-meta">
-        ${isPin ? '<span class="ns-col-pin">📌 Fijado</span>' : ''}
-        <span class="ns-col-cat">${n.category}</span>
-      </div>
-      <div class="ns-col-title">${n.title}</div>
-      <div class="ns-col-excerpt">${n.excerpt}</div>
-      <div class="ns-col-date">${n.dateLabel || n.date}</div>`;
-  }
-
-  const rEl = document.getElementById('ns-recent');
-  const pEl = document.getElementById('ns-pinned');
-  if (recent && rEl) rEl.innerHTML = cardHTML(recent, false);
-  if (pinned && pEl) pEl.innerHTML = cardHTML(pinned, true);
-})();
-</script>
 
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
+import { generateMatchNews } from './auto-noticias.js';
 
 /* ── PLAYER FOLDER MAP (for Brazos.png paths) ── */
 const FOLDER_OVERRIDE = { 'Buraa07': 'Buraa7' };
@@ -508,6 +478,27 @@ last5.forEach(m => {
     <span class="result-date">${dateStr}</span>`;
   resList.appendChild(row);
 });
+
+/* ── NEWS STRIP (single most recent) ── */
+const autoNews = generateMatchNews(SEED_MATCHES);
+const manualNews = typeof NOTICIAS !== 'undefined' ? NOTICIAS : [];
+const allNews = [...autoNews, ...manualNews].sort((a, b) => b.date.localeCompare(a.date));
+const topNews = allNews[0];
+const nsEl = document.getElementById('ns-single');
+if (topNews && nsEl) {
+  nsEl.innerHTML = `
+    ${topNews.image ? `<img class="ns-single-img" src="${topNews.image}" alt="${topNews.title}" onerror="this.style.display='none';this.parentElement.style.gridTemplateColumns='1fr'">` : ''}
+    <div class="ns-single-body">
+      <div class="ns-single-meta">
+        ${topNews.pinned ? '<span class="ns-col-pin">📌 Fijado</span>' : ''}
+        <span class="ns-col-cat">${topNews.category}</span>
+      </div>
+      <div class="ns-single-title">${topNews.title}</div>
+      <div class="ns-single-excerpt">${topNews.excerpt}</div>
+      <div class="ns-single-date">${topNews.dateLabel || topNews.date}</div>
+    </div>`;
+  if (!topNews.image) nsEl.style.gridTemplateColumns = '1fr';
+}
 
 /* ── ANIMATIONS ── */
 gsap.set('.hero-content > *', {opacity:0, y:24});
