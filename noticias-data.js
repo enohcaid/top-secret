@@ -19,6 +19,11 @@ const NOTICIAS = [
       'El anuncio fue realizado oficialmente por la cuenta de VPN Argentina en X. Top Secret FC es el club con más representantes en el Equipo de la Temporada.',
     ],
     shareCaption: '🏆 ¡EQUIPO DE LA TEMPORADA VPN! 🏆\n\n3 jugadores de Top Secret FC en el XI ideal de la Liga VPN:\n\n⚡ #7 Lautavester7 — 41G · 18A · 7.27 rating\n⚡ #22 cansitrGd22_ — 64G · 22A · 7.69 rating\n⚡ #11 BlackPanther-CG — 21G · 19A · 6.84 rating\n\n🖤⭐ #TopSecretFC #VPN #EquipoDeLaTemporada',
+    shareCaptions: {
+      ig: '🏆 EQUIPO DE LA TEMPORADA · LIGA VPN\n\n3 de los nuestros en el XI ideal de la Temporada 1 🖤⭐\n\n⚡ Lautavester7 — 41G · 18A\n⚡ cansitrGd22_ — 64G · 22A\n⚡ BlackPanther-CG — 21G · 19A\n\n#TopSecretFC #VPN #EquipoDeLaTemporada #EAFCClubsPro',
+      x:  '🏆 3 jugadores de Top Secret FC en el Equipo de la Temporada VPN\n\n⚡ Lautavester7 — 41G · 18A\n⚡ cansitrGd22_ — 64G · 22A\n⚡ BlackPanther-CG — 21G · 19A\n\n#TopSecretFC #VPN #EquipoDeLaTemporada',
+      fb: '🏆 ¡EQUIPO DE LA TEMPORADA VPN! 🏆\n\nTop Secret FC tuvo 3 representantes en el once ideal de la Liga VPN Temporada 1. Un reconocimiento histórico para el club.\n\n⚡ Lautavester7 — 41 goles · 18 asistencias\n⚡ cansitrGd22_ — 64 goles · 22 asistencias\n⚡ BlackPanther-CG — 21 goles · 19 asistencias\n\n#TopSecretFC #VPN #EAFCClubsPro',
+    },
   },
   {
     id: 'ascenso-primera-2025',
@@ -37,5 +42,10 @@ const NOTICIAS = [
       '¡Arriba Top Secret FC! ¡Primera División!',
     ],
     shareCaption: '🏆 ¡ASCENDIMOS A PRIMERA DIVISIÓN! 🏆\n\nTop Secret FC acaba de lograr uno de los hitos más importantes de su historia. Campaña perfecta, equipo comprometido, resultado histórico.\n\n¡A la Primera División de la VPN! 🖤⭐\n\n#TopSecretFC #VPN #PrimeraDivision #Ascenso #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🏆 ¡ASCENDIDOS A PRIMERA DIVISIÓN! 🏆\n\nCampaña histórica. Equipo comprometido. Un resultado que quedará para siempre en la memoria del club 🖤⭐\n\n#TopSecretFC #VPN #PrimeraDivision #Ascenso #EAFCClubsPro',
+      x:  '🏆 ¡Top Secret FC asciende a Primera División VPN!\n\nCampaña histórica. Gracias a todos los que acompañaron 🖤⭐\n\n#TopSecretFC #VPN #PrimeraDivision #Ascenso',
+      fb: '🏆 ¡ASCENDIDOS A PRIMERA DIVISIÓN! 🏆\n\nTop Secret FC logró el ascenso a la Primera División de la VPN tras una campaña histórica. Un resultado que quedará para siempre en la historia del club.\n\nGracias a cada jugador, cada entrenamiento y cada partido. Este logro es de todos. ¡Arriba Top Secret FC!\n\n#TopSecretFC #VPN #PrimeraDivision #Ascenso #EAFCClubsPro',
+    },
   },
 ];
