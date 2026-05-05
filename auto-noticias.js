@@ -1,0 +1,107 @@
+// ── Auto-generated match result news ─────────────────────────────────────────
+// Configurá las imágenes aquí a medida que las agregás a cada carpeta.
+
+export const RESULT_IMAGES = {
+  win:  [],   // ej: ['logos/victoria/foto1.jpg', 'logos/victoria/foto2.jpg']
+  draw: [],   // ej: ['logos/empate/foto1.jpg']
+  loss: [],   // ej: ['logos/derrota/foto1.jpg']
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function resultKey(matchResult) {
+  if (!matchResult) return 'draw';
+  const [gf, gc] = String(matchResult).split('-').map(Number);
+  return gf > gc ? 'win' : gf < gc ? 'loss' : 'draw';
+}
+
+function pickImage(arr) {
+  if (!arr || !arr.length) return '';
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function formatDateLabel(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const months = ['enero','febrero','marzo','abril','mayo','junio',
+                  'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const days   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const day    = new Date(iso + 'T12:00:00').getDay();
+  return `${days[day]} ${d} de ${months[m - 1]} de ${y}`;
+}
+
+const LEAGUE_LABEL = { VPN: 'Liga VPN', VPUG: 'VPUG', '11x11': '11x11' };
+const RES_EMOJI    = { win: '✅', draw: '➖', loss: '❌' };
+
+// ── Main export ───────────────────────────────────────────────────────────────
+export function generateMatchNews(matches) {
+  // Agrupar por fecha
+  const byDate = {};
+  matches.forEach(m => {
+    const d = m.date || '1970-01-01';
+    (byDate[d] = byDate[d] || []).push(m);
+  });
+
+  return Object.entries(byDate)
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([date, dayMatches]) => {
+      const wins   = dayMatches.filter(m => resultKey(m.match_result) === 'win').length;
+      const draws  = dayMatches.filter(m => resultKey(m.match_result) === 'draw').length;
+      const losses = dayMatches.filter(m => resultKey(m.match_result) === 'loss').length;
+      const pj     = dayMatches.length;
+
+      const overallKey = wins > losses ? 'win' : losses > wins ? 'loss' : 'draw';
+      const image      = pickImage(RESULT_IMAGES[overallKey]);
+
+      // Top performer del día
+      let topScorer = null, topGoals = 0, topRated = null, topRating = 0;
+      dayMatches.forEach(m => (m.players || []).forEach(p => {
+        if ((p.goals  || 0) > topGoals)  { topGoals  = p.goals;  topScorer = p.name; }
+        if ((p.rating || 0) > topRating) { topRating = p.rating; topRated  = p.name; }
+      }));
+
+      const ddmm  = date.slice(5).split('-').reverse().join('/');
+      const title = pj === 1
+        ? `${dayMatches[0].rival} — ${dayMatches[0].match_result}`
+        : `Jornada ${ddmm} · ${pj} partidos`;
+
+      const resultSummary = [wins && `${wins}V`, draws && `${draws}E`, losses && `${losses}D`]
+        .filter(Boolean).join(' · ');
+
+      const excerpt = dayMatches
+        .map(m => `${LEAGUE_LABEL[m.league] || m.league}: ${m.rival} ${m.match_result}`)
+        .join(' · ')
+        + (topScorer && topGoals > 0 ? ` · ⚡ ${topScorer} (${topGoals}G)` : '');
+
+      const body = [
+        `Top Secret FC disputó ${pj} ${pj === 1 ? 'partido' : 'partidos'} el ${formatDateLabel(date)}, con balance ${resultSummary}.`,
+        ...dayMatches.map(m => {
+          const rk  = resultKey(m.match_result);
+          const lg  = LEAGUE_LABEL[m.league] || m.league || '';
+          const mvp = (m.players || []).slice().sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
+          return `${RES_EMOJI[rk]} ${lg} vs ${m.rival} — ${m.match_result}${mvp ? ` · MVP: ${mvp.name} (${mvp.rating})` : ''}`;
+        }),
+        topScorer && topGoals  > 0 ? `⚡ Goleador del día: ${topScorer} (${topGoals} goles)` : '',
+        topRated  && topRating > 0 ? `⭐ Mejor rating: ${topRated} (${topRating})` : '',
+      ].filter(Boolean);
+
+      const capBase = `⚽ TOP SECRET FC · Resultados ${ddmm}\n\n`
+        + dayMatches.map(m => `${RES_EMOJI[resultKey(m.match_result)]} ${m.rival} ${m.match_result} (${m.league})`).join('\n');
+
+      return {
+        id:        `resultados-${date}`,
+        auto:      true,
+        category:  'Resultados',
+        title,
+        date,
+        dateLabel: formatDateLabel(date),
+        excerpt,
+        image,
+        body,
+        shareCaption: capBase + '\n\n#TopSecretFC #VPN #EAFCClubsPro',
+        shareCaptions: {
+          ig: capBase + '\n\n#TopSecretFC #VPN #EAFCClubsPro',
+          x:  capBase + '\n\n#TopSecretFC #VPN',
+          fb: capBase + '\n\n#TopSecretFC #VPN #EAFCClubsPro',
+        },
+      };
+    });
+}

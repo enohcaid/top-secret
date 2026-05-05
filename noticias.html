@@ -529,15 +529,24 @@
 <script src="mobile-nav.js"></script>
 <script>
 // NOTICIAS data is loaded from noticias-data.js
+// Auto-generated result news populated by the module script below
+window._AUTO_NEWS = [];
 
 // ── SHARE STATE ──────────────────────────────────────────────────────────────
 let _shareNews = null;
 const BASE_URL = 'https://enohcaid.github.io/top-secret/noticias.html';
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
+function allNews() {
+  return [...NOTICIAS, ...(window._AUTO_NEWS || [])];
+}
+
+function findNews(id) {
+  return allNews().find(x => x.id === id);
+}
+
 function formatDate(iso) {
-  // Returns label if stored, otherwise format ISO
-  const n = NOTICIAS.find(x => x.date === iso);
+  const n = allNews().find(x => x.date === iso);
   if (n && n.dateLabel) return n.dateLabel;
   const [y, m, d] = iso.split('-').map(Number);
   const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -593,9 +602,29 @@ function init() {
   renderGrid(rest);
 }
 
+function renderAutoSection(items) {
+  if (!items || !items.length) return;
+  const existingIds = new Set(NOTICIAS.map(n => n.id));
+  const newItems = items.filter(n => !existingIds.has(n.id));
+  if (!newItems.length) return;
+  const wrap = document.getElementById('other-news-wrap');
+  const grid = document.getElementById('news-grid');
+  wrap.style.display = 'block';
+  grid.innerHTML += newItems.map(n => `
+    <div class="news-card" onclick="openArticle('${n.id}')">
+      ${n.image ? `<img class="news-card-img" src="${n.image}" alt="${n.title}" onerror="this.style.background='var(--gray)';this.style.display='none'">` : '<div class="news-card-img" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.1em;">Resultados</div>'}
+      <div class="news-card-body">
+        <div class="news-card-cat">${n.category}</div>
+        <div class="news-card-title">${n.title}</div>
+        <div class="news-card-date">${n.dateLabel || formatDate(n.date)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
 // ── ARTICLE MODAL ─────────────────────────────────────────────────────────────
 function openArticle(id) {
-  const n = NOTICIAS.find(x => x.id === id);
+  const n = findNews(id);
   if (!n) return;
   document.getElementById('am-img').src = n.image;
   document.getElementById('am-img').alt = n.title;
@@ -620,7 +649,7 @@ function closeArticle() {
 
 // ── SHARE MODAL ──────────────────────────────────────────────────────────────
 function openShare(id) {
-  const n = NOTICIAS.find(x => x.id === id);
+  const n = findNews(id);
   if (!n) return;
   _shareNews = n;
   document.getElementById('share-caption').value = n.shareCaption || `${n.title}\n\n${BASE_URL}`;
@@ -812,15 +841,6 @@ async function shareAll() {
   await webShareAction();
 }
 
-function shareX() {
-  const text = encodeURIComponent(getCaption());
-  window.open('https://x.com/intent/tweet?text=' + text + '&url=' + encodeURIComponent(BASE_URL), '_blank');
-}
-
-function shareFB() {
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(BASE_URL), '_blank');
-}
-
 function downloadImg() {
   const canvas = document.getElementById('share-canvas');
   const link = document.createElement('a');
@@ -864,6 +884,13 @@ document.getElementById('share-overlay').addEventListener('click', function(e) {
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 init();
+</script>
+
+<script type="module">
+import { generateMatchNews } from './auto-noticias.js';
+import { SEED_MATCHES } from './seed_matches.js';
+window._AUTO_NEWS = generateMatchNews(SEED_MATCHES);
+renderAutoSection(window._AUTO_NEWS);
 </script>
 </body>
 </html>
