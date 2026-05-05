@@ -1,13 +1,30 @@
 // ── Auto-generated match result news ─────────────────────────────────────────
-// Configurá las imágenes aquí a medida que las agregás a cada carpeta.
 
+// Imágenes por defecto — aplican a todas las fechas anteriores al primer período.
 export const RESULT_IMAGES = {
-  win:  [],   // ej: ['logos/victoria/foto1.jpg', 'logos/victoria/foto2.jpg']
-  draw: [],   // ej: ['logos/empate/foto1.jpg']
-  loss: [],   // ej: ['logos/derrota/foto1.jpg']
+  win:  ['logos/victoria/festejo.png', 'logos/victoria/festejo 2.png', 'logos/victoria/festejo 4.png', 'logos/victoria/festejo 5.png'],
+  draw: [],
+  loss: [],
 };
 
+// Períodos con imágenes propias.
+// Cada entrada aplica a fechas >= `from` hasta la siguiente entrada.
+// Cuando agregues fotos a temp2, descomentá y completá el primer bloque.
+export const RESULT_IMAGES_PERIODS = [
+  // {
+  //   from: '2026-05-06',
+  //   win:  ['logos/temp2/victoria/foto1.png'],
+  //   draw: ['logos/temp2/empate/foto1.png'],
+  //   loss: ['logos/temp2/derrota/foto1.png'],
+  // },
+];
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
+function imagesForDate(date) {
+  const sorted = [...RESULT_IMAGES_PERIODS].sort((a, b) => b.from.localeCompare(a.from));
+  return sorted.find(p => date >= p.from) || RESULT_IMAGES;
+}
+
 function resultKey(matchResult) {
   if (!matchResult) return 'draw';
   const [gf, gc] = String(matchResult).split('-').map(Number);
@@ -33,7 +50,6 @@ const RES_EMOJI    = { win: '✅', draw: '➖', loss: '❌' };
 
 // ── Main export ───────────────────────────────────────────────────────────────
 export function generateMatchNews(matches) {
-  // Agrupar por fecha
   const byDate = {};
   matches.forEach(m => {
     const d = m.date || '1970-01-01';
@@ -49,7 +65,8 @@ export function generateMatchNews(matches) {
       const pj     = dayMatches.length;
 
       const overallKey = wins > losses ? 'win' : losses > wins ? 'loss' : 'draw';
-      const image      = pickImage(RESULT_IMAGES[overallKey]);
+      const imgs       = imagesForDate(date);
+      const image      = pickImage(imgs[overallKey]);
 
       // Top performer del día
       let topScorer = null, topGoals = 0, topRated = null, topRating = 0;
