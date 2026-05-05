@@ -509,7 +509,7 @@
         </button>
         <button class="share-btn" onclick="shareAll()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          Todas las redes
+          Más redes
         </button>
       </div>
       <div class="share-footer-row">
@@ -768,7 +768,23 @@ function getCaption() {
   return document.getElementById('share-caption').value;
 }
 
+function platformCaption(key) {
+  if (!_shareNews) return '';
+  return (_shareNews.shareCaptions || {})[key] || _shareNews.shareCaption || '';
+}
+
+function copyAndFlash(btn, text, label) {
+  navigator.clipboard.writeText(text).catch(() => {});
+  document.getElementById('share-caption').value = text;
+  const orig = btn.innerHTML;
+  btn.innerHTML = orig.replace(label, '✓ Copiado');
+  setTimeout(() => { btn.innerHTML = orig; }, 2000);
+}
+
 async function shareIG() {
+  const btn = event.currentTarget;
+  const cap = platformCaption('ig');
+  copyAndFlash(btn, cap, 'Instagram');
   const canvas = document.getElementById('share-canvas');
   const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
   const file = new File([blob], 'top-secret-fc.png', { type: 'image/png' });
@@ -776,10 +792,20 @@ async function shareIG() {
     try { await navigator.share({ files: [file] }); return; } catch(e) { if (e.name === 'AbortError') return; }
   }
   downloadImg();
+}
+
+function shareX() {
   const btn = event.currentTarget;
-  const orig = btn.innerHTML;
-  btn.innerHTML = btn.innerHTML.replace('Instagram', '¡Imagen lista!');
-  setTimeout(() => { btn.innerHTML = orig; }, 2200);
+  const cap = platformCaption('x');
+  copyAndFlash(btn, cap, 'X / Twitter');
+  window.open('https://x.com/intent/tweet?text=' + encodeURIComponent(cap), '_blank');
+}
+
+function shareFB() {
+  const btn = event.currentTarget;
+  const cap = platformCaption('fb');
+  copyAndFlash(btn, cap, 'Facebook');
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(BASE_URL), '_blank');
 }
 
 async function shareAll() {
