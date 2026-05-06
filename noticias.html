@@ -732,7 +732,9 @@ async function renderCanvas(ctx, n, W, H) {
                   (W - dw) / 2, (imgAreaH - dh) / 2, dw, dh);
   }
 
-  // Top gold bar
+  if (!isLandscape) return; // Instagram: imagen limpia, sin texto ni decoración
+
+  // Top gold bar (solo landscape)
   ctx.fillStyle = '#C9A84C';
   ctx.fillRect(0, 0, W, Math.max(3, Math.round(5 * scale)));
 
@@ -787,69 +789,6 @@ async function renderCanvas(ctx, n, W, H) {
     ctx.fillText(n.dateLabel || n.date, W - PAD, footerY);
     ctx.textAlign = 'left';
 
-  } else {
-    // ── SQUARE (Instagram): barra full-width en la parte inferior ──
-    const VPAD = Math.round(28 * scale); // padding vertical dentro de la barra
-
-    const tl = n.title.length;
-    const fs = tl <= 30 ? Math.round(52 * scale) : tl <= 50 ? Math.round(43 * scale) : Math.round(36 * scale);
-    ctx.font = `900 ${fs}px "Barlow Condensed"`;
-    const maxTW = W - PAD * 2;
-    const words = n.title.toUpperCase().split(' ');
-    let lines = 1, lineW = 0;
-    for (const word of words) {
-      const ww = ctx.measureText(word + ' ').width;
-      if (lineW + ww > maxTW && lineW > 0) { lines++; lineW = ww; }
-      else lineW += ww;
-    }
-    const titleH = lines * fs * 1.08;
-    const pillH = Math.round(22 * scale);
-    const clubFs = Math.round(18 * scale);
-    const barH = VPAD + pillH + Math.round(14 * scale) + titleH + Math.round(18 * scale) + clubFs + VPAD;
-
-    // Posición: anclada al 90% del canvas, sin sobresalir del borde inferior
-    const barY = Math.max(10, Math.min(H - barH, Math.round(H * 0.90 - barH / 2)));
-
-    // Barra sólida full-width hasta el borde inferior
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, barY, W, H - barY);
-
-    // Línea dorada en el borde superior de la barra
-    ctx.fillStyle = '#C9A84C';
-    ctx.fillRect(0, barY, W, Math.max(3, Math.round(4 * scale)));
-
-    let y = barY + VPAD;
-
-    // Category pill
-    const catFs = Math.round(16 * scale);
-    ctx.font = `800 ${catFs}px "Barlow Condensed"`;
-    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-    const catText = n.category.toUpperCase();
-    const catTxtW = ctx.measureText(catText).width;
-    const pillPad = Math.round(10 * scale);
-    ctx.fillStyle = '#C9A84C';
-    ctx.beginPath();
-    ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 2);
-    ctx.fill();
-    ctx.fillStyle = '#0a0a0a';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(catText, PAD + pillPad, y + pillH / 2);
-    y += pillH + Math.round(14 * scale);
-    ctx.letterSpacing = '0px';
-    ctx.textBaseline = 'top';
-
-    // Título
-    ctx.font = `900 ${fs}px "Barlow Condensed"`;
-    ctx.fillStyle = '#FFFFFF';
-    y = wrapText(ctx, n.title.toUpperCase(), PAD, y, maxTW, fs * 1.08);
-    y += Math.round(18 * scale);
-
-    // Club name
-    ctx.font = `700 ${clubFs}px "Barlow Condensed"`;
-    ctx.fillStyle = 'rgba(201,168,76,0.85)';
-    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-    ctx.fillText('TOP SECRET FC', PAD, y);
-    ctx.letterSpacing = '0px';
   }
 }
 
