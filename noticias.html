@@ -727,7 +727,8 @@ async function renderCanvas(ctx, n, W, H) {
     const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
     const sw = W / sc, sh = H / sc;
     const sx = (img.naturalWidth - sw) / 2;
-    ctx.drawImage(img, sx, 0, sw, sh, 0, 0, W, H);
+    const sy = (img.naturalHeight - sh) / 2;
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
   }
 
   // Landscape shows more photo; square keeps deeper panel
