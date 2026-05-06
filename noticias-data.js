@@ -15,13 +15,14 @@ const NOTICIAS = [
       'Top Secret FC da un paso adelante y presenta oficialmente su nueva identidad visual. Un rediseño que refleja la evolución del club y su crecimiento dentro del fútbol virtual argentino.',
       'La nueva imagen llega en un momento bisagra: el club acaba de lograr el ascenso a la Primera División de la VPN y se prepara para debutar en la élite del fútbol virtual argentino.',
       'El rebrand es más que un cambio estético. Representa la ambición del club, su identidad y el camino que tiene por delante.',
+      'Seguinos en nuestras redes: <a href="https://instagram.com/fctopsecret" target="_blank" rel="noopener">Instagram</a> · <a href="https://x.com/fctopsecret" target="_blank" rel="noopener">X</a> · <a href="https://facebook.com/topsecretfc" target="_blank" rel="noopener">Facebook</a>',
       '¡Bienvenidos a la nueva era de Top Secret FC!',
     ],
-    shareCaption: '⭐ TOP SECRET FC · NUEVA IDENTIDAD\n\nEl club presenta su nueva imagen. Una nueva era comienza.\n\n🖤⭐ #TopSecretFC #Rebrand #EAFCClubsPro',
+    shareCaption: '⭐ TOP SECRET FC · NUEVA IDENTIDAD\n\nEl club presenta su nueva imagen. Una nueva era comienza.\n\n📱 @fctopsecret en IG y X · fb.com/topsecretfc\n\n🖤⭐ #TopSecretFC #Rebrand #EAFCClubsPro',
     shareCaptions: {
-      ig: '⭐ NUEVA IDENTIDAD · TOP SECRET FC\n\nEvolucionamos. Presentamos nuestra nueva imagen 🖤⭐\n\n#TopSecretFC #Rebrand #EAFCClubsPro',
-      x:  '⭐ Top Secret FC presenta su nueva identidad visual.\n\nUna nueva era comienza 🖤\n\n#TopSecretFC #Rebrand',
-      fb: '⭐ TOP SECRET FC · NUEVA IDENTIDAD\n\nEl club presenta oficialmente su nueva imagen visual. Un rediseño que refleja nuestra evolución y el camino que tenemos por delante.\n\n¡Bienvenidos a la nueva era! 🖤⭐\n\n#TopSecretFC #Rebrand #EAFCClubsPro',
+      ig: '⭐ NUEVA IDENTIDAD · TOP SECRET FC\n\nEvolucionamos. Presentamos nuestra nueva imagen 🖤⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #Rebrand #EAFCClubsPro',
+      x:  '⭐ Top Secret FC presenta su nueva identidad visual.\n\nUna nueva era comienza 🖤\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #Rebrand',
+      fb: '⭐ TOP SECRET FC · NUEVA IDENTIDAD\n\nEl club presenta oficialmente su nueva imagen visual. Un rediseño que refleja nuestra evolución y el camino que tenemos por delante.\n\nSeguinos en Instagram y X: @fctopsecret\n\n¡Bienvenidos a la nueva era! 🖤⭐\n\n#TopSecretFC #Rebrand #EAFCClubsPro',
     },
   },
   {
