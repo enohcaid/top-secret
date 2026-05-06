@@ -626,6 +626,7 @@ function renderAutoSection(items) {
 function openArticle(id) {
   const n = findNews(id);
   if (!n) return;
+  if (location.hash !== '#' + id) history.pushState({ articleId: id }, '', '#' + id);
   document.getElementById('am-img').src = n.image;
   document.getElementById('am-img').alt = n.title;
   document.getElementById('am-eyebrow').innerHTML = `
@@ -637,15 +638,38 @@ function openArticle(id) {
   document.getElementById('am-content').innerHTML = n.body.map(p => `<p>${p}</p>`).join('');
   document.getElementById('am-actions').innerHTML = `
     <button class="btn-primary" onclick="closeArticle(); openShare('${n.id}')">Compartir</button>
+    <button class="btn-secondary" onclick="copyLink('${n.id}')">Copiar link</button>
   `;
   document.getElementById('article-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeArticle() {
+  if (location.hash) history.pushState(null, '', location.pathname + location.search);
   document.getElementById('article-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+function copyLink(id) {
+  const url = BASE_URL + '#' + id;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = event.currentTarget;
+    const orig = btn.textContent;
+    btn.textContent = '¡Link copiado!';
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  });
+}
+
+window.addEventListener('popstate', function () {
+  const id = location.hash.slice(1);
+  if (id) {
+    const n = findNews(id);
+    if (n) openArticle(id);
+  } else {
+    document.getElementById('article-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
 
 // ── SHARE MODAL ──────────────────────────────────────────────────────────────
 function openShare(id) {
@@ -884,6 +908,8 @@ document.getElementById('share-overlay').addEventListener('click', function(e) {
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 init();
+const _initHash = location.hash.slice(1);
+if (_initHash && findNews(_initHash)) openArticle(_initHash);
 </script>
 
 <script type="module">
@@ -891,6 +917,8 @@ import { generateMatchNews } from './auto-noticias.js';
 import { SEED_MATCHES } from './seed_matches.js';
 window._AUTO_NEWS = generateMatchNews(SEED_MATCHES);
 renderAutoSection(window._AUTO_NEWS);
+const _h = location.hash.slice(1);
+if (_h && !document.getElementById('article-overlay').classList.contains('open') && findNews(_h)) openArticle(_h);
 </script>
 </body>
 </html>
