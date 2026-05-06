@@ -713,99 +713,118 @@ async function renderCanvas(ctx, n, W, H) {
   const PAD = Math.round(108 * W / 1080); // 10% safe zone
 
   // Background
-  ctx.fillStyle = '#111111';
+  ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, W, H);
 
-  // Photo — top 52%, no text over it
+  // Photo: full bleed background
   const img = new Image();
   img.crossOrigin = 'anonymous';
   await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; img.src = n.image; });
 
-  const photoH = Math.round(H * 0.52);
   if (img.naturalWidth) {
-    const sc = Math.max(W / img.naturalWidth, photoH / img.naturalHeight);
-    const sw = W / sc, sh = photoH / sc;
+    const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+    const sw = W / sc, sh = H / sc;
     const sx = (img.naturalWidth - sw) / 2;
-    ctx.drawImage(img, sx, 0, sw, sh, 0, 0, W, photoH);
+    ctx.drawImage(img, sx, 0, sw, sh, 0, 0, W, H);
   }
 
-  // Subtle vignette at bottom of photo
-  const vig = ctx.createLinearGradient(0, photoH * 0.65, 0, photoH);
-  vig.addColorStop(0, 'rgba(17,17,17,0)');
-  vig.addColorStop(1, 'rgba(17,17,17,0.55)');
-  ctx.fillStyle = vig;
-  ctx.fillRect(0, photoH * 0.65, W, photoH * 0.35);
+  // Gradient transition (photo → panel)
+  const panelY = Math.round(H * 0.56);
+  const fadeGrad = ctx.createLinearGradient(0, H * 0.36, 0, panelY);
+  fadeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  fadeGrad.addColorStop(1, 'rgba(0,0,0,0.96)');
+  ctx.fillStyle = fadeGrad;
+  ctx.fillRect(0, H * 0.36, W, panelY - H * 0.36);
 
-  // Gold top bar
+  // Solid dark panel (bottom 44%)
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, panelY, W, H - panelY);
+
+  // Gold accent stripe on left edge of panel
+  ctx.fillStyle = '#C9A84C';
+  ctx.fillRect(0, panelY, Math.round(5 * scale), H - panelY);
+
+  // Top gold bar
   ctx.fillStyle = '#C9A84C';
   ctx.fillRect(0, 0, W, Math.max(6, Math.round(10 * scale)));
 
-  // Gold separator line at photo/text boundary
-  const sepH = Math.max(3, Math.round(4 * scale));
-  ctx.fillStyle = '#C9A84C';
-  ctx.fillRect(0, photoH, W, sepH);
-
-  // ── Text area (solid dark, below photo) ─────────────────────────
-  await document.fonts.load(`900 ${Math.round(78 * scale)}px "Barlow Condensed"`);
-  await document.fonts.load(`800 ${Math.round(24 * scale)}px "Barlow Condensed"`);
+  await document.fonts.load(`900 ${Math.round(76 * scale)}px "Barlow Condensed"`);
+  await document.fonts.load(`800 ${Math.round(20 * scale)}px "Barlow Condensed"`);
   await document.fonts.load(`400 ${Math.round(26 * scale)}px Barlow`);
 
-  let y = photoH + sepH + Math.round(36 * scale);
+  let y = panelY + Math.round(28 * scale);
 
   // Category pill
-  const catFs = Math.round(22 * scale);
+  const catFs = Math.round(20 * scale);
   ctx.font = `800 ${catFs}px "Barlow Condensed"`;
   ctx.letterSpacing = `${Math.round(3 * scale)}px`;
   const catText = n.category.toUpperCase();
   const catTxtW = ctx.measureText(catText).width;
-  const pillPad = Math.round(14 * scale);
-  const pillH = Math.round(30 * scale);
+  const pillPad = Math.round(12 * scale);
+  const pillH = Math.round(28 * scale);
   ctx.fillStyle = '#C9A84C';
   ctx.beginPath();
-  ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 3);
+  ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 2);
   ctx.fill();
-  ctx.fillStyle = '#111111';
+  ctx.fillStyle = '#0a0a0a';
   ctx.textBaseline = 'middle';
   ctx.fillText(catText, PAD + pillPad, y + pillH / 2);
-  y += pillH + Math.round(22 * scale);
+  y += pillH + Math.round(16 * scale);
   ctx.letterSpacing = '0px';
   ctx.textBaseline = 'top';
 
   // Title
   const titleLen = n.title.length;
-  const fs = titleLen <= 25 ? Math.round(78 * scale)
-           : titleLen <= 40 ? Math.round(66 * scale)
-           : titleLen <= 55 ? Math.round(56 * scale)
-           : Math.round(48 * scale);
+  const fs = titleLen <= 25 ? Math.round(76 * scale)
+           : titleLen <= 40 ? Math.round(64 * scale)
+           : titleLen <= 55 ? Math.round(54 * scale)
+           : Math.round(46 * scale);
   ctx.font = `900 ${fs}px "Barlow Condensed"`;
   ctx.fillStyle = '#FFFFFF';
-  y = wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.08);
+  y = wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.06);
   y += Math.round(14 * scale);
 
+  // Excerpt — 1 line truncated
+  if (n.excerpt) {
+    const exFs = Math.round(26 * scale);
+    ctx.font = `400 ${exFs}px Barlow`;
+    ctx.fillStyle = 'rgba(255,255,255,0.52)';
+    const maxExW = W - PAD * 2;
+    const words = n.excerpt.split(' ');
+    let line = '';
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > maxExW) { line += '…'; break; }
+      line = test;
+    }
+    ctx.fillText(line, PAD, y);
+    y += Math.round(exFs * 1.5);
+  }
+
   // Date
-  ctx.font = `400 ${Math.round(24 * scale)}px Barlow`;
-  ctx.fillStyle = 'rgba(255,255,255,0.40)';
+  ctx.font = `400 ${Math.round(22 * scale)}px Barlow`;
+  ctx.fillStyle = 'rgba(255,255,255,0.32)';
   ctx.fillText(n.dateLabel || n.date, PAD, y);
 
   // Footer
-  const ruleY = H - Math.round(90 * scale);
+  const ruleY = H - Math.round(88 * scale);
   ctx.fillStyle = 'rgba(201,168,76,0.30)';
   ctx.fillRect(PAD, ruleY, W - PAD * 2, 1);
 
-  ctx.font = `900 ${Math.round(40 * scale)}px "Barlow Condensed"`;
+  ctx.font = `900 ${Math.round(38 * scale)}px "Barlow Condensed"`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textBaseline = 'alphabetic';
   ctx.fillText('TOP SECRET FC', PAD, H - Math.round(50 * scale));
 
-  ctx.font = `700 ${Math.round(24 * scale)}px "Barlow Condensed"`;
+  ctx.font = `700 ${Math.round(22 * scale)}px "Barlow Condensed"`;
   ctx.fillStyle = '#C9A84C';
   ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-  ctx.fillText('PRIMERA DIVISIÓN · VPN', PAD, H - Math.round(22 * scale));
+  ctx.fillText('PRIMERA DIVISIÓN · VPN', PAD, H - Math.round(24 * scale));
   ctx.letterSpacing = '0px';
 
   ctx.fillStyle = 'rgba(201,168,76,0.55)';
   ctx.textAlign = 'right';
-  ctx.fillText('★ ★ ★', W - PAD, H - Math.round(22 * scale));
+  ctx.fillText('★ ★ ★', W - PAD, H - Math.round(24 * scale));
   ctx.textAlign = 'left';
 }
 
