@@ -13,7 +13,7 @@ const NOTICIAS = [
     image: 'logos/Anuncio Rebrand.png',
     body: [
       'Top Secret FC da un paso adelante y presenta oficialmente su nueva identidad visual. Un rediseño que refleja la evolución del club y su crecimiento dentro del fútbol virtual argentino.',
-      'La nueva imagen llega en un momento de madurez institucional: el equipo acaba de completar su primera temporada en Primera División de la VPN, con tres jugadores en el Equipo de la Temporada y una presencia consolidada en tres ligas.',
+      'La nueva imagen llega en un momento bisagra: el club acaba de lograr el ascenso a la Primera División de la VPN y se prepara para debutar en la élite del fútbol virtual argentino.',
       'El rebrand es más que un cambio estético. Representa la ambición del club, su identidad y el camino que tiene por delante.',
       '¡Bienvenidos a la nueva era de Top Secret FC!',
     ],
