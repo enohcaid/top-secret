@@ -22,7 +22,7 @@
     /* Topbar */
     .topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#111111;border-bottom:3px solid #C9A84C;display:flex;align-items:center;padding:0 24px 0 16px;gap:0;}
     .tb-brand{display:flex;align-items:center;gap:14px;text-decoration:none;margin-right:auto;}
-    .tb-brand img{height:80px;width:120px;object-fit:contain;}
+    .tb-brand img{height:44px;width:auto;object-fit:contain;}
     .tb-brand-name{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;letter-spacing:.14em;color:#FFFFFF;text-transform:uppercase;}
     .tb-brand-name span{color:#C9A84C;}
     .tb-center{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;pointer-events:none;}
