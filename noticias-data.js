@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'rebrand-2026',
+    pinned: false,
+    category: 'Institucional',
+    title: 'Top Secret FC presenta su nueva identidad',
+    date: '2026-05-06',
+    dateLabel: '6 de mayo de 2026',
+    excerpt: 'El club anuncia una renovación de su identidad visual. Una nueva era para Top Secret FC.',
+    image: 'logos/Anuncio Rebrand.png',
+    body: [
+      'Top Secret FC da un paso adelante y presenta oficialmente su nueva identidad visual. Un rediseño que refleja la evolución del club y su crecimiento dentro del fútbol virtual argentino.',
+      'La nueva imagen llega en un momento de madurez institucional: el equipo acaba de completar su primera temporada en Primera División de la VPN, con tres jugadores en el Equipo de la Temporada y una presencia consolidada en tres ligas.',
+      'El rebrand es más que un cambio estético. Representa la ambición del club, su identidad y el camino que tiene por delante.',
+      '¡Bienvenidos a la nueva era de Top Secret FC!',
+    ],
+    shareCaption: '⭐ TOP SECRET FC · NUEVA IDENTIDAD\n\nEl club presenta su nueva imagen. Una nueva era comienza.\n\n🖤⭐ #TopSecretFC #Rebrand #EAFCClubsPro',
+    shareCaptions: {
+      ig: '⭐ NUEVA IDENTIDAD · TOP SECRET FC\n\nEvolucionamos. Presentamos nuestra nueva imagen 🖤⭐\n\n#TopSecretFC #Rebrand #EAFCClubsPro',
+      x:  '⭐ Top Secret FC presenta su nueva identidad visual.\n\nUna nueva era comienza 🖤\n\n#TopSecretFC #Rebrand',
+      fb: '⭐ TOP SECRET FC · NUEVA IDENTIDAD\n\nEl club presenta oficialmente su nueva imagen visual. Un rediseño que refleja nuestra evolución y el camino que tenemos por delante.\n\n¡Bienvenidos a la nueva era! 🖤⭐\n\n#TopSecretFC #Rebrand #EAFCClubsPro',
+    },
+  },
+  {
     id: 'equipo-temporada-vpn-2026',
     pinned: false,
     category: 'Distinción',
