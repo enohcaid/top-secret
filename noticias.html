@@ -710,16 +710,18 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
 
 async function renderCanvas(ctx, n, W, H) {
   const scale = Math.min(W, H) / 1080;
-  const PAD = Math.round(64 * W / 1080);
+  const PAD = Math.round(108 * W / 1080); // 10% safe zone
 
+  // Background
   ctx.fillStyle = '#111111';
   ctx.fillRect(0, 0, W, H);
 
+  // Photo — top 52%, no text over it
   const img = new Image();
   img.crossOrigin = 'anonymous';
   await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; img.src = n.image; });
 
-  const photoH = Math.round(H * 0.62);
+  const photoH = Math.round(H * 0.52);
   if (img.naturalWidth) {
     const sc = Math.max(W / img.naturalWidth, photoH / img.naturalHeight);
     const sw = W / sc, sh = photoH / sc;
@@ -727,66 +729,83 @@ async function renderCanvas(ctx, n, W, H) {
     ctx.drawImage(img, sx, 0, sw, sh, 0, 0, W, photoH);
   }
 
-  const grad = ctx.createLinearGradient(0, H * 0.28, 0, photoH);
-  grad.addColorStop(0, 'rgba(17,17,17,0)');
-  grad.addColorStop(1, 'rgba(17,17,17,1)');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, H * 0.28, W, photoH - H * 0.28);
+  // Subtle vignette at bottom of photo
+  const vig = ctx.createLinearGradient(0, photoH * 0.65, 0, photoH);
+  vig.addColorStop(0, 'rgba(17,17,17,0)');
+  vig.addColorStop(1, 'rgba(17,17,17,0.55)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, photoH * 0.65, W, photoH * 0.35);
 
+  // Gold top bar
   ctx.fillStyle = '#C9A84C';
   ctx.fillRect(0, 0, W, Math.max(6, Math.round(10 * scale)));
 
-  await document.fonts.load(`900 ${Math.round(82 * scale)}px "Barlow Condensed"`);
-  await document.fonts.load(`700 ${Math.round(36 * scale)}px "Barlow Condensed"`);
-  await document.fonts.load(`500 ${Math.round(28 * scale)}px Barlow`);
+  // Gold separator line at photo/text boundary
+  const sepH = Math.max(3, Math.round(4 * scale));
+  ctx.fillStyle = '#C9A84C';
+  ctx.fillRect(0, photoH, W, sepH);
 
-  let y = photoH - Math.round(20 * scale);
+  // ── Text area (solid dark, below photo) ─────────────────────────
+  await document.fonts.load(`900 ${Math.round(78 * scale)}px "Barlow Condensed"`);
+  await document.fonts.load(`800 ${Math.round(24 * scale)}px "Barlow Condensed"`);
+  await document.fonts.load(`400 ${Math.round(26 * scale)}px Barlow`);
 
-  const catFs = Math.round(26 * scale);
+  let y = photoH + sepH + Math.round(36 * scale);
+
+  // Category pill
+  const catFs = Math.round(22 * scale);
   ctx.font = `800 ${catFs}px "Barlow Condensed"`;
   ctx.letterSpacing = `${Math.round(3 * scale)}px`;
   const catText = n.category.toUpperCase();
-  const catW = ctx.measureText(catText).width + Math.round(32 * scale);
-  const catH = Math.round(36 * scale);
+  const catTxtW = ctx.measureText(catText).width;
+  const pillPad = Math.round(14 * scale);
+  const pillH = Math.round(30 * scale);
   ctx.fillStyle = '#C9A84C';
   ctx.beginPath();
-  ctx.roundRect(PAD, y - catH, catW, catH + 2, 4);
+  ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 3);
   ctx.fill();
   ctx.fillStyle = '#111111';
-  ctx.fillText(catText, PAD + Math.round(16 * scale), y - Math.round(10 * scale));
-  y += Math.round(24 * scale);
+  ctx.textBaseline = 'middle';
+  ctx.fillText(catText, PAD + pillPad, y + pillH / 2);
+  y += pillH + Math.round(22 * scale);
   ctx.letterSpacing = '0px';
+  ctx.textBaseline = 'top';
 
+  // Title
   const titleLen = n.title.length;
-  const fs = titleLen <= 30 ? Math.round(82 * scale) : titleLen <= 50 ? Math.round(68 * scale) : Math.round(56 * scale);
+  const fs = titleLen <= 25 ? Math.round(78 * scale)
+           : titleLen <= 40 ? Math.round(66 * scale)
+           : titleLen <= 55 ? Math.round(56 * scale)
+           : Math.round(48 * scale);
   ctx.font = `900 ${fs}px "Barlow Condensed"`;
   ctx.fillStyle = '#FFFFFF';
-  ctx.textBaseline = 'top';
-  y = wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.05);
+  y = wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.08);
   y += Math.round(14 * scale);
 
-  ctx.font = `500 ${Math.round(28 * scale)}px Barlow`;
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  // Date
+  ctx.font = `400 ${Math.round(24 * scale)}px Barlow`;
+  ctx.fillStyle = 'rgba(255,255,255,0.40)';
   ctx.fillText(n.dateLabel || n.date, PAD, y);
 
-  ctx.fillStyle = 'rgba(201,168,76,0.45)';
-  ctx.fillRect(PAD, H - Math.round(112 * scale), W - PAD * 2, 1);
+  // Footer
+  const ruleY = H - Math.round(90 * scale);
+  ctx.fillStyle = 'rgba(201,168,76,0.30)';
+  ctx.fillRect(PAD, ruleY, W - PAD * 2, 1);
 
-  ctx.font = `900 ${Math.round(44 * scale)}px "Barlow Condensed"`;
+  ctx.font = `900 ${Math.round(40 * scale)}px "Barlow Condensed"`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText('TOP SECRET FC', PAD, H - Math.round(72 * scale));
+  ctx.fillText('TOP SECRET FC', PAD, H - Math.round(50 * scale));
 
-  ctx.font = `700 ${Math.round(28 * scale)}px "Barlow Condensed"`;
+  ctx.font = `700 ${Math.round(24 * scale)}px "Barlow Condensed"`;
   ctx.fillStyle = '#C9A84C';
   ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-  ctx.fillText('PRIMERA DIVISIÓN · VPN', PAD, H - Math.round(36 * scale));
+  ctx.fillText('PRIMERA DIVISIÓN · VPN', PAD, H - Math.round(22 * scale));
   ctx.letterSpacing = '0px';
 
-  ctx.font = `700 ${Math.round(28 * scale)}px "Barlow Condensed"`;
-  ctx.fillStyle = 'rgba(201,168,76,0.6)';
+  ctx.fillStyle = 'rgba(201,168,76,0.55)';
   ctx.textAlign = 'right';
-  ctx.fillText('★ ★ ★', W - PAD, H - Math.round(36 * scale));
+  ctx.fillText('★ ★ ★', W - PAD, H - Math.round(22 * scale));
   ctx.textAlign = 'left';
 }
 
