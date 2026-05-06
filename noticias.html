@@ -492,19 +492,6 @@
         <canvas id="share-canvas" width="1080" height="1080"></canvas>
         <div class="canvas-loading" id="canvas-loading">Generando imagen…</div>
       </div>
-      <!-- ── EDITOR TEMPORAL CAJA IG ── -->
-      <div id="box-editor" style="margin-bottom:16px;padding:14px 16px;background:#f7f7f2;border-radius:4px;border:1px solid #e5e5e0;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-bottom:10px;">⚙ Ajustar caja · Instagram</div>
-        <div style="display:grid;gap:6px;">
-          <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#555;">Posición vertical <b id="v-y">50</b>%</div>
-          <input type="range" id="box-yPct" min="10" max="90" value="50" style="width:100%;accent-color:#C9A84C">
-          <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#555;">Ancho de la caja <b id="v-w">78</b>%</div>
-          <input type="range" id="box-wPct" min="50" max="95" value="78" style="width:100%;accent-color:#C9A84C">
-          <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#555;">Opacidad del fondo <b id="v-o">78</b>%</div>
-          <input type="range" id="box-opacity" min="30" max="100" step="5" value="78" style="width:100%;accent-color:#C9A84C">
-        </div>
-      </div>
-      <!-- ──────────────────────────── -->
       <div class="share-caption-label">Texto para la publicación</div>
       <textarea class="share-caption" id="share-caption"></textarea>
       <div class="share-platforms">
@@ -547,7 +534,6 @@ window._AUTO_NEWS = [];
 
 // ── SHARE STATE ──────────────────────────────────────────────────────────────
 let _shareNews = null;
-let _boxPrefs = { yPct: 50, wPct: 78, opacity: 78 };
 const BASE_URL = 'https://enohcaid.github.io/top-secret/noticias.html';
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
@@ -802,16 +788,13 @@ async function renderCanvas(ctx, n, W, H) {
     ctx.textAlign = 'left';
 
   } else {
-    // ── SQUARE (Instagram): caja centrada ──────────────────────────
-    const IPAD = Math.round(36 * scale);
-    const boxW = Math.round(W * _boxPrefs.wPct / 100);
-    const boxX = (W - boxW) / 2;
+    // ── SQUARE (Instagram): barra full-width en la parte inferior ──
+    const VPAD = Math.round(28 * scale); // padding vertical dentro de la barra
 
-    // Calcular altura del box según longitud del título
     const tl = n.title.length;
     const fs = tl <= 30 ? Math.round(52 * scale) : tl <= 50 ? Math.round(43 * scale) : Math.round(36 * scale);
     ctx.font = `900 ${fs}px "Barlow Condensed"`;
-    const maxTW = boxW - IPAD * 2;
+    const maxTW = W - PAD * 2;
     const words = n.title.toUpperCase().split(' ');
     let lines = 1, lineW = 0;
     for (const word of words) {
@@ -822,26 +805,20 @@ async function renderCanvas(ctx, n, W, H) {
     const titleH = lines * fs * 1.08;
     const pillH = Math.round(22 * scale);
     const clubFs = Math.round(18 * scale);
-    const boxH = IPAD + pillH + Math.round(14 * scale) + titleH + Math.round(18 * scale) + clubFs + IPAD;
-    const boxY = Math.max(10, Math.min(H - boxH - 10,
-                  Math.round(H * _boxPrefs.yPct / 100 - boxH / 2)));
+    const barH = VPAD + pillH + Math.round(14 * scale) + titleH + Math.round(18 * scale) + clubFs + VPAD;
 
-    // Fondo del box
-    ctx.fillStyle = `rgba(0,0,0,${(_boxPrefs.opacity / 100).toFixed(2)})`;
-    ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxW, boxH, 8);
-    ctx.fill();
+    // Posición: anclada al 90% del canvas, sin sobresalir del borde inferior
+    const barY = Math.max(10, Math.min(H - barH, Math.round(H * 0.90 - barH / 2)));
 
-    // Borde dorado superior (con clip para respetar esquinas redondeadas)
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxW, boxH, 8);
-    ctx.clip();
+    // Barra sólida full-width hasta el borde inferior
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, barY, W, H - barY);
+
+    // Línea dorada en el borde superior de la barra
     ctx.fillStyle = '#C9A84C';
-    ctx.fillRect(boxX, boxY, boxW, Math.max(3, Math.round(4 * scale)));
-    ctx.restore();
+    ctx.fillRect(0, barY, W, Math.max(3, Math.round(4 * scale)));
 
-    let y = boxY + IPAD;
+    let y = barY + VPAD;
 
     // Category pill
     const catFs = Math.round(16 * scale);
@@ -852,11 +829,11 @@ async function renderCanvas(ctx, n, W, H) {
     const pillPad = Math.round(10 * scale);
     ctx.fillStyle = '#C9A84C';
     ctx.beginPath();
-    ctx.roundRect(boxX + IPAD, y, catTxtW + pillPad * 2, pillH, 2);
+    ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 2);
     ctx.fill();
     ctx.fillStyle = '#0a0a0a';
     ctx.textBaseline = 'middle';
-    ctx.fillText(catText, boxX + IPAD + pillPad, y + pillH / 2);
+    ctx.fillText(catText, PAD + pillPad, y + pillH / 2);
     y += pillH + Math.round(14 * scale);
     ctx.letterSpacing = '0px';
     ctx.textBaseline = 'top';
@@ -864,14 +841,14 @@ async function renderCanvas(ctx, n, W, H) {
     // Título
     ctx.font = `900 ${fs}px "Barlow Condensed"`;
     ctx.fillStyle = '#FFFFFF';
-    y = wrapText(ctx, n.title.toUpperCase(), boxX + IPAD, y, maxTW, fs * 1.08);
+    y = wrapText(ctx, n.title.toUpperCase(), PAD, y, maxTW, fs * 1.08);
     y += Math.round(18 * scale);
 
     // Club name
     ctx.font = `700 ${clubFs}px "Barlow Condensed"`;
     ctx.fillStyle = 'rgba(201,168,76,0.85)';
     ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-    ctx.fillText('TOP SECRET FC', boxX + IPAD, y);
+    ctx.fillText('TOP SECRET FC', PAD, y);
     ctx.letterSpacing = '0px';
   }
 }
@@ -972,21 +949,6 @@ function copyCaption() {
     setTimeout(() => { btn.innerHTML = orig; }, 1800);
   });
 }
-
-// ── BOX EDITOR ───────────────────────────────────────────────────────────────
-function _initBoxEditor() {
-  ['yPct','wPct','opacity'].forEach(key => {
-    const slider = document.getElementById('box-' + (key === 'yPct' ? 'yPct' : key === 'wPct' ? 'wPct' : 'opacity'));
-    const label  = document.getElementById('v-' + (key === 'yPct' ? 'y' : key === 'wPct' ? 'w' : 'o'));
-    if (!slider) return;
-    slider.addEventListener('input', () => {
-      _boxPrefs[key] = Number(slider.value);
-      label.textContent = slider.value;
-      if (_shareNews) buildShareCanvas(_shareNews);
-    });
-  });
-}
-_initBoxEditor();
 
 // ── CLOSE ON BACKDROP ────────────────────────────────────────────────────────
 document.getElementById('article-overlay').addEventListener('click', function(e) {
