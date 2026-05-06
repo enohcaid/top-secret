@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'kit-drop-2026',
+    pinned: false,
+    category: 'Indumentaria',
+    title: 'Nuevas camisetas para la temporada 2026',
+    date: '2026-05-06',
+    dateLabel: '6 de mayo de 2026',
+    excerpt: 'Top Secret FC presenta el nuevo kit oficial para la temporada 2026. Las camisetas que nos acompañarán en la VPN, la VPUG y el 11x11.',
+    image: 'logos/2026 Kit Drop.png',
+    body: [
+      'Top Secret FC presenta oficialmente el nuevo kit para la temporada 2026. Un diseño que llega con fuerza en un momento especial: el debut del club en la Primera División de la VPN.',
+      'Las nuevas camisetas nos acompañarán en todas las competencias del ciclo: la Liga VPN, la VPUG y el 11x11. Tres frentes, una sola identidad.',
+      'El kit es más que indumentaria. Es la imagen con la que salimos a la cancha, la que representa al club en cada partido y en cada foto. Este diseño está a la altura del momento.',
+      '¡A lucirlas en la cancha! 🖤⭐',
+    ],
+    shareCaption: '👕 NUEVAS CAMISETAS · TOP SECRET FC\n\nPresentamos el kit oficial para la temporada 2026 🖤⭐\n\nVPN · VPUG · 11x11\n\nSeguinos → @fctopsecret en IG y X · fb.com/topsecretfc\n\n#TopSecretFC #KitDrop #EAFCClubsPro',
+    shareCaptions: {
+      ig: '👕 KIT DROP 2026 · TOP SECRET FC\n\nNuevas camisetas para una nueva era 🖤⭐\n\nVPN · VPUG · 11x11\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #KitDrop #EAFCClubsPro #NuevaTemporada',
+      x:  '👕 Top Secret FC presenta el kit oficial 2026.\n\nTres ligas, una identidad 🖤⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #KitDrop #EAFCClubsPro',
+      fb: '👕 NUEVAS CAMISETAS · TOP SECRET FC\n\nPresentamos el kit oficial para la temporada 2026. Las camisetas que nos acompañarán en la VPN, la VPUG y el 11x11.\n\nUn diseño a la altura de la nueva era del club 🖤⭐\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #KitDrop #EAFCClubsPro',
+    },
+  },
+  {
     id: 'rebrand-2026',
     pinned: false,
     category: 'Institucional',
