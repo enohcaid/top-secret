@@ -84,9 +84,9 @@
   const sbRight = document.createElement('aside');
   sbRight.className = 'sidebar-right';
   sbRight.innerHTML = `
-    <a class="sr-icon" href="#" title="Instagram">IG</a>
-    <a class="sr-icon" href="#" title="Twitter/X">X</a>
-    <a class="sr-icon" href="#" title="YouTube">YT</a>
+    <a class="sr-icon" href="https://instagram.com/fctopsecret" target="_blank" rel="noopener" title="Instagram">IG</a>
+    <a class="sr-icon" href="https://x.com/fctopsecret" target="_blank" rel="noopener" title="Twitter/X">X</a>
+    <a class="sr-icon" href="https://facebook.com/topsecretfc" target="_blank" rel="noopener" title="Facebook">FB</a>
   `;
 
   // ── Inject into body ───────────────────────────────────────────────────────
