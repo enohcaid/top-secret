@@ -847,9 +847,9 @@ async function shareX() {
 async function shareFB() {
   const btn = event.currentTarget;
   const cap = platformCaption('fb');
-  copyAndFlash(btn, cap, 'Facebook');
+  copyAndFlash(btn, cap, 'Facebook · imagen descargada');
   await downloadForPlatform(_shareNews, 1200, 628, 'top-secret-fc-fb.png');
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(BASE_URL + '#' + _shareNews.id), '_blank');
+  window.open('https://www.facebook.com/', '_blank');
 }
 
 async function shareAll() {
