@@ -710,93 +710,155 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
 
 async function renderCanvas(ctx, n, W, H) {
   const isLandscape = W > H * 1.15;
-  // Landscape gets a font boost since H is small relative to W
   const scale = isLandscape ? H * 1.5 / 1080 : H / 1080;
   const PAD = Math.round(80 * W / 1080);
 
-  // Dark background (visible in letterbox areas)
   ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, W, H);
 
-  // Strip at bottom: taller for landscape to fit 2-line titles
-  const stripH = Math.round(H * (isLandscape ? 0.28 : 0.22));
+  // Image: always contain (no cropping)
+  const stripH = isLandscape ? Math.round(H * 0.28) : 0;
   const imgAreaH = H - stripH;
 
-  // Load image and fit COMPLETELY inside imgArea (no cropping)
   const img = new Image();
   img.crossOrigin = 'anonymous';
   await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; img.src = n.image; });
 
   if (img.naturalWidth) {
-    const sc = Math.min(W / img.naturalWidth, imgAreaH / img.naturalHeight); // contain
+    const sc = Math.min(W / img.naturalWidth, imgAreaH / img.naturalHeight);
     const dw = img.naturalWidth * sc;
     const dh = img.naturalHeight * sc;
-    const dx = (W - dw) / 2;
-    const dy = (imgAreaH - dh) / 2;
-    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, dx, dy, dw, dh);
+    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight,
+                  (W - dw) / 2, (imgAreaH - dh) / 2, dw, dh);
   }
 
   // Top gold bar
   ctx.fillStyle = '#C9A84C';
   ctx.fillRect(0, 0, W, Math.max(3, Math.round(5 * scale)));
 
-  // Strip: solid dark
-  const stripY = H - stripH;
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, stripY, W, stripH);
-
-  // Gold border at top of strip
-  ctx.fillStyle = '#C9A84C';
-  ctx.fillRect(0, stripY, W, Math.max(2, Math.round(3 * scale)));
-
   await document.fonts.load(`900 ${Math.round(56 * scale)}px "Barlow Condensed"`);
   await document.fonts.load(`800 ${Math.round(17 * scale)}px "Barlow Condensed"`);
   await document.fonts.load(`700 ${Math.round(19 * scale)}px "Barlow Condensed"`);
 
-  let y = stripY + Math.round(16 * scale);
+  if (isLandscape) {
+    // ── LANDSCAPE (X / FB): barra inferior sólida ──────────────────
+    const stripY = H - stripH;
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, stripY, W, stripH);
+    ctx.fillStyle = '#C9A84C';
+    ctx.fillRect(0, stripY, W, Math.max(2, Math.round(3 * scale)));
 
-  // Category pill
-  const catFs = Math.round(16 * scale);
-  ctx.font = `800 ${catFs}px "Barlow Condensed"`;
-  ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-  const catText = n.category.toUpperCase();
-  const catTxtW = ctx.measureText(catText).width;
-  const pillPad = Math.round(9 * scale);
-  const pillH = Math.round(21 * scale);
-  ctx.fillStyle = '#C9A84C';
-  ctx.beginPath();
-  ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 2);
-  ctx.fill();
-  ctx.fillStyle = '#0a0a0a';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(catText, PAD + pillPad, y + pillH / 2);
-  y += pillH + Math.round(11 * scale);
-  ctx.letterSpacing = '0px';
-  ctx.textBaseline = 'top';
+    let y = stripY + Math.round(16 * scale);
 
-  // Title — compact, max 2 lines
-  const titleLen = n.title.length;
-  const fs = titleLen <= 30 ? Math.round(54 * scale)
-           : titleLen <= 50 ? Math.round(44 * scale)
-           : Math.round(37 * scale);
-  ctx.font = `900 ${fs}px "Barlow Condensed"`;
-  ctx.fillStyle = '#FFFFFF';
-  wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.06);
+    const catFs = Math.round(16 * scale);
+    ctx.font = `800 ${catFs}px "Barlow Condensed"`;
+    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
+    const catText = n.category.toUpperCase();
+    const catTxtW = ctx.measureText(catText).width;
+    const pillPad = Math.round(9 * scale);
+    const pillH = Math.round(21 * scale);
+    ctx.fillStyle = '#C9A84C';
+    ctx.beginPath();
+    ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 2);
+    ctx.fill();
+    ctx.fillStyle = '#0a0a0a';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(catText, PAD + pillPad, y + pillH / 2);
+    y += pillH + Math.round(11 * scale);
+    ctx.letterSpacing = '0px';
+    ctx.textBaseline = 'top';
 
-  // Footer: club left · date right (anchored to bottom)
-  const footerY = H - Math.round(14 * scale);
-  ctx.textBaseline = 'alphabetic';
-  ctx.font = `700 ${Math.round(18 * scale)}px "Barlow Condensed"`;
-  ctx.fillStyle = '#C9A84C';
-  ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-  ctx.fillText('TOP SECRET FC', PAD, footerY);
-  ctx.letterSpacing = '0px';
+    const tl = n.title.length;
+    const fs = tl <= 30 ? Math.round(54 * scale) : tl <= 50 ? Math.round(44 * scale) : Math.round(37 * scale);
+    ctx.font = `900 ${fs}px "Barlow Condensed"`;
+    ctx.fillStyle = '#FFFFFF';
+    wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.06);
 
-  ctx.font = `400 ${Math.round(16 * scale)}px Barlow`;
-  ctx.fillStyle = 'rgba(255,255,255,0.38)';
-  ctx.textAlign = 'right';
-  ctx.fillText(n.dateLabel || n.date, W - PAD, footerY);
-  ctx.textAlign = 'left';
+    const footerY = H - Math.round(14 * scale);
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `700 ${Math.round(18 * scale)}px "Barlow Condensed"`;
+    ctx.fillStyle = '#C9A84C';
+    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
+    ctx.fillText('TOP SECRET FC', PAD, footerY);
+    ctx.letterSpacing = '0px';
+    ctx.font = `400 ${Math.round(16 * scale)}px Barlow`;
+    ctx.fillStyle = 'rgba(255,255,255,0.38)';
+    ctx.textAlign = 'right';
+    ctx.fillText(n.dateLabel || n.date, W - PAD, footerY);
+    ctx.textAlign = 'left';
+
+  } else {
+    // ── SQUARE (Instagram): caja centrada ──────────────────────────
+    const IPAD = Math.round(36 * scale);
+    const boxW = Math.round(W * 0.78);
+    const boxX = (W - boxW) / 2;
+
+    // Calcular altura del box según longitud del título
+    const tl = n.title.length;
+    const fs = tl <= 30 ? Math.round(52 * scale) : tl <= 50 ? Math.round(43 * scale) : Math.round(36 * scale);
+    ctx.font = `900 ${fs}px "Barlow Condensed"`;
+    const maxTW = boxW - IPAD * 2;
+    const words = n.title.toUpperCase().split(' ');
+    let lines = 1, lineW = 0;
+    for (const word of words) {
+      const ww = ctx.measureText(word + ' ').width;
+      if (lineW + ww > maxTW && lineW > 0) { lines++; lineW = ww; }
+      else lineW += ww;
+    }
+    const titleH = lines * fs * 1.08;
+    const pillH = Math.round(22 * scale);
+    const clubFs = Math.round(18 * scale);
+    const boxH = IPAD + pillH + Math.round(14 * scale) + titleH + Math.round(18 * scale) + clubFs + IPAD;
+    const boxY = Math.round((H - boxH) / 2);
+
+    // Fondo del box
+    ctx.fillStyle = 'rgba(0,0,0,0.78)';
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+    ctx.fill();
+
+    // Borde dorado superior (con clip para respetar esquinas redondeadas)
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+    ctx.clip();
+    ctx.fillStyle = '#C9A84C';
+    ctx.fillRect(boxX, boxY, boxW, Math.max(3, Math.round(4 * scale)));
+    ctx.restore();
+
+    let y = boxY + IPAD;
+
+    // Category pill
+    const catFs = Math.round(16 * scale);
+    ctx.font = `800 ${catFs}px "Barlow Condensed"`;
+    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
+    const catText = n.category.toUpperCase();
+    const catTxtW = ctx.measureText(catText).width;
+    const pillPad = Math.round(10 * scale);
+    ctx.fillStyle = '#C9A84C';
+    ctx.beginPath();
+    ctx.roundRect(boxX + IPAD, y, catTxtW + pillPad * 2, pillH, 2);
+    ctx.fill();
+    ctx.fillStyle = '#0a0a0a';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(catText, boxX + IPAD + pillPad, y + pillH / 2);
+    y += pillH + Math.round(14 * scale);
+    ctx.letterSpacing = '0px';
+    ctx.textBaseline = 'top';
+
+    // Título
+    ctx.font = `900 ${fs}px "Barlow Condensed"`;
+    ctx.fillStyle = '#FFFFFF';
+    y = wrapText(ctx, n.title.toUpperCase(), boxX + IPAD, y, maxTW, fs * 1.08);
+    y += Math.round(18 * scale);
+
+    // Club name
+    ctx.font = `700 ${clubFs}px "Barlow Condensed"`;
+    ctx.fillStyle = 'rgba(201,168,76,0.85)';
+    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
+    ctx.fillText('TOP SECRET FC', boxX + IPAD, y);
+    ctx.letterSpacing = '0px';
+  }
 }
 
 async function buildShareCanvas(n) {
