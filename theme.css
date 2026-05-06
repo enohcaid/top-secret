@@ -1,0 +1,15 @@
+/* ═══════════════════════════════════════════════════════════════
+   TOP SECRET FC · Theme
+   Editá este archivo para cambiar colores y fuentes en todo el sitio.
+   Los cambios se aplican automáticamente en todas las páginas.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Color de acento principal ──────────────────────────────── */
+  --gold:        #B0B8C4;   /* plateado principal  */
+  --gold2:       #CDD3DA;   /* plateado claro (hover) */
+
+  /* ── Fuentes ────────────────────────────────────────────────── */
+  --font-heading: 'Barlow Condensed', sans-serif;
+  --font-body:    'Barlow', sans-serif;
+}
