@@ -690,12 +690,6 @@ function closeShare() {
 }
 
 // ── CANVAS GENERATOR ─────────────────────────────────────────────────────────
-function titleFontSize(title) {
-  if (title.length <= 30) return 82;
-  if (title.length <= 50) return 68;
-  return 56;
-}
-
 function wrapText(ctx, text, x, y, maxW, lineH) {
   const words = text.split(' ');
   let line = '';
@@ -714,106 +708,103 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
   return cy;
 }
 
-async function buildShareCanvas(n) {
-  const canvas = document.getElementById('share-canvas');
-  const ctx = canvas.getContext('2d');
-  const W = 1080, H = 1080;
+async function renderCanvas(ctx, n, W, H) {
+  const scale = Math.min(W, H) / 1080;
+  const PAD = Math.round(64 * W / 1080);
 
-  // Background
   ctx.fillStyle = '#111111';
   ctx.fillRect(0, 0, W, H);
 
-  // Load & draw photo (top 62%)
   const img = new Image();
   img.crossOrigin = 'anonymous';
-  await new Promise(resolve => {
-    img.onload = resolve;
-    img.onerror = resolve;
-    img.src = n.image;
-  });
+  await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; img.src = n.image; });
 
   const photoH = Math.round(H * 0.62);
   if (img.naturalWidth) {
-    // Cover-fit to width, crop to photoH
-    const scale = Math.max(W / img.naturalWidth, photoH / img.naturalHeight);
-    const sw = W / scale, sh = photoH / scale;
+    const sc = Math.max(W / img.naturalWidth, photoH / img.naturalHeight);
+    const sw = W / sc, sh = photoH / sc;
     const sx = (img.naturalWidth - sw) / 2;
-    const sy = 0;
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, photoH);
+    ctx.drawImage(img, sx, 0, sw, sh, 0, 0, W, photoH);
   }
 
-  // Gradient overlay (photo area)
   const grad = ctx.createLinearGradient(0, H * 0.28, 0, photoH);
   grad.addColorStop(0, 'rgba(17,17,17,0)');
   grad.addColorStop(1, 'rgba(17,17,17,1)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, H * 0.28, W, photoH - H * 0.28);
 
-  // Top gold bar
   ctx.fillStyle = '#C9A84C';
-  ctx.fillRect(0, 0, W, 10);
+  ctx.fillRect(0, 0, W, Math.max(6, Math.round(10 * scale)));
 
-  // Ensure fonts loaded
-  await document.fonts.load('900 82px "Barlow Condensed"');
-  await document.fonts.load('700 36px "Barlow Condensed"');
-  await document.fonts.load('500 28px Barlow');
+  await document.fonts.load(`900 ${Math.round(82 * scale)}px "Barlow Condensed"`);
+  await document.fonts.load(`700 ${Math.round(36 * scale)}px "Barlow Condensed"`);
+  await document.fonts.load(`500 ${Math.round(28 * scale)}px Barlow`);
 
-  const PAD = 64;
-  let y = photoH - 20;
+  let y = photoH - Math.round(20 * scale);
 
-  // Category pill
-  ctx.font = '800 26px "Barlow Condensed"';
-  ctx.letterSpacing = '3px';
+  const catFs = Math.round(26 * scale);
+  ctx.font = `800 ${catFs}px "Barlow Condensed"`;
+  ctx.letterSpacing = `${Math.round(3 * scale)}px`;
   const catText = n.category.toUpperCase();
-  const catW = ctx.measureText(catText).width + 32;
+  const catW = ctx.measureText(catText).width + Math.round(32 * scale);
+  const catH = Math.round(36 * scale);
   ctx.fillStyle = '#C9A84C';
   ctx.beginPath();
-  ctx.roundRect(PAD, y - 34, catW, 36, 4);
+  ctx.roundRect(PAD, y - catH, catW, catH + 2, 4);
   ctx.fill();
   ctx.fillStyle = '#111111';
-  ctx.fillText(catText, PAD + 16, y - 10);
-  y += 24;
+  ctx.fillText(catText, PAD + Math.round(16 * scale), y - Math.round(10 * scale));
+  y += Math.round(24 * scale);
   ctx.letterSpacing = '0px';
 
-  // Title
-  const fs = titleFontSize(n.title);
+  const titleLen = n.title.length;
+  const fs = titleLen <= 30 ? Math.round(82 * scale) : titleLen <= 50 ? Math.round(68 * scale) : Math.round(56 * scale);
   ctx.font = `900 ${fs}px "Barlow Condensed"`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textBaseline = 'top';
   y = wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.05);
-  y += 14;
+  y += Math.round(14 * scale);
 
-  // Date
-  ctx.font = '500 28px Barlow';
+  ctx.font = `500 ${Math.round(28 * scale)}px Barlow`;
   ctx.fillStyle = 'rgba(255,255,255,0.45)';
   ctx.fillText(n.dateLabel || n.date, PAD, y);
-  y += 56;
 
-  // Rule
   ctx.fillStyle = 'rgba(201,168,76,0.45)';
-  ctx.fillRect(PAD, H - 112, W - PAD * 2, 1);
+  ctx.fillRect(PAD, H - Math.round(112 * scale), W - PAD * 2, 1);
 
-  // Club name
-  ctx.font = '900 44px "Barlow Condensed"';
+  ctx.font = `900 ${Math.round(44 * scale)}px "Barlow Condensed"`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText('TOP SECRET FC', PAD, H - 72);
+  ctx.fillText('TOP SECRET FC', PAD, H - Math.round(72 * scale));
 
-  // League
-  ctx.font = '700 28px "Barlow Condensed"';
+  ctx.font = `700 ${Math.round(28 * scale)}px "Barlow Condensed"`;
   ctx.fillStyle = '#C9A84C';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('PRIMERA DIVISIÓN · VPN', PAD, H - 36);
+  ctx.letterSpacing = `${Math.round(2 * scale)}px`;
+  ctx.fillText('PRIMERA DIVISIÓN · VPN', PAD, H - Math.round(36 * scale));
   ctx.letterSpacing = '0px';
 
-  // Stars right
-  ctx.font = '700 28px "Barlow Condensed"';
+  ctx.font = `700 ${Math.round(28 * scale)}px "Barlow Condensed"`;
   ctx.fillStyle = 'rgba(201,168,76,0.6)';
   ctx.textAlign = 'right';
-  ctx.fillText('★ ★ ★', W - PAD, H - 36);
+  ctx.fillText('★ ★ ★', W - PAD, H - Math.round(36 * scale));
   ctx.textAlign = 'left';
+}
 
+async function buildShareCanvas(n) {
+  const canvas = document.getElementById('share-canvas');
+  canvas.width = 1080; canvas.height = 1080;
+  await renderCanvas(canvas.getContext('2d'), n, 1080, 1080);
   document.getElementById('canvas-loading').style.display = 'none';
+}
+
+async function downloadForPlatform(n, w, h, filename) {
+  const off = document.createElement('canvas');
+  off.width = w; off.height = h;
+  await renderCanvas(off.getContext('2d'), n, w, h);
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = off.toDataURL('image/png');
+  a.click();
 }
 
 // ── SHARE ACTIONS ────────────────────────────────────────────────────────────
@@ -823,7 +814,9 @@ function getCaption() {
 
 function platformCaption(key) {
   if (!_shareNews) return '';
-  return (_shareNews.shareCaptions || {})[key] || _shareNews.shareCaption || '';
+  const base = (_shareNews.shareCaptions || {})[key] || _shareNews.shareCaption || '';
+  const url = BASE_URL + '#' + _shareNews.id;
+  return base + '\n\n🔗 ' + url;
 }
 
 function copyAndFlash(btn, text, label) {
@@ -838,27 +831,23 @@ async function shareIG() {
   const btn = event.currentTarget;
   const cap = platformCaption('ig');
   copyAndFlash(btn, cap, 'Instagram');
-  const canvas = document.getElementById('share-canvas');
-  const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-  const file = new File([blob], 'top-secret-fc.png', { type: 'image/png' });
-  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file] }); return; } catch(e) { if (e.name === 'AbortError') return; }
-  }
-  downloadImg();
+  await downloadForPlatform(_shareNews, 1080, 1080, 'top-secret-fc-ig.png');
 }
 
-function shareX() {
+async function shareX() {
   const btn = event.currentTarget;
   const cap = platformCaption('x');
   copyAndFlash(btn, cap, 'X / Twitter');
+  await downloadForPlatform(_shareNews, 1200, 675, 'top-secret-fc-x.png');
   window.open('https://x.com/intent/tweet?text=' + encodeURIComponent(cap), '_blank');
 }
 
-function shareFB() {
+async function shareFB() {
   const btn = event.currentTarget;
   const cap = platformCaption('fb');
   copyAndFlash(btn, cap, 'Facebook');
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(BASE_URL), '_blank');
+  await downloadForPlatform(_shareNews, 1200, 628, 'top-secret-fc-fb.png');
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(BASE_URL + '#' + _shareNews.id), '_blank');
 }
 
 async function shareAll() {
