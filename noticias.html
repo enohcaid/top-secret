@@ -709,8 +709,10 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
 }
 
 async function renderCanvas(ctx, n, W, H) {
-  const scale = Math.min(W, H) / 1080;
-  const PAD = Math.round(108 * W / 1080); // 10% safe zone
+  const isLandscape = W > H * 1.15;
+  // Landscape boost: min(W,H) is small for 16:9, so scale up fonts proportionally
+  const scale = isLandscape ? Math.min(W, H) * 1.35 / 1080 : Math.min(W, H) / 1080;
+  const PAD = Math.round(108 * W / 1080); // 10% safe zone (always width-based)
 
   // Background
   ctx.fillStyle = '#0a0a0a';
@@ -728,13 +730,14 @@ async function renderCanvas(ctx, n, W, H) {
     ctx.drawImage(img, sx, 0, sw, sh, 0, 0, W, H);
   }
 
-  // Gradient transition (photo → panel)
-  const panelY = Math.round(H * 0.56);
-  const fadeGrad = ctx.createLinearGradient(0, H * 0.36, 0, panelY);
+  // Landscape shows more photo; square keeps deeper panel
+  const panelY = Math.round(H * (isLandscape ? 0.50 : 0.56));
+  const fadeStart = isLandscape ? H * 0.30 : H * 0.36;
+  const fadeGrad = ctx.createLinearGradient(0, fadeStart, 0, panelY);
   fadeGrad.addColorStop(0, 'rgba(0,0,0,0)');
   fadeGrad.addColorStop(1, 'rgba(0,0,0,0.96)');
   ctx.fillStyle = fadeGrad;
-  ctx.fillRect(0, H * 0.36, W, panelY - H * 0.36);
+  ctx.fillRect(0, fadeStart, W, panelY - fadeStart);
 
   // Solid dark panel (bottom 44%)
   ctx.fillStyle = '#0a0a0a';
