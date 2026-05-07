@@ -112,7 +112,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   overflow: hidden;
   background: var(--black);
 }
-.player-card .card-img-wrap.bg-white { background: var(--white); }
+.player-card.v2 .card-img-wrap { background: var(--white); }
 .card-img-wrap::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0; height: 45%;
@@ -747,12 +747,6 @@ function buildCard(p, useV2 = false) {
 
   const brazos = card.querySelector('.img-brazos');
   const frente = card.querySelector('.img-frente');
-
-  if (useV2) {
-    const testV2 = new Image();
-    testV2.onload = () => card.querySelector('.card-img-wrap').classList.add('bg-white');
-    testV2.src = bSrc;
-  }
 
   card.addEventListener('mouseenter', () => {
     gsap.to(card, {y: -6, duration: 0.25, ease: 'power2.out'});
