@@ -327,6 +327,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
       <button class="mbtn mbtn-cancel" onclick="closeModal('blackOverlay')">Cancelar</button>
       <button class="mbtn mbtn-save" onclick="saveBlackDate()">Confirmar</button>
     </div>
+    <button class="mbtn" onclick="saveBlackIndefinite()" style="width:100%;margin-top:8px;background:#1a1a1a;color:#f97316;border:1px solid #f97316;">⛔ Tiempo indefinido</button>
   </div>
 </div>
 
@@ -344,18 +345,17 @@ const PLAYERS = [
   { name:'garayds',         pos:'POR', num:12, folder:'garayds'        },
   { name:'AR-ELTIO',   pos:'DFC', num:21, folder:'AR-ELTIO'  },
   { name:'Alexiisraiies23', pos:'DFC', num:3,  folder:'Alexiisraiies23'},
-  { name:'Cabers14',        pos:'DFC', num:14, folder:'Cabers14'       },
+  { name:'Cabers14',        pos:'DFC', num:27, folder:'Cabers14'       },
   { name:'Agubostero7',     pos:'DFD', num:31, folder:'Agubostero7'    },
   { name:'Huber236',        pos:'LD',  num:95, folder:'Huber236'       },
   { name:'zPibu__',         pos:'LI',  num:30, folder:'zPibu__'        },
   { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4' },
   { name:'RS32-DaniStone',  pos:'MCI', num:8,  folder:'RS32-DaniStone' },
   { name:'CipriMancini',    pos:'MVD', num:32, folder:'CipriMancini'   },
-  { name:'Buraa07',         pos:'MVI', num:12, folder:'Buraa7'         },
+  { name:'Buraa07',         pos:'MVI', num:5,  folder:'Buraa7'         },
   { name:'Guiidow',         pos:'MCI', num:20, folder:'Guiidow'        },
   { name:'BlackPanther-CG', pos:'ED',  num:11, folder:'BlackPanther-CG'},
   { name:'Lautavester7',    pos:'EI',  num:7,  folder:'Lautavester7'   },
-  { name:'cansitrGd22_',    pos:'DC',  num:22, folder:'cansitrGd22_'   },
   { name:'Lucasmati_akd',   pos:'DC',  num:9,  folder:'Lucasmati_akd'  },
 ];
 
@@ -968,6 +968,15 @@ function saveBlackDate() {
   saveState();
   closeModal('blackOverlay'); render();
   showToast(currentPlayer + ' → Ausente hasta ' + fmt);
+}
+function saveBlackIndefinite() {
+  availability[currentPlayer] = { status:'black', returnDate:'9999-12-31', note:'Ausente (indef.)' };
+  const _apIdx = alwaysPresent.indexOf(currentPlayer);
+  if (_apIdx !== -1) alwaysPresent.splice(_apIdx, 1);
+  delete dailyOverrides[currentPlayer];
+  saveState();
+  closeModal('blackOverlay'); render();
+  showToast(currentPlayer + ' → Ausente por tiempo indefinido');
 }
 
 /* ─── MODALS ─── */
