@@ -112,6 +112,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   overflow: hidden;
   background: var(--black);
 }
+.player-card.v2 .card-img-wrap { background: var(--white); }
 .card-img-wrap::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0; height: 45%;
@@ -711,7 +712,7 @@ let _currentPlayer = null;
 /* ─── BUILD CARD ─── */
 function buildCard(p, useV2 = false) {
   const card = document.createElement('div');
-  card.className = 'player-card';
+  card.className = useV2 ? 'player-card v2' : 'player-card';
   card.dataset.pos = p.pos;
   card.dataset.key = p.key;
 
