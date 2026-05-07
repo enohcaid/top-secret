@@ -439,12 +439,12 @@ footer span { color: var(--gold); }
 
 <!-- SEASON BAR -->
 <div class="season-bar">
-  <button class="season-pill active" onclick="switchSeason(1, this)">T1 · 2026</button>
-  <button class="season-pill" onclick="switchSeason(2, this)">T2 · 2026</button>
+  <button class="season-pill" onclick="switchSeason(1, this)">T1 · 2026</button>
+  <button class="season-pill active" onclick="switchSeason(2, this)">T2 · 2026</button>
 </div>
 
 <!-- T1 CONTENT -->
-<div id="t1-content">
+<div id="t1-content" style="display:none">
   <div class="pos-filter">
     <button class="pfbtn active" onclick="filterPos('all', this)">Todos</button>
     <button class="pfbtn" onclick="filterPos('POR', this)">POR</button>
@@ -457,7 +457,7 @@ footer span { color: var(--gold); }
 </div>
 
 <!-- T2 CONTENT -->
-<div id="t2-content" style="display:none">
+<div id="t2-content">
   <div class="pos-filter" id="pos-filter-t2">
     <button class="pfbtn active" onclick="filterPos2('all', this)">Todos</button>
     <button class="pfbtn" onclick="filterPos2('POR', this)">POR</button>
@@ -974,7 +974,7 @@ gsap.to('.season-bar', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0
 gsap.to('.pos-filter', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0.34});
 
 /* ─── INIT ─── */
-renderGrid('all');
+renderGrid2('all');
 </script>
 <script src="layout.js?v=3"></script>
 <script src="mobile-nav.js?v=3"></script>
