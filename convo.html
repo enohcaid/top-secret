@@ -244,6 +244,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
     </div>
     <div class="section-head-right">
       <span>Armado</span>
+      <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px">📋 Copiar lista</button>
       <button class="share-btn" id="shareBtn" onclick="doShare()">📸 Compartir</button>
     </div>
   </div>
@@ -973,6 +974,34 @@ function saveBlackDate() {
   saveState();
   closeModal('blackOverlay'); render();
   showToast(currentPlayer + ' → Ausente hasta ' + fmt);
+}
+
+/* ─── COPY PLAYER LIST ─── */
+function copyPlayerList() {
+  const statusIcon = { green:'🟢', yellow:'🟡', red:'🔴', black:'🟠', pending:'⬜' };
+  const groups = [
+    {label:'Arquero',        f:p=>p.pos==='POR'},
+    {label:'Defensores',     f:p=>['DCD','DFC','DFD','DCI'].includes(p.pos)},
+    {label:'Laterales',      f:p=>['LD','LI','DFI'].includes(p.pos)},
+    {label:'Mediocampistas', f:p=>['MCD','MCI','MVD','MVI'].includes(p.pos)},
+    {label:'Delanteros',     f:p=>['DC','EI','ED'].includes(p.pos)},
+  ];
+  const lines = [];
+  groups.forEach(g => {
+    const gp = PLAYERS.filter(g.f);
+    if (!gp.length) return;
+    lines.push('— ' + g.label.toUpperCase() + ' —');
+    gp.forEach(p => {
+      const st = getStatus(p.name);
+      lines.push(`${statusIcon[st] || '⬜'} ${p.pos}  #${p.num}  ${p.name}`);
+    });
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = document.getElementById('copyListBtn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => btn.textContent = orig, 1800);
+  });
 }
 
 /* ─── MODALS ─── */
