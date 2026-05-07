@@ -432,9 +432,9 @@ footer span { color: var(--gold); }
 <!-- TOPBAR -->
 <!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="ph-eyebrow">Temporada 1 · 2026</div>
+  <div class="ph-eyebrow">Temporada 2 · 2026</div>
   <h1 class="ph-title">El <span>Plantel</span></h1>
-  <p class="ph-sub">15 jugadores · Top Secret Football Club</p>
+  <p class="ph-sub">Top Secret Football Club</p>
 </div>
 
 <!-- SEASON BAR -->
@@ -456,13 +456,17 @@ footer span { color: var(--gold); }
   <div class="squad-grid" id="squadGrid"></div>
 </div>
 
-<!-- T2 PLACEHOLDER -->
-<div class="t2-soon" id="t2-content">
-  <div class="t2-card">
-    <div class="t2-icon">⚽</div>
-    <div class="t2-label">Próximamente</div>
-    <p class="t2-sub">El plantel de Temporada 2 · 2026 se anunciará pronto.<br>Habrá bajas, incorporaciones y nuevas caras.</p>
+<!-- T2 CONTENT -->
+<div id="t2-content" style="display:none">
+  <div class="pos-filter" id="pos-filter-t2">
+    <button class="pfbtn active" onclick="filterPos2('all', this)">Todos</button>
+    <button class="pfbtn" onclick="filterPos2('POR', this)">POR</button>
+    <button class="pfbtn" onclick="filterPos2('DEF', this)">DEF</button>
+    <button class="pfbtn" onclick="filterPos2('LAT', this)">LAT</button>
+    <button class="pfbtn" onclick="filterPos2('MED', this)">MED</button>
+    <button class="pfbtn" onclick="filterPos2('DEL', this)">DEL</button>
   </div>
+  <div class="squad-grid" id="squadGrid2"></div>
 </div>
 
 <!-- BACKDROP -->
@@ -602,10 +606,49 @@ const ROSTER = [
 ];
 const ROSTER_KEYS = ROSTER.map(r => r.key);
 
+/* ─── ROSTER T2 ─── */
+const ROSTER_T2 = [
+  {key:'Woolfyboyzx2',    pos:'POR', posn:'Portero',         num:'1',  nvl:'88',  arq:'Paragoles',  build:'Octopus',
+   stats:[{l:'ACE',v:80},{l:'APO',v:99},{l:'MPO',v:99},{l:'RPO',v:99}], total:377, photo:true},
+  {key:'garayds',         pos:'POR', posn:'Portero',         num:'12', nvl:'—',   arq:'—',          build:'—',
+   stats:[], total:0, photo:true},
+  {key:'AR-ELTIO',        pos:'DEF', posn:'Defensa central', num:'21', nvl:'—',   arq:'—',          build:'—',
+   stats:[], total:0, photo:true},
+  {key:'Alexiisraiies23', pos:'DEF', posn:'Defensa central', num:'3',  nvl:'88',  arq:'Jefe',       build:'Capitano',
+   stats:[{l:'FUE',v:99},{l:'AGR',v:99},{l:'CAB',v:99},{l:'BAR',v:75}], total:372, photo:true},
+  {key:'Cabers14',        pos:'DEF', posn:'Defensa central', num:'27', nvl:'—',   arq:'—',          build:'—',
+   stats:[], total:0, photo:true},
+  {key:'Agubostero7',     pos:'DEF', posn:'Defensor',        num:'31', nvl:'84',  arq:'Jefe',       build:'Capitano',
+   stats:[{l:'FUE',v:97},{l:'AGR',v:92},{l:'CAB',v:91},{l:'BAR',v:92}], total:372, photo:true},
+  {key:'Huber236',        pos:'LAT', posn:'Lateral',         num:'95', nvl:'80',  arq:'Precursor',  build:'Spark+',
+   stats:[{l:'ACE',v:95},{l:'AGI',v:92},{l:'CBA',v:90},{l:'REG',v:90}], total:367},
+  {key:'zPibu__',         pos:'LAT', posn:'Lateral',         num:'30', nvl:'87',  arq:'Objetivo',   build:'Runner',
+   stats:[{l:'SAL',v:96},{l:'FUE',v:94},{l:'CAB',v:85},{l:'TIR',v:75}], total:350, photo:true},
+  {key:'Juan_Martinez4',  pos:'MED', posn:'Mediocampista',   num:'6',  nvl:'MÁX', arq:'Objetivo',   build:'Roamer',
+   stats:[{l:'SAL',v:90},{l:'FUE',v:90},{l:'CAB',v:80},{l:'TIR',v:75}], total:335, photo:true},
+  {key:'RS32-DaniStone',  pos:'MED', posn:'Mediocampista',   num:'8',  nvl:'67',  arq:'Precursor',  build:'Progressor+',
+   stats:[{l:'COM',v:90},{l:'PLA',v:90},{l:'PDE',v:90},{l:'EFR',v:92}], total:362},
+  {key:'CipriMancini',    pos:'MED', posn:'Mediocampista',   num:'32', nvl:'82',  arq:'Objetivo',   build:'Maestro',
+   stats:[{l:'COM',v:90},{l:'VIS',v:87},{l:'CBA',v:88},{l:'PLA',v:85}], total:350, photo:true},
+  {key:'Buraa07',         pos:'MED', posn:'Mediocampista',   num:'5',  nvl:'61',  arq:'Precursor',  build:'Janitor',
+   stats:[{l:'COM',v:75},{l:'PLA',v:90},{l:'PDE',v:81},{l:'EFR',v:83}], total:329,
+   folderOverride:'Buraa7', photo:true},
+  {key:'Guiidow',         pos:'MED', posn:'Mediocampista',   num:'20', nvl:'71',  arq:'Precursor',  build:'Roamer',
+   stats:[{l:'SAL',v:92},{l:'FUE',v:92},{l:'CAB',v:80},{l:'TIR',v:75}], total:339, photo:true},
+  {key:'BlackPanther-CG', pos:'DEL', posn:'Delantero',       num:'11', nvl:'MÁX', arq:'Objetivo',   build:'Magician+',
+   stats:[{l:'ACE',v:95},{l:'BAL',v:85},{l:'DEF',v:95},{l:'CUR',v:85}], total:360, photo:true},
+  {key:'Lautavester7',    pos:'DEL', posn:'Delantero',       num:'7',  nvl:'MÁX', arq:'Objetivo',   build:'Target+',
+   stats:[{l:'SAL',v:96},{l:'FUE',v:98},{l:'CAB',v:86},{l:'TIR',v:96}], total:376, photo:true},
+  {key:'Lucasmati_akd',   pos:'DEL', posn:'Delantero',       num:'9',  nvl:'64',  arq:'Objetivo',   build:'—',
+   stats:[{l:'SAL',v:85},{l:'FUE',v:88},{l:'CAB',v:82},{l:'TIR',v:90}], total:345, photo:true},
+];
+
 /* ─── PATHS ─── */
 function renderFolder(p) { return p.folderOverride || p.key; }
 function brazosPath(p)   { return `Renders/${renderFolder(p)}/Brazos.png`; }
 function frontePath(p)   { return `Renders/${renderFolder(p)}/Frente.png`; }
+function brazos2Path(p)  { return `Renders/${renderFolder(p)}/Brazos2.png`; }
+function frente2Path(p)  { return `Renders/${renderFolder(p)}/Frente2.png`; }
 function svgPath(p)      { return `Renders/${p.key}.svg`; }
 
 /* ─── COMPUTE STATS ─── */
@@ -666,7 +709,7 @@ let selectedCard  = null;
 let _currentPlayer = null;
 
 /* ─── BUILD CARD ─── */
-function buildCard(p) {
+function buildCard(p, useV2 = false) {
   const card = document.createElement('div');
   card.className = 'player-card';
   card.dataset.pos = p.pos;
@@ -678,11 +721,16 @@ function buildCard(p) {
     <div class="ph-name">${p.key}</div>
   </div>`;
 
+  const bSrc  = useV2 ? brazos2Path(p) : brazosPath(p);
+  const bFall = brazosPath(p);
+  const fSrc  = useV2 ? frente2Path(p) : frontePath(p);
+  const fFall = frontePath(p);
+
   const imgHtml = `<div class="card-img-wrap">
-    <img class="img-brazos" src="${brazosPath(p)}" alt="${p.key}"
-      onerror="this.style.display='none';this.parentElement.querySelector('.card-placeholder').style.display='flex'">
-    <img class="img-frente" src="${frontePath(p)}" alt="${p.key} frente"
-      onerror="this.dataset.missing='1';this.style.display='none'">
+    <img class="img-brazos" src="${bSrc}" alt="${p.key}"
+      onerror="if(!this._f){this._f=1;this.src='${bFall}';}else{this.style.display='none';this.parentElement.querySelector('.card-placeholder').style.display='flex';}">
+    <img class="img-frente" src="${fSrc}" alt="${p.key} frente"
+      onerror="if(!this._f){this._f=1;this.src='${fFall}';}else{this.dataset.missing='1';this.style.display='none';}">
     ${ph}
   </div>`;
 
@@ -751,9 +799,32 @@ function switchSeason(n, btn) {
   const t1 = document.getElementById('t1-content');
   const t2 = document.getElementById('t2-content');
   if (n === 1) { t1.style.display = ''; t2.style.display = 'none'; }
-  else         { t1.style.display = 'none'; t2.style.display = 'block'; closePanel(false); }
+  else         { t1.style.display = 'none'; t2.style.display = 'block'; closePanel(false); renderGrid2(currentFilter2); }
 }
 window.switchSeason = switchSeason;
+
+/* ─── T2 GRID ─── */
+let currentFilter2 = 'all';
+
+function renderGrid2(filter) {
+  currentFilter2 = filter;
+  const grid = document.getElementById('squadGrid2');
+  grid.innerHTML = '';
+  const visible = ROSTER_T2.filter(p => filter === 'all' || p.pos === filter);
+  visible.forEach(p => grid.appendChild(buildCard(p, true)));
+  gsap.from(grid.querySelectorAll('.player-card'), {
+    opacity: 0, y: 28, duration: 0.45, stagger: 0.045, ease: 'power2.out'
+  });
+}
+
+function filterPos2(pos, btn) {
+  document.querySelectorAll('#pos-filter-t2 .pfbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const wasOpen = document.getElementById('player-panel').style.display === 'flex';
+  if (wasOpen) closePanel(false);
+  renderGrid2(pos);
+}
+window.filterPos2 = filterPos2;
 
 /* ─── OPEN PANEL ─── */
 function openPanel(p, card) {
@@ -771,6 +842,7 @@ function openPanel(p, card) {
   img.className = 'pp-photo';
   img.alt = p.key;
   img.onerror = function() {
+    if (!this._f) { this._f = 1; this.src = brazosPath(p); return; }
     this.remove();
     const ph = document.createElement('div');
     ph.className = 'pp-photo-placeholder';
@@ -779,7 +851,7 @@ function openPanel(p, card) {
       <div class="pp-ph-num">#${p.num}</div>`;
     photoWrap.insertBefore(ph, photoWrap.firstChild);
   };
-  img.src = brazosPath(p);
+  img.src = brazos2Path(p);
   photoWrap.insertBefore(img, photoWrap.firstChild);
 
   /* identity */

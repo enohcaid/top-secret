@@ -148,6 +148,11 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .share-btn{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .15s;}
 .share-btn:hover{background:var(--gold);color:#fff;}
 
+/* ── LIGHTBOX ── */
+.lightbox{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;cursor:zoom-out;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6);}
+
 /* ── MODALS ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;align-items:flex-end;justify-content:center;padding:0;}
 @media(min-width:500px){.overlay{align-items:center;padding:20px;}}
@@ -333,6 +338,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 </div>
 
 <div id="toast" class="toast"></div>
+<div id="lightbox" class="lightbox" onclick="closeLightbox()"><img id="lightboxImg" src="" alt=""></div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -564,29 +570,40 @@ function getNote(name) {
 /* ─── PHOTO HELPERS ─── */
 function brazosPath(p)  { return `Renders/${p.folder || p.name}/Brazos.png`; }
 function frontePath(p)  { return `Renders/${p.folder || p.name}/Frente.png`; }
+function brazos2Path(p) { return `Renders/${p.folder || p.name}/Brazos2.png`; }
+function frente2Path(p) { return `Renders/${p.folder || p.name}/Frente2.png`; }
 function svgPath(p)     { return `Renders/${p.name}.svg`; }
 
-/* ─── BUILD AVATAR (tries PNG → SVG crop) ─── */
-function buildAvatar(p, container) {
+function tryImages(paths, idx, onSuccess, onFail) {
+  if (idx >= paths.length) { onFail(); return; }
   const img = new Image();
-  img.onload = () => {
-    container.innerHTML = '';
-    const el = document.createElement('img');
-    el.src = brazosPath(p);
-    el.className = 'av-photo';
-    el.alt = p.name;
-    container.appendChild(el);
-  };
-  img.onerror = () => {
-    // fallback: SVG with crop
-    const crop = CROP_DATA[p.name];
-    if (crop) {
-      container.innerHTML = `<div class="av-crop-wrap"><img src="${svgPath(p)}" style="width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;"></div>`;
-    } else {
-      container.innerHTML = `<img src="${svgPath(p)}" style="width:100%;height:100%;object-fit:cover;">`;
+  img.onload = () => onSuccess(paths[idx]);
+  img.onerror = () => tryImages(paths, idx + 1, onSuccess, onFail);
+  img.src = paths[idx];
+}
+
+/* ─── BUILD AVATAR (tries Brazos2 → Brazos → SVG crop) ─── */
+function buildAvatar(p, container) {
+  tryImages([brazos2Path(p), brazosPath(p)], 0,
+    (src) => {
+      container.innerHTML = '';
+      const el = document.createElement('img');
+      el.src = src;
+      el.className = 'av-photo';
+      el.alt = p.name;
+      el.style.cursor = 'zoom-in';
+      el.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(src); });
+      container.appendChild(el);
+    },
+    () => {
+      const crop = CROP_DATA[p.name];
+      if (crop) {
+        container.innerHTML = `<div class="av-crop-wrap"><img src="${svgPath(p)}" style="width:${crop.iW}px;height:${crop.iH}px;left:-${crop.oX}px;top:-${crop.oY}px;"></div>`;
+      } else {
+        container.innerHTML = `<img src="${svgPath(p)}" style="width:100%;height:100%;object-fit:cover;">`;
+      }
     }
-  };
-  img.src = brazosPath(p);
+  );
 }
 
 /* ─── DATE HEADER ─── */
@@ -748,13 +765,10 @@ function renderPitch() {
         tok.appendChild(bar);
       }
 
-      // Try Frente → Brazos → SVG
-      const frente = new Image();
-      frente.onload = () => setPhoto(frontePath(player));
-      frente.onerror = () => {
-        const brazos = new Image();
-        brazos.onload = () => setPhoto(brazosPath(player));
-        brazos.onerror = () => {
+      // Try Frente2 → Frente → Brazos2 → Brazos → SVG
+      tryImages([frente2Path(player), frontePath(player), brazos2Path(player), brazosPath(player)], 0,
+        (src) => setPhoto(src),
+        () => {
           tok.innerHTML = '';
           const crop = CROP_DATA[player.name];
           if (crop) {
@@ -762,22 +776,20 @@ function renderPitch() {
             const oX = (crop.oX * stScale).toFixed(1), oY = (crop.oY * stScale).toFixed(1);
             tok.innerHTML = `<div class="av-crop-wrap" style="position:absolute;inset:0;overflow:hidden;"><img src="${svgPath(player)}" style="width:${iW}px;height:${iH}px;left:-${oX}px;top:-${oY}px;position:absolute;"></div>`;
           } else {
-            const img = document.createElement('img');
-            img.src = svgPath(player);
-            img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
-            tok.appendChild(img);
+            const img2 = document.createElement('img');
+            img2.src = svgPath(player);
+            img2.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+            tok.appendChild(img2);
           }
           const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
           tok.appendChild(numEl);
           if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
           const bar = document.createElement('div'); bar.className = 'stoken-bar';
-          const nameEl = document.createElement('span'); nameEl.className = 'stoken-name'; nameEl.textContent = player.name;
-          bar.appendChild(nameEl);
+          const nameEl2 = document.createElement('span'); nameEl2.className = 'stoken-name'; nameEl2.textContent = player.name;
+          bar.appendChild(nameEl2);
           tok.appendChild(bar);
-        };
-        brazos.src = brazosPath(player);
-      };
-      frente.src = frontePath(player);
+        }
+      );
     } else {
       tok.className = 'stoken empty';
       tok.textContent = s.l;
@@ -1008,6 +1020,18 @@ function copyPlayerList() {
   });
 }
 
+/* ─── LIGHTBOX ─── */
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
 /* ─── MODALS ─── */
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
@@ -1234,9 +1258,10 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
         resolve();
       }
       const i1 = new Image();
-      i1.onload = () => drawPhoto(i1);
-      i1.onerror = () => { const i2 = new Image(); i2.onload = () => drawPhoto(i2); i2.onerror = () => drawPhoto(null); i2.src = brazosPath(player); };
-      i1.src = frontePath(player);
+      tryImages([frente2Path(player), frontePath(player), brazos2Path(player), brazosPath(player)], 0,
+        (src) => { const im = new Image(); im.onload = () => drawPhoto(im); im.src = src; },
+        () => drawPhoto(null)
+      );
     })));
   } else {
     slots.forEach(s => {
