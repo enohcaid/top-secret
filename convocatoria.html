@@ -14,7 +14,7 @@
 /* ── DESIGN TOKENS ── */
 :root{
   --black:#111111; --white:#FFFFFF; --gray:#F5F5F0;
-  --gold:#C9A84C; --gold2:#E8C97A; --gold-dim:rgba(201,168,76,.12);
+  --gold:#B0B8C4; --gold2:#E8C97A; --gold-dim:rgba(201,168,76,.12);
   --mid:#888888; --mid2:#AAAAAA; --border:#E5E5E0;
   --text:#111111; --text2:#444444;
   --green:#3ecf8e; --yellow:#f5c518; --red:#e8502e;
@@ -1073,10 +1073,10 @@ function buildWhatsAppMessage() {
 function drawShareFooter(c2d, FW, FH, FOOTER, S) {
   /* Black bar with gold top stripe — no image loading (avoids canvas taint) */
   c2d.fillStyle = '#111111'; c2d.fillRect(0, FH, FW, FOOTER);
-  c2d.fillStyle = '#C9A84C'; c2d.fillRect(0, FH, FW, 3*S);
+  c2d.fillStyle = '#B0B8C4'; c2d.fillRect(0, FH, FW, 3*S);
   /* Gold shield badge (drawn, no image) */
   const badgeR = FOOTER * 0.34, badgeCX = FW*0.065, badgeCY = FH + FOOTER*0.5;
-  c2d.fillStyle = '#C9A84C';
+  c2d.fillStyle = '#B0B8C4';
   c2d.beginPath(); c2d.arc(badgeCX, badgeCY, badgeR, 0, Math.PI*2); c2d.fill();
   c2d.fillStyle = '#111';
   c2d.font = `900 ${Math.round(badgeR*1.1)}px "Barlow Condensed",sans-serif`;
@@ -1088,7 +1088,7 @@ function drawShareFooter(c2d, FW, FH, FOOTER, S) {
   c2d.font = `bold ${Math.round(FOOTER*0.3)}px "Barlow Condensed",sans-serif`;
   c2d.fillStyle = '#fff'; c2d.fillText('TOP ', nX, nMid);
   const w1 = c2d.measureText('TOP ').width;
-  c2d.fillStyle = '#C9A84C'; c2d.fillText('SECRET', nX+w1, nMid);
+  c2d.fillStyle = '#B0B8C4'; c2d.fillText('SECRET', nX+w1, nMid);
   const w2 = c2d.measureText('SECRET').width;
   c2d.fillStyle = '#fff'; c2d.fillText(' FC', nX+w1+w2, nMid);
   /* Date + session + formation */
@@ -1105,7 +1105,7 @@ function drawShareFooter(c2d, FW, FH, FOOTER, S) {
 /* ─── Build share canvas ─── */
 async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
   const slots  = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
-  const tokW   = Math.round(FW * 0.28);
+  const tokW   = Math.round(FW * 0.252);
   const tokH   = Math.round(tokW * (108/102));
   const barH   = Math.round(tokH * (17/108));
   const photoH = tokH - barH;
@@ -1144,7 +1144,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     ctx.restore();
     /* número: overlay bottom-left sobre la foto */
     ctx.font = `900 ${numSz}px "Barlow Condensed",sans-serif`;
-    ctx.fillStyle = '#C9A84C'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#B0B8C4'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 3*S;
     ctx.fillText(String(player.num), tx + 3*S, ty + photoH - 3*S);
     ctx.shadowBlur = 0;
