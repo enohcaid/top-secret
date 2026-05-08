@@ -1038,13 +1038,13 @@ const RAW = [
   // ══ SEMANA 6-9 ABR ══
   // Lun 6 Abr
   {date:'2026-04-06',time:'23:00',league:'VPN',  rival:'Infinitx',           isHome:false, result:null},
-  {date:'2026-04-06',time:'23:30',league:'VPN',  rival:'Lirico FC',          isHome:true,  result:null},
+  {date:'2026-04-06',time:'23:30',league:'VPN',  rival:'Lírico FC',          isHome:true,  result:[11,1]},
 
   // Mar 7 Abr
   {date:'2026-04-02',time:'23:50',league:'11x11',rival:'Suda ESP',           isHome:false, result:null},
 
   // Mar 14 Abr
-  {date:'2026-04-14',time:'23:00',league:'VPN',  rival:'Dep Ballester',      isHome:false, result:null},
+  {date:'2026-04-14',time:'23:00',league:'VPN',  rival:'Dep Ballester',      isHome:false, result:[2,3]},
   {date:'2026-04-14',time:'23:30',league:'VPN',  rival:'Dalmine Esports',    isHome:false, result:null},
   {date:'2026-04-14',time:'23:50',league:'VPN',  rival:'Camioneros eSp',     isHome:false, result:null},
 
@@ -1328,19 +1328,34 @@ function findSeedMatch(id){
   const m = getAnyMatch(typeof id === 'string' ? id : parseInt(id));
   if(!m || !m.date) return null;
   const mmdd = m.date.slice(5); // MM-DD
+
+  // When multiple seeds match (e.g. two legs vs same rival on same date),
+  // prefer the one where isHome also matches.
+  function bestOf(candidates){
+    if(!candidates.length) return null;
+    if(candidates.length === 1) return candidates[0];
+    if(m.isHome !== undefined){
+      const match = candidates.find(s => s.isHome === m.isHome);
+      if(match) return match;
+    }
+    return candidates[0];
+  }
+
   // 1st pass: exact date + league + rival
-  let hit = allSeeds.find(s =>
+  let hits = allSeeds.filter(s =>
     s.date === m.date && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
+  if(hits.length) return bestOf(hits);
   // 2nd pass: ignore year (handles seed entries with wrong year)
-  if(!hit) hit = allSeeds.find(s =>
+  hits = allSeeds.filter(s =>
     s.date.slice(5) === mmdd && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
+  if(hits.length) return bestOf(hits);
   // 3rd pass: same year + league + rival
-  if(!hit) hit = allSeeds.find(s =>
+  hits = allSeeds.filter(s =>
     s.date.slice(0,4) === m.date.slice(0,4) && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
-  return hit || null;
+  return bestOf(hits) || null;
 }
 
 function openStatsPanel(id){
