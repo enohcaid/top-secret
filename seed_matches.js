@@ -678,8 +678,8 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 19 11x11 - Sub21 CF - 6 Abr (Visita, 2-3, Derrota)
-  {rival:'Sub21 CF', league:'11x11', date:'2026-04-06', match_result:'2-3', uploadedAt:'2026-04-06T00:00:00.000Z', notes:'',
+  // Fecha 19 11x11 - Sub21 CF - 7 Abr (Visita, 2-3, Derrota)
+  {rival:'Sub21 CF', league:'11x11', date:'2026-04-07', match_result:'2-3', uploadedAt:'2026-04-07T00:00:00.000Z', notes:'',
   team_stats:{posesion:54,tiros:3,tiros_arco:null,goles_esperados:2.1,pases:219,precision_pases:85,entradas:25,entradas_exito:5,intercepciones:12,paradas:2,faltas:0,fuera_juego:1,corneres:3,regates_exito:95,precision_tiro:67},
   players:[
     {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -695,8 +695,8 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:4.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 20 11x11 - Ferro eSp - 6 Abr (Visita, 0-1, Derrota)
-  {rival:'Ferro eSp', league:'11x11', date:'2026-04-06', match_result:'0-1', uploadedAt:'2026-04-06T01:00:00.000Z', notes:'',
+  // Fecha 20 11x11 - Ferro eSp - 7 Abr (Visita, 0-1, Derrota)
+  {rival:'Ferro eSp', league:'11x11', date:'2026-04-07', match_result:'0-1', uploadedAt:'2026-04-07T01:00:00.000Z', notes:'',
   team_stats:{posesion:54,tiros:4,tiros_arco:null,goles_esperados:2.0,pases:189,precision_pases:81,entradas:33,entradas_exito:8,intercepciones:20,paradas:2,faltas:1,fuera_juego:1,corneres:5,regates_exito:91,precision_tiro:75},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:22, pass_accuracy:73, distance_km:18.8, sprints:13.0, tackles:3, interceptions:null},
@@ -712,8 +712,8 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:5.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 21 11x11 - Suda eSports - 6 Abr (Visita, 2-1, Victoria)
-  {rival:'Suda eSports', league:'11x11', date:'2026-04-06', match_result:'2-1', uploadedAt:'2026-04-06T02:00:00.000Z', notes:'',
+  // Fecha 21 11x11 - Suda eSports - 7 Abr (Visita, 2-1, Victoria)
+  {rival:'Suda eSports', league:'11x11', date:'2026-04-07', match_result:'2-1', uploadedAt:'2026-04-07T02:00:00.000Z', notes:'',
   team_stats:{posesion:54,tiros:7,tiros_arco:null,goles_esperados:4.5,pases:195,precision_pases:85,entradas:26,entradas_exito:6,intercepciones:15,paradas:4,faltas:3,fuera_juego:4,corneres:3,regates_exito:96,precision_tiro:57},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.5, goals:0, assists:0, passes:29, pass_accuracy:90, distance_km:19.3, sprints:13.6, tackles:1, interceptions:null},
