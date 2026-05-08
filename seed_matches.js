@@ -852,7 +852,7 @@ const SEED_MATCHES = [
 
 
   // â”€â”€ VPN PLAYOFFS â€” Cuartos de Final vs Camioneros eSports â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-24', match_result:'1-0', uploadedAt:'2026-04-24T00:00:00.000Z', notes:'Cuartos de Final Â· Ida (Visita)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
+  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-20', match_result:'1-0', uploadedAt:'2026-04-20T00:00:00.000Z', notes:'Cuartos de Final Â· Ida (Visita)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
   team_stats:{posesion:59,tiros:5,tiros_arco:null,goles_esperados:1.6,pases:213,precision_pases:87,entradas:19,entradas_exito:8,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:2,regates_exito:97,precision_tiro:60},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:25,  pass_accuracy:88,  distance_km:19.1, sprints:null, tackles:2,  interceptions:null},
@@ -868,7 +868,7 @@ const SEED_MATCHES = [
     {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'POR', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-24', match_result:'1-0', uploadedAt:'2026-04-24T01:00:00.000Z', notes:'Cuartos de Final Â· Vuelta (Local)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
+  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-20', match_result:'1-0', uploadedAt:'2026-04-20T01:00:00.000Z', notes:'Cuartos de Final Â· Vuelta (Local)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
   team_stats:{posesion:59,tiros:3,tiros_arco:null,goles_esperados:0.7,pases:192,precision_pases:84,entradas:18,entradas_exito:7,intercepciones:null,paradas:8,faltas:0,fuera_juego:0,corneres:1,regates_exito:93,precision_tiro:100},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.2, goals:0, assists:1, passes:22,  pass_accuracy:64,  distance_km:18.0, sprints:null, tackles:2,  interceptions:null},
