@@ -799,7 +799,7 @@ function switchSeason(n, btn) {
   btn.classList.add('active');
   const t1 = document.getElementById('t1-content');
   const t2 = document.getElementById('t2-content');
-  if (n === 1) { t1.style.display = ''; t2.style.display = 'none'; }
+  if (n === 1) { t1.style.display = ''; t2.style.display = 'none'; closePanel(false); renderGrid(currentFilter); }
   else         { t1.style.display = 'none'; t2.style.display = 'block'; closePanel(false); renderGrid2(currentFilter2); }
 }
 window.switchSeason = switchSeason;
