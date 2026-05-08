@@ -1073,8 +1073,19 @@ const ADMIN_PIN  = '8189';
 const WORKER_URL_CAL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const KV_KEY_CAL     = 'ts_matches_v1';
 let cloudSeedMatches = []; // populated on load
-let vpnResults       = []; // populated from VPN API — season 8 Liga Argentina 2da División
+let vpnResults       = []; // results de VPN — temporada activa de Liga Argentina 2da División
+let vpnFixtures      = []; // fixtures de VPN — partidos pendientes de la temporada activa
+let vpnDynamic       = []; // subset de vpnFixtures sin duplicados con RAW/custom
 let currentStatsId   = null; // id of the match currently open in the stats panel
+
+// Recalculates vpnDynamic = vpnFixtures entries not already covered by RAW or custom
+function rebuildVpnDynamic() {
+  vpnDynamic = vpnFixtures.filter(f => {
+    const inRaw    = RAW.some((_, i) => { const m = getMatch(i); return m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival); });
+    const inCustom = custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
+    return !inRaw && !inCustom;
+  });
+}
 
 async function fetchCloudSeedMatches() {
   try {
@@ -1091,6 +1102,17 @@ async function fetchVpnResults() {
     if (!r.ok) return;
     const data = await r.json();
     vpnResults = Array.isArray(data) ? data : [];
+    if (_fbReady) render();
+  } catch(e) {}
+}
+
+async function fetchVpnFixtures() {
+  try {
+    const r = await fetch(`${WORKER_URL_CAL}/vpn-fixtures`);
+    if (!r.ok) return;
+    const data = await r.json();
+    vpnFixtures = Array.isArray(data) ? data : [];
+    rebuildVpnDynamic();
     if (_fbReady) render();
   } catch(e) {}
 }
@@ -1131,6 +1153,7 @@ onSnapshot(CAL_DOC, snap => {
     localStorage.setItem('ts_custom',    JSON.stringify(custom));
     localStorage.setItem('ts_edits',     JSON.stringify(edits));
     localStorage.setItem('ts_suspended', JSON.stringify(suspended));
+    rebuildVpnDynamic(); // recalculate dedup after custom changes
   }
   if(!_fbReady){ _fbReady = true; render(); }
   else { render(); }
@@ -1165,6 +1188,11 @@ function getAnyMatch(id){
       return Object.assign({}, entry, {isHome: entry.home});
     }
     return entry;
+  }
+  if(typeof id === 'string' && id.startsWith('v')){
+    const f = vpnDynamic[parseInt(id.slice(1))];
+    if(!f) return undefined;
+    return { ...f, league: 'VPN' };
   }
   return getMatch(id);
 }
@@ -1470,10 +1498,11 @@ function renderWeekStrip() {
   const today = getToday();
   const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
-  // Get all unique match dates (RAW + custom)
+  // Get all unique match dates (RAW + custom + vpnDynamic)
   const matchDates = new Set();
   RAW.forEach((_,i) => { const m = getMatch(i); if (!m.free) matchDates.add(m.date); });
   custom.forEach(m => { if (m.date) matchDates.add(m.date); });
+  vpnDynamic.forEach(m => { if (m.date) matchDates.add(m.date); });
   const sorted = [...matchDates].sort();
 
   strip.innerHTML = '';
@@ -1579,6 +1608,10 @@ function renderNextHero() {
     if (m.date < today || (m.tipo && m.tipo !== 'partido')) return;
     upcoming.push({m, id: 'c'+ci});
   });
+  vpnDynamic.forEach((m, vi) => {
+    if (m.date < today) return;
+    upcoming.push({m: {...m, league:'VPN'}, id: 'v'+vi});
+  });
   upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || (a.m.time||'').localeCompare(b.m.time||''));
 
   if (!upcoming.length) {
@@ -1633,6 +1666,10 @@ function renderYearGrid() {
   custom.forEach((m, ci) => {
     if (!mbd[m.date]) mbd[m.date] = [];
     mbd[m.date].push('c'+ci);
+  });
+  vpnDynamic.forEach((m, vi) => {
+    if (!mbd[m.date]) mbd[m.date] = [];
+    mbd[m.date].push('v'+vi);
   });
   for (let mo = 0; mo < 12; mo++) grid.appendChild(buildMonthCard(year, mo, mbd, today));
 }
@@ -1730,6 +1767,10 @@ function render_legacy_unused(){
   custom.forEach((m, ci) => {
     if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
     matchesByDate[m.date].push('c'+ci);
+  });
+  vpnDynamic.forEach((m, vi) => {
+    if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
+    matchesByDate[m.date].push('v'+vi);
   });
 
   // Date range: past → only match days; today forward → every day through horizon
@@ -1959,6 +2000,13 @@ function updateStats(){
       const m = getMatch(i);
       if(m.free || m.league !== lg) return;
       const o = outcomeFor(i);
+      results_lg.push({ date:m.date, outcome:o });
+    });
+    if(lg === 'VPN') vpnDynamic.forEach((_, vi)=>{
+      const id = 'v'+vi;
+      const m = getAnyMatch(id);
+      if(!m) return;
+      const o = outcomeFor(id);
       results_lg.push({ date:m.date, outcome:o });
     });
     results_lg.sort((a,b)=>a.date.localeCompare(b.date));
@@ -2387,9 +2435,10 @@ window.editCurrentMatch = editCurrentMatch;
 document.body.classList.add('locked');
 
 // render() is called by onSnapshot when Firebase data loads
-// Fetch cloud match stats and VPN results in the background
+// Fetch cloud match stats, VPN results and VPN fixtures in the background
 fetchCloudSeedMatches();
 fetchVpnResults();
+fetchVpnFixtures();
 </script>
 
 <footer>

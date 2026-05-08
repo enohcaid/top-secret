@@ -216,9 +216,8 @@ export default {
 
       // ── VPN TEAM RESULTS (/vpn-results) ──────
       if (url.pathname === '/vpn-results' && request.method === 'GET') {
-        const TS_ID          = 28524;
-        const SEASON_NUMBER  = 8;
-        const LEAGUE_NAME    = 'Liga Argentina 2da División';
+        const TS_ID     = 28524;
+        const LEAGUE_ID = 2127; // Liga Argentina 2da División — auto-detects latest season
 
         const vpnResp = await fetch('https://www.virtualpronetwork.com/api/teams/28524/results', {
           headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
@@ -229,19 +228,20 @@ export default {
         const data = await vpnResp.json();
         const rows = Array.isArray(data.rows) ? data.rows : [];
 
-        const filtered = rows
-          .filter(m => {
-            const s = m.matchSeason;
-            return s &&
-              s.number === SEASON_NUMBER &&
-              s.league && s.league.name === LEAGUE_NAME;
-          })
+        const leagueRows = rows.filter(m => m.matchSeason && m.matchSeason.id_league === LEAGUE_ID);
+        if (!leagueRows.length) return new Response('[]', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' },
+        });
+        const latestSeason = Math.max(...leagueRows.map(m => m.matchSeason.number));
+
+        const filtered = leagueRows
+          .filter(m => m.matchSeason.number === latestSeason)
           .map(m => {
             const isHome   = m.team1 === TS_ID;
             const tsGoals  = isHome ? m.gteam1 : m.gteam2;
             const rvGoals  = isHome ? m.gteam2 : m.gteam1;
             const rival    = isHome ? m.awayTeam  : m.homeTeam;
-            // UTC → Argentina (UTC-3) para que la fecha coincida con el calendario
             const argDate  = new Date(new Date(m.date).getTime() - 3 * 60 * 60 * 1000)
               .toISOString().slice(0, 10);
             return {
@@ -251,6 +251,55 @@ export default {
               isHome,
               ts:    tsGoals,
               rv:    rvGoals,
+            };
+          });
+
+        return new Response(JSON.stringify(filtered), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' },
+        });
+      }
+
+      // ── VPN FIXTURES (/vpn-fixtures) ──────────
+      if (url.pathname === '/vpn-fixtures' && request.method === 'GET') {
+        const TS_ID     = 28524;
+        const LEAGUE_ID = 2127;
+
+        const vpnResp = await fetch('https://www.virtualpronetwork.com/api/teams/28524/fixtures', {
+          headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+          cf: { cacheTtl: 300, cacheEverything: true },
+        });
+        if (!vpnResp.ok) return jsonResp({ error: 'VPN API error', status: vpnResp.status }, 502);
+
+        const data = await vpnResp.json();
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+        if (!rows.length) return new Response('[]', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' },
+        });
+
+        const leagueRows = rows.filter(m => m.matchSeason &&
+          (m.matchSeason.id_league === LEAGUE_ID ||
+           (m.matchSeason.league && m.matchSeason.league.id === LEAGUE_ID)));
+        if (!leagueRows.length) return new Response('[]', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' },
+        });
+        const latestSeason = Math.max(...leagueRows.map(m => m.matchSeason.number));
+
+        const filtered = leagueRows
+          .filter(m => m.matchSeason.number === latestSeason)
+          .map(m => {
+            const isHome   = m.team1 === TS_ID;
+            const rival    = isHome ? m.awayTeam : m.homeTeam;
+            const argDt    = new Date(new Date(m.date).getTime() - 3 * 60 * 60 * 1000);
+            return {
+              id:     m.id,
+              date:   argDt.toISOString().slice(0, 10),
+              time:   argDt.toISOString().slice(11, 16),
+              rival:  rival.name || rival.short_name,
+              isHome,
+              round:  m.round,
             };
           });
 
@@ -292,7 +341,7 @@ export default {
         return jsonResp(teams);
       }
 
-      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-table, GET /ea, GET /fetch-url' }, 404);
+      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url' }, 404);
 
     } catch (err) {
       return jsonResp({ error: { message: err.message || 'Internal error' } }, 500);
