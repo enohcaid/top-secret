@@ -1,5 +1,5 @@
 ﻿// â”€â”€â”€ TOP SECRET FC Â· Datos de partidos compartidos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Importado por index.html. Para agregar partidos, editar estadisticas.html y actualizar este archivo.
+// Importado por calendario.html y estadisticas.html. Fuente única de verdad para todos los partidos.
 
 const SEED_MATCHES = [
 
@@ -696,7 +696,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 15 VPN - InfinitX - 9 Abr (Visita, 1-0, Victoria)
-  {rival:'InfinitX', league:'VPN', date:'2026-04-09', match_result:'1-0', uploadedAt:'2026-04-09T00:00:00.000Z', notes:'',
+  {rival:'InfinitX', league:'VPN', date:'2026-04-08', match_result:'1-0', uploadedAt:'2026-04-08T00:00:00.000Z', notes:'',
   team_stats:{posesion:60,tiros:2,tiros_arco:null,goles_esperados:0.9,pases:197,precision_pases:84,entradas:16,entradas_exito:5,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:0,regates_exito:96,precision_tiro:50},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:6.7, goals:0, assists:0, passes:13, pass_accuracy:85, distance_km:18.1, sprints:null, tackles:1,  interceptions:null},
@@ -713,7 +713,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 16 VPN - LÃ­rico FC - 9 Abr (Local, 11-1, Victoria)
-  {rival:'LÃ­rico FC', league:'VPN', date:'2026-04-09', match_result:'11-1', uploadedAt:'2026-04-09T01:00:00.000Z', notes:'',
+  {rival:'LÃ­rico FC', league:'VPN', date:'2026-04-08', match_result:'11-1', uploadedAt:'2026-04-08T01:00:00.000Z', notes:'',
   team_stats:{posesion:58,tiros:19,tiros_arco:null,goles_esperados:8.0,pases:165,precision_pases:87,entradas:29,entradas_exito:8,intercepciones:null,paradas:3,faltas:0,fuera_juego:3,corneres:5,regates_exito:91,precision_tiro:84},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.3, goals:0, assists:1, passes:17, pass_accuracy:100, distance_km:19.0, sprints:null, tackles:0,  interceptions:null},
@@ -729,8 +729,8 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 17 VPN - Dalmine Esports - 14 Abr (Visita, 3-3, Empate)
-  {rival:'Dalmine Esports', league:'VPN', date:'2026-04-14', match_result:'3-3', uploadedAt:'2026-04-14T00:00:00.000Z', notes:'',
+  // Fecha 17 VPN - Dalmine Esports - 13 Abr (Local, 3-3, Empate)
+  {rival:'Dalmine Esports', league:'VPN', date:'2026-04-13', match_result:'3-3', uploadedAt:'2026-04-13T00:00:00.000Z', notes:'',
   team_stats:{posesion:50,tiros:6,tiros_arco:null,goles_esperados:3.5,pases:198,precision_pases:85,entradas:24,entradas_exito:6,intercepciones:null,paradas:2,faltas:0,fuera_juego:1,corneres:5,regates_exito:93,precision_tiro:100},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.7, goals:0, assists:1, passes:24, pass_accuracy:75, distance_km:18.9, sprints:null, tackles:null, interceptions:null},
@@ -745,8 +745,8 @@ const SEED_MATCHES = [
     {name:'Agubostero7',     matched:'Agubostero7',     played_pos:'DFD', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 18 VPN - Camioneros eSp - 14 Abr (Visita, 2-1, Victoria)
-  {rival:'Camioneros eSp', league:'VPN', date:'2026-04-14', match_result:'2-1', uploadedAt:'2026-04-14T01:00:00.000Z', notes:'',
+  // Fecha 18 VPN - Camioneros eSp - 13 Abr (Visita, 2-1, Victoria)
+  {rival:'Camioneros eSp', league:'VPN', date:'2026-04-13', match_result:'2-1', uploadedAt:'2026-04-13T01:00:00.000Z', notes:'',
   team_stats:{posesion:54,tiros:12,tiros_arco:null,goles_esperados:5.1,pases:182,precision_pases:86,entradas:34,entradas_exito:7,intercepciones:null,paradas:2,faltas:1,fuera_juego:1,corneres:6,regates_exito:88,precision_tiro:58},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:24, pass_accuracy:88, distance_km:19.5, sprints:null, tackles:null, interceptions:null},
@@ -762,8 +762,8 @@ const SEED_MATCHES = [
     {name:'X.Huang',         matched:'X.Huang',         played_pos:'POR', rating:5.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 19 VPN - Dep Ballester - 14 Abr (Visita, 3-2, Victoria)
-  {rival:'Dep Ballester', league:'VPN', date:'2026-04-14', match_result:'3-2', uploadedAt:'2026-04-14T02:00:00.000Z', notes:'',
+  // Fecha 19 VPN - Dep Ballester - 13 Abr (Visita, 3-2, Victoria)
+  {rival:'Dep Ballester', league:'VPN', date:'2026-04-13', match_result:'3-2', uploadedAt:'2026-04-13T02:00:00.000Z', notes:'',
   team_stats:{posesion:60,tiros:8,tiros_arco:null,goles_esperados:3.9,pases:223,precision_pases:86,entradas:19,entradas_exito:7,intercepciones:null,paradas:1,faltas:0,fuera_juego:1,corneres:5,regates_exito:93,precision_tiro:63},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.8, goals:0, assists:1, passes:21, pass_accuracy:71, distance_km:18.1, sprints:null, tackles:null, interceptions:null},
