@@ -1242,8 +1242,8 @@ function getResult(id){
     const hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
     if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
   }
-  // Manual data (Firebase / RAW / seed) — used only while VPN hasn't published the result
-  if(results[id]) return results[id];
+  // Firebase overrides — never used for VPN matches (VPN API is authoritative)
+  if(results[id] && m.league !== 'VPN') return results[id];
   if(typeof id !== 'string' && m.result) return m.result;
   const seed = findSeedMatch(id);
   if(seed && seed.match_result){
