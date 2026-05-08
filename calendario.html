@@ -1235,11 +1235,16 @@ function nextLeagueDay(dateStr, league){
 }
 
 function getResult(id){
-  if(results[id]) return results[id];
   const m = getAnyMatch(id);
   if(!m) return null;
+  // VPN API is the authoritative source — always takes priority for VPN matches
+  if(m.league === 'VPN' && vpnResults.length){
+    const hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
+    if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
+  }
+  // Manual data (Firebase / RAW / seed) — used only while VPN hasn't published the result
+  if(results[id]) return results[id];
   if(typeof id !== 'string' && m.result) return m.result;
-  // Derive from seed match_result ("tsGoals-rivalGoals")
   const seed = findSeedMatch(id);
   if(seed && seed.match_result){
     const parts = seed.match_result.split('-').map(Number);
@@ -1247,11 +1252,6 @@ function getResult(id){
       const [ts, rival] = parts;
       return m.isHome ? [ts, rival] : [rival, ts];
     }
-  }
-  // VPN API — fallback para partidos VPN sin resultado en seed ni Firebase
-  if(m.league === 'VPN' && vpnResults.length){
-    const hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
-    if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
   }
   return null;
 }
