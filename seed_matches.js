@@ -52,6 +52,11 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:5.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 4 VPUG - Ferro eSports - 5 Mar (Visita, 1-0, W.O. Victoria)
+  {rival:'Ferro eSports', league:'VPUG', date:'2026-03-05', match_result:'1-0', uploadedAt:'2026-03-05T22:30:00.000Z', notes:'W.O.',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
+
   {rival:'I.A.C.C Cantera', league:'VPUG', date:'2026-03-09', match_result:'2-4', uploadedAt:'2025-03-09T00:00:00.000Z', notes:'',
   team_stats:{posesion:57,tiros:6,tiros_arco:null,goles_esperados:2.9,pases:234,precision_pases:83,entradas:19,entradas_exito:5,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:5,regates_exito:96,precision_tiro:83},
   players:[
@@ -67,6 +72,11 @@ const SEED_MATCHES = [
     {name:'Zurdo-_CABJ12',  matched:'Zurdo-_CABJ12',  rating:7.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'BlackPanther-CG',matched:'BlackPanther-CG', rating:4.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
+
+  // Fecha 6 VPUG - Evermeet Rising - 10 Mar (Visita, 1-0, W.O. Victoria)
+  {rival:'Evermeet Rising', league:'VPUG', date:'2026-03-10', match_result:'1-0', uploadedAt:'2026-03-10T22:30:00.000Z', notes:'W.O.',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
 
   // â”€â”€ 11x11 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   {rival:'Los Picantes Esports', league:'11x11', date:'2026-03-03', match_result:'7-0', uploadedAt:'2025-03-03T00:00:00.000Z', notes:'',
@@ -418,6 +428,11 @@ const SEED_MATCHES = [
   ]},
 
 
+  // Fecha 8b VPUG - Atletico Titan - 23 Mar (Visita, 1-0, W.O. Victoria)
+  {rival:'Atletico Titan', league:'VPUG', date:'2026-03-23', match_result:'1-0', uploadedAt:'2026-03-23T22:30:00.000Z', notes:'W.O.',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
+
   // Fecha 9 VPUG - Germinal eSports - 24 Mar (Local, 3-2, Victoria)
 
   // Fecha 9 - Germinal eSports - 24 Mar (Local, 3-2, Victoria)
@@ -575,6 +590,11 @@ const SEED_MATCHES = [
     {name:'Zurdo-_CABJ12',   matched:'Zurdo-_CABJ12',   played_pos:'DFD', rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Woolfyboyzx2',    matched:'Woolfyboyzx2',    played_pos:'POR', rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
+
+  // Fecha 11 VPUG - Almirante Brown eSp - 25 Mar (Visita, 1-0, W.O. Victoria)
+  {rival:'Almirante Brown eSp', league:'VPUG', date:'2026-03-25', match_result:'1-0', uploadedAt:'2026-03-25T22:30:00.000Z', notes:'W.O.',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
 
   // Fecha 17 - 4BDOMIFL4NES - 31 Mar (Local, 0-1, Derrota)
   {rival:'4BDOMIFL4NES', league:'11x11', date:'2026-03-31', match_result:'0-1', uploadedAt:'2026-03-31T00:00:00.000Z', notes:'',
