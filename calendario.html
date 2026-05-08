@@ -1102,12 +1102,12 @@ function rebuildVpnDynamic() {
     const inRaw = RAW.some((_, i) => {
       const m = getMatch(i);
       if (m.league !== 'VPN' || !rivalMatch(m.rival, f.rival)) return false;
-      // Same date → always exclude; different date but RAW entry already has result → also exclude
-      // (handles playoff matches stored at rescheduled dates that differ from VPN fixture date)
       return m.date === f.date || !!m.result;
     });
     const inCustom = custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
-    return !inRaw && !inCustom;
+    // Exclude if vpnResults already has a result for this rival (match was played)
+    const hasApiResult = vpnResults.some(r => rivalMatch(r.rival, f.rival));
+    return !inRaw && !inCustom && !hasApiResult;
   });
 }
 
@@ -1126,6 +1126,7 @@ async function fetchVpnResults() {
     if (!r.ok) return;
     const data = await r.json();
     vpnResults = Array.isArray(data) ? data : [];
+    if (vpnFixtures.length) rebuildVpnDynamic(); // Re-dedup: vpnResults now available
     if (_fbReady) render();
   } catch(e) {}
 }
@@ -1263,7 +1264,12 @@ function getResult(id){
   if(!m) return null;
   // VPN API is the authoritative source — always takes priority for VPN matches
   if(m.league === 'VPN' && vpnResults.length){
-    const hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
+    // Exact date+rival match first; fallback allows ±1 day for timezone/schedule discrepancies
+    let hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
+    if(!hit) hit = vpnResults.find(r => {
+      if(!rivalMatch(r.rival, m.rival)) return false;
+      return Math.abs(new Date(r.date) - new Date(m.date)) <= 86400000; // ≤ 1 day
+    });
     if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
   }
   // Firebase overrides — never used for VPN matches (VPN API is authoritative)
