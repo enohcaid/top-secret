@@ -3,6 +3,27 @@
 // Proxy a Google Gemini API (GRATIS) + KV storage + EA Sports proxy
 // ═══════════════════════════════════════════════════════════════
 
+// Strip nulls, URLs, and long strings from API JSON to reduce token usage
+function simplifyForAI(v, depth = 0) {
+  if (depth > 6) return undefined;
+  if (Array.isArray(v)) {
+    const arr = v.map(x => simplifyForAI(x, depth + 1)).filter(x => x !== undefined);
+    return arr.length ? arr : undefined;
+  }
+  if (v !== null && typeof v === 'object') {
+    const out = {};
+    for (const [k, val] of Object.entries(v)) {
+      if (val === null || val === undefined) continue;
+      if (typeof val === 'string' && val.startsWith('http')) continue;
+      if (typeof val === 'string' && val.length > 120) continue;
+      const s = simplifyForAI(val, depth + 1);
+      if (s !== undefined) out[k] = s;
+    }
+    return Object.keys(out).length ? out : undefined;
+  }
+  return v;
+}
+
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
@@ -115,7 +136,7 @@ export default {
       }
 
       // ── FETCH URL PROXY (/fetch-url) ──────────────
-      // Used to scrape tournament pages for auto-fill
+      // Pure proxy used by the agentic Gemini loop — domain-whitelisted for security
       if (url.pathname === '/fetch-url' && request.method === 'GET') {
         const targetUrl = url.searchParams.get('url');
         if (!targetUrl) return jsonResp({ error: 'Missing url' }, 400);
@@ -129,83 +150,36 @@ export default {
           return jsonResp({ error: 'Domain not allowed', hostname: target.hostname }, 403);
         }
 
-        // For VPN: detect bracket/playoffs URLs and also hit their API
-        const isVPN = target.hostname.includes('virtualpronetwork.com');
-        const isVPUG = target.hostname.includes('virtualprogaming.com');
-
-        const results = {};
-
-        // Always fetch the page HTML
         try {
-          const htmlResp = await fetch(targetUrl, {
+          const resp = await fetch(targetUrl, {
             headers: {
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept': 'application/json, text/html, */*',
               'Accept-Language': 'es-AR,es;q=0.9,en;q=0.8',
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
               'Cache-Control': 'no-cache',
+              'Referer': target.origin + '/',
             }
           });
-          const rawHtml = await htmlResp.text();
-          // Truncate but keep JSON data that may be embedded
-          results.html = rawHtml.slice(0, 60000);
-          results.httpStatus = htmlResp.status;
-        } catch(e) {
-          results.htmlError = e.message;
-        }
+          const ct = resp.headers.get('content-type') || '';
+          const body = await resp.text();
+          const result = { status: resp.status, contentType: ct };
 
-        // VPN: extract league ID and hit multiple API endpoints
-        if (isVPN) {
-          const vpnMatch = target.pathname.match(/\/league\/(\d+)/);
-          if (vpnMatch) {
-            const leagueId = vpnMatch[1];
-            results.vpnLeagueId = leagueId;
-
-            // Try several VPN API endpoints in parallel
-            const endpoints = [
-              `https://www.virtualpronetwork.com/api/leagues/${leagueId}/knockout`,
-              `https://www.virtualpronetwork.com/api/leagues/${leagueId}/playoff`,
-              `https://www.virtualpronetwork.com/api/leagues/${leagueId}`,
-              `https://www.virtualpronetwork.com/api/leagues/${leagueId}/table`,
-              `https://www.virtualpronetwork.com/api/leagues/${leagueId}/matches?phase=knockout`,
-            ];
-
-            const apiResults = await Promise.allSettled(endpoints.map(async ep => {
-              const r = await fetch(ep, {
-                headers: {
-                  'Accept': 'application/json',
-                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
-                  'Referer': 'https://www.virtualpronetwork.com/',
-                }
-              });
-              const text = await r.text();
-              return { url: ep, status: r.status, body: text.slice(0, 20000) };
-            }));
-
-            results.vpnApi = apiResults.map((r, i) => ({
-              url: endpoints[i],
-              ...(r.status === 'fulfilled' ? r.value : { error: r.reason?.message })
-            }));
-          }
-        }
-
-        // VPUG: extract league/tournament ID
-        if (isVPUG) {
-          const vpugMatch = target.pathname.match(/\/leagues\/([^/]+)/);
-          if (vpugMatch) {
-            const leagueSlug = vpugMatch[1];
-            results.vpugLeagueSlug = leagueSlug;
+          if (ct.includes('json')) {
             try {
-              const r = await fetch(`https://api.virtualprogaming.com/public/leagues/${leagueSlug}/bracket/`, {
-                headers: { 'Accept': 'application/json' }
-              });
-              results.vpugBracket = await r.text().then(t => t.slice(0, 20000));
+              // Parse and strip nulls/URLs/long-strings so AI gets clean, compact data
+              const simplified = simplifyForAI(JSON.parse(body));
+              result.json = simplified;
             } catch(e) {
-              results.vpugBracketError = e.message;
+              result.body = body.slice(0, 20000);
             }
+          } else {
+            result.body = body.slice(0, 20000);
           }
-        }
 
-        return jsonResp(results);
+          return jsonResp(result);
+        } catch(e) {
+          return jsonResp({ error: e.message }, 502);
+        }
       }
 
       // ── GEMINI API PROXY (POST a raíz /) ───────────
@@ -240,6 +214,52 @@ export default {
         return jsonResp(result);
       }
 
+      // ── VPN TEAM RESULTS (/vpn-results) ──────
+      if (url.pathname === '/vpn-results' && request.method === 'GET') {
+        const TS_ID          = 28524;
+        const SEASON_NUMBER  = 8;
+        const LEAGUE_NAME    = 'Liga Argentina 2da División';
+
+        const vpnResp = await fetch('https://www.virtualpronetwork.com/api/teams/28524/results', {
+          headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+          cf: { cacheTtl: 300, cacheEverything: true },
+        });
+        if (!vpnResp.ok) return jsonResp({ error: 'VPN API error', status: vpnResp.status }, 502);
+
+        const data = await vpnResp.json();
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+
+        const filtered = rows
+          .filter(m => {
+            const s = m.matchSeason;
+            return s &&
+              s.number === SEASON_NUMBER &&
+              s.league && s.league.name === LEAGUE_NAME;
+          })
+          .map(m => {
+            const isHome   = m.team1 === TS_ID;
+            const tsGoals  = isHome ? m.gteam1 : m.gteam2;
+            const rvGoals  = isHome ? m.gteam2 : m.gteam1;
+            const rival    = isHome ? m.awayTeam  : m.homeTeam;
+            // UTC → Argentina (UTC-3) para que la fecha coincida con el calendario
+            const argDate  = new Date(new Date(m.date).getTime() - 3 * 60 * 60 * 1000)
+              .toISOString().slice(0, 10);
+            return {
+              id:    m.id,
+              date:  argDate,
+              rival: rival.name || rival.short_name,
+              isHome,
+              ts:    tsGoals,
+              rv:    rvGoals,
+            };
+          });
+
+        return new Response(JSON.stringify(filtered), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' },
+        });
+      }
+
       // ── VPN API PROXY (/vpn-table) ────────────
       if (url.pathname === '/vpn-table' && request.method === 'GET') {
         const vpnResp = await fetch('https://www.virtualpronetwork.com/api/leagues/2127/table?season=6351&community_id=1');
@@ -272,7 +292,7 @@ export default {
         return jsonResp(teams);
       }
 
-      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-table, GET /ea, GET /fetch-url' }, 404);
+      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-table, GET /ea, GET /fetch-url' }, 404);
 
     } catch (err) {
       return jsonResp({ error: { message: err.message || 'Internal error' } }, 500);

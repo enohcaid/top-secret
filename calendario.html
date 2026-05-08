@@ -1073,6 +1073,7 @@ const ADMIN_PIN  = '8189';
 const WORKER_URL_CAL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const KV_KEY_CAL     = 'ts_matches_v1';
 let cloudSeedMatches = []; // populated on load
+let vpnResults       = []; // populated from VPN API — season 8 Liga Argentina 2da División
 let currentStatsId   = null; // id of the match currently open in the stats panel
 
 async function fetchCloudSeedMatches() {
@@ -1082,6 +1083,16 @@ async function fetchCloudSeedMatches() {
     const data = await r.json();
     cloudSeedMatches = Array.isArray(data) ? data : [];
   } catch(e) { /* silently ignore — stats panel falls back to local data */ }
+}
+
+async function fetchVpnResults() {
+  try {
+    const r = await fetch(`${WORKER_URL_CAL}/vpn-results`);
+    if (!r.ok) return;
+    const data = await r.json();
+    vpnResults = Array.isArray(data) ? data : [];
+    if (_fbReady) render();
+  } catch(e) {}
 }
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
@@ -1208,6 +1219,11 @@ function getResult(id){
       const [ts, rival] = parts;
       return m.isHome ? [ts, rival] : [rival, ts];
     }
+  }
+  // VPN API — fallback para partidos VPN sin resultado en seed ni Firebase
+  if(m.league === 'VPN' && vpnResults.length){
+    const hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
+    if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
   }
   return null;
 }
@@ -2371,8 +2387,9 @@ window.editCurrentMatch = editCurrentMatch;
 document.body.classList.add('locked');
 
 // render() is called by onSnapshot when Firebase data loads
-// Fetch cloud match stats in the background so the stats panel is complete
+// Fetch cloud match stats and VPN results in the background
 fetchCloudSeedMatches();
+fetchVpnResults();
 </script>
 
 <footer>
