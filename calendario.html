@@ -1570,7 +1570,7 @@ function renderTodayCard() {
   // Custom matches for today (partidos only, not entrenamiento/otro)
   const customToday = custom
     .map((m, ci) => ({m, id:'c'+ci, isCustom:true}))
-    .filter(({m}) => m.date === today && (!m.tipo || m.tipo === 'partido'));
+    .filter(({m}) => m.date === today && (!m.tipo || m.tipo === 'partido') && !customIsInRaw(m));
 
   const todayMatches = [...rawToday, ...customToday]
     .sort((a,b) => (a.m.time||'').localeCompare(b.m.time||''));
@@ -1630,6 +1630,7 @@ function renderNextHero() {
   });
   custom.forEach((m, ci) => {
     if (m.date < today || (m.tipo && m.tipo !== 'partido')) return;
+    if (customIsInRaw(m)) return;
     upcoming.push({m, id: 'c'+ci});
   });
   vpnDynamic.forEach((m, vi) => {
@@ -1675,6 +1676,18 @@ function renderNextHero() {
   </div></div>`;
 }
 
+// Returns true if a custom entry is already covered by a RAW entry (same rival+league,
+// same date OR RAW entry has a confirmed result). Prevents duplicate calendar cards
+// when playoff/rescheduled matches that were once custom get added to RAW.
+function customIsInRaw(cm) {
+  return RAW.some((_, i) => {
+    const r = getMatch(i);
+    if (cm.league && r.league !== cm.league) return false;
+    if (!rivalMatch(r.rival, cm.rival)) return false;
+    return r.date === cm.date || !!r.result;
+  });
+}
+
 function renderYearGrid() {
   const grid = document.getElementById('yearGrid');
   if (!grid) return;
@@ -1688,6 +1701,7 @@ function renderYearGrid() {
     mbd[m.date].push(i);
   });
   custom.forEach((m, ci) => {
+    if (customIsInRaw(m)) return;
     if (!mbd[m.date]) mbd[m.date] = [];
     mbd[m.date].push('c'+ci);
   });
