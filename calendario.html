@@ -1017,8 +1017,8 @@ const RAW = [
   // ══ SEMANA 30 MAR - 2 ABR ══
   // Lun 30 Mar
   {date:'2026-03-19',time:'22:30',league:'VPUG', rival:'Villa Dalmine eSp',  isHome:true,  result:null},
-  {date:'2026-03-30',time:'23:00',league:'VPN',  rival:'Nueva Chicago eSports',isHome:false,result:null},
-  {date:'2026-03-30',time:'23:30',league:'VPN',  rival:'Instituto Reserva',  isHome:false, result:null},
+  {date:'2026-04-01',time:'23:00',league:'VPN',  rival:'Nueva Chicago eSports',isHome:false,result:null},
+  {date:'2026-04-01',time:'23:30',league:'VPN',  rival:'Instituto Reserva',  isHome:false, result:null},
 
   // Mar 31 Mar
   {date:'2026-03-23',time:'22:30',league:'VPUG', rival:'Atletico Titan',     isHome:false, result:null},
@@ -1037,8 +1037,8 @@ const RAW = [
 
   // ══ SEMANA 6-9 ABR ══
   // Lun 6 Abr
-  {date:'2026-04-06',time:'23:00',league:'VPN',  rival:'Infinitx',           isHome:false, result:null},
-  {date:'2026-04-06',time:'23:30',league:'VPN',  rival:'Lírico FC',          isHome:true,  result:[11,1]},
+  {date:'2026-04-09',time:'23:00',league:'VPN',  rival:'Infinitx',           isHome:false, result:null},
+  {date:'2026-04-09',time:'23:30',league:'VPN',  rival:'Lírico FC',          isHome:true,  result:[11,1]},
 
   // Mar 7 Abr
   {date:'2026-04-02',time:'23:50',league:'11x11',rival:'Suda ESP',           isHome:false, result:null},
@@ -1355,14 +1355,9 @@ function findSeedMatch(id){
     s.date === m.date && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
   if(hits.length) return bestOf(hits);
-  // 2nd pass: ignore year (handles seed entries with wrong year)
+  // 2nd pass: ignore year (safety net for date-year discrepancies)
   hits = allSeeds.filter(s =>
     s.date.slice(5) === mmdd && s.league === m.league && rivalMatch(s.rival, m.rival)
-  );
-  if(hits.length) return bestOf(hits);
-  // 3rd pass: same year + league + rival
-  hits = allSeeds.filter(s =>
-    s.date.slice(0,4) === m.date.slice(0,4) && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
   return bestOf(hits) || null;
 }
