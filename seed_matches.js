@@ -852,8 +852,8 @@ const SEED_MATCHES = [
 
 
   // â”€â”€ VPN PLAYOFFS â€” Cuartos de Final vs Camioneros eSports â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-20', match_result:'1-0', uploadedAt:'2026-04-20T00:00:00.000Z', notes:'Cuartos de Final Â· Ida (Visita)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
-  team_stats:{posesion:59,tiros:5,tiros_arco:null,goles_esperados:1.6,pases:213,precision_pases:87,entradas:19,entradas_exito:8,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:2,regates_exito:97,precision_tiro:null},
+  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-24', match_result:'1-0', uploadedAt:'2026-04-24T00:00:00.000Z', notes:'Cuartos de Final Â· Ida (Visita)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
+  team_stats:{posesion:59,tiros:5,tiros_arco:null,goles_esperados:1.6,pases:213,precision_pases:87,entradas:19,entradas_exito:8,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:2,regates_exito:97,precision_tiro:60},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:25,  pass_accuracy:88,  distance_km:19.1, sprints:null, tackles:2,  interceptions:null},
     {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -868,7 +868,7 @@ const SEED_MATCHES = [
     {name:'BlackPanther-CG', matched:'BlackPanther-CG', played_pos:'POR', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-20', match_result:'1-0', uploadedAt:'2026-04-20T01:00:00.000Z', notes:'Cuartos de Final Â· Vuelta (Local)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
+  {rival:'Camioneros eSports', league:'VPN', date:'2026-04-24', match_result:'1-0', uploadedAt:'2026-04-24T01:00:00.000Z', notes:'Cuartos de Final Â· Vuelta (Local)', torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
   team_stats:{posesion:59,tiros:3,tiros_arco:null,goles_esperados:0.7,pases:192,precision_pases:84,entradas:18,entradas_exito:7,intercepciones:null,paradas:8,faltas:0,fuera_juego:0,corneres:1,regates_exito:93,precision_tiro:100},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.2, goals:0, assists:1, passes:22,  pass_accuracy:64,  distance_km:18.0, sprints:null, tackles:2,  interceptions:null},
@@ -921,7 +921,7 @@ const SEED_MATCHES = [
   // â”€â”€ VPN PLAYOFFS â€” Final de PromociÃ³n vs InfinitX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Ida (Visita): InfinitX 0-1 TS â€” 27 Abr
   {rival:'InfinitX', league:'VPN', date:'2026-04-27', match_result:'1-0', uploadedAt:'2026-04-27T00:00:00.000Z', notes:'Final PromociÃ³n Â· Ida (Visita)', isHome:false, torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
-  team_stats:{posesion:66,tiros:6,tiros_arco:null,goles_esperados:null,pases:214,precision_pases:null,entradas:14,entradas_exito:3,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  team_stats:{posesion:66,tiros:6,tiros_arco:null,goles_esperados:2.1,pases:214,precision_pases:82,entradas:14,entradas_exito:3,intercepciones:null,paradas:1,faltas:1,fuera_juego:1,corneres:4,regates_exito:95,precision_tiro:67},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -938,7 +938,7 @@ const SEED_MATCHES = [
 
   // Vuelta (Local): TS 1-3 InfinitX â€” 27 Abr
   {rival:'InfinitX', league:'VPN', date:'2026-04-27', match_result:'1-3', uploadedAt:'2026-04-27T01:00:00.000Z', notes:'Final PromociÃ³n Â· Vuelta (Local)', isHome:true, torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
-  team_stats:{posesion:64,tiros:6,tiros_arco:null,goles_esperados:null,pases:227,precision_pases:null,entradas:16,entradas_exito:3,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  team_stats:{posesion:64,tiros:6,tiros_arco:null,goles_esperados:2.2,pases:227,precision_pases:84,entradas:16,entradas_exito:3,intercepciones:null,paradas:1,faltas:0,fuera_juego:1,corneres:2,regates_exito:96,precision_tiro:50},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -955,8 +955,8 @@ const SEED_MATCHES = [
 
   // â”€â”€ VPN PLAYOFFS â€” Final de PromociÃ³n vs Comunicaciones eSports â”€â”€â”€â”€â”€â”€â”€â”€
   // Ida (Local): TS 1-1 Comunicaciones â€” 29 Abr
-  {rival:'Comunicaciones eSports', league:'VPN', date:'2026-04-29', match_result:'1-1', uploadedAt:'2026-04-29T00:00:00.000Z', notes:'Final PromociÃ³n Â· Ida (Local)', isHome:true, torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
-  team_stats:{posesion:55,tiros:6,tiros_arco:null,goles_esperados:null,pases:179,precision_pases:null,entradas:26,entradas_exito:11,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  {rival:'Comunicaciones eSports', league:'VPN', date:'2026-04-29', match_result:'1-1', uploadedAt:'2026-04-29T00:00:00.000Z', notes:'Final PromociÃ³n Â· Vuelta (Local)', isHome:true, torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
+  team_stats:{posesion:55,tiros:6,tiros_arco:null,goles_esperados:3.0,pases:179,precision_pases:77,entradas:26,entradas_exito:11,intercepciones:null,paradas:1,faltas:2,fuera_juego:1,corneres:5,regates_exito:87,precision_tiro:100},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -972,8 +972,8 @@ const SEED_MATCHES = [
   ]},
 
   // Vuelta (Visita): Comunicaciones 1-2 TS â€” 29 Abr
-  {rival:'Comunicaciones eSports', league:'VPN', date:'2026-04-29', match_result:'2-1', uploadedAt:'2026-04-29T01:00:00.000Z', notes:'Final PromociÃ³n Â· Vuelta (Visita)', isHome:false, torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
-  team_stats:{posesion:62,tiros:13,tiros_arco:null,goles_esperados:null,pases:221,precision_pases:null,entradas:14,entradas_exito:4,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  {rival:'Comunicaciones eSports', league:'VPN', date:'2026-04-29', match_result:'2-1', uploadedAt:'2026-04-29T01:00:00.000Z', notes:'Final PromociÃ³n Â· Ida (Visita)', isHome:false, torneo:'VPN 2da DivisiÃ³n Playoffs (T1 2026)',
+  team_stats:{posesion:62,tiros:13,tiros_arco:null,goles_esperados:5.9,pases:221,precision_pases:81,entradas:14,entradas_exito:4,intercepciones:null,paradas:1,faltas:1,fuera_juego:0,corneres:4,regates_exito:94,precision_tiro:54},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:8.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',    matched:'Lautavester7',    played_pos:'EI',  rating:8.0, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
