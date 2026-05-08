@@ -1099,7 +1099,13 @@ let currentStatsId   = null; // id of the match currently open in the stats pane
 // Recalculates vpnDynamic = vpnFixtures entries not already covered by RAW or custom
 function rebuildVpnDynamic() {
   vpnDynamic = vpnFixtures.filter(f => {
-    const inRaw    = RAW.some((_, i) => { const m = getMatch(i); return m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival); });
+    const inRaw = RAW.some((_, i) => {
+      const m = getMatch(i);
+      if (m.league !== 'VPN' || !rivalMatch(m.rival, f.rival)) return false;
+      // Same date → always exclude; different date but RAW entry already has result → also exclude
+      // (handles playoff matches stored at rescheduled dates that differ from VPN fixture date)
+      return m.date === f.date || !!m.result;
+    });
     const inCustom = custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
     return !inRaw && !inCustom;
   });
