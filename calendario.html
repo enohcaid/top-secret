@@ -1197,9 +1197,18 @@ function nextLeagueDay(dateStr, league){
 
 function getResult(id){
   if(results[id]) return results[id];
-  if(typeof id === 'string') return null; // custom matches: no pre-set result
-  const m = RAW[id];
-  if(m && m.result) return m.result;
+  const m = getAnyMatch(id);
+  if(!m) return null;
+  if(typeof id !== 'string' && m.result) return m.result;
+  // Derive from seed match_result ("tsGoals-rivalGoals")
+  const seed = findSeedMatch(id);
+  if(seed && seed.match_result){
+    const parts = seed.match_result.split('-').map(Number);
+    if(parts.length === 2 && !parts.some(isNaN)){
+      const [ts, rival] = parts;
+      return m.isHome ? [ts, rival] : [rival, ts];
+    }
+  }
   return null;
 }
 
