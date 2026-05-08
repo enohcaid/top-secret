@@ -4,7 +4,7 @@
 const SEED_MATCHES = [
 
   // ── VPUG ──────────────────────────────────
-  {rival:'Suda', league:'VPUG', date:'2025-03-02', match_result:'2-0', uploadedAt:'2025-03-02T00:00:00.000Z', notes:'',
+  {rival:'Suda eSports', league:'VPUG', date:'2025-03-02', match_result:'2-0', uploadedAt:'2025-03-02T00:00:00.000Z', notes:'',
   team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
   players:[
     {name:'Lautavester7',   matched:'Lautavester7',   rating:7.8, goals:1, assists:1, passes:21,  pass_accuracy:90, distance_km:18.4, sprints:null, tackles:1,  interceptions:null},
@@ -20,7 +20,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'Team Valhala', league:'VPUG', date:'2025-03-03', match_result:'5-0', uploadedAt:'2025-03-03T01:00:00.000Z', notes:'',
+  {rival:'Team Valhalla', league:'VPUG', date:'2025-03-03', match_result:'5-0', uploadedAt:'2025-03-03T01:00:00.000Z', notes:'',
   team_stats:{posesion:68,tiros:11,tiros_arco:null,goles_esperados:7.3,pases:242,precision_pases:87,entradas:19,entradas_exito:8,intercepciones:null,paradas:3,faltas:4,fuera_juego:2,corneres:4,regates_exito:95,precision_tiro:73},
   players:[
     {name:'Lautavester7',   matched:'Lautavester7',   rating:10.0, goals:3, assists:1, passes:16,  pass_accuracy:88, distance_km:17.9, sprints:null, tackles:6,  interceptions:null},
@@ -36,7 +36,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:6.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'La Unión', league:'VPUG', date:'2025-03-04', match_result:'8-1', uploadedAt:'2025-03-04T00:00:00.000Z', notes:'',
+  {rival:'La Unión FC', league:'VPUG', date:'2025-03-04', match_result:'8-1', uploadedAt:'2025-03-04T00:00:00.000Z', notes:'',
   team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
   players:[
     {name:'Alexiisraiies23',matched:'Alexiisraiies23',rating:7.2,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -52,7 +52,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:5.5,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'IACC Cantera', league:'VPN', date:'2025-03-09', match_result:'2-4', uploadedAt:'2025-03-09T00:00:00.000Z', notes:'',
+  {rival:'I.A.C.C Cantera', league:'VPN', date:'2025-03-09', match_result:'2-4', uploadedAt:'2025-03-09T00:00:00.000Z', notes:'',
   team_stats:{posesion:57,tiros:6,tiros_arco:null,goles_esperados:2.9,pases:234,precision_pases:83,entradas:19,entradas_exito:5,intercepciones:null,paradas:2,faltas:1,fuera_juego:0,corneres:5,regates_exito:96,precision_tiro:83},
   players:[
     {name:'Lautavester7',   matched:'Lautavester7',   rating:6.3,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -69,7 +69,7 @@ const SEED_MATCHES = [
   ]},
 
   // ── 11x11 ─────────────────────────────────
-  {rival:'Los Picantes', league:'11x11', date:'2025-03-03', match_result:'7-0', uploadedAt:'2025-03-03T00:00:00.000Z', notes:'',
+  {rival:'Los Picantes Esports', league:'11x11', date:'2025-03-03', match_result:'7-0', uploadedAt:'2025-03-03T00:00:00.000Z', notes:'',
   team_stats:{posesion:55,tiros:11,tiros_arco:10,goles_esperados:5.3,pases:199,precision_pases:86,entradas:28,entradas_exito:3,intercepciones:19,paradas:1,faltas:1,fuera_juego:0,corneres:4,regates_exito:93,precision_tiro:91},
   players:[
     {name:'zPibu__',        matched:'zPibu__',        rating:8.5,  goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -85,7 +85,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:6.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'Talleres R eSp', league:'11x11', date:'2025-03-05', match_result:'6-1', uploadedAt:'2025-03-05T00:00:00.000Z', notes:'',
+  {rival:'Talleres Cantera', league:'11x11', date:'2025-03-05', match_result:'6-1', uploadedAt:'2025-03-05T00:00:00.000Z', notes:'',
   team_stats:{posesion:64,tiros:13,tiros_arco:null,goles_esperados:6.9,pases:240,precision_pases:90,entradas:18,entradas_exito:4,intercepciones:28,paradas:0,faltas:1,fuera_juego:3,corneres:2,regates_exito:92,precision_tiro:62},
   players:[
     {name:'zPibu__',        matched:'zPibu__',        rating:9.5,  goals:0, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -101,7 +101,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:5.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'Inst. Senior', league:'11x11', date:'2025-03-05', match_result:'6-0', uploadedAt:'2025-03-05T01:00:00.000Z', notes:'',
+  {rival:'Instituto Senior', league:'11x11', date:'2025-03-05', match_result:'6-0', uploadedAt:'2025-03-05T01:00:00.000Z', notes:'',
   team_stats:{posesion:62,tiros:14,tiros_arco:null,goles_esperados:6.1,pases:208,precision_pases:88,entradas:25,entradas_exito:9,intercepciones:18,paradas:2,faltas:0,fuera_juego:0,corneres:4,regates_exito:91,precision_tiro:64},
   players:[
     {name:'zPibu__',        matched:'zPibu__',        rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -133,7 +133,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   rating:5.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'Estudiantes RC', league:'11x11', date:'2025-03-10', match_result:'4-0', uploadedAt:'2025-03-10T01:00:00.000Z', notes:'',
+  {rival:'Estudiantes Río Cuarto', league:'11x11', date:'2025-03-10', match_result:'4-0', uploadedAt:'2025-03-10T01:00:00.000Z', notes:'',
   team_stats:{posesion:67,tiros:10,tiros_arco:null,goles_esperados:6.1,pases:214,precision_pases:90,entradas:25,entradas_exito:10,intercepciones:17,paradas:1,faltas:0,fuera_juego:1,corneres:2,regates_exito:92,precision_tiro:80},
   players:[
     {name:'zPibu__',        matched:'zPibu__',        rating:7.2,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -198,7 +198,7 @@ const SEED_MATCHES = [
     {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',   played_pos:'PO',  rating:4.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
-  {rival:'Real Marcianos', league:'VPUG', date:'2025-03-12', match_result:'7-1', uploadedAt:'2025-03-12T22:30:00.000Z', notes:'',
+  {rival:'Real Marcianos FC', league:'VPUG', date:'2025-03-12', match_result:'7-1', uploadedAt:'2025-03-12T22:30:00.000Z', notes:'',
   team_stats:{posesion:52,tiros:11,tiros_arco:null,goles_esperados:3.4,pases:184,precision_pases:86,entradas:24,entradas_exito:5,intercepciones:22,paradas:0,faltas:1,fuera_juego:2,corneres:2,regates_exito:93,precision_tiro:82},
   players:[
     {name:'Lautavester7',   matched:'Lautavester7',   played_pos:'EI',  rating:10.0, goals:4, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -475,7 +475,7 @@ const SEED_MATCHES = [
 
 
   // Fecha 9 - Sub21 CF - 25 Mar (Local, 1-1, Empate)
-  {rival:'Sub21 CF', league:'VPN', date:'2026-03-25', match_result:'1-1', uploadedAt:'2026-03-25T00:00:00.000Z', notes:'',
+  {rival:'SUB 21CF', league:'VPN', date:'2026-03-25', match_result:'1-1', uploadedAt:'2026-03-25T00:00:00.000Z', notes:'',
   team_stats:{posesion:60,tiros:3,tiros_arco:null,goles_esperados:0.9,pases:206,precision_pases:83,entradas:19,entradas_exito:6,intercepciones:null,paradas:2,faltas:0,fuera_juego:0,corneres:2,regates_exito:87,precision_tiro:33},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.7, goals:0, assists:1, passes:22, pass_accuracy:73, distance_km:18.6, sprints:null, tackles:1, interceptions:null},
@@ -492,7 +492,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 10 - Parke Avellane - 25 Mar (Local, 3-1, Victoria)
-  {rival:'Parke Avellane', league:'VPN', date:'2026-03-25', match_result:'3-1', uploadedAt:'2026-03-25T01:00:00.000Z', notes:'',
+  {rival:'Parke Avellaneda', league:'VPN', date:'2026-03-25', match_result:'3-1', uploadedAt:'2026-03-25T01:00:00.000Z', notes:'',
   team_stats:{posesion:52,tiros:4,tiros_arco:null,goles_esperados:2.6,pases:189,precision_pases:79,entradas:24,entradas_exito:3,intercepciones:null,paradas:1,faltas:1,fuera_juego:0,corneres:1,regates_exito:92,precision_tiro:75},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:27, pass_accuracy:81, distance_km:18.9, sprints:null, tackles:1, interceptions:null},
@@ -509,7 +509,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 11 VPUG - De La Nada FC - 26 Mar (Visita, 4-1, Victoria)
-  {rival:'De La Nada FC', league:'VPUG', date:'2026-03-26', match_result:'4-1', uploadedAt:'2026-03-26T00:00:00.000Z', notes:'',
+  {rival:'DeLa Nada FC', league:'VPUG', date:'2026-03-26', match_result:'4-1', uploadedAt:'2026-03-26T00:00:00.000Z', notes:'',
   team_stats:{posesion:62,tiros:8,tiros_arco:null,goles_esperados:5.4,pases:212,precision_pases:88,entradas:14,entradas_exito:2,intercepciones:null,paradas:0,faltas:0,fuera_juego:0,corneres:1,regates_exito:93,precision_tiro:63},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.8, goals:0, assists:0, passes:28, pass_accuracy:82, distance_km:19.0, sprints:null, tackles:0, interceptions:null},
@@ -526,7 +526,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 15 - Roka56 - 26 Mar (Local, 3-0, Victoria)
-  {rival:'Roka56', league:'11x11', date:'2026-03-26', match_result:'3-0', uploadedAt:'2026-03-26T01:00:00.000Z', notes:'',
+  {rival:'ROKA56', league:'11x11', date:'2026-03-26', match_result:'3-0', uploadedAt:'2026-03-26T01:00:00.000Z', notes:'',
   team_stats:{posesion:61,tiros:8,tiros_arco:null,goles_esperados:4.2,pases:193,precision_pases:81,entradas:21,entradas_exito:9,intercepciones:null,paradas:4,faltas:1,fuera_juego:2,corneres:2,regates_exito:94,precision_tiro:63},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:18, pass_accuracy:72, distance_km:18.8, sprints:null, tackles:0, interceptions:null},
@@ -543,7 +543,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 16 - Cambaceres - 26 Mar (Local, 1-3, Derrota)
-  {rival:'CD Cambaceres', league:'11x11', date:'2026-03-26', match_result:'1-3', uploadedAt:'2026-03-26T02:00:00.000Z', notes:'',
+  {rival:'Cambaceres', league:'11x11', date:'2026-03-26', match_result:'1-3', uploadedAt:'2026-03-26T02:00:00.000Z', notes:'',
   team_stats:{posesion:51,tiros:7,tiros_arco:null,goles_esperados:3.7,pases:201,precision_pases:80,entradas:33,entradas_exito:9,intercepciones:null,paradas:1,faltas:0,fuera_juego:0,corneres:3,regates_exito:93,precision_tiro:43},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:21, pass_accuracy:81, distance_km:18.4, sprints:null, tackles:0, interceptions:null},
@@ -594,7 +594,7 @@ const SEED_MATCHES = [
   ]},
 
   // Fecha 18 - Camioneros eSp - 31 Mar (Local, 1-3, Derrota)
-  {rival:'Camioneros eSp', league:'11x11', date:'2026-03-31', match_result:'1-3', uploadedAt:'2026-03-31T01:00:00.000Z', notes:'',
+  {rival:'Camioneros Esports', league:'11x11', date:'2026-03-31', match_result:'1-3', uploadedAt:'2026-03-31T01:00:00.000Z', notes:'',
   team_stats:{posesion:61,tiros:3,tiros_arco:null,goles_esperados:1.2,pases:234,precision_pases:87,entradas:24,entradas_exito:5,intercepciones:null,paradas:5,faltas:0,fuera_juego:0,corneres:1,regates_exito:91,precision_tiro:67},
   players:[
     {name:'Juan_Martinez4',  matched:'Juan_Martinez4',  played_pos:'MCD', rating:7.9, goals:0, assists:0, passes:35, pass_accuracy:86, distance_km:18.8, sprints:null, tackles:null, interceptions:null},
