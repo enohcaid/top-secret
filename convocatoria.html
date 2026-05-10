@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Top Secret FC Â· Convocatoria</title>
+<title>Top Secret FC · Convocatoria</title>
 <link rel="icon" type="image/png" href="Top-Secret.png">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -11,7 +11,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-/* â”€â”€ DESIGN TOKENS â”€â”€ */
+/* ── DESIGN TOKENS ── */
 :root{
   --black:#111111; --white:#FFFFFF; --gray:#F5F5F0;
   --gold:#B0B8C4; --gold2:#E8C97A; --gold-dim:rgba(201,168,76,.12);
@@ -22,19 +22,19 @@
   --sb-left:64px; --sb-right:48px; --topbar:64px;
 }
 
-/* â”€â”€ BASE â”€â”€ */
+/* ── BASE ── */
 html,body{height:100%;} body{background:var(--gray);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding-left:var(--sb-left);padding-right:var(--sb-right);padding-top:var(--topbar);}
 
-/* â”€â”€ MAIN â”€â”€ */
+/* ── MAIN ── */
 .main{max-width:1160px;margin:0 auto;padding:28px 24px 80px;}
 
-/* â”€â”€ PAGE HEADER â”€â”€ */
+/* ── PAGE HEADER ── */
 .page-header{margin-bottom:28px;}
 .page-eyebrow{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:2.6rem;font-weight:900;letter-spacing:-.01em;line-height:1;color:var(--black);text-transform:uppercase;}
 .page-sub{font-size:13px;color:var(--mid);margin-top:6px;}
 
-/* â”€â”€ KPI BAR â”€â”€ */
+/* ── KPI BAR ── */
 .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
 .kpi-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px 16px;position:relative;}
 .kpi-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
@@ -49,18 +49,18 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .kpi-card.k-mid .kpi-val{color:var(--mid);}
 .kpi-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-top:4px;}
 
-/* â”€â”€ SECTION ROW HEADERS â”€â”€ */
+/* ── SECTION ROW HEADERS ── */
 .section-row{display:flex;gap:20px;margin-bottom:12px;}
 .section-head{flex:1 1 0;display:flex;align-items:center;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);padding-bottom:8px;border-bottom:1px solid var(--border);}
 .section-head-right{flex:1 1 0;display:flex;align-items:center;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);padding-bottom:8px;border-bottom:1px solid var(--border);}
 
-/* â”€â”€ MAIN 2-COL LAYOUT â”€â”€ */
+/* ── MAIN 2-COL LAYOUT ── */
 .conv-layout{display:flex;gap:20px;align-items:flex-start;}
 @media(max-width:900px){.conv-layout{flex-direction:column;}}
 .col-players{flex:1 1 0;min-width:0;}
 .col-pitch{flex:1 1 0;min-width:0;position:sticky;top:80px;}
 
-/* â”€â”€ PLAYER CARDS â”€â”€ */
+/* ── PLAYER CARDS ── */
 .pos-label{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);padding:10px 2px 4px;}
 .pcard{
   display:flex;align-items:center;gap:10px;
@@ -98,7 +98,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .sdot.sp{background:transparent;border:1.5px solid var(--border);}
 .on-pitch{font-size:.56rem;color:var(--green);font-weight:700;letter-spacing:.04em;}
 
-/* â”€â”€ FORMATION BAR â”€â”€ */
+/* ── FORMATION BAR ── */
 .fbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
 .fbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
 .fbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
@@ -108,7 +108,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .clear-btn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid rgba(136,136,136,.4);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
 .clear-btn:hover{border-color:var(--red);color:var(--red);}
 
-/* â”€â”€ PITCH TOKEN VARS â”€â”€ */
+/* ── PITCH TOKEN VARS ── */
 :root{
   --tok-w: 102px;
   --tok-h: 108px;
@@ -121,7 +121,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
   --bar-pad: 2px 5px 2px 4px;
 }
 
-/* â”€â”€ PITCH â”€â”€ */
+/* ── PITCH ── */
 .pitch{position:relative;width:100%;aspect-ratio:3/4;background:repeating-linear-gradient(180deg,#eef1ee 0,#eef1ee 28px,#f5f7f5 28px,#f5f7f5 56px);border-radius:10px;border:1px solid #d0d8d0;overflow:hidden;}
 .pitch-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
 .pitch-svg line,.pitch-svg rect,.pitch-svg circle,.pitch-svg path{stroke:rgba(60,90,60,.25)!important;}
@@ -140,20 +140,20 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .pitch-hint{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.35);text-align:center;margin-top:8px;transition:color .2s;}
 .pitch-hint.selecting{color:var(--gold);}
 
-/* â”€â”€ ASSIGN BANNER â”€â”€ */
+/* ── ASSIGN BANNER ── */
 .assign-banner{display:none;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.35);border-radius:8px;padding:8px 14px;margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;color:var(--gold);align-items:center;justify-content:space-between;gap:10px;}
 .assign-cancel{font-size:.7rem;opacity:.7;cursor:pointer;padding:2px 8px;border:1px solid currentColor;border-radius:4px;}
 
-/* â”€â”€ SHARE BTN â”€â”€ */
+/* ── SHARE BTN ── */
 .share-btn{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .15s;}
 .share-btn:hover{background:var(--gold);color:#fff;}
 
-/* â”€â”€ LIGHTBOX â”€â”€ */
+/* ── LIGHTBOX ── */
 .lightbox{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;cursor:zoom-out;}
 .lightbox.open{display:flex;}
 .lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6);}
 
-/* â”€â”€ MODALS â”€â”€ */
+/* ── MODALS ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;align-items:flex-end;justify-content:center;padding:0;}
 @media(min-width:500px){.overlay{align-items:center;padding:20px;}}
 .overlay.open{display:flex;}
@@ -179,16 +179,16 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .mbtn-cancel{background:transparent;color:#8b92aa;}
 .mbtn-save{background:var(--gold);border-color:var(--gold);color:#fff;}
 
-/* â”€â”€ TOAST â”€â”€ */
+/* ── TOAST ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);padding:10px 22px;border-radius:10px;font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:600;opacity:0;transition:all .28s;z-index:9999;pointer-events:none;white-space:nowrap;background:rgba(17,17,17,.95);color:var(--gold);border:1px solid var(--gold);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* â”€â”€ AVATAR PHOTO â”€â”€ */
+/* ── AVATAR PHOTO ── */
 .av-photo{width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(1.65) translateY(4%);transform-origin:top center;}
 .av-crop-wrap{position:relative;width:100%;height:100%;overflow:hidden;}
 .av-crop-wrap img{position:absolute;}
 
-/* â”€â”€ TODAY MATCHES PANEL â”€â”€ */
+/* ── TODAY MATCHES PANEL ── */
 .today-matches-panel{background:rgba(201,168,76,.06);border:1.5px solid rgba(201,168,76,.35);border-radius:10px;padding:12px 16px;margin-bottom:20px;}
 .tmp-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.2);}
 .tmp-title{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
@@ -218,7 +218,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 <main class="main">
 
   <div class="page-header">
-    <div class="page-eyebrow">Top Secret FC Â· 2026</div>
+    <div class="page-eyebrow">Top Secret FC · 2026</div>
     <h1 class="page-title">Convocatoria</h1>
     <p class="page-sub" id="dateTag">Cargando...</p>
   </div>
@@ -234,7 +234,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
   <!-- TODAY MATCHES PANEL -->
   <div id="todayMatchesPanel" class="today-matches-panel" style="display:none;">
     <div class="tmp-head">
-      <span>âš½</span>
+      <span>⚽</span>
       <span class="tmp-title">Partidos hoy</span>
     </div>
     <div class="tmp-list"></div>
@@ -248,8 +248,8 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
     </div>
     <div class="section-head-right">
       <span>Armado</span>
-      <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px">ðŸ“‹ Copiar lista</button>
-      <button class="share-btn" id="shareBtn" onclick="doShare()">ðŸ“¸ Compartir</button>
+      <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px">📋 Copiar lista</button>
+      <button class="share-btn" id="shareBtn" onclick="doShare()">📸 Compartir</button>
     </div>
   </div>
 
@@ -262,13 +262,13 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
     <!-- PITCH -->
     <div class="col-pitch">
       <div id="assignBanner" class="assign-banner">
-        <span id="assignBannerText">SeleccionÃ¡ un jugador</span>
-        <span class="assign-cancel" onclick="cancelSlotSelect()">âœ•</span>
+        <span id="assignBannerText">Seleccioná un jugador</span>
+        <span class="assign-cancel" onclick="cancelSlotSelect()">✕</span>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="fbar" id="fbar"></div>
-        <button class="auto-btn" onclick="autoLineup()">âš¡ Auto</button>
-        <button class="clear-btn" onclick="clearLineup()">âœ• Limpiar</button>
+        <button class="auto-btn" onclick="autoLineup()">⚡ Auto</button>
+        <button class="clear-btn" onclick="clearLineup()">✕ Limpiar</button>
       </div>
       <div class="pitch" id="pitch">
         <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" class="pitch-svg">
@@ -288,7 +288,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
           <path d="M110,334 A34,34 0 0,1 190,334" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
         </svg>
       </div>
-      <div class="pitch-hint" id="pitchHint">ArrastrÃ¡ un jugador al puesto Â· o tocÃ¡ un slot</div>
+      <div class="pitch-hint" id="pitchHint">Arrastrá un jugador al puesto · o tocá un slot</div>
     </div>
 
   </div>
@@ -299,12 +299,12 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
   <div class="modal">
     <div class="mph" id="mph"></div>
     <div class="sopts">
-      <button class="sopt" onclick="confirmStatus('green')">ðŸŸ¢ Presente hoy</button>
-      <button class="sopt sopt-always" onclick="confirmStatus('green_always')">ðŸ”µ Siempre presente <span style="font-size:.72rem;color:#4a9eff;font-weight:400">(todos los dÃ­as)</span></button>
-      <button class="sopt" onclick="confirmStatus('yellow')">ðŸŸ¡ Llego tardeâ€¦</button>
-      <button class="sopt" onclick="confirmStatus('red')">ðŸ”´ Ausente hoy</button>
-      <button class="sopt" onclick="confirmStatus('black')">ðŸŸ  Ausente varios dÃ­asâ€¦</button>
-      <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()">ðŸ…±ï¸ Asignar como capitÃ¡n</button>
+      <button class="sopt" onclick="confirmStatus('green')">🟢 Presente hoy</button>
+      <button class="sopt sopt-always" onclick="confirmStatus('green_always')">🔵 Siempre presente <span style="font-size:.72rem;color:#4a9eff;font-weight:400">(todos los días)</span></button>
+      <button class="sopt" onclick="confirmStatus('yellow')">🟡 Llego tarde…</button>
+      <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
+      <button class="sopt" onclick="confirmStatus('black')">🟠 Ausente varios días…</button>
+      <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()">🅱️ Asignar como capitán</button>
     </div>
     <button class="mbtn mbtn-cancel" onclick="closeModal('statusOverlay')" style="width:100%;margin-top:10px">Cancelar</button>
   </div>
@@ -313,8 +313,8 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 <!-- LATE MODAL -->
 <div class="overlay" id="lateOverlay" onclick="if(event.target===this)closeModal('lateOverlay')">
   <div class="modal">
-    <h3>ðŸŸ¡ Â¿A quÃ© hora llegÃ¡s?</h3>
-    <p style="font-size:.76rem;color:#8b92aa;margin-bottom:12px">IndicÃ¡ la hora estimada.</p>
+    <h3>🟡 ¿A qué hora llegás?</h3>
+    <p style="font-size:.76rem;color:#8b92aa;margin-bottom:12px">Indicá la hora estimada.</p>
     <input type="time" id="lateTimeInput" class="modal-input">
     <div class="mbtns">
       <button class="mbtn mbtn-cancel" onclick="closeModal('lateOverlay')">Cancelar</button>
@@ -326,14 +326,14 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 <!-- BLACK MODAL -->
 <div class="overlay" id="blackOverlay" onclick="if(event.target===this)closeModal('blackOverlay')">
   <div class="modal">
-    <h3>âš« Â¿Hasta cuÃ¡ndo?</h3>
-    <p style="font-size:.76rem;color:#8b92aa;margin-bottom:12px">Se marcarÃ¡ ausente hasta esta fecha.</p>
+    <h3>⚫ ¿Hasta cuándo?</h3>
+    <p style="font-size:.76rem;color:#8b92aa;margin-bottom:12px">Se marcará ausente hasta esta fecha.</p>
     <input type="date" id="blackDateInput" class="modal-input">
     <div class="mbtns">
       <button class="mbtn mbtn-cancel" onclick="closeModal('blackOverlay')">Cancelar</button>
       <button class="mbtn mbtn-save" onclick="saveBlackDate()">Confirmar</button>
     </div>
-    <button class="mbtn" onclick="saveBlackIndefinite()" style="width:100%;margin-top:8px;background:#1a1a1a;color:#f97316;border:1px solid #f97316;">â›” Tiempo indefinido</button>
+    <button class="mbtn" onclick="saveBlackIndefinite()" style="width:100%;margin-top:8px;background:#1a1a1a;color:#f97316;border:1px solid #f97316;">⛔ Tiempo indefinido</button>
   </div>
 </div>
 
@@ -343,10 +343,10 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   ROSTER â€” posiciones siguen la nomenclatura
-   de convocatoria.html (DCD, DFC, LD, MCIâ€¦)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────────────────────────────────────
+   ROSTER — posiciones siguen la nomenclatura
+   de convocatoria.html (DCD, DFC, LD, MCI…)
+───────────────────────────────────────────── */
 const PLAYERS = [
   { name:'pauloco10',    pos:'POR', num:19, folder:'pauloco10'   },
   { name:'garayds',         pos:'POR', num:12, folder:'garayds'        },
@@ -366,7 +366,7 @@ const PLAYERS = [
   { name:'Lucasmati_akd',   pos:'DC',  num:9,  folder:'Lucasmati_akd'  },
 ];
 
-/* â”€â”€â”€ SVG CROP DATA (fallback cuando no hay PNG) â”€â”€â”€ */
+/* ─── SVG CROP DATA (fallback cuando no hay PNG) ─── */
 const CROP_DATA = {
   'Agubostero7':    {iW:120.8,iH:67.9,oX:56.9,oY:13.8},
   'Alexiisraiies23':{iW:121.2,iH:68.1,oX:58.1,oY:13.0},
@@ -383,7 +383,7 @@ const CROP_DATA = {
   'Lucasmati_akd':  {iW:68.1, iH:68.1, oX:27.6,oY:13.0},
 };
 
-/* â”€â”€â”€ FORMATIONS â”€â”€â”€ */
+/* ─── FORMATIONS ─── */
 const FORMATIONS = {
   '4-3-3':[
     {key:'GK', l:'POR',x:50,y:84},
@@ -418,7 +418,7 @@ const FORMATIONS = {
   ],
 };
 
-/* â”€â”€â”€ POSITION LABELS â”€â”€â”€ */
+/* ─── POSITION LABELS ─── */
 const POS_LABEL = {
   POR:'Portero',DCD:'Def. Derecho',DFD:'Def. Derecho',DFC:'Defensa Central',
   DCI:'Def. Izquierdo',DFI:'Def. Izquierdo',LD:'Lateral Derecho',LI:'Lateral Izquierdo',
@@ -427,7 +427,7 @@ const POS_LABEL = {
 };
 function getPosLabel(pos){ return POS_LABEL[pos] || pos; }
 
-/* â”€â”€â”€ FIREBASE â”€â”€â”€ */
+/* ─── FIREBASE ─── */
 const FB_CONFIG = {
   apiKey: "AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M",
   authDomain: "top-secret-fc.firebaseapp.com",
@@ -444,7 +444,7 @@ try {
   CAL_DOC_CONV = _db.collection('calendario').doc('estado');
 } catch(e) { console.warn('Firebase init error:', e); }
 
-/* â”€â”€â”€ CALENDAR MATCHES (today) â”€â”€â”€ */
+/* ─── CALENDAR MATCHES (today) ─── */
 let calCustom = [];
 if (CAL_DOC_CONV) {
   CAL_DOC_CONV.onSnapshot(snap => {
@@ -466,19 +466,19 @@ function renderTodayMatchesPanel() {
   const lc = {VPN:'#f5c518',VPUG:'#3ecf8e','11x11':'#4a9eff'};
   wrap.querySelector('.tmp-list').innerHTML = matches.map(m => `
     <div class="tmp-row">
-      <span class="tmp-time">${m.time||'â€”'}</span>
-      <span class="tmp-rival">${m.rival||'â€”'}</span>
+      <span class="tmp-time">${m.time||'—'}</span>
+      <span class="tmp-rival">${m.rival||'—'}</span>
       ${m.league ? `<span class="tmp-badge" style="background:${lc[m.league]||'#888'}22;color:${lc[m.league]||'#888'};border:1px solid ${lc[m.league]||'#888'}55">${m.league}</span>` : ''}
-      <span class="tmp-loc">${m.isHome?'ðŸ ':'âœˆï¸'}</span>
+      <span class="tmp-loc">${m.isHome?'🏠':'✈️'}</span>
     </div>`).join('');
 }
 
-/* â”€â”€â”€ STATE â”€â”€â”€ */
+/* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
 const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
 
 let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
-let dailyOverrides  = {};   // { name: {status, day, note?} } â€” alwaysPresent daily overrides
+let dailyOverrides  = {};   // { name: {status, day, note?} } — alwaysPresent daily overrides
 let alwaysPresent   = [];   // players always present unless overridden
 let captain         = null;
 let lineup          = { formation:'4-3-3', slots:{} };
@@ -486,7 +486,7 @@ let currentPlayer   = null;
 let selectedSlotKey = null;
 let _savedResetDate = '';
 
-/* â”€â”€â”€ APPLY DATA (from Firestore or backup) â”€â”€â”€ */
+/* ─── APPLY DATA (from Firestore or backup) ─── */
 function applyData(data) {
   _savedResetDate = data.resetDate      || '';
   availability    = data.availability   || {};
@@ -496,10 +496,10 @@ function applyData(data) {
   lineup          = data.lineup         || { formation:'4-3-3', slots:{} };
 }
 
-/* â”€â”€â”€ DAILY RESET (midnight GMT-3) â”€â”€â”€ */
+/* ─── DAILY RESET (midnight GMT-3) ─── */
 function checkDailyReset() {
   if (_savedResetDate === TODAY) return;
-  // New day â€” clear daily statuses but preserve ongoing vacations (black with future returnDate)
+  // New day — clear daily statuses but preserve ongoing vacations (black with future returnDate)
   Object.keys(availability).forEach(name => {
     const a = availability[name];
     if (a.status === 'black' && a.returnDate && a.returnDate > TODAY) return;
@@ -517,7 +517,7 @@ function scheduleMidnightReset() {
   setTimeout(() => window.location.reload(), midnight - ar);
 }
 
-/* â”€â”€â”€ LOAD STATE â”€â”€â”€ */
+/* ─── LOAD STATE ─── */
 function loadState() {
   if (CONV_DOC) {
     CONV_DOC.onSnapshot(snap => {
@@ -525,14 +525,14 @@ function loadState() {
         applyData(snap.data());
         checkDailyReset();
       } else {
-        saveState(); // first user â€” seed the document
+        saveState(); // first user — seed the document
       }
       render();
     }, err => console.warn('Firestore listen error:', err));
   }
 }
 
-/* â”€â”€â”€ SAVE STATE â”€â”€â”€ */
+/* ─── SAVE STATE ─── */
 function saveState() {
   const data = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
   if (CONV_DOC) {
@@ -540,7 +540,7 @@ function saveState() {
   }
 }
 
-/* â”€â”€â”€ STATUS â”€â”€â”€ */
+/* ─── STATUS ─── */
 function getStatus(name) {
   // Vacation (black) check: takes priority for everyone
   const a = availability[name];
@@ -567,7 +567,7 @@ function getNote(name) {
   return availability[name]?.note || '';
 }
 
-/* â”€â”€â”€ PHOTO HELPERS â”€â”€â”€ */
+/* ─── PHOTO HELPERS ─── */
 function brazosPath(p)  { return `Renders/${p.folder || p.name}/Brazos.png`; }
 function frontePath(p)  { return `Renders/${p.folder || p.name}/Frente.png`; }
 function brazos2Path(p) { return `Renders/${p.folder || p.name}/Brazos2.png`; }
@@ -582,7 +582,7 @@ function tryImages(paths, idx, onSuccess, onFail) {
   img.src = paths[idx];
 }
 
-/* â”€â”€â”€ BUILD AVATAR (tries Brazos2 â†’ Brazos â†’ SVG crop) â”€â”€â”€ */
+/* ─── BUILD AVATAR (tries Brazos2 → Brazos → SVG crop) ─── */
 function buildAvatar(p, container) {
   tryImages([brazos2Path(p), brazosPath(p)], 0,
     (src) => {
@@ -606,16 +606,16 @@ function buildAvatar(p, container) {
   );
 }
 
-/* â”€â”€â”€ DATE HEADER â”€â”€â”€ */
+/* ─── DATE HEADER ─── */
 function renderDateTag() {
-  const DAYS  = ['Domingo','Lunes','Martes','MiÃ©rcoles','Jueves','Viernes','SÃ¡bado'];
+  const DAYS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MONTHS= ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const d = new Date();
-  document.getElementById('dateTag').textContent = DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + MONTHS[d.getMonth()] + ' Â· ' + d.getFullYear();
+  document.getElementById('dateTag').textContent = DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + MONTHS[d.getMonth()] + ' · ' + d.getFullYear();
   document.getElementById('sectionDate').textContent = TODAY;
 }
 
-/* â”€â”€â”€ RENDER PLAYERS LIST â”€â”€â”€ */
+/* ─── RENDER PLAYERS LIST ─── */
 function renderPlayers() {
   const el = document.getElementById('playersList');
   const onPitch = new Set(Object.values(lineup.slots));
@@ -674,11 +674,11 @@ function renderPlayers() {
       const info = document.createElement('div'); info.className = 'pinfo';
       const nm = document.createElement('div'); nm.className = 'pname';
       nm.textContent = p.name;
-      if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = 'âˆž'; nm.appendChild(b); }
+      if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; nm.appendChild(b); }
       const sub = document.createElement('div'); sub.className = 'psub';
       const pos = document.createElement('span'); pos.className = 'ppos'; pos.textContent = getPosLabel(p.pos);
       sub.appendChild(pos);
-      if (pitched) { const sp = document.createElement('span'); sp.className = 'on-pitch'; sp.textContent = 'âœ“ EN CANCHA'; sub.appendChild(sp); }
+      if (pitched) { const sp = document.createElement('span'); sp.className = 'on-pitch'; sp.textContent = '✓ EN CANCHA'; sub.appendChild(sp); }
       info.appendChild(nm); info.appendChild(sub);
       if (note) { const nt = document.createElement('div'); nt.className = 'pnote'; nt.style.marginTop = '2px'; nt.textContent = note; info.appendChild(nt); }
 
@@ -696,7 +696,7 @@ function renderPlayers() {
   gsap.fromTo(newCards, { opacity:0, x:-10 }, { opacity:1, x:0, duration:0.3, stagger:0.025, ease:'power2.out' });
 }
 
-/* â”€â”€â”€ RENDER STATS â”€â”€â”€ */
+/* ─── RENDER STATS ─── */
 function renderStats() {
   let g=0, y=0, r=0, p=0;
   PLAYERS.forEach(pl => {
@@ -709,7 +709,7 @@ function renderStats() {
   document.getElementById('sP').textContent = p;
 }
 
-/* â”€â”€â”€ RENDER FORMATION BAR â”€â”€â”€ */
+/* ─── RENDER FORMATION BAR ─── */
 function renderFbar() {
   const bar = document.getElementById('fbar');
   bar.innerHTML = '';
@@ -722,7 +722,7 @@ function renderFbar() {
   });
 }
 
-/* â”€â”€â”€ RENDER PITCH â”€â”€â”€ */
+/* ─── RENDER PITCH ─── */
 function renderPitch() {
   const pitch = document.getElementById('pitch');
   pitch.querySelectorAll('.slot').forEach(el => el.remove());
@@ -753,10 +753,10 @@ function renderPitch() {
         img.className = 'tok-photo';
         img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(var(--photo-scale)) translateY(var(--photo-y));transform-origin:top center;';
         tok.appendChild(img);
-        // NÃºmero sobre la foto (izquierda)
+        // Número sobre la foto (izquierda)
         const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
         tok.appendChild(numEl);
-        // Badge capitÃ¡n
+        // Badge capitán
         if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
         // Barra inferior solo con nombre
         const bar = document.createElement('div'); bar.className = 'stoken-bar';
@@ -765,7 +765,7 @@ function renderPitch() {
         tok.appendChild(bar);
       }
 
-      // Try Frente2 â†’ Frente â†’ Brazos2 â†’ Brazos â†’ SVG
+      // Try Frente2 → Frente → Brazos2 → Brazos → SVG
       tryImages([frente2Path(player), frontePath(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => setPhoto(src),
         () => {
@@ -808,7 +808,7 @@ function renderPitch() {
   });
 }
 
-/* â”€â”€â”€ RENDER (all) â”€â”€â”€ */
+/* ─── RENDER (all) ─── */
 function render() {
   renderPlayers();
   renderStats();
@@ -816,15 +816,15 @@ function render() {
   renderPitch();
 }
 
-/* â”€â”€â”€ FORMATION CHANGE â”€â”€â”€ */
+/* ─── FORMATION CHANGE ─── */
 function selectFormation(f) {
   if (f === lineup.formation) return;
   lineup = { formation:f, slots:{} };
   saveState(); render();
-  showToast('FormaciÃ³n ' + f);
+  showToast('Formación ' + f);
 }
 
-/* â”€â”€â”€ SLOT CLICK â”€â”€â”€ */
+/* ─── SLOT CLICK ─── */
 function handleSlotClick(key) {
   if (selectedSlotKey) {
     if (selectedSlotKey === key) {
@@ -839,7 +839,7 @@ function handleSlotClick(key) {
     }
   } else if (lineup.slots[key]) {
     selectSlot(key);
-    showToast('TocÃ¡ otro puesto para mover, o tocÃ¡ este de nuevo para quitar', 'info');
+    showToast('Tocá otro puesto para mover, o tocá este de nuevo para quitar', 'info');
   } else {
     selectSlot(key);
   }
@@ -851,14 +851,14 @@ function dropOnSlot(key, name) {
   saveState(); render();
 }
 
-/* â”€â”€â”€ SLOT SELECT â”€â”€â”€ */
+/* ─── SLOT SELECT ─── */
 function selectSlot(key) {
   if (selectedSlotKey === key) { cancelSlotSelect(); return; }
   selectedSlotKey = key;
   const slot = FORMATIONS[lineup.formation]?.find(s => s.key === key);
   const banner = document.getElementById('assignBanner');
   banner.style.display = 'flex';
-  document.getElementById('assignBannerText').textContent = 'ðŸŽ¯ Asignando a ' + (slot ? slot.l : key) + ' â€” tocÃ¡ un jugador';
+  document.getElementById('assignBannerText').textContent = '🎯 Asignando a ' + (slot ? slot.l : key) + ' — tocá un jugador';
   document.getElementById('pitchHint').classList.add('selecting');
   render();
 }
@@ -877,7 +877,7 @@ function assignPlayerToSelectedSlot(name) {
   cancelSlotSelect(); saveState(); render();
 }
 
-/* â”€â”€â”€ AUTO LINEUP â”€â”€â”€ */
+/* ─── AUTO LINEUP ─── */
 function autoLineup() {
   lineup.formation = '4-3-3';
   lineup.slots = {
@@ -886,17 +886,17 @@ function autoLineup() {
     'LM':'CipriMancini','RW':'BlackPanther-CG','CF':'cansitrGd22_','LW':'Lautavester7',
   };
   saveState(); render();
-  showToast('AlineaciÃ³n cargada âš¡');
+  showToast('Alineación cargada ⚡');
 }
 
-/* â”€â”€â”€ CLEAR LINEUP â”€â”€â”€ */
+/* ─── CLEAR LINEUP ─── */
 function clearLineup() {
   lineup.slots = {};
   saveState(); render();
-  showToast('FormaciÃ³n limpiada');
+  showToast('Formación limpiada');
 }
 
-/* â”€â”€â”€ STATUS MODAL â”€â”€â”€ */
+/* ─── STATUS MODAL ─── */
 function openStatusModal(name) {
   currentPlayer = name;
   const p = PLAYERS.find(pl => pl.name === name);
@@ -906,20 +906,20 @@ function openStatusModal(name) {
   const txt = document.createElement('div');
   const nm = document.createElement('div'); nm.className = 'mph-name'; nm.textContent = p.name;
   const st = getStatus(p.name);
-  const stIcon = {green:'ðŸŸ¢',yellow:'ðŸŸ¡',red:'ðŸ”´',black:'ðŸŸ ',pending:'â¬œ'}[st] || 'â¬œ';
+  const stIcon = {green:'🟢',yellow:'🟡',red:'🔴',black:'🟠',pending:'⬜'}[st] || '⬜';
   const sub = document.createElement('div'); sub.className = 'mph-sub';
-  sub.textContent = getPosLabel(p.pos) + ' Â· #' + p.num + ' Â· ' + stIcon;
+  sub.textContent = getPosLabel(p.pos) + ' · #' + p.num + ' · ' + stIcon;
   const note = getNote(p.name);
   txt.appendChild(nm); txt.appendChild(sub);
   if (note) { const nd = document.createElement('div'); nd.style.cssText = 'font-size:.7rem;color:var(--yellow);font-weight:600;margin-top:2px;'; nd.textContent = note; txt.appendChild(nd); }
   mph.appendChild(av); mph.appendChild(txt);
-  // Actualizar botÃ³n capitÃ¡n
+  // Actualizar botón capitán
   const capBtn = document.getElementById('captainBtn');
   if (captain === name) {
-    capBtn.textContent = 'ðŸ…±ï¸ Quitar capitanÃ­a';
+    capBtn.textContent = '🅱️ Quitar capitanía';
     capBtn.classList.add('is-captain');
   } else {
-    capBtn.textContent = 'ðŸ…±ï¸ Asignar como capitÃ¡n';
+    capBtn.textContent = '🅱️ Asignar como capitán';
     capBtn.classList.remove('is-captain');
   }
   document.getElementById('statusOverlay').classList.add('open');
@@ -928,7 +928,7 @@ function openStatusModal(name) {
 function toggleCaptain() {
   captain = (captain === currentPlayer) ? null : currentPlayer;
   saveState(); closeModal('statusOverlay'); render();
-  showToast(captain ? captain + ' es el capitÃ¡n ðŸ…±ï¸' : 'CapitanÃ­a removida');
+  showToast(captain ? captain + ' es el capitán 🅱️' : 'Capitanía removida');
 }
 
 function confirmStatus(status) {
@@ -942,18 +942,18 @@ function confirmStatus(status) {
     delete dailyOverrides[name];  // clear any daily override
     delete availability[name];    // remove from regular availability
     saveState();
-    render(); showToast(name + ' â†’ Siempre presente');
+    render(); showToast(name + ' → Siempre presente');
     return;
   }
 
   if (alwaysPresent.includes(name)) {
-    // Daily override only â€” alwaysPresent stays intact; resets automatically next day
+    // Daily override only — alwaysPresent stays intact; resets automatically next day
     dailyOverrides[name] = { status, day: TODAY };
   } else {
     availability[name] = { status };
   }
   saveState();
-  render(); showToast(name + ' â†’ ' + (status === 'green' ? 'Presente' : 'Ausente'));
+  render(); showToast(name + ' → ' + (status === 'green' ? 'Presente' : 'Ausente'));
 }
 
 function saveLateTime() {
@@ -965,14 +965,14 @@ function saveLateTime() {
   }
   saveState();
   closeModal('lateOverlay'); render();
-  showToast(currentPlayer + ' â†’ Tarde (~' + time + ')');
+  showToast(currentPlayer + ' → Tarde (~' + time + ')');
 }
 
 function saveBlackDate() {
   const date = document.getElementById('blackDateInput').value; if (!date) return;
   const d = new Date(date + 'T12:00:00');
   const fmt = d.getDate() + '/' + (d.getMonth() + 1);
-  // Vacation stored in availability for everyone â€” returnDate check handles expiry
+  // Vacation stored in availability for everyone — returnDate check handles expiry
   availability[currentPlayer] = { status:'black', returnDate:date, note:'Vuelve '+fmt };
   // Remove from alwaysPresent so "siempre disponible" set later takes precedence at reset
   const _apIdx = alwaysPresent.indexOf(currentPlayer);
@@ -980,7 +980,7 @@ function saveBlackDate() {
   delete dailyOverrides[currentPlayer];
   saveState();
   closeModal('blackOverlay'); render();
-  showToast(currentPlayer + ' â†’ Ausente hasta ' + fmt);
+  showToast(currentPlayer + ' → Ausente hasta ' + fmt);
 }
 function saveBlackIndefinite() {
   availability[currentPlayer] = { status:'black', returnDate:'9999-12-31', note:'Ausente (indef.)' };
@@ -989,12 +989,12 @@ function saveBlackIndefinite() {
   delete dailyOverrides[currentPlayer];
   saveState();
   closeModal('blackOverlay'); render();
-  showToast(currentPlayer + ' â†’ Ausente por tiempo indefinido');
+  showToast(currentPlayer + ' → Ausente por tiempo indefinido');
 }
 
-/* â”€â”€â”€ COPY PLAYER LIST â”€â”€â”€ */
+/* ─── COPY PLAYER LIST ─── */
 function copyPlayerList() {
-  const statusIcon = { green:'ðŸŸ¢', yellow:'ðŸŸ¡', red:'ðŸ”´', black:'ðŸŸ ', pending:'â¬œ' };
+  const statusIcon = { green:'🟢', yellow:'🟡', red:'🔴', black:'🟠', pending:'⬜' };
   const groups = [
     {label:'Arquero',        f:p=>p.pos==='POR'},
     {label:'Defensores',     f:p=>['DCD','DFC','DFD','DCI'].includes(p.pos)},
@@ -1006,21 +1006,21 @@ function copyPlayerList() {
   groups.forEach(g => {
     const gp = PLAYERS.filter(g.f);
     if (!gp.length) return;
-    lines.push('â€” ' + g.label.toUpperCase() + ' â€”');
+    lines.push('— ' + g.label.toUpperCase() + ' —');
     gp.forEach(p => {
       const st = getStatus(p.name);
-      lines.push(`${statusIcon[st] || 'â¬œ'} ${p.pos}  #${p.num}  ${p.name}`);
+      lines.push(`${statusIcon[st] || '⬜'} ${p.pos}  #${p.num}  ${p.name}`);
     });
   });
   navigator.clipboard.writeText(lines.join('\n')).then(() => {
     const btn = document.getElementById('copyListBtn');
     const orig = btn.textContent;
-    btn.textContent = 'âœ“ Copiado';
+    btn.textContent = '✓ Copiado';
     setTimeout(() => btn.textContent = orig, 1800);
   });
 }
 
-/* â”€â”€â”€ LIGHTBOX â”€â”€â”€ */
+/* ─── LIGHTBOX ─── */
 function openLightbox(src) {
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -1032,12 +1032,12 @@ function closeLightbox() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
-/* â”€â”€â”€ MODALS â”€â”€â”€ */
+/* ─── MODALS ─── */
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
 
-/* â”€â”€â”€ TOAST â”€â”€â”€ */
+/* ─── TOAST ─── */
 let toastTimer;
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
@@ -1047,22 +1047,22 @@ function showToast(msg, type = '') {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* â”€â”€â”€ SHARE â”€â”€â”€ */
+/* ─── SHARE ─── */
 function buildWhatsAppMessage() {
-  const D = ['Domingo','Lunes','Martes','MiÃ©rcoles','Jueves','Viernes','SÃ¡bado'];
+  const D = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const M = ['Enero','Feb','Marzo','Abril','Mayo','Junio','Julio','Agosto','Sep','Oct','Nov','Dic'];
   const dt = new Date(TODAY + 'T12:00:00');
   const dayStr = D[dt.getDay()] + ' ' + dt.getDate() + ' de ' + M[dt.getMonth()];
-  let msg = 'âš½ *TOP SECRET FC*\n';
-  msg += 'ðŸ“… ' + dayStr + '\n';
-  msg += 'â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n';
+  let msg = '⚽ *TOP SECRET FC*\n';
+  msg += '📅 ' + dayStr + '\n';
+  msg += '─────────────────\n';
   const matches = getTodayMatches();
   if (matches.length) {
-    msg += '*PARTIDOS HOY* ðŸ”¥\n';
+    msg += '*PARTIDOS HOY* 🔥\n';
     matches.forEach(m => {
-      msg += `ðŸ†š *${m.rival||'â€”'}* Â· ${m.time||''}hs`;
-      if (m.league) msg += ` Â· ${m.league}`;
-      msg += m.isHome ? ' Â· ðŸ  Local\n' : ' Â· âœˆï¸ Visita\n';
+      msg += `🆚 *${m.rival||'—'}* · ${m.time||''}hs`;
+      if (m.league) msg += ` · ${m.league}`;
+      msg += m.isHome ? ' · 🏠 Local\n' : ' · ✈️ Visita\n';
     });
   } else {
     msg += '_Entrenamiento_\n';
@@ -1071,7 +1071,7 @@ function buildWhatsAppMessage() {
 }
 
 function drawShareFooter(c2d, FW, FH, FOOTER, S) {
-  /* Black bar with gold top stripe â€” no image loading (avoids canvas taint) */
+  /* Black bar with gold top stripe — no image loading (avoids canvas taint) */
   c2d.fillStyle = '#111111'; c2d.fillRect(0, FH, FW, FOOTER);
   c2d.fillStyle = '#B0B8C4'; c2d.fillRect(0, FH, FW, 3*S);
   /* Gold shield badge (drawn, no image) */
@@ -1092,17 +1092,17 @@ function drawShareFooter(c2d, FW, FH, FOOTER, S) {
   const w2 = c2d.measureText('SECRET').width;
   c2d.fillStyle = '#fff'; c2d.fillText(' FC', nX+w1+w2, nMid);
   /* Date + session + formation */
-  const DAYS2   = ['Domingo','Lunes','Martes','MiÃ©rcoles','Jueves','Viernes','SÃ¡bado'];
+  const DAYS2   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MONTHS2 = ['Enero','Feb','Marzo','Abril','Mayo','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const nd = new Date();
   const session = lineup.nextMatch || 'Sin partidos';
   c2d.font = `${Math.round(FOOTER*0.2)}px "Barlow Condensed",sans-serif`;
   c2d.fillStyle = 'rgba(255,255,255,.45)';
-  c2d.fillText(`${DAYS2[nd.getDay()]} ${nd.getDate()} de ${MONTHS2[nd.getMonth()]} Â· ${session} Â· ${lineup.formation}`, nX, FH+FOOTER*0.75);
+  c2d.fillText(`${DAYS2[nd.getDay()]} ${nd.getDate()} de ${MONTHS2[nd.getMonth()]} · ${session} · ${lineup.formation}`, nX, FH+FOOTER*0.75);
   c2d.textBaseline = 'alphabetic';
 }
 
-/* â”€â”€â”€ Build share canvas â”€â”€â”€ */
+/* ─── Build share canvas ─── */
 async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
   const slots  = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
   const tokW   = Math.round(FW * 0.252);
@@ -1142,7 +1142,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     ctx.beginPath(); ctx.rect(tx, ty + photoH, tokW, barH); ctx.clip();
     ctx.fillText(player.name.toUpperCase(), tx + tokW/2, ty + photoH + barH * 0.5);
     ctx.restore();
-    /* nÃºmero: overlay bottom-left sobre la foto */
+    /* número: overlay bottom-left sobre la foto */
     ctx.font = `900 ${numSz}px "Barlow Condensed",sans-serif`;
     ctx.fillStyle = '#B0B8C4'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 3*S;
@@ -1173,7 +1173,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     ctx.textBaseline = 'alphabetic';
   }
 
-  /* helper: silueta para slots vacÃ­os */
+  /* helper: silueta para slots vacíos */
   function drawSilhouette(tx, ty) {
     ctx.save();
     ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
@@ -1198,7 +1198,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     // neck + torso con bezier
     ctx.beginPath();
     ctx.moveTo(cx - neckHW, neckBotY);
-    // izquierda: cuello â†’ hombro â†’ cintura â†’ cadera
+    // izquierda: cuello → hombro → cintura → cadera
     ctx.bezierCurveTo(cx - neckHW,     shoulderY - headR * 0.35,
                       cx - shoulderHW, shoulderY,
                       cx - shoulderHW, shoulderY + headR * 0.45);
@@ -1206,7 +1206,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
                       cx - hipHW * 0.82, waistY,
                       cx - hipHW,      botY);
     ctx.lineTo(cx + hipHW, botY);
-    // derecha: cadera â†’ cintura â†’ hombro â†’ cuello
+    // derecha: cadera → cintura → hombro → cuello
     ctx.bezierCurveTo(cx + hipHW * 0.82, waistY,
                       cx + shoulderHW, waistY - headR * 0.3,
                       cx + shoulderHW, shoulderY + headR * 0.45);
@@ -1238,7 +1238,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
           // Replicar object-fit:cover + object-position:top center + scale(3.6)
           const PHOTO_SCALE = 3.6;
           const imgW = img.naturalWidth, imgH = img.naturalHeight;
-          // 1. cover scale: escalar para cubrir tokW Ã— photoH
+          // 1. cover scale: escalar para cubrir tokW × photoH
           const coverScale = Math.max(tokW / imgW, photoH / imgH);
           // 2. crop cover en coordenadas fuente
           let srcW = tokW / coverScale, srcH = photoH / coverScale;
@@ -1288,9 +1288,9 @@ async function canvasToBlob(cvs) {
 async function doShare() {
   const btn = document.getElementById('shareBtn');
   const orig = btn.textContent;
-  btn.textContent = 'â³...'; btn.disabled = true;
+  btn.textContent = '⏳...'; btn.disabled = true;
 
-  /* â”€â”€ Copy WhatsApp message to clipboard â”€â”€ */
+  /* ── Copy WhatsApp message to clipboard ── */
   try { await navigator.clipboard.writeText(buildWhatsAppMessage()); } catch(e) {}
 
   try {
@@ -1300,17 +1300,17 @@ async function doShare() {
     if (!FW || !FH) { showToast('Error: cancha no visible', 'info'); btn.textContent=orig; btn.disabled=false; return; }
     const FOOTER = Math.round(FH * 0.13);
 
-    /* â”€â”€ Try with photos first â”€â”€ */
+    /* ── Try with photos first ── */
     let blob = null;
     try {
       const cvs = await buildShareCanvas(FW, FH, FOOTER, S, true);
       blob = await canvasToBlob(cvs);
     } catch(e) {
       if (e.name === 'SecurityError') {
-        /* Canvas tainted â€” file:// cross-origin. Rebuild without photos. */
+        /* Canvas tainted — file:// cross-origin. Rebuild without photos. */
         const cvs2 = await buildShareCanvas(FW, FH, FOOTER, S, false);
         blob = await canvasToBlob(cvs2);
-        showToast('Sin fotos Â· para verlas usÃ¡: npx serve .', 'info');
+        showToast('Sin fotos · para verlas usá: npx serve .', 'info');
       } else throw e;
     }
 
@@ -1321,13 +1321,13 @@ async function doShare() {
     const canWebShare = navigator.share && navigator.canShare && navigator.canShare({ files:[file] });
     if (canWebShare) {
       try {
-        await navigator.share({ files:[file], title:'Top Secret FC Â· Convocatoria' });
-        showToast('ðŸ“¤ Compartido Â· texto copiado');
+        await navigator.share({ files:[file], title:'Top Secret FC · Convocatoria' });
+        showToast('📤 Compartido · texto copiado');
       } catch(e) {
-        if (e.name !== 'AbortError') { _download(blob, fname); showToast('ðŸ“¸ Descargada Â· texto copiado'); }
+        if (e.name !== 'AbortError') { _download(blob, fname); showToast('📸 Descargada · texto copiado'); }
       }
     } else {
-      _download(blob, fname); showToast('ðŸ“¸ Imagen descargada Â· texto copiado');
+      _download(blob, fname); showToast('📸 Imagen descargada · texto copiado');
     }
 
   } catch(e) { console.error(e); showToast('Error: ' + e.message, 'info'); }
@@ -1343,17 +1343,17 @@ function _download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/* â”€â”€â”€ PAGE LOAD ANIMATION â”€â”€â”€ */
+/* ─── PAGE LOAD ANIMATION ─── */
 gsap.set('.page-header > *', { opacity:0, y:18 });
 gsap.set('.kpi-card', { opacity:0, y:14 });
 
-/* â”€â”€â”€ INIT â”€â”€â”€ */
+/* ─── INIT ─── */
 loadState();
 renderDateTag();
 render();
 scheduleMidnightReset();
 
-/* â”€â”€â”€ Animate after render â”€â”€â”€ */
+/* ─── Animate after render ─── */
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
 gsap.to('.kpi-card', { opacity:1, y:0, duration:0.45, stagger:0.07, ease:'power2.out', delay:0.3 });
 </script>
