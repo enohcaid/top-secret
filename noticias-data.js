@@ -10,7 +10,7 @@ const NOTICIAS = [
     date: '2026-05-11',
     dateLabel: '11 de mayo de 2026',
     excerpt: 'Top Secret FC presenta oficialmente el plantel para la temporada 2026. Quince jugadores, una misma misión: competir en la élite del fútbol virtual argentino.',
-    image: 'logos/Plantel T2 2026.jpeg',
+    image: 'logos/Plantel T2 2026.png',
     body: [
       'Top Secret FC presenta el plantel que defenderá los colores del club en la temporada 2026. Quince jugadores comprometidos con el proyecto, con historia dentro de la institución y con hambre de seguir creciendo.',
       'El bloque viene reforzado. A la base que logró el ascenso se suman tres incorporaciones que elevan la competencia interna y dan mayor profundidad en todas las líneas. El desafío es enorme — Primera División de la VPN — y el plantel está a la altura.',
