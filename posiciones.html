@@ -243,18 +243,18 @@ footer span { color: var(--gold); }
 <div class="wrap">
   <!-- SEASON SELECTOR -->
   <div class="season-sel">
-    <button class="season-btn active" id="sbtn-t1" onclick="switchSeason('t1',this)">
+    <button class="season-btn" id="sbtn-t1" onclick="switchSeason('t1',this)">
       <span class="sb-label">T1 2026</span>
       <span class="sb-sub">Finalizada</span>
     </button>
-    <button class="season-btn" id="sbtn-t2" onclick="switchSeason('t2',this)">
+    <button class="season-btn active" id="sbtn-t2" onclick="switchSeason('t2',this)">
       <span class="sb-label">T2 2026</span>
       <span class="sb-sub">En curso</span>
     </button>
   </div>
 
   <!-- ════════════ TEMPORADA 1 ════════════ -->
-  <div id="s-t1">
+  <div id="s-t1" style="display:none">
     <div class="t1-badge">✓ TEMPORADA 1 · FINAL</div>
     <div class="tabs">
       <button class="tab active" data-league="vpn"  onclick="switchTab('vpn','t1',this)">VPN</button>
@@ -288,7 +288,7 @@ footer span { color: var(--gold); }
   </div>
 
   <!-- ════════════ TEMPORADA 2 ════════════ -->
-  <div id="s-t2" style="display:none">
+  <div id="s-t2">
     <div class="tabs">
       <button class="tab active" data-league="vpn"  onclick="switchTab('vpn','t2',this)">VPN</button>
       <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t2',this)">VPUG</button>
