@@ -3,6 +3,30 @@
 
 const NOTICIAS = [
   {
+    id: 'fichajes-t2-2026',
+    pinned: false,
+    category: 'Mercado',
+    title: 'Cuatro incorporaciones para la Temporada 2',
+    date: '2026-05-10',
+    dateLabel: '10 de mayo de 2026',
+    excerpt: 'Top Secret FC anuncia las altas para la nueva temporada: Cabers14, garayds, pauloco10 y AR-ELTIO se suman al plantel. Nuevo Secreto. Misma Misión.',
+    image: 'logos/Fichajes.png',
+    body: [
+      'Top Secret FC cierra su ventana de mercado para la Temporada 2 con cuatro incorporaciones que refuerzan el plantel de cara al debut en la Primera División de la VPN.',
+      '<strong>#4 · Cabers14</strong> llega para puntalar la línea defensiva. Defensa central con presencia y capacidad para liderar la última línea en una categoría más exigente.',
+      '<strong>#12 · garayds</strong> se suma al arco como segunda opción entre los tres palos. Competencia interna para elevar el nivel en la posición más importante del campo.',
+      '<strong>#19 · pauloco10</strong> es la gran apuesta del club. Portero con un perfil moderno que llega a disputarle el puesto de titular en una categoría que exige reacciones al máximo nivel.',
+      '<strong>#21 · AR-ELTIO</strong> completa el bloque defensivo. Su incorporación da más profundidad al backline y permite al cuerpo técnico rotar sin resignar intensidad.',
+      'Las cuatro altas consolidan un plantel con mayor amplitud y competencia en cada línea. El mensaje es claro: <em>Nuevo Secreto. Misma Misión.</em>',
+    ],
+    shareCaption: '🖤 FICHAJES · TOP SECRET FC\n\nCuatro incorporaciones para la Temporada 2:\n\n🔒 #4 Cabers14\n🧤 #12 garayds\n🧤 #19 pauloco10\n🔒 #21 AR-ELTIO\n\nNuevo Secreto. Misma Misión. ⭐\n\n#TopSecretFC #Fichajes #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 NUEVAS INCORPORACIONES · TOP SECRET FC\n\nCuatro refuerzos para la Temporada 2 ⭐\n\n🔒 #4 Cabers14\n🧤 #12 garayds\n🧤 #19 pauloco10\n🔒 #21 AR-ELTIO\n\nNuevo Secreto. Misma Misión.\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #Fichajes #EAFCClubsPro #NuevaTemporada',
+      x:  '🖤 Top Secret FC anuncia cuatro incorporaciones para la Temporada 2.\n\n🔒 Cabers14 · garayds · pauloco10 · AR-ELTIO\n\nNuevo Secreto. Misma Misión. ⭐\n\n#TopSecretFC #Fichajes #EAFCClubsPro',
+      fb: '🖤 FICHAJES · TOP SECRET FC\n\nEl club cierra su mercado para la Temporada 2 con cuatro incorporaciones que refuerzan defensiva y portería de cara al debut en Primera División VPN.\n\n🔒 #4 Cabers14\n🧤 #12 garayds\n🧤 #19 pauloco10\n🔒 #21 AR-ELTIO\n\nNuevo Secreto. Misma Misión. 🖤⭐\n\n#TopSecretFC #Fichajes #EAFCClubsPro',
+    },
+  },
+  {
     id: 'kit-drop-2026',
     pinned: false,
     category: 'Indumentaria',
