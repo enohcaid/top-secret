@@ -3,6 +3,30 @@
 
 const NOTICIAS = [
   {
+    id: 'plantel-2026',
+    pinned: false,
+    category: 'Plantel',
+    title: 'Este es el plantel que jugará la nueva temporada',
+    date: '2026-05-11',
+    dateLabel: '11 de mayo de 2026',
+    excerpt: 'Top Secret FC presenta oficialmente el plantel para la temporada 2026. Dieciséis jugadores, una misma misión: competir en la élite del fútbol virtual argentino.',
+    image: 'logos/Plantel T2 2026.jpeg',
+    body: [
+      'Top Secret FC presenta el plantel que defenderá los colores del club en la temporada 2026. Dieciséis jugadores comprometidos con el proyecto, con historia dentro de la institución y con hambre de seguir creciendo.',
+      'El bloque viene reforzado. A la base que logró el ascenso se suman cuatro incorporaciones que elevan la competencia interna y dan mayor profundidad en todas las líneas. El desafío es enorme — Primera División de la VPN — y el plantel está a la altura.',
+      'En el arco, <strong>pauloco10 (#19)</strong> y <strong>garayds (#12)</strong> se disputan el puesto de titular. Atrás, <strong>Alexiisraiies23 (#3)</strong>, <strong>Cabers14 (#4)</strong>, <strong>AR-ELTIO (#21)</strong> y <strong>Agubostero7 (#31)</strong> forman una defensa sólida, mientras que <strong>Huber236 (#8)</strong> y <strong>zPibu__ (#30)</strong> cubren los laterales.',
+      'En el mediocampo, <strong>Juan_Martinez4 (#6)</strong>, <strong>RS32-DaniStone (#13)</strong>, <strong>CipriMancini (#32)</strong>, <strong>Buraa07 (#5)</strong> y <strong>Guiidow (#20)</strong> ofrecen variantes tácticas y físicas para cualquier sistema.',
+      'Arriba, la línea de ataque sigue siendo letal: <strong>BlackPanther-CG (#11)</strong>, <strong>Lautavester7 (#7)</strong> y <strong>Lucasmati_akd (#9)</strong> son los encargados de romper redes en la categoría más competitiva del fútbol virtual argentino.',
+      '16 jugadores. Una identidad. Bienvenidos a la nueva era de Top Secret FC. 🖤⭐',
+    ],
+    shareCaption: '🖤 TOP SECRET FC · PLANTEL 2026\n\nEste es el equipo que jugará la nueva temporada:\n\n🧤 #19 pauloco10 · #12 garayds\n🔒 #3 Alexiisraiies23 · #4 Cabers14 · #21 AR-ELTIO · #31 Agubostero7\n↔️ #8 Huber236 · #30 zPibu__\n⚙️ #6 Juan_Martinez4 · #13 RS32-DaniStone · #32 CipriMancini · #5 Buraa07 · #20 Guiidow\n⚡ #11 BlackPanther-CG · #7 Lautavester7 · #9 Lucasmati_akd\n\n16 jugadores. Una misión. ⭐\n\n#TopSecretFC #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 PLANTEL 2026 · TOP SECRET FC\n\n16 jugadores. Una identidad. Una misión. ⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #EAFCClubsPro #NuevaTemporada #VPN',
+      x:  '🖤 Top Secret FC presenta el plantel 2026.\n\n16 jugadores listos para la élite del fútbol virtual argentino ⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #EAFCClubsPro #VPN',
+      fb: '🖤 PLANTEL 2026 · TOP SECRET FC\n\nEl club presenta oficialmente el plantel para la nueva temporada. Dieciséis jugadores comprometidos con el proyecto y listos para competir en la Primera División de la VPN.\n\n16 jugadores. Una identidad. Una misión. 🖤⭐\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #EAFCClubsPro #VPN',
+    },
+  },
+  {
     id: 'fichajes-t2-2026',
     pinned: false,
     category: 'Mercado',
