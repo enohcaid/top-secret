@@ -249,7 +249,7 @@ footer span { color: var(--gold); }
     </button>
     <button class="season-btn" id="sbtn-t2" onclick="switchSeason('t2',this)">
       <span class="sb-label">T2 2026</span>
-      <span class="sb-sub">Próximamente</span>
+      <span class="sb-sub">En curso</span>
     </button>
   </div>
 
@@ -289,18 +289,33 @@ footer span { color: var(--gold); }
 
   <!-- ════════════ TEMPORADA 2 ════════════ -->
   <div id="s-t2" style="display:none">
-    <div class="prox-wrap">
-      <div class="prox-badge">Temporada 2 · 2026</div>
-      <div class="prox-title">Próximamente</div>
-      <p class="prox-sub">La Temporada 2 todavía no ha comenzado. Las tablas se actualizarán cuando arranque la competencia.</p>
+    <div class="tabs">
+      <button class="tab active" data-league="vpn"  onclick="switchTab('vpn','t2',this)">VPN</button>
+      <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t2',this)">VPUG</button>
+      <button class="tab"        data-league="e11"  onclick="switchTab('e11','t2',this)">11x11</button>
     </div>
-    <div class="prox-tables">
-      <div class="tabs">
-        <button class="tab active" style="pointer-events:none">VPN</button>
-        <button class="tab" style="pointer-events:none">VPUG</button>
-        <button class="tab" style="pointer-events:none">11x11</button>
+
+    <!-- VPN T2 -->
+    <div class="tab-pane active" id="t2-pane-vpn">
+      <div class="table-wrap"><table class="standings-table" id="t2-vpn-table"></table></div>
+    </div>
+
+    <!-- VPUG T2 -->
+    <div class="tab-pane" id="t2-pane-vpug">
+      <div class="prox-wrap" style="padding:40px 0">
+        <div class="prox-badge">VPUG · T2</div>
+        <div class="prox-title">Próximamente</div>
+        <p class="prox-sub">La tabla de la VPUG se actualizará cuando comience la competencia.</p>
       </div>
-      <div class="table-wrap"><table class="standings-table" id="t2-empty-table"></table></div>
+    </div>
+
+    <!-- 11x11 T2 -->
+    <div class="tab-pane" id="t2-pane-e11">
+      <div class="prox-wrap" style="padding:40px 0">
+        <div class="prox-badge">11x11 · T2</div>
+        <div class="prox-title">Próximamente</div>
+        <p class="prox-sub">La tabla del 11x11 se actualizará cuando comience la competencia.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -395,12 +410,12 @@ const E11_DATA = [
 
 /* ── NORMALIZERS ── */
 function normVPN(raw) {
-  // API returns [{team:{name,short_name,logoSmallUrl,...}, gp, gw, gt, gl, gf, gc, gd, pts}, ...]
+  const LOGO_BASE = 'https://www.virtualpronetwork.com/api/media/images/teamlogos/';
   return raw
     .map(e => ({
       name: e.team.name,
       abbr: e.team.short_name || e.team.name.slice(0,3).toUpperCase(),
-      logo: e.team.logoSmallUrl || e.team.logoUrl || null,
+      logo: e.team.logo1 ? LOGO_BASE + e.team.logo1 : (e.team.logo ? LOGO_BASE + e.team.logo : null),
       gp: e.gp, w: e.gw, d: e.gt, l: e.gl, gf: e.gf, gc: e.gc, gd: e.gd, pts: e.pts,
       us: /top.?secret/i.test(e.team.name)
     }))
@@ -521,35 +536,24 @@ function renderT1() {
   }, 50);
 }
 
-/* ── RENDER EMPTY T2 TABLE ── */
-function renderT2Empty() {
-  const table = document.getElementById('t2-empty-table');
-  table.innerHTML = `
-    <thead><tr>
-      <th style="width:36px">#</th>
-      <th class="left" style="min-width:160px">Equipo</th>
-      <th>PJ</th><th>V</th><th>E</th><th>D</th>
-      <th>GF</th><th>GC</th><th>DG</th>
-      <th style="color:var(--gold)">PTS</th>
-    </tr></thead>
-    <tbody>
-      ${Array.from({length:6}, (_,i)=>`
-        <tr style="opacity:.25">
-          <td><div class="td-pos">${i+1}</div></td>
-          <td class="left"><div class="td-team">
-            <div class="td-logo" style="background:var(--border)"></div>
-            <span class="td-name" style="color:var(--border)">—</span>
-          </div></td>
-          <td>0</td><td>0</td><td>0</td><td>0</td>
-          <td>0</td><td>0</td><td>0</td>
-          <td><strong class="td-pts">0</strong></td>
-        </tr>`).join('')}
-    </tbody>`;
+/* ── FETCH & RENDER T2 VPN ── */
+async function fetchT2VPN() {
+  try {
+    const r = await fetch(VPN_URL);
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    const data = normVPN(Array.isArray(raw) ? raw : []);
+    renderTable('t2-vpn-table', data, 'var(--vpn)');
+    gsap.to('#t2-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  } catch(e) {
+    const table = document.getElementById('t2-vpn-table');
+    if (table) table.innerHTML = '<tbody><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--mid)">No se pudo cargar la tabla. Intentá más tarde.</td></tr></tbody>';
+  }
 }
 
 /* ── INIT ── */
 renderT1();
-renderT2Empty();
+fetchT2VPN();
 
 
 
