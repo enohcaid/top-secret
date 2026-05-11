@@ -311,7 +311,7 @@ export default {
 
       // ── VPN API PROXY (/vpn-table) ────────────
       if (url.pathname === '/vpn-table' && request.method === 'GET') {
-        const vpnResp = await fetch('https://www.virtualpronetwork.com/api/leagues/2127/table?season=6351&community_id=1');
+        const vpnResp = await fetch('https://www.virtualpronetwork.com/api/leagues/2119/table?season=6395&community_id=1');
         const data = await vpnResp.json();
         return jsonResp(data);
       }
