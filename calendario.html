@@ -1092,6 +1092,7 @@ let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}'); // id 
 let custom     = JSON.parse(localStorage.getItem('ts_custom')    ||'[]'); // custom matches added via UI
 let currentFilter = 'all';
 let currentSeason = 'all';    // 'all' | 't1' | 't2'
+let currentGridSeason = 't2'; // section filter for the year grid
 let isAdminMode   = false;
 let editingId = null;
 let editHomeVal = true;
@@ -1334,11 +1335,14 @@ function shouldHide(dateStr, league){
   return seasonHide || leagueHide;
 }
 function setGridSeason(s, btn) {
+  currentGridSeason = s;
   document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  applyGridSeason();
+}
+function applyGridSeason() {
   document.querySelectorAll('.season-section').forEach(sec => {
-    if (s === 'all') { sec.style.display = ''; }
-    else { sec.style.display = sec.classList.contains(s) ? '' : 'none'; }
+    sec.style.display = (currentGridSeason === 'all' || sec.classList.contains(currentGridSeason)) ? '' : 'none';
   });
 }
 function setSeason(s, btn){
@@ -1785,6 +1789,8 @@ function renderYearGrid() {
     secDiv.appendChild(inner);
     grid.appendChild(secDiv);
   });
+
+  applyGridSeason();
 }
 
 function buildMonthCard(year, month, mbd, today) {
@@ -2522,6 +2528,7 @@ function showToast(msg, type='success'){
 window.filter         = filter;
 window.setSeason      = setSeason;
 window.setGridSeason  = setGridSeason;
+window.applyGridSeason = applyGridSeason;
 window.toggleAdmin    = toggleAdmin;
 window.handleResultClick = handleResultClick;
 window.openStatsPanel = openStatsPanel;
