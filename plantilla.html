@@ -157,7 +157,13 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   line-height: 1.2; max-width: 130px;
 }
 .cf-posn { font-size: .66rem; color: var(--mid); letter-spacing: .04em; margin-top: 2px; }
-.cf-right { flex-shrink: 0; margin-left: 6px; padding-top: 3px; }
+.cf-right { flex-shrink: 0; margin-left: 6px; padding-top: 3px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.flag-circle {
+  width: 20px; height: 20px; border-radius: 50%; overflow: hidden;
+  border: 1.5px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  flex-shrink: 0;
+}
+.flag-circle img { width: 28px; height: 20px; object-fit: cover; object-position: center; display: block; }
 .pos-badge {
   display: inline-block; padding: 3px 8px; border-radius: 4px;
   font-size: .6rem; font-weight: 700; letter-spacing: .1em;
@@ -597,7 +603,7 @@ const ROSTER = [
   {key:'zPibu__',         pos:'LAT', posn:'Lateral',         num:'30', nvl:'87',  arq:'Objetivo',  build:'Runner',
    stats:[{l:'SAL',v:96},{l:'FUE',v:94},{l:'CAB',v:85},{l:'TIR',v:75}], total:350, photo:true},
   {key:'BlackPanther-CG', pos:'DEL', posn:'Delantero',       num:'11', nvl:'MÁX', arq:'Objetivo',  build:'Magician+',
-   stats:[{l:'ACE',v:95},{l:'BAL',v:85},{l:'DEF',v:95},{l:'CUR',v:85}], total:360, photo:true},
+   stats:[{l:'ACE',v:95},{l:'BAL',v:85},{l:'DEF',v:95},{l:'CUR',v:85}], total:360, photo:true, nat:'uy'},
   {key:'cansitrGd22_',    pos:'DEL', posn:'Delantero',       num:'22', nvl:'MÁX', arq:'Objetivo',  build:'Target',
    stats:[{l:'SAL',v:96},{l:'FUE',v:98},{l:'CAB',v:82},{l:'TIR',v:99}], total:375, photo:true},
   {key:'Lautavester7',    pos:'DEL', posn:'Delantero',       num:'7',  nvl:'MÁX', arq:'Objetivo',  build:'Target+',
@@ -610,11 +616,11 @@ const ROSTER_KEYS = ROSTER.map(r => r.key);
 /* ─── ROSTER T2 ─── */
 const ROSTER_T2 = [
   {key:'pauloco10',       pos:'POR', posn:'Portero',         num:'19', nvl:'—',   arq:'—',          build:'—',
-   stats:[], total:0, photo:true},
+   stats:[], total:0, photo:true, nat:'uy'},
   {key:'Woolfyboyzx2',    pos:'POR', posn:'Portero',         num:'45', nvl:'—',   arq:'—',          build:'—',
    stats:[], total:0, photo:true},
   {key:'AR-ELTIO',        pos:'DEF', posn:'Defensa central', num:'21', nvl:'—',   arq:'—',          build:'—',
-   stats:[], total:0, photo:true},
+   stats:[], total:0, photo:true, nat:'uy'},
   {key:'Alexisraies23', pos:'DEF', posn:'Defensa central', num:'3',  nvl:'88',  arq:'Jefe',       build:'Capitano',
    stats:[{l:'FUE',v:99},{l:'AGR',v:99},{l:'CAB',v:99},{l:'BAR',v:75}], total:372, photo:true},
   {key:'Cabers14',        pos:'DEF', posn:'Defensa central', num:'4',  nvl:'—',   arq:'—',          build:'—',
@@ -637,7 +643,7 @@ const ROSTER_T2 = [
   {key:'Guiidow',         pos:'MED', posn:'Mediocampista',   num:'20', nvl:'71',  arq:'Precursor',  build:'Roamer',
    stats:[{l:'SAL',v:92},{l:'FUE',v:92},{l:'CAB',v:80},{l:'TIR',v:75}], total:339, photo:true},
   {key:'BlackPanther-CG', pos:'DEL', posn:'Delantero',       num:'11', nvl:'MÁX', arq:'Objetivo',   build:'Magician+',
-   stats:[{l:'ACE',v:95},{l:'BAL',v:85},{l:'DEF',v:95},{l:'CUR',v:85}], total:360, photo:true},
+   stats:[{l:'ACE',v:95},{l:'BAL',v:85},{l:'DEF',v:95},{l:'CUR',v:85}], total:360, photo:true, nat:'uy'},
   {key:'Lautavester7',    pos:'DEL', posn:'Delantero',       num:'7',  nvl:'MÁX', arq:'Objetivo',   build:'Target+',
    stats:[{l:'SAL',v:96},{l:'FUE',v:98},{l:'CAB',v:86},{l:'TIR',v:96}], total:376, photo:true},
   {key:'Lucasmati_akd',   pos:'DEL', posn:'Delantero',       num:'9',  nvl:'64',  arq:'Objetivo',   build:'—',
@@ -742,7 +748,10 @@ function buildCard(p, useV2 = false) {
         <div class="cf-name">${p.key}</div>
         <div class="cf-posn">${p.posn}</div>
       </div>
-      <div class="cf-right"><span class="pos-badge">${p.pos}</span></div>
+      <div class="cf-right">
+        <span class="pos-badge">${p.pos}</span>
+        <div class="flag-circle"><img src="https://flagcdn.com/w40/${p.nat||'ar'}.png" alt="${p.nat==='uy'?'Uruguay':'Argentina'}"></div>
+      </div>
     </div>`;
 
   const brazos = card.querySelector('.img-brazos');
