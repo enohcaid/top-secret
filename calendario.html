@@ -370,6 +370,16 @@ footer span{color:var(--gold);}
 .sbtn:hover{border-color:var(--mid);color:var(--black);}
 .sbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
 
+/* ─── SEASON SECTIONS ─── */
+.season-section{margin-bottom:4px;}
+.season-section-header{display:flex;align-items:center;gap:14px;padding:24px 32px 10px;max-width:1100px;margin:0 auto;}
+.season-section-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;}
+.season-section-sub{font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;opacity:.7;}
+.season-section-line{flex:1;height:1px;background:var(--border);}
+.season-section.t2 .season-section-label{color:var(--gold);}
+.season-section.t1 .season-section-label{color:var(--mid);}
+.season-section .year-grid{margin-top:0;padding-top:0;}
+
 /* ─── LOCK / ADMIN ─── */
 .btn-lock{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
 .btn-lock:hover{border-color:var(--mid);color:var(--black);}
@@ -761,10 +771,17 @@ body{padding-top:64px;}
     <span class="cln-item"><span class="cln-dot vpug"></span>VPUG · L–J</span>
     <span class="cln-item"><span class="cln-dot e11"></span>11x11 · M/J</span>
   </div>
-  <div class="cal-admin-btns">
-    <button class="fbtn admin-el" onclick="openAddModal()" style="border-color:var(--gold);color:var(--gold);font-size:1rem;padding:4px 14px;" title="Agregar partido">＋</button>
-    <button class="fbtn admin-el" id="btnSave" onclick="saveToFirebase()" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar">☁ Guardar</button>
-    <button class="btn-lock" id="btnLock" onclick="toggleAdmin()">🔒 Admin</button>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="season-btns">
+      <button class="sbtn active" id="sbtn-t2" onclick="setGridSeason('t2',this)">T2</button>
+      <button class="sbtn" id="sbtn-t1" onclick="setGridSeason('t1',this)">T1</button>
+      <button class="sbtn" id="sbtn-all" onclick="setGridSeason('all',this)">Todo</button>
+    </div>
+    <div class="cal-admin-btns">
+      <button class="fbtn admin-el" onclick="openAddModal()" style="border-color:var(--gold);color:var(--gold);font-size:1rem;padding:4px 14px;" title="Agregar partido">＋</button>
+      <button class="fbtn admin-el" id="btnSave" onclick="saveToFirebase()" style="border-color:#3ecf8e;color:#3ecf8e;" title="Guardar">☁ Guardar</button>
+      <button class="btn-lock" id="btnLock" onclick="toggleAdmin()">🔒 Admin</button>
+    </div>
   </div>
 </div>
 
@@ -1316,6 +1333,14 @@ function shouldHide(dateStr, league){
   const leagueHide = currentFilter !== 'all' && league !== currentFilter;
   return seasonHide || leagueHide;
 }
+function setGridSeason(s, btn) {
+  document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.season-section').forEach(sec => {
+    if (s === 'all') { sec.style.display = ''; }
+    else { sec.style.display = sec.classList.contains(s) ? '' : 'none'; }
+  });
+}
 function setSeason(s, btn){
   currentSeason = s;
   document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
@@ -1613,7 +1638,8 @@ function renderTodayCard() {
 
 /* ── SEASON DEFINITIONS ──────────────────────────────────────────────────── */
 const SEASON_RANGES = [
-  { id:'t1', label:'T1 · Temporada 1', color:'#C9A84C', bg:'rgba(201,168,76,.09)', months:['2026-03','2026-04'] },
+  { id:'t2', label:'T2 · Temporada 2', color:'#C9A84C', bg:'rgba(201,168,76,.09)', months:['2026-05','2026-06'] },
+  { id:'t1', label:'T1 · Temporada 1', color:'#888888', bg:'rgba(136,136,136,.06)', months:['2026-03','2026-04'] },
 ];
 
 function abbrevRival(rival) {
@@ -1649,9 +1675,9 @@ function renderNextHero() {
     hero.innerHTML = `<div class="nh-waiting">
       <span class="nh-w-icon">⏳</span>
       <div>
-        <div class="nh-eyebrow" style="color:var(--gold)">Próxima temporada</div>
-        <div class="nh-w-title">Esperando el próximo fixture</div>
-        <div class="nh-w-sub">Temporada 1 finalizada · Aguardando el calendario T2</div>
+        <div class="nh-eyebrow" style="color:var(--gold)">Temporada 2 · VPN Primera División</div>
+        <div class="nh-w-title">Aguardando el próximo partido</div>
+        <div class="nh-w-sub">El fixture está cargado · Los partidos aparecerán aquí cuando se confirmen</div>
       </div>
     </div>`;
     return;
@@ -1715,7 +1741,50 @@ function renderYearGrid() {
     if (!mbd[m.date]) mbd[m.date] = [];
     mbd[m.date].push('v'+vi);
   });
-  for (let mo = 0; mo < 12; mo++) grid.appendChild(buildMonthCard(year, mo, mbd, today));
+
+  function monthHasMatches(moKey) {
+    const [y, mo] = moKey.split('-').map(Number);
+    const days = new Date(y, mo, 0).getDate();
+    for (let d = 1; d <= days; d++) {
+      const ds = `${moKey}-${String(d).padStart(2,'0')}`;
+      if (mbd[ds]?.length) return true;
+    }
+    return false;
+  }
+
+  const sections = [
+    { id:'t2', label:'Temporada 2', sub:'En curso', months:['2026-05','2026-06'], forceShow:true },
+    { id:'t1', label:'Temporada 1', sub:'Finalizada', months:['2026-03','2026-04'], forceShow:false },
+  ];
+
+  sections.forEach(sec => {
+    const monthsToRender = sec.months.filter(mk => sec.forceShow || monthHasMatches(mk));
+    if (!monthsToRender.length) return;
+
+    const secDiv = document.createElement('div');
+    secDiv.className = `season-section ${sec.id}`;
+    secDiv.innerHTML = `<div class="season-section-header">
+      <span class="season-section-label">${sec.label}</span>
+      <span class="season-section-sub">${sec.sub}</span>
+      <span class="season-section-line"></span>
+    </div>`;
+
+    const inner = document.createElement('div');
+    inner.className = 'year-grid';
+    inner.style.cssText = 'margin-top:0;padding-top:0;padding-bottom:0;';
+
+    monthsToRender.forEach(mk => {
+      const [y, mo] = mk.split('-').map(Number);
+      const hasM = monthHasMatches(mk);
+      const card = buildMonthCard(y, mo - 1, mbd, today);
+      // T2 months always expanded; T1 months collapsed if no matches
+      if (sec.id === 't2' || hasM) card.classList.remove('collapsed');
+      inner.appendChild(card);
+    });
+
+    secDiv.appendChild(inner);
+    grid.appendChild(secDiv);
+  });
 }
 
 function buildMonthCard(year, month, mbd, today) {
@@ -2452,6 +2521,7 @@ function showToast(msg, type='success'){
 // ── EXPONER FUNCIONES AL SCOPE GLOBAL (necesario para type="module") ──────────
 window.filter         = filter;
 window.setSeason      = setSeason;
+window.setGridSeason  = setGridSeason;
 window.toggleAdmin    = toggleAdmin;
 window.handleResultClick = handleResultClick;
 window.openStatsPanel = openStatsPanel;
@@ -2486,7 +2556,7 @@ fetchVpnFixtures();
 </script>
 
 <footer>
-  <span>Top Secret FC</span> · Temporada 1 · 2026
+  <span>Top Secret FC</span> · Temporada 2 · 2026
 </footer>
 <script src="layout.js?v=3"></script>
 <script src="mobile-nav.js?v=3"></script>
