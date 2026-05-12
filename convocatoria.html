@@ -89,6 +89,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .ppos{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);}
 .pnote{font-size:.66rem;font-weight:700;color:var(--yellow);}
 .always-badge{font-size:.56rem;background:rgba(74,158,255,.15);color:#2563eb;border-radius:3px;padding:1px 4px;font-weight:700;}
+.cap-badge{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--gold);color:#111;font-size:.6rem;font-weight:900;font-family:'Barlow Condensed',sans-serif;margin-left:5px;vertical-align:middle;flex-shrink:0;box-shadow:0 0 5px rgba(201,168,76,.5);}
 .sdot{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-left:auto;}
 .sdot.sg{background:#1a7a40;box-shadow:0 0 0 2px rgba(26,122,64,.25);}
 .sdot.sa{background:#2563eb;box-shadow:0 0 0 2px rgba(74,158,255,.25);}
@@ -134,7 +135,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .stoken.selected{outline:2.5px solid var(--gold);box-shadow:0 0 14px rgba(201,168,76,.45);transform:scale(1.1);}
 .stoken-bar{position:absolute;bottom:0;left:0;right:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:var(--bar-h);}
 .stoken-num{position:absolute;left:4px;bottom:calc(var(--bar-h) + 3px);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:var(--num-size);color:var(--gold);line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:3;}
-.stoken-cap{position:absolute;bottom:calc(var(--bar-h) + 3px);right:4px;width:24px;height:24px;border-radius:50%;background:#1a90d9;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.78rem;color:#fff;z-index:3;line-height:1;}
+.stoken-cap{position:absolute;bottom:calc(var(--bar-h) + 3px);right:4px;width:22px;height:22px;border-radius:50%;background:var(--gold);border:2px solid rgba(255,255,255,.85);box-shadow:0 0 8px rgba(201,168,76,.7),0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.82rem;color:#111;z-index:3;line-height:1;}
 .stoken-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:var(--name-size);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;letter-spacing:.01em;text-transform:uppercase;text-align:center;width:100%;padding:0 4px;}
 .slabel{display:none;}
 .pitch-hint{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.35);text-align:center;margin-top:8px;transition:color .2s;}
@@ -675,6 +676,7 @@ function renderPlayers() {
       const nm = document.createElement('div'); nm.className = 'pname';
       nm.textContent = p.name;
       if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; nm.appendChild(b); }
+      if (captain === p.name) { const cb = document.createElement('span'); cb.className = 'cap-badge'; cb.textContent = 'C'; nm.appendChild(cb); }
       const sub = document.createElement('div'); sub.className = 'psub';
       const pos = document.createElement('span'); pos.className = 'ppos'; pos.textContent = getPosLabel(p.pos);
       sub.appendChild(pos);
