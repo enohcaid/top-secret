@@ -422,6 +422,7 @@ body.locked .result-box.pending{cursor:default;}
 .nh-lbadge.vpug{background:var(--vpug-bg);color:var(--vpug);}
 .nh-lbadge.e11{background:var(--e11-bg);color:var(--e11);}
 .nh-meta-txt{font-size:.78rem;color:#888;}
+.nh-rival-badge{width:44px;height:44px;border-radius:8px;object-fit:contain;background:#1a1d26;flex-shrink:0;}
 .nh-w-icon{font-size:2.4rem;opacity:.3;}
 .nh-w-title{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:800;color:var(--black);margin-bottom:6px;}
 .nh-w-sub{font-size:.8rem;color:var(--mid);}
@@ -745,6 +746,7 @@ body{padding-top:64px;}
 .today-match-row:last-child{border-bottom:none;}
 .tmr-time{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--gold);min-width:50px;}
 .tmr-rival{font-size:.9rem;font-weight:700;color:var(--black);flex:1;}
+.tmr-rival-badge{width:22px;height:22px;border-radius:4px;object-fit:contain;background:#eee;flex-shrink:0;}
 .jornada-badge{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.06em;color:var(--mid);background:var(--gray);border:1px solid var(--border);padding:1px 6px;border-radius:4px;}
 
 </style>
@@ -1635,8 +1637,10 @@ function renderTodayCard() {
     const jornada = isCustom ? null : getJornada(id);
     const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
     const addedBadge = isCustom ? `<span class="jornada-badge" style="background:rgba(201,168,76,.12);color:var(--gold);border-color:rgba(201,168,76,.3)">+ Agregado</span>` : `<span class="tmr-jornada">J${jornada}</span>`;
+    const tmrBadge = m.badge ? `<img class="tmr-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
     return `<div class="today-match-row">
       <span class="tmr-time">${m.time||'—'}</span>
+      ${tmrBadge}
       <span class="tmr-rival">${m.rival||'—'}</span>
       ${addedBadge}
       ${m.league ? `<span class="league-badge badge-${leagueCls[m.league]||''}" style="font-size:.6rem">${m.league}</span>` : ''}
@@ -1704,9 +1708,11 @@ function renderNextHero() {
     const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
     const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
     const roundBadge = m.round != null ? `<span class="nh-round-badge">J${m.round}</span>` : '';
+    const badgeImg = m.badge ? `<img class="nh-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
     return `<div class="nh-match-row">
       ${m.league?`<span class="nh-lbadge ${lgKey}">${m.league}</span>`:''}
       ${roundBadge}
+      ${badgeImg}
       <span class="nh-rival-name">vs ${m.rival}</span>
       <span class="nh-meta-txt">${m.time?'· '+m.time:''} · ${loc}</span>
     </div>`;
