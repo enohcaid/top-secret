@@ -4,7 +4,7 @@
 const NOTICIAS = [
   {
     id: 'fixture-vpn-t2-2026',
-    pinned: true,
+    pinned: false,
     category: 'Fixture',
     title: 'Ya tenemos fixture: 19 partidos en la Primera División VPN',
     date: '2026-05-13',
