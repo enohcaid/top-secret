@@ -489,8 +489,9 @@ last5.forEach(m => {
 const autoNews = generateMatchNews(SEED_MATCHES);
 const manualNews = typeof NOTICIAS !== 'undefined' ? NOTICIAS : [];
 const allNews = [...autoNews, ...manualNews].sort((a, b) => b.date.localeCompare(a.date));
-const latestNews = allNews[0];
-const pinnedNews = allNews.find(n => n.pinned);
+const stripNews = allNews.filter(n => !n.noStrip);
+const latestNews = stripNews[0];
+const pinnedNews = stripNews.find(n => n.pinned);
 
 function renderNewsCol(el, news) {
   if (!el || !news) return;
