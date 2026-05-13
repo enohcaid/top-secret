@@ -366,9 +366,10 @@
       overflow: hidden;
       margin-bottom: 20px;
     }
-    .canvas-wrap canvas {
+    .canvas-wrap img {
       width: 100%;
       height: 100%;
+      object-fit: contain;
       display: block;
     }
     .canvas-loading {
@@ -489,8 +490,8 @@
     </div>
     <div class="share-modal-body">
       <div class="canvas-wrap">
-        <canvas id="share-canvas" width="1080" height="1080"></canvas>
-        <div class="canvas-loading" id="canvas-loading">Generando imagen…</div>
+        <img id="share-preview" src="" alt="">
+        <div class="canvas-loading" id="canvas-loading">Cargando…</div>
       </div>
       <div class="share-caption-label">Texto para la publicación</div>
       <textarea class="share-caption" id="share-caption"></textarea>
@@ -689,124 +690,28 @@ function closeShare() {
   _shareNews = null;
 }
 
-// ── CANVAS GENERATOR ─────────────────────────────────────────────────────────
-function wrapText(ctx, text, x, y, maxW, lineH) {
-  const words = text.split(' ');
-  let line = '';
-  let cy = y;
-  for (const word of words) {
-    const test = line ? line + ' ' + word : word;
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line, x, cy);
-      cy += lineH;
-      line = word;
-    } else {
-      line = test;
-    }
-  }
-  if (line) { ctx.fillText(line, x, cy); cy += lineH; }
-  return cy;
-}
-
-async function renderCanvas(ctx, n, W, H) {
-  const isLandscape = W > H * 1.15;
-  const scale = isLandscape ? H * 1.5 / 1080 : H / 1080;
-  const PAD = Math.round(80 * W / 1080);
-
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, W, H);
-
-  // Image: always contain (no cropping)
-  const stripH = isLandscape ? Math.round(H * 0.28) : 0;
-  const imgAreaH = H - stripH;
-
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; img.src = n.image; });
-
-  if (img.naturalWidth) {
-    const sc = Math.min(W / img.naturalWidth, imgAreaH / img.naturalHeight);
-    const dw = img.naturalWidth * sc;
-    const dh = img.naturalHeight * sc;
-    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight,
-                  (W - dw) / 2, (imgAreaH - dh) / 2, dw, dh);
-  }
-
-  if (!isLandscape) return; // Instagram: imagen limpia, sin texto ni decoración
-
-  // Top gold bar (solo landscape)
-  ctx.fillStyle = '#C9A84C';
-  ctx.fillRect(0, 0, W, Math.max(3, Math.round(5 * scale)));
-
-  await document.fonts.load(`900 ${Math.round(56 * scale)}px "Barlow Condensed"`);
-  await document.fonts.load(`800 ${Math.round(17 * scale)}px "Barlow Condensed"`);
-  await document.fonts.load(`700 ${Math.round(19 * scale)}px "Barlow Condensed"`);
-
-  if (isLandscape) {
-    // ── LANDSCAPE (X / FB): barra inferior sólida ──────────────────
-    const stripY = H - stripH;
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, stripY, W, stripH);
-    ctx.fillStyle = '#C9A84C';
-    ctx.fillRect(0, stripY, W, Math.max(2, Math.round(3 * scale)));
-
-    let y = stripY + Math.round(16 * scale);
-
-    const catFs = Math.round(16 * scale);
-    ctx.font = `800 ${catFs}px "Barlow Condensed"`;
-    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-    const catText = n.category.toUpperCase();
-    const catTxtW = ctx.measureText(catText).width;
-    const pillPad = Math.round(9 * scale);
-    const pillH = Math.round(21 * scale);
-    ctx.fillStyle = '#C9A84C';
-    ctx.beginPath();
-    ctx.roundRect(PAD, y, catTxtW + pillPad * 2, pillH, 2);
-    ctx.fill();
-    ctx.fillStyle = '#0a0a0a';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(catText, PAD + pillPad, y + pillH / 2);
-    y += pillH + Math.round(11 * scale);
-    ctx.letterSpacing = '0px';
-    ctx.textBaseline = 'top';
-
-    const tl = n.title.length;
-    const fs = tl <= 30 ? Math.round(54 * scale) : tl <= 50 ? Math.round(44 * scale) : Math.round(37 * scale);
-    ctx.font = `900 ${fs}px "Barlow Condensed"`;
-    ctx.fillStyle = '#FFFFFF';
-    wrapText(ctx, n.title.toUpperCase(), PAD, y, W - PAD * 2, fs * 1.06);
-
-    const footerY = H - Math.round(14 * scale);
-    ctx.textBaseline = 'alphabetic';
-    ctx.font = `700 ${Math.round(18 * scale)}px "Barlow Condensed"`;
-    ctx.fillStyle = '#C9A84C';
-    ctx.letterSpacing = `${Math.round(2 * scale)}px`;
-    ctx.fillText('TOP SECRET FC', PAD, footerY);
-    ctx.letterSpacing = '0px';
-    ctx.font = `400 ${Math.round(16 * scale)}px Barlow`;
-    ctx.fillStyle = 'rgba(255,255,255,0.38)';
-    ctx.textAlign = 'right';
-    ctx.fillText(n.dateLabel || n.date, W - PAD, footerY);
-    ctx.textAlign = 'left';
-
-  }
-}
-
+// ── IMAGE PREVIEW + DESCARGA DIRECTA ─────────────────────────────────────────
 async function buildShareCanvas(n) {
-  const canvas = document.getElementById('share-canvas');
-  canvas.width = 1080; canvas.height = 1080;
-  await renderCanvas(canvas.getContext('2d'), n, 1080, 1080);
-  document.getElementById('canvas-loading').style.display = 'none';
+  const preview = document.getElementById('share-preview');
+  const loading = document.getElementById('canvas-loading');
+  loading.style.display = 'flex';
+  preview.src = n.image || '';
+  preview.onload  = () => { loading.style.display = 'none'; };
+  preview.onerror = () => { loading.style.display = 'none'; };
+  if (!n.image) loading.style.display = 'none';
 }
 
-async function downloadForPlatform(n, w, h, filename) {
-  const off = document.createElement('canvas');
-  off.width = w; off.height = h;
-  await renderCanvas(off.getContext('2d'), n, w, h);
-  const a = document.createElement('a');
-  a.download = filename;
-  a.href = off.toDataURL('image/png');
+async function downloadOriginalImage(n) {
+  if (!n || !n.image) return;
+  const resp = await fetch(n.image);
+  const blob = await resp.blob();
+  const ext  = (n.image.split('.').pop() || 'png').toLowerCase();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `top-secret-fc-${n.id}.${ext}`;
   a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 // ── SHARE ACTIONS ────────────────────────────────────────────────────────────
@@ -831,24 +736,22 @@ function copyAndFlash(btn, text, label) {
 
 async function shareIG() {
   const btn = event.currentTarget;
-  const cap = platformCaption('ig');
-  copyAndFlash(btn, cap, 'Instagram');
-  await downloadForPlatform(_shareNews, 1080, 1080, 'top-secret-fc-ig.png');
+  copyAndFlash(btn, platformCaption('ig'), 'Instagram');
+  await downloadOriginalImage(_shareNews);
 }
 
 async function shareX() {
   const btn = event.currentTarget;
   const cap = platformCaption('x');
   copyAndFlash(btn, cap, 'X / Twitter');
-  await downloadForPlatform(_shareNews, 1200, 675, 'top-secret-fc-x.png');
+  await downloadOriginalImage(_shareNews);
   window.open('https://x.com/intent/tweet?text=' + encodeURIComponent(cap), '_blank');
 }
 
 async function shareFB() {
   const btn = event.currentTarget;
-  const cap = platformCaption('fb');
-  copyAndFlash(btn, cap, 'Facebook · imagen descargada');
-  await downloadForPlatform(_shareNews, 1200, 628, 'top-secret-fc-fb.png');
+  copyAndFlash(btn, platformCaption('fb'), 'Facebook · imagen descargada');
+  await downloadOriginalImage(_shareNews);
   window.open('https://www.facebook.com/', '_blank');
 }
 
@@ -857,25 +760,19 @@ async function shareAll() {
 }
 
 function downloadImg() {
-  const canvas = document.getElementById('share-canvas');
-  const link = document.createElement('a');
-  link.download = 'top-secret-fc-noticia.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  downloadOriginalImage(_shareNews);
 }
 
 async function webShareAction() {
-  const canvas = document.getElementById('share-canvas');
+  if (!_shareNews || !_shareNews.image) return;
   try {
-    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-    const file = new File([blob], 'top-secret-fc.png', { type: 'image/png' });
-    await navigator.share({
-      title: _shareNews ? _shareNews.title : 'Top Secret FC',
-      text: getCaption(),
-      files: [file],
-    });
-  } catch (e) {
-    downloadImg();
+    const resp = await fetch(_shareNews.image);
+    const blob = await resp.blob();
+    const ext  = (_shareNews.image.split('.').pop() || 'png').toLowerCase();
+    const file = new File([blob], `top-secret-fc.${ext}`, { type: blob.type });
+    await navigator.share({ title: _shareNews.title, text: getCaption(), files: [file] });
+  } catch(e) {
+    if (e.name !== 'AbortError') await downloadOriginalImage(_shareNews);
   }
 }
 
