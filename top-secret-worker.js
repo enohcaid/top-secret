@@ -217,7 +217,7 @@ export default {
       // ── VPN TEAM RESULTS (/vpn-results) ──────
       if (url.pathname === '/vpn-results' && request.method === 'GET') {
         const TS_ID     = 28524;
-        const LEAGUE_ID = 2127; // Liga Argentina 2da División — auto-detects latest season
+        const LEAGUE_ID = 2119; // Liga Argentina 1ra División T2 — auto-detects latest season
 
         const vpnResp = await fetch('https://www.virtualpronetwork.com/api/teams/28524/results', {
           headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },

@@ -1117,14 +1117,15 @@ let currentStatsId   = null; // id of the match currently open in the stats pane
 // Recalculates vpnDynamic = vpnFixtures entries not already covered by RAW or custom
 function rebuildVpnDynamic() {
   vpnDynamic = vpnFixtures.filter(f => {
+    // Only exclude if there's a seed match on the EXACT same date (no cross-season by result)
     const inRaw = RAW.some((_, i) => {
       const m = getMatch(i);
       if (m.league !== 'VPN' || !rivalMatch(m.rival, f.rival)) return false;
-      return m.date === f.date || !!m.result;
+      return m.date === f.date;
     });
     const inCustom = custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
-    // Exclude if vpnResults already has a result for this rival (match was played)
-    const hasApiResult = vpnResults.some(r => rivalMatch(r.rival, f.rival));
+    // Match by fixture ID to avoid cross-season false positives from rivalMatch fuzzy logic
+    const hasApiResult = vpnResults.some(r => r.id === f.id);
     return !inRaw && !inCustom && !hasApiResult;
   });
 }
