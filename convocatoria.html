@@ -448,6 +448,13 @@ try {
 /* ─── CALENDAR MATCHES (today) ─── */
 let calCustom = [];
 let vpnFixtures = [];
+let _shareLogo = null;
+const _shareLogoReady = new Promise(res => {
+  const img = new Image();
+  img.onload = () => { _shareLogo = img; res(); };
+  img.onerror = () => res();
+  img.src = 'logos/Top Secret white.png';
+});
 if (CAL_DOC_CONV) {
   CAL_DOC_CONV.onSnapshot(snap => {
     if (snap.exists) calCustom = snap.data().custom || [];
@@ -1085,18 +1092,22 @@ function buildWhatsAppMessage() {
   return msg;
 }
 
-function drawShareFooter(c2d, FW, FH, FOOTER, S) {
-  /* Black bar with gold top stripe — no image loading (avoids canvas taint) */
+async function drawShareFooter(c2d, FW, FH, FOOTER, S) {
   c2d.fillStyle = '#111111'; c2d.fillRect(0, FH, FW, FOOTER);
   c2d.fillStyle = '#B0B8C4'; c2d.fillRect(0, FH, FW, 3*S);
-  /* Gold shield badge (drawn, no image) */
   const badgeR = FOOTER * 0.34, badgeCX = FW*0.065, badgeCY = FH + FOOTER*0.5;
-  c2d.fillStyle = '#B0B8C4';
-  c2d.beginPath(); c2d.arc(badgeCX, badgeCY, badgeR, 0, Math.PI*2); c2d.fill();
-  c2d.fillStyle = '#111';
-  c2d.font = `900 ${Math.round(badgeR*1.1)}px "Barlow Condensed",sans-serif`;
-  c2d.textAlign = 'center'; c2d.textBaseline = 'middle';
-  c2d.fillText('TS', badgeCX, badgeCY);
+  await _shareLogoReady;
+  if (_shareLogo) {
+    const logoSize = badgeR * 2;
+    c2d.drawImage(_shareLogo, badgeCX - badgeR, badgeCY - badgeR, logoSize, logoSize);
+  } else {
+    c2d.fillStyle = '#B0B8C4';
+    c2d.beginPath(); c2d.arc(badgeCX, badgeCY, badgeR, 0, Math.PI*2); c2d.fill();
+    c2d.fillStyle = '#111';
+    c2d.font = `900 ${Math.round(badgeR*1.1)}px "Barlow Condensed",sans-serif`;
+    c2d.textAlign = 'center'; c2d.textBaseline = 'middle';
+    c2d.fillText('TS', badgeCX, badgeCY);
+  }
   /* Club name */
   const nX = badgeCX + badgeR + 8*S, nMid = FH + FOOTER*0.45;
   c2d.textBaseline = 'middle'; c2d.textAlign = 'left';
@@ -1289,7 +1300,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     });
   }
 
-  drawShareFooter(ctx, FW, FH, FOOTER, S);
+  await drawShareFooter(ctx, FW, FH, FOOTER, S);
   return cvs;
 }
 
