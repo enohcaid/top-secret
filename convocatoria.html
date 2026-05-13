@@ -447,16 +447,29 @@ try {
 
 /* ─── CALENDAR MATCHES (today) ─── */
 let calCustom = [];
+let vpnFixtures = [];
 if (CAL_DOC_CONV) {
   CAL_DOC_CONV.onSnapshot(snap => {
     if (snap.exists) calCustom = snap.data().custom || [];
     renderTodayMatchesPanel();
   }, () => {});
 }
+fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
+  .then(r => r.json()).then(d => {
+    vpnFixtures = Array.isArray(d) ? d : [];
+    renderTodayMatchesPanel();
+  }).catch(() => {});
 function getTodayMatches() {
-  return calCustom
-    .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'))
-    .sort((a,b) => (a.time||'').localeCompare(b.time||''));
+  const fromCustom = calCustom
+    .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'));
+  const fromVpn = vpnFixtures
+    .filter(m => m.date === TODAY)
+    .map(m => ({ ...m, league: 'VPN' }));
+  // Deduplicate: skip vpn entry if calCustom already has same rival
+  const deduped = fromVpn.filter(v =>
+    !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase() === (v.rival||'').toLowerCase())
+  );
+  return [...fromCustom, ...deduped].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
   const wrap = document.getElementById('todayMatchesPanel');
