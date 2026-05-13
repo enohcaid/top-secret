@@ -409,6 +409,7 @@ body.locked .result-box.pending{cursor:default;}
 .nh-share-btn{display:flex;flex-direction:column;align-items:center;gap:5px;background:rgba(201,168,76,.1);border:1.5px solid rgba(201,168,76,.3);border-radius:10px;color:var(--gold);cursor:pointer;padding:10px 14px;transition:background .2s,border-color .2s;flex-shrink:0;}
 .nh-share-btn:hover{background:rgba(201,168,76,.18);border-color:rgba(201,168,76,.6);}
 .nh-share-btn span{font-family:'Barlow Condensed',sans-serif;font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg);}}
 .nh-round-badge{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:800;letter-spacing:.08em;color:rgba(201,168,76,.8);background:rgba(201,168,76,.1);border-radius:4px;padding:2px 7px;white-space:nowrap;flex-shrink:0;}
 .nh-eyebrow{font-size:.6rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
 .nh-match-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
@@ -2511,18 +2512,49 @@ async function saveToFirebase(){
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────────────
-function shareMatchday() {
-  const msg = 'Estos son los partidos de hoy, ya pueden confirmar asistencia: https://enohcaid.github.io/top-secret/convocatoria.html';
-  navigator.clipboard.writeText(msg).then(() => {
-    const btn = document.querySelector('.nh-share-btn');
-    if (btn) {
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>¡Copiado!</span>`;
-      setTimeout(() => {
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span>Compartir</span>`;
-      }, 2000);
+const _SHARE_MSG = 'Estos son los partidos de hoy, ya pueden confirmar asistencia: https://enohcaid.github.io/top-secret/convocatoria.html';
+const _SHARE_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span>Compartir</span>`;
+const _CHECK_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>¡Listo!</span>`;
+const _LOAD_ICON  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Cargando…</span>`;
+
+async function shareMatchday() {
+  const btn = document.querySelector('.nh-share-btn');
+  const card = document.querySelector('#nextHero .nh-card');
+  if (!card) return;
+
+  if (btn) btn.innerHTML = _LOAD_ICON;
+
+  // Copy text to clipboard in parallel
+  navigator.clipboard.writeText(_SHARE_MSG).catch(() => {});
+
+  try {
+    // Load html2canvas lazily
+    if (!window.html2canvas) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
     }
-    showToast('¡Copiado al portapapeles!');
-  }).catch(() => showToast('No se pudo copiar', 'error'));
+
+    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: '#111111' });
+    const blob   = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const file   = new File([blob], 'partidos-top-secret.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text: _SHARE_MSG });
+    } else {
+      // Desktop: open WhatsApp web with text
+      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(_SHARE_MSG), '_blank');
+    }
+
+    if (btn) { btn.innerHTML = _CHECK_ICON; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
+    showToast('¡Texto copiado al portapapeles!');
+  } catch(e) {
+    if (btn) btn.innerHTML = _SHARE_ICON;
+    if (e && e.name !== 'AbortError') showToast('No se pudo compartir', 'error');
+  }
 }
 
 function showToast(msg, type='success'){
