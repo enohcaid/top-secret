@@ -2544,13 +2544,18 @@ async function shareMatchday() {
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text: _SHARE_MSG });
+      if (btn) { btn.innerHTML = _CHECK_ICON; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
+      showToast('¡Texto copiado al portapapeles!');
     } else {
-      // Desktop: open WhatsApp web with text
-      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(_SHARE_MSG), '_blank');
+      // Desktop: download image + copy text already done above
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'partidos-top-secret.png';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      if (btn) { btn.innerHTML = _CHECK_ICON; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
+      showToast('📸 Imagen descargada · texto copiado');
     }
-
-    if (btn) { btn.innerHTML = _CHECK_ICON; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
-    showToast('¡Texto copiado al portapapeles!');
   } catch(e) {
     if (btn) btn.innerHTML = _SHARE_ICON;
     if (e && e.name !== 'AbortError') showToast('No se pudo compartir', 'error');
