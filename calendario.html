@@ -2546,10 +2546,22 @@ async function shareMatchday() {
       });
     }
 
+    // Swap rival badge src to CORS proxy so html2canvas can capture them
+    const IMG_PROXY = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/img-proxy?url=';
+    const badgeImgs = [...card.querySelectorAll('img.nh-rival-badge')];
+    const origSrcs = badgeImgs.map(img => img.src);
+    badgeImgs.forEach(img => { img.src = IMG_PROXY + encodeURIComponent(img.src); });
+    if (badgeImgs.length) {
+      await Promise.all(badgeImgs.map(img => new Promise(r => { img.onload = img.onerror = r; })));
+    }
+
     // Hide button before capture so it doesn't appear in the image
     if (btn) btn.style.visibility = 'hidden';
     const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: '#111111' });
     if (btn) btn.style.visibility = '';
+
+    // Restore original badge srcs
+    badgeImgs.forEach((img, i) => { img.src = origSrcs[i]; });
 
     const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
     const file = new File([blob], 'partidos-top-secret.png', { type: 'image/png' });
