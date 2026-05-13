@@ -1131,7 +1131,7 @@ async function drawShareFooter(c2d, FW, FH, FOOTER, S) {
   } else if (todayMs.length > 1) {
     session = todayMs.map(m => `${m.league||''} vs ${m.rival}`).join(' · ');
   } else {
-    session = lineup.nextMatch || 'Sin partidos';
+    session = 'Entrenamiento';
   }
   c2d.font = `${Math.round(FOOTER*0.2)}px "Barlow Condensed",sans-serif`;
   c2d.fillStyle = 'rgba(255,255,255,.45)';
