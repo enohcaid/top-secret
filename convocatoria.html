@@ -237,7 +237,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
   <div id="todayMatchesPanel" class="today-matches-panel" style="display:none;">
     <div class="tmp-head">
       <span>⚽</span>
-      <span class="tmp-title">PARTIDOS HOY - 22:30h ADENTRO</span>
+      <span class="tmp-title">Partidos hoy</span>
     </div>
     <div class="tmp-list"></div>
   </div>
@@ -1082,7 +1082,7 @@ function buildWhatsAppMessage() {
   msg += '─────────────────\n';
   const matches = getTodayMatches();
   if (matches.length) {
-    msg += '*PARTIDOS HOY* 🔥\n';
+    msg += '*PARTIDOS HOY - 22:30h ADENTRO* 🔥\n';
     matches.forEach(m => {
       msg += `🆚 *${m.rival||'—'}* · ${m.time||''}hs`;
       if (m.league) msg += ` · ${m.league}`;
