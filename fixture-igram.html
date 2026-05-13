@@ -11,11 +11,11 @@ body{background:#060709;min-height:100vh;display:flex;flex-direction:column;alig
 .dl-btn:hover{background:#E8C97A;}
 .dl-btn:disabled{background:#555;color:#888;cursor:default;}
 
-/* ── CARD 1080×1350 ── */
+/* ── CARD 1080px (alto auto para puppeteer) ── */
 #card{
-  width:1080px;height:1350px;
+  width:1080px;
   background:#111111;
-  position:relative;overflow:hidden;
+  position:relative;
   display:flex;flex-direction:column;
   padding:30px 36px 22px;
 }
@@ -39,7 +39,7 @@ body{background:#060709;min-height:100vh;display:flex;flex-direction:column;alig
 .hdr-league-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,197,24,.7);text-align:center;line-height:1.3;}
 
 /* ── GROUPS ── */
-.groups{flex:1;display:flex;flex-direction:column;padding-top:10px;gap:5px;overflow:hidden;}
+.groups{display:flex;flex-direction:column;padding-top:10px;gap:5px;}
 
 .date-group{display:flex;flex-direction:column;gap:2px;}
 
