@@ -263,7 +263,7 @@ export default {
       // ── VPN FIXTURES (/vpn-fixtures) ──────────
       if (url.pathname === '/vpn-fixtures' && request.method === 'GET') {
         const TS_ID     = 28524;
-        const LEAGUE_ID = 2127;
+        const LEAGUE_ID = 2119;
 
         const vpnResp = await fetch('https://www.virtualpronetwork.com/api/teams/28524/fixtures', {
           headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
@@ -292,11 +292,11 @@ export default {
           .map(m => {
             const isHome   = m.team1 === TS_ID;
             const rival    = isHome ? m.awayTeam : m.homeTeam;
-            const argDt    = new Date(new Date(m.date).getTime() - 3 * 60 * 60 * 1000);
+            const rawDt    = new Date(m.date);
             return {
               id:     m.id,
-              date:   argDt.toISOString().slice(0, 10),
-              time:   argDt.toISOString().slice(11, 16),
+              date:   rawDt.toISOString().slice(0, 10),
+              time:   rawDt.toISOString().slice(11, 16),
               rival:  rival.name || rival.short_name,
               isHome,
               round:  m.round,
