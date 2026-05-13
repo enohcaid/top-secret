@@ -1123,7 +1123,16 @@ async function drawShareFooter(c2d, FW, FH, FOOTER, S) {
   const DAYS2   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MONTHS2 = ['Enero','Feb','Marzo','Abril','Mayo','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const nd = new Date();
-  const session = lineup.nextMatch || 'Sin partidos';
+  const todayMs = getTodayMatches();
+  let session;
+  if (todayMs.length === 1) {
+    const m = todayMs[0];
+    session = `${m.league ? m.league + ' · ' : ''}vs ${m.rival}${m.time ? ' ' + m.time : ''}`;
+  } else if (todayMs.length > 1) {
+    session = todayMs.map(m => `${m.league||''} vs ${m.rival}`).join(' · ');
+  } else {
+    session = lineup.nextMatch || 'Sin partidos';
+  }
   c2d.font = `${Math.round(FOOTER*0.2)}px "Barlow Condensed",sans-serif`;
   c2d.fillStyle = 'rgba(255,255,255,.45)';
   c2d.fillText(`${DAYS2[nd.getDay()]} ${nd.getDate()} de ${MONTHS2[nd.getMonth()]} · ${session} · ${lineup.formation}`, nX, FH+FOOTER*0.75);
