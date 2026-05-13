@@ -404,9 +404,9 @@ body.locked .result-box.pending{cursor:default;}
 .nh-card{background:var(--black);border-radius:16px;padding:28px 36px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:28px;position:relative;overflow:hidden;}
 .nh-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:var(--gold);}
 .nh-waiting{background:var(--gray);border:1px solid var(--border);border-radius:16px;padding:28px 36px;display:flex;align-items:center;gap:20px;}
-.nh-cdown{display:flex;flex-direction:column;align-items:center;min-width:80px;}
-.nh-cdown-num{font-family:'Barlow Condensed',sans-serif;font-size:4.5rem;font-weight:900;color:var(--gold);line-height:.9;}
-.nh-cdown-lbl{font-size:.58rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(201,168,76,.6);margin-top:5px;}
+.nh-cdown{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:80px;}
+.nh-cdown img{width:58px;filter:drop-shadow(0 2px 10px rgba(201,168,76,.3));}
+.nh-round-badge{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:800;letter-spacing:.08em;color:rgba(201,168,76,.8);background:rgba(201,168,76,.1);border-radius:4px;padding:2px 7px;white-space:nowrap;flex-shrink:0;}
 .nh-eyebrow{font-size:.6rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
 .nh-match-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
 .nh-match-row:last-child{margin-bottom:0;}
@@ -1695,14 +1695,14 @@ function renderNextHero() {
   const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MESES_C = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const dateLabel = `${DIAS[matchDt.getDay()]} ${matchDt.getDate()} ${MESES_C[matchDt.getMonth()]}`;
-  const cdown = diff === 0
-    ? `<div class="nh-cdown"><div class="nh-cdown-num" style="font-size:2rem">HOY</div></div>`
-    : `<div class="nh-cdown"><div class="nh-cdown-num">${diff}</div><div class="nh-cdown-lbl">${diff===1?'Día':'Días'}</div></div>`;
+  const cdown = `<div class="nh-cdown"><img src="logos/Top Secret white.png" alt="Top Secret FC"></div>`;
   const matchRows = dayMatches.map(({m}) => {
     const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
     const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
+    const roundBadge = m.round != null ? `<span class="nh-round-badge">J${m.round}</span>` : '';
     return `<div class="nh-match-row">
       ${m.league?`<span class="nh-lbadge ${lgKey}">${m.league}</span>`:''}
+      ${roundBadge}
       <span class="nh-rival-name">vs ${m.rival}</span>
       <span class="nh-meta-txt">${m.time?'· '+m.time:''} · ${loc}</span>
     </div>`;
