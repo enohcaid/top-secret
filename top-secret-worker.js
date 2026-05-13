@@ -135,6 +135,32 @@ export default {
         });
       }
 
+      // ── IMAGE PROXY (/img-proxy) ──────────────────
+      // Returns cross-origin images with CORS headers so html2canvas can capture them
+      if (url.pathname === '/img-proxy' && request.method === 'GET') {
+        const targetUrl = url.searchParams.get('url');
+        if (!targetUrl) return jsonResp({ error: 'Missing url' }, 400);
+        let target;
+        try { target = new URL(targetUrl); }
+        catch(e) { return jsonResp({ error: 'Invalid URL' }, 400); }
+        const isAllowed = FETCH_ALLOWED_DOMAINS.some(d => target.hostname.includes(d));
+        if (!isAllowed) return jsonResp({ error: 'Domain not allowed' }, 403);
+        try {
+          const resp = await fetch(targetUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': target.origin + '/' },
+            cf: { cacheTtl: 86400, cacheEverything: true },
+          });
+          const ct = resp.headers.get('content-type') || 'image/png';
+          const body = await resp.arrayBuffer();
+          return new Response(body, {
+            status: resp.status,
+            headers: { 'Content-Type': ct, ...CORS_HEADERS, 'Cache-Control': 'public, max-age=86400' },
+          });
+        } catch(e) {
+          return jsonResp({ error: e.message }, 502);
+        }
+      }
+
       // ── FETCH URL PROXY (/fetch-url) ──────────────
       // Pure proxy used by the agentic Gemini loop — domain-whitelisted for security
       if (url.pathname === '/fetch-url' && request.method === 'GET') {
