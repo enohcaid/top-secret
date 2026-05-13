@@ -197,6 +197,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .tmp-row:last-child{border-bottom:none;}
 .tmp-time{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:var(--gold);min-width:50px;}
 .tmp-rival{font-size:.9rem;font-weight:700;flex:1;}
+.tmp-rival-badge{width:22px;height:22px;border-radius:4px;object-fit:contain;background:rgba(255,255,255,.06);flex-shrink:0;}
 .tmp-badge{font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.06em;}
 .tmp-loc{font-size:.85rem;}
 
@@ -488,6 +489,7 @@ function renderTodayMatchesPanel() {
   wrap.querySelector('.tmp-list').innerHTML = matches.map(m => `
     <div class="tmp-row">
       <span class="tmp-time">${m.time||'—'}</span>
+      ${m.badge?`<img class="tmp-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">`:''}
       <span class="tmp-rival">${m.rival||'—'}</span>
       ${m.league ? `<span class="tmp-badge" style="background:${lc[m.league]||'#888'}22;color:${lc[m.league]||'#888'};border:1px solid ${lc[m.league]||'#888'}55">${m.league}</span>` : ''}
       <span class="tmp-loc">${m.isHome?'🏠':'✈️'}</span>
@@ -1179,11 +1181,11 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       const capR = Math.round(tokH * 0.11);
       const capX = tx + tokW - capR - 3*S;
       const capY = ty + photoH - capR - 3*S;
-      ctx.fillStyle = '#1a90d9';
+      ctx.fillStyle = '#B0B8C4';
       ctx.beginPath(); ctx.arc(capX, capY, capR, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5*S; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.5*S; ctx.stroke();
       ctx.font = `900 ${Math.round(capR*1.1)}px "Barlow Condensed",sans-serif`;
-      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('C', capX, capY);
     }
     ctx.textBaseline = 'alphabetic';

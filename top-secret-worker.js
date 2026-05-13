@@ -298,6 +298,7 @@ export default {
               date:   rawDt.toISOString().slice(0, 10),
               time:   rawDt.toISOString().slice(11, 16),
               rival:  rival.name || rival.short_name,
+              badge:  rival.logoUrl || null,
               isHome,
               round:  m.round,
             };
