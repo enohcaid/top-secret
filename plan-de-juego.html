@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Juego · Top Secret FC</title>
+<link rel="icon" href="Top-Secret.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Barlow',sans-serif;}
+
+/* ── LOCK SCREEN ── */
+#lockScreen{
+  position:fixed;inset:0;
+  background:#000;
+  display:flex;align-items:center;justify-content:center;
+  z-index:10;
+}
+#lockContent{
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+  opacity:0;
+  animation:revealIn 2.4s ease-out 0.6s forwards;
+}
+@keyframes revealIn{
+  0%  {opacity:0;filter:brightness(.2);}
+  40% {opacity:.6;filter:brightness(.6);}
+  100%{opacity:1;filter:brightness(1);}
+}
+
+.secret-logo{
+  width:clamp(100px,18vw,160px);
+  height:clamp(100px,18vw,160px);
+  object-fit:contain;
+  filter:drop-shadow(0 0 24px rgba(201,168,76,.5));
+  margin-bottom:8px;
+}
+
+.lock-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:clamp(1.4rem,4vw,2.2rem);
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:#C9A84C;
+  text-shadow:0 0 30px rgba(201,168,76,.4);
+}
+.lock-subtitle{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;
+  font-size:clamp(.8rem,2vw,1rem);
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.45);
+  margin-top:-8px;
+}
+
+/* ── PIN DOTS ── */
+.pin-dots{
+  display:flex;gap:18px;margin:8px 0 4px;
+}
+.pin-dot{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid rgba(201,168,76,.45);
+  background:transparent;
+  transition:background .15s, border-color .15s, box-shadow .15s;
+}
+.pin-dot.filled{
+  background:#C9A84C;
+  border-color:#C9A84C;
+  box-shadow:0 0 10px rgba(201,168,76,.5);
+}
+.pin-dot.error{
+  background:#e8502e;
+  border-color:#e8502e;
+  box-shadow:0 0 10px rgba(232,80,46,.5);
+}
+
+/* ── ERROR ── */
+.lock-error{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;
+  color:#e8502e;height:20px;text-align:center;
+  transition:opacity .2s;
+}
+
+/* ── NUMPAD ── */
+.numpad{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-top:8px;
+}
+.nk{
+  width:72px;height:72px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:1.5rem;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s,transform .08s,border-color .12s;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.nk:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);}
+.nk:active{transform:scale(.93);background:rgba(201,168,76,.18);border-color:rgba(201,168,76,.4);}
+.nk.del{font-size:1.3rem;color:rgba(255,255,255,.55);}
+.nk.empty{background:transparent;border:none;cursor:default;pointer-events:none;}
+
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-10px);}
+  40%{transform:translateX(10px);}
+  60%{transform:translateX(-7px);}
+  80%{transform:translateX(7px);}
+}
+.shake{animation:shake .35s ease;}
+
+/* ── PDF VIEWER ── */
+#pdfViewer{
+  position:fixed;inset:0;
+  display:none;flex-direction:column;
+  background:#111;
+  opacity:0;transition:opacity .6s ease;
+}
+#pdfViewer.visible{display:flex;opacity:1;}
+
+.pdf-bar{
+  flex-shrink:0;
+  height:52px;
+  background:#111;
+  border-bottom:2px solid #C9A84C;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  gap:16px;
+}
+.pdf-bar-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;font-size:1rem;letter-spacing:.14em;
+  text-transform:uppercase;color:#C9A84C;
+}
+.pdf-bar-actions{display:flex;gap:10px;}
+.pdf-btn{
+  padding:7px 16px;border-radius:6px;border:none;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;
+  transition:background .12s;
+}
+.pdf-btn-lock{background:rgba(255,255,255,.08);color:#aaa;}
+.pdf-btn-lock:hover{background:rgba(255,255,255,.15);color:#fff;}
+.pdf-btn-dl{background:#C9A84C;color:#111;}
+.pdf-btn-dl:hover{background:#e8c97a;}
+
+#pdfFrame{flex:1;border:none;width:100%;background:#222;}
+</style>
+</head>
+<body>
+
+<!-- ── LOCK SCREEN ── -->
+<div id="lockScreen">
+  <div id="lockContent">
+    <img class="secret-logo" src="logos/Secreto.png" alt="Top Secret FC">
+    <div class="lock-title">Acceso Restringido</div>
+    <div class="lock-subtitle">Ingrese el código</div>
+
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="lock-error" id="lockErr"></div>
+
+    <div class="numpad" id="numpad">
+      <button class="nk" onclick="pressKey('1')">1</button>
+      <button class="nk" onclick="pressKey('2')">2</button>
+      <button class="nk" onclick="pressKey('3')">3</button>
+      <button class="nk" onclick="pressKey('4')">4</button>
+      <button class="nk" onclick="pressKey('5')">5</button>
+      <button class="nk" onclick="pressKey('6')">6</button>
+      <button class="nk" onclick="pressKey('7')">7</button>
+      <button class="nk" onclick="pressKey('8')">8</button>
+      <button class="nk" onclick="pressKey('9')">9</button>
+      <button class="nk empty"></button>
+      <button class="nk" onclick="pressKey('0')">0</button>
+      <button class="nk del" onclick="pressDelete()">⌫</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PDF VIEWER ── -->
+<div id="pdfViewer">
+  <div class="pdf-bar">
+    <span class="pdf-bar-title">★ Plan de Juego · Top Secret FC ★</span>
+    <div class="pdf-bar-actions">
+      <a class="pdf-btn pdf-btn-dl" href="logos/TopSecret_FC_Plan_de_Juego.pdf" download>⬇ Descargar</a>
+      <button class="pdf-btn pdf-btn-lock" onclick="lockAgain()">🔒 Cerrar</button>
+    </div>
+  </div>
+  <iframe id="pdfFrame" src="" title="Plan de Juego"></iframe>
+</div>
+
+<script>
+const CODE = '9075';
+let entered = '';
+
+function pressKey(k) {
+  if (entered.length >= 4) return;
+  entered += k;
+  updateDots();
+  if (entered.length === 4) setTimeout(checkCode, 120);
+}
+
+function pressDelete() {
+  if (!entered.length) return;
+  entered = entered.slice(0, -1);
+  updateDots();
+  document.getElementById('lockErr').textContent = '';
+}
+
+function updateDots(state) {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('pd' + i);
+    d.classList.remove('filled', 'error');
+    if (state === 'error') d.classList.add('error');
+    else if (i < entered.length) d.classList.add('filled');
+  }
+}
+
+function checkCode() {
+  if (entered === CODE) {
+    unlock();
+  } else {
+    updateDots('error');
+    document.getElementById('lockErr').textContent = 'Código incorrecto';
+    document.getElementById('lockContent').classList.add('shake');
+    setTimeout(() => {
+      entered = '';
+      updateDots();
+      document.getElementById('lockErr').textContent = '';
+      document.getElementById('lockContent').classList.remove('shake');
+    }, 700);
+  }
+}
+
+function unlock() {
+  document.getElementById('pdfFrame').src = 'logos/TopSecret_FC_Plan_de_Juego.pdf';
+  const viewer = document.getElementById('pdfViewer');
+  viewer.style.display = 'flex';
+  requestAnimationFrame(() => { viewer.classList.add('visible'); });
+  document.getElementById('lockScreen').style.display = 'none';
+}
+
+function lockAgain() {
+  entered = '';
+  updateDots();
+  document.getElementById('lockErr').textContent = '';
+  document.getElementById('pdfFrame').src = '';
+  const viewer = document.getElementById('pdfViewer');
+  viewer.classList.remove('visible');
+  setTimeout(() => { viewer.style.display = 'none'; }, 600);
+  document.getElementById('lockScreen').style.display = 'flex';
+}
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  if (e.key >= '0' && e.key <= '9') pressKey(e.key);
+  else if (e.key === 'Backspace') pressDelete();
+});
+</script>
+</body>
+</html>
