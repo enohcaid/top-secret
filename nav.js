@@ -9,7 +9,6 @@ const TS_NAV_PAGES = [
   { label:'Estadísticas',  url:'estadisticas.html',  icon:'📊' },
   { label:'Convocatoria',  url:'convocatoria.html',  icon:'⚽' },
   { label:'Posiciones',    url:'posiciones.html',    icon:'🏆' },
-  { label:'Plan de Juego', url:'plan-de-juego.html', icon:'🔒' },
 ];
 
 (function() {
