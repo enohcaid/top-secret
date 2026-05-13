@@ -2520,12 +2520,14 @@ const _LOAD_ICON  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"
 async function shareMatchday() {
   const btn = document.querySelector('.nh-share-btn');
   const card = document.querySelector('#nextHero .nh-card');
-  if (!card) return;
+  if (!card || (btn && btn.disabled)) return;
 
-  if (btn) btn.innerHTML = _LOAD_ICON;
+  if (btn) { btn.innerHTML = _LOAD_ICON; btn.disabled = true; }
 
-  // Copy text to clipboard in parallel
+  // Copy text to clipboard once
   navigator.clipboard.writeText(_SHARE_MSG).catch(() => {});
+
+  const restore = () => { if (btn) { btn.innerHTML = _SHARE_ICON; btn.disabled = false; btn.style.visibility = ''; } };
 
   try {
     // Load html2canvas lazily
@@ -2538,26 +2540,28 @@ async function shareMatchday() {
       });
     }
 
+    // Hide button before capture so it doesn't appear in the image
+    if (btn) btn.style.visibility = 'hidden';
     const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: '#111111' });
-    const blob   = await new Promise(res => canvas.toBlob(res, 'image/png'));
-    const file   = new File([blob], 'partidos-top-secret.png', { type: 'image/png' });
+    if (btn) btn.style.visibility = '';
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const file = new File([blob], 'partidos-top-secret.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text: _SHARE_MSG });
-      if (btn) { btn.innerHTML = _CHECK_ICON; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
-      showToast('¡Texto copiado al portapapeles!');
     } else {
-      // Desktop: download image + copy text already done above
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = 'partidos-top-secret.png';
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-      if (btn) { btn.innerHTML = _CHECK_ICON; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
       showToast('📸 Imagen descargada · texto copiado');
     }
+
+    if (btn) { btn.innerHTML = _CHECK_ICON; btn.disabled = false; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
   } catch(e) {
-    if (btn) btn.innerHTML = _SHARE_ICON;
+    restore();
     if (e && e.name !== 'AbortError') showToast('No se pudo compartir', 'error');
   }
 }
