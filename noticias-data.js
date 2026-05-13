@@ -3,6 +3,29 @@
 
 const NOTICIAS = [
   {
+    id: 'fixture-vpn-t2-2026',
+    pinned: true,
+    category: 'Fixture',
+    title: 'Ya tenemos fixture: 19 partidos en la Primera División VPN',
+    date: '2026-05-13',
+    dateLabel: '13 de mayo de 2026',
+    excerpt: 'La Liga VPN publicó el calendario oficial de la Temporada 2. Top Secret FC jugará 19 partidos en su debut en Primera División, con el primer partido hoy mismo.',
+    image: 'logos/Fixture VPN.png',
+    body: [
+      'Ya está oficial. La Liga VPN publicó el calendario completo de la Temporada 2 y Top Secret FC tiene por delante 19 partidos en su primera experiencia en la élite del fútbol virtual argentino.',
+      'El debut es hoy: tres encuentros en una misma jornada frente a <strong>Escuela Vieja</strong> (Local · 23:00), <strong>Nueva Chicago eSports</strong> (Visita · 23:30) y <strong>Real Black</strong> (Local · 23:59). Un arranque exigente que marcará el tono de lo que viene.',
+      'El fixture se extiende hasta el <strong>8 de junio</strong> con rivales de primer nivel: Comunicaciones, San Lorenzo Esports, Instituto Esports, Estudiantes LP, Talleres Esports, Belgrano Esports y más. Diecinueve jornadas que pondrán a prueba el nivel del plantel en la categoría más competitiva de la VPN Argentina.',
+      'El desafío es histórico. Es la primera vez que Top Secret FC compite en Primera División y el club llega con un plantel renovado, hambre de demostrar y la convicción de que puede competirle a cualquiera.',
+      'El fixture completo está disponible en el calendario del sitio. Confirmá tu asistencia para cada partido y seguí de cerca cada resultado. 🖤⭐',
+    ],
+    shareCaption: '📋 FIXTURE OFICIAL · TEMPORADA 2\n\nTop Secret FC ya tiene calendario en la Primera División VPN:\n\n🗓️ 19 partidos\n📅 13 mayo → 8 junio\n🏆 VPN Argentina · Primera División\n\nEl debut es HOY. ¡Vamos! 🖤⭐\n\n#TopSecretFC #VPN #PrimeraDivision',
+    shareCaptions: {
+      ig: '📋 FIXTURE OFICIAL · TEMPORADA 2 🖤\n\n19 partidos. 7 fechas. Primera División VPN.\n\nEl debut es HOY ⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPN #PrimeraDivision #EAFCClubsPro #Fixture',
+      x:  '📋 Ya tenemos fixture en Primera División VPN.\n\n19 partidos entre el 13/05 y el 08/06.\n\nEl debut es hoy 🖤⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPN #PrimeraDivision',
+      fb: '📋 FIXTURE OFICIAL · TEMPORADA 2\n\nLa Liga VPN publicó el calendario completo y Top Secret FC tiene 19 partidos por delante en su debut en Primera División.\n\n🗓️ 13 de mayo al 8 de junio\n🏆 VPN Argentina · Primera División\n\nEl primer partido es hoy. ¡Vamos Top Secret FC! 🖤⭐\n\n#TopSecretFC #VPN #PrimeraDivision #EAFCClubsPro',
+    },
+  },
+  {
     id: 'plantel-2026',
     pinned: false,
     category: 'Plantel',
