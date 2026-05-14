@@ -1324,43 +1324,213 @@ async function canvasToBlob(cvs) {
   });
 }
 
+/* ─── MATCHDAY CARD GENERATOR ────────────────────────────────────────────────
+   Dibuja sobre la imagen base "Partidos Hoy.webp" (1024×1536):
+   fecha + partidos del día + renders de los jugadores en la formación.
+   Ajustá las constantes MC para calibrar posiciones si la imagen cambia.
+──────────────────────────────────────────────────────────────────────────── */
+const MC = {
+  W: 1024, H: 1536,
+  // Franja "N PARTIDOS · FECHA"
+  dateCoverY: 356, dateCoverH: 56, dateTextY: 384,
+  // Tarjetas de partido (y_top de cada slot)
+  cardX: 28, cardW: 968, cardH: 128,
+  cardTops: [413, 556, 699],
+  // Área del campo
+  pitchLeft: 50, pitchWidth: 924, pitchTop: 893, pitchHeight: 592,
+  fieldColor: '#0c1910',
+  // Renders de jugadores
+  renderW: 130, renderH: 165,
+};
+
+async function generateMatchdayCard() {
+  const { W, H, dateCoverY, dateCoverH, dateTextY,
+          cardX, cardW, cardH, cardTops,
+          pitchLeft, pitchWidth, pitchTop, pitchHeight,
+          fieldColor, renderW, renderH } = MC;
+  const PROXY = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/img-proxy?url=';
+
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+
+  const loadImg = src => new Promise(res => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => res(img);
+    img.onerror = () => res(null);
+    img.src = src;
+  });
+
+  const rRect = (x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.closePath();
+  };
+
+  await document.fonts.ready;
+
+  // 1. Imagen base
+  const base = await loadImg('logos/Partidos Hoy.webp');
+  if (base) ctx.drawImage(base, 0, 0, W, H);
+
+  // 2. Franja fecha / cantidad de partidos
+  const matches = getTodayMatches();
+  const DAYS   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const dt = new Date(TODAY + 'T12:00:00');
+  const dateStr  = `${DAYS[dt.getDay()]} ${dt.getDate()} de ${MONTHS[dt.getMonth()]}`.toUpperCase();
+  const countStr = `${matches.length} PARTIDO${matches.length !== 1 ? 'S' : ''}`;
+
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(0, dateCoverY, W, dateCoverH);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 27px "Barlow Condensed", sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(`${countStr}  ·  ${dateStr}  ·`, W / 2, dateTextY);
+
+  // 3. Tarjetas de partido
+  for (let i = 0; i < 3; i++) {
+    const m = matches[i];
+    const cardY  = cardTops[i];
+    const midY   = cardY + cardH / 2;
+
+    rRect(cardX, cardY, cardW, cardH, 10);
+    ctx.fillStyle = '#1a1d26'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    if (!m) continue;
+
+    let cx = cardX + 20;
+    ctx.textBaseline = 'middle';
+
+    // Badge de liga
+    if (m.league) {
+      const lc = { VPN:'#f5c518', VPUG:'#3ecf8e' }[m.league] || '#4a9eff';
+      rRect(cx, midY-17, 50, 34, 4);
+      ctx.fillStyle = lc+'22'; ctx.fill();
+      ctx.strokeStyle = lc+'88'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = lc;
+      ctx.font = '800 14px "Barlow Condensed", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(m.league, cx+25, midY);
+      cx += 60;
+    }
+
+    // Badge de jornada
+    if (m.round != null) {
+      rRect(cx, midY-17, 40, 34, 4);
+      ctx.fillStyle = 'rgba(201,168,76,.12)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(201,168,76,.28)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = '#C9A84C';
+      ctx.font = '900 14px "Barlow Condensed", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`J${m.round}`, cx+20, midY);
+      cx += 50;
+    }
+
+    // Logo rival
+    if (m.badge) {
+      const logo = await loadImg(PROXY + encodeURIComponent(m.badge));
+      if (logo) { const s=68; ctx.drawImage(logo, cx, midY-s/2, s, s); }
+      cx += 78;
+    }
+
+    // Nombre rival
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 36px "Barlow Condensed", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText((m.rival||'—').toUpperCase(), cx, midY-14);
+
+    // Hora · Local/Visita
+    const locColor = m.isHome ? '#3ecf8e' : '#4a9eff';
+    const timeTxt  = `${m.time||''}hs  ·  `;
+    ctx.fillStyle = '#999'; ctx.font = '500 20px "Barlow", sans-serif';
+    ctx.fillText(timeTxt, cx, midY+18);
+    ctx.fillStyle = locColor;
+    ctx.fillText(m.isHome ? '🏠 LOCAL' : '✈️ VISITA', cx + ctx.measureText(timeTxt).width, midY+18);
+  }
+
+  // 4. Renders de jugadores en la formación
+  const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
+
+  for (const slot of slots) {
+    const assigned = lineup.slots[slot.key];
+    const player   = assigned ? PLAYERS.find(p => p.name === assigned) : null;
+
+    const cx = Math.round(pitchLeft + (slot.x / 100) * pitchWidth);
+    const cy = Math.round(pitchTop  + (slot.y / 100) * pitchHeight);
+
+    // Tapar contenido anterior
+    ctx.fillStyle = fieldColor;
+    ctx.fillRect(cx - renderW/2 - 16, cy - renderH - 4, renderW + 32, renderH + 40);
+
+    if (!player) continue;
+
+    // Render del jugador
+    const img = await loadImg(`Renders/${player.folder}/Frente.png`);
+    if (img) {
+      ctx.drawImage(img, cx - renderW/2, cy - renderH, renderW, renderH);
+    } else {
+      ctx.fillStyle = '#1a2030';
+      ctx.fillRect(cx - renderW/2, cy - renderH, renderW, renderH);
+    }
+
+    // Número de camiseta
+    ctx.font = '900 34px "Barlow Condensed", sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#000';
+    const numStr = String(player.num);
+    ctx.strokeText(numStr, cx - renderW/2 - 2, cy - renderH + 2);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(numStr, cx - renderW/2 - 2, cy - renderH + 2);
+
+    // Badge capitán
+    if (player.name === captain) {
+      const nw = ctx.measureText(numStr).width;
+      const bx = cx - renderW/2 - 2 + nw + 14, by = cy - renderH + 20;
+      ctx.beginPath(); ctx.arc(bx, by, 12, 0, Math.PI*2);
+      ctx.fillStyle = '#B0B8C4'; ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#111';
+      ctx.font = 'bold 14px "Barlow Condensed", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('C', bx, by);
+    }
+
+    // Nombre del jugador
+    ctx.font = 'bold 15px "Barlow Condensed", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.lineWidth = 3; ctx.strokeStyle = '#000';
+    const nameStr = player.name.replace(/_/g,' ').toUpperCase();
+    ctx.strokeText(nameStr, cx, cy + 5);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(nameStr, cx, cy + 5);
+  }
+
+  return cvs;
+}
+
 async function doShare() {
   const btn = document.getElementById('shareBtn');
   const orig = btn.textContent;
   btn.textContent = '⏳...'; btn.disabled = true;
 
-  /* ── Copy WhatsApp message to clipboard ── */
   try { await navigator.clipboard.writeText(buildWhatsAppMessage()); } catch(e) {}
 
   try {
-    const pitchEl = document.getElementById('pitch');
-    const S = 2;
-    const FW = pitchEl.offsetWidth * S, FH = pitchEl.offsetHeight * S;
-    if (!FW || !FH) { showToast('Error: cancha no visible', 'info'); btn.textContent=orig; btn.disabled=false; return; }
-    const FOOTER = Math.round(FH * 0.13);
-
-    /* ── Try with photos first ── */
-    let blob = null;
-    try {
-      const cvs = await buildShareCanvas(FW, FH, FOOTER, S, true);
-      blob = await canvasToBlob(cvs);
-    } catch(e) {
-      if (e.name === 'SecurityError') {
-        /* Canvas tainted — file:// cross-origin. Rebuild without photos. */
-        const cvs2 = await buildShareCanvas(FW, FH, FOOTER, S, false);
-        blob = await canvasToBlob(cvs2);
-        showToast('Sin fotos · para verlas usá: npx serve .', 'info');
-      } else throw e;
-    }
-
-    if (!blob) throw new Error('null blob');
-
+    const cvs  = await generateMatchdayCard();
+    const blob = await canvasToBlob(cvs);
     const fname = `TopSecret-FC-${TODAY}.png`;
-    const file = new File([blob], fname, { type:'image/png' });
+    const file  = new File([blob], fname, { type:'image/png' });
     const canWebShare = navigator.share && navigator.canShare && navigator.canShare({ files:[file] });
     if (canWebShare) {
       try {
-        await navigator.share({ files:[file], title:'Top Secret FC · Convocatoria' });
+        await navigator.share({ files:[file], title:'Top Secret FC · Partidos Hoy' });
         showToast('📤 Compartido · texto copiado');
       } catch(e) {
         if (e.name !== 'AbortError') { _download(blob, fname); showToast('📸 Descargada · texto copiado'); }
@@ -1368,7 +1538,6 @@ async function doShare() {
     } else {
       _download(blob, fname); showToast('📸 Imagen descargada · texto copiado');
     }
-
   } catch(e) { console.error(e); showToast('Error: ' + e.message, 'info'); }
   btn.textContent = orig; btn.disabled = false;
 }
