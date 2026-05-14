@@ -985,6 +985,16 @@ gsap.to('.pos-filter', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0
 
 /* ─── INIT ─── */
 renderGrid2('all');
+
+// Deep link: plantilla.html?player=KEY
+(function(){
+  const key = new URLSearchParams(location.search).get('player');
+  if (!key) return;
+  setTimeout(() => {
+    const card = document.querySelector(`[data-key="${key}"]`);
+    if (card) { card.scrollIntoView({behavior:'smooth', block:'center'}); card.click(); }
+  }, 400);
+})();
 </script>
 <script src="layout.js?v=3"></script>
 <script src="mobile-nav.js?v=3"></script>
