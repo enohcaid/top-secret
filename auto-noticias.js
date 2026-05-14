@@ -1,8 +1,8 @@
-// ── Auto-generated match result news ─────────────────────────────────────────
+﻿// ── Auto-generated match result news ─────────────────────────────────────────
 
 // Imágenes por defecto — aplican a todas las fechas anteriores al primer período.
 export const RESULT_IMAGES = {
-  win:  ['logos/victoria/festejo.png', 'logos/victoria/festejo 2.png', 'logos/victoria/festejo 4.png', 'logos/victoria/festejo 5.png'],
+  win:  ['logos/victoria/festejo.webp', 'logos/victoria/festejo 2.png', 'logos/victoria/festejo 4.png', 'logos/victoria/festejo 5.png'],
   draw: [],
   loss: [],
 };

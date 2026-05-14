@@ -1,4 +1,4 @@
-// ── TOP SECRET FC · Noticias compartidas ────────────────────────────────────
+﻿// ── TOP SECRET FC · Noticias compartidas ────────────────────────────────────
 // Orden: más reciente primero. Agregar nuevas noticias al inicio del array.
 
 const NOTICIAS = [
@@ -10,7 +10,7 @@ const NOTICIAS = [
     date: '2026-05-13',
     dateLabel: '13 de mayo de 2026',
     excerpt: 'La Liga VPN publicó el calendario oficial de la Temporada 2. Top Secret FC jugará 19 partidos en su debut en Primera División, con el primer partido hoy mismo.',
-    image: 'logos/Fixture VPN.png',
+    image: 'logos/Fixture VPN.webp',
     body: [
       'Ya está oficial. La Liga VPN publicó el calendario completo de la Temporada 2 y Top Secret FC tiene por delante 19 partidos en su primera experiencia en la élite del fútbol virtual argentino.',
       'El debut es hoy: tres encuentros en una misma jornada frente a <strong>Escuela Vieja</strong> (Local · 23:00), <strong>Nueva Chicago eSports</strong> (Visita · 23:30) y <strong>Real Black</strong> (Local · 23:59). Un arranque exigente que marcará el tono de lo que viene.',
@@ -33,7 +33,7 @@ const NOTICIAS = [
     date: '2026-05-11',
     dateLabel: '11 de mayo de 2026',
     excerpt: 'Top Secret FC presenta oficialmente el plantel para la temporada 2026. Dieciséis jugadores, una misma misión: competir en la élite del fútbol virtual argentino.',
-    image: 'logos/Plantel T2 2026.png',
+    image: 'logos/Plantel T2 2026.webp',
     body: [
       'Top Secret FC presenta el plantel que defenderá los colores del club en la temporada 2026. Dieciséis jugadores comprometidos con el proyecto, con historia dentro de la institución y con hambre de seguir creciendo.',
       'El bloque viene reforzado. A la base que logró el ascenso se suman tres incorporaciones que elevan la competencia interna y dan mayor profundidad en todas las líneas. El desafío es enorme — Primera División de la VPN — y el plantel está a la altura.',
@@ -57,7 +57,7 @@ const NOTICIAS = [
     date: '2026-05-10',
     dateLabel: '10 de mayo de 2026',
     excerpt: 'Top Secret FC anuncia las altas para la nueva temporada: Cabers14, pauloco10 y AR-ELTIO se suman al plantel. Nuevo Secreto. Misma Misión.',
-    image: 'logos/Fichajes.png',
+    image: 'logos/Fichajes.webp',
     body: [
       'Top Secret FC cierra su ventana de mercado para la Temporada 2 con tres incorporaciones que refuerzan el plantel de cara al debut en la Primera División de la VPN.',
       '<strong>#4 · Cabers14</strong> llega para puntalar la línea defensiva. Defensa central con presencia y capacidad para liderar la última línea en una categoría más exigente.',
@@ -102,7 +102,7 @@ const NOTICIAS = [
     date: '2026-05-06',
     dateLabel: '6 de mayo de 2026',
     excerpt: 'El club anuncia una renovación de su identidad visual. Una nueva era para Top Secret FC.',
-    image: 'logos/Anuncio Rebrand.png',
+    image: 'logos/Anuncio Rebrand.webp',
     body: [
       'Top Secret FC da un paso adelante y presenta oficialmente su nueva identidad visual. Un rediseño que refleja la evolución del club y su crecimiento dentro del fútbol virtual argentino.',
       'La nueva imagen llega en un momento bisagra: el club acaba de lograr el ascenso a la Primera División de la VPN y se prepara para debutar en la élite del fútbol virtual argentino.',
@@ -125,7 +125,7 @@ const NOTICIAS = [
     date: '2026-05-04',
     dateLabel: '4 de mayo de 2026',
     excerpt: 'La Liga VPN seleccionó a Lautavester7, cansitrGd22_ y BlackPanther-CG en su equipo ideal de la Temporada 1. Los tres delanteros del club firmaron números históricos.',
-    image: 'logos/equipo-temporada-vpn.png',
+    image: 'logos/equipo-temporada-vpn.webp',
     body: [
       'La Liga VPN hizo oficial su Equipo de la Temporada 1 y Top Secret FC tuvo una participación histórica: tres jugadores seleccionados en el once ideal, todos delanteros.',
       'cansitrGd22_ fue el gran protagonista de la temporada con 64 goles y 22 asistencias en 49 partidos, cerrando con un rating promedio de 7.69 — el más alto del club. Sus números lo ubican como uno de los goleadores más letales de toda la liga.',
@@ -148,7 +148,7 @@ const NOTICIAS = [
     date: '2025-05-03',
     dateLabel: '3 de mayo de 2025',
     excerpt: 'Top Secret FC logró el ascenso a la Primera División de la VPN tras una campaña histórica. Un hito que marca el inicio de una nueva era para el club.',
-    image: 'logos/Festejo Ascenso.png',
+    image: 'logos/Festejo Ascenso.webp',
     body: [
       'Top Secret FC escribió una de las páginas más importantes de su historia al coronarse campeón y obtener el ascenso a la Primera División de la VPN.',
       'Fue una temporada de entrega, trabajo y colectivo. El equipo demostró carácter en los momentos clave y supo imponerse ante rivales de mucho nivel para hacerse merecedor de este logro.',
