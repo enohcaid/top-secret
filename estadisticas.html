@@ -1708,11 +1708,14 @@ function renderPlayers(filter){
     const st=allStats.find(s=>s.player.name===player.name);
     const entries=st?st.entries:[];
 
-    if(!entries.length) return `<div class="pcard">
-      <div class="pcard-header">
-        <div class="pcard-avatar">${initials(player.name)}</div>
-        <div><div class="pcard-name">${player.name}</div><div class="pcard-games">Sin datos aún</div></div>
-      </div></div>`;
+    if(!entries.length) {
+      if (currentSeason === 2) return '';
+      return `<div class="pcard">
+        <div class="pcard-header">
+          <div class="pcard-avatar">${initials(player.name)}</div>
+          <div><div class="pcard-name">${player.name}</div><div class="pcard-games">Sin datos aún</div></div>
+        </div></div>`;
+    }
 
     const {ratings,avgR,totalG,totalA,showTackles,showDist,showPrec,avgDist,avgPrec,tacklesVals}=st;
     const totalT=showTackles?sum(tacklesVals):null;
@@ -2758,6 +2761,19 @@ function switchStatsSeason(n){
   if(activeTab) activeTab.click();
 }
 window.switchStatsSeason = switchStatsSeason;
+window.filterPlayers    = filterPlayers;
+window.setLeague        = setLeague;
+window.setPlayerView    = setPlayerView;
+window.openPlayerModal  = openPlayerModal;
+window.closeModal       = closeModal;
+window.toggleDetail     = toggleDetail;
+window.deleteMatch      = deleteMatch;
+window.analyzeAll       = analyzeAll;
+window.discardResult    = discardResult;
+window.saveResult       = saveResult;
+window.removeFromQueue  = removeFromQueue;
+window.ceaSetPlatform   = ceaSetPlatform;
+window.ceaSortBy        = ceaSortBy;
 
 // Deep link: estadisticas.html?player=NAME
 (function(){
