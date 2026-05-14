@@ -1288,9 +1288,10 @@ function getResult(id){
       return Math.abs(new Date(r.date) - new Date(m.date)) <= 86400000; // ≤ 1 day
     });
     if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
+    // API didn't have this specific match — fall through to manually loaded result
   }
-  // Firebase overrides — never used for VPN matches (VPN API is authoritative)
-  if(results[id] && m.league !== 'VPN') return results[id];
+  // Firebase overrides (including VPN matches not yet in the API)
+  if(results[id]) return results[id];
   if(typeof id !== 'string' && m.result) return m.result;
   const seed = findSeedMatch(id);
   if(seed && seed.match_result){
@@ -2133,6 +2134,13 @@ function updateStats(){
       const m = getAnyMatch(id);
       if(!m) return;
       const o = outcomeFor(id);
+      results_lg.push({ date:m.date, outcome:o });
+    });
+    // Custom VPN matches (T2 manually added) also count
+    custom.forEach((m, ci) => {
+      if(!m.league || m.league !== lg) return;
+      if(customIsInRaw(m)) return;
+      const o = outcomeFor('c'+ci);
       results_lg.push({ date:m.date, outcome:o });
     });
     results_lg.sort((a,b)=>a.date.localeCompare(b.date));
