@@ -12,7 +12,7 @@ export const RESULT_IMAGES = {
 export const RESULT_IMAGES_PERIODS = [
   {
     from: '2026-05-13',
-    win:  ['logos/victoria/Victoria 0.png'],
+    win:  ['logos/victoria/Victoria 0.png', 'logos/victoria/Victoria 1.png'],
     draw: ['logos/empate/Empate 0.png', 'logos/empate/Empate 1.png'],
     loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png', 'logos/derrota/Derrota 2.png'],
   },
