@@ -4,18 +4,17 @@
 export const RESULT_IMAGES = {
   win:  ['logos/victoria/festejo.webp', 'logos/victoria/festejo 2.png', 'logos/victoria/festejo 4.png', 'logos/victoria/festejo 5.png'],
   draw: [],
-  loss: [],
+  loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png'],
 };
 
 // Períodos con imágenes propias.
 // Cada entrada aplica a fechas >= `from` hasta la siguiente entrada.
-// Cuando agregues fotos a temp2, descomentá y completá el primer bloque.
 export const RESULT_IMAGES_PERIODS = [
   {
     from: '2026-05-10',
-    win:  [], // agregar rutas cuando haya fotos en logos/temp2/victoria/
-    draw: [], // agregar rutas cuando haya fotos en logos/temp2/empate/
-    loss: [], // agregar rutas cuando haya fotos en logos/temp2/derrota/
+    win:  [],
+    draw: [],
+    loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png'],
   },
 ];
 
