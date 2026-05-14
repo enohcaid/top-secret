@@ -681,7 +681,7 @@ function computePlayerStats(matches) {
 }
 
 /* ─── COMPUTE RANKINGS ─── */
-function computeRankings(allStats) {
+function computeRankings(stats, rosterKeys) {
   const cats = [
     {key:'g',         label:'Goles',        fn:x=>x.g},
     {key:'a',         label:'Asistencias',  fn:x=>x.a},
@@ -692,9 +692,9 @@ function computeRankings(allStats) {
   ];
   const rankings = {};
   cats.forEach(cat => {
-    const candidates = ROSTER_KEYS
-      .filter(k => allStats[k] && allStats[k].pj > 0)
-      .map(k => ({key:k, val: cat.fn(allStats[k])}))
+    const candidates = rosterKeys
+      .filter(k => stats[k] && stats[k].pj > 0)
+      .map(k => ({key:k, val: cat.fn(stats[k])}))
       .filter(x => x.val > 0)
       .sort((a,b) => b.val - a.val);
     candidates.slice(0,3).forEach((item, i) => {
@@ -707,8 +707,14 @@ function computeRankings(allStats) {
 }
 
 /* ─── INIT DATA ─── */
-const allStats = computePlayerStats(SEED_MATCHES);
-const allRankings = computeRankings(allStats);
+const T2_CUTOFF    = '2026-04-30';
+const T2_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T2_CUTOFF);
+const ROSTER_T2_KEYS = ROSTER_T2.map(r => r.key);
+
+const allStats     = computePlayerStats(SEED_MATCHES);
+const allRankings  = computeRankings(allStats, ROSTER_KEYS);
+const t2Stats      = computePlayerStats(T2_MATCHES);
+const t2Rankings   = computeRankings(t2Stats, ROSTER_T2_KEYS);
 
 /* ─── STATE ─── */
 let currentFilter = 'all';
@@ -871,7 +877,8 @@ function openPanel(p, card) {
   document.getElementById('pp-posn').textContent  = p.posn;
 
   /* KPIs */
-  const st = allStats[p.key] || {pj:0, g:0, a:0, avgRating:0, maxRating:0};
+  const isT2 = card.classList.contains('v2');
+  const st = (isT2 ? t2Stats : allStats)[p.key] || {pj:0, g:0, a:0, avgRating:0, maxRating:0};
   document.getElementById('pk-nvl').textContent   = p.nvl;
   document.getElementById('pk-pj').textContent    = st.pj || '—';
   document.getElementById('pk-total').textContent = p.total;
@@ -901,7 +908,7 @@ function openPanel(p, card) {
   document.getElementById('pk-arq').textContent   = p.arq;
 
   /* medals */
-  const medals = allRankings[p.key] || [];
+  const medals = (isT2 ? t2Rankings : allRankings)[p.key] || [];
   const mc = ['m1','m2','m3'];
   const medalsEl = document.getElementById('pp-medals');
   medalsEl.innerHTML = medals.length
