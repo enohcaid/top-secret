@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -195,7 +195,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       </div>
     </div>
     <div class="hero-visual">
-      <img class="hero-photo" id="hero-img-a" src="logos/festejo.png" alt="Top Secret FC">
+      <img class="hero-photo" id="hero-img-a" src="logos/festejo.webp" alt="Top Secret FC">
       <img class="hero-photo" id="hero-img-b" alt="Top Secret FC" style="opacity:0">
       <div class="hero-photo-fade"></div>
       <div class="hero-slider-ui">
@@ -552,7 +552,7 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   function probe(n) {
     return new Promise(resolve => {
       const img = new Image();
-      img.src = n === 1 ? 'logos/festejo.png' : `logos/festejo ${n}.png`;
+      img.src = n === 1 ? 'logos/festejo.webp' : `logos/festejo ${n}.png`;
       img.onload  = () => { images.push(img.src); resolve(true); };
       img.onerror = () => resolve(false);
     });
