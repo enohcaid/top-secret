@@ -11,6 +11,12 @@ export const RESULT_IMAGES = {
 // Cada entrada aplica a fechas >= `from` hasta la siguiente entrada.
 export const RESULT_IMAGES_PERIODS = [
   {
+    from: '2026-05-13',
+    win:  ['logos/victoria/Victoria 0.png'],
+    draw: ['logos/empate/Empate 0.png', 'logos/empate/Empate 1.png'],
+    loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png', 'logos/derrota/Derrota 2.png'],
+  },
+  {
     from: '2026-05-10',
     win:  [],
     draw: ['logos/empate/Empate 0.png', 'logos/empate/Empate 1.png'],
