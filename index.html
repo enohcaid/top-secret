@@ -97,7 +97,27 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .top-rank.gold{color:var(--gold);}
 .top-rank.silver{color:#999;}
 .top-rank.bronze{color:#a07040;}
-.top-av{width:32px;height:32px;border-radius:6px;overflow:hidden;background:var(--black);flex-shrink:0;position:relative;}
+.top-av{width:32px;height:32px;border-radius:6px;overflow:hidden;background:var(--black);flex-shrink:0;position:relative;cursor:pointer;}
+/* ── PLAYER MODAL ── */
+.pmov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:800;display:none;align-items:center;justify-content:center;padding:20px;}
+.pmov.open{display:flex;}
+.pmob{background:var(--white);border-radius:14px;width:300px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.22);animation:pmIn .2s ease;}
+@keyframes pmIn{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.pmob-img{height:210px;background:var(--black);overflow:hidden;position:relative;}
+.pmob-img img{width:100%;height:100%;object-fit:cover;object-position:top center;}
+.pmob-close{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1;}
+.pmob-body{padding:16px 18px;}
+.pmob-name{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;letter-spacing:.04em;color:var(--black);}
+.pmob-pos{font-size:.67rem;color:var(--mid);font-weight:700;margin-top:2px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.07em;}
+.pmob-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.pmob-stat{background:var(--gray);border-radius:8px;padding:10px 6px;text-align:center;}
+.pmob-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;line-height:1;}
+.pmob-stat-lbl{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-top:3px;}
+.pmob-btns{display:flex;gap:8px;}
+.pmob-btn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:800;letter-spacing:.04em;cursor:pointer;text-align:center;text-decoration:none;color:var(--black);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;}
+.pmob-btn:hover{border-color:var(--gold);color:var(--gold);}
+.pmob-btn.primary{background:var(--gold);border-color:var(--gold);color:#111;}
+.pmob-btn.primary:hover{background:#b8963c;}
 .top-av img{position:absolute;top:2%;left:0;width:100%;height:300%;object-fit:cover;object-position:top center;}
 .top-av-init{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:900;color:var(--gold);}
 .top-info{flex:1;min-width:0;}
@@ -456,7 +476,7 @@ function buildTopCard(title, players, valFn, suffix) {
     const dispV = typeof v === 'number' && v % 1 !== 0 ? v.toFixed(2) : v;
     return `<div class="top-entry">
       <span class="top-rank ${rankClasses[i]}">${rankNums[i]}</span>
-      <div class="top-av">
+      <div class="top-av" onclick="showPlayerModal('${k}')">
         <img src="${t2PhotoPath(k)}" alt="${k}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="top-av-init" style="display:none">${k.charAt(0).toUpperCase()}</div>
       </div>
@@ -538,6 +558,37 @@ function renderNewsCol(el, news) {
 
 renderNewsCol(document.getElementById('ns-latest'), latestNews);
 renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
+
+/* ── PLAYER QUICK MODAL ── */
+function showPlayerModal(key) {
+  const st = playerStats[key];
+  if (!st) return;
+  const r = st.avgRating != null ? st.avgRating.toFixed(2) : '—';
+  const pos = ROSTER_POSN[key] || '';
+  document.getElementById('playerModalBox').innerHTML =
+    `<div class="pmob-img">
+       <img src="${t2PhotoPath(key)}" alt="${key}" onerror="this.style.display='none'">
+       <button class="pmob-close" onclick="closePlayerModal()">×</button>
+     </div>
+     <div class="pmob-body">
+       <div class="pmob-name">${key}</div>
+       <div class="pmob-pos">${pos} · T2 2026</div>
+       <div class="pmob-stats">
+         <div class="pmob-stat"><div class="pmob-stat-val" style="color:var(--gold)">${st.pj}</div><div class="pmob-stat-lbl">PJ</div></div>
+         <div class="pmob-stat"><div class="pmob-stat-val" style="color:#2a9d5c">${st.g}</div><div class="pmob-stat-lbl">Goles</div></div>
+         <div class="pmob-stat"><div class="pmob-stat-val" style="color:var(--gold)">${r}</div><div class="pmob-stat-lbl">Rating</div></div>
+       </div>
+       <div class="pmob-btns">
+         <a class="pmob-btn" href="estadisticas.html?player=${encodeURIComponent(key)}">📊 Stats</a>
+         <a class="pmob-btn primary" href="plantilla.html?player=${encodeURIComponent(key)}">👤 Plantilla</a>
+       </div>
+     </div>`;
+  document.getElementById('playerModalOverlay').classList.add('open');
+}
+function closePlayerModal() {
+  document.getElementById('playerModalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayerModal(); });
 
 /* ── ANIMATIONS ── */
 gsap.set('.hero-content > *', {opacity:0, y:24});
@@ -627,5 +678,8 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
 </script>
 <script src="layout.js?v=3"></script>
 <script src="mobile-nav.js?v=3"></script>
+<div class="pmov" id="playerModalOverlay" onclick="if(event.target===this)closePlayerModal()">
+  <div class="pmob" id="playerModalBox"></div>
+</div>
 </body>
 </html>

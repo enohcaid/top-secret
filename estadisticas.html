@@ -2759,6 +2759,15 @@ function switchStatsSeason(n){
 }
 window.switchStatsSeason = switchStatsSeason;
 
+// Deep link: estadisticas.html?player=NAME
+(function(){
+  const key = new URLSearchParams(location.search).get('player');
+  if (!key) return;
+  const playersTab = [...document.querySelectorAll('.tab')].find(t => t.textContent.includes('Por Jugador'));
+  if (playersTab) switchTab('players', playersTab);
+  setTimeout(() => openPlayerModal(key), 350);
+})();
+
 // ════════════════════════════════════════════
 // TORNEOS — Firebase + Gemini AI
 // ════════════════════════════════════════════
