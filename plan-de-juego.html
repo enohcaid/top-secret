@@ -8,11 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Barlow',sans-serif;}
+html,body{width:100%;height:100%;background:#000;font-family:'Barlow',sans-serif;}
+
+/* Content area sits inside topbar + sidebars */
+#lockScreen,#pdfViewer{
+  position:fixed;
+  top:64px;left:64px;right:48px;bottom:0;
+}
 
 /* ── LOCK SCREEN ── */
 #lockScreen{
-  position:fixed;inset:0;
   background:#000;
   display:flex;align-items:center;justify-content:center;
   z-index:10;
@@ -23,23 +28,23 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
   animation:revealIn 2.4s ease-out 0.6s forwards;
 }
 @keyframes revealIn{
-  0%  {opacity:0;filter:brightness(.2);}
-  40% {opacity:.6;filter:brightness(.6);}
+  0%  {opacity:0;filter:brightness(.1);}
+  40% {opacity:.5;filter:brightness(.5);}
   100%{opacity:1;filter:brightness(1);}
 }
 
 .secret-logo{
-  width:clamp(100px,18vw,160px);
-  height:clamp(100px,18vw,160px);
+  width:clamp(90px,14vw,150px);
+  height:clamp(90px,14vw,150px);
   object-fit:contain;
-  filter:drop-shadow(0 0 24px rgba(201,168,76,.5));
-  margin-bottom:8px;
+  filter:drop-shadow(0 0 28px rgba(201,168,76,.55));
+  margin-bottom:4px;
 }
 
 .lock-title{
   font-family:'Barlow Condensed',sans-serif;
   font-weight:900;
-  font-size:clamp(1.4rem,4vw,2.2rem);
+  font-size:clamp(1.3rem,3.5vw,2rem);
   letter-spacing:.22em;
   text-transform:uppercase;
   color:#C9A84C;
@@ -48,10 +53,10 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
 .lock-subtitle{
   font-family:'Barlow Condensed',sans-serif;
   font-weight:600;
-  font-size:clamp(.8rem,2vw,1rem);
+  font-size:clamp(.75rem,1.8vw,.95rem);
   letter-spacing:.3em;
   text-transform:uppercase;
-  color:rgba(255,255,255,.45);
+  color:rgba(255,255,255,.4);
   margin-top:-8px;
 }
 
@@ -61,9 +66,9 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
 }
 .pin-dot{
   width:18px;height:18px;border-radius:50%;
-  border:2px solid rgba(201,168,76,.45);
+  border:2px solid rgba(201,168,76,.4);
   background:transparent;
-  transition:background .15s, border-color .15s, box-shadow .15s;
+  transition:background .15s,border-color .15s,box-shadow .15s;
 }
 .pin-dot.filled{
   background:#C9A84C;
@@ -76,12 +81,10 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
   box-shadow:0 0 10px rgba(232,80,46,.5);
 }
 
-/* ── ERROR ── */
 .lock-error{
   font-family:'Barlow Condensed',sans-serif;
-  font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;
+  font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;
   color:#e8502e;height:20px;text-align:center;
-  transition:opacity .2s;
 }
 
 /* ── NUMPAD ── */
@@ -90,12 +93,12 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
   margin-top:8px;
 }
 .nk{
-  width:72px;height:72px;border-radius:50%;
+  width:68px;height:68px;border-radius:50%;
   border:1px solid rgba(255,255,255,.1);
   background:rgba(255,255,255,.05);
   color:#fff;
   font-family:'Barlow Condensed',sans-serif;
-  font-weight:700;font-size:1.5rem;
+  font-weight:700;font-size:1.45rem;
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:background .12s,transform .08s,border-color .12s;
@@ -103,7 +106,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
 }
 .nk:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);}
 .nk:active{transform:scale(.93);background:rgba(201,168,76,.18);border-color:rgba(201,168,76,.4);}
-.nk.del{font-size:1.3rem;color:rgba(255,255,255,.55);}
+.nk.del{font-size:1.2rem;color:rgba(255,255,255,.5);}
 .nk.empty{background:transparent;border:none;cursor:default;pointer-events:none;}
 
 @keyframes shake{
@@ -117,21 +120,18 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
 
 /* ── PDF VIEWER ── */
 #pdfViewer{
-  position:fixed;inset:0;
   display:none;flex-direction:column;
   background:#111;
-  opacity:0;transition:opacity .6s ease;
+  opacity:0;transition:opacity .5s ease;
+  z-index:10;
 }
 #pdfViewer.visible{display:flex;opacity:1;}
 
 .pdf-bar{
-  flex-shrink:0;
-  height:52px;
-  background:#111;
-  border-bottom:2px solid #C9A84C;
+  flex-shrink:0;height:50px;
+  background:#111;border-bottom:2px solid #C9A84C;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;
-  gap:16px;
+  padding:0 20px;gap:16px;
 }
 .pdf-bar-title{
   font-family:'Barlow Condensed',sans-serif;
@@ -141,8 +141,10 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
 .pdf-bar-actions{display:flex;gap:10px;}
 .pdf-btn{
   padding:7px 16px;border-radius:6px;border:none;cursor:pointer;
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;
-  transition:background .12s;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;
+  transition:background .12s;text-decoration:none;
+  display:inline-flex;align-items:center;
 }
 .pdf-btn-lock{background:rgba(255,255,255,.08);color:#aaa;}
 .pdf-btn-lock:hover{background:rgba(255,255,255,.15);color:#fff;}
@@ -150,6 +152,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
 .pdf-btn-dl:hover{background:#e8c97a;}
 
 #pdfFrame{flex:1;border:none;width:100%;background:#222;}
+
+/* Mobile: full width under topbar only */
+@media(max-width:640px){
+  #lockScreen,#pdfViewer{left:0;right:0;top:64px;}
+}
 </style>
 </head>
 <body>
@@ -169,7 +176,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
     </div>
     <div class="lock-error" id="lockErr"></div>
 
-    <div class="numpad" id="numpad">
+    <div class="numpad">
       <button class="nk" onclick="pressKey('1')">1</button>
       <button class="nk" onclick="pressKey('2')">2</button>
       <button class="nk" onclick="pressKey('3')">3</button>
@@ -198,6 +205,8 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ba
   <iframe id="pdfFrame" src="" title="Plan de Juego"></iframe>
 </div>
 
+<script src="layout.js"></script>
+<script src="mobile-nav.js"></script>
 <script>
 const CODE = '9075';
 let entered = '';
@@ -245,7 +254,7 @@ function unlock() {
   document.getElementById('pdfFrame').src = 'logos/TopSecret_FC_Plan_de_Juego.pdf';
   const viewer = document.getElementById('pdfViewer');
   viewer.style.display = 'flex';
-  requestAnimationFrame(() => { viewer.classList.add('visible'); });
+  requestAnimationFrame(() => requestAnimationFrame(() => viewer.classList.add('visible')));
   document.getElementById('lockScreen').style.display = 'none';
 }
 
@@ -256,11 +265,10 @@ function lockAgain() {
   document.getElementById('pdfFrame').src = '';
   const viewer = document.getElementById('pdfViewer');
   viewer.classList.remove('visible');
-  setTimeout(() => { viewer.style.display = 'none'; }, 600);
+  setTimeout(() => { viewer.style.display = 'none'; }, 500);
   document.getElementById('lockScreen').style.display = 'flex';
 }
 
-// Keyboard support
 document.addEventListener('keydown', e => {
   if (e.key >= '0' && e.key <= '9') pressKey(e.key);
   else if (e.key === 'Backspace') pressDelete();
