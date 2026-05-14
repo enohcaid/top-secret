@@ -589,6 +589,8 @@ function closePlayerModal() {
   document.getElementById('playerModalOverlay').classList.remove('open');
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayerModal(); });
+window.showPlayerModal  = showPlayerModal;
+window.closePlayerModal = closePlayerModal;
 
 /* ── ANIMATIONS ── */
 gsap.set('.hero-content > *', {opacity:0, y:24});
