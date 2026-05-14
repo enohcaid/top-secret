@@ -1122,9 +1122,9 @@ function rebuildVpnDynamic() {
       return m.date === f.date;
     });
     const inCustom = custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
-    // Match by fixture ID to avoid cross-season false positives from rivalMatch fuzzy logic
-    const hasApiResult = vpnResults.some(r => r.id === f.id);
-    return !inRaw && !inCustom && !hasApiResult;
+    // Note: we keep fixtures even if vpnResults has a result for them — they must appear
+    // in the calendar as completed matches (getResult handles the result correctly).
+    return !inRaw && !inCustom;
   });
 }
 
