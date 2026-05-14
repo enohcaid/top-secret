@@ -1114,18 +1114,44 @@ let currentStatsId   = null; // id of the match currently open in the stats pane
 
 // Recalculates vpnDynamic = vpnFixtures entries not already covered by RAW or custom
 function rebuildVpnDynamic() {
-  vpnDynamic = vpnFixtures.filter(f => {
-    // Only exclude if there's a seed match on the EXACT same date (no cross-season by result)
-    const inRaw = RAW.some((_, i) => {
+  function isInRaw(f) {
+    return RAW.some((_, i) => {
       const m = getMatch(i);
       if (m.league !== 'VPN' || !rivalMatch(m.rival, f.rival)) return false;
       return m.date === f.date;
     });
-    const inCustom = custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
-    // Note: we keep fixtures even if vpnResults has a result for them — they must appear
-    // in the calendar as completed matches (getResult handles the result correctly).
-    return !inRaw && !inCustom;
-  });
+  }
+  function isInCustom(f) {
+    return custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
+  }
+
+  // Future fixtures not already in RAW or custom
+  const futureEntries = vpnFixtures.filter(f => !isInRaw(f) && !isInCustom(f));
+
+  // Past results not covered by vpnFixtures, RAW, or custom
+  // (/vpn-fixtures only returns upcoming matches; /vpn-results has the history)
+  const fixtureIds = new Set(vpnFixtures.map(f => f.id));
+  const historyEntries = vpnResults
+    .filter(r => !fixtureIds.has(r.id) && !isInRaw(r) && !isInCustom(r))
+    .map(r => ({
+      id:     r.id,
+      date:   r.date,
+      time:   '22:30',
+      rival:  r.rival,
+      badge:  null,
+      isHome: r.isHome,
+      round:  r.round || null,
+    }));
+
+  // Merge, dedup by id (fixtures take priority so they keep badge/round/time)
+  const seen = new Set();
+  vpnDynamic = [];
+  for (const e of [...futureEntries, ...historyEntries]) {
+    if (!seen.has(e.id)) {
+      seen.add(e.id);
+      vpnDynamic.push(e);
+    }
+  }
 }
 
 async function fetchCloudSeedMatches() {
