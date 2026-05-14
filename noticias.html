@@ -630,12 +630,17 @@ function init() {
 function renderAutoSection(items) {
   if (!items || !items.length) return;
   const existingIds = new Set(NOTICIAS.map(n => n.id));
-  const newItems = items.filter(n => !existingIds.has(n.id));
-  if (!newItems.length) return;
+  const autoItems = items.filter(n => !existingIds.has(n.id));
+  if (!autoItems.length) return;
+
+  // Merge noticias manuales (no pinned) con auto-news y ordenar por fecha desc
+  const nonPinned = NOTICIAS.filter(n => !n.pinned);
+  const merged = [...nonPinned, ...autoItems].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
   const wrap = document.getElementById('other-news-wrap');
   const grid = document.getElementById('news-grid');
   wrap.style.display = 'block';
-  grid.innerHTML += newItems.map(n => `
+  grid.innerHTML = merged.map(n => `
     <div class="news-card" onclick="openArticle('${n.id}')">
       ${n.image ? `<img class="news-card-img" src="${n.image}" alt="${n.title}" onerror="this.style.background='var(--gray)';this.style.display='none'">` : '<div class="news-card-img" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.1em;">Resultados</div>'}
       <div class="news-card-body">
