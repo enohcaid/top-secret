@@ -464,16 +464,11 @@ footer span{color:#C9A84C;}
   <!-- SEASON SELECTOR -->
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
     <span style="font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-right:4px;">Temporada</span>
-    <button id="spill1" onclick="switchStatsSeason(1)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T1 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--gold);color:#000;">FINALIZADA</span></button>
-    <button id="spill2" onclick="switchStatsSeason(2)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">PRÓXIMAMENTE</span></button>
+    <button id="spill1" onclick="switchStatsSeason(1)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T1 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
+    <button id="spill2" onclick="switchStatsSeason(2)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--gold);color:#000;">EN CURSO</span></button>
   </div>
-  <!-- T2 PRÓXIMAMENTE -->
-  <div id="statsSoon" style="display:none;padding:80px 20px;text-align:center;">
-    <div style="font-size:2.8rem;margin-bottom:16px;">🏆</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;letter-spacing:.04em;margin-bottom:8px;">Temporada <span style="color:var(--gold)">2 · 2026</span></div>
-    <div style="font-size:.9rem;color:var(--muted);line-height:1.6;">Las estadísticas de la nueva temporada<br>estarán disponibles cuando comiencen los partidos.</div>
-    <div style="display:inline-block;margin-top:20px;padding:6px 18px;border-radius:20px;border:1px solid var(--border2);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);">Próximamente</div>
-  </div>
+  <!-- statsSoon placeholder (unused) -->
+  <div id="statsSoon" style="display:none;"></div>
   <div id="statsContent">
   <div class="tabs">
     <button class="tab active" onclick="switchTab('season',this)">🏆 Temporada</button>
@@ -673,9 +668,11 @@ const KV_KEY     = 'ts_matches_v1';   // clave en el KV del worker
 
 const ROSTER = [
   {name:'Woolfyboyzx2',    pos:'POR'},
+  {name:'pauloco10',       pos:'POR'},
   {name:'Zurdo-_CABJ12',   pos:'DEF'},
   {name:'Agubostero7',     pos:'DEF'},
-  {name:'Alexisraies23', pos:'DEF'},
+  {name:'Alexisraies23',   pos:'DEF'},
+  {name:'Cabers14',        pos:'DEF'},
   {name:'RS32-DaniStone',  pos:'MED'},
   {name:'Juan_Martinez4',  pos:'MED'},
   {name:'CipriMancini',    pos:'MED'},
@@ -771,6 +768,17 @@ function loadMatches(){
     return { ...m, match_result: matchResult };
   });
 }
+// ════════════════════════════════════════════
+// SEASON FILTER
+// ════════════════════════════════════════════
+let currentSeason = 2;
+const T2_CUTOFF = '2026-04-30';
+function seasonMatches() {
+  const all = loadMatches();
+  if (currentSeason === 1) return all.filter(m => !m.date || m.date <= T2_CUTOFF);
+  return all.filter(m => m.date && m.date > T2_CUTOFF);
+}
+
 // ════════════════════════════════════════════
 // TABS
 // ════════════════════════════════════════════
@@ -1146,7 +1154,7 @@ function drawLineChart(canvasId, labels, values, color){
 // TAB TEMPORADA
 // ════════════════════════════════════════════
 function renderSeason(){
-  const allMatches = loadMatches();
+  const allMatches = seasonMatches();
   const matches = currentLeague==='all' ? allMatches : allMatches.filter(m=>m.league===currentLeague);
   const kpiRow   = document.getElementById('kpiRow');
   const grid     = document.getElementById('seasonGrid');
@@ -1621,7 +1629,7 @@ function filterPlayers(pos, btn){
 }
 
 function renderPlayers(filter){
-  const matches = loadMatches();
+  const matches = seasonMatches();
   const grid = document.getElementById('playerGrid');
   const players = ROSTER.filter(p=>filter==='all'||p.pos===filter);
 
@@ -1751,7 +1759,7 @@ function renderPlayers(filter){
 // TAB HISTORIAL
 // ════════════════════════════════════════════
 function renderHistory(){
-  const allMatches=loadMatches();
+  const allMatches=seasonMatches();
   const leagueF=document.getElementById('histFilterLeague')?.value||'all';
   const monthF=document.getElementById('histFilterMonth')?.value||'all';
   const monthSel=document.getElementById('histFilterMonth');
@@ -2072,7 +2080,7 @@ function showToast(msg,type='success'){
 // MODAL ESTADÍSTICAS COMPLETAS
 // ════════════════════════════════════════════
 function openPlayerModal(playerName){
-  const matches = loadMatches();
+  const matches = seasonMatches();
   const player = ROSTER.find(p=>p.name===playerName);
   if(!player) return;
 
@@ -2736,18 +2744,20 @@ window.switchTab = function(id, btn) {
 };
 
 function switchStatsSeason(n){
+  currentSeason = n;
   const s1=document.getElementById('spill1'),s2=document.getElementById('spill2');
-  const soon=document.getElementById('statsSoon'),content=document.getElementById('statsContent');
   if(n===1){
     s1.style.border='1px solid var(--gold)';s1.style.background='var(--gold-dim)';s1.style.color='var(--gold)';
     s2.style.border='1px solid var(--border2)';s2.style.background='transparent';s2.style.color='var(--muted)';
-    soon.style.display='none';content.style.display='';
   } else {
     s2.style.border='1px solid var(--gold)';s2.style.background='var(--gold-dim)';s2.style.color='var(--gold)';
     s1.style.border='1px solid var(--border2)';s1.style.background='transparent';s1.style.color='var(--muted)';
-    soon.style.display='block';content.style.display='none';
   }
+  renderSeason();
+  const activeTab=document.querySelector('.tab.active');
+  if(activeTab) activeTab.click();
 }
+window.switchStatsSeason = switchStatsSeason;
 
 // ════════════════════════════════════════════
 // TORNEOS — Firebase + Gemini AI
