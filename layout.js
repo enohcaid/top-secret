@@ -17,19 +17,24 @@
 
   const currentFile = location.pathname.split('/').pop() || 'index.html';
 
+  if (!document.querySelector('link[href*="Bebas+Neue"]')) {
+    const font = document.createElement('link');
+    font.rel = 'stylesheet';
+    font.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
+    document.head.appendChild(font);
+  }
+
   // ── CSS ────────────────────────────────────────────────────────────────────
   const style = document.createElement('style');
   style.textContent = `
     :root{--gold:#C9A84C;--gold2:#E8C97A;}
     /* Topbar */
     .topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#111111;border-bottom:3px solid var(--gold);display:flex;align-items:center;padding:0 24px 0 16px;gap:0;}
-    .tb-brand{display:flex;align-items:center;gap:14px;text-decoration:none;margin-right:auto;}
+    .tb-brand{display:flex;align-items:center;gap:22px;text-decoration:none;margin-right:auto;}
     .tb-brand img{height:44px;width:auto;object-fit:contain;}
-    .tb-brand-name{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;letter-spacing:.14em;color:#FFFFFF;text-transform:uppercase;}
+    .tb-brand-name{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;font-weight:400;letter-spacing:.1em;color:#FFFFFF;line-height:1;}
     .tb-brand-name span{color:var(--gold);}
-    .tb-center{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;pointer-events:none;}
-    .tb-center-star{font-size:1rem;color:var(--gold);opacity:.8;}
-    .tb-center-text{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+    .tb-center{display:none;}
     .tb-logos{display:flex;align-items:center;gap:40px;margin-right:60px;}
     .tb-logos img{width:auto;object-fit:contain;opacity:.95;}
     .tb-logos img[alt="EA FC 26"]{height:100px;}
@@ -63,11 +68,6 @@
       <img src="logos/Top Secret white.png" alt="TSFC">
       <span class="tb-brand-name">TOP <span>SECRET</span> FC</span>
     </a>
-    <div class="tb-center">
-      <span class="tb-center-star">★</span>
-      <span class="tb-center-text">Primera División · VPN</span>
-      <span class="tb-center-star">★</span>
-    </div>
     <div class="tb-logos">
       <div class="tb-sep"></div>
       <img src="logos/Logo EA FC26.png" alt="EA FC 26">
