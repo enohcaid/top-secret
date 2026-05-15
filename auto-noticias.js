@@ -2,7 +2,7 @@
 
 // Imágenes por defecto — aplican a todas las fechas anteriores al primer período.
 export const RESULT_IMAGES = {
-  win:  ['logos/victoria/festejo.webp', 'logos/victoria/festejo 2.png', 'logos/victoria/festejo 4.png', 'logos/victoria/festejo 5.png'],
+  win:  ['logos/victoria/festejo.png', 'logos/victoria/festejo 2.png', 'logos/victoria/festejo 4.png', 'logos/victoria/festejo 5.png'],
   draw: ['logos/empate/Empate 0.png', 'logos/empate/Empate 1.png'],
   loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png', 'logos/derrota/Derrota 2.png'],
 };
