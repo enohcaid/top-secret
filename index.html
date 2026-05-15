@@ -26,7 +26,7 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .main{min-height:calc(100vh - var(--topbar));}
 
 /* ── HERO ── */
-.hero{background:var(--black);aspect-ratio:2/1;max-height:85vh;display:flex;align-items:flex-end;justify-content:center;padding:0 40px 56px;position:relative;overflow:hidden;margin-right:calc(-1 * var(--sb-right));}
+.hero{background:var(--black);width:100vw;margin-left:calc(-1 * var(--sb-left));aspect-ratio:2/1;max-height:85vh;display:flex;align-items:flex-end;justify-content:center;padding:0 calc(var(--sb-left) + 40px) 56px;position:relative;overflow:hidden;}
 .hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;}
 .hero-lines::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);}
 .hero-content{position:relative;z-index:3;width:100%;max-width:700px;text-align:center;display:flex;flex-direction:column;align-items:center;}
@@ -180,7 +180,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .leagues-grid,.tops-grid{grid-template-columns:1fr;}
   .nav-grid{grid-template-columns:repeat(2,1fr);}
-  .hero{aspect-ratio:2/1;max-height:75vh;padding:0 20px 36px;}
+  .hero{aspect-ratio:2/1;max-height:75vh;padding:0 calc(var(--sb-left) + 20px) 36px;}
   .section{padding:28px 20px;}
 }
 @media(max-width:640px){
