@@ -216,6 +216,14 @@
       display: block;
       background: var(--gray);
     }
+    .news-card.portrait {
+      display: grid;
+      grid-template-columns: 42% 1fr;
+    }
+    .news-card.portrait .news-card-img {
+      height: 100%;
+      min-height: 200px;
+    }
     .news-card-body { padding: 18px 20px; }
     .news-card-cat {
       font-family: 'Barlow Condensed', sans-serif;
@@ -610,7 +618,7 @@ function renderGrid(items) {
   wrap.style.display = 'block';
   grid.innerHTML = items.map(n => `
     <div class="news-card" onclick="openArticle('${n.id}')">
-      <img class="news-card-img" src="${n.image}" alt="${n.title}" onerror="this.style.background='var(--gray)'">
+      <img class="news-card-img" src="${n.image}" alt="${n.title}" onload="if(this.naturalHeight>this.naturalWidth)this.closest('.news-card').classList.add('portrait')" onerror="this.style.background='var(--gray)'">
       <div class="news-card-body">
         <div class="news-card-cat">${n.category}</div>
         <div class="news-card-title">${n.title}</div>
@@ -642,7 +650,7 @@ function renderAutoSection(items) {
   wrap.style.display = 'block';
   grid.innerHTML = merged.map(n => `
     <div class="news-card" onclick="openArticle('${n.id}')">
-      ${n.image ? `<img class="news-card-img" src="${n.image}" alt="${n.title}" onerror="this.style.background='var(--gray)';this.style.display='none'">` : '<div class="news-card-img" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.1em;">Resultados</div>'}
+      ${n.image ? `<img class="news-card-img" src="${n.image}" alt="${n.title}" onload="if(this.naturalHeight>this.naturalWidth)this.closest('.news-card').classList.add('portrait')" onerror="this.style.background='var(--gray)';this.style.display='none'">` : '<div class="news-card-img" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.1em;">Resultados</div>'}
       <div class="news-card-body">
         <div class="news-card-cat">${n.category}</div>
         <div class="news-card-title">${n.title}</div>
