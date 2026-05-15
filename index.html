@@ -180,14 +180,22 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .leagues-grid,.tops-grid{grid-template-columns:1fr;}
   .nav-grid{grid-template-columns:repeat(2,1fr);}
-  .hero{aspect-ratio:2/1;max-height:75vh;padding:0 calc(var(--sb-left) + 20px) 36px;}
+  /* reset hero: body sin padding, margin-left negativo lo sacaría del viewport */
+  .hero{width:100vw;margin-left:0;aspect-ratio:2/1;max-height:75vh;padding:0 20px 24px;}
+  .hero-content{transform:scale(.88);transform-origin:bottom center;}
   .section{padding:28px 20px;}
 }
 @media(max-width:640px){
   .stats-grid{grid-template-columns:1fr 1fr;}
-  .hero{aspect-ratio:2/1;max-height:60vh;padding:0 16px 28px;}
-  .hero-title{font-size:clamp(28px,7vw,48px);}
-  .hero-cta{flex-direction:column;align-items:flex-start;gap:6px;}
+  /* hero más alto en portrait, glass a tamaño natural */
+  .hero{aspect-ratio:16/9;max-height:65vh;padding:0 12px 16px;}
+  .hero-content{transform:scale(1);padding:12px 16px 12px;max-width:100%;}
+  .hero-badge{display:none;}
+  .hero-logo{height:clamp(32px,7vw,44px);}
+  .hero-title{font-size:clamp(22px,9vw,40px);}
+  .hero-sub{font-size:10px;}
+  .hero-cta{flex-direction:column;align-items:center;gap:6px;width:100%;}
+  .btn-primary,.btn-ghost{width:100%;justify-content:center;}
   .section{padding:20px 16px;}
   .nav-grid{grid-template-columns:1fr 1fr;}
   footer{flex-direction:column;gap:8px;padding:20px 16px;text-align:center;}
