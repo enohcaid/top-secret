@@ -26,11 +26,10 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .main{min-height:calc(100vh - var(--topbar));}
 
 /* ── HERO ── */
-.hero{background:var(--black);padding:48px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:320px;position:relative;overflow:hidden;}
-.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(201,168,76,.04));pointer-events:none;}
-.hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.hero{background:var(--black);padding:56px 40px;display:flex;align-items:center;min-height:460px;position:relative;overflow:hidden;}
+.hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;}
 .hero-lines::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);}
-.hero-content{flex:1;z-index:1;}
+.hero-content{flex:1;z-index:3;position:relative;max-width:500px;}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:3px 10px;margin-bottom:10px;}
 .hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
 .hero-badge-text{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
@@ -44,9 +43,9 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .btn-primary:hover{background:var(--gold2);}
 .btn-ghost{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:4px;cursor:pointer;text-decoration:none;transition:all .2s;}
 .btn-ghost:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
-.hero-visual{flex-shrink:0;z-index:1;width:42%;align-self:stretch;position:relative;overflow:hidden;margin:-48px -40px -48px 0;background:var(--black);}
-.hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;}
-.hero-photo-fade{position:absolute;inset:0;background:linear-gradient(to right,var(--black) 0%,rgba(17,17,17,.35) 28%,transparent 100%);z-index:2;}
+.hero-visual{position:absolute;inset:0;z-index:0;}
+.hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% center;}
+.hero-photo-fade{position:absolute;inset:0;background:linear-gradient(to right,#111 0%,#111 25%,rgba(17,17,17,.85) 45%,rgba(17,17,17,.3) 70%,transparent 100%);z-index:2;}
 .hero-slider-ui{position:absolute;bottom:10px;right:10px;display:flex;align-items:center;gap:6px;z-index:3;}
 .hero-nav-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:1.1rem;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s,border-color .2s;}
 .hero-nav-btn:hover{background:rgba(201,168,76,.35);border-color:var(--gold);}
@@ -181,15 +180,14 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .leagues-grid,.tops-grid{grid-template-columns:1fr;}
   .nav-grid{grid-template-columns:repeat(2,1fr);}
-  .hero{padding:28px 20px;flex-direction:row;min-height:220px;}
-  .hero-visual{width:38%;margin:-28px -20px -28px 0;}
+  .hero{padding:28px 20px;min-height:280px;}
   .section{padding:28px 20px;}
 }
 @media(max-width:640px){
   .stats-grid{grid-template-columns:1fr 1fr;}
-  .hero{padding:20px 16px;min-height:180px;}
+  .hero{padding:20px 16px;min-height:220px;}
   .hero-title{font-size:clamp(32px,8vw,48px);}
-  .hero-visual{display:none;}
+  .hero-photo-fade{background:linear-gradient(to right,#111 0%,#111 40%,rgba(17,17,17,.9) 65%,rgba(17,17,17,.5) 100%);}
   .hero-cta{flex-direction:column;align-items:flex-start;gap:6px;}
   .section{padding:20px 16px;}
   .nav-grid{grid-template-columns:1fr 1fr;}
