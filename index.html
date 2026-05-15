@@ -590,40 +590,9 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
     document.getElementById('lc-vpn-badge').textContent = 'T2 · Fecha 3';
   }
 
-  // VPUG — proxy devuelve [{name, gp, w, d, l, pts}, ...]
-  try {
-    const raw = await (await fetch(WORKER + '/vpug-table')).json();
-    const rows = (Array.isArray(raw) ? raw : []).map(e => ({
-      name: e.name || '',
-      gp:  e.gp  || 0,
-      w:   e.w   || 0,
-      d:   e.d   || 0,
-      l:   e.l   || 0,
-      pts: e.pts || 0,
-    }));
-    applyCard('lc-vpug-pos','lc-vpug-pts','lc-vpug-badge', rows);
-  } catch(_) {
-    document.getElementById('lc-vpug-pts').textContent = 'Por iniciar';
-    document.getElementById('lc-vpug-badge').textContent = 'T2 2026';
-  }
-
-  // 11x11
-  try {
-    const raw = await (await fetch('https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2')).json();
-    const pick = (o,...ks) => { for (const k of ks) if (o[k]!=null) return o[k]; return 0; };
-    const rows = (Array.isArray(raw) ? raw : []).map(e => ({
-      name: e.name || e.team_name || '',
-      gp:  pick(e,'gp','gamesPlayed'),
-      w:   pick(e,'w','wins'),
-      d:   pick(e,'d','ties','draws'),
-      l:   pick(e,'l','losses'),
-      pts: pick(e,'pts','points'),
-    }));
-    applyCard('lc-e11-pos','lc-e11-pts','lc-e11-badge', rows);
-  } catch(_) {
-    document.getElementById('lc-e11-pts').textContent = 'Por iniciar';
-    document.getElementById('lc-e11-badge').textContent = 'T2 2026';
-  }
+  // VPUG y 11x11 — T2 aún no iniciado
+  ['lc-vpug-pts','lc-e11-pts'].forEach(id => document.getElementById(id).textContent = 'T2 · Por iniciar');
+  ['lc-vpug-pos','lc-e11-pos'].forEach(id => document.getElementById(id).textContent = '—');
 })();
 
 /* ── PLAYER QUICK MODAL ── */
