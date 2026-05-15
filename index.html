@@ -711,5 +711,63 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   <div class="pmob" id="playerModalBox"></div>
 </div>
 
+<!-- DEV: editor top performers — borrar cuando se fijen los valores -->
+<div id="dev-top-editor" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(17,17,17,.94);backdrop-filter:blur(12px);border:1px solid rgba(201,168,76,.4);border-radius:10px;padding:14px 22px;display:flex;align-items:center;gap:20px;font-family:'Barlow',sans-serif;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap;">
+  <span style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);">Top performers</span>
+
+  <label style="display:flex;align-items:center;gap:8px;">
+    <span style="font-size:11px;color:rgba(255,255,255,.6);">Foto</span>
+    <input id="dev-av-size" type="range" min="24" max="96" value="32" style="width:120px;accent-color:#C9A84C;cursor:pointer;">
+    <span id="dev-av-val" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#C9A84C;min-width:40px;">32px</span>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:8px;">
+    <span style="font-size:11px;color:rgba(255,255,255,.6);">Encuadre</span>
+    <input id="dev-av-top" type="range" min="-60" max="40" value="2" style="width:120px;accent-color:#C9A84C;cursor:pointer;">
+    <span id="dev-av-top-val" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#C9A84C;min-width:44px;">2%</span>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:8px;">
+    <span style="font-size:11px;color:rgba(255,255,255,.6);">Nombre</span>
+    <input id="dev-name-size" type="range" min="8" max="22" value="12" style="width:120px;accent-color:#C9A84C;cursor:pointer;">
+    <span id="dev-name-val" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#C9A84C;min-width:40px;">12px</span>
+  </label>
+
+  <button id="dev-copy-btn" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#C9A84C;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;">Copiar</button>
+</div>
+<script>
+(function(){
+  const avSize  = document.getElementById('dev-av-size');
+  const avTop   = document.getElementById('dev-av-top');
+  const nameSz  = document.getElementById('dev-name-size');
+  const avVal   = document.getElementById('dev-av-val');
+  const avTVal  = document.getElementById('dev-av-top-val');
+  const nameVal = document.getElementById('dev-name-val');
+
+  function applyAll() {
+    const sz  = avSize.value  + 'px';
+    const top = avTop.value   + '%';
+    const nm  = nameSz.value  + 'px';
+    document.querySelectorAll('.top-av').forEach(el => { el.style.width = sz; el.style.height = sz; });
+    document.querySelectorAll('.top-av img').forEach(el => { el.style.top = top; });
+    document.querySelectorAll('.top-name').forEach(el => { el.style.fontSize = nm; });
+    avVal.textContent   = sz;
+    avTVal.textContent  = top;
+    nameVal.textContent = nm;
+  }
+
+  avSize.addEventListener('input', applyAll);
+  avTop.addEventListener('input', applyAll);
+  nameSz.addEventListener('input', applyAll);
+
+  document.getElementById('dev-copy-btn').addEventListener('click', function(){
+    const txt = `foto: ${avSize.value}px | encuadre: ${avTop.value}% | nombre: ${nameSz.value}px`;
+    navigator.clipboard.writeText(txt).then(() => {
+      this.textContent = '✓ Copiado';
+      setTimeout(() => this.textContent = 'Copiar', 1800);
+    });
+  });
+})();
+</script>
 </body>
 </html>
