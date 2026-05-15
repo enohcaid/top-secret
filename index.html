@@ -710,5 +710,25 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
 <div class="pmov" id="playerModalOverlay" onclick="if(event.target===this)closePlayerModal()">
   <div class="pmob" id="playerModalBox"></div>
 </div>
+
+<!-- DEV: editor de tamaño de fuente hero — borrar cuando se fije el valor -->
+<div id="dev-font-editor" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(17,17,17,.92);backdrop-filter:blur(12px);border:1px solid rgba(201,168,76,.4);border-radius:10px;padding:12px 20px;display:flex;align-items:center;gap:14px;font-family:'Barlow',sans-serif;box-shadow:0 8px 32px rgba(0,0,0,.5);">
+  <span style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);">Título hero</span>
+  <input id="dev-font-range" type="range" min="32" max="140" value="96" style="width:180px;accent-color:#C9A84C;cursor:pointer;">
+  <span id="dev-font-val" style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#C9A84C;min-width:52px;text-align:center;">96px</span>
+  <button onclick="navigator.clipboard.writeText(document.getElementById('dev-font-val').textContent).then(()=>{this.textContent='✓ Copiado';setTimeout(()=>this.textContent='Copiar',1500)})" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#C9A84C;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;">Copiar</button>
+</div>
+<script>
+(function(){
+  const range = document.getElementById('dev-font-range');
+  const val   = document.getElementById('dev-font-val');
+  const title = document.querySelector('.hero-title');
+  range.addEventListener('input', function(){
+    const px = this.value + 'px';
+    title.style.fontSize = px;
+    val.textContent = px;
+  });
+})();
+</script>
 </body>
 </html>
