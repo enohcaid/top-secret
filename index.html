@@ -266,33 +266,33 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
         <div class="lc-tag" style="color:var(--vpn)">VPN · 1ra DIVISIÓN</div>
         <div class="lc-name">Virtual Pro Network</div>
         <div class="lc-pos">
-          <div class="lc-pos-num">—</div>
+          <div class="lc-pos-num" id="lc-vpn-pos">—</div>
           <div class="lc-pos-suf">lugar</div>
         </div>
-        <div class="lc-pts">0V 0E 3D · 0 pts · 3 PJ</div>
-        <span class="lc-badge" style="background:rgba(245,197,24,.1);color:#b45309;border-color:rgba(245,197,24,.4);">T2 · Jornada 3</span>
+        <div class="lc-pts" id="lc-vpn-pts">cargando...</div>
+        <span class="lc-badge" id="lc-vpn-badge" style="background:rgba(245,197,24,.1);color:#b45309;border-color:rgba(245,197,24,.4);">T2 2026</span>
       </div>
       <div class="league-card">
         <div class="lc-accent" style="background:var(--vpug)"></div>
         <div class="lc-tag" style="color:var(--vpug)">VPUG</div>
         <div class="lc-name">Virtual Pro — Clubs Pro</div>
         <div class="lc-pos">
-          <div class="lc-pos-num">—</div>
+          <div class="lc-pos-num" id="lc-vpug-pos">—</div>
           <div class="lc-pos-suf">lugar</div>
         </div>
-        <div class="lc-pts">T2 · Por iniciar</div>
-        <span class="lc-badge final-badge">T2 2026</span>
+        <div class="lc-pts" id="lc-vpug-pts">cargando...</div>
+        <span class="lc-badge final-badge" id="lc-vpug-badge">T2 2026</span>
       </div>
       <div class="league-card">
         <div class="lc-accent" style="background:var(--e11)"></div>
         <div class="lc-tag" style="color:var(--e11)">11x11</div>
         <div class="lc-name">Virtual Pro Gaming</div>
         <div class="lc-pos">
-          <div class="lc-pos-num">—</div>
+          <div class="lc-pos-num" id="lc-e11-pos">—</div>
           <div class="lc-pos-suf">lugar</div>
         </div>
-        <div class="lc-pts">T2 · Por iniciar</div>
-        <span class="lc-badge final-badge">T2 2026</span>
+        <div class="lc-pts" id="lc-e11-pts">cargando...</div>
+        <span class="lc-badge final-badge" id="lc-e11-badge">T2 2026</span>
       </div>
     </div>
   </section>
@@ -558,6 +558,73 @@ function renderNewsCol(el, news) {
 
 renderNewsCol(document.getElementById('ns-latest'), latestNews);
 renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
+
+/* ── LIGA POSITIONS ── */
+(async function(){
+  const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+  const isUs = n => /top.?secret/i.test(n || '');
+
+  function applyCard(posId, ptsId, badgeId, rows) {
+    const idx = rows.findIndex(r => isUs(r.name));
+    if (idx < 0) return;
+    const t = rows[idx];
+    document.getElementById(posId).textContent  = idx + 1;
+    document.getElementById(ptsId).textContent  = `${t.w}V ${t.d}E ${t.l}D · ${t.pts} pts · ${t.gp} PJ`;
+    document.getElementById(badgeId).textContent = `T2 · Fecha ${t.gp}`;
+  }
+
+  // VPN
+  try {
+    const raw = await (await fetch(WORKER + '/vpn-table')).json();
+    const rows = (Array.isArray(raw) ? raw : []).map(e => ({
+      name: e.team?.name || '',
+      gp:  e.ranking?.gamesPlayed || 0,
+      w:   e.ranking?.wins        || 0,
+      d:   e.ranking?.draws       || 0,
+      l:   e.ranking?.losses      || 0,
+      pts: e.ranking?.pts         || 0,
+    }));
+    applyCard('lc-vpn-pos','lc-vpn-pts','lc-vpn-badge', rows);
+  } catch(_) {
+    document.getElementById('lc-vpn-pts').textContent = '0V 0E 3D · 0 pts · 3 PJ';
+    document.getElementById('lc-vpn-badge').textContent = 'T2 · Fecha 3';
+  }
+
+  // VPUG
+  try {
+    const raw = await (await fetch(WORKER + '/vpug-table')).json();
+    const rows = (Array.isArray(raw) ? raw : []).map(e => ({
+      name: e.name || e.team?.name || '',
+      gp:  e.gp  || e.gamesPlayed || 0,
+      w:   e.w   || e.wins        || 0,
+      d:   e.d   || e.draws       || 0,
+      l:   e.l   || e.losses      || 0,
+      pts: e.pts || e.points      || 0,
+    }));
+    applyCard('lc-vpug-pos','lc-vpug-pts','lc-vpug-badge', rows);
+  } catch(_) {
+    document.getElementById('lc-vpug-pts').textContent = 'Por iniciar';
+    document.getElementById('lc-vpug-badge').textContent = 'T2 2026';
+  }
+
+  // 11x11
+  try {
+    const raw = await (await fetch('https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2')).json();
+    const pick = (o,...ks) => { for (const k of ks) if (o[k]!=null) return o[k]; return 0; };
+    const rows = (Array.isArray(raw) ? raw : []).map(e => ({
+      name: e.name || e.team_name || '',
+      gp:  pick(e,'gp','gamesPlayed'),
+      w:   pick(e,'w','wins'),
+      d:   pick(e,'d','ties','draws'),
+      l:   pick(e,'l','losses'),
+      pts: pick(e,'pts','points'),
+    }));
+    applyCard('lc-e11-pos','lc-e11-pts','lc-e11-badge', rows);
+  } catch(_) {
+    document.getElementById('lc-e11-pts').textContent = 'Por iniciar';
+    document.getElementById('lc-e11-badge').textContent = 'T2 2026';
+  }
+})();
 
 /* ── PLAYER QUICK MODAL ── */
 function showPlayerModal(key) {
