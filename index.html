@@ -29,7 +29,7 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .hero{background:var(--black);width:100vw;margin-left:calc(-1 * var(--sb-left));aspect-ratio:2/1;max-height:85vh;display:flex;align-items:flex-end;justify-content:center;padding:0 calc(var(--sb-left) + 40px) 20px;position:relative;overflow:hidden;}
 .hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;}
 .hero-lines::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);}
-.hero-content{position:relative;z-index:3;width:100%;max-width:700px;text-align:center;display:flex;flex-direction:column;align-items:center;background:rgba(17,17,17,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(201,168,76,.22);border-radius:12px;padding:20px 36px 18px;}
+.hero-content{position:relative;z-index:3;width:100%;max-width:700px;text-align:center;display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:20px 36px 18px;transform:scale(.75);transform-origin:bottom center;}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:3px 10px;margin-bottom:10px;}
 .hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
 .hero-badge-text{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
@@ -711,25 +711,5 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   <div class="pmob" id="playerModalBox"></div>
 </div>
 
-<!-- DEV: editor de tamaño del glass hero — borrar cuando se fije el valor -->
-<div id="dev-glass-editor" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(17,17,17,.92);backdrop-filter:blur(12px);border:1px solid rgba(201,168,76,.4);border-radius:10px;padding:12px 20px;display:flex;align-items:center;gap:14px;font-family:'Barlow',sans-serif;box-shadow:0 8px 32px rgba(0,0,0,.5);">
-  <span style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);">Glass</span>
-  <input id="dev-glass-range" type="range" min="50" max="150" value="100" style="width:200px;accent-color:#C9A84C;cursor:pointer;">
-  <span id="dev-glass-val" style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#C9A84C;min-width:48px;text-align:center;">100%</span>
-  <button onclick="navigator.clipboard.writeText(document.getElementById('dev-glass-val').textContent).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='Copiar',1500)})" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#C9A84C;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.06em;">Copiar</button>
-</div>
-<script>
-(function(){
-  const range = document.getElementById('dev-glass-range');
-  const val   = document.getElementById('dev-glass-val');
-  const glass = document.querySelector('.hero-content');
-  glass.style.transformOrigin = 'bottom center';
-  range.addEventListener('input', function(){
-    const s = this.value / 100;
-    glass.style.transform = 'scale(' + s + ')';
-    val.textContent = this.value + '%';
-  });
-})();
-</script>
 </body>
 </html>
