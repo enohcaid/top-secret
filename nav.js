@@ -14,6 +14,13 @@ const TS_NAV_PAGES = [
 (function() {
   const currentFile = location.pathname.split('/').pop() || 'index.html';
 
+  if (!document.querySelector('link[href*="Bebas+Neue"]')) {
+    const font = document.createElement('link');
+    font.rel = 'stylesheet';
+    font.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
+    document.head.appendChild(font);
+  }
+
   const style = document.createElement('style');
   style.textContent = `
     #ts-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,11,14,.94);backdrop-filter:blur(12px);border-bottom:1px solid #1e2230;height:60px;display:flex;align-items:center;padding:0 24px;gap:0;}
