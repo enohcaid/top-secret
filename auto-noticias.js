@@ -73,12 +73,15 @@ export function generateMatchNews(matches) {
       const imgs       = imagesForDate(date);
       const image      = pickImage(imgs[overallKey]);
 
-      // Top performer del día
-      let topScorer = null, topGoals = 0, topRated = null, topRating = 0;
+      // Top performer del día — acumular por jugador entre todos los partidos del día
+      const _dayG = {}, _dayR = {};
       dayMatches.forEach(m => (m.players || []).forEach(p => {
-        if ((p.goals  || 0) > topGoals)  { topGoals  = p.goals;  topScorer = p.name; }
-        if ((p.rating || 0) > topRating) { topRating = p.rating; topRated  = p.name; }
+        _dayG[p.name] = (_dayG[p.name] || 0) + (p.goals || 0);
+        if ((p.rating || 0) > (_dayR[p.name] || 0)) _dayR[p.name] = p.rating || 0;
       }));
+      let topScorer = null, topGoals = 0, topRated = null, topRating = 0;
+      Object.entries(_dayG).forEach(([n, g]) => { if (g > topGoals)  { topGoals  = g; topScorer = n; } });
+      Object.entries(_dayR).forEach(([n, r]) => { if (r > topRating) { topRating = r; topRated  = n; } });
 
       const ddmm  = date.slice(5).split('-').reverse().join('/');
       const title = pj === 1
