@@ -217,7 +217,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       </div>
     </div>
     <div class="hero-visual">
-      <img class="hero-photo" id="hero-img-a" src="logos/festejo.webp" alt="Top Secret FC">
+      <img class="hero-photo" id="hero-img-a" src="logos/Facha 0.png" alt="Top Secret FC">
       <img class="hero-photo" id="hero-img-b" alt="Top Secret FC" style="opacity:0">
       <div class="hero-photo-fade"></div>
       <div class="hero-slider-ui">
@@ -666,16 +666,7 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   const imgB   = document.getElementById('hero-img-b');
   const dotsEl = document.getElementById('hero-dots');
 
-  const images = [];
-  function probe(n) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.src = n === 1 ? 'logos/festejo.webp' : `logos/festejo ${n}.png`;
-      img.onload  = () => { images.push(img.src); resolve(true); };
-      img.onerror = () => resolve(false);
-    });
-  }
-  for (let i = 1; i <= 20; i++) { if (!await probe(i)) break; }
+  const images = ['logos/Facha 0.png','logos/Facha 1.png','logos/Facha 2.png','logos/Facha 3.png'];
 
   if (images.length <= 1) return;
 
