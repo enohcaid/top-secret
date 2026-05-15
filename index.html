@@ -6,7 +6,7 @@
 <title>Top Secret FC · Inicio</title>
 <link rel="icon" href="Top-Secret.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
 :root{
@@ -29,13 +29,13 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .hero{background:var(--black);width:100vw;margin-left:calc(-1 * var(--sb-left));aspect-ratio:2/1;max-height:85vh;display:flex;align-items:flex-end;justify-content:center;padding:0 calc(var(--sb-left) + 40px) 20px;position:relative;overflow:hidden;}
 .hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;}
 .hero-lines::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);}
-.hero-content{position:relative;z-index:3;width:100%;max-width:700px;text-align:center;display:flex;flex-direction:column;align-items:center;}
+.hero-content{position:relative;z-index:3;width:100%;max-width:700px;text-align:center;display:flex;flex-direction:column;align-items:center;background:rgba(17,17,17,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(201,168,76,.22);border-radius:12px;padding:20px 36px 18px;}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:3px 10px;margin-bottom:10px;}
 .hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
 .hero-badge-text{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
 .hero-identity{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
 .hero-logo{height:clamp(52px,5vw,76px);width:auto;object-fit:contain;flex-shrink:0;}
-.hero-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(44px,5.5vw,82px);font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--white);text-transform:uppercase;white-space:nowrap;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6.5vw,96px);font-weight:400;line-height:1;letter-spacing:.06em;color:var(--white);text-transform:uppercase;white-space:nowrap;}
 .hero-title-accent{color:var(--gold);}
 .hero-sub{font-size:13px;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin-bottom:2px;}
 .hero-cta{display:flex;gap:8px;margin-top:12px;}
