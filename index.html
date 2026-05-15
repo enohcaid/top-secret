@@ -33,10 +33,10 @@ body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;f
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:3px 10px;margin-bottom:10px;}
 .hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
 .hero-badge-text{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
-.hero-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(42px,5.5vw,72px);font-weight:900;line-height:.88;letter-spacing:-.01em;color:var(--white);text-transform:uppercase;margin-bottom:10px;}
+.hero-identity{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.hero-logo{height:54px;width:auto;object-fit:contain;flex-shrink:0;}
+.hero-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,4.2vw,62px);font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--white);text-transform:uppercase;white-space:nowrap;}
 .hero-title-accent{color:var(--gold);}
-.hero-logo{height:72px;width:auto;object-fit:contain;margin-bottom:12px;display:block;}
-.hero-line{width:36px;height:2px;background:var(--gold);margin-bottom:10px;}
 .hero-sub{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
 .hero-cta{display:flex;gap:8px;margin-top:12px;}
 .btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:var(--black);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:4px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;}
@@ -186,7 +186,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
 @media(max-width:640px){
   .stats-grid{grid-template-columns:1fr 1fr;}
   .hero{height:clamp(280px,70vw,400px);padding:0 16px 28px;}
-  .hero-title{font-size:clamp(32px,8vw,48px);}
+  .hero-title{font-size:clamp(26px,6vw,44px);}
   .hero-cta{flex-direction:column;align-items:flex-start;gap:6px;}
   .section{padding:20px 16px;}
   .nav-grid{grid-template-columns:1fr 1fr;}
@@ -204,9 +204,10 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     <div class="hero-lines"></div>
     <div class="hero-content">
       <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">VPN 1ra División · Temporada 2 · 2026</span></div>
-      <img class="hero-logo" src="logos/Top Secret Logo.png" alt="Top Secret FC">
-      <h1 class="hero-title">TOP<br><span class="hero-title-accent">SECRET</span><br>FC</h1>
-      <div class="hero-line"></div>
+      <div class="hero-identity">
+        <img class="hero-logo" src="logos/Top Secret Logo.png" alt="Top Secret FC">
+        <h1 class="hero-title">TOP <span class="hero-title-accent">SECRET</span> FC</h1>
+      </div>
       <p class="hero-sub">EA FC Clubs Pro · Buenos Aires · Argentina</p>
       <div class="hero-cta">
         <a class="btn-primary" href="plantilla.html">Ver plantel</a>
