@@ -3,6 +3,31 @@
 
 const NOTICIAS = [
   {
+    id: 'nuevo-ct-2026',
+    pinned: false,
+    category: 'Institucional',
+    title: 'Top Secret FC presenta su nuevo Cuerpo Técnico',
+    date: '2026-05-15',
+    dateLabel: '15 de mayo de 2026',
+    excerpt: 'Top Secret FC anuncia la conformación oficial de su nuevo Cuerpo Técnico. Cinco nombres, cinco roles, una sola dirección: llevar al club a lo más alto de la Primera División.',
+    image: 'logos/Nuevo CT.png',
+    body: [
+      'Top Secret FC hace oficial la conformación de su nuevo Cuerpo Técnico de cara a la Temporada 2. Cinco integrantes, roles bien definidos y una convicción compartida: este club tiene todo para competirle a cualquiera en la élite del fútbol virtual argentino.',
+      '<strong>#6 · Juan_Martinez4 — Director Técnico.</strong> El cerebro del equipo asume la conducción táctica. Define sistemas, gestiona el plantel y toma las decisiones que marcan el rumbo de cada partido. La pelota en el centro de la mesa no es casual.',
+      '<strong>#32 · CipriMancini — Analista Táctico.</strong> El encargado de estudiar a los rivales antes de cada fecha. Lectura del juego, informes de video y propuestas para neutralizar al oponente. La preparación empieza antes de conectarse.',
+      '<strong>#20 · Guiidow — Preparador Físico y Rendimiento.</strong> Gestiona la rotación del plantel, el estado de forma de cada jugador y los tiempos de carga y descanso durante la temporada. La base de un equipo competitivo es llegar siempre al cien.',
+      '<strong>#7 · Lautavester7 — Entrenador de Línea Ofensiva.</strong> Especialista en patrones de ataque, combinaciones y pressing alto. Su experiencia como uno de los delanteros más letales del club convierte su mirada en un recurso invaluable para la línea de ataque.',
+      '<strong>#30 · zPibu__ — Coordinador de Plantel y Mercado.</strong> Maneja la comunicación interna del grupo, la disponibilidad de jugadores para cada convocatoria y el seguimiento del mercado. El vínculo entre lo que pasa adentro y lo que se proyecta hacia afuera.',
+      'Cinco roles distintos, mismo objetivo. El Cuerpo Técnico de Top Secret FC ya está trabajando. 🖤⭐',
+    ],
+    shareCaption: '🖤 NUEVO CUERPO TÉCNICO · TOP SECRET FC ⭐\n\nPresentamos oficialmente al CT que conducirá al club en la Temporada 2:\n\n📋 DT: Juan_Martinez4\n🔍 Analista: CipriMancini\n💪 Físico: Guiidow\n⚡ Ataque: Lautavester7\n🗂️ Coordinador: zPibu__\n\n#TopSecretFC #EAFCClubsPro #NuevaTemporada #VPN',
+    shareCaptions: {
+      ig: '🖤 NUEVO CUERPO TÉCNICO · TOP SECRET FC ⭐\n\nPresentamos oficialmente al CT que conducirá al club en la Temporada 2.\n\n📋 DT: Juan_Martinez4 · Analista: CipriMancini · Físico: Guiidow · Ataque: Lautavester7 · Coordinador: zPibu__\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #EAFCClubsPro #NuevaTemporada #VPN',
+      x:  '🖤 Top Secret FC presenta su nuevo Cuerpo Técnico para la Temporada 2.\n\nDT: Juan_Martinez4 · Analista: CipriMancini · Físico: Guiidow · Ataque: Lautavester7 · Coordinador: zPibu__\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #EAFCClubsPro #VPN',
+      fb: '🖤 NUEVO CUERPO TÉCNICO · TOP SECRET FC ⭐\n\nEl club presenta oficialmente al Cuerpo Técnico que conducirá al equipo en la Temporada 2. Cinco integrantes, roles bien definidos, mismo objetivo.\n\n📋 DT: Juan_Martinez4\n🔍 Analista Táctico: CipriMancini\n💪 Preparador Físico: Guiidow\n⚡ Entrenador de Ataque: Lautavester7\n🗂️ Coordinador de Plantel: zPibu__\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #EAFCClubsPro #NuevaTemporada #VPN',
+    },
+  },
+  {
     id: 'fixture-vpn-t2-2026',
     pinned: false,
     category: 'Fixture',
