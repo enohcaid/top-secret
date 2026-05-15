@@ -573,16 +573,16 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
     document.getElementById(badgeId).textContent = `T2 · Fecha ${t.gp}`;
   }
 
-  // VPN
+  // VPN — proxy devuelve [{team:{name}, gp, gw, gt, gl, pts}, ...]
   try {
     const raw = await (await fetch(WORKER + '/vpn-table')).json();
     const rows = (Array.isArray(raw) ? raw : []).map(e => ({
       name: e.team?.name || '',
-      gp:  e.ranking?.gamesPlayed || 0,
-      w:   e.ranking?.wins        || 0,
-      d:   e.ranking?.draws       || 0,
-      l:   e.ranking?.losses      || 0,
-      pts: e.ranking?.pts         || 0,
+      gp:  e.gp  || 0,
+      w:   e.gw  || 0,
+      d:   e.gt  || 0,
+      l:   e.gl  || 0,
+      pts: e.pts || 0,
     }));
     applyCard('lc-vpn-pos','lc-vpn-pts','lc-vpn-badge', rows);
   } catch(_) {
@@ -590,16 +590,16 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
     document.getElementById('lc-vpn-badge').textContent = 'T2 · Fecha 3';
   }
 
-  // VPUG
+  // VPUG — proxy devuelve [{name, gp, w, d, l, pts}, ...]
   try {
     const raw = await (await fetch(WORKER + '/vpug-table')).json();
     const rows = (Array.isArray(raw) ? raw : []).map(e => ({
-      name: e.name || e.team?.name || '',
-      gp:  e.gp  || e.gamesPlayed || 0,
-      w:   e.w   || e.wins        || 0,
-      d:   e.d   || e.draws       || 0,
-      l:   e.l   || e.losses      || 0,
-      pts: e.pts || e.points      || 0,
+      name: e.name || '',
+      gp:  e.gp  || 0,
+      w:   e.w   || 0,
+      d:   e.d   || 0,
+      l:   e.l   || 0,
+      pts: e.pts || 0,
     }));
     applyCard('lc-vpug-pos','lc-vpug-pts','lc-vpug-badge', rows);
   } catch(_) {
