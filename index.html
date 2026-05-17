@@ -43,39 +43,35 @@ body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;f
 .btn-primary:hover{background:var(--gold2);}
 .btn-ghost{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:4px;cursor:pointer;text-decoration:none;transition:all .2s;}
 .btn-ghost:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
-/* ── GLASS BUTTONS — estilo físico 3D (pill + highlight + shadow-copia) ── */
-.hero-content .btn-primary,
-.hero-content .btn-ghost{
-  position:relative;border-radius:50px;padding:9px 22px;border:none;overflow:visible;
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  transition:background .2s,transform .15s;
-}
-/* borde superior luminoso + profundidad inferior = efecto 3D */
-.hero-content .btn-primary{
-  background:rgba(255,255,255,.18);color:#fff;
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.08);
-}
-.hero-content .btn-primary:hover{background:rgba(255,255,255,.26);transform:translateY(-1px);}
-/* shadow = copia borrosa del botón debajo, color dorado */
-.hero-content .btn-primary::after{
-  content:'';position:absolute;inset:8px 6px -14px;
-  background:rgba(201,168,76,.55);filter:blur(16px);
-  border-radius:inherit;z-index:-1;opacity:.7;transition:opacity .25s;
-}
-.hero-content .btn-primary:hover::after{opacity:1;}
+/* ── GLASS BUTTONS — adaptado de "Glass Button" by Petr Knoll (CodePen) ── */
+@property --angle-1{syntax:"<angle>";inherits:false;initial-value:-75deg;}
+@property --angle-2{syntax:"<angle>";inherits:false;initial-value:-45deg;}
 
-.hero-content .btn-ghost{
-  background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.05);
-}
-.hero-content .btn-ghost:hover{background:rgba(255,255,255,.16);color:#fff;transform:translateY(-1px);}
-/* shadow = copia borrosa blanca */
-.hero-content .btn-ghost::after{
-  content:'';position:absolute;inset:8px 6px -14px;
-  background:rgba(255,255,255,.3);filter:blur(14px);
-  border-radius:inherit;z-index:-1;opacity:.35;transition:opacity .25s;
-}
-.hero-content .btn-ghost:hover::after{opacity:.7;}
+.btn-glass-wrap{position:relative;z-index:2;display:inline-block;border-radius:999vw;pointer-events:none;transition:all 400ms cubic-bezier(.25,1,.5,1);}
+.btn-shadow{--sc:1.4em;position:absolute;width:calc(100% + var(--sc));height:calc(100% + var(--sc));top:calc(-1 * var(--sc) / 2);left:calc(-1 * var(--sc) / 2);filter:blur(clamp(2px,.125em,12px));overflow:visible;pointer-events:none;}
+.btn-shadow::after{content:"";position:absolute;border-radius:999vw;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.18));width:calc(100% - var(--sc) - .25em);height:calc(100% - var(--sc) - .25em);top:calc(var(--sc) - .5em);left:calc(var(--sc) - .875em);padding:.125em;box-sizing:border-box;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;transition:all 400ms cubic-bezier(.25,1,.5,1);opacity:1;}
+
+.hero-content .btn-primary,.hero-content .btn-ghost{--bw:1.5px;all:unset;display:inline-flex;align-items:center;cursor:pointer;position:relative;pointer-events:auto;z-index:3;text-decoration:none;border-radius:999vw;background:linear-gradient(-75deg,rgba(255,255,255,.05),rgba(255,255,255,.2),rgba(255,255,255,.05));box-shadow:inset 0 2px 2px rgba(0,0,0,.05),inset 0 -2px 2px rgba(255,255,255,.45),0 4px 2px -2px rgba(0,0,0,.25),inset 0 0 0 4px rgba(255,255,255,.15);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);transition:all 400ms cubic-bezier(.25,1,.5,1);overflow:visible;}
+.hero-content .btn-primary:hover,.hero-content .btn-ghost:hover{transform:scale(.975);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);box-shadow:inset 0 2px 2px rgba(0,0,0,.05),inset 0 -2px 2px rgba(255,255,255,.45),0 2px 1px -1.5px rgba(0,0,0,.28),inset 0 0 0 2px rgba(255,255,255,.4);}
+
+.hero-content .btn-primary span,.hero-content .btn-ghost span{position:relative;display:block;user-select:none;font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em;font-weight:800;font-size:.76rem;text-transform:uppercase;color:rgba(255,255,255,.92);text-shadow:0 4px 1px rgba(0,0,0,.2);transition:all 400ms cubic-bezier(.25,1,.5,1);padding-inline:18px;padding-block:8px;}
+.hero-content .btn-primary:hover span,.hero-content .btn-ghost:hover span{text-shadow:.4px .4px .4px rgba(0,0,0,.15);}
+
+.hero-content .btn-primary span::after,.hero-content .btn-ghost span::after{content:"";display:block;position:absolute;width:calc(100% - var(--bw));height:calc(100% - var(--bw));top:calc(var(--bw) / 2);left:calc(var(--bw) / 2);box-sizing:border-box;border-radius:999vw;overflow:clip;background:linear-gradient(var(--angle-2),rgba(255,255,255,0) 0%,rgba(255,255,255,.5) 40% 50%,rgba(255,255,255,0) 55%);mix-blend-mode:screen;pointer-events:none;background-size:200% 200%;background-position:0% 50%;background-repeat:no-repeat;transition:background-position 500ms cubic-bezier(.25,1,.5,1),--angle-2 500ms cubic-bezier(.25,1,.5,1);}
+.hero-content .btn-primary:hover span::after,.hero-content .btn-ghost:hover span::after{background-position:25% 50%;}
+.hero-content .btn-primary:active span::after,.hero-content .btn-ghost:active span::after{background-position:50% 15%;--angle-2:-15deg;}
+
+.hero-content .btn-primary::after,.hero-content .btn-ghost::after{content:"";position:absolute;border-radius:999vw;width:calc(100% + var(--bw));height:calc(100% + var(--bw));top:calc(-1 * var(--bw) / 2);left:calc(-1 * var(--bw) / 2);padding:var(--bw);box-sizing:border-box;background:conic-gradient(from var(--angle-1) at 50% 50%,rgba(0,0,0,.5),rgba(0,0,0,0) 5% 40%,rgba(0,0,0,.5) 50%,rgba(0,0,0,0) 60% 95%,rgba(0,0,0,.5)),linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.5));mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;transition:all 400ms cubic-bezier(.25,1,.5,1),--angle-1 500ms ease;box-shadow:inset 0 0 0 calc(var(--bw) / 2) rgba(255,255,255,.5);z-index:1;}
+.hero-content .btn-primary:hover::after,.hero-content .btn-ghost:hover::after{--angle-1:-125deg;}
+.hero-content .btn-primary:active::after,.hero-content .btn-ghost:active::after{--angle-1:-75deg;}
+
+.btn-glass-wrap:has(.btn-primary:hover) .btn-shadow,.btn-glass-wrap:has(.btn-ghost:hover) .btn-shadow{filter:blur(clamp(2px,.0625em,6px));}
+.btn-glass-wrap:has(.btn-primary:hover) .btn-shadow::after,.btn-glass-wrap:has(.btn-ghost:hover) .btn-shadow::after{top:calc(var(--sc) - .875em);}
+.btn-glass-wrap:has(.btn-primary:active),.btn-glass-wrap:has(.btn-ghost:active){transform:rotate3d(1,0,0,25deg);}
+.btn-glass-wrap:has(.btn-primary:active) .btn-primary,.btn-glass-wrap:has(.btn-ghost:active) .btn-ghost{box-shadow:inset 0 2px 2px rgba(0,0,0,.05),inset 0 -2px 2px rgba(255,255,255,.45),0 2px 2px -2px rgba(0,0,0,.2),inset 0 0 0 4px rgba(255,255,255,.15),0 3.5px 1px 0 rgba(0,0,0,.07),0 4px 0 0 rgba(255,255,255,.6),inset 0 4px 1px 0 rgba(0,0,0,.12);}
+.btn-glass-wrap:has(.btn-primary:active) .btn-shadow,.btn-glass-wrap:has(.btn-ghost:active) .btn-shadow{filter:blur(clamp(2px,.125em,12px));}
+.btn-glass-wrap:has(.btn-primary:active) .btn-shadow::after,.btn-glass-wrap:has(.btn-ghost:active) .btn-shadow::after{top:calc(var(--sc) - .5em);opacity:.75;}
+.btn-glass-wrap:has(.btn-primary:active) span,.btn-glass-wrap:has(.btn-ghost:active) span{text-shadow:.4px 4px 1px rgba(0,0,0,.15);}
 .hero-visual{position:absolute;inset:0;z-index:0;}
 .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;}
 .hero-photo-fade{position:absolute;inset:0;background:linear-gradient(to top,#111 0%,rgba(17,17,17,.8) 16%,rgba(17,17,17,.1) 28%,transparent 40%);z-index:2;}
@@ -254,8 +250,14 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       </div>
       <p class="hero-sub">EA FC Clubs Pro · Buenos Aires · Argentina</p>
       <div class="hero-cta">
-        <a class="btn-primary" href="plantilla.html">Ver plantel</a>
-        <a class="btn-ghost" href="estadisticas.html">Estadísticas</a>
+        <div class="btn-glass-wrap">
+          <a class="btn-primary" href="plantilla.html"><span>Ver plantel</span></a>
+          <div class="btn-shadow"></div>
+        </div>
+        <div class="btn-glass-wrap">
+          <a class="btn-ghost" href="estadisticas.html"><span>Estadísticas</span></a>
+          <div class="btn-shadow"></div>
+        </div>
       </div>
     </div>
     <div class="hero-visual">
