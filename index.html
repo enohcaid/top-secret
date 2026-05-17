@@ -29,7 +29,7 @@ body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;f
 .hero{background:var(--black);width:100vw;margin-left:calc(-1 * var(--sb-left));aspect-ratio:2/1;max-height:85vh;display:flex;align-items:flex-end;justify-content:center;padding:0 calc(var(--sb-left) + 40px) 20px;position:relative;overflow:hidden;}
 .hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;}
 .hero-lines::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);}
-.hero-content{position:relative;z-index:3;width:100%;max-width:700px;text-align:center;display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:20px 36px 18px;transform:scale(.75);transform-origin:bottom center;box-shadow:0 20px 48px rgba(255,255,255,.07),0 8px 24px rgba(201,168,76,.06);}
+.hero-content{position:relative;z-index:3;width:100%;max-width:700px;text-align:center;display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:12px;--bw:1.5px;padding:20px 36px 18px;transform:scale(.75);transform-origin:bottom center;box-shadow:0 20px 48px rgba(255,255,255,.07),0 8px 24px rgba(201,168,76,.06);}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:3px 10px;margin-bottom:10px;}
 .hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
 .hero-badge-text{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
@@ -72,6 +72,18 @@ body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;f
 .btn-glass-wrap:has(.btn-primary:active) .btn-shadow,.btn-glass-wrap:has(.btn-ghost:active) .btn-shadow{filter:blur(clamp(2px,.125em,12px));}
 .btn-glass-wrap:has(.btn-primary:active) .btn-shadow::after,.btn-glass-wrap:has(.btn-ghost:active) .btn-shadow::after{top:calc(var(--sc) - .5em);opacity:.75;}
 .btn-glass-wrap:has(.btn-primary:active) span,.btn-glass-wrap:has(.btn-ghost:active) span{text-shadow:.4px 4px 1px rgba(0,0,0,.15);}
+
+/* ── PANEL BORDER animado ── */
+@keyframes panel-spin{from{--angle-1:-75deg}to{--angle-1:285deg}}
+.hero-content::after{content:"";position:absolute;border-radius:12px;inset:calc(-1 * var(--bw));padding:var(--bw);box-sizing:border-box;background:conic-gradient(from var(--angle-1) at 50% 50%,rgba(0,0,0,.5),rgba(0,0,0,0) 5% 40%,rgba(0,0,0,.5) 50%,rgba(0,0,0,0) 60% 95%,rgba(0,0,0,.5)),linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.5));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:panel-spin 8s linear infinite;pointer-events:none;}
+
+/* ── BADGE glass button ── */
+.hero-badge-wrap{margin-bottom:10px;}
+.hero-content .hero-badge{--bw:1.5px;background:linear-gradient(-75deg,rgba(255,255,255,.05),rgba(255,255,255,.2),rgba(255,255,255,.05));border:none;border-radius:999vw;box-shadow:inset 0 2px 2px rgba(0,0,0,.05),inset 0 -2px 2px rgba(255,255,255,.45),0 4px 2px -2px rgba(0,0,0,.25),inset 0 0 0 4px rgba(255,255,255,.15);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:5px 14px;position:relative;overflow:visible;margin-bottom:0;}
+.hero-content .hero-badge::after{content:"";position:absolute;border-radius:999vw;inset:calc(-1 * var(--bw));padding:var(--bw);box-sizing:border-box;background:conic-gradient(from var(--angle-1) at 50% 50%,rgba(0,0,0,.5),rgba(0,0,0,0) 5% 40%,rgba(0,0,0,.5) 50%,rgba(0,0,0,0) 60% 95%,rgba(0,0,0,.5)),linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.5));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:panel-spin 5s linear infinite;pointer-events:none;box-shadow:inset 0 0 0 calc(var(--bw) / 2) rgba(255,255,255,.5);}
+.hero-content .hero-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.hero-content .hero-badge-text{font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.92);text-shadow:0 2px 1px rgba(0,0,0,.2);}
+
 .hero-visual{position:absolute;inset:0;z-index:0;}
 .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;}
 .hero-photo-fade{position:absolute;inset:0;background:linear-gradient(to top,#111 0%,rgba(17,17,17,.8) 16%,rgba(17,17,17,.1) 28%,transparent 40%);z-index:2;}
@@ -244,7 +256,10 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   <section class="hero">
     <div class="hero-lines"></div>
     <div class="hero-content">
-      <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">VPN 1ra División · Temporada 2 · 2026</span></div>
+      <div class="btn-glass-wrap hero-badge-wrap">
+        <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">VPN 1ra División · Temporada 2 · 2026</span></div>
+        <div class="btn-shadow"></div>
+      </div>
       <div class="hero-identity">
         <img class="hero-logo" src="logos/Top Secret Logo.png" alt="Top Secret FC">
         <h1 class="hero-title">TOP <span class="hero-title-accent">SECRET</span> FC</h1>
