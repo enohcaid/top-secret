@@ -43,15 +43,39 @@ body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;f
 .btn-primary:hover{background:var(--gold2);}
 .btn-ghost{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:4px;cursor:pointer;text-decoration:none;transition:all .2s;}
 .btn-ghost:hover{border-color:rgba(255,255,255,.5);color:var(--white);}
-/* ── GLASS BUTTONS (solo dentro del hero glass panel) ── */
-.hero-content .btn-primary{position:relative;background:rgba(201,168,76,.22);color:#fff;border:1px solid rgba(201,168,76,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);}
-.hero-content .btn-primary::after{content:'';position:absolute;inset:4px 10px -10px;background:rgba(201,168,76,.65);filter:blur(14px);border-radius:inherit;z-index:-1;opacity:.55;transition:opacity .25s;}
-.hero-content .btn-primary:hover{background:rgba(201,168,76,.35);border-color:rgba(201,168,76,.75);}
+/* ── GLASS BUTTONS — estilo físico 3D (pill + highlight + shadow-copia) ── */
+.hero-content .btn-primary,
+.hero-content .btn-ghost{
+  position:relative;border-radius:50px;padding:9px 22px;border:none;overflow:visible;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:background .2s,transform .15s;
+}
+/* borde superior luminoso + profundidad inferior = efecto 3D */
+.hero-content .btn-primary{
+  background:rgba(255,255,255,.18);color:#fff;
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.08);
+}
+.hero-content .btn-primary:hover{background:rgba(255,255,255,.26);transform:translateY(-1px);}
+/* shadow = copia borrosa del botón debajo, color dorado */
+.hero-content .btn-primary::after{
+  content:'';position:absolute;inset:8px 6px -14px;
+  background:rgba(201,168,76,.55);filter:blur(16px);
+  border-radius:inherit;z-index:-1;opacity:.7;transition:opacity .25s;
+}
 .hero-content .btn-primary:hover::after{opacity:1;}
-.hero-content .btn-ghost{position:relative;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.1);}
-.hero-content .btn-ghost::after{content:'';position:absolute;inset:4px 10px -10px;background:rgba(255,255,255,.28);filter:blur(10px);border-radius:inherit;z-index:-1;opacity:0;transition:opacity .25s;}
-.hero-content .btn-ghost:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.42);color:#fff;}
-.hero-content .btn-ghost:hover::after{opacity:.55;}
+
+.hero-content .btn-ghost{
+  background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.05);
+}
+.hero-content .btn-ghost:hover{background:rgba(255,255,255,.16);color:#fff;transform:translateY(-1px);}
+/* shadow = copia borrosa blanca */
+.hero-content .btn-ghost::after{
+  content:'';position:absolute;inset:8px 6px -14px;
+  background:rgba(255,255,255,.3);filter:blur(14px);
+  border-radius:inherit;z-index:-1;opacity:.35;transition:opacity .25s;
+}
+.hero-content .btn-ghost:hover::after{opacity:.7;}
 .hero-visual{position:absolute;inset:0;z-index:0;}
 .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;}
 .hero-photo-fade{position:absolute;inset:0;background:linear-gradient(to top,#111 0%,rgba(17,17,17,.8) 16%,rgba(17,17,17,.1) 28%,transparent 40%);z-index:2;}
