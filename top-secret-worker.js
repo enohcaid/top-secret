@@ -345,7 +345,7 @@ export default {
 
       // ── VPUG API PROXY (/vpug-table) ──────────
       if (url.pathname === '/vpug-table' && request.method === 'GET') {
-        const fbResp = await fetch('https://copafacil-web.firebaseio.com/events/-fthh5@n619/teams.json');
+        const fbResp = await fetch('https://copafacil-web.firebaseio.com/events/-fthh5@pg59/teams.json');
         const raw = await fbResp.json();
         if (!raw) return jsonResp({ error: 'Firebase returned null', fallback: true }, 200);
         const teams = Object.values(raw).map(t => {
