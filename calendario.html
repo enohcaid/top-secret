@@ -962,15 +962,15 @@ import { SEED_MATCHES } from './seed_matches.js';
 const RAW = [
   // ══ SEMANA 2-5 MARZO ══
   // Lun 02 Mar - VPUG
-  {date:'2026-03-02',time:'22:30',league:'VPUG', rival:'Suda eSports',       isHome:true,  result:[2,0]},
+  {date:'2026-03-02',time:'22:30',league:'VPUG', rival:'Suda eSports',       isHome:true,  result:null},
   // Mar 03 Mar - VPUG + 11x11
-  {date:'2026-03-03',time:'22:30',league:'VPUG', rival:'Team Valhalla',      isHome:false, result:[0,5]},
+  {date:'2026-03-03',time:'22:30',league:'VPUG', rival:'Team Valhalla',      isHome:false, result:null},
   {date:'2026-03-03',time:'23:00',league:'11x11',rival:'Instituto Reserva',   isHome:false, result:[0,3]},
   {date:'2026-03-03',time:'23:30',league:'11x11',rival:'Los Picantes Esports',isHome:true,  result:[7,0]},
   // Mié 04 Mar - VPUG
-  {date:'2026-03-04',time:'22:30',league:'VPUG', rival:'La Unión FC',        isHome:true,  result:[8,1]},
+  {date:'2026-03-04',time:'22:30',league:'VPUG', rival:'La Unión FC',        isHome:true,  result:null},
   // Jue 05 Mar - VPUG + 11x11
-  {date:'2026-03-05',time:'22:30',league:'VPUG', rival:'Ferro eSports',      isHome:false, result:[0,1]},
+  {date:'2026-03-05',time:'22:30',league:'VPUG', rival:'Ferro eSports',      isHome:false, result:null},
   {date:'2026-03-05',time:'23:00',league:'11x11',rival:'Talleres Cantera',    isHome:true,  result:[6,0]},
   {date:'2026-03-05',time:'23:30',league:'11x11',rival:'Instituto Senior',    isHome:true,  result:[6,0]},
 
@@ -998,7 +998,7 @@ const RAW = [
   {date:'2026-03-16',time:'23:30',league:'VPN',  rival:'FERRO',              isHome:false, result:null},
 
   // Mar 17 Mar
-  {date:'2026-03-10',time:'22:30',league:'VPUG', rival:'Evermeet Rising',    isHome:false, result:[0,1]},
+  {date:'2026-03-10',time:'22:30',league:'VPUG', rival:'Evermeet Rising',    isHome:false, result:null},
   {date:'2026-03-17',time:'23:00',league:'11x11',rival:'Deportivo Ballester',isHome:false, result:null},
   {date:'2026-03-17',time:'23:30',league:'11x11',rival:'Olimpo Esports',     isHome:true,  result:null},
 
@@ -1036,7 +1036,7 @@ const RAW = [
   {date:'2026-04-01',time:'23:30',league:'VPN',  rival:'Instituto Reserva',  isHome:false, result:null},
 
   // Mar 31 Mar
-  {date:'2026-03-23',time:'22:30',league:'VPUG', rival:'Atletico Titan',     isHome:false, result:[0,1]},
+  {date:'2026-03-23',time:'22:30',league:'VPUG', rival:'Atletico Titan',     isHome:false, result:null},
   {date:'2026-03-31',time:'23:00',league:'11x11',rival:'4BDOMIFL4NES',       isHome:true,  result:null},
   {date:'2026-03-31',time:'23:30',league:'11x11',rival:'Camioneros Esports', isHome:true,  result:null},
 
@@ -1046,7 +1046,7 @@ const RAW = [
   {date:'2026-04-06',time:'23:30',league:'VPN',  rival:'Instituto Cantera',  isHome:true,  result:null},
 
   // Jue 2 Abr
-  {date:'2026-03-25',time:'22:30',league:'VPUG', rival:'Almirante Brown eSp',isHome:false, result:[0,1]},
+  {date:'2026-03-25',time:'22:30',league:'VPUG', rival:'Almirante Brown eSp',isHome:false, result:null},
   {date:'2026-04-07',time:'23:00',league:'11x11',rival:'Sub 21 CF',          isHome:false, result:null},
   {date:'2026-04-07',time:'23:30',league:'11x11',rival:'Ferro',              isHome:false, result:null},
 
@@ -1754,7 +1754,7 @@ function customIsInRaw(cm) {
     const r = getMatch(i);
     if (cm.league && r.league !== cm.league) return false;
     if (!rivalMatch(r.rival, cm.rival)) return false;
-    return r.date === cm.date || !!r.result;
+    return r.date === cm.date || !!r.result || !!results[i];
   });
 }
 

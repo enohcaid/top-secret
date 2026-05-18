@@ -302,10 +302,9 @@ footer span { color: var(--gold); }
 
     <!-- VPUG T2 -->
     <div class="tab-pane" id="t2-pane-vpug">
-      <div class="prox-wrap" style="padding:40px 0">
-        <div class="prox-badge">VPUG · T2</div>
-        <div class="prox-title">Próximamente</div>
-        <p class="prox-sub">La tabla de la VPUG se actualizará cuando comience la competencia.</p>
+      <div class="table-wrap"><table class="standings-table" id="t2-vpug-table"></table></div>
+      <div class="zone-legend">
+        <div class="zl-item"><span class="zone-dot" style="background:var(--vpug)"></span>Clasificado directo</div>
       </div>
     </div>
 
@@ -340,6 +339,27 @@ const WORKER_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const VPN_URL  = WORKER_BASE + '/vpn-table';
 const VPUG_URL = WORKER_BASE + '/vpug-table';
 const E11_URL  = 'https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2';
+
+const VPUG_T2_DATA = [
+  {name:'TOP Secret',           abbr:'TOP', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, us:true, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMurZRTaYIDhkHTacb.png?alt=media&token=1'},
+  {name:'All Boys eSports',     abbr:'ALB', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuxjrkBhlxqgHYo3h.png?alt=media&token=1'},
+  {name:'Atletico Moneiro',     abbr:'ATM', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMufqFxBsoawhOuaBj.png?alt=media&token=1'},
+  {name:'Evermeet Rising',      abbr:'EVR', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuzAoZE3jVN4OQFXE.png?alt=media&token=1'},
+  {name:'Germinal eSports',     abbr:'GER', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMutXodyVLwoM4J5wE.png?alt=media&token=1'},
+  {name:'Hacha eSports',        abbr:'HAC', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuj6jB2yFLi8_u_BT.png?alt=media&token=1'},
+  {name:'I.A.C.C Cantera',      abbr:'IAC', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuw6E8LdYHoDoCUr1l.png?alt=media&token=1'},
+  {name:'InfinitX',             abbr:'INF', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuhE-u1E66GmHygQ8.png?alt=media&token=1'},
+  {name:'La Union FC',          abbr:'LUF', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuv-Tncx4ZJag-r26.png?alt=media&token=1'},
+  {name:'NuVo FC',              abbr:'NUV', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvBXyushQcOcLYfub.png?alt=media&token=1'},
+  {name:'Nueva Chicago eSports',abbr:'NCH', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMv1LKGj7lioqdDP0i.png?alt=media&token=1'},
+  {name:'Olimpo eSports',       abbr:'OLI', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMunLybVb4pwFbqCue.png?alt=media&token=1'},
+  {name:'Real Marcianos FC',    abbr:'RMF', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMv2cJ5Fped-UWTHGu.png?alt=media&token=1'},
+  {name:'Suda eSports',         abbr:'SUD', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuuL37DZJ4_U3v-AE.png?alt=media&token=1'},
+  {name:'Team Valhalla',        abbr:'VAL', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMv-OatbjUrVHU2SRR.png?alt=media&token=1'},
+  {name:'United Mito',          abbr:'UNM', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvCo5TroXXRQESh8X.png?alt=media&token=1'},
+  {name:'Villa Dalmine eSports',abbr:'VDE', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMusnJNuTqdPlqecqy.png?alt=media&token=1'},
+  {name:'4BDOMIFL4NES',         abbr:'4BD', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMv3twVIiqprWZaFrj.png?alt=media&token=1'},
+];
 
 const VPUG_DATA = [
   {name:'Villa Dalmine eSp',  abbr:'VDE', gp:8, w:7, d:1, l:0, gf:15, gc:4,  gd:11,  pts:22, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fn619%2Fteams%2F-OmWPzqBjj1QCR6oNHIq.png?alt=media&token=1&m=1772317663374'},
@@ -536,6 +556,22 @@ function renderT1() {
   }, 50);
 }
 
+/* ── FETCH & RENDER T2 VPUG ── */
+async function fetchT2VPUG() {
+  try {
+    const r = await fetch(VPUG_URL);
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    const data = normVPUG(Array.isArray(raw) ? raw : []);
+    if (!data.length) throw new Error('empty');
+    renderTable('t2-vpug-table', data, 'var(--vpug)');
+    gsap.to('#t2-vpug-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  } catch(e) {
+    renderTable('t2-vpug-table', VPUG_T2_DATA, 'var(--vpug)');
+    gsap.to('#t2-vpug-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  }
+}
+
 /* ── FETCH & RENDER T2 VPN ── */
 async function fetchT2VPN() {
   try {
@@ -554,6 +590,7 @@ async function fetchT2VPN() {
 /* ── INIT ── */
 renderT1();
 fetchT2VPN();
+fetchT2VPUG();
 
 
 
