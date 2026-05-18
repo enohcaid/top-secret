@@ -1267,11 +1267,36 @@ async function saveState(){
   } catch(e){ console.warn('Firebase write error:', e); }
 }
 
+// VPUG T2 team badges (Firebase Storage)
+const _FB = 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F';
+const _FQ = '.png?alt=media&token=1';
+const VPUG_T2_BADGES = {
+  'United Mito':           _FB+'-OsMvCo5TroXXRQESh8X'+_FQ,
+  'All Boys eSports':      _FB+'-OsMuxjrkBhlxqgHYo3h'+_FQ,
+  'Olimpo eSports':        _FB+'-OsMunLybVb4pwFbqCue'+_FQ,
+  'InfinitX':              _FB+'-OsMuhE-u1E66GmHygQ8'+_FQ,
+  'I.A.C.C Cantera':       _FB+'-OsMuw6E8LdYHDoCUr1l'+_FQ,
+  'Hacha eSports':         _FB+'-OsMuj6jB2yFLi8_u_BT'+_FQ,
+  'Evermeet Rising':       _FB+'-OsMuzAoZE3jVN4OQFXE'+_FQ,
+  'Real Marcianos FC':     _FB+'-OsMv2cJ5Fped-UWTHGu'+_FQ,
+  'Team Valhalla':         _FB+'-OsMv-OatbjUrVHU2SRR'+_FQ,
+  'Germinal eSports':      _FB+'-OsMutXodyVLwoM4J5wE'+_FQ,
+  'Atletico Moneiro':      _FB+'-OsMufqFxBsoawhOuaBj'+_FQ,
+  'Villa Dalmine eSports': _FB+'-OsMusnJNuTqdPlqecqy'+_FQ,
+  'La Unión FC':           _FB+'-OsMuv-Tncx4ZJag-r26'+_FQ,
+  '4BDOMIFL4NES':          _FB+'-OsMv3twVIiqprWZaFrj'+_FQ,
+  'NuVo FC':               _FB+'-OsMvBXyushQcOcLYfub'+_FQ,
+  'Suda eSports':          _FB+'-OsMuuL37DZJ4_U3v-AE'+_FQ,
+  'Nueva Chicago eSports': _FB+'-OsMv1LKGj7lioqdDP0i'+_FQ,
+};
+function vpugBadge(rival){ return VPUG_T2_BADGES[rival] || null; }
+
 // Returns effective match data (with edits and suspension applied)
 function getMatch(i){
   const base = Object.assign({}, RAW[i]);
   if(edits[i])     Object.assign(base, edits[i]);
   if(suspended[i]) base.date = suspended[i].newDate;
+  if(!base.badge && base.league === 'VPUG') base.badge = vpugBadge(base.rival);
   return base;
 }
 
@@ -1280,10 +1305,14 @@ function getMatch(i){
 function getAnyMatch(id){
   if(typeof id === 'string' && id.startsWith('c')){
     const entry = custom[parseInt(id.slice(1))];
+    let m;
     if(entry && entry.isHome === undefined && entry.home !== undefined){
-      return Object.assign({}, entry, {isHome: entry.home});
+      m = Object.assign({}, entry, {isHome: entry.home});
+    } else {
+      m = entry;
     }
-    return entry;
+    if(m && !m.badge && m.league === 'VPUG') return Object.assign({}, m, {badge: vpugBadge(m.rival)});
+    return m;
   }
   if(typeof id === 'string' && id.startsWith('v')){
     const f = vpnDynamic[parseInt(id.slice(1))];
