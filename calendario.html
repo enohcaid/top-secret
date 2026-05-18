@@ -1083,31 +1083,31 @@ const RAW = [
 
   // ══ VPUG T2 — Temporada 2 ══
   // Semana 18-21 May
-  {date:'2026-05-18',time:'22:40',league:'VPUG', rival:'United Mito',            isHome:false, result:null}, // F1
-  {date:'2026-05-19',time:'22:40',league:'VPUG', rival:'All Boys eSports',       isHome:true,  result:null}, // F2
-  {date:'2026-05-20',time:'22:40',league:'VPUG', rival:'Olimpo eSports',         isHome:false, result:null}, // F3
-  {date:'2026-05-21',time:'22:40',league:'VPUG', rival:'InfinitX',               isHome:true,  result:null}, // F4
+  {date:'2026-05-18',time:'22:40',league:'VPUG', rival:'United Mito',            isHome:false, result:null, round:1},  // F1
+  {date:'2026-05-19',time:'22:40',league:'VPUG', rival:'All Boys eSports',       isHome:true,  result:null, round:2},  // F2
+  {date:'2026-05-20',time:'22:40',league:'VPUG', rival:'Olimpo eSports',         isHome:false, result:null, round:3},  // F3
+  {date:'2026-05-21',time:'22:40',league:'VPUG', rival:'InfinitX',               isHome:true,  result:null, round:4},  // F4
 
   // Semana 25-28 May
-  {date:'2026-05-25',time:'22:40',league:'VPUG', rival:'I.A.C.C Cantera',        isHome:false, result:null}, // F5
-  {date:'2026-05-26',time:'22:40',league:'VPUG', rival:'Hacha eSports',          isHome:true,  result:null}, // F6
-  {date:'2026-05-27',time:'22:40',league:'VPUG', rival:'Evermeet Rising',        isHome:false, result:null}, // F7
-  {date:'2026-05-28',time:'22:40',league:'VPUG', rival:'Real Marcianos FC',      isHome:false, result:null}, // F8
+  {date:'2026-05-25',time:'22:40',league:'VPUG', rival:'I.A.C.C Cantera',        isHome:false, result:null, round:5},  // F5
+  {date:'2026-05-26',time:'22:40',league:'VPUG', rival:'Hacha eSports',          isHome:true,  result:null, round:6},  // F6
+  {date:'2026-05-27',time:'22:40',league:'VPUG', rival:'Evermeet Rising',        isHome:false, result:null, round:7},  // F7
+  {date:'2026-05-28',time:'22:40',league:'VPUG', rival:'Real Marcianos FC',      isHome:false, result:null, round:8},  // F8
 
   // Semana 1-4 Jun
-  {date:'2026-06-01',time:'22:40',league:'VPUG', rival:'Team Valhalla',          isHome:true,  result:null}, // F9
-  {date:'2026-06-02',time:'22:40',league:'VPUG', rival:'Germinal eSports',       isHome:false, result:null}, // F10
-  {date:'2026-06-03',time:'22:40',league:'VPUG', rival:'Atletico Moneiro',       isHome:true,  result:null}, // F11
-  {date:'2026-06-04',time:'22:40',league:'VPUG', rival:'Villa Dalmine eSports',  isHome:false, result:null}, // F12
+  {date:'2026-06-01',time:'22:40',league:'VPUG', rival:'Team Valhalla',          isHome:true,  result:null, round:9},  // F9
+  {date:'2026-06-02',time:'22:40',league:'VPUG', rival:'Germinal eSports',       isHome:false, result:null, round:10}, // F10
+  {date:'2026-06-03',time:'22:40',league:'VPUG', rival:'Atletico Moneiro',       isHome:true,  result:null, round:11}, // F11
+  {date:'2026-06-04',time:'22:40',league:'VPUG', rival:'Villa Dalmine eSports',  isHome:false, result:null, round:12}, // F12
 
   // Semana 8-11 Jun
-  {date:'2026-06-08',time:'22:40',league:'VPUG', rival:'La Unión FC',            isHome:true,  result:null}, // F13
-  {date:'2026-06-09',time:'22:40',league:'VPUG', rival:'4BDOMIFL4NES',           isHome:false, result:null}, // F14
-  {date:'2026-06-10',time:'22:40',league:'VPUG', rival:'NuVo FC',                isHome:true,  result:null}, // F15
-  {date:'2026-06-11',time:'22:40',league:'VPUG', rival:'Suda eSports',           isHome:false, result:null}, // F16
+  {date:'2026-06-08',time:'22:40',league:'VPUG', rival:'La Unión FC',            isHome:true,  result:null, round:13}, // F13
+  {date:'2026-06-09',time:'22:40',league:'VPUG', rival:'4BDOMIFL4NES',           isHome:false, result:null, round:14}, // F14
+  {date:'2026-06-10',time:'22:40',league:'VPUG', rival:'NuVo FC',                isHome:true,  result:null, round:15}, // F15
+  {date:'2026-06-11',time:'22:40',league:'VPUG', rival:'Suda eSports',           isHome:false, result:null, round:16}, // F16
 
   // Semana 15 Jun
-  {date:'2026-06-15',time:'22:40',league:'VPUG', rival:'Nueva Chicago eSports',  isHome:true,  result:null}, // F17
+  {date:'2026-06-15',time:'22:40',league:'VPUG', rival:'Nueva Chicago eSports',  isHome:true,  result:null, round:17}, // F17
 
 ];
 
@@ -1712,9 +1712,15 @@ function renderTodayCard() {
 
   const leagueCls = {VPN:'vpn',VPUG:'vpug','11x11':'e11'};
   document.getElementById('todayMatchList').innerHTML = todayMatches.map(({m, id, isCustom}) => {
-    const jornada = isCustom ? null : getJornada(id);
     const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
-    const addedBadge = isCustom ? `<span class="jornada-badge" style="background:rgba(201,168,76,.12);color:var(--gold);border-color:rgba(201,168,76,.3)">+ Agregado</span>` : `<span class="tmr-jornada">J${jornada}</span>`;
+    let addedBadge;
+    if (isCustom) {
+      addedBadge = `<span class="jornada-badge" style="background:rgba(201,168,76,.12);color:var(--gold);border-color:rgba(201,168,76,.3)">+ Agregado</span>`;
+    } else if (m.round != null) {
+      addedBadge = `<span class="tmr-jornada">J${m.round}</span>`;
+    } else {
+      addedBadge = `<span class="tmr-jornada">J${getJornada(id)}</span>`;
+    }
     const tmrBadge = m.badge ? `<img class="tmr-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
     return `<div class="today-match-row">
       <span class="tmr-time">${m.time||'—'}</span>
