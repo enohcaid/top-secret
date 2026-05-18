@@ -451,6 +451,50 @@ try {
 /* ─── CALENDAR MATCHES (today) ─── */
 let calCustom = [];
 let vpnFixtures = [];
+
+// VPUG T2 badges (Firebase Storage)
+const _CFB = 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F';
+const _CFQ = '.png?alt=media&token=1';
+const VPUG_T2_BADGES = {
+  'United Mito':           _CFB+'-OsMvCo5TroXXRQESh8X'+_CFQ,
+  'All Boys eSports':      _CFB+'-OsMuxjrkBhlxqgHYo3h'+_CFQ,
+  'Olimpo eSports':        _CFB+'-OsMunLybVb4pwFbqCue'+_CFQ,
+  'InfinitX':              _CFB+'-OsMuhE-u1E66GmHygQ8'+_CFQ,
+  'I.A.C.C Cantera':       _CFB+'-OsMuw6E8LdYHDoCUr1l'+_CFQ,
+  'Hacha eSports':         _CFB+'-OsMuj6jB2yFLi8_u_BT'+_CFQ,
+  'Evermeet Rising':       _CFB+'-OsMuzAoZE3jVN4OQFXE'+_CFQ,
+  'Real Marcianos FC':     _CFB+'-OsMv2cJ5Fped-UWTHGu'+_CFQ,
+  'Team Valhalla':         _CFB+'-OsMv-OatbjUrVHU2SRR'+_CFQ,
+  'Germinal eSports':      _CFB+'-OsMutXodyVLwoM4J5wE'+_CFQ,
+  'Atletico Moneiro':      _CFB+'-OsMufqFxBsoawhOuaBj'+_CFQ,
+  'Villa Dalmine eSports': _CFB+'-OsMusnJNuTqdPlqecqy'+_CFQ,
+  'La Unión FC':           _CFB+'-OsMuv-Tncx4ZJag-r26'+_CFQ,
+  '4BDOMIFL4NES':          _CFB+'-OsMv3twVIiqprWZaFrj'+_CFQ,
+  'NuVo FC':               _CFB+'-OsMvBXyushQcOcLYfub'+_CFQ,
+  'Suda eSports':          _CFB+'-OsMuuL37DZJ4_U3v-AE'+_CFQ,
+  'Nueva Chicago eSports': _CFB+'-OsMv1LKGj7lioqdDP0i'+_CFQ,
+};
+
+// VPUG T2 schedule (mirrors RAW in calendario.html — update both if dates change)
+const VPUG_T2_SCHEDULE = [
+  {date:'2026-05-18',time:'22:40',league:'VPUG',rival:'United Mito',           isHome:false},
+  {date:'2026-05-19',time:'22:40',league:'VPUG',rival:'All Boys eSports',      isHome:true },
+  {date:'2026-05-20',time:'22:40',league:'VPUG',rival:'Olimpo eSports',        isHome:false},
+  {date:'2026-05-21',time:'22:40',league:'VPUG',rival:'InfinitX',              isHome:true },
+  {date:'2026-05-25',time:'22:40',league:'VPUG',rival:'I.A.C.C Cantera',       isHome:false},
+  {date:'2026-05-26',time:'22:40',league:'VPUG',rival:'Hacha eSports',         isHome:true },
+  {date:'2026-05-27',time:'22:40',league:'VPUG',rival:'Evermeet Rising',       isHome:false},
+  {date:'2026-05-28',time:'22:40',league:'VPUG',rival:'Real Marcianos FC',     isHome:false},
+  {date:'2026-06-01',time:'22:40',league:'VPUG',rival:'Team Valhalla',         isHome:true },
+  {date:'2026-06-02',time:'22:40',league:'VPUG',rival:'Germinal eSports',      isHome:false},
+  {date:'2026-06-03',time:'22:40',league:'VPUG',rival:'Atletico Moneiro',      isHome:true },
+  {date:'2026-06-04',time:'22:40',league:'VPUG',rival:'Villa Dalmine eSports', isHome:false},
+  {date:'2026-06-08',time:'22:40',league:'VPUG',rival:'La Unión FC',           isHome:true },
+  {date:'2026-06-09',time:'22:40',league:'VPUG',rival:'4BDOMIFL4NES',          isHome:false},
+  {date:'2026-06-10',time:'22:40',league:'VPUG',rival:'NuVo FC',               isHome:true },
+  {date:'2026-06-11',time:'22:40',league:'VPUG',rival:'Suda eSports',          isHome:false},
+  {date:'2026-06-15',time:'22:40',league:'VPUG',rival:'Nueva Chicago eSports', isHome:true },
+];
 let _shareLogo = null;
 const _shareLogoReady = new Promise(res => {
   const img = new Image();
@@ -470,16 +514,23 @@ fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
     renderTodayMatchesPanel();
   }).catch(() => {});
 function getTodayMatches() {
+  // Inject VPUG badges into calCustom entries
   const fromCustom = calCustom
-    .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'));
+    .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'))
+    .map(m => m.league === 'VPUG' && !m.badge ? {...m, badge: VPUG_T2_BADGES[m.rival]||null} : m);
   const fromVpn = vpnFixtures
     .filter(m => m.date === TODAY)
     .map(m => ({ ...m, league: 'VPN' }));
-  // Deduplicate: skip vpn entry if calCustom already has same rival
-  const deduped = fromVpn.filter(v =>
+  // VPUG T2 schedule — include today's entry if not already in calCustom
+  const fromVpugT2 = VPUG_T2_SCHEDULE
+    .filter(m => m.date === TODAY)
+    .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
+    .map(m => ({...m, badge: VPUG_T2_BADGES[m.rival]||null}));
+  // Deduplicate VPN: skip if calCustom already has same rival
+  const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase() === (v.rival||'').toLowerCase())
   );
-  return [...fromCustom, ...deduped].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+  return [...fromCustom, ...fromVpugT2, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
   const wrap = document.getElementById('todayMatchesPanel');

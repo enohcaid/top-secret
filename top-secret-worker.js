@@ -55,6 +55,7 @@ const FETCH_ALLOWED_DOMAINS = [
   'smash.gg',
   'start.gg',
   'faceit.com',
+  'firebasestorage.googleapis.com',
 ];
 
 export default {
