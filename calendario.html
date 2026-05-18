@@ -1345,6 +1345,8 @@ function getResult(id){
     // API didn't have this specific match — fall through to manually loaded result
   }
   // Firebase overrides (including VPN matches not yet in the API)
+  // For custom entries prefer inline result — it survives deleteCustom index shifts
+  if(typeof id === 'string' && id.startsWith('c') && m.result) return m.result;
   if(results[id]) return results[id];
   if(typeof id !== 'string' && m.result) return m.result;
   const seed = findSeedMatch(id);
@@ -2284,6 +2286,11 @@ async function saveRes(){
   const homeG = m.isHome ? myG : opG;
   const awayG = m.isHome ? opG : myG;
   results[editingId] = [homeG, awayG];
+  // Also store inline in custom entry so result survives index shifts
+  if(typeof editingId === 'string' && editingId.startsWith('c')){
+    const n = parseInt(editingId.slice(1));
+    if(custom[n]) custom[n].result = [homeG, awayG];
+  }
   saveState();
   closeModal();
   render();
@@ -2295,6 +2302,10 @@ async function saveRes(){
 async function clearRes(){
   const m = getAnyMatch(typeof editingId === 'string' ? editingId : parseInt(editingId));
   delete results[editingId];
+  if(typeof editingId === 'string' && editingId.startsWith('c')){
+    const n = parseInt(editingId.slice(1));
+    if(custom[n]) delete custom[n].result;
+  }
   saveState();
   closeModal();
   render();
@@ -2537,6 +2548,13 @@ function saveAdd(){
 }
 function deleteCustom(ci){
   if(!confirm('¿Eliminar este evento?')) return;
+  // Shift results keys so cN still points to the same logical match after splice
+  delete results['c'+ci];
+  for(let k = ci + 1; k < custom.length; k++){
+    if(results['c'+k] !== undefined) results['c'+(k-1)] = results['c'+k];
+    else delete results['c'+(k-1)];
+    delete results['c'+k];
+  }
   custom.splice(ci, 1);
   saveState();
   render();
