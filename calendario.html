@@ -747,6 +747,7 @@ body{padding-top:64px;}
 .tmr-time{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--gold);min-width:50px;}
 .tmr-rival{font-size:.9rem;font-weight:700;color:var(--black);flex:1;}
 .tmr-rival-badge{width:22px;height:22px;border-radius:4px;object-fit:contain;background:#eee;flex-shrink:0;}
+.mmi-rival-badge{width:20px;height:20px;border-radius:3px;object-fit:contain;vertical-align:middle;margin-right:4px;flex-shrink:0;}
 .jornada-badge{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.06em;color:var(--mid);background:var(--gray);border:1px solid var(--border);padding:1px 6px;border-radius:4px;}
 
 </style>
@@ -1279,12 +1280,28 @@ const VPUG_T2_BADGES = {
 };
 function vpugBadge(rival){ return VPUG_T2_BADGES[rival] || null; }
 
+// 11x11 T2 (VPG challengers-t3) team badges
+const _VPG = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
+const E11_T3_BADGES = {
+  'Los Waxiturros':         _VPG+'admin_cc6be68a-ba09-42a9-8b02-f212a63a69ee/public',
+  'Argentino de Merlo':     _VPG+'admin_4b75c893-290e-4735-a5a9-8ec09a84c088/public',
+  'Ferro':                  _VPG+'admin_1c583c95-59d3-4e79-9682-4d87ea41d8fe/public',
+  'Dep. Ballester':         _VPG+'admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public',
+  'All Boys':               _VPG+'admin_9d643667-da1a-4878-923c-88713acb1625/public',
+  'Comunicaciones eSports': _VPG+'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public',
+  'Instituto Reserva':      _VPG+'admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/public',
+  '4BDOMIFL4NES':           _VPG+'admin_d926fffb-49b9-44a2-8230-f2a44400927e/public',
+  'Los Picantes eSports':   _VPG+'admin_f47091ff-af62-4f7f-bdb4-9aba143c3bef/public',
+};
+function e11Badge(rival){ return E11_T3_BADGES[rival] || null; }
+
 // Returns effective match data (with edits and suspension applied)
 function getMatch(i){
   const base = Object.assign({}, RAW[i]);
   if(edits[i])     Object.assign(base, edits[i]);
   if(suspended[i]) base.date = suspended[i].newDate;
-  if(!base.badge && base.league === 'VPUG') base.badge = vpugBadge(base.rival);
+  if(!base.badge && base.league === 'VPUG')  base.badge = vpugBadge(base.rival);
+  if(!base.badge && base.league === '11x11') base.badge = e11Badge(base.rival);
   return base;
 }
 
@@ -1299,7 +1316,8 @@ function getAnyMatch(id){
     } else {
       m = entry;
     }
-    if(m && !m.badge && m.league === 'VPUG') return Object.assign({}, m, {badge: vpugBadge(m.rival)});
+    if(m && !m.badge && m.league === 'VPUG')  return Object.assign({}, m, {badge: vpugBadge(m.rival)});
+    if(m && !m.badge && m.league === '11x11') return Object.assign({}, m, {badge: e11Badge(m.rival)});
     return m;
   }
   if(typeof id === 'string' && id.startsWith('v')){
@@ -1923,10 +1941,11 @@ function buildMonthCard(year, month, mbd, today) {
         : `<span class="mmi-pending">Pendiente</span>`;
       const idJs = typeof id === 'string' ? `'${id}'` : String(id);
       const clickAttr = m.free ? 'class="month-match-item no-click"' : `class="month-match-item${outCls}" onclick="openStatsPanel(${idJs})"`;
+      const mmiBadge = m.badge ? `<img class="mmi-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
       return `<div ${clickAttr}>
         <span class="mmi-date">${dayLabel}</span>
         <span class="nh-lbadge ${lgKey}">${m.league||'—'}</span>
-        <span class="mmi-rival">vs ${m.rival||'?'}</span>
+        ${mmiBadge}<span class="mmi-rival">vs ${m.rival||'?'}</span>
         <span class="mmi-loc">${loc}</span>
         ${scoreHtml}
       </div>`;
