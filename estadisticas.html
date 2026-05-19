@@ -686,30 +686,6 @@ const ROSTER = [
   {name:'Lucasmati_akd',   pos:'DEL'},
 ];
 
-// ════════════════════════════════════════════
-// VPN RESULTS — authoritative source for VPN match scores
-// ════════════════════════════════════════════
-let vpnResultsData = [];
-
-function vpnRivalMatch(a, b){
-  const ra = (a||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  const rb = (b||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  if(!ra || !rb) return false;
-  if(ra === rb) return true;
-  const [long, short] = ra.length >= rb.length ? [ra, rb] : [rb, ra];
-  if(long.includes(short)) return true;
-  return long.includes(short.slice(0,4)) || long.includes(short.slice(-4));
-}
-
-async function fetchVpnResultsForStats(){
-  try {
-    const r = await fetch(`${WORKER_URL}/vpn-results`);
-    if(!r.ok) return;
-    const data = await r.json();
-    vpnResultsData = Array.isArray(data) ? data : [];
-    renderSeason();
-  } catch(e){}
-}
 
 // ════════════════════════════════════════════
 // CLOUD STORAGE (Cloudflare KV via Worker)
@@ -754,19 +730,8 @@ function setCloudStatus(ok, msg){
   document.getElementById('cloudLabel').textContent = msg;
 }
 
-// SEED siempre es la base + lo que se suba por la UI
-// VPN API overrides match_result for VPN matches when official data is available
 function loadMatches(){
-  const base = [...SEED_MATCHES, ...cloudMatches];
-  if(!vpnResultsData.length) return base;
-  return base.map(m => {
-    if(m.league !== 'VPN') return m;
-    const hit = vpnResultsData.find(r => r.date === m.date && vpnRivalMatch(r.rival, m.rival));
-    if(!hit) return m;
-    // Convert VPN {ts, rv} to home-away format used by estadisticas
-    const matchResult = m.isHome ? `${hit.ts}-${hit.rv}` : `${hit.rv}-${hit.ts}`;
-    return { ...m, match_result: matchResult };
-  });
+  return [...SEED_MATCHES, ...cloudMatches];
 }
 // ════════════════════════════════════════════
 // SEASON FILTER
@@ -2228,7 +2193,6 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 // Init: mostrar datos SEED de inmediato, luego sincronizar con nube
 renderSeason();
 cloudLoad().then(()=>renderSeason());
-fetchVpnResultsForStats();
 
 // ════════════════════════════════════════════
 // CLUB EA — Stats desde EA Sports API
