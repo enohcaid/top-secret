@@ -747,7 +747,6 @@ body{padding-top:64px;}
 .tmr-time{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--gold);min-width:50px;}
 .tmr-rival{font-size:.9rem;font-weight:700;color:var(--black);flex:1;}
 .tmr-rival-badge{width:22px;height:22px;border-radius:4px;object-fit:contain;background:#eee;flex-shrink:0;}
-.mmi-rival-badge{width:20px;height:20px;border-radius:3px;object-fit:contain;vertical-align:middle;margin-right:4px;flex-shrink:0;}
 .jornada-badge{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.06em;color:var(--mid);background:var(--gray);border:1px solid var(--border);padding:1px 6px;border-radius:4px;}
 
 </style>
@@ -1283,7 +1282,7 @@ function vpugBadge(rival){ return VPUG_T2_BADGES[rival] || null; }
 // 11x11 T2 (VPG challengers-t3) team badges
 const _VPG = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
 const E11_T3_BADGES = {
-  'Los Waxiturros':         _VPG+'admin_cc6be68a-ba09-42a9-8b02-f212a63a69ee/public',
+  'Los Waxiturros':         _VPG+'admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/public',
   'Argentino de Merlo':     _VPG+'admin_4b75c893-290e-4735-a5a9-8ec09a84c088/public',
   'Ferro':                  _VPG+'admin_1c583c95-59d3-4e79-9682-4d87ea41d8fe/public',
   'Dep. Ballester':         _VPG+'admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public',
@@ -1941,11 +1940,10 @@ function buildMonthCard(year, month, mbd, today) {
         : `<span class="mmi-pending">Pendiente</span>`;
       const idJs = typeof id === 'string' ? `'${id}'` : String(id);
       const clickAttr = m.free ? 'class="month-match-item no-click"' : `class="month-match-item${outCls}" onclick="openStatsPanel(${idJs})"`;
-      const mmiBadge = m.badge ? `<img class="mmi-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
       return `<div ${clickAttr}>
         <span class="mmi-date">${dayLabel}</span>
         <span class="nh-lbadge ${lgKey}">${m.league||'—'}</span>
-        ${mmiBadge}<span class="mmi-rival">vs ${m.rival||'?'}</span>
+        <span class="mmi-rival">vs ${m.rival||'?'}</span>
         <span class="mmi-loc">${loc}</span>
         ${scoreHtml}
       </div>`;
