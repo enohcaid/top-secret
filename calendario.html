@@ -1194,23 +1194,23 @@ async function fetchCloudSeedMatches() {
 async function fetchVpnResults() {
   try {
     const r = await fetch(`${WORKER_URL_CAL}/vpn-results`);
-    if (!r.ok) return;
+    if (!r.ok) { console.warn('[VPN results] HTTP', r.status); return; }
     const data = await r.json();
     vpnResults = Array.isArray(data) ? data : [];
     if (vpnFixtures.length) rebuildVpnDynamic(); // Re-dedup: vpnResults now available
     if (_fbReady) render();
-  } catch(e) {}
+  } catch(e) { console.warn('[VPN results] fetch error', e); }
 }
 
 async function fetchVpnFixtures() {
   try {
     const r = await fetch(`${WORKER_URL_CAL}/vpn-fixtures`);
-    if (!r.ok) return;
+    if (!r.ok) { console.warn('[VPN fixtures] HTTP', r.status); return; }
     const data = await r.json();
     vpnFixtures = Array.isArray(data) ? data : [];
     rebuildVpnDynamic();
     if (_fbReady) render();
-  } catch(e) {}
+  } catch(e) { console.warn('[VPN fixtures] fetch error', e); }
 }
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
@@ -1692,7 +1692,14 @@ function renderTodayCard() {
     .map((m, ci) => ({m, id:'c'+ci, isCustom:true}))
     .filter(({m}) => m.date === today && (!m.tipo || m.tipo === 'partido') && !customIsInRaw(m));
 
-  const todayMatches = [...rawToday, ...customToday]
+  // VPN T2 dynamic fixtures for today (not already covered by RAW or custom)
+  const vpnToday = vpnDynamic
+    .map((m, vi) => ({m: {...m, league:'VPN'}, id:'v'+vi, isCustom:false}))
+    .filter(({m}) => m.date === today)
+    .filter(({m}) => !rawToday.some(r => r.m.league === 'VPN' && rivalMatch(r.m.rival, m.rival))
+                  && !customToday.some(c => c.m.league === 'VPN' && rivalMatch(c.m.rival, m.rival)));
+
+  const todayMatches = [...rawToday, ...customToday, ...vpnToday]
     .sort((a,b) => (a.m.time||'').localeCompare(b.m.time||''));
 
   const wrap = document.getElementById('todayCard');
