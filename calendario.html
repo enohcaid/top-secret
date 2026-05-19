@@ -1143,7 +1143,6 @@ const ADMIN_PIN  = '8189';
 const WORKER_URL_CAL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const KV_KEY_CAL     = 'ts_matches_v1';
 let cloudSeedMatches = []; // populated on load
-let vpnResults       = []; // results de VPN — temporada activa de Liga Argentina 2da División
 let vpnFixtures      = []; // fixtures de VPN — partidos pendientes de la temporada activa
 let vpnDynamic       = []; // subset de vpnFixtures sin duplicados con RAW/custom
 let currentStatsId   = null; // id of the match currently open in the stats panel
@@ -1162,33 +1161,8 @@ function rebuildVpnDynamic() {
     return custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
   }
 
-  // Future fixtures not already in RAW or custom
-  const futureEntries = vpnFixtures.filter(f => !isInRaw(f) && !isInCustom(f));
-
-  // Past results not covered by vpnFixtures, RAW, or custom
-  // (/vpn-fixtures only returns upcoming matches; /vpn-results has the history)
-  const fixtureIds = new Set(vpnFixtures.map(f => f.id));
-  const historyEntries = vpnResults
-    .filter(r => !fixtureIds.has(r.id) && !isInRaw(r) && !isInCustom(r))
-    .map(r => ({
-      id:     r.id,
-      date:   r.date,
-      time:   '22:30',
-      rival:  r.rival,
-      badge:  null,
-      isHome: r.isHome,
-      round:  r.round || null,
-    }));
-
-  // Merge, dedup by id (fixtures take priority so they keep badge/round/time)
-  const seen = new Set();
-  vpnDynamic = [];
-  for (const e of [...futureEntries, ...historyEntries]) {
-    if (!seen.has(e.id)) {
-      seen.add(e.id);
-      vpnDynamic.push(e);
-    }
-  }
+  // Only upcoming fixtures not already covered by RAW or custom entries
+  vpnDynamic = vpnFixtures.filter(f => !isInRaw(f) && !isInCustom(f));
 }
 
 async function fetchCloudSeedMatches() {
@@ -1200,16 +1174,6 @@ async function fetchCloudSeedMatches() {
   } catch(e) { /* silently ignore — stats panel falls back to local data */ }
 }
 
-async function fetchVpnResults() {
-  try {
-    const r = await fetch(`${WORKER_URL_CAL}/vpn-results`);
-    if (!r.ok) { console.warn('[VPN results] HTTP', r.status); return; }
-    const data = await r.json();
-    vpnResults = Array.isArray(data) ? data : [];
-    if (vpnFixtures.length) rebuildVpnDynamic(); // Re-dedup: vpnResults now available
-    if (_fbReady) render();
-  } catch(e) { console.warn('[VPN results] fetch error', e); }
-}
 
 async function fetchVpnFixtures() {
   try {
@@ -1375,19 +1339,6 @@ function nextLeagueDay(dateStr, league){
 function getResult(id){
   const m = getAnyMatch(id);
   if(!m) return null;
-  // VPN API is the authoritative source — always takes priority for VPN matches
-  // Skip entirely for future dates: the VPN platform stores times without timezone,
-  // so argDate can equal the scheduled future date and produce false exact matches.
-  if(m.league === 'VPN' && vpnResults.length && m.date <= getToday()){
-    // Exact date+rival match first; fallback allows ±1 day for timezone/schedule discrepancies
-    let hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
-    if(!hit) hit = vpnResults.find(r => {
-      if(!rivalMatch(r.rival, m.rival)) return false;
-      return Math.abs(new Date(r.date) - new Date(m.date)) <= 86400000; // ≤ 1 day
-    });
-    if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
-    // API didn't have this specific match — fall through to manually loaded result
-  }
   // Firebase overrides (including VPN matches not yet in the API)
   // For custom entries prefer inline result — it survives deleteCustom index shifts
   if(typeof id === 'string' && id.startsWith('c') && m.result) return m.result;
@@ -2786,7 +2737,6 @@ document.body.classList.add('locked');
 // render() is called by onSnapshot when Firebase data loads
 // Fetch cloud match stats, VPN results and VPN fixtures in the background
 fetchCloudSeedMatches();
-fetchVpnResults();
 fetchVpnFixtures();
 </script>
 
