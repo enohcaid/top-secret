@@ -652,9 +652,27 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
     document.getElementById('lc-vpn-badge').textContent = 'T2 · Fecha 3';
   }
 
-  // VPUG y 11x11 — T2 aún no iniciado
-  ['lc-vpug-pts','lc-e11-pts'].forEach(id => document.getElementById(id).textContent = 'T2 · Por iniciar');
-  ['lc-vpug-pos','lc-e11-pos'].forEach(id => document.getElementById(id).textContent = '—');
+  // VPUG T2 — tabla en vivo desde Firebase vía worker
+  try {
+    const vpugRaw = await (await fetch(WORKER + '/vpug-table')).json();
+    const vpugRows = (Array.isArray(vpugRaw) ? vpugRaw : []).map(e => ({
+      name: e.name || '',
+      gp: e.gp || 0,
+      w:  e.w  || 0,
+      d:  e.d  || 0,
+      l:  e.l  || 0,
+      pts: e.pts || 0,
+    }));
+    if (vpugRows.length) applyCard('lc-vpug-pos','lc-vpug-pts','lc-vpug-badge', vpugRows);
+    else throw new Error('empty');
+  } catch(_) {
+    document.getElementById('lc-vpug-pts').textContent = '1V 0E 0D · 3 pts · 1 PJ';
+    document.getElementById('lc-vpug-badge').textContent = 'T2 · Fecha 1';
+  }
+
+  // 11x11 — T2 aún no iniciado
+  document.getElementById('lc-e11-pts').textContent = 'T2 · Por iniciar';
+  document.getElementById('lc-e11-pos').textContent = '—';
 })();
 
 /* ── PLAYER QUICK MODAL ── */
