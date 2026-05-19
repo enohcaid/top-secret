@@ -1381,6 +1381,7 @@ function getResult(id){
     let hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
     if(!hit) hit = vpnResults.find(r => {
       if(!rivalMatch(r.rival, m.rival)) return false;
+      if(m.date > getToday()) return false; // no ±1 day for future fixtures
       return Math.abs(new Date(r.date) - new Date(m.date)) <= 86400000; // ≤ 1 day
     });
     if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
