@@ -1376,12 +1376,13 @@ function getResult(id){
   const m = getAnyMatch(id);
   if(!m) return null;
   // VPN API is the authoritative source — always takes priority for VPN matches
-  if(m.league === 'VPN' && vpnResults.length){
+  // Skip entirely for future dates: the VPN platform stores times without timezone,
+  // so argDate can equal the scheduled future date and produce false exact matches.
+  if(m.league === 'VPN' && vpnResults.length && m.date <= getToday()){
     // Exact date+rival match first; fallback allows ±1 day for timezone/schedule discrepancies
     let hit = vpnResults.find(r => r.date === m.date && rivalMatch(r.rival, m.rival));
     if(!hit) hit = vpnResults.find(r => {
       if(!rivalMatch(r.rival, m.rival)) return false;
-      if(m.date > getToday()) return false; // no ±1 day for future fixtures
       return Math.abs(new Date(r.date) - new Date(m.date)) <= 86400000; // ≤ 1 day
     });
     if(hit) return m.isHome ? [hit.ts, hit.rv] : [hit.rv, hit.ts];
