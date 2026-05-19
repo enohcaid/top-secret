@@ -1215,7 +1215,7 @@ async function fetchVpnFixtures() {
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M",
@@ -1231,9 +1231,11 @@ const db  = getFirestore(app);
 const CAL_DOC = doc(db, 'calendario', 'estado');
 
 let _fbReady = false;
+let _localWritePending = false; // true while we have an in-flight write to prevent onSnapshot from overriding it
 
 // Load from Firestore on start, then keep local state in sync
 onSnapshot(CAL_DOC, snap => {
+  if(_localWritePending) return; // ignore stale snapshot while our own write is in flight
   if(snap.exists()){
     const data = snap.data();
     results   = data.results   || {};
@@ -1262,9 +1264,11 @@ async function saveState(){
   localStorage.setItem('ts_suspended', JSON.stringify(suspended));
   localStorage.setItem('ts_custom',    JSON.stringify(custom));
   // Save to Firebase
+  _localWritePending = true;
   try {
     await setDoc(CAL_DOC, { results, edits, suspended, custom }, { merge: true });
   } catch(e){ console.warn('Firebase write error:', e); }
+  finally { _localWritePending = false; }
 }
 
 // VPUG T2 team badges (Firebase Storage)
@@ -2348,9 +2352,20 @@ async function clearRes(){
     const n = parseInt(editingId.slice(1));
     if(custom[n]) delete custom[n].result;
   }
-  saveState();
+  // Save locally immediately
+  localStorage.setItem('ts_results', JSON.stringify(results));
+  localStorage.setItem('ts_custom',  JSON.stringify(custom));
   closeModal();
   render();
+  // Use updateDoc + deleteField so Firestore actually removes the key (setDoc merge doesn't guarantee deletion of map sub-keys)
+  _localWritePending = true;
+  try {
+    await updateDoc(CAL_DOC, {
+      [`results.${editingId}`]: deleteField(),
+      custom,
+    });
+  } catch(e) { console.warn('clearRes Firestore error:', e); }
+  finally { _localWritePending = false; }
   if(m && m.source === 'torneo' && m.calId){
     syncCalResultToTorneo(m.calId, null, null);
   }
