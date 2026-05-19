@@ -698,16 +698,21 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
     document.getElementById('lc-vpug-pts').textContent = 'Sin datos';
   }
 
-  // 11x11 T2 — live desde VPG API
+  // 11x11 T2 — Grupo A en vivo desde VPG (grupos endpoint)
   try {
-    const e11Raw = await (await fetch('https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=3')).json();
-    const e11Rows = (Array.isArray(e11Raw) ? e11Raw : []).map(e => ({
+    const e11Groups = await (await fetch('https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/')).json();
+    // raw[0] = Grupo A (donde está Top Secret), raw[1] = Grupo B
+    const g1raw = Array.isArray(e11Groups[0]) ? e11Groups[0] : Object.values(e11Groups[0] || {});
+    const e11Rows = g1raw.map(e => ({
       name: e.team_name || e.name || '',
-      gp: e.played ?? e.gp ?? 0,
-      w:  e.wins   ?? e.w  ?? 0,
-      d:  e.draws  ?? e.d  ?? 0,
-      l:  e.losses ?? e.l  ?? 0,
-      pts: e.points ?? e.pts ?? 0,
+      gp:  e.played  ?? e.gp  ?? 0,
+      w:   e.wins    ?? e.w   ?? 0,
+      d:   e.draws   ?? e.d   ?? 0,
+      l:   e.losses  ?? e.l   ?? 0,
+      gf:  e.score_for     ?? e.gf ?? null,
+      gc:  e.score_against ?? e.gc ?? null,
+      gd:  e.gd ?? null,
+      pts: e.points  ?? e.pts ?? 0,
     }));
     if (e11Rows.length) applyCard('lc-e11-pos', 'lc-e11-pts', 'lc-e11-badge', e11Rows);
     else throw new Error('empty');

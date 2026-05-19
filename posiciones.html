@@ -194,6 +194,14 @@ td.left { text-align: left; }
 .prox-sub { font-size:.88rem; color:var(--mid); max-width:420px; margin:0 auto; }
 .prox-tables { margin-top:40px; opacity:.35; pointer-events:none; }
 
+/* ── GROUP HEADER ── */
+.group-header {
+  font-family:'Barlow Condensed',sans-serif; font-size:.7rem; font-weight:800;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--mid);
+  padding:18px 0 8px; border-top:1px solid var(--border); margin-top:24px;
+}
+.group-header:first-child { border-top:none; margin-top:0; padding-top:0; }
+
 /* ── T1 BADGE ── */
 .t1-badge {
   display:inline-flex; align-items:center; gap:6px; padding:3px 10px;
@@ -310,7 +318,10 @@ footer span { color: var(--gold); }
 
     <!-- 11x11 T2 -->
     <div class="tab-pane" id="t2-pane-e11">
-      <div class="table-wrap"><table class="standings-table" id="t2-e11-table"></table></div>
+      <div class="group-header">Grupo A</div>
+      <div class="table-wrap"><table class="standings-table" id="t2-e11-g1-table"></table></div>
+      <div class="group-header">Grupo B</div>
+      <div class="table-wrap"><table class="standings-table" id="t2-e11-g2-table"></table></div>
       <div class="zone-legend" style="margin-top:16px">
         <div class="zl-item"><span class="zone-dot" style="background:var(--e11)"></span>Clasificado a Playoff</div>
       </div>
@@ -337,7 +348,7 @@ window.addEventListener('DOMContentLoaded', () => {
 const WORKER_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const VPN_URL  = WORKER_BASE + '/vpn-table';
 const VPUG_URL = WORKER_BASE + '/vpug-table';
-const E11_URL  = 'https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=3';
+const E11_GROUPS_URL = 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/';
 
 const VPUG_T2_DATA = [
   {name:'TOP Secret',           abbr:'TOP', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, us:true, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMurZRTaYIDhkHTacb.png?alt=media&token=1'},
@@ -575,8 +586,8 @@ async function fetchT2VPUG() {
   }
 }
 
-/* ── FETCH & RENDER T2 11x11 ── */
-const E11_T3_FALLBACK = [
+/* ── FETCH & RENDER T2 11x11 (2 grupos) ── */
+const E11_FALLBACK_G1 = [
   {name:'Comunicaciones eSports', abbr:'COM', logo:VPG_LOGO+'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
   {name:'All Boys',               abbr:'ALB', logo:VPG_LOGO+'admin_9d643667-da1a-4878-923c-88713acb1625/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
   {name:'Instituto Reserva',      abbr:'INS', logo:VPG_LOGO+'admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
@@ -588,20 +599,36 @@ const E11_T3_FALLBACK = [
   {name:'Los Waxiturros',         abbr:'WXT', logo:VPG_LOGO+'admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
   {name:'Argentino de Merlo',     abbr:'ARM', logo:VPG_LOGO+'admin_4b75c893-290e-4735-a5a9-8ec09a84c088/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
 ];
+const E11_FALLBACK_G2 = [
+  {name:'Sub 21 CF',              abbr:'Sub', logo:VPG_LOGO+'admin_eaba7052-0cc9-4e41-8565-1a30736c24d9/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'IACC Cantera',           abbr:'IAC', logo:VPG_LOGO+'admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Camioneros eSports',     abbr:'CAM', logo:VPG_LOGO+'admin_e5ab2259-7ae3-47ce-a6c7-bc479b7bff72/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Atlético Rafaela',       abbr:'ATL', logo:VPG_LOGO+'admin_e8cf97bc-300b-47d2-a43d-4bff6a382b37/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Team Valhalla',          abbr:'VAL', logo:VPG_LOGO+'admin_a0feb073-7b6d-4eef-95d4-7377635fc2f2/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'InfinitX',               abbr:'INF', logo:VPG_LOGO+'admin_37b001c9-d56a-43bd-9706-1a914d1b35d3/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Olimpo eSports',         abbr:'OLI', logo:VPG_LOGO+'admin_b993e784-2fac-4459-bc68-db298ab57240/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Suda eSp',               abbr:'SUD', logo:VPG_LOGO+'admin_60ab2610-29da-4c4d-8734-9b2f736cf168/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Cambaceres',             abbr:'CAM', logo:VPG_LOGO+'admin_0418078a-b62c-4e2e-9656-6ace007d73f7/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Altoke Perro',           abbr:'ATP', logo:VPG_LOGO+'admin_7e8994de-82a6-412a-8e55-c3a3306a1f2a/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+];
 
 async function fetchT2E11() {
-  let data;
+  let g1, g2;
   try {
-    const r = await fetch(E11_URL);
+    const r = await fetch(E11_GROUPS_URL);
     if (!r.ok) throw new Error(r.status);
     const raw = await r.json();
-    data = normE11(Array.isArray(raw) ? raw : []);
-    if (!data.length) throw new Error('empty');
+    // raw is an array of 2 arrays: [group1_teams, group2_teams]
+    g1 = normE11(Array.isArray(raw[0]) ? raw[0] : Object.values(raw[0] || {}));
+    g2 = normE11(Array.isArray(raw[1]) ? raw[1] : Object.values(raw[1] || {}));
+    if (!g1.length || !g2.length) throw new Error('empty');
   } catch(e) {
-    data = E11_T3_FALLBACK;
+    g1 = E11_FALLBACK_G1;
+    g2 = E11_FALLBACK_G2;
   }
-  renderTable('t2-e11-table', data, 'var(--e11)');
-  gsap.to('#t2-e11-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  renderTable('t2-e11-g1-table', g1, 'var(--e11)');
+  renderTable('t2-e11-g2-table', g2, 'var(--e11)');
+  gsap.to('#t2-e11-g1-table tbody tr, #t2-e11-g2-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
 }
 
 /* ── FETCH & RENDER T2 VPN ── */
