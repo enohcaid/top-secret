@@ -310,10 +310,9 @@ footer span { color: var(--gold); }
 
     <!-- 11x11 T2 -->
     <div class="tab-pane" id="t2-pane-e11">
-      <div class="prox-wrap" style="padding:40px 0">
-        <div class="prox-badge">11x11 · T2</div>
-        <div class="prox-title">Próximamente</div>
-        <p class="prox-sub">La tabla del 11x11 se actualizará cuando comience la competencia.</p>
+      <div class="table-wrap"><table class="standings-table" id="t2-e11-table"></table></div>
+      <div class="zone-legend" style="margin-top:16px">
+        <div class="zl-item"><span class="zone-dot" style="background:var(--e11)"></span>Clasificado a Playoff</div>
       </div>
     </div>
   </div>
@@ -338,7 +337,7 @@ window.addEventListener('DOMContentLoaded', () => {
 const WORKER_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const VPN_URL  = WORKER_BASE + '/vpn-table';
 const VPUG_URL = WORKER_BASE + '/vpug-table';
-const E11_URL  = 'https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2';
+const E11_URL  = 'https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=3';
 
 const VPUG_T2_DATA = [
   {name:'TOP Secret',           abbr:'TOP', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, us:true, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMurZRTaYIDhkHTacb.png?alt=media&token=1'},
@@ -451,23 +450,27 @@ function normVPUG(raw) {
   }));
 }
 
+const VPG_LOGO = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
 function normE11(raw) {
-  // API: [{name, acronym/short_name, logo, gp/gamesPlayed, w/wins, d/ties, l/losses, gf, gc, gd, pts/points}, ...]
-  const pick = (o, ...keys) => { for (const k of keys) if (o[k] !== undefined) return o[k]; return 0; };
-  return raw.map(e => ({
-    name: e.name || e.team_name || '',
-    abbr: e.acronym || e.short_name || (e.name||'').slice(0,3).toUpperCase(),
-    logo: e.logo || e.logoUrl || e.logoSmallUrl || null,
-    gp: pick(e,'gp','gamesPlayed','games_played'),
-    w:  pick(e,'w','wins','gw'),
-    d:  pick(e,'d','ties','gt','draws'),
-    l:  pick(e,'l','losses','gl'),
-    gf: pick(e,'gf','goalsFor','goals_for'),
-    gc: pick(e,'gc','goalsAgainst','goals_against'),
-    gd: pick(e,'gd','goalDifference','goal_difference'),
-    pts: pick(e,'pts','points'),
-    us: /top.?secret/i.test(e.name || '')
-  }));
+  // VPG API: [{team_name, team_abbr, team_logo, played, wins, draws, losses, score_for, score_against, points}, ...]
+  return raw.map(e => {
+    const name = e.team_name || e.name || '';
+    const gf = e.score_for   ?? e.gf ?? 0;
+    const gc = e.score_against ?? e.gc ?? 0;
+    return {
+      name,
+      abbr: e.team_abbr || e.abbr || name.slice(0,3).toUpperCase(),
+      logo: e.team_logo ? VPG_LOGO + e.team_logo + '/public' : (e.logo || null),
+      gp:  e.played  ?? e.gp  ?? 0,
+      w:   e.wins    ?? e.w   ?? 0,
+      d:   e.draws   ?? e.d   ?? 0,
+      l:   e.losses  ?? e.l   ?? 0,
+      gf, gc,
+      gd:  e.gd ?? (gf - gc),
+      pts: e.points  ?? e.pts ?? 0,
+      us: /top.?secret/i.test(name),
+    };
+  });
 }
 
 /* ── RENDER TABLE ── */
@@ -572,6 +575,35 @@ async function fetchT2VPUG() {
   }
 }
 
+/* ── FETCH & RENDER T2 11x11 ── */
+const E11_T3_FALLBACK = [
+  {name:'Comunicaciones eSports', abbr:'COM', logo:VPG_LOGO+'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'All Boys',               abbr:'ALB', logo:VPG_LOGO+'admin_9d643667-da1a-4878-923c-88713acb1625/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Instituto Reserva',      abbr:'INS', logo:VPG_LOGO+'admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Los Picantes eSports',   abbr:'LP',  logo:VPG_LOGO+'admin_f47091ff-af62-4f7f-bdb4-9aba143c3bef/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'TOP SECRET',             abbr:'TOP', logo:VPG_LOGO+'admin_fdad592e-b51e-49c8-a6f0-7a4516541c6a/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:true},
+  {name:'Deportivo Ballester',    abbr:'BAL', logo:VPG_LOGO+'admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'4BDOMIFL4NES',           abbr:'ABD', logo:VPG_LOGO+'admin_d926fffb-49b9-44a2-8230-f2a44400927e/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Ferro',                  abbr:'FER', logo:VPG_LOGO+'admin_1c583c95-59d3-4e79-9682-4d87ea41d8fe/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Los Waxiturros',         abbr:'WXT', logo:VPG_LOGO+'admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Argentino de Merlo',     abbr:'ARM', logo:VPG_LOGO+'admin_4b75c893-290e-4735-a5a9-8ec09a84c088/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+];
+
+async function fetchT2E11() {
+  let data;
+  try {
+    const r = await fetch(E11_URL);
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    data = normE11(Array.isArray(raw) ? raw : []);
+    if (!data.length) throw new Error('empty');
+  } catch(e) {
+    data = E11_T3_FALLBACK;
+  }
+  renderTable('t2-e11-table', data, 'var(--e11)');
+  gsap.to('#t2-e11-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+}
+
 /* ── FETCH & RENDER T2 VPN ── */
 async function fetchT2VPN() {
   try {
@@ -591,6 +623,7 @@ async function fetchT2VPN() {
 renderT1();
 fetchT2VPN();
 fetchT2VPUG();
+fetchT2E11();
 
 
 

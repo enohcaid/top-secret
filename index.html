@@ -698,9 +698,23 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
     document.getElementById('lc-vpug-pts').textContent = 'Sin datos';
   }
 
-  // 11x11 — T2 aún no iniciado
-  document.getElementById('lc-e11-pts').textContent = 'T2 · Por iniciar';
-  document.getElementById('lc-e11-pos').textContent = '—';
+  // 11x11 T2 — live desde VPG API
+  try {
+    const e11Raw = await (await fetch('https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=3')).json();
+    const e11Rows = (Array.isArray(e11Raw) ? e11Raw : []).map(e => ({
+      name: e.team_name || e.name || '',
+      gp: e.played ?? e.gp ?? 0,
+      w:  e.wins   ?? e.w  ?? 0,
+      d:  e.draws  ?? e.d  ?? 0,
+      l:  e.losses ?? e.l  ?? 0,
+      pts: e.points ?? e.pts ?? 0,
+    }));
+    if (e11Rows.length) applyCard('lc-e11-pos', 'lc-e11-pts', 'lc-e11-badge', e11Rows);
+    else throw new Error('empty');
+  } catch(_) {
+    document.getElementById('lc-e11-pts').textContent = 'T2 · Por iniciar';
+    document.getElementById('lc-e11-pos').textContent = '—';
+  }
 })();
 
 /* ── PLAYER QUICK MODAL ── */
