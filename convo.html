@@ -455,6 +455,74 @@ try {
 /* ─── CALENDAR MATCHES (today) ─── */
 let calCustom = [];
 let vpnFixtures = [];
+
+// 11x11 T2 (VPG challengers-t3) team badges
+const _CVPG = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
+const E11_T3_BADGES = {
+  'Los Waxiturros':         _CVPG+'admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/public',
+  'Argentino de Merlo':     _CVPG+'admin_4b75c893-290e-4735-a5a9-8ec09a84c088/public',
+  'Ferro':                  _CVPG+'admin_1c583c95-59d3-4e79-9682-4d87ea41d8fe/public',
+  'Dep. Ballester':         _CVPG+'admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public',
+  'All Boys':               _CVPG+'admin_9d643667-da1a-4878-923c-88713acb1625/public',
+  'Comunicaciones eSports': _CVPG+'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public',
+  'Instituto Reserva':      _CVPG+'admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/public',
+  '4BDOMIFL4NES':           _CVPG+'admin_d926fffb-49b9-44a2-8230-f2a44400927e/public',
+  'Los Picantes eSports':   _CVPG+'admin_f47091ff-af62-4f7f-bdb4-9aba143c3bef/public',
+};
+// VPUG T2 badges (Firebase Storage)
+const _CFB = 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F';
+const _CFQ = '.png?alt=media&token=1';
+const VPUG_T2_BADGES = {
+  'United Mito':           _CFB+'-OsMvCo5TroXXRQESh8X'+_CFQ,
+  'All Boys eSports':      _CFB+'-OsMuxjrkBhlxqgHYo3h'+_CFQ,
+  'Olimpo eSports':        _CFB+'-OsMunLybVb4pwFbqCue'+_CFQ,
+  'InfinitX':              _CFB+'-OsMuhE-u1E66GmHygQ8'+_CFQ,
+  'I.A.C.C Cantera':       _CFB+'-OsMuw6E8LdYHDoCUr1l'+_CFQ,
+  'Hacha eSports':         _CFB+'-OsMuj6jB2yFLi8_u_BT'+_CFQ,
+  'Evermeet Rising':       _CFB+'-OsMuzAoZE3jVN4OQFXE'+_CFQ,
+  'Real Marcianos FC':     _CFB+'-OsMv2cJ5Fped-UWTHGu'+_CFQ,
+  'Team Valhalla':         _CFB+'-OsMv-OatbjUrVHU2SRR'+_CFQ,
+  'Germinal eSports':      _CFB+'-OsMutXodyVLwoM4J5wE'+_CFQ,
+  'Atletico Moneiro':      _CFB+'-OsMufqFxBsoawhOuaBj'+_CFQ,
+  'Villa Dalmine eSports': _CFB+'-OsMusnJNuTqdPlqecqy'+_CFQ,
+  'La Unión FC':           _CFB+'-OsMuv-Tncx4ZJag-r26'+_CFQ,
+  '4BDOMIFL4NES':          _CFB+'-OsMv3twVIiqprWZaFrj'+_CFQ,
+  'NuVo FC':               _CFB+'-OsMvBXyushQcOcLYfub'+_CFQ,
+  'Suda eSports':          _CFB+'-OsMuuL37DZJ4_U3v-AE'+_CFQ,
+  'Nueva Chicago eSports': _CFB+'-OsMv1LKGj7lioqdDP0i'+_CFQ,
+};
+// VPUG T2 schedule
+const VPUG_T2_SCHEDULE = [
+  {date:'2026-05-18',time:'22:40',league:'VPUG',rival:'United Mito',           isHome:false},
+  {date:'2026-05-19',time:'22:40',league:'VPUG',rival:'All Boys eSports',      isHome:true },
+  {date:'2026-05-20',time:'22:40',league:'VPUG',rival:'Olimpo eSports',        isHome:false},
+  {date:'2026-05-21',time:'22:40',league:'VPUG',rival:'InfinitX',              isHome:true },
+  {date:'2026-05-25',time:'22:40',league:'VPUG',rival:'I.A.C.C Cantera',       isHome:false},
+  {date:'2026-05-26',time:'22:40',league:'VPUG',rival:'Hacha eSports',         isHome:true },
+  {date:'2026-05-27',time:'22:40',league:'VPUG',rival:'Evermeet Rising',       isHome:false},
+  {date:'2026-05-28',time:'22:40',league:'VPUG',rival:'Real Marcianos FC',     isHome:false},
+  {date:'2026-06-01',time:'22:40',league:'VPUG',rival:'Team Valhalla',         isHome:true },
+  {date:'2026-06-02',time:'22:40',league:'VPUG',rival:'Germinal eSports',      isHome:false},
+  {date:'2026-06-03',time:'22:40',league:'VPUG',rival:'Atletico Moneiro',      isHome:true },
+  {date:'2026-06-04',time:'22:40',league:'VPUG',rival:'Villa Dalmine eSports', isHome:false},
+  {date:'2026-06-08',time:'22:40',league:'VPUG',rival:'La Unión FC',           isHome:true },
+  {date:'2026-06-09',time:'22:40',league:'VPUG',rival:'4BDOMIFL4NES',          isHome:false},
+  {date:'2026-06-10',time:'22:40',league:'VPUG',rival:'NuVo FC',               isHome:true },
+  {date:'2026-06-11',time:'22:40',league:'VPUG',rival:'Suda eSports',          isHome:false},
+  {date:'2026-06-15',time:'22:40',league:'VPUG',rival:'Nueva Chicago eSports', isHome:true },
+];
+// 11x11 T2 schedule
+const E11_T3_SCHEDULE = [
+  {date:'2026-05-19',time:'23:00',league:'11x11',rival:'Los Waxiturros',         isHome:true },
+  {date:'2026-05-19',time:'23:30',league:'11x11',rival:'Argentino de Merlo',     isHome:false},
+  {date:'2026-05-21',time:'23:00',league:'11x11',rival:'Ferro',                  isHome:true },
+  {date:'2026-05-21',time:'23:30',league:'11x11',rival:'Dep. Ballester',         isHome:true },
+  {date:'2026-05-23',time:'23:00',league:'11x11',rival:'All Boys',               isHome:true },
+  {date:'2026-05-23',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
+  {date:'2026-05-25',time:'23:00',league:'11x11',rival:'Instituto Reserva',      isHome:false},
+  {date:'2026-05-25',time:'23:30',league:'11x11',rival:'4BDOMIFL4NES',           isHome:false},
+  {date:'2026-05-27',time:'23:00',league:'11x11',rival:'Los Picantes eSports',   isHome:true },
+];
 let _shareLogo = null;
 const _shareLogoReady = new Promise(res => {
   const img = new Image();
@@ -475,14 +543,28 @@ fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
   }).catch(() => {});
 function getTodayMatches() {
   const fromCustom = calCustom
-    .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'));
+    .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'))
+    .map(m => {
+      if (m.badge) return m;
+      if (m.league === 'VPUG')  return {...m, badge: VPUG_T2_BADGES[m.rival]||null};
+      if (m.league === '11x11') return {...m, badge: E11_T3_BADGES[m.rival]||null};
+      return m;
+    });
   const fromVpn = vpnFixtures
     .filter(m => m.date === TODAY)
     .map(m => ({ ...m, league: 'VPN' }));
-  const deduped = fromVpn.filter(v =>
+  const fromVpugT2 = VPUG_T2_SCHEDULE
+    .filter(m => m.date === TODAY)
+    .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
+    .map(m => ({...m, badge: VPUG_T2_BADGES[m.rival]||null}));
+  const from11x11 = E11_T3_SCHEDULE
+    .filter(m => m.date === TODAY)
+    .filter(m => !fromCustom.some(c => c.league === '11x11' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
+    .map(m => ({...m, badge: E11_T3_BADGES[m.rival]||null}));
+  const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase() === (v.rival||'').toLowerCase())
   );
-  return [...fromCustom, ...deduped].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+  return [...fromCustom, ...fromVpugT2, ...from11x11, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
   const wrap = document.getElementById('todayMatchesPanel');
