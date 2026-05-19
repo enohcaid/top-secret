@@ -111,18 +111,39 @@ body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;f
 
 /* ── LEAGUE CARDS ── */
 .leagues-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.league-card{background:#1E1E1E;border:1px solid var(--border);border-radius:6px;padding:22px 22px 20px;position:relative;overflow:hidden;transition:border-color .2s;}
+.league-card{background:#1E1E1E;border:1px solid var(--border);border-radius:6px;padding:18px 18px 16px;position:relative;overflow:hidden;transition:border-color .2s;}
 .league-card:hover{border-color:var(--gold);}
 .lc-accent{position:absolute;top:0;left:0;right:0;height:3px;}
-.lc-tag{font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;}
-.lc-name{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text2);margin-bottom:16px;letter-spacing:.04em;}
+.lc-tag{font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:5px;}
+.lc-name{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;color:var(--text2);margin-bottom:12px;letter-spacing:.04em;}
+.lc-badge{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-top:10px;}
+.final-badge{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
+.active-badge{background:#0d2b18;color:#4ade80;border:1px solid #1a5c30;}
+/* mini standings table inside league card */
+.lc-table-wrap{overflow-x:auto;margin:0 -2px;}
+.lc-table{width:100%;border-collapse:collapse;font-size:.7rem;}
+.lc-table thead th{padding:3px 5px;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid2);border-bottom:1px solid var(--border);white-space:nowrap;text-align:center;}
+.lc-table thead th.left{text-align:left;}
+.lc-table tbody tr{border-bottom:1px solid rgba(255,255,255,.04);}
+.lc-table tbody tr:last-child{border-bottom:none;}
+.lc-table tbody tr.us{background:rgba(201,168,76,.07);}
+.lc-table td{padding:4px 5px;color:var(--text2);text-align:center;white-space:nowrap;}
+.lc-table td.left{text-align:left;}
+.lc-table .td-pos{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.78rem;width:18px;text-align:center;}
+.lc-table .td-pos.p1{color:#f5c518;}
+.lc-table .td-pos.p2{color:#a8b8d8;}
+.lc-table .td-pos.p3{color:#c49060;}
+.lc-table .td-name{font-weight:600;font-size:.72rem;}
+.lc-table .td-name.us{color:var(--gold);}
+.lc-table .td-pts{font-weight:800;font-size:.78rem;color:var(--white);}
+.lc-table .td-gd.pos{color:#3ecf8e;}
+.lc-table .td-gd.neg{color:#e8502e;}
+.lc-no-table{font-size:.78rem;color:var(--mid);text-align:center;padding:18px 0;}
+/* old single-row elements — keep for 11x11 */
 .lc-pos{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;}
 .lc-pos-num{font-family:'Barlow Condensed',sans-serif;font-size:2.6rem;font-weight:900;color:var(--white);line-height:1;}
 .lc-pos-suf{font-size:.82rem;font-weight:700;color:var(--mid);align-self:flex-end;padding-bottom:4px;}
 .lc-pts{font-size:.75rem;color:var(--mid);letter-spacing:.06em;}
-.lc-badge{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-top:10px;}
-.final-badge{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
-.active-badge{background:#0d2b18;color:#4ade80;border:1px solid #1a5c30;}
 
 /* ── TOP PERFORMERS ── */
 .tops-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
@@ -327,23 +348,13 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
         <div class="lc-accent" style="background:var(--vpn)"></div>
         <div class="lc-tag" style="color:var(--vpn)">VPN · 1ra DIVISIÓN</div>
         <div class="lc-name">Virtual Pro Network</div>
-        <div class="lc-pos">
-          <div class="lc-pos-num" id="lc-vpn-pos">—</div>
-          <div class="lc-pos-suf">lugar</div>
-        </div>
-        <div class="lc-pts" id="lc-vpn-pts">cargando...</div>
-        <span class="lc-badge" id="lc-vpn-badge" style="background:rgba(245,197,24,.1);color:#b45309;border-color:rgba(245,197,24,.4);">T2 2026</span>
+        <div class="lc-table-wrap"><table class="lc-table" id="lc-vpn-table"><tbody><tr><td colspan="10" class="lc-no-table">cargando…</td></tr></tbody></table></div>
       </div>
       <div class="league-card">
         <div class="lc-accent" style="background:var(--vpug)"></div>
         <div class="lc-tag" style="color:var(--vpug)">VPUG</div>
         <div class="lc-name">Virtual Pro — Clubs Pro</div>
-        <div class="lc-pos">
-          <div class="lc-pos-num" id="lc-vpug-pos">—</div>
-          <div class="lc-pos-suf">lugar</div>
-        </div>
-        <div class="lc-pts" id="lc-vpug-pts">cargando...</div>
-        <span class="lc-badge final-badge" id="lc-vpug-badge">T2 2026</span>
+        <div class="lc-table-wrap"><table class="lc-table" id="lc-vpug-table"><tbody><tr><td colspan="10" class="lc-no-table">cargando…</td></tr></tbody></table></div>
       </div>
       <div class="league-card">
         <div class="lc-accent" style="background:var(--e11)"></div>
@@ -626,16 +637,35 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
   const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
   const isUs = n => /top.?secret/i.test(n || '');
 
-  function applyCard(posId, ptsId, badgeId, rows) {
-    const idx = rows.findIndex(r => isUs(r.name));
-    if (idx < 0) return;
-    const t = rows[idx];
-    document.getElementById(posId).textContent  = idx + 1;
-    document.getElementById(ptsId).textContent  = `${t.w}V ${t.d}E ${t.l}D · ${t.pts} pts · ${t.gp} PJ`;
-    document.getElementById(badgeId).textContent = `T2 · Fecha ${t.gp}`;
+  function renderLcTable(tableId, rows) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const hasGoals = rows.some(r => r.gf != null);
+    const hdr = hasGoals
+      ? `<tr><th class="left">#</th><th class="left">Equipo</th><th>PJ</th><th>V</th><th>E</th><th>D</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th></tr>`
+      : `<tr><th class="left">#</th><th class="left">Equipo</th><th>PJ</th><th>V</th><th>E</th><th>D</th><th>PTS</th></tr>`;
+    const body = rows.map((r, i) => {
+      const pos = i + 1;
+      const posClass = pos === 1 ? 'p1' : pos === 2 ? 'p2' : pos === 3 ? 'p3' : '';
+      const us = isUs(r.name);
+      const gd = r.gd != null ? r.gd : (r.gf != null ? r.gf - r.gc : null);
+      const gdClass = gd > 0 ? 'pos' : gd < 0 ? 'neg' : '';
+      const gdText = gd != null ? (gd > 0 ? '+' + gd : String(gd)) : '';
+      const goalsHtml = hasGoals
+        ? `<td>${r.gf ?? 0}</td><td>${r.gc ?? 0}</td><td class="td-gd ${gdClass}">${gdText}</td>`
+        : '';
+      return `<tr class="${us ? 'us' : ''}">
+        <td class="td-pos ${posClass}">${pos}</td>
+        <td class="td-name left ${us ? 'us' : ''}">${r.name}</td>
+        <td>${r.gp ?? 0}</td><td>${r.w ?? 0}</td><td>${r.d ?? 0}</td><td>${r.l ?? 0}</td>
+        ${goalsHtml}
+        <td class="td-pts">${r.pts ?? 0}</td>
+      </tr>`;
+    }).join('');
+    table.innerHTML = `<thead>${hdr}</thead><tbody>${body}</tbody>`;
   }
 
-  // VPN — proxy devuelve [{team:{name}, gp, gw, gt, gl, pts}, ...]
+  // VPN — proxy devuelve [{team:{name}, gp, gw, gt, gl, gf, gc, gd, pts}, ...]
   try {
     const raw = await (await fetch(WORKER + '/vpn-table')).json();
     const rows = (Array.isArray(raw) ? raw : []).map(e => ({
@@ -644,12 +674,16 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
       w:   e.gw  || 0,
       d:   e.gt  || 0,
       l:   e.gl  || 0,
+      gf:  e.gf  ?? null,
+      gc:  e.gc  ?? null,
+      gd:  e.gd  ?? null,
       pts: e.pts || 0,
     }));
-    applyCard('lc-vpn-pos','lc-vpn-pts','lc-vpn-badge', rows);
+    if (rows.length) renderLcTable('lc-vpn-table', rows);
+    else throw new Error('empty');
   } catch(_) {
-    document.getElementById('lc-vpn-pts').textContent = '0V 0E 3D · 0 pts · 3 PJ';
-    document.getElementById('lc-vpn-badge').textContent = 'T2 · Fecha 3';
+    const t = document.getElementById('lc-vpn-table');
+    if (t) t.innerHTML = '<tbody><tr><td colspan="10" class="lc-no-table">Sin datos</td></tr></tbody>';
   }
 
   // VPUG T2 — tabla en vivo desde Firebase vía worker
@@ -657,17 +691,20 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
     const vpugRaw = await (await fetch(WORKER + '/vpug-table')).json();
     const vpugRows = (Array.isArray(vpugRaw) ? vpugRaw : []).map(e => ({
       name: e.name || '',
-      gp: e.gp || 0,
-      w:  e.w  || 0,
-      d:  e.d  || 0,
-      l:  e.l  || 0,
+      gp:  e.gp || 0,
+      w:   e.w  || 0,
+      d:   e.d  || 0,
+      l:   e.l  || 0,
+      gf:  e.gf ?? null,
+      gc:  e.gc ?? null,
+      gd:  e.gd ?? null,
       pts: e.pts || 0,
     }));
-    if (vpugRows.length) applyCard('lc-vpug-pos','lc-vpug-pts','lc-vpug-badge', vpugRows);
+    if (vpugRows.length) renderLcTable('lc-vpug-table', vpugRows);
     else throw new Error('empty');
   } catch(_) {
-    document.getElementById('lc-vpug-pts').textContent = '1V 0E 0D · 3 pts · 1 PJ';
-    document.getElementById('lc-vpug-badge').textContent = 'T2 · Fecha 1';
+    const t = document.getElementById('lc-vpug-table');
+    if (t) t.innerHTML = '<tbody><tr><td colspan="10" class="lc-no-table">Sin datos</td></tr></tbody>';
   }
 
   // 11x11 — T2 aún no iniciado
