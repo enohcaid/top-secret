@@ -1081,9 +1081,17 @@ const RAW = [
   {date:'2026-04-29',time:'23:00',league:'VPN',  rival:'Comunicaciones eSports', isHome:false, result:[1,2], playoff:'Promo · Ida'},
   {date:'2026-04-29',time:'23:30',league:'VPN',  rival:'Comunicaciones eSports', isHome:true,  result:[1,1], playoff:'Promo · Vuelta'},
 
+  // ══ VPN T2 — Temporada 2 (partidos jugados — respaldo RAW por si la API falla) ══
+  {date:'2026-05-13',time:'22:30',league:'VPN', rival:'Escuela Vieja',           isHome:true,  result:[3,4], round:1},  // F1
+  {date:'2026-05-13',time:'22:30',league:'VPN', rival:'Nueva Chicago eSports',   isHome:false, result:[2,1], round:2},  // F2
+  {date:'2026-05-13',time:'22:30',league:'VPN', rival:'Real Black FC',           isHome:true,  result:[3,5], round:3},  // F3
+  {date:'2026-05-18',time:'22:30',league:'VPN', rival:'Comunicaciones',          isHome:false, result:[3,2], round:4},  // F4
+  {date:'2026-05-18',time:'22:30',league:'VPN', rival:'San Jorge eSp',           isHome:true,  result:[1,4], round:5},  // F5
+  {date:'2026-05-18',time:'22:30',league:'VPN', rival:'InfinitX',                isHome:false, result:[3,2], round:6},  // F6
+
   // ══ VPUG T2 — Temporada 2 ══
   // Semana 18-21 May
-  {date:'2026-05-18',time:'22:40',league:'VPUG', rival:'United Mito',            isHome:false, result:null, round:1},  // F1
+  {date:'2026-05-18',time:'22:40',league:'VPUG', rival:'United Mito',            isHome:false, result:[0,3], round:1},  // F1
   {date:'2026-05-19',time:'22:40',league:'VPUG', rival:'All Boys eSports',       isHome:true,  result:null, round:2},  // F2
   {date:'2026-05-20',time:'22:40',league:'VPUG', rival:'Olimpo eSports',         isHome:false, result:null, round:3},  // F3
   {date:'2026-05-21',time:'22:40',league:'VPUG', rival:'InfinitX',               isHome:true,  result:null, round:4},  // F4
@@ -1551,6 +1559,12 @@ function findSeedMatch(id){
   hits = allSeeds.filter(s =>
     s.date.slice(5) === mmdd && s.league === m.league && rivalMatch(s.rival, m.rival)
   );
+  if(hits.length) return bestOf(hits);
+  // 3rd pass: ±1 day tolerance (UTC vs Argentina timezone offset for late-night matches)
+  hits = allSeeds.filter(s => {
+    if(s.league !== m.league || !rivalMatch(s.rival, m.rival)) return false;
+    return Math.abs(new Date(s.date) - new Date(m.date)) <= 86400000;
+  });
   return bestOf(hits) || null;
 }
 
