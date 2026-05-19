@@ -348,13 +348,23 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
         <div class="lc-accent" style="background:var(--vpn)"></div>
         <div class="lc-tag" style="color:var(--vpn)">VPN · 1ra DIVISIÓN</div>
         <div class="lc-name">Virtual Pro Network</div>
-        <div class="lc-table-wrap"><table class="lc-table" id="lc-vpn-table"><tbody><tr><td colspan="10" class="lc-no-table">cargando…</td></tr></tbody></table></div>
+        <div class="lc-pos">
+          <div class="lc-pos-num" id="lc-vpn-pos">—</div>
+          <div class="lc-pos-suf">lugar</div>
+        </div>
+        <div class="lc-pts" id="lc-vpn-pts">cargando...</div>
+        <span class="lc-badge" id="lc-vpn-badge" style="background:rgba(245,197,24,.1);color:#b45309;border-color:rgba(245,197,24,.4);">T2 2026</span>
       </div>
       <div class="league-card">
         <div class="lc-accent" style="background:var(--vpug)"></div>
         <div class="lc-tag" style="color:var(--vpug)">VPUG</div>
         <div class="lc-name">Virtual Pro — Clubs Pro</div>
-        <div class="lc-table-wrap"><table class="lc-table" id="lc-vpug-table"><tbody><tr><td colspan="10" class="lc-no-table">cargando…</td></tr></tbody></table></div>
+        <div class="lc-pos">
+          <div class="lc-pos-num" id="lc-vpug-pos">—</div>
+          <div class="lc-pos-suf">lugar</div>
+        </div>
+        <div class="lc-pts" id="lc-vpug-pts">cargando...</div>
+        <span class="lc-badge final-badge" id="lc-vpug-badge">T2 2026</span>
       </div>
       <div class="league-card">
         <div class="lc-accent" style="background:var(--e11)"></div>
@@ -637,32 +647,15 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
   const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
   const isUs = n => /top.?secret/i.test(n || '');
 
-  function renderLcTable(tableId, rows) {
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    const hasGoals = rows.some(r => r.gf != null);
-    const hdr = hasGoals
-      ? `<tr><th class="left">#</th><th class="left">Equipo</th><th>PJ</th><th>V</th><th>E</th><th>D</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th></tr>`
-      : `<tr><th class="left">#</th><th class="left">Equipo</th><th>PJ</th><th>V</th><th>E</th><th>D</th><th>PTS</th></tr>`;
-    const body = rows.map((r, i) => {
-      const pos = i + 1;
-      const posClass = pos === 1 ? 'p1' : pos === 2 ? 'p2' : pos === 3 ? 'p3' : '';
-      const us = isUs(r.name);
-      const gd = r.gd != null ? r.gd : (r.gf != null ? r.gf - r.gc : null);
-      const gdClass = gd > 0 ? 'pos' : gd < 0 ? 'neg' : '';
-      const gdText = gd != null ? (gd > 0 ? '+' + gd : String(gd)) : '';
-      const goalsHtml = hasGoals
-        ? `<td>${r.gf ?? 0}</td><td>${r.gc ?? 0}</td><td class="td-gd ${gdClass}">${gdText}</td>`
-        : '';
-      return `<tr class="${us ? 'us' : ''}">
-        <td class="td-pos ${posClass}">${pos}</td>
-        <td class="td-name left ${us ? 'us' : ''}">${r.name}</td>
-        <td>${r.gp ?? 0}</td><td>${r.w ?? 0}</td><td>${r.d ?? 0}</td><td>${r.l ?? 0}</td>
-        ${goalsHtml}
-        <td class="td-pts">${r.pts ?? 0}</td>
-      </tr>`;
-    }).join('');
-    table.innerHTML = `<thead>${hdr}</thead><tbody>${body}</tbody>`;
+  function applyCard(posId, ptsId, badgeId, rows) {
+    const idx = rows.findIndex(r => isUs(r.name));
+    if (idx < 0) return;
+    const t = rows[idx];
+    document.getElementById(posId).textContent = idx + 1;
+    const gd = t.gd != null ? t.gd : (t.gf != null ? t.gf - t.gc : null);
+    const gdStr = gd != null ? ` · DG ${gd > 0 ? '+' + gd : gd}` : '';
+    document.getElementById(ptsId).textContent = `${t.w}V ${t.d}E ${t.l}D · ${t.pts} pts · ${t.gp} PJ${gdStr}`;
+    document.getElementById(badgeId).textContent = `T2 · Fecha ${t.gp}`;
   }
 
   // VPN — proxy devuelve [{team:{name}, gp, gw, gt, gl, gf, gc, gd, pts}, ...]
@@ -679,11 +672,10 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
       gd:  e.gd  ?? null,
       pts: e.pts || 0,
     }));
-    if (rows.length) renderLcTable('lc-vpn-table', rows);
+    if (rows.length) applyCard('lc-vpn-pos', 'lc-vpn-pts', 'lc-vpn-badge', rows);
     else throw new Error('empty');
   } catch(_) {
-    const t = document.getElementById('lc-vpn-table');
-    if (t) t.innerHTML = '<tbody><tr><td colspan="10" class="lc-no-table">Sin datos</td></tr></tbody>';
+    document.getElementById('lc-vpn-pts').textContent = 'Sin datos';
   }
 
   // VPUG T2 — tabla en vivo desde Firebase vía worker
@@ -700,11 +692,10 @@ renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
       gd:  e.gd ?? null,
       pts: e.pts || 0,
     }));
-    if (vpugRows.length) renderLcTable('lc-vpug-table', vpugRows);
+    if (vpugRows.length) applyCard('lc-vpug-pos', 'lc-vpug-pts', 'lc-vpug-badge', vpugRows);
     else throw new Error('empty');
   } catch(_) {
-    const t = document.getElementById('lc-vpug-table');
-    if (t) t.innerHTML = '<tbody><tr><td colspan="10" class="lc-no-table">Sin datos</td></tr></tbody>';
+    document.getElementById('lc-vpug-pts').textContent = 'Sin datos';
   }
 
   // 11x11 — T2 aún no iniciado
