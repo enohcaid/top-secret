@@ -31,7 +31,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 
 /* TABS */
 .tabs{display:flex;gap:4px;margin-bottom:32px;border-bottom:1px solid var(--border);}
-.tab{padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.06em;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .18s;white-space:nowrap;}
+.tab{padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.06em;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .18s, border-bottom-color .18s;white-space:nowrap;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--gold);border-bottom-color:var(--gold);}
 .tab-content{display:none;}
@@ -85,7 +85,7 @@ canvas.chart{width:100%;display:block;}
 /* ── POR JUGADOR ── */
 .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
 .filter-bar label{font-size:.75rem;color:var(--muted2);font-weight:600;}
-.fbtn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.fbtn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .fbtn:hover{border-color:var(--gold);color:var(--gold);}
 .fbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
 .player-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
@@ -112,9 +112,9 @@ canvas.chart{width:100%;display:block;}
 .history-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
 .history-table tr:last-child td{border-bottom:none;}
 .history-table tr:hover td{background:var(--card2);}
-.delete-btn{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:4px;transition:all .15s;}
+.delete-btn{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:4px;transition:color .15s, background-color .15s;}
 .delete-btn:hover{color:var(--loss);background:rgba(232,80,46,.1);}
-.expand-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 8px;border-radius:4px;transition:all .15s;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
+.expand-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 8px;border-radius:4px;transition:color .15s, background-color .15s;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
 .expand-btn:hover{color:var(--gold);}
 .detail-row{display:none;}
 .detail-row.open{display:table-row;}
@@ -135,7 +135,7 @@ canvas.chart{width:100%;display:block;}
 .meta-group select,.meta-group input{width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .18s;}
 .meta-group select:focus,.meta-group input:focus{border-color:var(--gold);}
 .meta-group select option{background:var(--bg);}
-.upload-area{border:2px dashed var(--border2);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--card);margin-bottom:20px;}
+.upload-area{border:2px dashed var(--border2);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s, background-color .2s;position:relative;background:var(--card);margin-bottom:20px;}
 .upload-area:hover,.upload-area.drag{border-color:var(--gold);background:var(--gold-dim);}
 .upload-icon{font-size:2.8rem;margin-bottom:12px;display:block;}
 .upload-title{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:6px;}
@@ -151,9 +151,9 @@ canvas.chart{width:100%;display:block;}
 .img-thumb.analyzing .thumb-status{background:rgba(10,11,14,.7);}
 .img-thumb.done .thumb-status{background:rgba(62,207,142,.2);}
 .img-thumb.error .thumb-status{background:rgba(232,80,46,.2);}
-.add-more-btn{width:120px;height:90px;border-radius:10px;border:2px dashed var(--border2);background:transparent;color:var(--muted);font-size:1.6rem;cursor:pointer;transition:all .18s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.add-more-btn{width:120px;height:90px;border-radius:10px;border:2px dashed var(--border2);background:transparent;color:var(--muted);font-size:1.6rem;cursor:pointer;transition:border-color .18s, color .18s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .add-more-btn:hover{border-color:var(--gold);color:var(--gold);}
-.btn-analyze{width:100%;padding:14px;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-analyze{width:100%;padding:14px;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;transition:background-color .2s, transform .2s, box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:10px;}
 .btn-analyze:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,168,75,.3);}
 .btn-analyze:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
 .analyzing-state{display:none;text-align:center;padding:40px;border:1px solid var(--border);border-radius:16px;background:var(--card);margin-top:20px;}
@@ -190,7 +190,7 @@ canvas.chart{width:100%;display:block;}
 .empty-icon{font-size:3rem;margin-bottom:12px;opacity:.4;}
 .empty-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;color:var(--muted);margin-bottom:6px;}
 .empty-sub{font-size:.82rem;color:var(--muted2);}
-.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:.85rem;font-weight:600;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:.85rem;font-weight:600;transform:translateY(80px);opacity:0;transition:transform .3s, opacity .3s;pointer-events:none;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.success{border-color:rgba(62,207,142,.4);color:var(--win);}
 .toast.error{border-color:rgba(232,80,46,.4);color:var(--loss);}
@@ -219,7 +219,7 @@ footer span{color:#C9A84C;}
 .cea-club-name{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:.04em;}
 .cea-club-sub{font-size:.72rem;color:var(--muted2);margin-top:2px;}
 .cea-platform-btns{display:flex;gap:6px;margin-left:auto;}
-.cea-pbtn{padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;}
+.cea-pbtn{padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:.75rem;font-weight:700;cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .cea-pbtn:hover{border-color:var(--gold);color:var(--gold);}
 .cea-pbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
 .cea-kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px;}
@@ -274,7 +274,7 @@ footer span{color:#C9A84C;}
 .cea-stat-row:last-child{border-bottom:none;}
 .cea-stat-lbl{color:var(--muted);}
 .cea-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;}
-.cea-link-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--gold);border-radius:8px;color:var(--gold);text-decoration:none;font-size:.78rem;font-weight:700;letter-spacing:.06em;transition:all .18s;}
+.cea-link-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--gold);border-radius:8px;color:var(--gold);text-decoration:none;font-size:.78rem;font-weight:700;letter-spacing:.06em;transition:background-color .18s;}
 .cea-link-badge:hover{background:var(--gold-dim);}
 #ceaPlayerTableBody tr{border-bottom:1px solid var(--border);transition:background .12s;}
 #ceaPlayerTableBody tr:hover td{background:var(--card2);}
@@ -317,7 +317,7 @@ footer span{color:#C9A84C;}
 .modal-stat-lbl{font-size:.78rem;color:var(--muted);}
 .modal-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;}
 .modal-pos-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
-.pos-fbtn{padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.pos-fbtn{padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .pos-fbtn:hover{border-color:var(--gold);color:var(--gold);}
 .pos-fbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
 .pos-fbtn-count{font-weight:500;opacity:.65;font-size:.65rem;}
@@ -425,7 +425,7 @@ footer span{color:#C9A84C;}
 
 /* "ver más" en pcard */
 .pcard-more{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);text-align:center;}
-.btn-more{background:none;border:1px solid var(--border2);color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:5px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.btn-more{background:none;border:1px solid var(--border2);color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:5px 14px;border-radius:6px;cursor:pointer;transition:color .15s, border-color .15s;}
 .btn-more:hover{border-color:var(--gold);color:var(--gold);}
 
 
@@ -455,6 +455,39 @@ footer span{color:#C9A84C;}
   .filter-bar{padding:8px 0;}
 }
 
+/* ── NUMERIC RENDERING ── */
+.kpi-val, .rank-val, .ps-val, .avg-rating .val,
+.modal-kpi-val, .modal-stat-val, .ts-kpi-val,
+.cea-kpi-val, .result-score, .rank-pos { font-variant-numeric: tabular-nums; }
+
+/* ── TEXT BALANCE ── */
+.page-title { text-wrap: balance; }
+
+/* ── IMPROVED MODAL ENTRANCE ── */
+@keyframes modalIn{from{transform:translateY(12px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+
+/* ── PLAYER CARD STAGGER ── */
+@keyframes cardUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.pcard{animation:cardUp .3s cubic-bezier(0.16,1,0.3,1) both;}
+.pcard:nth-child(1){animation-delay:.04s}
+.pcard:nth-child(2){animation-delay:.08s}
+.pcard:nth-child(3){animation-delay:.12s}
+.pcard:nth-child(4){animation-delay:.16s}
+.pcard:nth-child(5){animation-delay:.20s}
+.pcard:nth-child(6){animation-delay:.24s}
+.pcard:nth-child(7){animation-delay:.28s}
+.pcard:nth-child(8){animation-delay:.32s}
+
+/* ── ACTIVE PRESS STATES ── */
+.fbtn:active, .tab:active, .btn-analyze:not(:disabled):active,
+.cea-pbtn:active, .pos-fbtn:active, .btn-more:active,
+.delete-btn:active, .expand-btn:active { transform: scale(0.97); }
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+}
+
 </style>
 </head>
 <body>
@@ -476,11 +509,11 @@ footer span{color:#C9A84C;}
   <div id="statsSoon" style="display:none;"></div>
   <div id="statsContent">
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('season',this)">🏆 Temporada</button>
-    <button class="tab" onclick="switchTab('players',this)">👤 Por Jugador</button>
-    <button class="tab" onclick="switchTab('history',this)">📋 Historial</button>
-    <button class="tab" onclick="switchTab('clubea',this)">🌐 Club EA</button>
-    <button class="tab" onclick="switchTab('torneos',this)">🏆 Torneos</button>
+    <button class="tab active" onclick="switchTab('season',this)">Temporada</button>
+    <button class="tab" onclick="switchTab('players',this)">Por Jugador</button>
+    <button class="tab" onclick="switchTab('history',this)">Historial</button>
+    <button class="tab" onclick="switchTab('clubea',this)">Club EA</button>
+    <button class="tab" onclick="switchTab('torneos',this)">Torneos</button>
   </div>
 
   <!-- ── TAB TEMPORADA ── -->
@@ -2685,7 +2718,7 @@ function ceaRenderInto(container, overall, members, matches, resolvedId, resolve
     <div class="cea-grid" style="grid-template-columns:1fr">${infoBlock}</div>
     <div style="text-align:center;padding:20px 0 4px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
       <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">↗ Ver en PROCLUBS.IO</a>
-      <button onclick="ceaLoaded=false;ceaLoad()" style="background:none;border:1px solid var(--border2);color:var(--muted);font-size:.78rem;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">↺ Actualizar datos</button>
+      <button onclick="ceaLoaded=false;ceaLoad()" style="background:none;border:1px solid var(--border2);color:var(--muted);font-size:.78rem;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;transition:color .15s,border-color .15s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">↺ Actualizar datos</button>
     </div>`;
 }
 

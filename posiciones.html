@@ -62,7 +62,7 @@ body {
   font-size: 1rem; font-weight: 700; letter-spacing: .08em;
   color: var(--mid); background: none; border: none;
   cursor: pointer; border-bottom: 3px solid transparent;
-  margin-bottom: -2px; transition: all .18s;
+  margin-bottom: -2px; transition: color .18s, border-bottom-color .18s;
 }
 .tab:hover { color: var(--black); }
 .tab[data-league="vpn"].active   { color: var(--vpn);  border-bottom-color: var(--vpn);  }
@@ -168,7 +168,7 @@ td.left { text-align: left; }
 /* ── SEASON SELECTOR ── */
 .season-sel { display:flex; gap:8px; margin-bottom:28px; }
 .season-btn {
-  padding:8px 22px; border-radius:24px; cursor:pointer; transition:all .2s;
+  padding:8px 22px; border-radius:24px; cursor:pointer; transition:color .2s, border-color .2s, background-color .2s;
   font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:.08em;
   border:2px solid var(--border); background:transparent; color:var(--mid);
   display:flex; flex-direction:column; align-items:center; gap:1px;
@@ -234,6 +234,17 @@ footer span { color: var(--gold); }
   table{ min-width:480px; }
   .prox-wrap{ padding:32px 0; }
   .zl-grid{ flex-direction:column; gap:8px; }
+}
+
+/* ── NUMERIC RENDERING ── */
+td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
+
+/* ── ACTIVE PRESS STATES ── */
+.tab:active, .season-btn:active { transform: scale(0.97); }
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
 }
 
 </style>
