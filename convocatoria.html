@@ -545,7 +545,7 @@ if (CAL_DOC_CONV) {
     renderTodayMatchesPanel();
   }, () => {});
 }
-fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
+const _vpnFixturesReady = fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
   .then(r => r.json()).then(d => {
     vpnFixtures = Array.isArray(d) ? d : [];
     renderTodayMatchesPanel();
@@ -1640,6 +1640,7 @@ async function buildPartidosHoyCanvas(withPhotos) {
 async function doGeneratePartidosHoy() {
   const btn = document.getElementById('partidosHoyBtn');
   const orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
+  await _vpnFixturesReady; // garantiza que los fixtures VPN estén cargados
   try {
     let blob;
     try {
