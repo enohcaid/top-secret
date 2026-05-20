@@ -773,8 +773,8 @@ function posCategory(pos){
   if(!pos) return null;
   pos=pos.toUpperCase();
   if(['POR','PO'].includes(pos)) return 'POR';
-  if(['DCD','DFC','DFD','DCI'].includes(pos)) return 'DEF';
-  if(['LD','LI','DFI'].includes(pos)) return 'LAT';
+  if(['DCD','DFC','DCI'].includes(pos)) return 'DEF';
+  if(['LD','LI','DFI','DFD'].includes(pos)) return 'LAT';
   if(['MCD','MCI','MVD','MVI'].includes(pos)) return 'MED';
   if(['DC','EI','ED'].includes(pos)) return 'DEL';
   return null;
