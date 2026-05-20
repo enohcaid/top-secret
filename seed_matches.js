@@ -1124,7 +1124,7 @@ const SEED_MATCHES = [
     {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.6, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:5.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
@@ -1143,7 +1143,7 @@ const SEED_MATCHES = [
     {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:5.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
@@ -1160,7 +1160,7 @@ const SEED_MATCHES = [
     {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:8.0, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFD', rating:8.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFD', rating:8.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
