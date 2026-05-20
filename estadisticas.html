@@ -316,6 +316,11 @@ footer span{color:#C9A84C;}
 .modal-stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--card2);border-radius:8px;}
 .modal-stat-lbl{font-size:.78rem;color:var(--muted);}
 .modal-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;}
+.modal-pos-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.pos-fbtn{padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.pos-fbtn:hover{border-color:var(--gold);color:var(--gold);}
+.pos-fbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.pos-fbtn-count{font-weight:500;opacity:.65;font-size:.65rem;}
 .modal-chart-wrap{margin-top:4px;}
 
 /* ── TEAM STATS HERO ── */
@@ -2047,27 +2052,28 @@ function showToast(msg,type='success'){
 // ════════════════════════════════════════════
 // MODAL ESTADÍSTICAS COMPLETAS
 // ════════════════════════════════════════════
-function openPlayerModal(playerName){
+function openPlayerModal(playerName, posFilter='all'){
   const matches = seasonMatches();
   const player = ROSTER.find(p=>p.name===playerName);
   if(!player) return;
 
-  const entries = [];
+  // Collect ALL entries for this player across all positions
+  const allEntries = [];
   matches.forEach(m=>{
     const p=(m.players||[]).find(p=>(p.matched||'').toLowerCase()===player.name.toLowerCase());
-    if(p) entries.push({...p, rival:m.rival, date:m.date, league:m.league, match_result:m.match_result});
+    if(p) allEntries.push({...p, rival:m.rival, date:m.date, league:m.league, match_result:m.match_result});
   });
+
+  // Unique positions this player has played, in appearance order
+  const uniquePositions = [...new Set(allEntries.map(e=>e.played_pos).filter(Boolean))];
+
+  // Filter entries by selected position (or all)
+  const entries = posFilter === 'all' ? allEntries : allEntries.filter(e => e.played_pos === posFilter);
 
   const ratings  = entries.map(e=>e.rating).filter(v=>v!=null);
   const avgR     = avg(ratings);
   const totalG   = entries.reduce((s,e)=>s+(e.goals||0),0);
   const totalA   = entries.reduce((s,e)=>s+(e.assists||0),0);
-
-  // Ratings en posición vs fuera de posición
-  const inPosRatings  = entries.filter(e=>e.rating!=null && e.played_pos && (isInPosition(player.pos, e.played_pos)===true || (player.name==='BlackPanther-CG' && !['POR','PO'].includes(e.played_pos)))).map(e=>e.rating);
-  const outPosRatings = entries.filter(e=>e.rating!=null && e.played_pos && isInPosition(player.pos, e.played_pos)===false && !(player.name==='BlackPanther-CG' && !['POR','PO'].includes(e.played_pos))).map(e=>e.rating);
-  const avgInPos  = avg(inPosRatings);
-  const avgOutPos = avg(outPosRatings);
 
   const distVals = entries.map(e=>e.distance_km).filter(v=>v!=null);
   const precVals = entries.map(e=>e.pass_accuracy).filter(v=>v!=null);
@@ -2076,30 +2082,7 @@ function openPlayerModal(playerName){
   const intVals  = entries.map(e=>e.interceptions).filter(v=>v!=null);
   const sprVals  = entries.map(e=>e.sprints).filter(v=>v!=null);
 
-  const v = (arr, fn='avg', dec=1) => {
-    if(!arr.length) return null;
-    const val = fn==='avg' ? arr.reduce((s,v)=>s+v,0)/arr.length : arr.reduce((s,v)=>s+v,0);
-    return +val.toFixed(dec);
-  };
-
-  // KPIs
-  const kpis = [
-    {lbl:'Partidos', val:entries.length,              color:'var(--gold)'},
-    {lbl:'Goles',    val:totalG,                      color:'var(--win)'},
-    {lbl:'Asist.',   val:totalA,                      color:'var(--vpug)'},
-    {lbl:'Rating prom.', val:avgR!=null?avgR.toFixed(1):'—', color:vrColor(avgR)},
-  ];
-
-  // Position-based rating stats
-  const posRatingStats = [];
-  if(inPosRatings.length>0){
-    posRatingStats.push({lbl:'Rating en posición ('+player.pos+')', vals:inPosRatings, fn:'avg', color:vrColor(avgInPos)});
-  }
-  if(outPosRatings.length>0){
-    posRatingStats.push({lbl:'Rating fuera de pos.', vals:outPosRatings, fn:'avg', color:'var(--loss)'});
-  }
-
-  // Optional stats — mostrar siempre en modal, indicar muestra
+  // Optional stats
   const optStats = [
     {lbl:'Dist. prom. (km)',   vals:distVals, fn:'avg'},
     {lbl:'Precisión pases',   vals:precVals, fn:'avg', suffix:'%'},
@@ -2114,9 +2097,8 @@ function openPlayerModal(playerName){
     const r=e.rating;
     const rc=r==null?'':r>=8?'high':r>=6.5?'mid':'low';
     const lc=leagueClass(e.league);
-    const posInfo = e.played_pos ? e.played_pos : '';
-    const oop = e.played_pos && isInPosition(player.pos, e.played_pos)===false && !(player.name==='BlackPanther-CG' && !['POR','PO'].includes(e.played_pos));
-    const posTag = posInfo ? '<span style="font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;'+(oop?'background:rgba(232,80,46,.15);color:var(--loss)':'background:rgba(255,255,255,.06);color:var(--muted2)')+'">'+posInfo+(oop?' ⚠':'')+'</span>' : '';
+    const posInfo = e.played_pos || '';
+    const posTag = posInfo ? '<span style="font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;background:rgba(255,255,255,.06);color:var(--muted2)">'+posInfo+'</span>' : '';
     return `<div class="modal-match-row">
       <span class="modal-match-date">${formatDate(e.date)}</span>
       <span class="modal-match-rival">vs ${e.rival} <span class="res-league ${lc}" style="font-size:.6rem;padding:1px 6px;border-radius:3px">${e.league}</span>${posTag}</span>
@@ -2132,7 +2114,7 @@ function openPlayerModal(playerName){
   const trendVals = sortedEntries.map(e=>e.rating).filter(v=>v!=null);
   const trendLabels = sortedEntries.filter(e=>e.rating!=null).map(e=>e.rival.split(' ')[0]);
 
-  // Construir HTML de stats avanzadas fuera del template para evitar expresiones complejas
+  // Build HTML fragments
   const optStatsHTML = optStats.map(s => {
     const val = s.fn === 'avg'
       ? (s.vals.reduce((a,b) => a+b, 0) / s.vals.length).toFixed(1) + (s.suffix||'')
@@ -2143,7 +2125,12 @@ function openPlayerModal(playerName){
     return '<div class="modal-stat-row"><span class="modal-stat-lbl">' + s.lbl + sample + '</span><span class="modal-stat-val">' + val + '</span></div>';
   }).join('');
 
-  const kpisHTML = kpis.map(k =>
+  const kpisHTML = [
+    {lbl:'Partidos', val:entries.length,                    color:'var(--gold)'},
+    {lbl:'Goles',    val:totalG,                            color:'var(--win)'},
+    {lbl:'Asist.',   val:totalA,                            color:'var(--vpug)'},
+    {lbl:'Rating prom.', val:avgR!=null?avgR.toFixed(1):'—', color:vrColor(avgR)},
+  ].map(k =>
     '<div class="modal-kpi"><div class="modal-kpi-val" style="color:' + k.color + '">' + k.val + '</div><div class="modal-kpi-lbl">' + k.lbl + '</div></div>'
   ).join('');
 
@@ -2151,24 +2138,26 @@ function openPlayerModal(playerName){
     ? '<div class="modal-section-title">Evolución del rating</div><div class="modal-chart-wrap"><canvas class="chart" id="' + ratingTrendId + '" style="height:100px"></canvas></div>'
     : '';
 
-  // HTML de rating por posición
-  const posHTML = posRatingStats.length > 0
-    ? '<div class="modal-section-title">Rating según posición</div><div class="modal-stat-grid">' +
-      posRatingStats.map(s => {
-        const val = (s.vals.reduce((a,b)=>a+b,0)/s.vals.length).toFixed(1);
-        const sample = '<span style="font-size:.6rem;color:var(--muted2)"> (' + s.vals.length + ' PJ)</span>';
-        return '<div class="modal-stat-row"><span class="modal-stat-lbl">' + s.lbl + sample + '</span><span class="modal-stat-val" style="color:' + (s.color||'var(--text)') + '">' + val + '</span></div>';
-      }).join('') + '</div>'
-    : '';
-
   const advHTML = optStats.length
     ? '<div class="modal-section-title">Estadísticas avanzadas</div><div class="modal-stat-grid">' + optStatsHTML + '</div>'
     : '';
 
+  // Position filter buttons — only shown when player has played multiple positions
+  const safeName = playerName.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  const posFilterHTML = uniquePositions.length > 1
+    ? '<div class="modal-pos-filter">' +
+        '<button class="pos-fbtn' + (posFilter==='all'?' active':'') + '" onclick="openPlayerModal(\'' + safeName + '\',\'all\')">Total <span class="pos-fbtn-count">(' + allEntries.length + ' PJ)</span></button>' +
+        uniquePositions.map(pos => {
+          const cnt = allEntries.filter(e=>e.played_pos===pos).length;
+          return '<button class="pos-fbtn' + (posFilter===pos?' active':'') + '" onclick="openPlayerModal(\'' + safeName + '\',\'' + pos + '\')">' + pos + ' <span class="pos-fbtn-count">(' + cnt + ' PJ)</span></button>';
+        }).join('') +
+      '</div>'
+    : '';
+
   document.getElementById('modalTitle').textContent = playerName + ' · ' + player.pos;
   document.getElementById('modalBody').innerHTML =
+    posFilterHTML +
     '<div class="modal-kpis">' + kpisHTML + '</div>' +
-    posHTML +
     trendHTML + advHTML +
     '<div class="modal-section-title">Historial de partidos</div>' +
     (matchRows || '<div style="color:var(--muted2);font-size:.8rem">Sin datos</div>');
