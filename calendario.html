@@ -117,7 +117,7 @@ footer span{color:var(--gold);}
   background:transparent;
   color:var(--mid);
   cursor:pointer;
-  transition:all .18s;
+  transition:color .18s, border-color .18s, background-color .18s;
 }
 .fbtn:hover{border-color:var(--mid);color:var(--black);}
 .fbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
@@ -158,34 +158,33 @@ footer span{color:var(--gold);}
 /* ─── MATCH CARD ─── */
 .match{
   display:grid;
-  grid-template-columns:4px 1fr auto auto auto;
+  grid-template-columns:1fr auto auto auto;
   align-items:center;
   gap:0 14px;
+  padding-left:14px;
   background:var(--white);
   border:1px solid var(--border);
   border-radius:10px;
   margin-bottom:5px;
   overflow:hidden;
-  transition:border-color .2s, background .2s;
+  transition:border-color .18s, background-color .18s;
   cursor:default;
-  animation:fadeUp .35s ease both;
+  animation:fadeUp .35s cubic-bezier(0.16,1,0.3,1) both;
 }
 .match:hover{border-color:var(--border2);background:var(--gray);}
+.match[data-league="VPN"]{background:var(--vpn-bg);}
+.match[data-league="VPN"]:hover{background:rgba(212,160,23,.15);}
+.match[data-league="VPUG"]{background:var(--vpug-bg);}
+.match[data-league="VPUG"]:hover{background:rgba(42,157,92,.15);}
+.match[data-league="11x11"]{background:var(--e11-bg);}
+.match[data-league="11x11"]:hover{background:rgba(37,99,235,.15);}
 
 @keyframes fadeUp{
   from{opacity:0;transform:translateY(8px);}
   to{opacity:1;transform:translateY(0);}
 }
 
-.match-bar{
-  width:4px;
-  height:100%;
-  align-self:stretch;
-  min-height:58px;
-}
-.bar-vpn{background:var(--vpn);}
-.bar-vpug{background:var(--vpug);}
-.bar-e11{background:var(--e11);}
+.match-bar{display:none;}
 
 .match-body{
   display:flex;
@@ -366,7 +365,7 @@ footer span{color:var(--gold);}
 
 /* ─── SEASON SELECTOR ─── */
 .season-btns{display:flex;gap:6px;flex-wrap:wrap;}
-.sbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
+.sbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .sbtn:hover{border-color:var(--mid);color:var(--black);}
 .sbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
 
@@ -381,7 +380,7 @@ footer span{color:var(--gold);}
 .season-section .year-grid{margin-top:0;padding-top:0;}
 
 /* ─── LOCK / ADMIN ─── */
-.btn-lock{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
+.btn-lock{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .btn-lock:hover{border-color:var(--mid);color:var(--black);}
 .btn-lock.unlocked{border-color:var(--win);color:var(--win);}
 /* Admin-only elements hidden when body.locked */
@@ -587,7 +586,7 @@ body.locked .result-box.pending{cursor:default;}
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   font-size:.75rem;
-  transition:all .15s;
+  transition:color .15s, border-color .15s, background-color .15s;
   flex-shrink:0;
 }
 .act-btn:hover{border-color:var(--mid);color:var(--black);background:var(--card2);}
@@ -639,7 +638,7 @@ body.locked .result-box.pending{cursor:default;}
   font-weight:700;
   letter-spacing:.08em;
   cursor:pointer;
-  transition:all .15s;
+  transition:color .15s, border-color .15s, background-color .15s;
 }
 .toggle-opt.sel{background:rgba(201,168,76,.12);border-color:var(--gold);color:var(--gold);}
 .suspend-section{
@@ -728,7 +727,7 @@ body{padding-top:64px;}
 .week-strip-wrap{position:sticky;top:64px;z-index:50;background:rgba(255,255,255,.97);border-bottom:1px solid var(--border);padding:10px 32px 8px;max-width:calc(100% - 0px);}
 .week-strip{display:flex;flex-direction:row;gap:5px;overflow-x:auto;scrollbar-width:none;max-width:1100px;margin:0 auto;}
 .week-strip::-webkit-scrollbar{display:none;}
-.day-pill{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 9px;border-radius:8px;cursor:pointer;border:1px solid transparent;min-width:42px;transition:all .15s;user-select:none;}
+.day-pill{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 9px;border-radius:8px;cursor:pointer;border:1px solid transparent;min-width:42px;transition:border-color .15s, background-color .15s, opacity .15s;user-select:none;}
 .day-pill:hover{border-color:var(--border);}
 .day-pill.past{opacity:.35;}
 .day-pill.today{background:var(--gold);border-color:var(--gold);}
@@ -748,6 +747,21 @@ body{padding-top:64px;}
 .tmr-rival{font-size:.9rem;font-weight:700;color:var(--black);flex:1;}
 .tmr-rival-badge{width:22px;height:22px;border-radius:4px;object-fit:contain;background:#eee;flex-shrink:0;}
 .jornada-badge{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.06em;color:var(--mid);background:var(--gray);border:1px solid var(--border);padding:1px 6px;border-radius:4px;}
+
+/* ── NUMERIC RENDERING ── */
+.result-score, .match-time, .dp-num { font-variant-numeric: tabular-nums; }
+
+/* ── TEXT BALANCE ── */
+.ph-title { text-wrap: balance; }
+
+/* ── ACTIVE PRESS STATES ── */
+.fbtn:active, .sbtn:active, .btn-lock:active, .act-btn:active,
+.day-pill:active, .result-box:active { transform: scale(0.97); }
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+}
 
 </style>
 <link rel="icon" type="image/png" href="Top-Secret.png">
@@ -2725,7 +2739,7 @@ function showToast(msg, type='success'){
   if(!t){
     t = document.createElement('div');
     t.id = 'cal-toast';
-    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);padding:12px 24px;border-radius:10px;font-family:Barlow,sans-serif;font-size:.9rem;font-weight:600;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);padding:12px 24px;border-radius:10px;font-family:Barlow,sans-serif;font-size:.9rem;font-weight:600;opacity:0;transition:transform .3s,opacity .3s;z-index:9999;pointer-events:none;white-space:nowrap;';
     document.body.appendChild(t);
   }
   t.textContent = msg;

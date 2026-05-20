@@ -103,12 +103,12 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 
 /* ── FORMATION BAR ── */
 .fbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
-.fbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
+.fbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .fbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
 .fbtn:hover:not(.active){border-color:var(--black);color:var(--black);}
-.auto-btn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid rgba(201,168,76,.5);background:rgba(201,168,76,.1);color:var(--gold);cursor:pointer;transition:all .15s;}
+.auto-btn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid rgba(201,168,76,.5);background:rgba(201,168,76,.1);color:var(--gold);cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .auto-btn:hover{background:var(--gold);color:#fff;}
-.clear-btn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid rgba(136,136,136,.4);background:transparent;color:var(--mid);cursor:pointer;transition:all .15s;}
+.clear-btn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;border:1px solid rgba(136,136,136,.4);background:transparent;color:var(--mid);cursor:pointer;transition:color .15s, border-color .15s;}
 .clear-btn:hover{border-color:var(--red);color:var(--red);}
 
 /* ── PITCH TOKEN VARS ── */
@@ -148,7 +148,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .assign-cancel{font-size:.7rem;opacity:.7;cursor:pointer;padding:2px 8px;border:1px solid currentColor;border-radius:4px;}
 
 /* ── SHARE BTN ── */
-.share-btn{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .15s;}
+.share-btn{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:color .15s, background-color .15s;}
 .share-btn:hover{background:var(--gold);color:#fff;}
 
 /* ── LIGHTBOX ── */
@@ -168,7 +168,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .mph-name{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;}
 .mph-sub{font-size:.72rem;color:#8b92aa;margin-top:2px;}
 .sopts{display:flex;flex-direction:column;gap:7px;}
-.sopt{width:100%;padding:12px 14px;text-align:left;font-family:'Barlow',sans-serif;font-size:.88rem;font-weight:600;background:#0f1117;border:1px solid #252a38;color:#dde1ec;border-radius:9px;cursor:pointer;transition:all .14s;}
+.sopt{width:100%;padding:12px 14px;text-align:left;font-family:'Barlow',sans-serif;font-size:.88rem;font-weight:600;background:#0f1117;border:1px solid #252a38;color:#dde1ec;border-radius:9px;cursor:pointer;transition:border-color .14s, background-color .14s;}
 .sopt:hover{border-color:#8b92aa;background:#13161e;}
 .sopt-always{border-color:rgba(74,158,255,.35)!important;color:#4a9eff!important;}
 .sopt-always:hover{border-color:#4a9eff!important;background:rgba(74,158,255,.08)!important;}
@@ -178,12 +178,12 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
 .modal-input{width:100%;background:#0a0b0e;border:1px solid #252a38;border-radius:8px;color:#dde1ec;font-family:'Barlow',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;margin-bottom:12px;}
 .modal-input:focus{border-color:var(--gold);}
 .mbtns{display:flex;gap:8px;margin-top:4px;}
-.mbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px;border-radius:8px;border:1px solid #252a38;cursor:pointer;flex:1;transition:all .15s;}
+.mbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px;border-radius:8px;border:1px solid #252a38;cursor:pointer;flex:1;transition:color .15s, background-color .15s, border-color .15s;}
 .mbtn-cancel{background:transparent;color:#8b92aa;}
 .mbtn-save{background:var(--gold);border-color:var(--gold);color:#fff;}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);padding:10px 22px;border-radius:10px;font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:600;opacity:0;transition:all .28s;z-index:9999;pointer-events:none;white-space:nowrap;background:rgba(17,17,17,.95);color:var(--gold);border:1px solid var(--gold);}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);padding:10px 22px;border-radius:10px;font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:600;opacity:0;transition:transform .28s, opacity .28s;z-index:9999;pointer-events:none;white-space:nowrap;background:rgba(17,17,17,.95);color:var(--gold);border:1px solid var(--gold);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ── AVATAR PHOTO ── */
@@ -212,6 +212,15 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
   .pnum{font-size:1.2rem;min-width:24px;}
   .section-row{flex-direction:column;gap:4px;}
   .toast{bottom:72px;}
+}
+
+/* ── ACTIVE PRESS STATES ── */
+.fbtn:active, .auto-btn:active, .clear-btn:active,
+.share-btn:active, .mbtn:active { transform: scale(0.97); }
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
 }
 </style>
 </head>

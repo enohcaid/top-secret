@@ -61,7 +61,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   background: transparent; color: var(--mid);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: .82rem; font-weight: 700; letter-spacing: .08em;
-  cursor: pointer; transition: all .18s;
+  cursor: pointer; transition: color .18s, border-color .18s, background-color .18s;
 }
 .season-pill:hover { border-color: var(--gold); color: var(--gold); }
 .season-pill.active { background: var(--gold); border-color: var(--gold); color: var(--black); }
@@ -77,7 +77,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   background: transparent; color: var(--mid);
   font-family: 'Barlow', sans-serif;
   font-size: .8rem; font-weight: 600;
-  cursor: pointer; transition: all .18s;
+  cursor: pointer; transition: color .18s, border-color .18s, background-color .18s;
 }
 .pfbtn:hover { border-color: var(--black); color: var(--black); }
 .pfbtn.active { background: var(--black); border-color: var(--black); color: var(--white); }
@@ -253,7 +253,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   background: rgba(0,0,0,.6); border: 1px solid rgba(201,168,76,.4);
   color: rgba(255,255,255,.7); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  font-size: .8rem; transition: all .15s;
+  font-size: .8rem; transition: color .15s, background-color .15s, border-color .15s;
 }
 .pp-close:hover { background: rgba(201,168,76,.2); color: var(--white); border-color: var(--gold); }
 .pp-identity {
@@ -390,7 +390,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   border-radius: 6px; color: rgba(201,168,76,.7);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: .82rem; font-weight: 700; letter-spacing: .08em;
-  cursor: pointer; transition: all .18s;
+  cursor: pointer; transition: color .18s, border-color .18s, background-color .18s;
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 .pp-dl-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,.07); }
@@ -431,6 +431,20 @@ footer span { color: var(--gold); }
   .card-info { padding: 8px 10px 10px; }
   .card-num { font-size:1.4rem; }
   .card-name { font-size:1rem; }
+}
+
+/* ── NUMERIC RENDERING ── */
+.card-num, .pp-num, .stat-val { font-variant-numeric: tabular-nums; }
+
+/* ── TEXT BALANCE ── */
+.ph-title { text-wrap: balance; }
+
+/* ── ACTIVE PRESS STATES ── */
+.season-pill:active, .pfbtn:active, .pp-dl-btn:active { transform: scale(0.97); }
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
 }
 </style>
 </head>
