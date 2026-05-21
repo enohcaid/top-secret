@@ -262,7 +262,6 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
     <div class="section-head-right">
       <span>Armado</span>
       <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px">📋 Copiar lista</button>
-      <button class="share-btn" id="partidosHoyBtn" onclick="doGeneratePartidosHoy()" style="margin-right:6px">Partidos Hoy</button>
       <button class="share-btn" id="shareBtn" onclick="doShare()">📸 Compartir</button>
     </div>
   </div>
@@ -545,7 +544,7 @@ if (CAL_DOC_CONV) {
     renderTodayMatchesPanel();
   }, () => {});
 }
-const _vpnFixturesReady = fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
+fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
   .then(r => r.json()).then(d => {
     vpnFixtures = Array.isArray(d) ? d : [];
     renderTodayMatchesPanel();
@@ -1479,184 +1478,6 @@ function _download(blob, name) {
   document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-/* ─── PARTIDOS HOY IMAGE ─── */
-function _phGroupRows(formSlots) {
-  const sorted = [...formSlots].sort((a, b) => a.y - b.y);
-  const rows = [];
-  let cur = [sorted[0]];
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i].y - sorted[i-1].y < 13) cur.push(sorted[i]);
-    else { rows.push(cur.slice().sort((a,b)=>a.x-b.x)); cur = [sorted[i]]; }
-  }
-  rows.push(cur.slice().sort((a,b)=>a.x-b.x));
-  return rows;
-}
-
-async function buildPartidosHoyCanvas(withPhotos) {
-  const W = 1080, PAD = 36;
-  const matches = getTodayMatches();
-  const formSlots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
-  const rows = _phGroupRows(formSlots);
-  const maxCols = Math.max(...rows.map(r => r.length), 1);
-
-  const CARD_W  = Math.floor((W - PAD*2) / maxCols);
-  const PHOTO_H = Math.round(CARD_W * 1.05);
-  const BAR_H   = Math.round(CARD_W * 0.13);
-  const ROW_H   = PHOTO_H + BAR_H + 6;
-
-  const hHeader  = 362;
-  const hMatches = matches.length ? matches.length * 116 + 58 : 80;
-  const hForm    = 58 + rows.length * ROW_H + 40;
-  const H        = hHeader + hMatches + hForm;
-
-  const cvs = document.createElement('canvas');
-  cvs.width = W; cvs.height = H;
-  const ctx = cvs.getContext('2d');
-
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#0d0f14'); grad.addColorStop(0.55, '#111418'); grad.addColorStop(1, '#0a0b0e');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = '#C9A84C'; ctx.fillRect(0, 0, W, 4);
-
-  let dy = 4;
-  const DAYS_ES   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const nowART    = new Date(new Date().toLocaleString('en-US',{timeZone:'America/Argentina/Buenos_Aires'}));
-
-  dy += 36;
-  await _shareLogoReady;
-  if (_shareLogo) { const LS=76; ctx.drawImage(_shareLogo, W/2-LS/2, dy, LS, LS); }
-  dy += 88;
-
-  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.font = '900 italic 82px "Barlow Condensed",sans-serif';
-  ctx.fillStyle = '#ffffff'; ctx.fillText('HOY JUEGA', W/2, dy); dy += 88;
-
-  ctx.font = '900 italic 82px "Barlow Condensed",sans-serif';
-  ctx.fillStyle = '#C9A84C'; ctx.fillText('TOP SECRET FC', W/2, dy); dy += 50;
-
-  const dayName = DAYS_ES[nowART.getDay()].toUpperCase();
-  const monName = MONTHS_ES[nowART.getMonth()].toUpperCase();
-  const dateLabel = `${matches.length} ${matches.length===1?'PARTIDO':'PARTIDOS'} · ${dayName} ${nowART.getDate()} DE ${monName}`;
-  ctx.font = '600 24px "Barlow Condensed",sans-serif';
-  ctx.fillStyle = 'rgba(201,168,76,.65)'; ctx.fillText(dateLabel, W/2, dy); dy += 22;
-  ctx.fillStyle = 'rgba(201,168,76,.22)'; ctx.fillRect(PAD, dy, W-PAD*2, 1); dy += 14;
-
-  const LC = {VPN:'#f5c518',VPUG:'#3ecf8e','11x11':'#4a9eff'};
-  if (!matches.length) {
-    ctx.font = '400 italic 22px "Barlow",sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.fillText('Sin partidos hoy', W/2, dy+40);
-    dy += 80;
-  } else {
-    for (const m of matches) {
-      const MH = 108, bW = 96;
-      const lc = LC[m.league] || '#888';
-      ctx.fillStyle = lc+'18';
-      ctx.beginPath(); ctx.roundRect?ctx.roundRect(PAD,dy+8,bW,MH-16,8):ctx.rect(PAD,dy+8,bW,MH-16); ctx.fill();
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='900 23px "Barlow Condensed",sans-serif';
-      ctx.fillStyle=lc+'cc'; ctx.fillText(m.league||'', PAD+bW/2, dy+MH*0.36);
-      if (m.round) {
-        ctx.font='700 17px "Barlow Condensed",sans-serif';
-        ctx.fillStyle='rgba(255,255,255,.45)'; ctx.fillText(`J${m.round}`, PAD+bW/2, dy+MH*0.62);
-      }
-      let rivalX = PAD + bW + 14;
-      if (withPhotos && m.badge) {
-        await new Promise(r => {
-          const img = new Image(); img.crossOrigin='anonymous';
-          img.onload = () => { ctx.drawImage(img, rivalX, dy+(MH-52)/2, 52, 52); r(); };
-          img.onerror = () => r(); img.src = m.badge;
-        });
-        rivalX += 62;
-      }
-      ctx.textAlign='left'; ctx.textBaseline='middle';
-      const rLen = (m.rival||'').length;
-      ctx.font=`800 ${rLen>20?34:rLen>14?40:46}px "Barlow Condensed",sans-serif`;
-      ctx.fillStyle='#fff'; ctx.fillText((m.rival||'RIVAL').toUpperCase(), rivalX, dy+MH*0.4);
-      ctx.textAlign='right';
-      ctx.font='700 28px "Barlow Condensed",sans-serif';
-      ctx.fillStyle=lc; ctx.fillText(m.time||'—', W-PAD, dy+MH*0.37);
-      ctx.font='500 19px "Barlow Condensed",sans-serif';
-      ctx.fillStyle='rgba(255,255,255,.38)'; ctx.fillText(m.isHome?'LOCAL':'VISITA', W-PAD, dy+MH*0.64);
-      dy += MH;
-      ctx.fillStyle='rgba(255,255,255,.07)'; ctx.fillRect(PAD,dy,W-PAD*2,1); dy++;
-    }
-    dy += 18;
-  }
-
-  ctx.fillStyle='#C9A84C'; ctx.fillRect(PAD,dy,W-PAD*2,2); dy += 14;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.font='700 18px "Barlow Condensed",sans-serif';
-  ctx.fillStyle='rgba(201,168,76,.55)'; ctx.fillText(`FORMACIÓN ${lineup.formation}`, W/2, dy+8); dy += 26;
-
-  const NS = Math.round(PHOTO_H*0.2), BNS = Math.round(BAR_H*0.65);
-  for (const row of rows) {
-    const rW = CARD_W * row.length, sx = (W-rW)/2;
-    await Promise.all(row.map((s, i) => new Promise(async resolve => {
-      const assigned = lineup.slots[s.key];
-      const player = assigned ? PLAYERS.find(p => p.name===assigned) : null;
-      const tx = Math.round(sx + i*CARD_W) + 3, cw = CARD_W - 6;
-      if (withPhotos && player) {
-        await new Promise(ir => {
-          const img = new Image();
-          img.onload = () => { ctx.drawImage(img, tx, dy, cw, PHOTO_H); ir(); };
-          img.onerror = () => { ctx.fillStyle='rgba(201,168,76,.1)'; ctx.fillRect(tx,dy,cw,PHOTO_H); ir(); };
-          img.src = `Renders/${player.folder}/Frente.png`;
-        });
-      } else {
-        ctx.fillStyle = player ? 'rgba(201,168,76,.1)' : 'rgba(255,255,255,.05)';
-        ctx.fillRect(tx, dy, cw, PHOTO_H);
-      }
-      if (player) {
-        ctx.font=`900 ${NS}px "Barlow Condensed",sans-serif`;
-        ctx.fillStyle='#C9A84C'; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-        ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=5;
-        ctx.fillText(String(player.num), tx+5, dy+PHOTO_H-5); ctx.shadowBlur=0;
-        if (captain===player.name) {
-          const cr=Math.round(PHOTO_H*0.1), cx2=tx+cw-cr-4, cy2=dy+PHOTO_H-cr-4;
-          ctx.fillStyle='#C9A84C'; ctx.beginPath(); ctx.arc(cx2,cy2,cr,0,Math.PI*2); ctx.fill();
-          ctx.fillStyle='#111'; ctx.font=`900 ${Math.round(cr*1.1)}px "Barlow Condensed",sans-serif`;
-          ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('C',cx2,cy2);
-        }
-      }
-      ctx.fillStyle='#111111'; ctx.fillRect(tx, dy+PHOTO_H, cw, BAR_H);
-      if (player) {
-        ctx.font=`700 ${BNS}px "Barlow Condensed",sans-serif`;
-        ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.save(); ctx.beginPath(); ctx.rect(tx,dy+PHOTO_H,cw,BAR_H); ctx.clip();
-        ctx.fillText(player.name.toUpperCase(), tx+cw/2, dy+PHOTO_H+BAR_H/2); ctx.restore();
-      }
-      resolve();
-    })));
-    dy += ROW_H;
-  }
-
-  ctx.fillStyle='#C9A84C'; ctx.fillRect(0, H-4, W, 4);
-  return cvs;
-}
-
-async function doGeneratePartidosHoy() {
-  const btn = document.getElementById('partidosHoyBtn');
-  const orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
-  await _vpnFixturesReady; // garantiza que los fixtures VPN estén cargados
-  try {
-    let blob;
-    try {
-      const cvs = await buildPartidosHoyCanvas(true);
-      blob = await canvasToBlob(cvs);
-    } catch(e) {
-      if (e.name === 'SecurityError') {
-        const cvs2 = await buildPartidosHoyCanvas(false);
-        blob = await canvasToBlob(cvs2);
-        showToast('Sin fotos · usá npx serve . para verlas', 'info');
-      } else throw e;
-    }
-    _download(blob, 'Partidos Hoy.png');
-    showToast('Imagen generada');
-  } catch(e) { console.error(e); showToast('Error: '+e.message,'info'); }
-  btn.textContent = orig; btn.disabled = false;
 }
 
 /* ─── PAGE LOAD ANIMATION ─── */
