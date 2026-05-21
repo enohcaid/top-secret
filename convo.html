@@ -278,11 +278,7 @@ html,body{height:100%;} body{background:var(--gray);color:var(--text);font-famil
         <span id="assignBannerText">Seleccioná un jugador</span>
         <span class="assign-cancel" onclick="cancelSlotSelect()">✕</span>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-        <div class="fbar" id="fbar"></div>
-        <button class="auto-btn" onclick="autoLineup()">⚡ Auto</button>
-        <button class="clear-btn" onclick="clearLineup()">✕ Limpiar</button>
-      </div>
+      <div class="fbar" id="fbar"></div>
       <div class="pitch" id="pitch">
         <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" class="pitch-svg">
           <rect x="10" y="10" width="280" height="380" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
@@ -848,6 +844,16 @@ function renderFbar() {
     btn.onclick = () => selectFormation(f);
     bar.appendChild(btn);
   });
+  const autoBtn = document.createElement('button');
+  autoBtn.className = 'auto-btn';
+  autoBtn.innerHTML = '⚡ Auto';
+  autoBtn.onclick = autoLineup;
+  bar.appendChild(autoBtn);
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'clear-btn';
+  clearBtn.innerHTML = '✕ Limpiar';
+  clearBtn.onclick = clearLineup;
+  bar.appendChild(clearBtn);
 }
 
 /* ─── RENDER PITCH ─── */
