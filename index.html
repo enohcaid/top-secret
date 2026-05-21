@@ -528,11 +528,12 @@ function matchOutcome(s) {
 }
 
 T2_MATCHES.forEach(m => {
+  if (!m.match_result) return;
   const outcome = matchOutcome(m.match_result);
   if (outcome === 'win') totalWins++;
   else if (outcome === 'draw') totalDraws++;
   totalGoals += parseScore(m.match_result)[0];
-  m.players.forEach(p => {
+  (m.players || []).forEach(p => {
     const k = p.matched || p.name;
     if (!playerStats[k]) playerStats[k] = {pj:0,g:0,a:0,ratings:[]};
     playerStats[k].pj++;
