@@ -967,7 +967,7 @@ body{padding-top:64px;}
 </div>
 
 <script type="module">
-import { SEED_MATCHES } from './seed_matches.js?v=20260521';
+import { SEED_MATCHES } from './seed_matches.js?v=20260522';
 // ── MATCH DATA ────────────────────────────────────────────────────────────────
 // location: 'L'=Local (Top Secret primero), 'V'=Visitante (rival primero)
 // result: null=pending, [homeGoals, awayGoals] (desde perspectiva del partido, no del equipo)
@@ -1168,27 +1168,7 @@ const ADMIN_PIN  = '8189';
 const WORKER_URL_CAL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const KV_KEY_CAL     = 'ts_matches_v1';
 let cloudSeedMatches = []; // populated on load
-let vpnFixtures      = []; // fixtures de VPN — partidos pendientes de la temporada activa
-let vpnDynamic       = []; // subset de vpnFixtures sin duplicados con RAW/custom
 let currentStatsId   = null; // id of the match currently open in the stats panel
-
-// Recalculates vpnDynamic = vpnFixtures entries not already covered by RAW or custom
-function rebuildVpnDynamic() {
-  function isInRaw(f) {
-    return RAW.some((_, i) => {
-      const m = getMatch(i);
-      if (m.league !== 'VPN' || !rivalMatch(m.rival, f.rival)) return false;
-      // ±1 day tolerance: late-night ART matches cross midnight UTC, giving date+1 in fixtures API
-      return Math.abs(new Date(m.date) - new Date(f.date)) <= 86400000;
-    });
-  }
-  function isInCustom(f) {
-    return custom.some(m => m.date === f.date && m.league === 'VPN' && rivalMatch(m.rival, f.rival));
-  }
-
-  // Only upcoming fixtures not already covered by RAW or custom entries
-  vpnDynamic = vpnFixtures.filter(f => !isInRaw(f) && !isInCustom(f));
-}
 
 async function fetchCloudSeedMatches() {
   try {
@@ -1197,18 +1177,6 @@ async function fetchCloudSeedMatches() {
     const data = await r.json();
     cloudSeedMatches = Array.isArray(data) ? data : [];
   } catch(e) { /* silently ignore — stats panel falls back to local data */ }
-}
-
-
-async function fetchVpnFixtures() {
-  try {
-    const r = await fetch(`${WORKER_URL_CAL}/vpn-fixtures`);
-    if (!r.ok) { console.warn('[VPN fixtures] HTTP', r.status); return; }
-    const data = await r.json();
-    vpnFixtures = Array.isArray(data) ? data : [];
-    rebuildVpnDynamic();
-    if (_fbReady) render();
-  } catch(e) { console.warn('[VPN fixtures] fetch error', e); }
 }
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
@@ -1249,7 +1217,6 @@ onSnapshot(CAL_DOC, snap => {
     localStorage.setItem('ts_custom',    JSON.stringify(custom));
     localStorage.setItem('ts_edits',     JSON.stringify(edits));
     localStorage.setItem('ts_suspended', JSON.stringify(suspended));
-    rebuildVpnDynamic(); // recalculate dedup after custom changes
   }
   if(!_fbReady){ _fbReady = true; render(); }
   else { render(); }
@@ -1332,11 +1299,6 @@ function getAnyMatch(id){
     if(m && !m.badge && m.league === 'VPUG')  return Object.assign({}, m, {badge: vpugBadge(m.rival)});
     if(m && !m.badge && m.league === '11x11') return Object.assign({}, m, {badge: e11Badge(m.rival)});
     return m;
-  }
-  if(typeof id === 'string' && id.startsWith('vpn_')){
-    const f = vpnDynamic.find(f => f.id === parseInt(id.slice(4)));
-    if(!f) return undefined;
-    return { ...f, league: 'VPN' };
   }
   return getMatch(id);
 }
@@ -1667,11 +1629,10 @@ function renderWeekStrip() {
   const today = getToday();
   const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
-  // Get all unique match dates (RAW + custom + vpnDynamic)
+  // Get all unique match dates (RAW + custom)
   const matchDates = new Set();
   RAW.forEach((_,i) => { const m = getMatch(i); if (!m.free) matchDates.add(m.date); });
   custom.forEach(m => { if (m.date) matchDates.add(m.date); });
-  vpnDynamic.forEach(m => { if (m.date) matchDates.add(m.date); });
   const sorted = [...matchDates].sort();
 
   strip.innerHTML = '';
@@ -1717,14 +1678,7 @@ function renderTodayCard() {
     .map((m, ci) => ({m, id:'c'+ci, isCustom:true}))
     .filter(({m}) => m.date === today && (!m.tipo || m.tipo === 'partido') && !customIsInRaw(m));
 
-  // VPN T2 dynamic fixtures for today (not already covered by RAW or custom)
-  const vpnToday = vpnDynamic
-    .map((m) => ({m: {...m, league:'VPN'}, id:'vpn_'+m.id, isCustom:false}))
-    .filter(({m}) => m.date === today)
-    .filter(({m}) => !rawToday.some(r => r.m.league === 'VPN' && rivalMatch(r.m.rival, m.rival))
-                  && !customToday.some(c => c.m.league === 'VPN' && rivalMatch(c.m.rival, m.rival)));
-
-  const todayMatches = [...rawToday, ...customToday, ...vpnToday]
+  const todayMatches = [...rawToday, ...customToday]
     .sort((a,b) => lgOrder(a.m.league) - lgOrder(b.m.league) || (a.m.time||'').localeCompare(b.m.time||''));
 
   const wrap = document.getElementById('todayCard');
@@ -1793,10 +1747,6 @@ function renderNextHero() {
     if (m.date < today || (m.tipo && m.tipo !== 'partido')) return;
     if (customIsInRaw(m)) return;
     upcoming.push({m, id: 'c'+ci});
-  });
-  vpnDynamic.forEach((m) => {
-    if (m.date < today) return;
-    upcoming.push({m: {...m, league:'VPN'}, id: 'vpn_'+m.id});
   });
   upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || lgOrder(a.m.league) - lgOrder(b.m.league) || (a.m.time||'').localeCompare(b.m.time||''));
 
@@ -1872,11 +1822,6 @@ function renderYearGrid() {
     if (!mbd[m.date]) mbd[m.date] = [];
     mbd[m.date].push('c'+ci);
   });
-  vpnDynamic.forEach((m) => {
-    if (!mbd[m.date]) mbd[m.date] = [];
-    mbd[m.date].push('vpn_'+m.id);
-  });
-
   function monthHasMatches(moKey) {
     const [y, mo] = moKey.split('-').map(Number);
     const days = new Date(y, mo, 0).getDate();
@@ -2028,10 +1973,6 @@ function render_legacy_unused(){
   custom.forEach((m, ci) => {
     if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
     matchesByDate[m.date].push('c'+ci);
-  });
-  vpnDynamic.forEach((m) => {
-    if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
-    matchesByDate[m.date].push('vpn_'+m.id);
   });
 
   // Date range: past → only match days; today forward → every day through horizon
@@ -2263,14 +2204,7 @@ function updateStats(){
       const o = outcomeFor(i);
       results_lg.push({ date:m.date, outcome:o });
     });
-    if(lg === 'VPN') vpnDynamic.forEach((f)=>{
-      const id = 'vpn_'+f.id;
-      const m = getAnyMatch(id);
-      if(!m) return;
-      const o = outcomeFor(id);
-      results_lg.push({ date:m.date, outcome:o });
-    });
-    // Custom VPN matches (T2 manually added) also count
+    // Custom VPN matches also count
     custom.forEach((m, ci) => {
       if(!m.league || m.league !== lg) return;
       if(customIsInRaw(m)) return;
@@ -2799,9 +2733,7 @@ window.editCurrentMatch = editCurrentMatch;
 document.body.classList.add('locked');
 
 // render() is called by onSnapshot when Firebase data loads
-// Fetch cloud match stats, VPN results and VPN fixtures in the background
 fetchCloudSeedMatches();
-fetchVpnFixtures();
 </script>
 
 <footer>
