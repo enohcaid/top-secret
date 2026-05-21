@@ -2252,8 +2252,8 @@ function updateStats(){
       const o = outcomeFor(i);
       results_lg.push({ date:m.date, outcome:o });
     });
-    if(lg === 'VPN') vpnDynamic.forEach((m)=>{
-      const id = 'vpn_'+m.id;
+    if(lg === 'VPN') vpnDynamic.forEach((f)=>{
+      const id = 'vpn_'+f.id;
       const m = getAnyMatch(id);
       if(!m) return;
       const o = outcomeFor(id);
