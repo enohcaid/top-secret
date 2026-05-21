@@ -1143,6 +1143,18 @@ const SEED_MATCHES = [
     {name:'pauloco10',     matched:'pauloco10',         played_pos:'POR', rating:5.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // ── VPN T2 FIXTURES PENDIENTES ────────────────────────────────────────────────
+  {rival:'Aesma Gaming',       league:'VPN', date:'2026-05-27', isHome:false, time:'23:00'},
+  {rival:'CAI Esports',        league:'VPN', date:'2026-05-27', isHome:true,  time:'23:30'},
+  {rival:'San Lorenzo Esports',league:'VPN', date:'2026-05-27', isHome:true,  time:'23:59'},
+  {rival:'Instituto Esports',  league:'VPN', date:'2026-06-01', isHome:false, time:'23:00'},
+  {rival:'Estudiantes LP',     league:'VPN', date:'2026-06-01', isHome:true,  time:'23:30'},
+  {rival:'Talleres Esports',   league:'VPN', date:'2026-06-01', isHome:false, time:'23:59'},
+  {rival:'FCO Cannabiense',    league:'VPN', date:'2026-06-03', isHome:true,  time:'23:00'},
+  {rival:'Monoidales',         league:'VPN', date:'2026-06-03', isHome:false, time:'23:30'},
+  {rival:'Hacha eSports',      league:'VPN', date:'2026-06-08', isHome:true,  time:'23:00'},
+  {rival:'Belgrano Esports',   league:'VPN', date:'2026-06-08', isHome:false, time:'23:30'},
+
   // ── VPUG TEMPORADA 2 ──────────────────────────────────────────────────────────
 
   // Fecha 1 VPUG T2 - United Mito - 18 May 2026 (Visita, 3-0, Victoria)
