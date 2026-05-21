@@ -57,6 +57,7 @@ const RES_EMOJI    = { win: '✅', draw: '➖', loss: '❌' };
 export function generateMatchNews(matches) {
   const byDate = {};
   matches.forEach(m => {
+    if (!m.match_result) return;
     const d = m.date || '1970-01-01';
     (byDate[d] = byDate[d] || []).push(m);
   });
