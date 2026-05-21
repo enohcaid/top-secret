@@ -1092,6 +1092,57 @@ const SEED_MATCHES = [
     {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:5.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 7 VPN T2 - BNA San Jorge - 20 May 2026 (Local, 1-3, Derrota)
+  {rival:'BNA San Jorge', league:'VPN', date:'2026-05-20', isHome:true, match_result:'1-3', uploadedAt:'2026-05-21T02:30:00.000Z', notes:'',
+  team_stats:{posesion:53,tiros:5,tiros_arco:null,goles_esperados:2.7,pases:218,precision_pases:84,entradas:17,entradas_exito:4,intercepciones:21,paradas:4,faltas:1,fuera_juego:1,corneres:4,regates_exito:96,precision_tiro:80},
+  players:[
+    {name:'M. Crespo',     matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:29,  pass_accuracy:69, distance_km:18.9, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',  matched:'Lucasmati_akd',     played_pos:'EI',  rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',  matched:'Lautavester7',      played_pos:'DC',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',  matched:'BlackPanther-CG',   played_pos:'ED',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',  matched:'CipriMancini',      played_pos:'MCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',       matched:'Guiidow',           played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',          matched:'zPibu__',           played_pos:'DFI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',      matched:'AR_ELTIO',          played_pos:'DCI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',      matched:'Cabers14',          played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',  matched:'Alexisraies23',     played_pos:'DFD', rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'pauloco10',     matched:'pauloco10',         played_pos:'POR', rating:4.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 8 VPN T2 - Chacarita eSports - 20 May 2026 (Visita, 0-3, Derrota)
+  {rival:'Chacarita eSports', league:'VPN', date:'2026-05-20', isHome:false, match_result:'0-3', uploadedAt:'2026-05-21T03:00:00.000Z', notes:'',
+  team_stats:{posesion:64,tiros:2,tiros_arco:null,goles_esperados:1.1,pases:244,precision_pases:85,entradas:15,entradas_exito:4,intercepciones:18,paradas:2,faltas:1,fuera_juego:0,corneres:1,regates_exito:94,precision_tiro:50},
+  players:[
+    {name:'J. Martinez',   matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:40,  pass_accuracy:78, distance_km:18.3, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',  matched:'Lucasmati_akd',     played_pos:'EI',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',  matched:'Lautavester7',      played_pos:'DC',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',  matched:'BlackPanther-CG',   played_pos:'ED',  rating:6.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',  matched:'CipriMancini',      played_pos:'MCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',       matched:'Guiidow',           played_pos:'MCD', rating:8.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',          matched:'zPibu__',           played_pos:'DFI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',      matched:'AR_ELTIO',          played_pos:'DCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',      matched:'Cabers14',          played_pos:'DFC', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',  matched:'Alexisraies23',     played_pos:'DFD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'pauloco10',     matched:'pauloco10',         played_pos:'POR', rating:5.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 9 VPN T2 - Riestra eSports - 20 May 2026 (Local, 1-1, Empate)
+  {rival:'Riestra eSports', league:'VPN', date:'2026-05-20', isHome:true, match_result:'1-1', uploadedAt:'2026-05-21T03:30:00.000Z', notes:'',
+  team_stats:{posesion:58,tiros:3,tiros_arco:null,goles_esperados:1.0,pases:230,precision_pases:84,entradas:23,entradas_exito:4,intercepciones:21,paradas:3,faltas:2,fuera_juego:1,corneres:1,regates_exito:93,precision_tiro:67},
+  players:[
+    {name:'J. Martinez',   matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:32,  pass_accuracy:69, distance_km:19.0, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',  matched:'Lucasmati_akd',     played_pos:'EI',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',  matched:'Lautavester7',      played_pos:'DC',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',  matched:'BlackPanther-CG',   played_pos:'ED',  rating:6.9, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',  matched:'CipriMancini',      played_pos:'MCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',       matched:'Guiidow',           played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',          matched:'zPibu__',           played_pos:'DFI', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',      matched:'AR_ELTIO',          played_pos:'DCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',      matched:'Cabers14',          played_pos:'DFC', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',  matched:'Alexisraies23',     played_pos:'DFD', rating:7.6, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'pauloco10',     matched:'pauloco10',         played_pos:'POR', rating:5.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
   // ── VPUG TEMPORADA 2 ──────────────────────────────────────────────────────────
 
   // Fecha 1 VPUG T2 - United Mito - 18 May 2026 (Visita, 3-0, Victoria)
