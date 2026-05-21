@@ -1128,6 +1128,23 @@ const SEED_MATCHES = [
     {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:5.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 3 VPUG T2 - Olimpo eSports - 20 May 2026 (Visita, 2-0, Victoria)
+  {rival:'Olimpo eSports', league:'VPUG', date:'2026-05-20', isHome:false, match_result:'2-0', uploadedAt:'2026-05-21T02:00:00.000Z', notes:'',
+  team_stats:{posesion:59,tiros:5,tiros_arco:null,goles_esperados:1.6,pases:198,precision_pases:83,entradas:16,entradas_exito:3,intercepciones:12,paradas:3,faltas:0,fuera_juego:0,corneres:3,regates_exito:95,precision_tiro:40},
+  players:[
+    {name:'M. Crespo',      matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:22,  pass_accuracy:68, distance_km:19.6, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'EI',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DC',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'ED',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFD', rating:7.6, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
   // ── 11x11 TEMPORADA 2 ─────────────────────────────────────────────────────────
 
   // Fecha 1 11x11 T2 - Los Waxiturros - 19 May 2026 (Local, 1-2, Derrota)
