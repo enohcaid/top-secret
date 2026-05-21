@@ -967,7 +967,7 @@ body{padding-top:64px;}
 </div>
 
 <script type="module">
-import { SEED_MATCHES } from './seed_matches.js?v=20260519';
+import { SEED_MATCHES } from './seed_matches.js?v=20260520';
 // ── MATCH DATA ────────────────────────────────────────────────────────────────
 // location: 'L'=Local (Top Secret primero), 'V'=Visitante (rival primero)
 // result: null=pending, [homeGoals, awayGoals] (desde perspectiva del partido, no del equipo)
@@ -1333,8 +1333,8 @@ function getAnyMatch(id){
     if(m && !m.badge && m.league === '11x11') return Object.assign({}, m, {badge: e11Badge(m.rival)});
     return m;
   }
-  if(typeof id === 'string' && id.startsWith('v')){
-    const f = vpnDynamic[parseInt(id.slice(1))];
+  if(typeof id === 'string' && id.startsWith('vpn_')){
+    const f = vpnDynamic.find(f => f.id === parseInt(id.slice(4)));
     if(!f) return undefined;
     return { ...f, league: 'VPN' };
   }
@@ -1719,7 +1719,7 @@ function renderTodayCard() {
 
   // VPN T2 dynamic fixtures for today (not already covered by RAW or custom)
   const vpnToday = vpnDynamic
-    .map((m, vi) => ({m: {...m, league:'VPN'}, id:'v'+vi, isCustom:false}))
+    .map((m) => ({m: {...m, league:'VPN'}, id:'vpn_'+m.id, isCustom:false}))
     .filter(({m}) => m.date === today)
     .filter(({m}) => !rawToday.some(r => r.m.league === 'VPN' && rivalMatch(r.m.rival, m.rival))
                   && !customToday.some(c => c.m.league === 'VPN' && rivalMatch(c.m.rival, m.rival)));
@@ -1794,9 +1794,9 @@ function renderNextHero() {
     if (customIsInRaw(m)) return;
     upcoming.push({m, id: 'c'+ci});
   });
-  vpnDynamic.forEach((m, vi) => {
+  vpnDynamic.forEach((m) => {
     if (m.date < today) return;
-    upcoming.push({m: {...m, league:'VPN'}, id: 'v'+vi});
+    upcoming.push({m: {...m, league:'VPN'}, id: 'vpn_'+m.id});
   });
   upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || lgOrder(a.m.league) - lgOrder(b.m.league) || (a.m.time||'').localeCompare(b.m.time||''));
 
@@ -1872,9 +1872,9 @@ function renderYearGrid() {
     if (!mbd[m.date]) mbd[m.date] = [];
     mbd[m.date].push('c'+ci);
   });
-  vpnDynamic.forEach((m, vi) => {
+  vpnDynamic.forEach((m) => {
     if (!mbd[m.date]) mbd[m.date] = [];
-    mbd[m.date].push('v'+vi);
+    mbd[m.date].push('vpn_'+m.id);
   });
 
   function monthHasMatches(moKey) {
@@ -2018,9 +2018,9 @@ function render_legacy_unused(){
     if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
     matchesByDate[m.date].push('c'+ci);
   });
-  vpnDynamic.forEach((m, vi) => {
+  vpnDynamic.forEach((m) => {
     if(!matchesByDate[m.date]) matchesByDate[m.date] = [];
-    matchesByDate[m.date].push('v'+vi);
+    matchesByDate[m.date].push('vpn_'+m.id);
   });
 
   // Date range: past → only match days; today forward → every day through horizon
@@ -2252,8 +2252,8 @@ function updateStats(){
       const o = outcomeFor(i);
       results_lg.push({ date:m.date, outcome:o });
     });
-    if(lg === 'VPN') vpnDynamic.forEach((_, vi)=>{
-      const id = 'v'+vi;
+    if(lg === 'VPN') vpnDynamic.forEach((m)=>{
+      const id = 'vpn_'+m.id;
       const m = getAnyMatch(id);
       if(!m) return;
       const o = outcomeFor(id);
