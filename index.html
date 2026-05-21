@@ -610,7 +610,7 @@ const pillClass = {win:'pill-w', draw:'pill-d', loss:'pill-l'};
 const pillLabel = {win:'V', draw:'E', loss:'D'};
 const M_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-const last5 = [...T2_MATCHES].reverse().slice(0,5);
+const last5 = [...T2_MATCHES].filter(m => m.match_result).reverse().slice(0,5);
 const resList = document.getElementById('results-list');
 resList.innerHTML = '';
 last5.forEach(m => {
