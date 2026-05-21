@@ -1096,7 +1096,7 @@ const SEED_MATCHES = [
   {rival:'BNA San Jorge', league:'VPN', date:'2026-05-20', isHome:true, match_result:'1-3', uploadedAt:'2026-05-21T02:30:00.000Z', notes:'',
   team_stats:{posesion:53,tiros:5,tiros_arco:null,goles_esperados:2.7,pases:218,precision_pases:84,entradas:17,entradas_exito:4,intercepciones:21,paradas:4,faltas:1,fuera_juego:1,corneres:4,regates_exito:96,precision_tiro:80},
   players:[
-    {name:'M. Crespo',     matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:29,  pass_accuracy:69, distance_km:18.9, sprints:null, tackles:null, interceptions:null},
+    {name:'J. Martinez',     matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:29,  pass_accuracy:69, distance_km:18.9, sprints:null, tackles:null, interceptions:null},
     {name:'lucasmatiakd',  matched:'Lucasmati_akd',     played_pos:'EI',  rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',  matched:'Lautavester7',      played_pos:'DC',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'BlackPanther',  matched:'BlackPanther-CG',   played_pos:'ED',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -1195,7 +1195,7 @@ const SEED_MATCHES = [
   {rival:'Olimpo eSports', league:'VPUG', date:'2026-05-20', isHome:false, match_result:'2-0', uploadedAt:'2026-05-21T02:00:00.000Z', notes:'',
   team_stats:{posesion:59,tiros:5,tiros_arco:null,goles_esperados:1.6,pases:198,precision_pases:83,entradas:16,entradas_exito:3,intercepciones:12,paradas:3,faltas:0,fuera_juego:0,corneres:3,regates_exito:95,precision_tiro:40},
   players:[
-    {name:'M. Crespo',      matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:22,  pass_accuracy:68, distance_km:19.6, sprints:null, tackles:null, interceptions:null},
+    {name:'J. Martinez',      matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:22,  pass_accuracy:68, distance_km:19.6, sprints:null, tackles:null, interceptions:null},
     {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'EI',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DC',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'ED',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
