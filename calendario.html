@@ -1887,9 +1887,20 @@ function renderYearGrid() {
     return false;
   }
 
+  // Dynamically extend sections to include any month present in mbd but not hardcoded,
+  // so index-shift-induced stale Firestore dates never silently hide a match.
+  const t2Base = new Set(['2026-05','2026-06']);
+  const t1Base = new Set(['2026-03','2026-04']);
+  Object.keys(mbd).forEach(d => {
+    const mk = d.slice(0,7);
+    if (!t2Base.has(mk) && !t1Base.has(mk)) {
+      if (mk >= '2026-05') t2Base.add(mk);
+      else t1Base.add(mk);
+    }
+  });
   const sections = [
-    { id:'t2', label:'Temporada 2', sub:'En curso', months:['2026-05','2026-06'], forceShow:true },
-    { id:'t1', label:'Temporada 1', sub:'Finalizada', months:['2026-03','2026-04'], forceShow:false },
+    { id:'t2', label:'Temporada 2', sub:'En curso', months:[...t2Base].sort(), forceShow:true },
+    { id:'t1', label:'Temporada 1', sub:'Finalizada', months:[...t1Base].sort(), forceShow:false },
   ];
 
   sections.forEach(sec => {
