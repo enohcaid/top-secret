@@ -1363,17 +1363,16 @@ function getResult(id){
   if(!m) return null;
   const today = getToday();
   if(m.date > today) return null;  // never show results for future matches
-  // Same-day guard: block all results until match kick-off time (ART) to prevent
-  // stale localStorage entries from showing for unplayed matches
+  // Explicit inline results always win — no time guard needed, they were set intentionally
+  if(typeof id === 'string' && id.startsWith('c') && m.result) return m.result;
+  if(results[id]) return results[id];
+  if(typeof id !== 'string' && m.result) return m.result;
+  // Same-day guard: for seed-only matches block until kick-off (ART) to prevent
+  // stale entries from showing for unplayed matches
   if(m.date === today && m.time) {
     const nowART = new Date().toLocaleTimeString('sv', {timeZone:'America/Argentina/Buenos_Aires'}).slice(0, 5);
     if(nowART < m.time) return null;
   }
-  // Firebase overrides (including VPN matches not yet in the API)
-  // For custom entries prefer inline result — it survives deleteCustom index shifts
-  if(typeof id === 'string' && id.startsWith('c') && m.result) return m.result;
-  if(results[id]) return results[id];
-  if(typeof id !== 'string' && m.result) return m.result;
   if(m.date === today) return null;  // today: only explicit results, skip seed lookup
   const seed = findSeedMatch(id);
   if(seed && seed.match_result){
