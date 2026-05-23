@@ -117,12 +117,22 @@
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
+  var COUNTER_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/counter';
+
+  function updateCounterDisplay() {
+    fetch(COUNTER_URL)
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var el = document.getElementById('tb-count');
+        if (el) el.textContent = fmtCount(d.count);
+      })
+      .catch(function() {});
+  }
+
   (function initCounter() {
-    const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/counter';
-    // Count once per browser session — subsequent page navigations just read
-    const alreadyCounted = sessionStorage.getItem('ts_v');
-    fetch(WORKER, { method: alreadyCounted ? 'GET' : 'POST' })
-      .then(r => r.json())
+    var alreadyCounted = sessionStorage.getItem('ts_v');
+    fetch(COUNTER_URL, { method: alreadyCounted ? 'GET' : 'POST' })
+      .then(function(r) { return r.json(); })
       .then(function(d) {
         var el = document.getElementById('tb-count');
         if (el) el.textContent = fmtCount(d.count);
@@ -132,6 +142,8 @@
         var el = document.getElementById('tb-count');
         if (el) el.textContent = '';
       });
+    // Poll every 30s to keep the count fresh without reloading
+    setInterval(updateCounterDisplay, 30000);
   })();
 
 })();
