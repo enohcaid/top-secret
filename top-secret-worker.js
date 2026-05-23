@@ -369,7 +369,47 @@ export default {
         return jsonResp(teams);
       }
 
-      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url' }, 404);
+      // ── OG META REDIRECT (/og) ───────────────────
+      // Returns an HTML page with OG/Twitter Card meta tags so WhatsApp's crawler
+      // reads article-specific metadata, then redirects the user to the real page.
+      // Params: t (title), d (description), i (image URL), r (redirect URL)
+      if (url.pathname === '/og' && request.method === 'GET') {
+        const t = url.searchParams.get('t') || 'Top Secret FC';
+        const d = url.searchParams.get('d') || 'Noticias del equipo';
+        const i = url.searchParams.get('i') || 'https://enohcaid.github.io/top-secret/Top-Secret.png';
+        const r = url.searchParams.get('r') || 'https://enohcaid.github.io/top-secret/noticias.html';
+        const e = s => s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const html = `<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8">
+<title>${e(t)}</title>
+<meta property="og:type" content="article">
+<meta property="og:title" content="${e(t)}">
+<meta property="og:description" content="${e(d)}">
+<meta property="og:image" content="${e(i)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="${e(r)}">
+<meta property="og:site_name" content="Top Secret FC">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${e(t)}">
+<meta name="twitter:description" content="${e(d)}">
+<meta name="twitter:image" content="${e(i)}">
+<meta http-equiv="refresh" content="0;url=${e(r)}">
+</head><body>
+<script>window.location.replace(${JSON.stringify(r)});<\/script>
+<p>Redirigiendo… <a href="${e(r)}">Hacer clic aquí</a></p>
+</body></html>`;
+        return new Response(html, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/html;charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+            ...CORS_HEADERS,
+          },
+        });
+      }
+
+      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url, GET /og' }, 404);
 
     } catch (err) {
       return jsonResp({ error: { message: err.message || 'Internal error' } }, 500);
