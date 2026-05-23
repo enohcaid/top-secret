@@ -835,12 +835,7 @@ function copyCaption() {
 function copyOgLink() {
   if (!_shareNews) return;
   const btn = event.currentTarget;
-  const n = _shareNews;
-  // Pass title + relative image path as inline params — no KV, works instantly everywhere
-  const params = new URLSearchParams({ t: n.title });
-  if (n.image) params.set('i', n.image);
-  const ogUrl = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/og/'
-    + n.id + '?' + params.toString();
+  const ogUrl = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/og/' + _shareNews.id;
   navigator.clipboard.writeText(ogUrl).then(() => {
     const orig = btn.innerHTML;
     btn.innerHTML = btn.innerHTML.replace('Copiar link', '¡Copiado!');
