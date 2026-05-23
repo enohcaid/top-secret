@@ -832,25 +832,15 @@ function copyCaption() {
   });
 }
 
-async function copyOgLink() {
+function copyOgLink() {
   if (!_shareNews) return;
   const btn = event.currentTarget;
   const n = _shareNews;
-  const siteBase = 'https://enohcaid.github.io/top-secret/';
-  const imgUrl = n.image
-    ? (n.image.startsWith('http') ? n.image : siteBase + n.image)
-    : siteBase + 'Top-Secret.png';
-  const desc = n.excerpt || n.body?.[0] || '';
-  const redirectUrl = BASE_URL + '#' + n.id;
-  const ogUrl = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/og/' + encodeURIComponent(n.id);
-
-  // Store OG data in KV so the Worker can build the preview without long params
-  await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/kv', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'og:' + n.id, value: { t: n.title, d: desc, i: imgUrl, r: redirectUrl } }),
-  }).catch(() => {}); // silently ignore network errors
-
+  // Pass title + relative image path as inline params — no KV, works instantly everywhere
+  const params = new URLSearchParams({ t: n.title });
+  if (n.image) params.set('i', n.image);
+  const ogUrl = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/og/'
+    + n.id + '?' + params.toString();
   navigator.clipboard.writeText(ogUrl).then(() => {
     const orig = btn.innerHTML;
     btn.innerHTML = btn.innerHTML.replace('Copiar link', '¡Copiado!');
