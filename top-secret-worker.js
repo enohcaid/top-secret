@@ -370,38 +370,26 @@ export default {
       }
 
       // ── OG META REDIRECT (/og/<id>) ──────────────
-      // Short-link for WhatsApp previews. The client POSTs OG data to /kv first
-      // (key = "og:<id>"), then shares /og/<id>. WhatsApp's crawler hits this
-      // route, reads article-specific OG/Twitter Card meta tags, and real users
-      // are redirected to the actual article page.
+      // WhatsApp preview link. URL format: /og/<articleId>?t=<title>&i=<relative-image-path>
+      // The redirect target is always noticias.html#<id> — no KV needed, works instantly.
       if (url.pathname.startsWith('/og') && request.method === 'GET') {
-        // Extract article id from path (/og/<id>) or fall back to ?id=
-        const pathId = url.pathname.length > 4 ? decodeURIComponent(url.pathname.slice(4).replace(/^\//, '')) : null;
-        const queryId = url.searchParams.get('id');
-        const articleId = pathId || queryId;
+        const pathId = url.pathname.length > 4
+          ? decodeURIComponent(url.pathname.slice(4).replace(/^\//, ''))
+          : null;
 
-        let t, d, i, r;
-
-        if (articleId) {
-          const stored = await env.TS_KV.get('og:' + articleId, 'json');
-          if (stored) {
-            t = stored.t; d = stored.d; i = stored.i; r = stored.r;
-          } else {
-            // KV miss — redirect straight to noticias
-            return Response.redirect('https://enohcaid.github.io/top-secret/noticias.html#' + articleId, 302);
-          }
-        } else {
-          // Legacy: full params in query string
-          t = url.searchParams.get('t');
-          d = url.searchParams.get('d');
-          i = url.searchParams.get('i');
-          r = url.searchParams.get('r');
-        }
-
-        t = t || 'Top Secret FC';
-        d = d || 'Noticias del equipo';
-        i = i || 'https://enohcaid.github.io/top-secret/Top-Secret.png';
-        r = r || 'https://enohcaid.github.io/top-secret/noticias.html';
+        const siteBase = 'https://enohcaid.github.io/top-secret/';
+        const t = url.searchParams.get('t') || 'Top Secret FC';
+        const imgParam = url.searchParams.get('i');
+        // Reconstruct absolute image URL; encode spaces/special chars in the filename
+        const i = imgParam
+          ? (imgParam.startsWith('http')
+              ? imgParam
+              : siteBase + imgParam.split('/').map(seg => encodeURIComponent(seg)).join('/'))
+          : siteBase + 'Top-Secret.png';
+        const r = pathId
+          ? siteBase + 'noticias.html#' + pathId
+          : (url.searchParams.get('r') || siteBase + 'noticias.html');
+        const d = url.searchParams.get('d') || 'Top Secret FC · Noticias';
 
         const e = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         const html = `<!DOCTYPE html><html lang="es"><head>
@@ -428,7 +416,7 @@ export default {
           status: 200,
           headers: {
             'Content-Type': 'text/html;charset=utf-8',
-            'Cache-Control': 'public, max-age=86400',
+            'Cache-Control': 'public, max-age=3600',
             ...CORS_HEADERS,
           },
         });
