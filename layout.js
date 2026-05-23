@@ -35,7 +35,10 @@
     .tb-brand-name{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;font-weight:400;letter-spacing:.1em;color:#FFFFFF;line-height:1;}
     .tb-brand-name span{color:var(--gold);}
     .tb-center{display:none;}
-    .tb-logos{display:flex;align-items:center;gap:40px;margin-right:60px;}
+    .tb-logos{display:flex;align-items:center;gap:40px;margin-right:12px;}
+    .tb-counter{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:var(--gold);white-space:nowrap;flex-shrink:0;cursor:default;user-select:none;}
+    .tb-counter svg{width:13px;height:13px;flex-shrink:0;opacity:.85;}
+    @media(max-width:640px){.tb-counter{padding:4px 9px;font-size:.68rem;}}
     .tb-logos img{width:auto;object-fit:contain;opacity:.95;}
     .tb-logos img[alt="EA FC 26"]{height:100px;}
     .tb-logos img[alt="Clubs Pro"]{height:90px;}
@@ -73,6 +76,10 @@
       <img src="logos/Logo EA FC26.png" alt="EA FC 26">
       <img src="logos/Clubs Pro Badge.png" alt="Clubs Pro">
     </div>
+    <div class="tb-counter" id="tb-counter" title="Visitas al sitio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="tb-count">—</span>
+    </div>
   `;
 
   // ── Left sidebar HTML ──────────────────────────────────────────────────────
@@ -104,5 +111,27 @@
 
   if (document.body) inject();
   else document.addEventListener('DOMContentLoaded', inject);
+
+  // ── Visit counter ──────────────────────────────────────────────────────────
+  function fmtCount(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  (function initCounter() {
+    const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/counter';
+    // Count once per browser session — subsequent page navigations just read
+    const alreadyCounted = sessionStorage.getItem('ts_v');
+    fetch(WORKER, { method: alreadyCounted ? 'GET' : 'POST' })
+      .then(r => r.json())
+      .then(function(d) {
+        var el = document.getElementById('tb-count');
+        if (el) el.textContent = fmtCount(d.count);
+        if (!alreadyCounted) sessionStorage.setItem('ts_v', '1');
+      })
+      .catch(function() {
+        var el = document.getElementById('tb-count');
+        if (el) el.textContent = '';
+      });
+  })();
 
 })();
