@@ -369,16 +369,41 @@ export default {
         return jsonResp(teams);
       }
 
-      // ── OG META REDIRECT (/og) ───────────────────
-      // Returns an HTML page with OG/Twitter Card meta tags so WhatsApp's crawler
-      // reads article-specific metadata, then redirects the user to the real page.
-      // Params: t (title), d (description), i (image URL), r (redirect URL)
-      if (url.pathname === '/og' && request.method === 'GET') {
-        const t = url.searchParams.get('t') || 'Top Secret FC';
-        const d = url.searchParams.get('d') || 'Noticias del equipo';
-        const i = url.searchParams.get('i') || 'https://enohcaid.github.io/top-secret/Top-Secret.png';
-        const r = url.searchParams.get('r') || 'https://enohcaid.github.io/top-secret/noticias.html';
-        const e = s => s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      // ── OG META REDIRECT (/og/<id>) ──────────────
+      // Short-link for WhatsApp previews. The client POSTs OG data to /kv first
+      // (key = "og:<id>"), then shares /og/<id>. WhatsApp's crawler hits this
+      // route, reads article-specific OG/Twitter Card meta tags, and real users
+      // are redirected to the actual article page.
+      if (url.pathname.startsWith('/og') && request.method === 'GET') {
+        // Extract article id from path (/og/<id>) or fall back to ?id=
+        const pathId = url.pathname.length > 4 ? decodeURIComponent(url.pathname.slice(4).replace(/^\//, '')) : null;
+        const queryId = url.searchParams.get('id');
+        const articleId = pathId || queryId;
+
+        let t, d, i, r;
+
+        if (articleId) {
+          const stored = await env.TS_KV.get('og:' + articleId, 'json');
+          if (stored) {
+            t = stored.t; d = stored.d; i = stored.i; r = stored.r;
+          } else {
+            // KV miss — redirect straight to noticias
+            return Response.redirect('https://enohcaid.github.io/top-secret/noticias.html#' + articleId, 302);
+          }
+        } else {
+          // Legacy: full params in query string
+          t = url.searchParams.get('t');
+          d = url.searchParams.get('d');
+          i = url.searchParams.get('i');
+          r = url.searchParams.get('r');
+        }
+
+        t = t || 'Top Secret FC';
+        d = d || 'Noticias del equipo';
+        i = i || 'https://enohcaid.github.io/top-secret/Top-Secret.png';
+        r = r || 'https://enohcaid.github.io/top-secret/noticias.html';
+
+        const e = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         const html = `<!DOCTYPE html><html lang="es"><head>
 <meta charset="utf-8">
 <title>${e(t)}</title>
@@ -403,7 +428,7 @@ export default {
           status: 200,
           headers: {
             'Content-Type': 'text/html;charset=utf-8',
-            'Cache-Control': 'public, max-age=3600',
+            'Cache-Control': 'public, max-age=86400',
             ...CORS_HEADERS,
           },
         });
