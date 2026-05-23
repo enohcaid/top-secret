@@ -3,6 +3,48 @@
 // Proxy a Google Gemini API (GRATIS) + KV storage + EA Sports proxy
 // ═══════════════════════════════════════════════════════════════
 
+// ── NOTICIAS — OG meta map ───────────────────────────────────────
+// Add an entry here whenever a new article is added to noticias-data.js
+const SITE = 'https://enohcaid.github.io/top-secret/';
+const NOTICIAS_OG = {
+  'destacados-semana1-t2': {
+    t: 'Semana 1 de Temporada 2: análisis de los tres frentes',
+    i: SITE + 'logos/Destacados%20Sem1.png',
+  },
+  'nuevo-ct-2026': {
+    t: 'Top Secret FC presenta su nuevo Cuerpo Técnico',
+    i: SITE + 'logos/Nuevo%20CT.png',
+  },
+  'fixture-vpn-t2-2026': {
+    t: 'Ya tenemos fixture: 19 partidos en la Primera División VPN',
+    i: SITE + 'logos/Fixture%20VPN.webp',
+  },
+  'plantel-2026': {
+    t: 'Este es el plantel que jugará la nueva temporada',
+    i: SITE + 'logos/Plantel%20T2%202026.webp',
+  },
+  'fichajes-t2-2026': {
+    t: 'Tres incorporaciones para la Temporada 2',
+    i: SITE + 'logos/Fichajes.webp',
+  },
+  'kit-drop-2026': {
+    t: 'Nuevas camisetas para la temporada 2026',
+    i: SITE + 'logos/2026%20Kit%20Drop.png',
+  },
+  'rebrand-2026': {
+    t: 'Top Secret FC presenta su nueva identidad',
+    i: SITE + 'logos/Anuncio%20Rebrand.webp',
+  },
+  'equipo-temporada-vpn-2026': {
+    t: 'Tres jugadores en el Equipo de la Temporada VPN',
+    i: SITE + 'logos/equipo-temporada-vpn.webp',
+  },
+  'ascenso-primera-2025': {
+    t: 'Ascendimos a Primera División',
+    i: SITE + 'logos/Festejo%20Ascenso.webp',
+  },
+};
+
 // Strip nulls, URLs, and long strings from API JSON to reduce token usage
 function simplifyForAI(v, depth = 0) {
   if (depth > 6) return undefined;
@@ -370,26 +412,21 @@ export default {
       }
 
       // ── OG META REDIRECT (/og/<id>) ──────────────
-      // WhatsApp preview link. URL format: /og/<articleId>?t=<title>&i=<relative-image-path>
-      // The redirect target is always noticias.html#<id> — no KV needed, works instantly.
+      // Clean short link for WhatsApp previews. URL: /og/<articleId>
+      // Article data comes from the NOTICIAS_OG map above — no KV, no query params.
       if (url.pathname.startsWith('/og') && request.method === 'GET') {
-        const pathId = url.pathname.length > 4
-          ? decodeURIComponent(url.pathname.slice(4).replace(/^\//, ''))
-          : null;
+        const articleId = decodeURIComponent(url.pathname.slice(4).replace(/^\//, ''));
+        const article = NOTICIAS_OG[articleId];
 
-        const siteBase = 'https://enohcaid.github.io/top-secret/';
-        const t = url.searchParams.get('t') || 'Top Secret FC';
-        const imgParam = url.searchParams.get('i');
-        // Reconstruct absolute image URL; encode spaces/special chars in the filename
-        const i = imgParam
-          ? (imgParam.startsWith('http')
-              ? imgParam
-              : siteBase + imgParam.split('/').map(seg => encodeURIComponent(seg)).join('/'))
-          : siteBase + 'Top-Secret.png';
-        const r = pathId
-          ? siteBase + 'noticias.html#' + pathId
-          : (url.searchParams.get('r') || siteBase + 'noticias.html');
-        const d = url.searchParams.get('d') || 'Top Secret FC · Noticias';
+        if (!article) {
+          // Unknown article — redirect to noticias without a preview
+          return Response.redirect(SITE + 'noticias.html' + (articleId ? '#' + articleId : ''), 302);
+        }
+
+        const t = article.t;
+        const i = article.i;
+        const r = SITE + 'noticias.html#' + articleId;
+        const d = 'Top Secret FC · Noticias';
 
         const e = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         const html = `<!DOCTYPE html><html lang="es"><head>
@@ -416,7 +453,7 @@ export default {
           status: 200,
           headers: {
             'Content-Type': 'text/html;charset=utf-8',
-            'Cache-Control': 'public, max-age=3600',
+            'Cache-Control': 'public, max-age=86400',
             ...CORS_HEADERS,
           },
         });
