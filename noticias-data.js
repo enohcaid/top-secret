@@ -3,6 +3,31 @@
 
 const NOTICIAS = [
   {
+    id: 'destacados-semana1-t2',
+    pinned: false,
+    category: 'Destacados',
+    title: 'Semana 1 de Temporada 2: los que brillaron en tres frentes',
+    date: '2026-05-22',
+    dateLabel: '22 de mayo de 2026',
+    excerpt: '16 partidos en 9 días, tres ligas y un balance que mezcla realismo con esperanza. Lautavester7, BlackPanther, ciprimancini y compañía encendieron la primera semana de la nueva era.',
+    image: 'logos/Destacados Sem1.png',
+    body: [
+      'La Temporada 2 arrancó con todo. Entre el 13 y el 21 de mayo, Top Secret FC disputó <strong>16 partidos en tres competencias distintas</strong> y el resultado colectivo fue tan contrastado como revelador: la VPN mostró lo duro que es la élite (0-1-8), mientras que VPUG y 11x11 encendieron la esperanza con <strong>6 victorias en 8 partidos</strong>.',
+      '<strong>Lautavester7 — El goleador de la semana.</strong> Doce goles en los tres torneos. Seis en la VPN, tres en VPUG —incluyendo un doblete con 9.3 de rating en la remontada ante InfinitX, su mejor partido de la semana— y tres más en el 11x11. El delantero número 7 está en un nivel diferente y es la referencia ofensiva indiscutida de la Temporada 2.',
+      '<strong>BlackPanther — Goles en las tres ligas.</strong> Ocho tantos y dos asistencias repartidos en VPN, VPUG y 11x11. Dos goles en el debut goleador ante United Mito (VPUG), presencia constante en el marcador y rendimiento arriba de 8 en la jornada inaugural de VPUG. Extremo, delantero, amenaza: BlackPanther no tiene una sola cara.',
+      '<strong>ciprimancini — El motor que no para.</strong> Sin goles en la semana, pero con los ratings más altos del plantel: 9.0 ante United Mito, 8.9 ante Nueva Chicago y 8.6 ante Los Waxiturros. El creador de juego que activa todo. Cuando ciprimancini está bien, el equipo funciona.',
+      '<strong>AR ELTIO — La figura defensiva.</strong> 8.5 en la noche más dura de VPN ante San Jorge eSp. 8.4 ante Dep. Ballester en 11x11, donde fue elegido Futbolista del Partido. Consistencia, liderazgo y un nivel que crece semana a semana.',
+      '<strong>J. Martinez — El kilómetro que nadie ve.</strong> Presente en los 16 partidos. Rating por encima de 7 en casi todos los encuentros y hasta 19.8 km recorridos en una sola noche. El mediocampista sin el que el equipo no funciona — aunque no siempre aparezca en el destacado.',
+      'Semana 1 completada. La Temporada 2 acaba de empezar. 🖤⭐',
+    ],
+    shareCaption: '⭐ DESTACADOS · SEMANA 1 · TEMPORADA 2\n\n16 partidos. Tres ligas. Cinco figuras:\n\n🔥 Lautavester7 — 12 goles en la semana\n🔥 BlackPanther — 8 goles en las tres ligas\n🔥 ciprimancini — 9.0 de rating tope de la semana\n🔥 AR ELTIO — MVP vs Dep. Ballester\n🔥 J. Martinez — 16/16 partidos jugados\n\n#TopSecretFC #VPN #VPUG #11x11 #EAFCClubsPro',
+    shareCaptions: {
+      ig: '⭐ SEMANA 1 · TEMPORADA 2\n\nCinco figuras que encendieron el arranque 🖤\n\n🔥 Lautavester7 — 12 goles\n🔥 BlackPanther — 8 goles en 3 ligas\n🔥 ciprimancini — 9.0 de rating\n🔥 AR ELTIO — MVP\n🔥 J. Martinez — el motor invisible\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPN #VPUG #11x11 #EAFCClubsPro',
+      x:  '⭐ Semana 1 de Temporada 2 completada.\n\nLautavester7: 12 goles. BlackPanther: 8 goles en las 3 ligas. ciprimancini: 9.0 de rating. 16 partidos en 9 días.\n\nLa nueva era arrancó 🖤\n\n#TopSecretFC #VPN #VPUG #11x11',
+      fb: '⭐ DESTACADOS · SEMANA 1 · TEMPORADA 2\n\nTop Secret FC completó su primera semana en la Temporada 2 con 16 partidos en tres ligas. Estos fueron los que marcaron la diferencia:\n\n🔥 Lautavester7 — 12 goles entre VPN, VPUG y 11x11\n🔥 BlackPanther — 8 goles en las tres competencias\n🔥 ciprimancini — 9.0 de rating ante United Mito, motor del mediocampo\n🔥 AR ELTIO — MVP ante Dep. Ballester, sólido en cada línea\n🔥 J. Martinez — presente en los 16 partidos, el kilómetro que nadie ve\n\nLa Temporada 2 acaba de empezar. 🖤⭐\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #VPN #VPUG #11x11 #EAFCClubsPro',
+    },
+  },
+  {
     id: 'nuevo-ct-2026',
     pinned: false,
     category: 'Institucional',
