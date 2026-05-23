@@ -411,6 +411,21 @@ export default {
         return jsonResp(teams);
       }
 
+      // ── VISIT COUNTER (/counter) ─────────────────
+      if (url.pathname === '/counter') {
+        const key = 'site:visits';
+        if (request.method === 'POST') {
+          const v = await env.TS_KV.get(key);
+          const next = parseInt(v || '0') + 1;
+          await env.TS_KV.put(key, String(next));
+          return jsonResp({ count: next });
+        }
+        if (request.method === 'GET') {
+          const v = await env.TS_KV.get(key);
+          return jsonResp({ count: parseInt(v || '0') });
+        }
+      }
+
       // ── OG META REDIRECT (/og/<id>) ──────────────
       // Clean short link for WhatsApp previews. URL: /og/<articleId>
       // Article data comes from the NOTICIAS_OG map above — no KV, no query params.
