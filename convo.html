@@ -509,19 +509,19 @@ const VPUG_T2_SCHEDULE = [
   {date:'2026-05-19',time:'22:40',league:'VPUG',rival:'All Boys eSports',      isHome:true },
   {date:'2026-05-20',time:'22:40',league:'VPUG',rival:'Olimpo eSports',        isHome:false},
   {date:'2026-05-21',time:'22:40',league:'VPUG',rival:'InfinitX',              isHome:true },
-  {date:'2026-05-25',time:'22:40',league:'VPUG',rival:'I.A.C.C Cantera',       isHome:false},
-  {date:'2026-05-26',time:'22:40',league:'VPUG',rival:'Hacha eSports',         isHome:true },
-  {date:'2026-05-27',time:'22:40',league:'VPUG',rival:'Evermeet Rising',       isHome:false},
-  {date:'2026-05-28',time:'22:40',league:'VPUG',rival:'Real Marcianos FC',     isHome:false},
-  {date:'2026-06-01',time:'22:40',league:'VPUG',rival:'Team Valhalla',         isHome:true },
-  {date:'2026-06-02',time:'22:40',league:'VPUG',rival:'Germinal eSports',      isHome:false},
-  {date:'2026-06-03',time:'22:40',league:'VPUG',rival:'Atletico Moneiro',      isHome:true },
-  {date:'2026-06-04',time:'22:40',league:'VPUG',rival:'Villa Dalmine eSports', isHome:false},
-  {date:'2026-06-08',time:'22:40',league:'VPUG',rival:'La Unión FC',           isHome:true },
-  {date:'2026-06-09',time:'22:40',league:'VPUG',rival:'4BDOMIFL4NES',          isHome:false},
-  {date:'2026-06-10',time:'22:40',league:'VPUG',rival:'NuVo FC',               isHome:true },
-  {date:'2026-06-11',time:'22:40',league:'VPUG',rival:'Suda eSports',          isHome:false},
-  {date:'2026-06-15',time:'22:40',league:'VPUG',rival:'Nueva Chicago eSports', isHome:true },
+  {date:'2026-05-26',time:'22:40',league:'VPUG',rival:'I.A.C.C Cantera',       isHome:false},
+  {date:'2026-05-27',time:'22:40',league:'VPUG',rival:'Hacha eSports',         isHome:true },
+  {date:'2026-05-28',time:'22:40',league:'VPUG',rival:'Evermeet Rising',       isHome:false},
+  {date:'2026-06-01',time:'22:40',league:'VPUG',rival:'Real Marcianos FC',     isHome:false},
+  {date:'2026-06-02',time:'22:40',league:'VPUG',rival:'Team Valhalla',         isHome:true },
+  {date:'2026-06-03',time:'22:40',league:'VPUG',rival:'Germinal eSports',      isHome:false},
+  {date:'2026-06-04',time:'22:40',league:'VPUG',rival:'Atletico Moneiro',      isHome:true },
+  {date:'2026-06-08',time:'22:40',league:'VPUG',rival:'Villa Dalmine eSports', isHome:false},
+  {date:'2026-06-09',time:'22:40',league:'VPUG',rival:'La Unión FC',           isHome:true },
+  {date:'2026-06-10',time:'22:40',league:'VPUG',rival:'4BDOMIFL4NES',          isHome:false},
+  {date:'2026-06-11',time:'22:40',league:'VPUG',rival:'NuVo FC',               isHome:true },
+  {date:'2026-06-15',time:'22:40',league:'VPUG',rival:'Suda eSports',          isHome:false},
+  {date:'2026-06-16',time:'22:40',league:'VPUG',rival:'Nueva Chicago eSports', isHome:true },
 ];
 // 11x11 T2 schedule
 const E11_T3_SCHEDULE = [
@@ -529,11 +529,11 @@ const E11_T3_SCHEDULE = [
   {date:'2026-05-19',time:'23:30',league:'11x11',rival:'Argentino de Merlo',     isHome:false},
   {date:'2026-05-21',time:'23:00',league:'11x11',rival:'Ferro',                  isHome:true },
   {date:'2026-05-21',time:'23:30',league:'11x11',rival:'Dep. Ballester',         isHome:true },
-  {date:'2026-05-23',time:'23:00',league:'11x11',rival:'All Boys',               isHome:true },
-  {date:'2026-05-23',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
-  {date:'2026-05-25',time:'23:00',league:'11x11',rival:'Instituto Reserva',      isHome:false},
-  {date:'2026-05-25',time:'23:30',league:'11x11',rival:'4BDOMIFL4NES',           isHome:false},
-  {date:'2026-05-27',time:'23:00',league:'11x11',rival:'Los Picantes eSports',   isHome:true },
+  {date:'2026-05-26',time:'23:00',league:'11x11',rival:'All Boys',               isHome:true },
+  {date:'2026-05-26',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
+  {date:'2026-05-28',time:'23:00',league:'11x11',rival:'Instituto Reserva',      isHome:false},
+  {date:'2026-05-28',time:'23:30',league:'11x11',rival:'4BDOMIFL4NES',           isHome:false},
+  {date:'2026-05-28',time:'23:59',league:'11x11',rival:'Los Picantes eSports',   isHome:true },
 ];
 let _shareLogo = null;
 const _shareLogoReady = new Promise(res => {
@@ -596,8 +596,14 @@ function renderTodayMatchesPanel() {
 }
 
 /* ─── STATE ─── */
-// Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
-const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
+// Use GMT-3 (Argentina). Sports day resets at 05:00 ART (not midnight) so
+// late-night users past midnight still see the previous calendar date.
+const _artStr  = new Date().toLocaleString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
+const _artDate = _artStr.slice(0, 10);
+const _artTime = _artStr.slice(11, 16);
+const TODAY = (_artTime < '05:00')
+  ? (() => { const d = new Date(_artDate+'T12:00:00'); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); })()
+  : _artDate;
 
 let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
 let dailyOverrides  = {};   // { name: {status, day, note?} } — alwaysPresent daily overrides
