@@ -600,14 +600,8 @@ function renderTodayMatchesPanel() {
 }
 
 /* ─── STATE ─── */
-// Use GMT-3 (Argentina). Sports day resets at 05:00 ART (not midnight) so
-// late-night users past midnight still see the previous calendar date.
-const _artStr  = new Date().toLocaleString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
-const _artDate = _artStr.slice(0, 10);
-const _artTime = _artStr.slice(11, 16);
-const TODAY = (_artTime < '05:00')
-  ? (() => { const d = new Date(_artDate+'T12:00:00'); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); })()
-  : _artDate;
+// Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
+const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
 
 let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
 let dailyOverrides  = {};   // { name: {status, day, note?} } — alwaysPresent daily overrides
