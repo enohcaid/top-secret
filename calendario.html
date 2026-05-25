@@ -1324,19 +1324,7 @@ function getAnyMatch(id){
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 const DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-function getToday(){
-  // Argentina (UTC-3). Sports day resets at 05:00 ART so late-night users
-  // (past midnight but before 5 am) still see the previous calendar date.
-  const artStr  = new Date().toLocaleString('sv', {timeZone:'America/Argentina/Buenos_Aires'}); // "YYYY-MM-DD HH:MM:SS"
-  const artDate = artStr.slice(0, 10);
-  const artTime = artStr.slice(11, 16);
-  if (artTime < '05:00') {
-    const dt = new Date(artDate + 'T12:00:00');
-    dt.setDate(dt.getDate() - 1);
-    return dt.toISOString().slice(0, 10);
-  }
-  return artDate;
-}
+function getToday(){ return new Date().toLocaleDateString('sv',{timeZone:'America/Argentina/Buenos_Aires'}); }
 
 function fmtDate(d){
   const dt = new Date(d+'T12:00:00');
