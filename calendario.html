@@ -1754,6 +1754,31 @@ function renderNextHero() {
   const today = getToday();
   const hero = document.getElementById('nextHero');
   if (!hero) return;
+
+  const DIAS   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MESES_C = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const cdown  = `<div class="nh-cdown"><img src="logos/Top Secret white.png" alt="Top Secret FC"></div>`;
+  const shareBtn = `<button class="nh-share-btn" onclick="shareMatchday()" title="Copiar al portapapeles">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    <span>Compartir</span>
+  </button>`;
+
+  function buildMatchRows(matches) {
+    return matches.map(({m}) => {
+      const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
+      const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
+      const roundBadge = m.round != null ? `<span class="nh-round-badge">J${m.round}</span>` : '';
+      const badgeImg = m.badge ? `<img class="nh-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
+      return `<div class="nh-match-row">
+        ${m.league?`<span class="nh-lbadge ${lgKey}">${m.league}</span>`:''}
+        ${roundBadge}${badgeImg}
+        <span class="nh-rival-name">vs ${m.rival}</span>
+        <span class="nh-meta-txt">${m.time?'· '+m.time:''} · ${loc}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Collect all upcoming (today included)
   const upcoming = [];
   RAW.forEach((_, i) => {
     const m = getMatch(i);
@@ -1778,37 +1803,35 @@ function renderNextHero() {
     </div>`;
     return;
   }
-  const nextDate = upcoming[0].m.date;
-  const dayMatches = upcoming.filter(x => x.m.date === nextDate);
-  const todayDt = new Date(today+'T12:00:00');
-  const matchDt = new Date(nextDate+'T12:00:00');
-  const diff = Math.round((matchDt - todayDt)/(1000*60*60*24));
-  const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const MESES_C = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const dateLabel = `${DIAS[matchDt.getDay()]} ${matchDt.getDate()} ${MESES_C[matchDt.getMonth()]}`;
-  const cdown = `<div class="nh-cdown"><img src="logos/Top Secret white.png" alt="Top Secret FC"></div>`;
-  const matchRows = dayMatches.map(({m}) => {
-    const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
-    const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
-    const roundBadge = m.round != null ? `<span class="nh-round-badge">J${m.round}</span>` : '';
-    const badgeImg = m.badge ? `<img class="nh-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
-    return `<div class="nh-match-row">
-      ${m.league?`<span class="nh-lbadge ${lgKey}">${m.league}</span>`:''}
-      ${roundBadge}
-      ${badgeImg}
-      <span class="nh-rival-name">vs ${m.rival}</span>
-      <span class="nh-meta-txt">${m.time?'· '+m.time:''} · ${loc}</span>
-    </div>`;
-  }).join('');
-  const shareBtn = `<button class="nh-share-btn" onclick="shareMatchday()" title="Copiar al portapapeles">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-    <span>Compartir</span>
-  </button>`;
-  const whenLabel = diff === 0 ? 'HOY' : diff === 1 ? 'MAÑANA' : `En ${diff} días`;
-  const countLabel2 = dayMatches.length > 1 ? `${dayMatches.length} partidos` : 'Próximo partido';
+
+  // ── Partidos de HOY ───────────────────────────────────────────────────────
+  const todayMatches = upcoming.filter(x => x.m.date === today);
+  if (todayMatches.length) {
+    const todayDt   = new Date(today+'T12:00:00');
+    const dateLabel = `${DIAS[todayDt.getDay()]} ${todayDt.getDate()} ${MESES_C[todayDt.getMonth()]}`;
+    const countLbl  = todayMatches.length > 1 ? `${todayMatches.length} partidos` : '1 partido';
+    hero.innerHTML  = `<div class="nh-card">${cdown}<div>
+      <div class="nh-eyebrow">HOY · ${countLbl} · ${dateLabel}</div>
+      ${buildMatchRows(todayMatches)}
+    </div>${shareBtn}</div>`;
+    return;
+  }
+
+  // ── Sin partidos hoy → mostrar próximo ────────────────────────────────────
+  const nextDate  = upcoming[0].m.date;
+  const nextDt    = new Date(nextDate+'T12:00:00');
+  const todayDt   = new Date(today+'T12:00:00');
+  const diff      = Math.round((nextDt - todayDt) / (1000*60*60*24));
+  const whenLabel = diff === 1 ? 'MAÑANA' : `En ${diff} días`;
+  const dateLabel = `${DIAS[nextDt.getDay()]} ${nextDt.getDate()} ${MESES_C[nextDt.getMonth()]}`;
+  const nextMatches = upcoming.filter(x => x.m.date === nextDate);
+  const countLbl  = nextMatches.length > 1 ? `${nextMatches.length} partidos` : 'Próximo partido';
+
   hero.innerHTML = `<div class="nh-card">${cdown}<div>
-    <div class="nh-eyebrow">${whenLabel} · ${countLabel2} · ${dateLabel}</div>
-    ${matchRows}
+    <div class="nh-eyebrow" style="color:var(--mid)">HOY · Sin partidos</div>
+    <div style="font-size:.78rem;color:var(--muted);margin:4px 0 10px;font-family:'Barlow',sans-serif;">No hay partidos programados para hoy.</div>
+    <div class="nh-eyebrow" style="margin-top:4px;">${whenLabel} · ${countLbl} · ${dateLabel}</div>
+    ${buildMatchRows(nextMatches)}
   </div>${shareBtn}</div>`;
 }
 
