@@ -1827,10 +1827,14 @@ function renderNextHero() {
   const nextMatches = upcoming.filter(x => x.m.date === nextDate);
   const countLbl  = nextMatches.length > 1 ? `${nextMatches.length} partidos` : 'Próximo partido';
 
+  const todayDt2   = new Date(today+'T12:00:00');
+  const todayLabel = `${DIAS[todayDt2.getDay()]} ${todayDt2.getDate()} ${MESES_C[todayDt2.getMonth()]}`;
+
   hero.innerHTML = `<div class="nh-card">${cdown}<div>
-    <div class="nh-eyebrow" style="color:var(--mid)">HOY · Sin partidos</div>
-    <div style="font-size:.78rem;color:var(--muted);margin:4px 0 10px;font-family:'Barlow',sans-serif;">No hay partidos programados para hoy.</div>
-    <div class="nh-eyebrow" style="margin-top:4px;">${whenLabel} · ${countLbl} · ${dateLabel}</div>
+    <div class="nh-eyebrow">HOY · ${todayLabel}</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;color:var(--mid);letter-spacing:.01em;margin:2px 0 14px;">Sin partidos hoy</div>
+    <div style="border-top:1px solid var(--border);margin-bottom:10px;"></div>
+    <div class="nh-eyebrow">${whenLabel} · ${countLbl} · ${dateLabel}</div>
     ${buildMatchRows(nextMatches)}
   </div>${shareBtn}</div>`;
 }
