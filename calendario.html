@@ -1129,7 +1129,7 @@ const RAW = [
   {date:'2026-05-21',time:'22:40',league:'VPUG', rival:'InfinitX',               isHome:true,  result:[3,2], round:4},  // F4
 
   // Semana 26-29 May
-  {date:'2026-05-26',time:'22:40',league:'VPUG', rival:'I.A.C.C Cantera',        isHome:false, result:null, round:5},  // F5
+  {date:'2026-05-26',time:'22:40',league:'VPUG', rival:'I.A.C.C Cantera',        isHome:false, result:[1,2], round:5},  // F5
   {date:'2026-05-27',time:'22:40',league:'VPUG', rival:'Hacha eSports',          isHome:true,  result:null, round:6},  // F6
   {date:'2026-05-28',time:'22:40',league:'VPUG', rival:'Evermeet Rising',        isHome:false, result:null, round:7},  // F7
   {date:'2026-06-01',time:'22:40',league:'VPUG', rival:'Real Marcianos FC',      isHome:false, result:null, round:8},  // F8 (jue→lun)
@@ -1293,12 +1293,49 @@ const E11_T3_BADGES = {
 };
 function e11Badge(rival){ return E11_T3_BADGES[rival] || null; }
 
+// VPN T2 badges — populated async from the proxy (same source as posiciones.html)
+let _vpnBadgeCache = {};  // key: team name from API
+function vpnBadge(rival){
+  // 1. exact match
+  if(_vpnBadgeCache[rival]) return _vpnBadgeCache[rival];
+  // 2. fuzzy match (same logic as rivalMatch)
+  const key = Object.keys(_vpnBadgeCache).find(k => rivalMatch(k, rival));
+  return key ? _vpnBadgeCache[key] : null;
+}
+async function fetchVpnBadges(){
+  try {
+    const r = await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-table');
+    if(!r.ok){ console.warn('[VPN Badges] proxy error', r.status); return; }
+    const raw = await r.json();
+    if(!Array.isArray(raw) || !raw.length){ console.warn('[VPN Badges] unexpected format', typeof raw); return; }
+    const LOGO_BASE = 'https://www.virtualpronetwork.com/api/media/images/teamlogos/';
+    function logoUrl(v){ if(!v) return null; return v.startsWith('http') ? v : LOGO_BASE + v; }
+    function cache(name, hash){ if(name && hash){ const u = logoUrl(hash); if(u) _vpnBadgeCache[name] = u; } }
+    raw.forEach(e => {
+      if(!e) return;
+      // Extract from standings entry
+      if(e.team){ cache(e.team.name, e.team.logo1 || e.team.logo); }
+      // Also extract from each match's homeTeam / awayTeam for extra coverage
+      if(Array.isArray(e.matches)){
+        e.matches.forEach(match => {
+          if(match && match.homeTeam) cache(match.homeTeam.name, match.homeTeam.logo1 || match.homeTeam.logo);
+          if(match && match.awayTeam) cache(match.awayTeam.name, match.awayTeam.logo1 || match.awayTeam.logo);
+        });
+      }
+    });
+    const keys = Object.keys(_vpnBadgeCache);
+    console.log('[VPN Badges] cached', keys.length, 'teams:', keys.join(', '));
+    if(keys.length) render();
+  } catch(err){ console.warn('[VPN Badges] failed:', err); }
+}
+
 // Returns effective match data (with edits and suspension applied)
 function getMatch(i){
   const base = Object.assign({}, RAW[i]);
   if(edits[i])     Object.assign(base, edits[i]);
   if(suspended[i]) base.date = suspended[i].newDate;
   if(!base.badge && base.league === 'VPUG')  base.badge = vpugBadge(base.rival);
+  if(!base.badge && base.league === 'VPN')   base.badge = vpnBadge(base.rival);
   if(!base.badge && base.league === '11x11') base.badge = e11Badge(base.rival);
   return base;
 }
@@ -1768,7 +1805,7 @@ function renderNextHero() {
       const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league] || '';
       const loc = m.isHome ? '🏠 Local' : '✈️ Visita';
       const roundBadge = m.round != null ? `<span class="nh-round-badge">J${m.round}</span>` : '';
-      const badgeImg = m.badge ? `<img class="nh-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">` : '';
+      const badgeImg = m.badge ? `<img class="nh-rival-badge" src="${m.badge}" alt="" onerror="console.warn('[VPN img] failed to load:',this.src);this.style.display='none'">` : '';
       return `<div class="nh-match-row">
         ${m.league?`<span class="nh-lbadge ${lgKey}">${m.league}</span>`:''}
         ${roundBadge}${badgeImg}
@@ -2780,6 +2817,7 @@ document.body.classList.add('locked');
 
 // render() is called by onSnapshot when Firebase data loads
 fetchCloudSeedMatches();
+fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 </script>
 
 <footer>
