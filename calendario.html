@@ -967,7 +967,7 @@ body{padding-top:64px;}
 </div>
 
 <script type="module">
-import { SEED_MATCHES } from './seed_matches.js?v=20260522';
+import { SEED_MATCHES } from './seed_matches.js?v=20260528';
 // ── MATCH DATA ────────────────────────────────────────────────────────────────
 // location: 'L'=Local (Top Secret primero), 'V'=Visitante (rival primero)
 // result: null=pending, [homeGoals, awayGoals] (desde perspectiva del partido, no del equipo)
@@ -1562,10 +1562,16 @@ function findSeedMatch(id){
   const mmdd = m.date.slice(5); // MM-DD
 
   // When multiple seeds match (e.g. two legs vs same rival on same date),
-  // prefer the one where isHome also matches.
+  // prefer exact rival name, then isHome.
   function bestOf(candidates){
     if(!candidates.length) return null;
     if(candidates.length === 1) return candidates[0];
+    // Exact rival name wins over fuzzy matches (avoids e.g. "CAI Esports" vs "San Lorenzo Esports" sharing suffix "orts")
+    const rivalNorm = m.rival ? m.rival.trim().toLowerCase() : '';
+    if(rivalNorm){
+      const exact = candidates.find(s => s.rival && s.rival.trim().toLowerCase() === rivalNorm);
+      if(exact) return exact;
+    }
     if(m.isHome !== undefined){
       const match = candidates.find(s => s.isHome === m.isHome);
       if(match) return match;
