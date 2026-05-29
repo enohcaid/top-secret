@@ -3,6 +3,30 @@
 
 const NOTICIAS = [
   {
+    id: 'destacados-semana2-t2',
+    pinned: false,
+    category: 'Destacados',
+    title: 'Semana 2: el miércoles salva la semana',
+    date: '2026-05-29',
+    dateLabel: '29 de mayo de 2026',
+    excerpt: '11 partidos en 3 noches. La VPN sigue sin ceder puntos. El VPUG cerró con una goleada. El 11x11 respondió con dos victorias seguidas. lucasmatiakd convirtió 8 goles en la semana.',
+    image: 'logos/Destacados Sem2.png',
+    body: [
+      'Entre el 26 y el 28 de mayo, Top Secret FC completó su segunda semana de competencia en la Temporada 2. <strong>11 partidos en tres noches</strong>, distribuidos en las tres ligas. La semana fue de contrastes: difícil en las primeras jornadas de VPN y VPUG, brillante en el cierre del miércoles, donde el equipo convirtió 10 goles en dos partidos.',
+      '<strong>VPN — El nudo que no afloja.</strong> Tres partidos, tres derrotas, tres goles marcados y siete recibidos. El martes fue el día más exigente en la Primera División: ante Aesma Gaming (0-1 de visita) el equipo propuso, tuvo el 54% de posesión y generó por los costados, pero con apenas 2 tiros y 0.4 de xG el gol propio nunca llegó. Guiidow fue la figura con 8.3. Ante CAI Esports (2-3 de local) el nivel ofensivo apareció — Lautavester7 y lucasmatiakd anotaron, Buraa 07 (7.6) distribuyó desde el mediocampo — pero la solidez defensiva siguió siendo el problema. San Lorenzo Esports cerró la noche con un 3-1 donde Lautavester7 anotó el descuento y J. Martinez (7.7) fue el mejor del plantel. La VPN no perdona errores defensivos y el equipo todavía no encontró el equilibrio entre ataque y retaguardia.',
+      '<strong>VPUG — Del bache al golazo.</strong> La semana en la VPUG arrancó mal: derrota 1-2 de visita ante I.A.C.C Cantera el lunes — Lautavester7 descontó con asistencia de Cabers14 — y caída en casa 0-1 ante Hacha eSports el martes. Pero el miércoles llegó la respuesta más contundente de toda la semana: 4-0 de visita ante Evermeet FC. BlackPanther fue la figura del partido con 9.0 (2 goles y asistencia), lucasmatiakd sumó otros dos tantos con 8.6 de rating y J. Martinez (8.0) organizó desde el mediocampo con 34 pases y una asistencia. Una noche perfecta en el momento justo.',
+      '<strong>11x11 — Reacción en el cierre.</strong> El lunes fue parejo pero sin premio: 1-1 ante All Boys con gol de lucasmatiakd y asistencia de Pibu, y luego derrota 2-3 ante Comunicaciones eSports donde el equipo llegó con claridad (lucasmatiakd y Huber236 anotaron, J. Martinez asistió) pero no sostuvo el resultado. El miércoles fue otra historia. Ante 4BDOMIFL4NES, victoria 4-2 con Lautavester7 en modo estelar (9.2, 2 goles y asistencia) y lucasmatiakd imparable (8.5, 2 goles más). Para cerrar, 2-0 ante Los Picantes eSports: ciprimancini como figura total (9.2, 1 gol y asistencia), Pibu sumando otra asistencia y el equipo dominando con 65% de posesión. Dos victorias seguidas para terminar el miércoles con buen sabor.',
+      'En el plano individual, <strong>lucasmatiakd</strong> fue el jugador de la semana con 8 goles en siete partidos — cuatro solo en el miércoles, con doblete ante 4BDOMIFL4NES y doblete ante Evermeet FC. <strong>Lautavester7</strong> anotó cinco veces (Cantera, CAI, San Lorenzo y dos ante los 4B) y su 9.2 ante 4BDOMIFL4NES fue el rating individual más alto del período. <strong>BlackPanther</strong> protagonizó la mejor actuación colectiva con 9.0 y un partido completo ante Evermeet (2G+1A). <strong>ciprimancini</strong> cerró la semana de 11x11 con 9.2 y participación directa en los dos goles ante Los Picantes. En defensa, <strong>AR ELTIO</strong> fue el mejor de la línea con 8.9 ante IACC Reserva. <strong>J. Martinez</strong> completó los 11 partidos acumulando 8.1 ante IACC Reserva y 8.0 ante Evermeet como mejores actuaciones de la semana.',
+      'Semana 2 completada. El desafío en la VPN sigue pendiente; el VPUG y el 11x11 muestran que el potencial está. 🖤⭐',
+    ],
+    shareCaption: '🖤 SEMANA 2 · TEMPORADA 2 · TOP SECRET FC\n\n11 partidos · 3 ligas · 3 noches\n\nVPN: 0V · 0E · 3D — el desafío persiste\nVPUG: 1V · 0E · 2D — goleada ante Evermeet (4-0)\n11x11: 2V · 1E · 2D — dos victorias en el cierre\n\nlucasmatiakd: 8 goles · Lautavester7: 5 goles · BlackPanther: 9.0 vs Evermeet\n\n#TopSecretFC #VPN #VPUG #11x11 #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 SEMANA 2 · TEMPORADA 2\n\n11 partidos. Tres ligas. Balance real:\n\nVPN 0-0-3 · VPUG 1-0-2 · 11x11 2-1-2\n\nlucasmatiakd: 8G · Lautavester7: 5G · BlackPanther: 9.0 ante Evermeet\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPN #VPUG #11x11 #EAFCClubsPro',
+      x:  '🖤 Semana 2 de Temporada 2 completada.\n\nVPN 0-0-3 · VPUG 1-0-2 · 11x11 2-1-2\n\n11 partidos en 3 noches. lucasmatiakd: 8 goles en la semana.\n\n#TopSecretFC #VPN #VPUG #11x11',
+      fb: '🖤 SEMANA 2 · TEMPORADA 2 · TOP SECRET FC\n\nBalance de la segunda semana en tres competencias:\n\n📊 VPN: 0 victorias · 0 empates · 3 derrotas — el frente más duro de la temporada\n📊 VPUG: 1 victoria · 0 empates · 2 derrotas — cierre goleador (4-0 ante Evermeet)\n📊 11x11: 2 victorias · 1 empate · 2 derrotas — dos victorias seguidas el miércoles\n\nlucasmatiakd convirtió 8 goles en la semana. Lautavester7: 5 goles. BlackPanther: 9.0 ante Evermeet (2G+1A). ciprimancini: 9.2 ante Los Picantes.\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #VPN #VPUG #11x11 #EAFCClubsPro',
+    },
+  },
+  {
     id: 'destacados-semana1-t2',
     pinned: false,
     category: 'Destacados',
