@@ -1409,6 +1409,62 @@ const SEED_MATCHES = [
     {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:5.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 7 11x11 T2 - IACC Reserva - 28 May 2026 (Visita, 1-2, Derrota)
+  {rival:'IACC Reserva', league:'11x11', date:'2026-05-28', isHome:false, match_result:'1-2', uploadedAt:'2026-05-29T00:00:00.000Z', notes:'',
+  team_stats:{posesion:57,tiros:10,tiros_arco:null,goles_esperados:5.0,pases:215,precision_pases:85,entradas:20,entradas_exito:6,intercepciones:null,paradas:0,faltas:1,fuera_juego:1,corneres:2,regates_exito:92,precision_tiro:50},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:8.1, goals:0, assists:0, passes:38,  pass_accuracy:71, distance_km:18.3, sprints:null, tackles:1,  interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DI',  rating:7.0, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'DD',  rating:7.2, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa 07',       matched:'Buraa07',           played_pos:'MCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'MCD', rating:7.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:8.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',      played_pos:'POR', rating:4.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 8 11x11 T2 - 4BDOMIFL4NES - 28 May 2026 (Local, 4-2, Victoria)
+  {rival:'4BDOMIFL4NES', league:'11x11', date:'2026-05-28', isHome:true, match_result:'4-2', uploadedAt:'2026-05-29T00:00:00.000Z', notes:'',
+  team_stats:{posesion:58,tiros:13,tiros_arco:null,goles_esperados:7.5,pases:210,precision_pases:86,entradas:14,entradas_exito:4,intercepciones:null,paradas:4,faltas:1,fuera_juego:1,corneres:5,regates_exito:93,precision_tiro:92},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.6, goals:0, assists:1, passes:27,  pass_accuracy:81, distance_km:18.4, sprints:null, tackles:0,  interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:9.2, goals:2, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DD',  rating:8.5, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:8.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa 07',       matched:'Buraa07',           played_pos:'MCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'MCD', rating:8.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFD', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:5.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 9 11x11 T2 - Los Picantes eSports - 28 May 2026 (Local, 2-0, Victoria)
+  {rival:'Los Picantes eSports', league:'11x11', date:'2026-05-28', isHome:true, match_result:'2-0', uploadedAt:'2026-05-29T00:00:00.000Z', notes:'',
+  team_stats:{posesion:65,tiros:6,tiros_arco:null,goles_esperados:2.7,pases:242,precision_pases:87,entradas:22,entradas_exito:6,intercepciones:null,paradas:1,faltas:1,fuera_juego:0,corneres:2,regates_exito:96,precision_tiro:67},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.3, goals:0, assists:0, passes:35,  pass_accuracy:66, distance_km:18.0, sprints:null, tackles:0,  interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DD',  rating:7.2, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:9.2, goals:1, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa 07',       matched:'Buraa07',           played_pos:'MCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.9, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFD', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 7 VPUG T2 - Evermeet FC - 28 May 2026 (Visita, 4-0, Victoria)
+  {rival:'Evermeet FC', league:'VPUG', date:'2026-05-28', isHome:false, match_result:'4-0', uploadedAt:'2026-05-29T00:00:00.000Z', notes:'',
+  team_stats:{posesion:60,tiros:12,tiros_arco:null,goles_esperados:3.1,pases:217,precision_pases:88,entradas:16,entradas_exito:7,intercepciones:null,paradas:2,faltas:0,fuera_juego:0,corneres:3,regates_exito:92,precision_tiro:58},
+  players:[]},
+
 ];
 
 
