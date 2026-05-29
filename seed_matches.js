@@ -1463,7 +1463,19 @@ const SEED_MATCHES = [
   // Fecha 7 VPUG T2 - Evermeet FC - 28 May 2026 (Visita, 4-0, Victoria)
   {rival:'Evermeet FC', league:'VPUG', date:'2026-05-28', isHome:false, match_result:'4-0', uploadedAt:'2026-05-29T00:00:00.000Z', notes:'',
   team_stats:{posesion:60,tiros:12,tiros_arco:null,goles_esperados:3.1,pases:217,precision_pases:88,entradas:16,entradas_exito:7,intercepciones:null,paradas:2,faltas:0,fuera_juego:0,corneres:3,regates_exito:92,precision_tiro:58},
-  players:[]},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:8.0, goals:0, assists:1, passes:34,  pass_accuracy:79, distance_km:19.1, sprints:null, tackles:0,  interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DI',  rating:8.6, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'DD',  rating:9.0, goals:2, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:8.2, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa 07',       matched:'Buraa07',           played_pos:'MCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:7.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Woolfyboyzx2',   matched:'Woolfyboyzx2',      played_pos:'POR', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
 
 ];
 
