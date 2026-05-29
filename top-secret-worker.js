@@ -8,7 +8,7 @@
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
   'destacados-semana2-t2': {
-    t: 'Semana 2: el miércoles salva la semana',
+    t: 'Semana 2: el jueves salva la semana',
     i: SITE + 'logos/Destacados%20Sem2.png',
   },
   'destacados-semana1-t2': {
