@@ -1541,6 +1541,23 @@ const SEED_MATCHES = [
     {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 9 VPUG T2 - Team Valhalla - 2 Jun 2026 (Local, 0-2, Derrota)
+  {rival:'Team Valhalla', league:'VPUG', date:'2026-06-02', isHome:true, match_result:'0-2', uploadedAt:'2026-06-02T00:00:00.000Z', notes:'',
+  team_stats:{posesion:60,tiros:4,tiros_arco:null,goles_esperados:0.6,pases:220,precision_pases:84,entradas:14,entradas_exito:3,intercepciones:null,paradas:0,faltas:1,fuera_juego:1,corneres:4,regates_exito:92,precision_tiro:50},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:25,  pass_accuracy:88, distance_km:16.1, sprints:null, tackles:2,  interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'EI',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DC',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'ED',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa 07',       matched:'Buraa07',           played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DFI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DCI', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:8.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFD', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:4.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
