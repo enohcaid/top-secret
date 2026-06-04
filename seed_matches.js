@@ -1243,8 +1243,37 @@ const SEED_MATCHES = [
     {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DFD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'pauloco10',      matched:'pauloco10',         played_pos:'POR', rating:4.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
-  {rival:'FCO Cannabiense',    league:'VPN', date:'2026-06-03', isHome:true,  time:'23:00', players:[]},
-  {rival:'Monoidales',         league:'VPN', date:'2026-06-03', isHome:false, time:'23:30', players:[]},
+  // Fecha 16 VPN T2 - FCO Cannabiense - 3 Jun 2026 (Local, 0-1, Derrota)
+  {rival:'FCO Cannabiense', league:'VPN', date:'2026-06-03', isHome:true, match_result:'0-1', uploadedAt:'2026-06-04T00:00:00.000Z', notes:'',
+  team_stats:{posesion:61,tiros:4,tiros_arco:null,goles_esperados:1.3,pases:218,precision_pases:87,entradas:19,entradas_exito:5,intercepciones:null,paradas:1,faltas:0,fuera_juego:1,corneres:2,regates_exito:92,precision_tiro:75},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.3, goals:0, assists:0, passes:27,  pass_accuracy:70, distance_km:19.0, sprints:null, tackles:1,  interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DI',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'DD',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R.RS32DaniSton', matched:'R.RS32DaniSton',    played_pos:'MCI', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFC', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 17 VPN T2 - Monoidales - 3 Jun 2026 (Visita, 1-1, Empate)
+  {rival:'Monoidales', league:'VPN', date:'2026-06-03', isHome:false, match_result:'1-1', uploadedAt:'2026-06-04T00:00:00.000Z', notes:'',
+  team_stats:{posesion:62,tiros:9,tiros_arco:null,goles_esperados:2.2,pases:241,precision_pases:90,entradas:18,entradas_exito:1,intercepciones:null,paradas:0,faltas:3,fuera_juego:0,corneres:2,regates_exito:93,precision_tiro:56},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:8.2, goals:0, assists:0, passes:41,  pass_accuracy:88, distance_km:18.6, sprints:null, tackles:1,  interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DI',  rating:7.5, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'DD',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:8.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R.RS32DaniSton', matched:'R.RS32DaniSton',    played_pos:'MCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.6, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFC', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
   {rival:'Hacha eSports',      league:'VPN', date:'2026-06-08', isHome:true,  time:'23:00', players:[]},
   {rival:'Belgrano Esports',   league:'VPN', date:'2026-06-08', isHome:false, time:'23:30', players:[]},
 
@@ -1556,6 +1585,22 @@ const SEED_MATCHES = [
     {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:8.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Huber236',       matched:'Huber236',          played_pos:'DFD', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:4.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 10 VPUG T2 - Germinal eSports - 3 Jun 2026 (Visita, 2-2, Empate)
+  {rival:'Germinal eSports', league:'VPUG', date:'2026-06-03', isHome:false, match_result:'2-2', uploadedAt:'2026-06-04T00:00:00.000Z', notes:'',
+  team_stats:{posesion:60,tiros:11,tiros_arco:null,goles_esperados:5.0,pases:219,precision_pases:85,entradas:24,entradas_exito:5,intercepciones:null,paradas:2,faltas:0,fuera_juego:1,corneres:3,regates_exito:93,precision_tiro:91},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:8.3, goals:0, assists:1, passes:30,  pass_accuracy:90, distance_km:19.5, sprints:null, tackles:0,  interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DI',  rating:7.6, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'DD',  rating:7.5, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R.RS32DaniSton', matched:'R.RS32DaniSton',    played_pos:'MCI', rating:8.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:8.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.2, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
 ];
