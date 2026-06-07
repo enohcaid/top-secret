@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'destacados-semana3-t2': {
+    t: 'Semana 3: la goleada en VPUG y el punto arrancado en VPN',
+    i: SITE + 'logos/Destacados%20Sem3.png',
+  },
   'destacados-semana2-t2': {
     t: 'Semana 2: el jueves salva la semana',
     i: SITE + 'logos/Destacados%20Sem2.png',

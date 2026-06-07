@@ -3,6 +3,29 @@
 
 const NOTICIAS = [
   {
+    id: 'destacados-semana3-t2',
+    pinned: false,
+    category: 'Destacados',
+    title: 'Semana 3: la goleada en VPUG y el punto arrancado en VPN',
+    date: '2026-06-05',
+    dateLabel: '5 de junio de 2026',
+    excerpt: '9 partidos en 4 noches. La VPN rescató un empate ante Monoidales tras cuatro derrotas. La VPUG brilló con un 4-0 a Real Marcianos. Sin actividad en el 11x11. Lautavester7 convirtió 5 goles en la semana.',
+    image: 'logos/Destacados Sem3.png',
+    body: [
+      'Entre el 1 y el 4 de junio, Top Secret FC afrontó nueve partidos repartidos en la VPN y la VPUG. <strong>Sin actividad en el 11x11</strong>, la semana se concentró en los dos frentes más exigentes de la temporada y dejó una lectura clara: una victoria dominante, tres empates peleados y cinco derrotas que no desdibujan lo que el equipo viene construyendo.',
+      '<strong>VPN — Cinco partidos, un punto vital.</strong> El lunes fue la jornada más dura: tres partidos en una sola noche y tres derrotas. Ante Instituto Esports (1-3 de visita) Agubostero7 descontó y fue figura con 8.4 de rating; Alexisraies2 (8.9) fue el más sólido de la zaga y el número individual más alto de toda la semana. En el segundo partido, la caída 1-2 ante Estudiantes LP de local fue un duelo de dominio sin recompensa —58% de posesión, 3 tiros— con Lautavester7 marcando el descuento y Alexisraies2 (8.3) y J. Martinez (7.9) como los mejores. La noche cerró con la derrota más abultada: 1-5 de visita ante Talleres eSports, aunque el equipo generó —7 tiros, 1.8 xG— y Guiidow (7.9) y Agubostero7 (7.8) se mantuvieron al nivel. El miércoles trajo dos partidos de signo distinto: primero la frustración de caer 0-1 ante FCO Cannabiense con 61% de posesión y 4 tiros sin convertir, y después la mejor noticia de la VPN en la semana: empate 1-1 de visita ante Monoidales con J. Martinez en modo excepcional (8.2, 41 pases, 88% de precisión), ciprimancini dominando el mediocampo (8.0) y lucasmatiakd anotando el gol. Pibu sumó asistencia. El equipo manejó el 62% de la posesión y generó 9 tiros. Un punto rescatado que sabe bien.',
+      '<strong>VPUG — Del 4-0 a la resiliencia.</strong> La jornada más brillante de toda la semana llegó el mismo lunes: 4-0 de visita ante Real Marcianos FC. Lautavester7 (8.6) anotó dos veces, BlackPanther (8.2) sumó gol y asistencia, lucasmatiakd convirtió el cuarto tanto (7.8) y J. Martinez (8.6) fue el arquitecto desde el mediocampo con 41 pases al 90% de precisión. ciprimancini (8.4) y Agubostero7 (7.8) completaron una noche sin fisuras. El martes llegó el tropiezo: derrota 0-2 ante Team Valhalla de local con 60% de posesión pero apenas 4 tiros y 0.6 xG. Cabers14 (8.5) fue la figura individual en la derrota. El miércoles el equipo respondió con el mejor partido colectivo de la VPUG en la semana: empate 2-2 de visita ante Germinal eSports, con J. Martinez otra vez imperial (8.3, 30 pases, 90% de precisión), R.RS32DaniSton brillando con 8.4 y Cabers14 sólido (8.0); lucasmatiakd y BlackPanther anotaron. El jueves cerró con un empate 1-1 ante Atlético Moneiro de local: Lautavester7 abrió el marcador, lucasmatiakd asistió y J. Martinez (8.0) fue el mejor de la cancha.',
+      'En el plano individual, <strong>Alexisraies2</strong> firmó el rating más alto de la semana con 8.9 ante Instituto Esports —una actuación defensiva completa que marcó el tono del bloque de fondo—. <strong>J. Martinez</strong> fue el jugador de la semana sin discusión: nueve partidos completados, promedios de pases altísimos (41 al 90% ante Real Marcianos, 30 al 90% ante Germinal, 41 al 88% ante Monoidales) y ratings entre 7.2 y 8.6 en toda la semana. <strong>Lautavester7</strong> fue el máximo goleador con cinco tantos y su 8.6 ante Real Marcianos como cima. <strong>Cabers14</strong> tuvo la mejor semana de su temporada en la VPUG: 8.5 ante Valhalla y 8.0 ante Germinal como picos. <strong>R.RS32DaniSton</strong> brilló con 8.4 ante Germinal en su mejor actuación de la temporada.',
+      'Nueve partidos. Once goles. Una semana de contrastes entre el mejor resultado de la temporada en la VPUG y el desafío que sigue pendiente en la VPN. El 11x11 retoma esta semana. 🖤⭐',
+    ],
+    shareCaption: '🖤 SEMANA 3 · TEMPORADA 2 · TOP SECRET FC\n\n9 partidos · 2 ligas · 4 noches\n\nVPN: 0V · 1E · 4D — empate rescatado ante Monoidales\nVPUG: 1V · 2E · 1D — goleada 4-0 ante Real Marcianos\n11x11: sin actividad\n\nLautavester7: 5 goles · Alexisraies2: 8.9 rating · J. Martinez: 9 partidos al máximo nivel\n\n#TopSecretFC #VPN #VPUG #11x11 #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 SEMANA 3 · TEMPORADA 2\n\n9 partidos. Dos ligas. Balance:\n\nVPN 0-1-4 · VPUG 1-2-1\n\nLautavester7: 5G · Alexisraies2: 8.9 · J. Martinez: 9 partidos al máximo nivel\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPN #VPUG #EAFCClubsPro',
+      x:  '🖤 Semana 3 de Temporada 2 completada.\n\nVPN 0-1-4 · VPUG 1-2-1\n\n9 partidos en 4 noches. 4-0 a Real Marcianos. Lautavester7: 5 goles.\n\n#TopSecretFC #VPN #VPUG',
+      fb: '🖤 SEMANA 3 · TEMPORADA 2 · TOP SECRET FC\n\nBalance de la tercera semana:\n\n📊 VPN: 0 victorias · 1 empate · 4 derrotas — punto rescatado vs Monoidales en el cierre\n📊 VPUG: 1 victoria · 2 empates · 1 derrota — goleada 4-0 ante Real Marcianos\n📊 11x11: sin actividad\n\nLautavester7: 5 goles en la semana. Alexisraies2: 8.9 rating ante Instituto (máximo de la semana). J. Martinez completó los 9 partidos con rating siempre por encima de 7.2.\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #VPN #VPUG #EAFCClubsPro',
+    },
+  },
+  {
     id: 'destacados-semana2-t2',
     pinned: false,
     category: 'Destacados',
