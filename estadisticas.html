@@ -11,12 +11,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root{
-  --bg:#FFFFFF;--card:#F5F5F0;--card2:#EBEBEB;
-  --border:#E5E5E0;--border2:#D0D0C8;
-  --text:#111111;--muted:#666666;--muted2:#999999;
+  --bg:#111111;--card:#1C1C1C;--card2:#242424;
+  --border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.05);
+  --text:#F0F2F8;--muted:rgba(255,255,255,.4);--muted2:rgba(255,255,255,.28);
   --gold:#C9A84C;--gold2:#E8C97A;--gold-dim:rgba(201,168,76,.12);
-  --win:#2a9d5c;--draw:#d4a017;--loss:#c0392b;
-  --vpn:#d4a017;--vpug:#2a9d5c;--e11:#2563eb;
+  --win:#22C55E;--draw:#F59E0B;--loss:#EF4444;
+  --vpn:#F5C518;--vpug:#3ECF8E;--e11:#4A9EFF;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -346,7 +346,7 @@ footer span{color:#C9A84C;}
 .ts-breakdown.open{display:block;}
 .ts-breakdown-title{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;text-align:center;}
 .ts-bd-row{display:flex;align-items:center;gap:8px;padding:5px 4px;border-radius:6px;transition:background .12s;}
-.ts-bd-row:hover{background:rgba(0,0,0,.03);}
+.ts-bd-row:hover{background:rgba(255,255,255,.04);}
 .ts-bd-rival{font-size:.75rem;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ts-bd-date{font-size:.65rem;color:var(--muted2);white-space:nowrap;}
 .ts-bd-league{font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;}
@@ -409,7 +409,7 @@ footer span{color:#C9A84C;}
 .compare-table th.sort-desc::after{content:' ↓';}
 .compare-table td{padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;color:var(--muted);}
 .compare-table td:first-child{text-align:left;font-weight:600;color:var(--text);}
-.compare-table tr:hover td{background:rgba(0,0,0,.02);}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
 .cmp-pos{font-size:.62rem;color:var(--muted2);font-weight:500;margin-left:4px;}
 .cmp-val-hi{color:var(--text);font-weight:700;}
 .cmp-locked{color:var(--border2);font-size:.7rem;}

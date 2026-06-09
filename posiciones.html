@@ -11,21 +11,21 @@
 :root {
   --black:  #111111;
   --white:  #FFFFFF;
-  --gray:   #F5F5F0;
+  --gray:   #1C1C1C;
   --gold:   #C9A84C;
   --gold2:  #E8C97A;
-  --mid:    #888888;
-  --border: #E5E5E0;
-  --vpn:    #d4a017;
-  --vpug:   #2a9d5c;
-  --e11:    #2563eb;
+  --mid:    rgba(255,255,255,.4);
+  --border: rgba(255,255,255,.09);
+  --vpn:    #F5C518;
+  --vpug:   #3ECF8E;
+  --e11:    #4A9EFF;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  background: var(--white);
-  color: var(--black);
+  background: var(--black);
+  color: var(--text, #F0F2F8);
   font-family: 'Barlow', sans-serif;
   min-height: 100vh;
   margin-left: 64px;
@@ -43,7 +43,7 @@ body {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: clamp(2.8rem, 6vw, 5rem);
   font-weight: 900; line-height: .9; letter-spacing: -.01em;
-  text-transform: uppercase; color: var(--black);
+  text-transform: uppercase; color: var(--text);
 }
 .ph-title span { color: var(--gold); }
 .ph-sub { font-size: .85rem; color: var(--mid); margin-top: 10px; }
@@ -64,7 +64,7 @@ body {
   cursor: pointer; border-bottom: 3px solid transparent;
   margin-bottom: -2px; transition: color .18s, border-bottom-color .18s;
 }
-.tab:hover { color: var(--black); }
+.tab:hover { color: var(--text); }
 .tab[data-league="vpn"].active   { color: var(--vpn);  border-bottom-color: var(--vpn);  }
 .tab[data-league="vpug"].active  { color: var(--vpug); border-bottom-color: var(--vpug); }
 .tab[data-league="e11"].active   { color: var(--e11);  border-bottom-color: var(--e11);  }
@@ -95,7 +95,7 @@ body {
 /* ── TABLE ── */
 .standings-table {
   width: 100%; border-collapse: collapse;
-  background: var(--white); border: 1px solid var(--border);
+  background: var(--gray); border: 1px solid var(--border);
   border-radius: 8px; overflow: hidden;
 }
 .standings-table thead th {
@@ -137,14 +137,14 @@ td.left { text-align: left; }
 }
 .td-name {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: .92rem; font-weight: 700; color: var(--black);
+  font-size: .92rem; font-weight: 700; color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .td-name.us { color: var(--gold); }
 
 .td-pts {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.1rem; font-weight: 900; color: var(--black);
+  font-size: 1.1rem; font-weight: 900; color: var(--text);
 }
 
 .td-gd { font-weight: 600; }
