@@ -32,7 +32,7 @@
   // ── CSS ────────────────────────────────────────────────────────────────────
   const style = document.createElement('style');
   style.textContent = `
-    :root{--gold:#C9A84C;--gold2:#E8C97A;}
+    :root{--gold:#B0B8C4;--gold2:#D4DAE4;}
 
     /* ── Topbar ── */
     .topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#111111;border-bottom:3px solid var(--gold);display:flex;align-items:center;padding:0 16px 0 16px;gap:8px;}
@@ -76,6 +76,8 @@
 
     /* CSS variable overrides */
     html.light-mode {
+      --gold:   #C9A84C;
+      --gold2:  #E8C97A;
       --gray:   #F5F5F0;
       --mid:    #888888;
       --border: #E5E5E0;
