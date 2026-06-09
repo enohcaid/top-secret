@@ -28,7 +28,7 @@ const NOTICIAS = [
   },
   {
     id: 'cierre-vpn-t2',
-    pinned: false,
+    pinned: true,
     category: 'Análisis',
     title: 'Cierre VPN T2: 19 partidos en Primera División, Lautavester7 termina con 13 goles',
     date: '2026-06-09',
