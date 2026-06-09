@@ -7,6 +7,14 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'cierre-11x11-t2': {
+    t: 'Cierre 11x11 T2: Lautavester7 y lucasmatiakd, 5 goles cada uno',
+    i: SITE + 'logos/Destacados%20Sem3.png',
+  },
+  'cierre-vpn-t2': {
+    t: 'Cierre VPN T2: 19 partidos en Primera División, Lautavester7 termina con 13 goles',
+    i: SITE + 'logos/equipo-temporada-vpn.png',
+  },
   'destacados-semana3-t2': {
     t: 'Semana 3: la goleada en VPUG y el punto arrancado en VPN',
     i: SITE + 'logos/Destacados%20Sem3.png',
