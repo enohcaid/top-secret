@@ -10,7 +10,7 @@ const NOTICIAS = [
     date: '2026-06-09',
     dateLabel: '9 de junio de 2026',
     excerpt: '9 partidos, 4 victorias, 14 goles. La liga más equilibrada de la temporada cerró con balance positivo. Lautavester7 y lucasmatiakd terminaron como cogoleadores con 5 tantos cada uno. ciprimancini fue el jugador más consistente del torneo.',
-    image: 'logos/Destacados Sem3.png',
+    image: '',
     body: [
       'Con nueve partidos disputados entre el 19 de mayo y el 28 de mayo de 2026, Top Secret FC cerró su participación en el <strong>11x11 Temporada 2</strong>. El balance final fue de <strong>4 victorias, 1 empate y 4 derrotas</strong>, con 14 goles marcados y 12 recibidos. Una campaña pareja, con picos ofensivos notables y un colectivo que encontró su mejor versión en los partidos más importantes.',
       'El equipo arrancó con dos derrotas en la primera jornada —1-2 ante Los Waxiturros y 1-2 de visita ante Argentino de Merlo— pero se recompuso de inmediato con victorias consecutivas por 1-0 ante Ferro eSp y Dep Ballester. Luego llegó el empate ante All Boys, la caída ante Comunicaciones, otra derrota ante IACC Reserva, y el cierre más explosivo de la temporada: <strong>victoria 4-2 ante 4BDOMIFL4NES y 2-0 ante Los Picantes eSports</strong> en los dos últimos partidos. El equipo terminó ganando cuando más importaba.',
@@ -34,7 +34,7 @@ const NOTICIAS = [
     date: '2026-06-09',
     dateLabel: '9 de junio de 2026',
     excerpt: '19 partidos en la Primera División de la VPN. El salto de categoría fue exigente: 1 victoria, 2 empates y 16 derrotas. Pero Lautavester7 convirtió 13 goles para liderar la tabla de artilleros. Un cierre agridulce con lecciones para la próxima temporada.',
-    image: 'logos/equipo-temporada-vpn.png',
+    image: '',
     body: [
       'Con el partido ante Belgrano Esports del 8 de junio, Top Secret FC cerró su primera temporada completa en la <strong>Primera División de la VPN</strong>. Diecinueve partidos, 23 goles marcados y un registro de <strong>1 victoria, 2 empates y 16 derrotas</strong>. El salto desde la categoría anterior a la élite fue directo y el nivel del torneo lo hizo notar partido a partido. Sin embargo, en ese contexto, los números individuales de algunos jugadores tienen aún más valor.',
       '<strong>El escenario.</strong> La VPN de Primera División es el torneo más competitivo de los tres en que participa el club. En casi todos los encuentros el equipo mantuvo la posesión —57% de promedio a lo largo de la temporada— y generó situaciones, pero la efectividad ofensiva y la solidez defensiva no estuvieron siempre alineadas. Los dos empates (ante Riestra eSports y Monoidales) y la única victoria (3-1 ante Belgrano Esports en el cierre) muestran que cuando el equipo funcionó en bloque, el resultado llegó.',
