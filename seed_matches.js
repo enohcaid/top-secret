@@ -1274,8 +1274,39 @@ const SEED_MATCHES = [
     {name:'Alexisraies2',   matched:'Alexisraies2',      played_pos:'DFC', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
-  {rival:'Hacha eSports',      league:'VPN', date:'2026-06-08', isHome:true,  time:'23:00', players:[]},
-  {rival:'Belgrano Esports',   league:'VPN', date:'2026-06-08', isHome:false, time:'23:30', players:[]},
+  // Fecha 18 VPN T2 - Hacha eSports - 8 Jun 2026 (Local, 0-4, Derrota)
+  {rival:'Hacha eSports', league:'VPN', date:'2026-06-08', isHome:true, match_result:'0-4', uploadedAt:'2026-06-09T00:00:00.000Z', notes:'',
+  team_stats:{posesion:48,tiros:7,tiros_arco:null,goles_esperados:3.2,pases:169,precision_pases:81,entradas:26,entradas_exito:5,intercepciones:null,paradas:5,faltas:1,fuera_juego:0,corneres:3,regates_exito:85,precision_tiro:29},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:6.0, goals:0, assists:0, passes:21,  pass_accuracy:52, distance_km:19.8, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DD',  rating:6.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R.RS32DaniSton', matched:'R.RS32DaniSton',    played_pos:'MCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DFC', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:5.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 19 VPN T2 - Belgrano Esports - 8 Jun 2026 (Visita, 3-1, Victoria)
+  {rival:'Belgrano Esports', league:'VPN', date:'2026-06-08', isHome:false, match_result:'3-1', uploadedAt:'2026-06-09T00:00:00.000Z', notes:'',
+  team_stats:{posesion:52,tiros:9,tiros_arco:null,goles_esperados:5.2,pases:182,precision_pases:84,entradas:27,entradas_exito:9,intercepciones:null,paradas:5,faltas:1,fuera_juego:0,corneres:2,regates_exito:91,precision_tiro:78},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:18,  pass_accuracy:67, distance_km:19.8, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:8.1, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DD',  rating:7.7, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R.RS32DaniSton', matched:'R.RS32DaniSton',    played_pos:'MCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:8.5, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:7.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DFC', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
 
   // ── VPUG TEMPORADA 2 ──────────────────────────────────────────────────────────
 
@@ -1618,6 +1649,23 @@ const SEED_MATCHES = [
     {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DFC', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Huber236',       matched:'Huber236',          played_pos:'DFD', rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 12 VPUG T2 - Dalmine eSport - 8 Jun 2026 (Visita, 0-0, Empate)
+  {rival:'Dalmine eSport', league:'VPUG', date:'2026-06-08', isHome:false, match_result:'0-0', uploadedAt:'2026-06-09T00:00:00.000Z', notes:'',
+  team_stats:{posesion:52,tiros:7,tiros_arco:null,goles_esperados:3.1,pases:184,precision_pases:84,entradas:18,entradas_exito:5,intercepciones:null,paradas:3,faltas:3,fuera_juego:2,corneres:4,regates_exito:92,precision_tiro:57},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:18,  pass_accuracy:67, distance_km:19.0, sprints:null, tackles:1,  interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'lucasmatiakd',   matched:'Lucasmati_akd',     played_pos:'DD',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R.RS32DaniSton', matched:'R.RS32DaniSton',    played_pos:'MCI', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DFC', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
 ];
