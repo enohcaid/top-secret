@@ -634,7 +634,7 @@ function renderGrid(items) {
 function init() {
   const pinned = NOTICIAS.find(n => n.pinned);
   if (pinned) renderFeatured(pinned);
-  const rest = NOTICIAS.filter(n => !n.pinned);
+  const rest = NOTICIAS.filter(n => n !== pinned);
   renderGrid(rest);
 }
 
@@ -645,7 +645,8 @@ function renderAutoSection(items) {
   if (!autoItems.length) return;
 
   // Merge noticias manuales (no pinned) con auto-news y ordenar por fecha desc
-  const nonPinned = NOTICIAS.filter(n => !n.pinned);
+  const pinned = NOTICIAS.find(n => n.pinned);
+  const nonPinned = NOTICIAS.filter(n => n !== pinned);
   const merged = [...nonPinned, ...autoItems].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   const wrap = document.getElementById('other-news-wrap');
