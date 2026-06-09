@@ -308,3 +308,7 @@ const NOTICIAS = [
     },
   },
 ];
+
+// Solo la primera noticia con pinned:true queda fijada; las demás se desclavan.
+const _pi = NOTICIAS.findIndex(n => n.pinned);
+NOTICIAS.forEach((n, i) => { n.pinned = i === _pi; });
