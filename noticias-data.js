@@ -286,7 +286,7 @@ const NOTICIAS = [
   },
   {
     id: 'ascenso-primera-2025',
-    pinned: true,
+    pinned: false,
     category: 'Histórico',
     title: 'Ascendimos a Primera División',
     date: '2025-05-03',
