@@ -967,7 +967,7 @@ body{padding-top:64px;}
 </div>
 
 <script type="module">
-import { SEED_MATCHES } from './seed_matches.js?v=20260601';
+import { SEED_MATCHES } from './seed_matches.js?v=20260609';
 // ── MATCH DATA ────────────────────────────────────────────────────────────────
 // location: 'L'=Local (Top Secret primero), 'V'=Visitante (rival primero)
 // result: null=pending, [homeGoals, awayGoals] (desde perspectiva del partido, no del equipo)
@@ -1118,8 +1118,8 @@ const RAW = [
   {date:'2026-06-03',time:'23:00',league:'VPN', rival:'FCO Cannabiense',         isHome:true,  result:[0,1],  round:16}, // F16
   {date:'2026-06-03',time:'23:30',league:'VPN', rival:'Monoidales',              isHome:false, result:[1,1],  round:17}, // F17
   // Semana 8 Jun
-  {date:'2026-06-08',time:'23:00',league:'VPN', rival:'Hacha eSports',           isHome:true,  result:null,  round:18}, // F18
-  {date:'2026-06-08',time:'23:30',league:'VPN', rival:'Belgrano Esports',        isHome:false, result:null,  round:19}, // F19
+  {date:'2026-06-08',time:'23:00',league:'VPN', rival:'Hacha eSports',           isHome:true,  result:[0,4], round:18}, // F18
+  {date:'2026-06-08',time:'23:30',league:'VPN', rival:'Belgrano Esports',        isHome:false, result:[1,3], round:19}, // F19
 
   // ══ VPUG T2 — Temporada 2 ══
   // Semana 18-21 May
@@ -1138,7 +1138,7 @@ const RAW = [
   {date:'2026-06-02',time:'22:40',league:'VPUG', rival:'Team Valhalla',          isHome:true,  result:[0,2], round:9},  // F9
   {date:'2026-06-03',time:'22:40',league:'VPUG', rival:'Germinal eSports',       isHome:false, result:[2,2], round:10}, // F10
   {date:'2026-06-04',time:'22:40',league:'VPUG', rival:'Atletico Moneiro',       isHome:true,  result:[1,1], round:11}, // F11
-  {date:'2026-06-08',time:'22:40',league:'VPUG', rival:'Villa Dalmine eSports',  isHome:false, result:null, round:12}, // F12 (jue→lun)
+  {date:'2026-06-08',time:'22:40',league:'VPUG', rival:'Villa Dalmine eSports',  isHome:false, result:[0,0], round:12}, // F12 (jue→lun)
 
   // Semana 9-12 Jun
   {date:'2026-06-09',time:'22:40',league:'VPUG', rival:'La Unión FC',            isHome:true,  result:null, round:13}, // F13
