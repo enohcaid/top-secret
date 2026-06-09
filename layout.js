@@ -144,8 +144,10 @@
   document.head.appendChild(style);
 
   // ── Topbar HTML ────────────────────────────────────────────────────────────
-  const MOON_SVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-  const SUN_SVG  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  const MOON_SVG   = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  const SUN_SVG    = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  const LOGO_DARK  = 'logos/Top Secret white.png';
+  const LOGO_LIGHT = 'Top-Secret.png';
 
   const isLight = () => htmlEl.classList.contains('light-mode');
 
@@ -153,7 +155,7 @@
   topbar.className = 'topbar';
   topbar.innerHTML = `
     <a class="tb-brand" href="index.html">
-      <img src="logos/Top Secret white.png" alt="TSFC">
+      <img id="tb-logo" src="${isLight() ? LOGO_LIGHT : LOGO_DARK}" alt="TSFC">
       <span class="tb-brand-name">TOP <span>SECRET</span> FC</span>
     </a>
     <div class="tb-logos">
@@ -201,11 +203,13 @@
     // Theme button listener
     const btn = document.getElementById('tb-theme-btn');
     const icon = document.getElementById('tb-theme-icon');
+    const logo = document.getElementById('tb-logo');
     if (btn && icon) {
       btn.addEventListener('click', function () {
         const light = !htmlEl.classList.contains('light-mode');
         htmlEl.classList.toggle('light-mode', light);
         icon.innerHTML = light ? SUN_SVG : MOON_SVG;
+        if (logo) logo.src = light ? LOGO_LIGHT : LOGO_DARK;
         localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
       });
     }
