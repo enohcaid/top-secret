@@ -32,7 +32,6 @@
 
       /* Topbar: hide heavy logos, keep brand */
       .tb-logos { display:none !important; }
-      .tb-counter { display:none !important; }
       .topbar { padding: 0 12px !important; gap:6px !important; }
       .tb-brand-name { font-size:1.35rem !important; white-space:nowrap; }
       .tb-brand img { height:34px !important; }
