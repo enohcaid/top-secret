@@ -1651,6 +1651,11 @@ const SEED_MATCHES = [
     {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 13 VPUG T2 - La Unión FC - 10 Jun 2026 (Local, 1-0, Victoria, WO)
+  {rival:'La Unión FC', league:'VPUG', date:'2026-06-10', isHome:true, match_result:'1-0', uploadedAt:'2026-06-10T00:00:00.000Z', notes:'WO',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
+
   // Fecha 12 VPUG T2 - Dalmine eSport - 8 Jun 2026 (Visita, 0-0, Empate)
   {rival:'Dalmine eSport', league:'VPUG', date:'2026-06-08', isHome:false, match_result:'0-0', uploadedAt:'2026-06-09T00:00:00.000Z', notes:'',
   team_stats:{posesion:52,tiros:7,tiros_arco:null,goles_esperados:3.1,pases:184,precision_pases:84,entradas:18,entradas_exito:5,intercepciones:null,paradas:3,faltas:3,fuera_juego:2,corneres:4,regates_exito:92,precision_tiro:57},
