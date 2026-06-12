@@ -4,7 +4,7 @@
 const NOTICIAS = [
   {
     id: 'cierre-vpug-t2',
-    pinned: true,
+    pinned: false,
     category: 'Análisis',
     title: 'Cierre VPUG T2: 17 partidos, 30 goles y BlackPanther como máximo artillero con 10',
     date: '2026-06-12',
