@@ -1673,6 +1673,60 @@ const SEED_MATCHES = [
     {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 14 VPUG T2 - 4BDOMIFL4NES - 11 Jun 2026 (Local, 3-2, Victoria)
+  {rival:'4BDOMIFL4NES', league:'VPUG', date:'2026-06-11', isHome:true, match_result:'3-2', uploadedAt:'2026-06-12T00:00:00.000Z', notes:'',
+  team_stats:{posesion:53,tiros:10,tiros_arco:null,goles_esperados:6.3,pases:183,precision_pases:87,entradas:14,entradas_exito:7,intercepciones:null,paradas:2,faltas:0,fuera_juego:3,corneres:4,regates_exito:93,precision_tiro:80},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.5, goals:0, assists:0, passes:23,  pass_accuracy:91, distance_km:18.8, sprints:null, tackles:3,  interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:7.3, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DD',  rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:8.6, goals:0, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniSton',matched:'R.RS32DaniSton',    played_pos:'MCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:9.1, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFI', rating:7.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DFC', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Buraa 07',       matched:'Buraa07',           played_pos:'DFD', rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'POR', rating:6.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 15 VPUG T2 - NuVo - 11 Jun 2026 (Local, 1-0, Victoria, WO)
+  {rival:'NuVo', league:'VPUG', date:'2026-06-11', isHome:true, match_result:'1-0', uploadedAt:'2026-06-12T00:00:00.000Z', notes:'WO',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
+
+  // Fecha 16 VPUG T2 - Suda eSports - 11 Jun 2026 (Visita, 2-2, Empate)
+  {rival:'Suda eSports', league:'VPUG', date:'2026-06-11', isHome:false, match_result:'2-2', uploadedAt:'2026-06-12T00:00:00.000Z', notes:'',
+  team_stats:{posesion:46,tiros:4,tiros_arco:null,goles_esperados:2.1,pases:181,precision_pases:85,entradas:23,entradas_exito:6,intercepciones:null,paradas:2,faltas:1,fuera_juego:1,corneres:0,regates_exito:93,precision_tiro:100},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:22,  pass_accuracy:77, distance_km:19.5, sprints:null, tackles:0,  interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:8.1, goals:1, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'DD',  rating:7.8, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniSton',matched:'R.RS32DaniSton',    played_pos:'MCI', rating:7.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 17 VPUG T2 - Nueva Chicago - 11 Jun 2026 (Local, 2-3, Derrota)
+  {rival:'Nueva Chicago', league:'VPUG', date:'2026-06-11', isHome:true, match_result:'2-3', uploadedAt:'2026-06-12T00:00:00.000Z', notes:'',
+  team_stats:{posesion:58,tiros:5,tiros_arco:null,goles_esperados:3.0,pases:216,precision_pases:83,entradas:20,entradas_exito:7,intercepciones:null,paradas:1,faltas:1,fuera_juego:0,corneres:3,regates_exito:91,precision_tiro:80},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:30,  pass_accuracy:77, distance_km:19.4, sprints:null, tackles:0,  interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.9, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'DD',  rating:7.5, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCO', rating:7.9, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniSton',matched:'R.RS32DaniSton',    played_pos:'MCI', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'MCD', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pibu',           matched:'zPibu__',           played_pos:'DFI', rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Agubostero7',    matched:'Agubostero7',       played_pos:'DCI', rating:7.9, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AR ELTIO',       matched:'AR_ELTIO',          played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
