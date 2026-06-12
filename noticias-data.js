@@ -3,6 +3,30 @@
 
 const NOTICIAS = [
   {
+    id: 'cierre-vpug-t2',
+    pinned: true,
+    category: 'Análisis',
+    title: 'Cierre VPUG T2: 17 partidos, 30 goles y BlackPanther como máximo artillero con 10',
+    date: '2026-06-12',
+    dateLabel: '12 de junio de 2026',
+    excerpt: '17 partidos, 8 victorias, 4 empates y 5 derrotas. 30 goles marcados y 19 recibidos. BlackPanther terminó como goleador de la temporada con 10 tantos. El balance completo de la VPUG T2.',
+    image: 'logos/Cierre VPUG T2.png',
+    body: [
+      'Con los cuatro partidos del 11 de junio, Top Secret FC cerró su participación en la <strong>VPUG Temporada 2</strong>. Diecisiete fechas, 30 goles marcados y un balance de <strong>8 victorias, 4 empates y 5 derrotas</strong>. Una diferencia de goles de +11 que refleja una temporada sólida del primer al último partido.',
+      '<strong>BlackPanther — 10 goles, el goleador de la temporada.</strong> El resultado es incontestable: BlackPanther terminó como el máximo artillero de la VPUG T2 con diez tantos. Doblete en el arranque ante United Mito (9.0 de rating), goles ante InfinitX (8.0), dupla goleadora ante Evermeet FC (9.0, 2G+1A), doblete ante Real Marcianos (8.2) y goles ante Germinal, Suda eSports y Nueva Chicago. Una temporada que lo consolida como el delantero más letal del plantel cuando ocupa ese rol.',
+      '<strong>Lautavester7 — 9 goles, el otro artillero.</strong> A un gol del líder, Lautavester7 cerró con nueve tantos: doblete ante InfinitX con un 9.3 de rating —el individual más alto de toda la temporada—, dos goles ante Real Marcianos (8.6), y tantos ante United Mito, IACC Cantera, Atletico Moneiro, 4BDOMIFL4NES y Suda eSports. Su 9.3 ante InfinitX es el pico más alto registrado por cualquier jugador del equipo en toda la VPUG T2.',
+      '<strong>ciprimancini — el jugador más consistente.</strong> 14 partidos, 7.81 de promedio, el número más alto del plantel. Su mejor noche fue la inaugural: 9.0 ante United Mito con dos asistencias en la goleada 3-0. Presente en todos los partidos importantes, siempre organizado y siempre por encima de 6.9. <strong>Cabers14</strong> promedió 7.63 en 14 partidos y cerró la temporada con su mejor actuación: 9.1 ante 4BDOMIFL4NES con un doblete que definió la victoria 3-2. <strong>J. Martinez</strong> fue el más utilizado: 15 partidos, 7.59 de promedio y el eje de cada partido desde el mediocampo.',
+      '<strong>Las dos noches perfectas.</strong> El 28 de mayo y el 1 de junio el equipo mostró su mejor versión con goleadas consecutivas por 4-0. Primero de visita ante Evermeet FC —BlackPanther y lucasmatiakd con doblete cada uno, J. Martinez asistiendo (8.0)—. Después ante Real Marcianos FC con J. Martinez imperial (8.6, 41 pases al 90%), Lautavester7 como referencia ofensiva (8.6, 2G) y BlackPanther sumando gol y asistencia (8.2). Dos partidos sin fisuras que representan el techo colectivo de la temporada.',
+      '30 goles marcados, 19 recibidos, +11 en diferencia. BlackPanther y Lautavester7 como dupla goleadora, ciprimancini y J. Martinez como columna vertebral del mediocampo, Cabers14 cerrando desde atrás con consistencia. La base está. La siguiente temporada llega con identidad. 🖤⭐',
+    ],
+    shareCaption: '🖤 CIERRE VPUG · TEMPORADA 2 · TOP SECRET FC\n\n17 partidos · 8V · 4E · 5D · 30 goles\n\nBlackPanther: 10 goles · Lautavester7: 9 goles · ciprimancini: 7.81 prom · Cabers14: 9.1 vs 4BDOMIFL4NES\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 CIERRE VPUG · TEMPORADA 2\n\n17 partidos. Balance final:\n\n8V · 4E · 5D · 30 goles\n\nBlackPanther: 10G · Lautavester7: 9G · ciprimancini: 7.81 prom\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+      x:  '🖤 Top Secret FC cierra la VPUG T2.\n\n8V-4E-5D · 30 goles marcados · +11 diferencia\n\nBlackPanther: 10 goles. Lautavester7: 9. ciprimancini: 7.81 prom.\n\n#TopSecretFC #VPUG',
+      fb: '🖤 CIERRE VPUG · TEMPORADA 2 · TOP SECRET FC\n\n17 partidos. Balance final:\n\n📊 8 victorias · 4 empates · 5 derrotas\n📊 30 goles marcados · 19 recibidos · diferencia +11\n\nBlackPanther: 10 goles (máximo artillero). Lautavester7: 9 goles. lucasmatiakd: 4. ciprimancini: 7.81 promedio en 14 partidos. J. Martinez: 7.59 en 15 partidos. Cabers14: 9.1 ante 4BDOMIFL4NES en el cierre.\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    },
+  },
+  {
     id: 'cierre-11x11-t2',
     pinned: false,
     category: 'Análisis',
