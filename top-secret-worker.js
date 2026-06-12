@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'cierre-vpug-t2': {
+    t: 'Cierre VPUG T2: 17 partidos, 30 goles y BlackPanther como máximo artillero con 10',
+    i: SITE + 'logos/Cierre%20VPUG%20T2.png',
+  },
   'cierre-11x11-t2': {
     t: 'Cierre 11x11 T2: Lautavester7 y lucasmatiakd, 5 goles cada uno',
     i: SITE + 'logos/Cierre%2011x11%20T2.png',
