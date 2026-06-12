@@ -704,7 +704,7 @@ function closeArticle() {
 }
 
 function copyLink(id) {
-  const url = BASE_URL + '#' + id;
+  const url = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/og/' + id;
   navigator.clipboard.writeText(url).then(() => {
     const btn = event.currentTarget;
     const orig = btn.textContent;
