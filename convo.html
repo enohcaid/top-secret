@@ -718,7 +718,7 @@ function tryImages(paths, idx, onSuccess, onFail) {
 /* ─── BUILD AVATAR (tries Brazos2 → Brazos → SVG crop) ─── */
 function buildAvatar(p, container) {
   if (p.isGuest) {
-    container.innerHTML = `<div class="guest-sil"><svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:68%;height:68%;opacity:.32;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#fff"/><path d="M4 56C4 38 36 38 36 56Z" fill="#fff"/></svg></div>`;
+    container.innerHTML = `<div class="guest-sil"><svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:68%;height:68%;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#2a2a2a"/><path d="M4 56C4 38 36 38 36 56Z" fill="#2a2a2a"/></svg></div>`;
     return;
   }
   tryImages([brazos2Path(p), brazosPath(p)], 0,
@@ -908,7 +908,7 @@ function renderPitch() {
         tok.innerHTML = '';
         const _sil = document.createElement('div');
         _sil.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;';
-        _sil.innerHTML = `<svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:52%;height:52%;opacity:.32;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#fff"/><path d="M4 56C4 38 36 38 36 56Z" fill="#fff"/></svg>`;
+        _sil.innerHTML = `<svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:52%;height:52%;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#2a2a2a"/><path d="M4 56C4 38 36 38 36 56Z" fill="#2a2a2a"/></svg>`;
         tok.appendChild(_sil);
         const _bar = document.createElement('div'); _bar.className = 'stoken-bar';
         const _gnm = document.createElement('span'); _gnm.className = 'stoken-name guest-tok-name'; _gnm.textContent = guestName;
