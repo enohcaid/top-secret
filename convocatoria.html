@@ -194,6 +194,8 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .guest-sil{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
 .guest-name-input{background:none;border:none;border-bottom:1px solid rgba(201,168,76,.45);color:var(--text);font-family:'Barlow',sans-serif;font-size:.88rem;font-weight:600;width:100%;max-width:130px;outline:none;padding:0 0 1px;cursor:text;}
 .guest-name-input:focus{border-bottom-color:var(--gold);}
+.stoken-name-input{background:none;border:none;border-bottom:1px solid rgba(255,255,255,.2);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;width:100%;outline:none;padding:0;text-align:center;text-transform:uppercase;cursor:text;}
+.stoken-name-input:focus{border-bottom-color:rgba(201,168,76,.7);}
 
 /* ── TODAY MATCHES PANEL ── */
 .today-matches-panel{background:rgba(201,168,76,.06);border:1.5px solid rgba(201,168,76,.35);border-radius:10px;padding:12px 16px;margin-bottom:20px;}
@@ -393,13 +395,14 @@ const CROP_DATA = {
   'Lucasmati_akd':  {iW:68.1, iH:68.1, oX:27.6,oY:13.0},
 };
 
-/* ─── GUEST PLAYER NAME (editable, persisted in localStorage) ─── */
-let guestName = localStorage.getItem('ts_guest_name') || 'Prueba';
-function setGuestName(n) {
-  guestName = n.trim() || 'Prueba';
-  localStorage.setItem('ts_guest_name', guestName);
-  document.querySelectorAll('.guest-label').forEach(el => el.textContent = guestName);
-  document.querySelectorAll('.guest-tok-name').forEach(el => el.textContent = guestName);
+/* ─── GUEST PLAYER NAMES (per slot, persisted in localStorage) ─── */
+let guestSlotNames = JSON.parse(localStorage.getItem('ts_guest_slot_names') || '{}');
+function setGuestSlotName(slotKey, name) {
+  guestSlotNames[slotKey] = name.trim() || 'Prueba';
+  localStorage.setItem('ts_guest_slot_names', JSON.stringify(guestSlotNames));
+}
+function getGuestSlotName(slotKey) {
+  return guestSlotNames[slotKey] || 'Prueba';
 }
 
 /* ─── FORMATIONS ─── */
@@ -772,7 +775,7 @@ function renderPlayers() {
   el.innerHTML = '';
 
   groups.forEach(g => {
-    const gp = PLAYERS.filter(g.f);
+    const gp = PLAYERS.filter(p => !p.isGuest && g.f(p));
     if (!gp.length) return;
     const lbl = document.createElement('div');
     lbl.className = 'pos-label';
@@ -813,19 +816,9 @@ function renderPlayers() {
       // Info
       const info = document.createElement('div'); info.className = 'pinfo';
       const nm = document.createElement('div'); nm.className = 'pname';
-      if (p.isGuest) {
-        const inp = document.createElement('input');
-        inp.type = 'text'; inp.className = 'guest-name-input';
-        inp.value = guestName; inp.placeholder = 'Nombre...';
-        inp.addEventListener('click', e => e.stopPropagation());
-        inp.addEventListener('dragstart', e => e.stopPropagation());
-        inp.addEventListener('input', () => setGuestName(inp.value));
-        nm.appendChild(inp);
-      } else {
-        nm.textContent = p.name;
-        if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; nm.appendChild(b); }
-        if (captain === p.name) { const cb = document.createElement('span'); cb.className = 'cap-badge'; cb.textContent = 'C'; nm.appendChild(cb); }
-      }
+      nm.textContent = p.name;
+      if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; nm.appendChild(b); }
+      if (captain === p.name) { const cb = document.createElement('span'); cb.className = 'cap-badge'; cb.textContent = 'C'; nm.appendChild(cb); }
       const sub = document.createElement('div'); sub.className = 'psub';
       const pos = document.createElement('span'); pos.className = 'ppos'; pos.textContent = getPosLabel(p.pos);
       sub.appendChild(pos);
@@ -842,6 +835,37 @@ function renderPlayers() {
       newCards.push(card);
     });
   });
+
+  // Guest players — below all groups
+  const guestPlayers = PLAYERS.filter(p => p.isGuest);
+  if (guestPlayers.length) {
+    const gsep = document.createElement('div');
+    gsep.style.cssText = 'height:1px;background:var(--border);margin:6px 0 4px;';
+    el.appendChild(gsep);
+    guestPlayers.forEach(p => {
+      const st = getStatus(p.name);
+      const pitched = onPitch.has(p.name);
+      const card = document.createElement('div');
+      card.className = 'pcard ' + st;
+      card.draggable = true;
+      card.addEventListener('dragstart', e => { e.dataTransfer.setData('playerName', p.name); e.dataTransfer.effectAllowed = 'move'; setTimeout(() => card.style.opacity = '.4', 0); });
+      card.addEventListener('dragend', () => card.style.opacity = '');
+      card.addEventListener('click', () => { if (selectedSlotKey) assignPlayerToSelectedSlot(p.name); else openStatusModal(p.name); });
+      if (selectedSlotKey) card.classList.add('assignable');
+      const av = document.createElement('div'); av.className = 'pavatar'; buildAvatar(p, av);
+      const info = document.createElement('div'); info.className = 'pinfo';
+      const nm = document.createElement('div'); nm.className = 'pname'; nm.textContent = 'Prueba';
+      const sub = document.createElement('div'); sub.className = 'psub';
+      const posEl = document.createElement('span'); posEl.className = 'ppos'; posEl.textContent = 'Jugador prueba';
+      sub.appendChild(posEl);
+      if (pitched) { const sp = document.createElement('span'); sp.className = 'on-pitch'; sp.textContent = '✓ EN CANCHA'; sub.appendChild(sp); }
+      info.appendChild(nm); info.appendChild(sub);
+      const dot = document.createElement('span'); dot.className = 'sdot ' + (dotCls[st] || 'sp');
+      card.appendChild(av); card.appendChild(info); card.appendChild(dot);
+      el.appendChild(card);
+      newCards.push(card);
+    });
+  }
 
   // Animate new cards
   gsap.fromTo(newCards, { opacity:0, x:-10 }, { opacity:1, x:0, duration:0.3, stagger:0.025, ease:'power2.out' });
@@ -904,8 +928,7 @@ function renderPitch() {
       tok.className = 'stoken filled';
       // Placeholder while loading
       tok.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:rgba(255,255,255,.25);font-size:.82rem;">${s.l}</div>`;
-      lbl.textContent = player.isGuest ? guestName : player.name;
-      if (player.isGuest) lbl.classList.add('guest-label');
+      lbl.textContent = player.isGuest ? getGuestSlotName(s.key) : player.name;
 
       if (player.isGuest) {
         tok.innerHTML = '';
@@ -914,8 +937,12 @@ function renderPitch() {
         _sil.innerHTML = `<svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:52%;height:52%;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#2a2a2a"/><path d="M4 56C4 38 36 38 36 56Z" fill="#2a2a2a"/></svg>`;
         tok.appendChild(_sil);
         const _bar = document.createElement('div'); _bar.className = 'stoken-bar';
-        const _gnm = document.createElement('span'); _gnm.className = 'stoken-name guest-tok-name'; _gnm.textContent = guestName;
-        _bar.appendChild(_gnm); tok.appendChild(_bar);
+        const _ginp = document.createElement('input');
+        _ginp.type = 'text'; _ginp.className = 'stoken-name-input';
+        _ginp.value = getGuestSlotName(s.key); _ginp.placeholder = 'Prueba';
+        _ginp.addEventListener('click', e => e.stopPropagation());
+        _ginp.addEventListener('input', () => { setGuestSlotName(s.key, _ginp.value); lbl.textContent = _ginp.value || 'Prueba'; });
+        _bar.appendChild(_ginp); tok.appendChild(_bar);
       }
 
       // Helper: set photo inside token (portrait, chest-up crop) + name bar
@@ -1180,7 +1207,7 @@ function copyPlayerList() {
   ];
   const lines = [];
   groups.forEach(g => {
-    const gp = PLAYERS.filter(g.f);
+    const gp = PLAYERS.filter(p => !p.isGuest && g.f(p));
     if (!gp.length) return;
     lines.push('— ' + g.label.toUpperCase() + ' —');
     gp.forEach(p => {
@@ -1422,7 +1449,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       }
       if (player.isGuest) {
         drawSilhouette(tx, ty);
-        drawBar(tx, ty, { name: guestName || 'Prueba', num: '' });
+        drawBar(tx, ty, { name: getGuestSlotName(s.key), num: '' });
         return resolve();
       }
       function drawPhoto(img) {
@@ -1464,7 +1491,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       const assigned = lineup.slots[s.key];
       const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
       if (player) {
-        if (player.isGuest) { drawSilhouette(tx, ty); drawBar(tx, ty, { name: guestName || 'Prueba', num: '' }); }
+        if (player.isGuest) { drawSilhouette(tx, ty); drawBar(tx, ty, { name: getGuestSlotName(s.key), num: '' }); }
         else { drawPlaceholder(tx, ty, player); drawBar(tx, ty, player); }
       } else { drawSilhouette(tx, ty); drawBar(tx, ty, { name: 'PRUEBA', num: '' }); }
     });
