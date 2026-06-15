@@ -195,6 +195,10 @@ html,body{height:100%;} body{background:var(--gray);color:#1a1a1a;font-family:'B
 .av-photo{width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(1.65) translateY(-8%);transform-origin:top center;}
 .av-crop-wrap{position:relative;width:100%;height:100%;overflow:hidden;}
 .av-crop-wrap img{position:absolute;}
+/* ── GUEST PLAYER ── */
+.guest-sil{width:100%;height:100%;background:#1a1a22;display:flex;align-items:center;justify-content:center;}
+.guest-name-input{background:none;border:none;border-bottom:1px solid rgba(201,168,76,.45);color:var(--text);font-family:'Barlow',sans-serif;font-size:.88rem;font-weight:600;width:100%;max-width:130px;outline:none;padding:0 0 1px;cursor:text;}
+.guest-name-input:focus{border-bottom-color:var(--gold);}
 </style>
 </head>
 <body>
@@ -375,7 +379,7 @@ const PLAYERS = [
   { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4' },
   { name:'RS32-DaniStone',  pos:'MCI', num:8,  folder:'RS32-DaniStone' },
   { name:'CipriMancini',    pos:'MVD', num:32, folder:'CipriMancini'   },
-  { name:'Buraa07',         pos:'MVI', num:12, folder:'Buraa7'         },
+  { name:'Prueba',          pos:'MCD', num:'', folder:null, isGuest:true },
   { name:'Guiidow',         pos:'MCI', num:20, folder:'Guiidow'        },
   { name:'BlackPanther-CG', pos:'ED',  num:11, folder:'BlackPanther-CG'},
   { name:'Lautavester7',    pos:'EI',  num:7,  folder:'Lautavester7'   },
@@ -396,9 +400,17 @@ const CROP_DATA = {
   'Zurdo-_CABJ12':  {iW:121.2,iH:68.1,oX:60.5,oY:13.0},
   'cansitrGd22_':   {iW:121.2,iH:68.1,oX:60.6,oY:13.0},
   'zPibu__':        {iW:121.2,iH:68.1,oX:60.2,oY:13.0},
-  'Buraa07':        {iW:68.1, iH:68.1, oX:28.1,oY:8.7 },
   'Lucasmati_akd':  {iW:68.1, iH:68.1, oX:27.6,oY:13.0},
 };
+
+/* ─── GUEST PLAYER NAME (editable, persisted in localStorage) ─── */
+let guestName = localStorage.getItem('ts_guest_name') || 'Prueba';
+function setGuestName(n) {
+  guestName = n.trim() || 'Prueba';
+  localStorage.setItem('ts_guest_name', guestName);
+  document.querySelectorAll('.guest-label').forEach(el => el.textContent = guestName);
+  document.querySelectorAll('.guest-tok-name').forEach(el => el.textContent = guestName);
+}
 
 /* ─── FORMATIONS ─── */
 const FORMATIONS = {
@@ -497,6 +509,10 @@ function svgPath(p)     { return `../Renders/${p.name}.svg`; }
 
 /* ─── BUILD AVATAR (tries PNG → SVG crop) ─── */
 function buildAvatar(p, container) {
+  if (p.isGuest) {
+    container.innerHTML = `<div class="guest-sil"><svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:68%;height:68%;opacity:.32;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#fff"/><path d="M4 56C4 38 36 38 36 56Z" fill="#fff"/></svg></div>`;
+    return;
+  }
   const img = new Image();
   img.onload = () => {
     container.innerHTML = '';
@@ -585,8 +601,18 @@ function renderPlayers() {
       // Info
       const info = document.createElement('div'); info.className = 'pinfo';
       const nm = document.createElement('div'); nm.className = 'pname';
-      nm.textContent = p.name;
-      if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; nm.appendChild(b); }
+      if (p.isGuest) {
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.className = 'guest-name-input';
+        inp.value = guestName; inp.placeholder = 'Nombre...';
+        inp.addEventListener('click', e => e.stopPropagation());
+        inp.addEventListener('dragstart', e => e.stopPropagation());
+        inp.addEventListener('input', () => setGuestName(inp.value));
+        nm.appendChild(inp);
+      } else {
+        nm.textContent = p.name;
+        if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; nm.appendChild(b); }
+      }
       const sub = document.createElement('div'); sub.className = 'psub';
       const pos = document.createElement('span'); pos.className = 'ppos'; pos.textContent = getPosLabel(p.pos);
       sub.appendChild(pos);
@@ -655,7 +681,19 @@ function renderPitch() {
       tok.className = 'stoken filled';
       // Placeholder while loading
       tok.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:rgba(255,255,255,.25);font-size:.82rem;">${s.l}</div>`;
-      lbl.textContent = player.name;
+      lbl.textContent = player.isGuest ? guestName : player.name;
+      if (player.isGuest) lbl.classList.add('guest-label');
+
+      if (player.isGuest) {
+        tok.innerHTML = '';
+        const _sil = document.createElement('div');
+        _sil.style.cssText = 'position:absolute;inset:0;background:#1a1a22;display:flex;align-items:center;justify-content:center;';
+        _sil.innerHTML = `<svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:52%;height:52%;opacity:.32;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#fff"/><path d="M4 56C4 38 36 38 36 56Z" fill="#fff"/></svg>`;
+        tok.appendChild(_sil);
+        const _bar = document.createElement('div'); _bar.className = 'stoken-bar';
+        const _gnm = document.createElement('span'); _gnm.className = 'stoken-name guest-tok-name'; _gnm.textContent = guestName;
+        _bar.appendChild(_gnm); tok.appendChild(_bar);
+      }
 
       // Helper: set photo inside token (portrait, chest-up crop) + name bar
       function setPhoto(src) {
@@ -674,6 +712,7 @@ function renderPitch() {
       }
 
       // Try Frente → Brazos → SVG
+      if (!player.isGuest) {
       const frente = new Image();
       frente.onload = () => setPhoto(frontePath(player));
       frente.onerror = () => {
@@ -701,6 +740,7 @@ function renderPitch() {
         brazos.src = brazosPath(player);
       };
       frente.src = frontePath(player);
+      } // end !player.isGuest
     } else {
       tok.className = 'stoken empty';
       tok.textContent = s.l;
@@ -1002,6 +1042,11 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
         ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(s.l,cx,cy); ctx.textBaseline='alphabetic';
         return resolve();
       }
+      if (player.isGuest) {
+        drawPlaceholder(tx, ty, { num: '' });
+        drawBar(tx, ty, { name: guestName || 'Prueba', num: '' });
+        return resolve();
+      }
       function drawPhoto(img) {
         ctx.save();
         ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
@@ -1026,8 +1071,10 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       const tx = Math.round(cx - tokW/2), ty = Math.round(cy - tokH/2);
       const assigned = lineup.slots[s.key];
       const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
-      if (player) { drawPlaceholder(tx, ty, player); drawBar(tx, ty, player); }
-      else {
+      if (player) {
+        if (player.isGuest) { drawPlaceholder(tx, ty, { num: '' }); drawBar(tx, ty, { name: guestName || 'Prueba', num: '' }); }
+        else { drawPlaceholder(tx, ty, player); drawBar(tx, ty, player); }
+      } else {
         ctx.fillStyle='rgba(0,0,0,.05)'; ctx.fillRect(tx,ty,tokW,tokH);
         ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=S;
         ctx.setLineDash([3*S,3*S]); ctx.strokeRect(tx,ty,tokW,tokH); ctx.setLineDash([]);
