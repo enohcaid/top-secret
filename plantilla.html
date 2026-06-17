@@ -461,7 +461,8 @@ footer span { color: var(--gold); }
 <!-- SEASON BAR -->
 <div class="season-bar">
   <button class="season-pill" onclick="switchSeason(1, this)">T1 · 2026</button>
-  <button class="season-pill active" onclick="switchSeason(2, this)">T2 · 2026</button>
+  <button class="season-pill" onclick="switchSeason(2, this)">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:800;background:rgba(255,255,255,.1);color:var(--muted);">FINALIZADA</span></button>
+  <button class="season-pill active" onclick="switchSeason(3, this)">T3 · 2026</button>
 </div>
 
 <!-- T1 CONTENT -->
@@ -478,7 +479,7 @@ footer span { color: var(--gold); }
 </div>
 
 <!-- T2 CONTENT -->
-<div id="t2-content">
+<div id="t2-content" style="display:none">
   <div class="pos-filter" id="pos-filter-t2">
     <button class="pfbtn active" onclick="filterPos2('all', this)">Todos</button>
     <button class="pfbtn" onclick="filterPos2('POR', this)">POR</button>
@@ -488,6 +489,19 @@ footer span { color: var(--gold); }
     <button class="pfbtn" onclick="filterPos2('DEL', this)">DEL</button>
   </div>
   <div class="squad-grid" id="squadGrid2"></div>
+</div>
+
+<!-- T3 CONTENT -->
+<div id="t3-content">
+  <div class="pos-filter" id="pos-filter-t3">
+    <button class="pfbtn active" onclick="filterPos3('all', this)">Todos</button>
+    <button class="pfbtn" onclick="filterPos3('POR', this)">POR</button>
+    <button class="pfbtn" onclick="filterPos3('DEF', this)">DEF</button>
+    <button class="pfbtn" onclick="filterPos3('LAT', this)">LAT</button>
+    <button class="pfbtn" onclick="filterPos3('MED', this)">MED</button>
+    <button class="pfbtn" onclick="filterPos3('DEL', this)">DEL</button>
+  </div>
+  <div class="squad-grid" id="squadGrid3"></div>
 </div>
 
 <!-- BACKDROP -->
@@ -664,12 +678,32 @@ const ROSTER_T2 = [
    stats:[{l:'SAL',v:85},{l:'FUE',v:88},{l:'CAB',v:82},{l:'TIR',v:90}], total:345, photo:true},
 ];
 
+/* ─── ROSTER T3 ─── */
+const ROSTER_T3 = [
+  {key:'Woolfyboyzx2',   pos:'POR', posn:'Portero',         num:'45', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'rivarola90',     pos:'DEF', posn:'Defensa central', num:'2',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'Alexisraies23',  pos:'DEF', posn:'Defensa central', num:'3',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'Cabers14',       pos:'DEF', posn:'Defensa central', num:'4',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'Agubostero7',    pos:'DEF', posn:'Defensor',        num:'31', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'Huber236',       pos:'LAT', posn:'Lateral',         num:'8',  nvl:'—', arq:'—', build:'—', stats:[], total:0},
+  {key:'zPibu__',        pos:'LAT', posn:'Lateral',         num:'30', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'Juan_Martinez4', pos:'MED', posn:'Mediocampista',   num:'6',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'RS32-DaniStone', pos:'MED', posn:'Mediocampista',   num:'13', nvl:'—', arq:'—', build:'—', stats:[], total:0},
+  {key:'CipriMancini',   pos:'MED', posn:'Mediocampista',   num:'32', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'Guiidow',        pos:'MED', posn:'Mediocampista',   num:'20', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'BlackPanther-CG',pos:'DEL', posn:'Extremo',         num:'11', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, nat:'uy'},
+  {key:'Lautavester7',   pos:'DEL', posn:'Extremo',         num:'7',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'Lucasmati_akd',  pos:'DEL', posn:'Delantero',       num:'9',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+];
+
 /* ─── PATHS ─── */
 function renderFolder(p) { return p.folderOverride || p.key; }
 function brazosPath(p)   { return `Renders/${renderFolder(p)}/Brazos.png`; }
 function frontePath(p)   { return `Renders/${renderFolder(p)}/Frente.png`; }
 function brazos2Path(p)  { return `Renders/${renderFolder(p)}/Brazos2.png`; }
 function frente2Path(p)  { return `Renders/${renderFolder(p)}/Frente2.png`; }
+function brazos3Path(p)  { return `Renders/${renderFolder(p)}/Brazos3.png`; }
+function frente3Path(p)  { return `Renders/${renderFolder(p)}/Frente3.png`; }
 function svgPath(p)      { return `Renders/${p.key}.svg`; }
 
 /* ─── COMPUTE STATS ─── */
@@ -722,13 +756,18 @@ function computeRankings(stats, rosterKeys) {
 
 /* ─── INIT DATA ─── */
 const T2_CUTOFF    = '2026-04-30';
-const T2_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T2_CUTOFF);
+const T3_CUTOFF    = '2026-06-30';
+const T2_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T2_CUTOFF && m.date <= T3_CUTOFF);
+const T3_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T3_CUTOFF);
 const ROSTER_T2_KEYS = ROSTER_T2.map(r => r.key);
+const ROSTER_T3_KEYS = ROSTER_T3.map(r => r.key);
 
 const allStats     = computePlayerStats(SEED_MATCHES);
 const allRankings  = computeRankings(allStats, ROSTER_KEYS);
 const t2Stats      = computePlayerStats(T2_MATCHES);
 const t2Rankings   = computeRankings(t2Stats, ROSTER_T2_KEYS);
+const t3Stats      = computePlayerStats(T3_MATCHES);
+const t3Rankings   = computeRankings(t3Stats, ROSTER_T3_KEYS);
 
 /* ─── STATE ─── */
 let currentFilter = 'all';
@@ -736,9 +775,9 @@ let selectedCard  = null;
 let _currentPlayer = null;
 
 /* ─── BUILD CARD ─── */
-function buildCard(p, useV2 = false) {
+function buildCard(p, useV2 = false, useV3 = false) {
   const card = document.createElement('div');
-  card.className = useV2 ? 'player-card v2' : 'player-card';
+  card.className = useV3 ? 'player-card v3' : (useV2 ? 'player-card v2' : 'player-card');
   card.dataset.pos = p.pos;
   card.dataset.key = p.key;
 
@@ -748,10 +787,10 @@ function buildCard(p, useV2 = false) {
     <div class="ph-name">${p.key}</div>
   </div>`;
 
-  const bSrc  = useV2 ? brazos2Path(p) : brazosPath(p);
-  const bFall = brazosPath(p);
-  const fSrc  = useV2 ? frente2Path(p) : frontePath(p);
-  const fFall = frontePath(p);
+  const bSrc  = useV3 ? brazos3Path(p) : (useV2 ? brazos2Path(p) : brazosPath(p));
+  const bFall = useV3 ? brazos2Path(p) : brazosPath(p);
+  const fSrc  = useV3 ? frente3Path(p) : (useV2 ? frente2Path(p) : frontePath(p));
+  const fFall = useV3 ? frente2Path(p) : frontePath(p);
 
   const imgHtml = `<div class="card-img-wrap">
     <img class="img-brazos" src="${bSrc}" alt="${p.key}"
@@ -828,8 +867,12 @@ function switchSeason(n, btn) {
   btn.classList.add('active');
   const t1 = document.getElementById('t1-content');
   const t2 = document.getElementById('t2-content');
-  if (n === 1) { t1.style.display = ''; t2.style.display = 'none'; closePanel(false); renderGrid(currentFilter); }
-  else         { t1.style.display = 'none'; t2.style.display = 'block'; closePanel(false); renderGrid2(currentFilter2); }
+  const t3 = document.getElementById('t3-content');
+  t1.style.display = 'none'; t2.style.display = 'none'; t3.style.display = 'none';
+  closePanel(false);
+  if (n === 1) { t1.style.display = ''; renderGrid(currentFilter); }
+  else if (n === 2) { t2.style.display = 'block'; renderGrid2(currentFilter2); }
+  else { t3.style.display = 'block'; renderGrid3(currentFilter3); }
 }
 window.switchSeason = switchSeason;
 
@@ -855,6 +898,29 @@ function filterPos2(pos, btn) {
   renderGrid2(pos);
 }
 window.filterPos2 = filterPos2;
+
+/* ─── T3 GRID ─── */
+let currentFilter3 = 'all';
+
+function renderGrid3(filter) {
+  currentFilter3 = filter;
+  const grid = document.getElementById('squadGrid3');
+  grid.innerHTML = '';
+  const visible = ROSTER_T3.filter(p => filter === 'all' || p.pos === filter);
+  visible.forEach(p => grid.appendChild(buildCard(p, false, true)));
+  gsap.from(grid.querySelectorAll('.player-card'), {
+    opacity: 0, y: 28, duration: 0.45, stagger: 0.045, ease: 'power2.out'
+  });
+}
+
+function filterPos3(pos, btn) {
+  document.querySelectorAll('#pos-filter-t3 .pfbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const wasOpen = document.getElementById('player-panel').style.display === 'flex';
+  if (wasOpen) closePanel(false);
+  renderGrid3(pos);
+}
+window.filterPos3 = filterPos3;
 
 /* ─── OPEN PANEL ─── */
 function openPanel(p, card) {
@@ -892,7 +958,9 @@ function openPanel(p, card) {
 
   /* KPIs */
   const isT2 = card.classList.contains('v2');
-  const st = (isT2 ? t2Stats : allStats)[p.key] || {pj:0, g:0, a:0, avgRating:0, maxRating:0};
+  const isT3 = card.classList.contains('v3');
+  const statMap = isT3 ? t3Stats : (isT2 ? t2Stats : allStats);
+  const st = statMap[p.key] || {pj:0, g:0, a:0, avgRating:0, maxRating:0};
   document.getElementById('pk-nvl').textContent   = p.nvl;
   document.getElementById('pk-pj').textContent    = st.pj || '—';
   document.getElementById('pk-total').textContent = p.total;
@@ -922,7 +990,8 @@ function openPanel(p, card) {
   document.getElementById('pk-arq').textContent   = p.arq;
 
   /* medals */
-  const medals = (isT2 ? t2Rankings : allRankings)[p.key] || [];
+  const rankMap = isT3 ? t3Rankings : (isT2 ? t2Rankings : allRankings);
+  const medals = rankMap[p.key] || [];
   const mc = ['m1','m2','m3'];
   const medalsEl = document.getElementById('pp-medals');
   medalsEl.innerHTML = medals.length
@@ -1005,7 +1074,7 @@ gsap.to('.season-bar', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0
 gsap.to('.pos-filter', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0.34});
 
 /* ─── INIT ─── */
-renderGrid2('all');
+renderGrid3('all');
 
 // Deep link: plantilla.html?player=KEY
 (function(){
