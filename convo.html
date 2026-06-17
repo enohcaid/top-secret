@@ -707,6 +707,8 @@ function brazosPath(p)  { return `Renders/${p.folder || p.name}/Brazos.png`; }
 function frontePath(p)  { return `Renders/${p.folder || p.name}/Frente.png`; }
 function brazos2Path(p) { return `Renders/${p.folder || p.name}/Brazos2.png`; }
 function frente2Path(p) { return `Renders/${p.folder || p.name}/Frente2.png`; }
+function brazos3Path(p) { return `Renders/${p.folder || p.name}/Brazos3.png`; }
+function frente3Path(p) { return `Renders/${p.folder || p.name}/Frente3.png`; }
 function svgPath(p)     { return `Renders/${p.name}.svg`; }
 
 function tryImages(paths, idx, onSuccess, onFail) {
@@ -723,7 +725,7 @@ function buildAvatar(p, container) {
     container.innerHTML = `<div class="guest-sil"><svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:68%;height:68%;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#2a2a2a"/><path d="M4 56C4 38 36 38 36 56Z" fill="#2a2a2a"/></svg></div>`;
     return;
   }
-  tryImages([brazos2Path(p), brazosPath(p)], 0,
+  tryImages([brazos3Path(p), brazos2Path(p), brazosPath(p)], 0,
     (src) => {
       container.innerHTML = '';
       const el = document.createElement('img');
@@ -962,7 +964,7 @@ function renderPitch() {
       }
 
       // Try Frente2 → Frente → Brazos2 → Brazos → SVG
-      if (!player.isGuest) tryImages([frente2Path(player), frontePath(player), brazos2Path(player), brazosPath(player)], 0,
+      if (!player.isGuest) tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => setPhoto(src),
         () => {
           tok.innerHTML = '';
@@ -1465,7 +1467,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
         resolve();
       }
       const i1 = new Image();
-      tryImages([frente2Path(player), frontePath(player), brazos2Path(player), brazosPath(player)], 0,
+      tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => { const im = new Image(); im.onload = () => drawPhoto(im); im.src = src; },
         () => drawPhoto(null)
       );
