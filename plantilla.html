@@ -789,14 +789,21 @@ function buildCard(p, useV2 = false, useV3 = false) {
 
   const bSrc  = useV3 ? brazos3Path(p) : (useV2 ? brazos2Path(p) : brazosPath(p));
   const bFall = useV3 ? brazos2Path(p) : brazosPath(p);
+  const bFall2 = useV3 ? brazosPath(p) : null;
   const fSrc  = useV3 ? frente3Path(p) : (useV2 ? frente2Path(p) : frontePath(p));
   const fFall = useV3 ? frente2Path(p) : frontePath(p);
+  const fFall2 = useV3 ? frontePath(p) : null;
+
+  const bErr = bFall2
+    ? `if(!this._f){this._f=1;this.src='${bFall}';}else if(!this._f2){this._f2=1;this.src='${bFall2}';}else{this.style.display='none';this.parentElement.querySelector('.card-placeholder').style.display='flex';}`
+    : `if(!this._f){this._f=1;this.src='${bFall}';}else{this.style.display='none';this.parentElement.querySelector('.card-placeholder').style.display='flex';}`;
+  const fErr = fFall2
+    ? `if(!this._f){this._f=1;this.src='${fFall}';}else if(!this._f2){this._f2=1;this.src='${fFall2}';}else{this.dataset.missing='1';this.style.display='none';}`
+    : `if(!this._f){this._f=1;this.src='${fFall}';}else{this.dataset.missing='1';this.style.display='none';}`;
 
   const imgHtml = `<div class="card-img-wrap">
-    <img class="img-brazos" src="${bSrc}" alt="${p.key}"
-      onerror="if(!this._f){this._f=1;this.src='${bFall}';}else{this.style.display='none';this.parentElement.querySelector('.card-placeholder').style.display='flex';}">
-    <img class="img-frente" src="${fSrc}" alt="${p.key} frente"
-      onerror="if(!this._f){this._f=1;this.src='${fFall}';}else{this.dataset.missing='1';this.style.display='none';}">
+    <img class="img-brazos" src="${bSrc}" alt="${p.key}" onerror="${bErr}">
+    <img class="img-frente" src="${fSrc}" alt="${p.key} frente" onerror="${fErr}">
     ${ph}
   </div>`;
 
