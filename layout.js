@@ -7,7 +7,11 @@
   // ── Theme — apply immediately to avoid flash ──────────────────────────────
   const THEME_KEY = 'ts_theme';
   const htmlEl = document.documentElement;
-  if (localStorage.getItem(THEME_KEY) === 'light') htmlEl.classList.add('light-mode');
+
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored === 'light') htmlEl.classList.add('light-mode');
+  else if (stored === 'dark') { /* dark: no class, original look */ }
+  else htmlEl.classList.add('t3-mode'); // null o 't3' → T3 es el nuevo default
 
   const PAGES = [
     { url: 'index.html',        label: 'Inicio', svg: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>' },
@@ -57,7 +61,7 @@
 
     /* ── Left sidebar ── */
     .sidebar-left{position:fixed;top:64px;left:0;z-index:100;width:64px;height:calc(100vh - 64px);background:#111111;border-right:1px solid rgba(176,184,196,.15);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:4px;}
-    .sl-link{width:44px;height:44px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:rgba(255,255,255,.35);transition:background .15s,color .15s;}
+    .sl-link{width:44px;height:44px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:rgba(255,255,255,.35);transition:background-color .15s,color .15s;}
     .sl-link svg{width:18px;height:18px;}
     .sl-link span{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
     .sl-link:hover{background:rgba(176,184,196,.1);color:rgba(255,255,255,.75);}
@@ -71,10 +75,65 @@
     @media(max-width:860px){.tb-center{display:none;}}
 
     /* ────────────────────────────────────────────────────────────────────────
-       LIGHT MODE OVERRIDES — applied when <html class="light-mode">
+       T3 MODE — nuevo default: gris oscuro + azul
     ──────────────────────────────────────────────────────────────────────── */
+    html.t3-mode {
+      --gold:     #4a9eff;
+      --gold2:    #7ab8ff;
+      --gold-dim: rgba(74,158,255,.12);
+      --black:    #0d1117;
+      --gray:     #161b22;
+      --card:     #161b22;
+      --bg:       #0d1117;
+      --border:   rgba(74,158,255,.15);
+      --text:     #e0e8f4;
+      --text2:    rgba(224,232,244,.55);
+      --mid:      rgba(224,232,244,.4);
+      --mid2:     rgba(224,232,244,.28);
+    }
+    html.t3-mode body { background: #0d1117; color: #e0e8f4; }
+    html.t3-mode .topbar { background: #0d1117; border-bottom-color: #4a9eff; }
+    html.t3-mode .tb-brand-name { color: #e0e8f4; }
+    html.t3-mode .tb-sep { background: rgba(74,158,255,.2); }
+    html.t3-mode .tb-counter { background: rgba(74,158,255,.08); border-color: rgba(74,158,255,.22); color: #4a9eff; }
+    html.t3-mode .tb-theme-btn { border-color: rgba(74,158,255,.25); color: rgba(224,232,244,.5); }
+    html.t3-mode .tb-theme-btn:hover { color: #4a9eff; border-color: rgba(74,158,255,.5); background: rgba(74,158,255,.08); }
+    html.t3-mode .sidebar-left { background: #0d1117; border-right-color: rgba(74,158,255,.12); }
+    html.t3-mode .sl-link { color: rgba(224,232,244,.3); }
+    html.t3-mode .sl-link:hover { background: rgba(74,158,255,.08); color: rgba(224,232,244,.8); }
+    html.t3-mode .sl-link.active { background: rgba(74,158,255,.12); color: #4a9eff; }
+    html.t3-mode .sidebar-right { background: #0d1117; border-left-color: rgba(74,158,255,.1); }
+    html.t3-mode .sr-icon { color: rgba(224,232,244,.35); }
+    html.t3-mode .sr-icon:hover { color: rgba(224,232,244,.85); }
 
-    /* CSS variable overrides */
+    /* Calendario */
+    html.t3-mode .week-strip-wrap { background: rgba(13,17,23,.97) !important; }
+    html.t3-mode .month-title-row:hover { background: rgba(74,158,255,.04) !important; }
+    html.t3-mode .result-box.win  { border-color: rgba(34,197,94,.35)  !important; background: rgba(34,197,94,.04)  !important; }
+    html.t3-mode .result-box.loss { border-color: rgba(239,68,68,.35)  !important; background: rgba(239,68,68,.04)  !important; }
+    html.t3-mode .result-box.draw { border-color: rgba(245,197,24,.35) !important; background: rgba(245,197,24,.04) !important; }
+
+    /* Stats panel */
+    html.t3-mode .sp-panel { background: #161b22 !important; }
+    html.t3-mode .sp-score-box, html.t3-mode .sp-ts { background: #0d1117 !important; }
+
+    /* Convocatoria / Convo */
+    html.t3-mode .pname { color: #e0e8f4 !important; }
+    html.t3-mode .pitch-hint { color: rgba(224,232,244,.35) !important; }
+    html.t3-mode .stoken.empty { background: rgba(74,158,255,.04) !important; border-color: rgba(74,158,255,.2) !important; color: rgba(224,232,244,.3) !important; }
+    html.t3-mode .always-badge { color: #4a9eff !important; }
+    html.t3-mode .sdot.sg { background: #22c55e !important; }
+    html.t3-mode .sdot.sy { background: #f5c518 !important; }
+    html.t3-mode .sdot.sr { background: #ef4444 !important; }
+    html.t3-mode .sdot.sa { background: #4a9eff !important; }
+
+    /* Mobile nav */
+    html.t3-mode #ts-mobile-nav { background: #0d1117 !important; border-top-color: rgba(74,158,255,.25) !important; }
+    html.t3-mode #ts-mobile-nav a.ts-mbn-active { color: #4a9eff !important; }
+
+    /* ────────────────────────────────────────────────────────────────────────
+       LIGHT MODE — applied when <html class="light-mode">
+    ──────────────────────────────────────────────────────────────────────── */
     html.light-mode {
       --gold:   #C9A84C;
       --gold2:  #E8C97A;
@@ -102,11 +161,7 @@
       --yellow: #d4a017;
       --red:    #c0392b;
     }
-
-    /* Body */
     html.light-mode body { background: #FFFFFF; color: #111111; }
-
-    /* Layout */
     html.light-mode .topbar { background: #FFFFFF; border-bottom-color: #C9A84C; }
     html.light-mode .tb-brand-name { color: #111111; }
     html.light-mode .tb-sep { background: rgba(0,0,0,.12); }
@@ -119,19 +174,13 @@
     html.light-mode .sidebar-right { background: #FFFFFF; border-left-color: #E5E5E0; }
     html.light-mode .sr-icon { color: #888888; }
     html.light-mode .sr-icon:hover { color: #111111; }
-
-    /* Calendario: week strip, result boxes, hover states */
     html.light-mode .week-strip-wrap { background: rgba(255,255,255,.97) !important; }
     html.light-mode .month-title-row:hover { background: rgba(0,0,0,.03) !important; }
     html.light-mode .result-box.win  { border-color: rgba(42,157,92,.4)  !important; background: rgba(42,157,92,.04)  !important; }
     html.light-mode .result-box.loss { border-color: rgba(192,57,43,.4)  !important; background: rgba(192,57,43,.04)  !important; }
     html.light-mode .result-box.draw { border-color: rgba(212,160,23,.4) !important; background: rgba(212,160,23,.04) !important; }
-
-    /* Stats panel */
     html.light-mode .sp-panel { background: #FFFFFF !important; }
     html.light-mode .sp-score-box, html.light-mode .sp-ts { background: #F5F5F0 !important; }
-
-    /* Convocatoria / Convo: pitch, player names */
     html.light-mode .pname { color: #111111 !important; }
     html.light-mode .pitch-hint { color: rgba(0,0,0,.35) !important; }
     html.light-mode .stoken.empty { background: rgba(0,0,0,.06) !important; border-color: rgba(0,0,0,.18) !important; color: rgba(0,0,0,.3) !important; }
@@ -143,19 +192,54 @@
   `;
   document.head.appendChild(style);
 
-  // ── Topbar HTML ────────────────────────────────────────────────────────────
-  const MOON_SVG   = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-  const SUN_SVG    = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  // ── Icons ─────────────────────────────────────────────────────────────────
+  const MOON_SVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  const SUN_SVG  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  const T3_SVG   = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
+
   const LOGO_DARK  = 'logos/Top Secret white.png';
   const LOGO_LIGHT = 'Top-Secret.png';
 
-  const isLight = () => htmlEl.classList.contains('light-mode');
+  // ── Theme helpers ──────────────────────────────────────────────────────────
+  function getTheme() {
+    const s = localStorage.getItem(THEME_KEY);
+    if (s === 'light' || s === 'dark') return s;
+    return 't3';
+  }
 
+  function themeIcon(theme) {
+    if (theme === 'light') return SUN_SVG;
+    if (theme === 'dark')  return MOON_SVG;
+    return T3_SVG;
+  }
+
+  function themeLogo(theme) {
+    return theme === 'light' ? LOGO_LIGHT : LOGO_DARK;
+  }
+
+  function applyTheme(theme) {
+    htmlEl.classList.remove('light-mode', 't3-mode');
+    if (theme === 'light') htmlEl.classList.add('light-mode');
+    if (theme === 't3')    htmlEl.classList.add('t3-mode');
+    localStorage.setItem(THEME_KEY, theme);
+    const icon = document.getElementById('tb-theme-icon');
+    const logo = document.getElementById('tb-logo');
+    if (icon) icon.innerHTML = themeIcon(theme);
+    if (logo) logo.src = themeLogo(theme);
+  }
+
+  function cycleTheme() {
+    const next = { t3: 'dark', dark: 'light', light: 't3' }[getTheme()];
+    applyTheme(next);
+  }
+
+  // ── Topbar HTML ────────────────────────────────────────────────────────────
+  const currentTheme = getTheme();
   const topbar = document.createElement('header');
   topbar.className = 'topbar';
   topbar.innerHTML = `
     <a class="tb-brand" href="index.html">
-      <img id="tb-logo" src="${isLight() ? LOGO_LIGHT : LOGO_DARK}" alt="TSFC">
+      <img id="tb-logo" src="${themeLogo(currentTheme)}" alt="TSFC">
       <span class="tb-brand-name">TOP <span>SECRET</span> FC</span>
     </a>
     <div class="tb-logos">
@@ -165,7 +249,7 @@
     </div>
     <button class="tb-theme-btn" id="tb-theme-btn" title="Cambiar tema">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="tb-theme-icon">
-        ${isLight() ? SUN_SVG : MOON_SVG}
+        ${themeIcon(currentTheme)}
       </svg>
     </button>
     <div class="tb-counter" id="tb-counter" title="Visitas al sitio">
@@ -200,19 +284,8 @@
     document.body.insertBefore(sbLeft,  document.body.firstChild);
     document.body.insertBefore(topbar,  document.body.firstChild);
 
-    // Theme button listener
     const btn = document.getElementById('tb-theme-btn');
-    const icon = document.getElementById('tb-theme-icon');
-    const logo = document.getElementById('tb-logo');
-    if (btn && icon) {
-      btn.addEventListener('click', function () {
-        const light = !htmlEl.classList.contains('light-mode');
-        htmlEl.classList.toggle('light-mode', light);
-        icon.innerHTML = light ? SUN_SVG : MOON_SVG;
-        if (logo) logo.src = light ? LOGO_LIGHT : LOGO_DARK;
-        localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
-      });
-    }
+    if (btn) btn.addEventListener('click', cycleTheme);
   }
 
   if (document.body) inject();
