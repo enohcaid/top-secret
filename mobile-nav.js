@@ -43,8 +43,8 @@
         bottom: 0; left: 0; right: 0;
         z-index: 500;
         height: 60px;
-        background: #111111;
-        border-top: 2px solid rgba(201,168,76,.25);
+        background: var(--black, #111111);
+        border-top: 2px solid var(--gold-dim, rgba(201,168,76,.25));
         display: flex;
         align-items: stretch;
         justify-content: space-around;
@@ -71,7 +71,7 @@
         width: 20px; height: 20px;
         flex-shrink: 0;
       }
-      #ts-mobile-nav a.ts-mbn-active { color: #C9A84C; }
+      #ts-mobile-nav a.ts-mbn-active { color: var(--gold, #C9A84C); }
       #ts-mobile-nav a:hover { color: rgba(255,255,255,.7); }
     }
 
