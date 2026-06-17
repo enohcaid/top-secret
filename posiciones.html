@@ -266,9 +266,13 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <span class="sb-label">T1 2026</span>
       <span class="sb-sub">Finalizada</span>
     </button>
-    <button class="season-btn active" id="sbtn-t2" onclick="switchSeason('t2',this)">
+    <button class="season-btn" id="sbtn-t2" onclick="switchSeason('t2',this)">
       <span class="sb-label">T2 2026</span>
-      <span class="sb-sub">En curso</span>
+      <span class="sb-sub">Finalizada</span>
+    </button>
+    <button class="season-btn active" id="sbtn-t3" onclick="switchSeason('t3',this)">
+      <span class="sb-label">T3 2026</span>
+      <span class="sb-sub">Próximamente</span>
     </button>
   </div>
 
@@ -307,7 +311,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
   </div>
 
   <!-- ════════════ TEMPORADA 2 ════════════ -->
-  <div id="s-t2">
+  <div id="s-t2" style="display:none">
     <div class="tabs">
       <button class="tab active" data-league="vpn"  onclick="switchTab('vpn','t2',this)">VPN</button>
       <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t2',this)">VPUG</button>
@@ -336,6 +340,15 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <div class="zone-legend" style="margin-top:16px">
         <div class="zl-item"><span class="zone-dot" style="background:var(--e11)"></span>Clasificado a Playoff</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ════════════ TEMPORADA 3 ════════════ -->
+  <div id="s-t3">
+    <div style="text-align:center;padding:56px 16px;color:var(--muted);">
+      <div style="font-size:2.2rem;font-weight:800;color:var(--gold);letter-spacing:.06em;">T3 · 2026</div>
+      <div style="margin-top:8px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
+      <div style="margin-top:10px;font-size:.8rem;">La Temporada 3 comenzará en julio 2026</div>
     </div>
   </div>
 </div>
@@ -554,6 +567,7 @@ function switchSeason(season, btn) {
   btn.classList.add('active');
   document.getElementById('s-t1').style.display = season === 't1' ? '' : 'none';
   document.getElementById('s-t2').style.display = season === 't2' ? '' : 'none';
+  document.getElementById('s-t3').style.display = season === 't3' ? '' : 'none';
 }
 
 /* ── TAB SWITCH (per season) ── */

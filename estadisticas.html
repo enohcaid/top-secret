@@ -503,11 +503,18 @@ footer span{color:#C9A84C;}
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
     <span style="font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-right:4px;">Temporada</span>
     <button id="spill1" onclick="switchStatsSeason(1)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T1 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
-    <button id="spill2" onclick="switchStatsSeason(2)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--gold);color:#000;">EN CURSO</span></button>
+    <button id="spill2" onclick="switchStatsSeason(2)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
+    <button id="spill3" onclick="switchStatsSeason(3)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--gold);color:#000;">PRÓXIMAMENTE</span></button>
   </div>
-  <!-- statsSoon placeholder (unused) -->
-  <div id="statsSoon" style="display:none;"></div>
-  <div id="statsContent">
+  <!-- statsSoon: shown when T3 is active (no data yet) -->
+  <div id="statsSoon" style="display:block;">
+    <div style="text-align:center;padding:56px 16px;color:var(--muted);">
+      <div style="font-size:2.2rem;font-weight:800;color:var(--gold);letter-spacing:.06em;">T3 · 2026</div>
+      <div style="margin-top:8px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
+      <div style="margin-top:10px;font-size:.8rem;">La Temporada 3 comenzará en julio 2026</div>
+    </div>
+  </div>
+  <div id="statsContent" style="display:none;">
   <div class="tabs">
     <button class="tab active" onclick="switchTab('season',this)">Temporada</button>
     <button class="tab" onclick="switchTab('players',this)">Por Jugador</button>
@@ -774,12 +781,14 @@ function loadMatches(){
 // ════════════════════════════════════════════
 // SEASON FILTER
 // ════════════════════════════════════════════
-let currentSeason = 2;
+let currentSeason = 3;
 const T2_CUTOFF = '2026-04-30';
+const T3_CUTOFF = '2026-06-30';
 function seasonMatches() {
   const all = loadMatches();
   if (currentSeason === 1) return all.filter(m => !m.date || m.date <= T2_CUTOFF);
-  return all.filter(m => m.date && m.date > T2_CUTOFF);
+  if (currentSeason === 2) return all.filter(m => m.date && m.date > T2_CUTOFF && m.date <= T3_CUTOFF);
+  return all.filter(m => m.date && m.date > T3_CUTOFF);
 }
 
 // ════════════════════════════════════════════
@@ -2734,14 +2743,14 @@ window.switchTab = function(id, btn) {
 
 function switchStatsSeason(n){
   currentSeason = n;
-  const s1=document.getElementById('spill1'),s2=document.getElementById('spill2');
-  if(n===1){
-    s1.style.border='1px solid var(--gold)';s1.style.background='var(--gold-dim)';s1.style.color='var(--gold)';
-    s2.style.border='1px solid var(--border2)';s2.style.background='transparent';s2.style.color='var(--muted)';
-  } else {
-    s2.style.border='1px solid var(--gold)';s2.style.background='var(--gold-dim)';s2.style.color='var(--gold)';
-    s1.style.border='1px solid var(--border2)';s1.style.background='transparent';s1.style.color='var(--muted)';
-  }
+  const s1=document.getElementById('spill1'),s2=document.getElementById('spill2'),s3=document.getElementById('spill3');
+  const inactive='1px solid var(--border2)';
+  [s1,s2,s3].forEach(s=>{ s.style.border=inactive; s.style.background='transparent'; s.style.color='var(--muted)'; });
+  const active=[s1,s2,s3][n-1];
+  active.style.border='1px solid var(--gold)'; active.style.background='var(--gold-dim)'; active.style.color='var(--gold)';
+  const soon=document.getElementById('statsSoon'), content=document.getElementById('statsContent');
+  if(n===3){ soon.style.display='block'; content.style.display='none'; return; }
+  soon.style.display='none'; content.style.display='';
   renderSeason();
   const activeTab=document.querySelector('.tab.active');
   if(activeTab) activeTab.click();

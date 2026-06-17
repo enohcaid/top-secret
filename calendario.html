@@ -375,6 +375,7 @@ footer span{color:var(--gold);}
 .season-section-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;}
 .season-section-sub{font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;opacity:.7;}
 .season-section-line{flex:1;height:1px;background:var(--border);}
+.season-section.t3 .season-section-label{color:#4a9eff;}
 .season-section.t2 .season-section-label{color:var(--gold);}
 .season-section.t1 .season-section-label{color:var(--mid);}
 .season-section .year-grid{margin-top:0;padding-top:0;}
@@ -785,7 +786,8 @@ body{padding-top:64px;}
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <div class="season-btns">
-      <button class="sbtn active" id="sbtn-t2" onclick="setGridSeason('t2',this)">T2</button>
+      <button class="sbtn active" id="sbtn-t3" onclick="setGridSeason('t3',this)">T3</button>
+      <button class="sbtn" id="sbtn-t2" onclick="setGridSeason('t2',this)">T2</button>
       <button class="sbtn" id="sbtn-t1" onclick="setGridSeason('t1',this)">T1</button>
       <button class="sbtn" id="sbtn-all" onclick="setGridSeason('all',this)">Todo</button>
     </div>
@@ -1169,7 +1171,7 @@ let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}'); // id 
 let custom     = JSON.parse(localStorage.getItem('ts_custom')    ||'[]'); // custom matches added via UI
 let currentFilter = 'all';
 let currentSeason = 'all';    // 'all' | 't1' | 't2'
-let currentGridSeason = 't2'; // section filter for the year grid
+let currentGridSeason = 't3'; // section filter for the year grid
 let isAdminMode   = false;
 let editingId = null;
 let editHomeVal = true;
@@ -1177,8 +1179,9 @@ let editHomeVal = true;
 let addType = 'partido';
 let addHomeVal = true;
 
-// T1/T2 season boundary: matches on or before this date are T1
+// T1/T2/T3 season boundaries
 const T1_CUTOFF  = '2026-04-30';
+const T3_CUTOFF  = '2026-06-30';
 // Admin PIN (change here to customize)
 const ADMIN_PIN  = '8189';
 
@@ -1445,7 +1448,9 @@ function scoreDisplay(id){
 
 // ── SEASON / VISIBILITY ───────────────────────────────────────────────────────
 function matchSeason(dateStr){
-  return dateStr <= T1_CUTOFF ? 't1' : 't2';
+  if (dateStr <= T1_CUTOFF) return 't1';
+  if (dateStr <= T3_CUTOFF) return 't2';
+  return 't3';
 }
 function shouldHide(dateStr, league){
   const seasonHide = currentSeason !== 'all' && matchSeason(dateStr) !== currentSeason;
@@ -1781,6 +1786,7 @@ function renderTodayCard() {
 
 /* ── SEASON DEFINITIONS ──────────────────────────────────────────────────── */
 const SEASON_RANGES = [
+  { id:'t3', label:'T3 · Temporada 3', color:'#4a9eff', bg:'rgba(74,158,255,.09)', months:['2026-07','2026-08'] },
   { id:'t2', label:'T2 · Temporada 2', color:'#C9A84C', bg:'rgba(201,168,76,.09)', months:['2026-05','2026-06'] },
   { id:'t1', label:'T1 · Temporada 1', color:'#888888', bg:'rgba(136,136,136,.06)', months:['2026-03','2026-04'] },
 ];
@@ -1921,20 +1927,22 @@ function renderYearGrid() {
     return false;
   }
 
-  // Dynamically extend sections to include any month present in mbd but not hardcoded,
-  // so index-shift-induced stale Firestore dates never silently hide a match.
+  // Dynamically extend sections to include any month present in mbd but not hardcoded.
+  const t3Base = new Set(['2026-07','2026-08']);
   const t2Base = new Set(['2026-05','2026-06']);
   const t1Base = new Set(['2026-03','2026-04']);
   Object.keys(mbd).forEach(d => {
     const mk = d.slice(0,7);
-    if (!t2Base.has(mk) && !t1Base.has(mk)) {
-      if (mk >= '2026-05') t2Base.add(mk);
+    if (!t3Base.has(mk) && !t2Base.has(mk) && !t1Base.has(mk)) {
+      if (mk > T3_CUTOFF.slice(0,7)) t3Base.add(mk);
+      else if (mk >= '2026-05') t2Base.add(mk);
       else t1Base.add(mk);
     }
   });
   const sections = [
-    { id:'t2', label:'Temporada 2', sub:'En curso', months:[...t2Base].sort(), forceShow:true },
-    { id:'t1', label:'Temporada 1', sub:'Finalizada', months:[...t1Base].sort(), forceShow:false },
+    { id:'t3', label:'Temporada 3', sub:'Próximamente', months:[...t3Base].sort(), forceShow:true },
+    { id:'t2', label:'Temporada 2', sub:'Finalizada',   months:[...t2Base].sort(), forceShow:false },
+    { id:'t1', label:'Temporada 1', sub:'Finalizada',   months:[...t1Base].sort(), forceShow:false },
   ];
 
   sections.forEach(sec => {
