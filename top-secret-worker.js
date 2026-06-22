@@ -447,7 +447,7 @@ export default {
         const TS_KEY = '-OvQetM8ROfp55aARizV';
 
         // Fixed schedule: Tue & Thu, 2 rounds/day at 22:30 and 23:00
-        // Starting Thu Jun 18, 2026
+        // Exception: R21 moved to Tue Jul 21 at 23:30 — triple date to close the tournament
         const SCHEDULE = [
           null,                        // index 0 unused
           {date:'2026-06-18',time:'22:30'}, // R1
@@ -470,7 +470,7 @@ export default {
           {date:'2026-07-16',time:'23:00'}, // R18
           {date:'2026-07-21',time:'22:30'}, // R19
           {date:'2026-07-21',time:'23:00'}, // R20
-          {date:'2026-07-23',time:'22:30'}, // R21
+          {date:'2026-07-21',time:'23:30'}, // R21 — triple fecha de cierre
         ];
 
         try {
