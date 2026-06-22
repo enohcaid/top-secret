@@ -473,6 +473,12 @@ export default {
           {date:'2026-07-21',time:'23:30'}, // R21 — triple fecha de cierre
         ];
 
+        // Logo fallback for teams not registered in CopáFácil but known from VPG
+        const VPG_CDN = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
+        const LOGO_FALLBACK = {
+          'Comunicaciones': VPG_CDN + 'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public',
+        };
+
         try {
           const [teamsResp, matchsResp, playersResp] = await Promise.all([
             fetch(`${BASE}/events/${EVT}/teams.json`,         { cf: { cacheTtl: 300, cacheEverything: true } }),
@@ -498,7 +504,8 @@ export default {
             const latest = dtKeys.length ? t.dt[dtKeys[dtKeys.length - 1]] : null;
             const stats  = (latest && latest.dt) ? parseStats(latest.dt) : {};
             const colg   = latest ? (latest.colg ?? latest.col ?? 99) : 99;
-            teams[id] = { id, name: (t.name || '').trim(), logo: t.url || null, group: t.g, colg, us: id === TS_KEY, ...stats };
+            const tName = (t.name || '').trim();
+            teams[id] = { id, name: tName, logo: t.url || LOGO_FALLBACK[tName] || null, group: t.g, colg, us: id === TS_KEY, ...stats };
           }
 
           const groupA = Object.values(teams).filter(t => t.group === 'A').sort((a,b) => a.colg - b.colg);
