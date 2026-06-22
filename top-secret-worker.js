@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'invierno-2026-j1j2': {
+    t: 'Campeonato de Invierno: Top Secret arranca con dos victorias — 2-1 y 3-2',
+    i: SITE + 'logos/Campeonato%20Invierno.png',
+  },
   'cierre-vpug-t2': {
     t: 'Cierre VPUG T2: 17 partidos, 30 goles y BlackPanther como máximo artillero con 10',
     i: SITE + 'logos/Cierre%20VPUG%20T2.png',
@@ -466,11 +470,12 @@ export default {
         ];
 
         try {
-          const [teamsResp, matchsResp] = await Promise.all([
+          const [teamsResp, matchsResp, playersResp] = await Promise.all([
             fetch(`${BASE}/events/${EVT}/teams.json`,         { cf: { cacheTtl: 300, cacheEverything: true } }),
             fetch(`${BASE}/events/${PARENT}/matchs.json`,     { cf: { cacheTtl: 300, cacheEverything: true } }),
+            fetch(`${BASE}/events/${EVT}/player.json`,        { cf: { cacheTtl: 300, cacheEverything: true } }),
           ]);
-          const [teamsRaw, matchsRaw] = await Promise.all([teamsResp.json(), matchsResp.json()]);
+          const [teamsRaw, matchsRaw, playersRaw] = await Promise.all([teamsResp.json(), matchsResp.json(), playersResp.json()]);
 
           // Parse "0=pts#1=gp#2=w#3=d#4=l#5=gf#6=gc#7=gd#..." stats string
           function parseStats(dtStr) {
@@ -529,11 +534,24 @@ export default {
 
           tsMatches.sort((a, b) => a.round - b.round);
 
+          // Build Top Secret player stats with snapshot history for differential approach
+          const tsPlayers = Object.values(playersRaw || {})
+            .filter(p => p.team === TS_KEY)
+            .map(p => {
+              const snapshots = {};
+              for (const [k, snap] of Object.entries(p.fs || {})) {
+                snapshots[k] = { goals: snap.ART || 0, assists: snap.ASS || 0 };
+              }
+              return { name: p.name, goals: p.ART || 0, assists: p.ASS || 0, snapshots };
+            })
+            .sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists) || b.goals - a.goals);
+
           return new Response(JSON.stringify({
             tournament: 'Campeonato de Invierno VPUG',
             ts_team: teams[TS_KEY] || null,
             standings: { A: groupA, B: groupB },
             matches: tsMatches,
+            players: tsPlayers,
           }), { status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' } });
 
         } catch(e) {

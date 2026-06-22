@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'invierno-2026-j1j2',
+    pinned: false,
+    category: 'Resultado',
+    title: 'Campeonato de Invierno: puntaje ideal en el debut — 2-1 y 3-2 en la primera jornada VPUG',
+    date: '2026-06-18',
+    dateLabel: '18 de junio de 2026',
+    excerpt: 'Primera jornada del Campeonato de Invierno VPUG. Dos partidos, dos victorias: 2-1 ante Black Mamba AC y 3-2 ante Vikings Team. Cabers14 y Huber236 lideran con gol y asistencia cada uno. Cinco goleadores distintos en el estreno.',
+    image: 'logos/Campeonato Invierno.png',
+    body: [
+      'Top Secret FC abrió su participación en el <strong>Campeonato de Invierno VPUG</strong> con un debut impecable. La jornada del 18 de junio dejó dos victorias: <strong>2-1 ante Black Mamba AC</strong> en el primer turno y <strong>3-2 ante Vikings Team</strong> en el cierre de la noche. Seis puntos de seis posibles y cinco goleadores distintos en dos partidos.',
+      'La distribución del gol es la lectura más importante de esta apertura. No hubo un referente individual que cargara el peso ofensivo: <strong>Agubostero7, Cabers14, Lautavester7, pibu y Huber236</strong> anotaron un gol cada uno. Ciprimancini y BlackPanther sumaron una asistencia cada uno. Un equipo con producción distribuida a lo largo del plantel es más difícil de neutralizar, y estas dos fechas lo confirman desde el primer partido.',
+      '<strong>Cabers14 y Huber236 — los más completos de la jornada.</strong> De los siete jugadores de Top Secret con participación directa en la creación de goles, dos sobresalieron por su doble contribución: gol y asistencia en el mismo encuentro. Cabers14 repite el patrón que ya había mostrado en la recta final de la VPUG Temporada 2, donde promedió 7.63 en 14 partidos y cerró con 9.1 ante 4BDOMIFL4NES. Huber236, más presente en los bancos durante la temporada anterior, respondió con eficiencia desde el inicio: presencia en el marcador y en la generación.',
+      'El <strong>Campeonato de Invierno VPUG</strong> se disputa martes y jueves, con dos fechas por jornada a las 22:30 y 23:00. El torneo se extiende hasta el 23 de julio, con 21 rondas en total. Top Secret juega en el <strong>Grupo B</strong> y arranca primero en la tabla de posiciones. La próxima jornada es el <strong>martes 23 de junio</strong> — fechas 3 y 4. 🖤⭐',
+    ],
+    shareCaption: '🖤 CAMPEONATO DE INVIERNO · FECHA 1-2 · TOP SECRET FC\n\nDos victorias · 2-1 vs Black Mamba AC · 3-2 vs Vikings Team\n\nCabers14 y Huber236: 1G+1A · Lautavester7, pibu, Agubostero7: 1G · ciprimancini y BlackPanther: 1A\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 INVIERNO 2026 · PRIMERA JORNADA\n\n2-1 vs Black Mamba AC · 3-2 vs Vikings Team\n\n5 goleadores distintos. Cabers14 y Huber236 lideran con 1G+1A cada uno.\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+      x:  '🖤 Top Secret FC abre el Campeonato de Invierno VPUG con puntaje ideal.\n\n2-1 vs Black Mamba AC · 3-2 vs Vikings Team\n\n5 goleadores distintos. Grupo B líderes.\n\n#TopSecretFC #VPUG',
+      fb: '🖤 CAMPEONATO DE INVIERNO VPUG · FECHA 1 Y 2\n\nTop Secret FC debuta con dos victorias:\n\n⚽ 2-1 vs Black Mamba AC\n⚽ 3-2 vs Vikings Team\n\nGoleadores: Cabers14 (1G+1A), Huber236 (1G+1A), Lautavester7 (1G), pibu (1G), Agubostero7 (1G)\nAsistentes: ciprimancini (1A), BlackPanther (1A)\n\nPróxima fecha: martes 23 de junio.\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    },
+  },
+  {
     id: 'cierre-vpug-t2',
     pinned: false,
     category: 'Análisis',
