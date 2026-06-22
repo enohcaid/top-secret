@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'kits-t3-2026': {
+    t: 'Top Secret FC presenta sus kits T3 con Nike — el azul debuta',
+    i: SITE + 'logos/T3%20Kits.png',
+  },
   'invierno-2026-j1j2': {
     t: 'Campeonato de Invierno: Top Secret arranca con dos victorias — 2-1 y 3-2',
     i: SITE + 'logos/Campeonato%20Invierno.png',
