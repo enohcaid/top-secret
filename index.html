@@ -638,8 +638,8 @@ const autoNews = generateMatchNews(SEED_MATCHES);
 const manualNews = typeof NOTICIAS !== 'undefined' ? NOTICIAS : [];
 const allNews = [...autoNews, ...manualNews].sort((a, b) => b.date.localeCompare(a.date));
 const stripNews = allNews.filter(n => !n.noStrip);
-const latestNews = stripNews[0];
 const pinnedNews = stripNews.find(n => n.pinned);
+const latestNews = stripNews.find(n => n !== pinnedNews);
 
 function renderNewsCol(el, news) {
   if (!el || !news) return;
