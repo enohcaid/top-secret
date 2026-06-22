@@ -431,6 +431,116 @@ export default {
         return jsonResp(teams);
       }
 
+      // ── COPAFACIL PRETEMPORADA (/copafacil-pretemporada) ──────────────
+      if (url.pathname === '/copafacil-pretemporada' && request.method === 'GET') {
+        const BASE   = 'https://copafacil-web.firebaseio.com';
+        const EVT    = '-fthh5@llo8';
+        const PARENT = '-fthh5';
+        const TS_KEY = '-OvQetM8ROfp55aARizV';
+
+        // Fixed schedule: Tue & Thu, 2 rounds/day at 22:30 and 23:00
+        // Starting Thu Jun 18, 2026
+        const SCHEDULE = [
+          null,                        // index 0 unused
+          {date:'2026-06-18',time:'22:30'}, // R1
+          {date:'2026-06-18',time:'23:00'}, // R2
+          {date:'2026-06-23',time:'22:30'}, // R3
+          {date:'2026-06-23',time:'23:00'}, // R4
+          {date:'2026-06-25',time:'22:30'}, // R5
+          {date:'2026-06-25',time:'23:00'}, // R6
+          {date:'2026-06-30',time:'22:30'}, // R7
+          {date:'2026-06-30',time:'23:00'}, // R8
+          {date:'2026-07-02',time:'22:30'}, // R9
+          {date:'2026-07-02',time:'23:00'}, // R10
+          {date:'2026-07-07',time:'22:30'}, // R11
+          {date:'2026-07-07',time:'23:00'}, // R12
+          {date:'2026-07-09',time:'22:30'}, // R13
+          {date:'2026-07-09',time:'23:00'}, // R14
+          {date:'2026-07-14',time:'22:30'}, // R15
+          {date:'2026-07-14',time:'23:00'}, // R16
+          {date:'2026-07-16',time:'22:30'}, // R17
+          {date:'2026-07-16',time:'23:00'}, // R18
+          {date:'2026-07-21',time:'22:30'}, // R19
+          {date:'2026-07-21',time:'23:00'}, // R20
+          {date:'2026-07-23',time:'22:30'}, // R21
+        ];
+
+        try {
+          const [teamsResp, matchsResp] = await Promise.all([
+            fetch(`${BASE}/events/${EVT}/teams.json`,         { cf: { cacheTtl: 300, cacheEverything: true } }),
+            fetch(`${BASE}/events/${PARENT}/matchs.json`,     { cf: { cacheTtl: 300, cacheEverything: true } }),
+          ]);
+          const [teamsRaw, matchsRaw] = await Promise.all([teamsResp.json(), matchsResp.json()]);
+
+          // Parse "0=pts#1=gp#2=w#3=d#4=l#5=gf#6=gc#7=gd#..." stats string
+          function parseStats(dtStr) {
+            const s = {};
+            (dtStr || '').split('#').forEach(p => {
+              const eq = p.indexOf('=');
+              if (eq > -1) s[+p.slice(0, eq)] = +p.slice(eq + 1);
+            });
+            return { pts: s[0]||0, gp: s[1]||0, w: s[2]||0, d: s[3]||0, l: s[4]||0, gf: s[5]||0, gc: s[6]||0, gd: s[7]||0 };
+          }
+
+          // Build team map
+          const teams = {};
+          for (const [id, t] of Object.entries(teamsRaw || {})) {
+            const dtKeys = Object.keys(t.dt || {}).sort();
+            const latest = dtKeys.length ? t.dt[dtKeys[dtKeys.length - 1]] : null;
+            const stats  = (latest && latest.dt) ? parseStats(latest.dt) : {};
+            const colg   = latest ? (latest.colg ?? latest.col ?? 99) : 99;
+            teams[id] = { id, name: (t.name || '').trim(), logo: t.url || null, group: t.g, colg, us: id === TS_KEY, ...stats };
+          }
+
+          const groupA = Object.values(teams).filter(t => t.group === 'A').sort((a,b) => a.colg - b.colg);
+          const groupB = Object.values(teams).filter(t => t.group === 'B').sort((a,b) => a.colg - b.colg);
+
+          // Build round number map and collect TS matches
+          const roundMap = {};
+          let roundCount = 0;
+          const tsMatches = [];
+
+          // Process matches in key-sorted order (timestamps = chronological)
+          for (const id of Object.keys(matchsRaw || {}).sort()) {
+            const m = matchsRaw[id];
+            if (!m || m.evt !== `${PARENT}@llo8`) continue;
+            if (!roundMap[m.m_set]) roundMap[m.m_set] = ++roundCount;
+            if (m.team1 !== TS_KEY && m.team2 !== TS_KEY) continue;
+
+            const isHome    = m.team1 === TS_KEY;
+            const rivalKey  = isHome ? m.team2 : m.team1;
+            const rival     = teams[rivalKey] || {};
+            const tsGoals   = isHome ? (m.dt?.qt_g1 ?? 0) : (m.dt?.qt_g2 ?? 0);
+            const rivGoals  = isHome ? (m.dt?.qt_g2 ?? 0) : (m.dt?.qt_g1 ?? 0);
+            const finished  = !!m.finished;
+            const round     = roundMap[m.m_set];
+            const sched     = SCHEDULE[round] || null;
+            const result    = !finished ? null : tsGoals > rivGoals ? 'win' : tsGoals < rivGoals ? 'loss' : 'draw';
+
+            tsMatches.push({
+              id, round,
+              date: sched?.date || null,
+              time: sched?.time || null,
+              rival: rival.name || '?',
+              rivalLogo: rival.logo || null,
+              isHome, tsGoals, rivGoals, finished, result,
+            });
+          }
+
+          tsMatches.sort((a, b) => a.round - b.round);
+
+          return new Response(JSON.stringify({
+            tournament: 'Campeonato de Invierno VPUG',
+            ts_team: teams[TS_KEY] || null,
+            standings: { A: groupA, B: groupB },
+            matches: tsMatches,
+          }), { status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' } });
+
+        } catch(e) {
+          return jsonResp({ error: e.message }, 502);
+        }
+      }
+
       // ── VISIT COUNTER (/counter) ─────────────────
       if (url.pathname === '/counter') {
         const key = 'site:visits';
