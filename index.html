@@ -341,7 +341,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     <div class="section-header">
       <h2 class="section-title">Temporada 3 · 2026</h2>
       <div class="section-line"></div>
-      <span class="section-badge" style="color:var(--gold);border-color:rgba(201,168,76,.35);">PRÓXIMAMENTE</span>
+      <span class="section-badge" id="t3-badge" style="color:var(--gold);border-color:rgba(201,168,76,.35);">PRÓXIMAMENTE</span>
     </div>
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card"><div class="stat-num" id="sq-pj">—</div><div class="stat-label">Partidos jugados</div><div class="stat-sub" id="sq-pj-sub">T3 · Próximamente</div></div>
@@ -511,8 +511,8 @@ function t2PhotoPath(key) {
   return fname ? `Renders/T2-Frentes/${fname}.png` : brazosPath(key);
 }
 
-/* ── COMPUTE AGGREGATE STATS (T2 only) ── */
-const T2_MATCHES = SEED_MATCHES.filter(m => m.date > T2_CUTOFF);
+/* ── COMPUTE AGGREGATE STATS (T3 — SEED matches + pretemporada via Worker) ── */
+const T3_MATCHES = SEED_MATCHES.filter(m => m.date > T3_CUTOFF);
 
 let totalGoals = 0, totalWins = 0, totalDraws = 0;
 const allRatings = [];
@@ -528,7 +528,7 @@ function matchOutcome(s) {
   return gf > gc ? 'win' : (gf === gc ? 'draw' : 'loss');
 }
 
-T2_MATCHES.forEach(m => {
+T3_MATCHES.forEach(m => {
   if (!m.match_result) return;
   const outcome = matchOutcome(m.match_result);
   if (outcome === 'win') totalWins++;
@@ -548,7 +548,7 @@ Object.keys(playerStats).forEach(k => {
   p.avgRating = p.ratings.length ? +(p.ratings.reduce((a,b)=>a+b,0)/p.ratings.length).toFixed(2) : 0;
 });
 
-const totalGames = T2_MATCHES.length;
+const totalGames = T3_MATCHES.length;
 const avgRating  = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(2) : '—';
 const eff        = totalGames ? Math.round(totalWins/totalGames*100) : 0;
 const gpg        = totalGames ? (totalGoals/totalGames).toFixed(1) : '—';
@@ -601,6 +601,85 @@ topsGrid.innerHTML =
   buildTopCard('🅰️ Asistencias', top3A,   k => playerStats[k].a,          '') +
   buildTopCard('⭐ Calificación', top3Rat, k => playerStats[k].avgRating,  '★');
 
+/* ── PRETEMPORADA — fetch & merge ── */
+const PRE_NAME_MAP = {
+  'cabrera14':'Cabers14', 'huber236':'Huber236', 'agusbostero':'Agubostero7',
+  'lautavester7':'Lautavester7', 'pibu':'zPibu__',
+  'ciprimancini':'CipriMancini', 'black panther':'BlackPanther-CG',
+};
+
+async function loadPretemporada() {
+  try {
+    const resp = await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/copafacil-pretemporada');
+    if (!resp.ok) return;
+    const data = await resp.json();
+
+    const played  = (data.matches || []).filter(m => m.finished);
+    if (!played.length) return;
+
+    const preWins  = played.filter(m => m.result === 'win').length;
+    const preGF    = played.reduce((s, m) => s + (m.tsGoals  || 0), 0);
+    const preGC    = played.reduce((s, m) => s + (m.rivGoals || 0), 0);
+
+    const combined     = T3_MATCHES.length + played.length;
+    const combWins     = totalWins  + preWins;
+    const combGoals    = totalGoals + preGF;
+    const combEff      = combined ? Math.round(combWins / combined * 100) : 0;
+    const combGpg      = combined ? (combGoals / combined).toFixed(1) : '—';
+
+    document.getElementById('sq-pj').textContent    = combined;
+    document.getElementById('sq-wins').textContent  = combWins;
+    document.getElementById('sq-goals').textContent = combGoals;
+    document.getElementById('sq-eff').textContent   = combEff + '% efectividad';
+    document.getElementById('sq-gpg').textContent   = combGpg + ' por partido';
+    document.getElementById('sq-pj-sub').textContent = 'Pretemporada VPUG' + (T3_MATCHES.length ? ' · T3' : '');
+    document.getElementById('sq-rat-sub').textContent = 'GC: ' + preGC;
+
+    const badge = document.getElementById('t3-badge');
+    if (badge) { badge.textContent = 'EN CURSO'; badge.style.color = 'var(--vpug)'; badge.style.borderColor = 'rgba(62,207,142,.35)'; }
+
+    // Merge pretemporada player goals/assists into playerStats
+    (data.players || []).forEach(p => {
+      const key = PRE_NAME_MAP[p.name] || p.name;
+      if (!playerStats[key]) playerStats[key] = { pj: 0, g: 0, a: 0, ratings: [], avgRating: 0 };
+      playerStats[key].g  += p.goals || 0;
+      playerStats[key].a  += p.assists || 0;
+      playerStats[key].pj += 1;
+    });
+
+    // Rebuild top performers with merged data
+    const allKeys  = Object.keys(playerStats);
+    const newTopG  = allKeys.filter(k => playerStats[k].g  > 0).sort((a,b) => playerStats[b].g  - playerStats[a].g).slice(0, 5);
+    const newTopA  = allKeys.filter(k => playerStats[k].a  > 0).sort((a,b) => playerStats[b].a  - playerStats[a].a).slice(0, 5);
+    const newTopR  = allKeys.filter(k => playerStats[k].ratings.length > 0).sort((a,b) => playerStats[b].avgRating - playerStats[a].avgRating).slice(0, 5);
+
+    document.getElementById('tops-grid').innerHTML =
+      buildTopCard('⚽ Goleadores',   newTopG, k => playerStats[k].g,         '') +
+      buildTopCard('🅰️ Asistencias',  newTopA, k => playerStats[k].a,         '') +
+      (newTopR.length ? buildTopCard('⭐ Calificación', newTopR, k => playerStats[k].avgRating, '★') : '');
+
+    // Prepend pretemporada results to recent list
+    const preList = document.getElementById('results-list');
+    const preRows = played.sort((a, b) => b.round - a.round).map(m => {
+      const dt = new Date(m.date + 'T12:00:00');
+      const dateStr = dt.getDate() + ' ' + M_NAMES[dt.getMonth()];
+      const row = document.createElement('div');
+      row.className = 'result-row';
+      const scoreStr = `${m.tsGoals} – ${m.rivGoals}`;
+      row.innerHTML = `
+        <span class="result-pill ${pillClass[m.result]||'pill-d'}">${pillLabel[m.result]||'E'}</span>
+        <span class="result-league" style="${leagueStyle.VPUG}">VPUG</span>
+        <span class="result-rival">${m.rival || '—'}</span>
+        <span class="result-score">${scoreStr}</span>
+        <span class="result-date">${dateStr}</span>`;
+      return row;
+    });
+    preRows.forEach(r => preList.insertBefore(r, preList.firstChild));
+
+  } catch(e) { /* fail silently */ }
+}
+loadPretemporada();
+
 /* ── RECENT RESULTS (last 5) ── */
 const leagueStyle = {
   VPN:  'background:rgba(245,197,24,.1);color:#b45309;',
@@ -611,7 +690,7 @@ const pillClass = {win:'pill-w', draw:'pill-d', loss:'pill-l'};
 const pillLabel = {win:'V', draw:'E', loss:'D'};
 const M_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-const last5 = [...T2_MATCHES].filter(m => m.match_result).sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
+const last5 = [...T3_MATCHES].filter(m => m.match_result).sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
 const resList = document.getElementById('results-list');
 resList.innerHTML = '';
 last5.forEach(m => {
