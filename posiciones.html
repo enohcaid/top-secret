@@ -274,6 +274,10 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <span class="sb-label">T3 2026</span>
       <span class="sb-sub">Próximamente</span>
     </button>
+    <button class="season-btn" id="sbtn-pre" onclick="switchSeason('pre',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
+      <span class="sb-label">Pretemporada</span>
+      <span class="sb-sub">Invierno VPUG</span>
+    </button>
   </div>
 
   <!-- ════════════ TEMPORADA 1 ════════════ -->
@@ -350,6 +354,35 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <div style="margin-top:8px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
       <div style="margin-top:10px;font-size:.8rem;">La Temporada 3 comenzará en julio 2026</div>
     </div>
+  </div>
+
+  <!-- ════════════ PRETEMPORADA ════════════ -->
+  <div id="s-pre" style="display:none">
+    <div class="t1-badge" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);">
+      CAMPEONATO DE INVIERNO VPUG · EN CURSO
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-league="pre-ga" onclick="switchTab('pre-ga','pre',this)">Grupo A</button>
+      <button class="tab"        data-league="pre-gb" onclick="switchTab('pre-gb','pre',this)">Grupo B</button>
+    </div>
+
+    <!-- Grupo A -->
+    <div class="tab-pane active" id="pre-pane-pre-ga">
+      <div id="pre-loading-a" class="loading-state">Cargando...</div>
+      <div class="table-wrap"><table class="standings-table" id="pre-ga-table" style="display:none"></table></div>
+    </div>
+
+    <!-- Grupo B -->
+    <div class="tab-pane" id="pre-pane-pre-gb">
+      <div id="pre-loading-b" class="loading-state">Cargando...</div>
+      <div class="table-wrap"><table class="standings-table" id="pre-gb-table" style="display:none"></table></div>
+    </div>
+
+    <div class="zone-legend" style="margin-top:16px">
+      <div class="zl-item"><span class="zone-dot" style="background:var(--vpug)"></span>Clasifica a Playoff Oro</div>
+      <div class="zl-item"><span class="zone-dot" style="background:#4a9eff"></span>Clasifica a Playoff Plata</div>
+    </div>
+    <div style="margin-top:10px;font-size:.72rem;color:var(--muted2);padding:0 2px;">Fuente: CopáFácil · Comunidad VPUG · Se actualiza cada 5 min</div>
   </div>
 </div>
 
@@ -565,9 +598,11 @@ function renderTable(tableId, data, accentColor) {
 function switchSeason(season, btn) {
   document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('s-t1').style.display = season === 't1' ? '' : 'none';
-  document.getElementById('s-t2').style.display = season === 't2' ? '' : 'none';
-  document.getElementById('s-t3').style.display = season === 't3' ? '' : 'none';
+  document.getElementById('s-t1').style.display  = season === 't1'  ? '' : 'none';
+  document.getElementById('s-t2').style.display  = season === 't2'  ? '' : 'none';
+  document.getElementById('s-t3').style.display  = season === 't3'  ? '' : 'none';
+  document.getElementById('s-pre').style.display = season === 'pre' ? '' : 'none';
+  if (season === 'pre' && !window._preFetched) fetchPretemporada();
 }
 
 /* ── TAB SWITCH (per season) ── */
@@ -668,6 +703,65 @@ async function fetchT2VPN() {
   } catch(e) {
     const table = document.getElementById('t2-vpn-table');
     if (table) table.innerHTML = '<tbody><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--mid)">No se pudo cargar la tabla. Intentá más tarde.</td></tr></tbody>';
+  }
+}
+
+/* ── FETCH & RENDER PRETEMPORADA ── */
+async function fetchPretemporada() {
+  window._preFetched = true;
+  try {
+    const r = await fetch(WORKER_BASE + '/copafacil-pretemporada');
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+
+    function renderPreGroup(tableId, loadingId, teams, accentColor) {
+      document.getElementById(loadingId).style.display = 'none';
+      const tbl = document.getElementById(tableId);
+      tbl.style.display = '';
+      tbl.innerHTML = `
+        <thead><tr>
+          <th style="width:36px">#</th>
+          <th class="left" style="min-width:160px">Equipo</th>
+          <th>PJ</th><th>V</th><th>E</th><th>D</th>
+          <th>GF</th><th>GC</th><th>DG</th>
+          <th style="color:${accentColor}">PTS</th>
+        </tr></thead><tbody></tbody>`;
+      const tbody = tbl.querySelector('tbody');
+      teams.forEach((t, i) => {
+        const pos = i + 1;
+        const posClass = pos===1?'p1':pos===2?'p2':pos===3?'p3':'';
+        const gdClass  = t.gd>0?'pos':t.gd<0?'neg':'';
+        const logoHtml = t.logo
+          ? `<img class="td-logo" src="${t.logo}" alt="" onerror="this.style.display='none'">`
+          : `<div class="td-logo" style="font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:900;color:#888;display:flex;align-items:center;justify-content:center;">${t.name.slice(0,3).toUpperCase()}</div>`;
+        const dotColor = pos<=4 ? 'var(--vpug)' : pos<=8 ? '#4a9eff' : '';
+        const dotHtml  = dotColor ? `<span class="zone-dot" style="background:${dotColor};margin-right:2px;"></span>` : '';
+        const tr = document.createElement('tr');
+        if (t.us) tr.className = 'highlight';
+        tr.innerHTML = `
+          <td><div class="td-pos ${posClass}">${pos}</div></td>
+          <td class="left">
+            <div class="td-team">${dotHtml}${logoHtml}
+              <span class="td-name ${t.us?'us':''}">${t.name}</span>
+            </div>
+          </td>
+          <td>${t.gp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+          <td>${t.gf}</td><td>${t.gc}</td>
+          <td class="td-gd ${gdClass}">${t.gd>0?'+':''}${t.gd}</td>
+          <td><strong class="td-pts">${t.pts}</strong></td>`;
+        tbody.appendChild(tr);
+      });
+      gsap.to('#'+tableId+' tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.05});
+    }
+
+    renderPreGroup('pre-ga-table', 'pre-loading-a', data.standings.A || [], 'var(--vpug)');
+    renderPreGroup('pre-gb-table', 'pre-loading-b', data.standings.B || [], 'var(--vpug)');
+
+  } catch(e) {
+    ['pre-loading-a','pre-loading-b'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<span style="color:var(--gold)">Error al cargar. Intentá más tarde.</span>';
+    });
   }
 }
 

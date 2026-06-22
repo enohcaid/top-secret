@@ -378,6 +378,7 @@ footer span{color:var(--gold);}
 .season-section.t3 .season-section-label{color:#4a9eff;}
 .season-section.t2 .season-section-label{color:var(--gold);}
 .season-section.t1 .season-section-label{color:var(--mid);}
+.season-section.pre .season-section-label{color:var(--vpug);}
 .season-section .year-grid{margin-top:0;padding-top:0;}
 
 /* ─── LOCK / ADMIN ─── */
@@ -786,6 +787,7 @@ body{padding-top:64px;}
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <div class="season-btns">
+      <button class="sbtn" id="sbtn-pre" onclick="setGridSeason('pre',this)" style="border-color:rgba(62,207,142,.35);color:var(--vpug);">PRE</button>
       <button class="sbtn active" id="sbtn-t3" onclick="setGridSeason('t3',this)">T3</button>
       <button class="sbtn" id="sbtn-t2" onclick="setGridSeason('t2',this)">T2</button>
       <button class="sbtn" id="sbtn-t1" onclick="setGridSeason('t1',this)">T1</button>
@@ -1172,6 +1174,7 @@ let custom     = JSON.parse(localStorage.getItem('ts_custom')    ||'[]'); // cus
 let currentFilter = 'all';
 let currentSeason = 'all';    // 'all' | 't1' | 't2'
 let currentGridSeason = 't3'; // section filter for the year grid
+let _preData = null;           // cached pretemporada data from Worker
 let isAdminMode   = false;
 let editingId = null;
 let editHomeVal = true;
@@ -1461,6 +1464,10 @@ function setGridSeason(s, btn) {
   currentGridSeason = s;
   document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  if (s === 'pre' || s === 'all') {
+    if (!_preData) fetchPretemporada();
+    else insertPreSection();
+  }
   applyGridSeason();
 }
 function applyGridSeason() {
@@ -1468,6 +1475,99 @@ function applyGridSeason() {
     sec.style.display = (currentGridSeason === 'all' || sec.classList.contains(currentGridSeason)) ? '' : 'none';
   });
 }
+async function fetchPretemporada() {
+  if (_preData) { insertPreSection(); return; }
+  try {
+    const resp = await fetch(WORKER_URL_CAL + '/copafacil-pretemporada');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    _preData = await resp.json();
+  } catch(e) {
+    console.warn('[Pre] fetch failed:', e);
+    return;
+  }
+  if (currentGridSeason === 'pre' || currentGridSeason === 'all') insertPreSection();
+}
+
+function insertPreSection() {
+  const grid = document.getElementById('yearGrid');
+  if (!grid || !_preData) return;
+
+  // Remove stale PRE section so we rebuild fresh
+  grid.querySelector('.season-section.pre')?.remove();
+
+  const DIAS_L  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MESES_C = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const today   = getToday();
+
+  // Group matches by date
+  const byDate = {};
+  _preData.matches.forEach(m => {
+    if (!byDate[m.date]) byDate[m.date] = [];
+    byDate[m.date].push(m);
+  });
+
+  const inner = document.createElement('div');
+  inner.className = 'year-grid';
+  inner.style.cssText = 'margin-top:0;padding-top:0;padding-bottom:0;';
+
+  Object.keys(byDate).sort().forEach(date => {
+    const matches = byDate[date];
+    const dt = new Date(date + 'T12:00:00');
+    const dayLabel = `${DIAS_L[dt.getDay()]} ${dt.getDate()} ${MESES_C[dt.getMonth()]}`;
+    const isToday = date === today;
+    const isPast  = date < today;
+    const playedCount = matches.filter(m => m.finished).length;
+    const countLabel  = playedCount
+      ? `${playedCount} jugado${playedCount!==1?'s':''} / ${matches.length}`
+      : `${matches.length} ${matches.length===1?'partido':'partidos'}`;
+
+    const rows = matches.map(m => {
+      const outCls = m.result ? ` mmi-${m.result}` : '';
+      const logoHtml = m.rivalLogo
+        ? `<img src="${m.rivalLogo}" alt="" style="width:32px;height:32px;object-fit:contain;border-radius:4px;background:var(--gray);flex-shrink:0;" onerror="this.style.display='none'">`
+        : `<span class="nh-lbadge vpug" style="font-size:.62rem;">VPUG</span>`;
+      const scoreHtml = m.finished
+        ? `<span class="mmi-score">${m.tsGoals} – ${m.rivGoals}</span>`
+        : `<span class="mmi-pending">Pendiente</span>`;
+      return `<div class="month-match-item no-click${outCls}">
+        <span class="mmi-date">J${m.round} · ${m.time}</span>
+        ${logoHtml}
+        <span class="mmi-rival">vs ${m.rival||'?'}</span>
+        <span class="mmi-loc">${m.isHome?'Local':'Visita'}</span>
+        ${scoreHtml}
+      </div>`;
+    }).join('');
+
+    const card = document.createElement('div');
+    card.className = 'month-card' + (isPast ? '' : ' collapsed');
+    card.innerHTML = `
+      <div class="month-season-band" style="background:rgba(62,207,142,.09);color:var(--vpug);border-color:var(--vpug);">Pretemporada · Invierno VPUG</div>
+      <div class="month-title-row" onclick="this.closest('.month-card').classList.toggle('collapsed')">
+        <div class="month-title-left">
+          <span class="month-name-lbl">${dayLabel}</span>
+          ${isToday?'<span class="today-inline-badge" style="margin-left:8px;">HOY</span>':''}
+        </div>
+        <div class="month-title-right">
+          <span class="month-match-count">${countLabel}</span>
+          <span class="month-toggle-chevron">▾</span>
+        </div>
+      </div>
+      <div class="month-body"><div class="month-match-list">${rows}</div></div>`;
+    inner.appendChild(card);
+  });
+
+  const secDiv = document.createElement('div');
+  secDiv.className = 'season-section pre';
+  secDiv.innerHTML = `<div class="season-section-header">
+    <span class="season-section-label">Pretemporada</span>
+    <span class="season-section-sub">Campeonato de Invierno VPUG · En curso</span>
+    <span class="season-section-line"></span>
+  </div>`;
+  secDiv.appendChild(inner);
+
+  grid.insertBefore(secDiv, grid.firstChild);
+}
+
 function setSeason(s, btn){
   currentSeason = s;
   document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
@@ -1974,6 +2074,7 @@ function renderYearGrid() {
     grid.appendChild(secDiv);
   });
 
+  if (_preData) insertPreSection();
   applyGridSeason();
 }
 
@@ -2802,6 +2903,8 @@ window.filter         = filter;
 window.setSeason      = setSeason;
 window.setGridSeason  = setGridSeason;
 window.applyGridSeason = applyGridSeason;
+window.fetchPretemporada = fetchPretemporada;
+window.insertPreSection  = insertPreSection;
 window.shareMatchday  = shareMatchday;
 window.toggleAdmin    = toggleAdmin;
 window.handleResultClick = handleResultClick;
@@ -2828,6 +2931,18 @@ window.editCurrentMatch = editCurrentMatch;
 
 // Start in locked mode
 document.body.classList.add('locked');
+
+// Auto-activate PRE during the Campeonato de Invierno VPUG (Jun 18 – Jul 23, 2026)
+{
+  const _initToday = getToday();
+  if (_initToday >= '2026-06-18' && _initToday <= '2026-07-23') {
+    currentGridSeason = 'pre';
+    document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
+    const preBtn = document.getElementById('sbtn-pre');
+    if (preBtn) preBtn.classList.add('active');
+    fetchPretemporada(); // async — will insert section after render
+  }
+}
 
 // render() is called by onSnapshot when Firebase data loads
 fetchCloudSeedMatches();
