@@ -1486,6 +1486,7 @@ async function fetchPretemporada() {
     return;
   }
   if (currentGridSeason === 'pre' || currentGridSeason === 'all') insertPreSection();
+  renderNextHero();
 }
 
 function insertPreSection() {
@@ -1939,15 +1940,25 @@ function renderNextHero() {
     if (customIsInRaw(m)) return;
     upcoming.push({m, id: 'c'+ci});
   });
+  // Include pretemporada upcoming matches (from CopáFácil via Worker)
+  if (_preData) {
+    (_preData.matches || []).filter(m => !m.finished && m.date >= today).forEach(m => {
+      upcoming.push({
+        m: { date: m.date, time: m.time, rival: m.rival, league: 'VPUG',
+             isHome: m.isHome, round: m.round, badge: m.rivalLogo || null },
+        id: 'pre-' + m.round,
+      });
+    });
+  }
   upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || lgOrder(a.m.league) - lgOrder(b.m.league) || (a.m.time||'').localeCompare(b.m.time||''));
 
   if (!upcoming.length) {
     hero.innerHTML = `<div class="nh-waiting">
       <span class="nh-w-icon">⏳</span>
       <div>
-        <div class="nh-eyebrow" style="color:var(--gold)">Temporada 2 · VPN Primera División</div>
-        <div class="nh-w-title">Aguardando el próximo partido</div>
-        <div class="nh-w-sub">El fixture está cargado · Los partidos aparecerán aquí cuando se confirmen</div>
+        <div class="nh-eyebrow" style="color:var(--gold)">Temporada 3 · 2026</div>
+        <div class="nh-w-title">Sin partidos próximos</div>
+        <div class="nh-w-sub">El fixture de T3 estará disponible cuando se publique el calendario</div>
       </div>
     </div>`;
     return;
