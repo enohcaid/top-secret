@@ -941,11 +941,19 @@ function openPanel(p, card) {
   const photoWrap = document.getElementById('pp-photo-wrap');
   photoWrap.querySelectorAll('.pp-photo,.pp-photo-placeholder').forEach(el => el.remove());
 
+  const isT2 = card.classList.contains('v2');
+  const isT3 = card.classList.contains('v3');
+
   const img = document.createElement('img');
   img.className = 'pp-photo';
   img.alt = p.key;
+  const ppFallbacks = isT3
+    ? [brazos3Path(p), brazos2Path(p), brazosPath(p)]
+    : [brazos2Path(p), brazosPath(p)];
+  let ppFi = 0;
   img.onerror = function() {
-    if (!this._f) { this._f = 1; this.src = brazosPath(p); return; }
+    ppFi++;
+    if (ppFi < ppFallbacks.length) { this.src = ppFallbacks[ppFi]; return; }
     this.remove();
     const ph = document.createElement('div');
     ph.className = 'pp-photo-placeholder';
@@ -954,7 +962,7 @@ function openPanel(p, card) {
       <div class="pp-ph-num">#${p.num}</div>`;
     photoWrap.insertBefore(ph, photoWrap.firstChild);
   };
-  img.src = brazos2Path(p);
+  img.src = ppFallbacks[0];
   photoWrap.insertBefore(img, photoWrap.firstChild);
 
   /* identity */
@@ -964,8 +972,6 @@ function openPanel(p, card) {
   document.getElementById('pp-posn').textContent  = p.posn;
 
   /* KPIs */
-  const isT2 = card.classList.contains('v2');
-  const isT3 = card.classList.contains('v3');
   const statMap = isT3 ? t3Stats : (isT2 ? t2Stats : allStats);
   const st = statMap[p.key] || {pj:0, g:0, a:0, avgRating:0, maxRating:0};
   document.getElementById('pk-nvl').textContent   = p.nvl;

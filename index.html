@@ -510,6 +510,10 @@ function t2PhotoPath(key) {
   const fname = T2_PHOTO[key];
   return fname ? `Renders/T2-Frentes/${fname}.png` : brazosPath(key);
 }
+const T3_PHOTO_KEYS = new Set(['Agubostero7','CipriMancini','Guiidow','Huber236','Juan_Martinez4','Lautavester7','rivarola90','slandaco9','zPibu__']);
+function t3PhotoPath(key) {
+  return T3_PHOTO_KEYS.has(key) ? `Renders/T3-Frentes/${key}.png` : t2PhotoPath(key);
+}
 
 /* ── COMPUTE AGGREGATE STATS (T3 — SEED matches + pretemporada via Worker) ── */
 const T3_MATCHES = SEED_MATCHES.filter(m => m.date > T3_CUTOFF);
@@ -578,7 +582,7 @@ function buildTopCard(title, players, valFn, suffix) {
     return `<div class="top-entry">
       <span class="top-rank ${rankClasses[i]}">${rankNums[i]}</span>
       <div class="top-av" onclick="showPlayerModal('${k}')">
-        <img src="${t2PhotoPath(k)}" alt="${k}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <img src="${t3PhotoPath(k)}" alt="${k}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="top-av-init" style="display:none">${k.charAt(0).toUpperCase()}</div>
       </div>
       <div class="top-info">
@@ -827,7 +831,7 @@ function showPlayerModal(key) {
   const pos = ROSTER_POSN[key] || '';
   document.getElementById('playerModalBox').innerHTML =
     `<div class="pmob-img">
-       <img src="${t2PhotoPath(key)}" alt="${key}" onerror="this.style.display='none'">
+       <img src="${t3PhotoPath(key)}" alt="${key}" onerror="this.style.display='none'">
        <button class="pmob-close" onclick="closePlayerModal()">×</button>
      </div>
      <div class="pmob-body">
