@@ -1410,10 +1410,13 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
     if (_silImg) {
       ctx.globalAlpha = 0.55;
+      const PHOTO_SCALE = 2.0;
       const imgW = _silImg.naturalWidth, imgH = _silImg.naturalHeight;
       const coverScale = Math.max(tokW / imgW, photoH / imgH);
-      const srcW = tokW / coverScale, srcH = photoH / coverScale;
-      const srcX = (imgW - srcW) / 2;
+      let srcW = tokW / coverScale, srcH = photoH / coverScale;
+      let srcX = (imgW - srcW) / 2;
+      srcW = srcW / PHOTO_SCALE; srcH = srcH / PHOTO_SCALE;
+      srcX += (tokW / coverScale - srcW) / 2;
       ctx.drawImage(_silImg, srcX, 0, srcW, srcH, tx, ty, tokW, photoH);
       ctx.globalAlpha = 1;
     } else {
@@ -1455,8 +1458,8 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
         ctx.save();
         ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
         if (img) {
-          // Replicar object-fit:cover + object-position:top center + scale(3.6)
-          const PHOTO_SCALE = 3.6;
+          // Replicar object-fit:cover + object-position:top center + scale(2.0) → pecho arriba
+          const PHOTO_SCALE = 2.0;
           const imgW = img.naturalWidth, imgH = img.naturalHeight;
           // 1. cover scale: escalar para cubrir tokW × photoH
           const coverScale = Math.max(tokW / imgW, photoH / imgH);
