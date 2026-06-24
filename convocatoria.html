@@ -677,6 +677,7 @@ function loadState() {
 /* ─── SAVE STATE ─── */
 function saveState() {
   if (!_firestoreLoaded) return; // never overwrite before first snapshot arrives
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return; // no writes in local testing
   const data = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
   if (CONV_DOC) {
     CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
