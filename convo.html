@@ -950,7 +950,9 @@ function renderPitch() {
         const img = document.createElement('img');
         img.src = src;
         img.className = 'tok-photo';
-        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(var(--photo-scale)) translateY(var(--photo-y));transform-origin:top center;';
+        const isV3 = /Frente3|Brazos3/.test(src);
+        const scale = isV3 ? '2.7' : 'var(--photo-scale)';
+        img.style.cssText = `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(${scale}) translateY(var(--photo-y));transform-origin:top center;`;
         tok.appendChild(img);
         // Número sobre la foto (izquierda)
         const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
