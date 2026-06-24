@@ -1410,15 +1410,11 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
     if (_silImg) {
       ctx.globalAlpha = 0.55;
-      const PHOTO_SCALE = 3.6;
       const imgW = _silImg.naturalWidth, imgH = _silImg.naturalHeight;
       const coverScale = Math.max(tokW / imgW, photoH / imgH);
-      let srcW = tokW / coverScale, srcH = photoH / coverScale;
-      let srcX = (imgW - srcW) / 2;
-      let srcY = 0;
-      srcW = srcW / PHOTO_SCALE; srcH = srcH / PHOTO_SCALE;
-      srcX += (tokW / coverScale - srcW) / 2;
-      ctx.drawImage(_silImg, srcX, srcY, srcW, srcH, tx, ty, tokW, photoH);
+      const srcW = tokW / coverScale, srcH = photoH / coverScale;
+      const srcX = (imgW - srcW) / 2;
+      ctx.drawImage(_silImg, srcX, 0, srcW, srcH, tx, ty, tokW, photoH);
       ctx.globalAlpha = 1;
     } else {
       ctx.fillStyle = 'rgba(0,0,0,0.42)';
