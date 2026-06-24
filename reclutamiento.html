@@ -433,7 +433,7 @@ document.querySelectorAll('.pos-chip').forEach(chip => {
 });
 
 /* ─── ARCHETYPE BUILDER ─── */
-const NIV_OPTIONS = ['Básico','Intermedio','Avanzado','Elite'];
+const NIV_OPTIONS = Array.from({length:96}, (_,i) => 95 - i);
 
 function makeArqEntry() {
   const wrap = document.createElement('div');
