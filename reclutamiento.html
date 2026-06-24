@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Secret FC · Reclutamiento</title>
+<link rel="icon" type="image/png" href="Top-Secret.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#111111;--card:#1C1C1C;--gold:#C9A84C;--gold2:#E8C97A;
+  --gold-dim:rgba(201,168,76,.12);--border:rgba(255,255,255,.09);
+  --text:#F0F2F8;--text2:rgba(255,255,255,.55);
+  --mid:rgba(255,255,255,.4);--mid2:rgba(255,255,255,.28);
+  --green:#22C55E;--yellow:#F5C518;--red:#EF4444;--blue:#4a9eff;
+  --sb-left:64px;--sb-right:48px;--topbar:64px;
+}
+
+html,body{min-height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding-left:var(--sb-left);padding-right:var(--sb-right);padding-top:var(--topbar);}
+
+.main{max-width:700px;margin:0 auto;padding:40px 24px 100px;}
+
+.page-eyebrow{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:3rem;font-weight:900;letter-spacing:-.01em;line-height:1;color:var(--text);text-transform:uppercase;margin-bottom:6px;}
+.page-sub{font-size:14px;color:var(--mid);margin-bottom:40px;line-height:1.5;}
+
+/* Form card */
+.form-card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:12px;padding:32px 28px;margin-bottom:16px;}
+.form-title{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;text-transform:uppercase;color:var(--text);margin-bottom:4px;}
+.form-desc{font-size:13px;color:var(--mid);margin-bottom:28px;line-height:1.5;}
+
+/* Fields */
+.field-group{margin-bottom:22px;}
+.field-label{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-bottom:8px;}
+.field-label .req{color:var(--gold);margin-left:2px;}
+.field-input{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Barlow',sans-serif;
+  font-size:14px;outline:none;transition:border-color .15s,background .15s;
+}
+.field-input:focus{border-color:var(--gold);background:rgba(201,168,76,.05);}
+.field-input::placeholder{color:var(--mid2);}
+select.field-input{
+  cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+}
+select.field-input option{background:#1C1C1C;color:var(--text);}
+
+/* Inline field (edad, horario) */
+.field-input.narrow{max-width:160px;}
+
+/* Validation */
+.field-error{font-size:11px;color:var(--red);margin-top:5px;display:none;}
+.field-group.has-error .field-input{border-color:var(--red);}
+.field-group.has-error .field-error{display:block;}
+
+/* Day chips */
+.day-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.day-chip input{display:none;}
+.day-chip label{
+  display:inline-block;padding:7px 15px;border-radius:20px;
+  border:1px solid var(--border);background:rgba(255,255,255,.04);
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mid);cursor:pointer;transition:all .15s;user-select:none;
+}
+.day-chip label:hover{border-color:var(--mid2);color:var(--text);}
+.day-chip input:checked+label{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.field-group.has-error .day-chip label{border-color:rgba(239,68,68,.4);}
+
+/* Submit */
+.submit-btn{
+  width:100%;padding:14px;background:var(--gold);border:none;border-radius:8px;
+  color:#111;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;cursor:pointer;
+  transition:background .15s,transform .1s;margin-top:4px;
+}
+.submit-btn:hover{background:var(--gold2);}
+.submit-btn:active{transform:scale(.99);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* Success */
+.success-card{
+  background:var(--card);border:1px solid rgba(34,197,94,.3);
+  border-radius:12px;padding:48px 28px;text-align:center;display:none;
+}
+.success-icon{
+  width:56px;height:56px;border-radius:50%;background:rgba(34,197,94,.12);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+}
+.success-title{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:900;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
+.success-msg{font-size:14px;color:var(--mid);line-height:1.6;max-width:340px;margin:0 auto;}
+
+/* Admin access link */
+.admin-access{margin-top:24px;display:flex;justify-content:flex-end;}
+.admin-btn-link{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  padding:8px 16px;color:var(--mid);font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:color .15s,border-color .15s;
+}
+.admin-btn-link:hover{color:var(--text);border-color:var(--mid2);}
+.admin-btn-link svg{opacity:.6;}
+
+/* Password modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:900;
+  display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:#1C1C1C;border:1px solid var(--border);border-radius:12px;
+  padding:28px;width:320px;max-width:calc(100vw - 32px);
+}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;text-transform:uppercase;color:var(--text);margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--mid);margin-bottom:18px;}
+.modal-input{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:8px;padding:11px 14px;color:var(--text);font-family:'Barlow',sans-serif;
+  font-size:16px;letter-spacing:.25em;outline:none;margin-bottom:8px;
+  transition:border-color .15s;
+}
+.modal-input:focus{border-color:var(--gold);}
+.modal-error{font-size:11px;color:var(--red);margin-bottom:10px;display:none;}
+.modal-row{display:flex;gap:8px;}
+.modal-cancel{
+  flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;background:none;
+  color:var(--mid);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;transition:border-color .15s,color .15s;
+}
+.modal-cancel:hover{border-color:var(--mid2);color:var(--text);}
+.modal-ok{
+  flex:2;padding:10px;background:var(--gold);border:none;border-radius:6px;
+  color:#111;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;transition:background .15s;
+}
+.modal-ok:hover{background:var(--gold2);}
+
+/* Admin panel */
+.admin-panel{display:none;margin-top:32px;}
+.admin-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.admin-panel-title{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;}
+.admin-count{font-size:12px;color:var(--mid);margin-left:10px;font-weight:400;font-family:'Barlow',sans-serif;text-transform:none;letter-spacing:0;}
+.admin-close{background:none;border:none;color:var(--mid);cursor:pointer;padding:4px;transition:color .15s;display:flex;align-items:center;}
+.admin-close:hover{color:var(--text);}
+.admin-refresh{background:none;border:1px solid var(--border);border-radius:5px;padding:5px 10px;color:var(--mid);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:color .15s,border-color .15s;margin-right:8px;}
+.admin-refresh:hover{color:var(--text);border-color:var(--mid2);}
+.table-wrap{border-radius:8px;border:1px solid var(--border);overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{background:rgba(255,255,255,.04);}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.td-tag{font-weight:600;color:var(--text);}
+.td-pos{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;color:var(--gold);}
+.td-date{color:var(--mid);font-size:11px;white-space:nowrap;}
+.status-sel{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:4px;padding:4px 8px;font-size:11px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;cursor:pointer;outline:none;
+  font-family:'Barlow',sans-serif;
+}
+.status-sel option{background:#1C1C1C;color:var(--text);}
+.s-pendiente{color:var(--yellow);}
+.s-en_revision{color:var(--blue);}
+.s-aceptado{color:var(--green);}
+.s-rechazado{color:var(--red);}
+.del-btn{background:none;border:none;color:rgba(239,68,68,.35);cursor:pointer;padding:4px 7px;border-radius:4px;transition:color .15s,background .15s;font-size:13px;line-height:1;}
+.del-btn:hover{color:var(--red);background:rgba(239,68,68,.1);}
+.empty-state{padding:48px 24px;text-align:center;color:var(--mid);font-size:13px;}
+
+@media(max-width:640px){
+  .main{padding:24px 16px 80px;}
+  .page-title{font-size:2.2rem;}
+  .form-card{padding:22px 18px;}
+  th,td{padding:9px 10px;}
+}
+</style>
+</head>
+<body>
+<div class="main">
+
+  <div class="page-eyebrow">Top Secret FC</div>
+  <h1 class="page-title">Reclutamiento</h1>
+  <p class="page-sub">Sumate al club. Completá el formulario y nos ponemos en contacto si tu perfil encaja.</p>
+
+  <!-- ── FORM ── -->
+  <div class="form-card" id="formCard">
+    <div class="form-title">Solicitud de Prueba</div>
+    <div class="form-desc">Completá todos los campos requeridos. Te contactamos para coordinar una prueba si cumplís el perfil.</div>
+
+    <div class="field-group" id="fg-gamertag">
+      <label class="field-label" for="f-gamertag">Gamertag <span class="req">*</span></label>
+      <input class="field-input" id="f-gamertag" type="text" placeholder="Tu ID de jugador (PS / Xbox / PC)" maxlength="48" autocomplete="off" spellcheck="false">
+      <div class="field-error">Ingresá tu gamertag.</div>
+    </div>
+
+    <div class="field-group" id="fg-posicion">
+      <label class="field-label" for="f-posicion">Posición preferida <span class="req">*</span></label>
+      <select class="field-input" id="f-posicion">
+        <option value="">Seleccionar...</option>
+        <option value="POR">POR — Portero</option>
+        <option value="DEF">DEF — Defensor Central</option>
+        <option value="LAT">LAT — Lateral</option>
+        <option value="MED">MED — Mediocampista</option>
+        <option value="DEL">DEL — Delantero</option>
+        <option value="IND">Indiferente</option>
+      </select>
+      <div class="field-error">Seleccioná una posición.</div>
+    </div>
+
+    <div class="field-group" id="fg-edad">
+      <label class="field-label" for="f-edad">Edad <span class="req">*</span></label>
+      <input class="field-input narrow" id="f-edad" type="number" placeholder="Ej: 22" min="13" max="60">
+      <div class="field-error">Ingresá una edad válida (13–60).</div>
+    </div>
+
+    <div class="field-group" id="fg-dias">
+      <label class="field-label">Días disponibles <span class="req">*</span></label>
+      <div class="day-chips">
+        <div class="day-chip"><input type="checkbox" id="d-lun" value="Lun"><label for="d-lun">Lun</label></div>
+        <div class="day-chip"><input type="checkbox" id="d-mar" value="Mar"><label for="d-mar">Mar</label></div>
+        <div class="day-chip"><input type="checkbox" id="d-mie" value="Mié"><label for="d-mie">Mié</label></div>
+        <div class="day-chip"><input type="checkbox" id="d-jue" value="Jue"><label for="d-jue">Jue</label></div>
+        <div class="day-chip"><input type="checkbox" id="d-vie" value="Vie"><label for="d-vie">Vie</label></div>
+        <div class="day-chip"><input type="checkbox" id="d-sab" value="Sáb"><label for="d-sab">Sáb</label></div>
+        <div class="day-chip"><input type="checkbox" id="d-dom" value="Dom"><label for="d-dom">Dom</label></div>
+      </div>
+      <div class="field-error">Seleccioná al menos un día.</div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="f-horario">Horario estimado</label>
+      <input class="field-input narrow" id="f-horario" type="text" placeholder="Ej: 21hs a 00hs" maxlength="40">
+    </div>
+
+    <button class="submit-btn" id="submitBtn">Enviar solicitud</button>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="success-card" id="successCard">
+    <div class="success-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="success-title">Solicitud enviada</div>
+    <div class="success-msg">Recibimos tu solicitud. Si tu perfil encaja con lo que buscamos, nos ponemos en contacto a la brevedad.</div>
+  </div>
+
+  <!-- ── ADMIN ACCESS ── -->
+  <div class="admin-access">
+    <button class="admin-btn-link" id="adminAccessBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Ver solicitudes
+    </button>
+  </div>
+
+  <!-- ── ADMIN PANEL ── -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-panel-header">
+      <div style="display:flex;align-items:baseline;gap:0;">
+        <span class="admin-panel-title">Solicitudes</span>
+        <span class="admin-count" id="adminCount"></span>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <button class="admin-refresh" id="adminRefreshBtn">Actualizar</button>
+        <button class="admin-close" id="adminCloseBtn" title="Cerrar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Gamertag</th>
+            <th>Pos</th>
+            <th>Edad</th>
+            <th>Días</th>
+            <th>Horario</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="adminTbody">
+          <tr><td colspan="8" class="empty-state">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── PASSWORD MODAL ── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-title">Acceso restringido</div>
+    <div class="modal-sub">Ingresá la contraseña para ver las solicitudes.</div>
+    <input class="modal-input" id="pwInput" type="password" placeholder="••••" maxlength="20" autocomplete="off">
+    <div class="modal-error" id="pwError">Contraseña incorrecta.</div>
+    <div class="modal-row">
+      <button class="modal-cancel" id="modalCancelBtn">Cancelar</button>
+      <button class="modal-ok" id="modalOkBtn">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── FIRESTORE ─── */
+const FB_CONFIG = {
+  apiKey: "AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M",
+  authDomain: "top-secret-fc.firebaseapp.com",
+  projectId: "top-secret-fc",
+  storageBucket: "top-secret-fc.firebasestorage.app",
+  messagingSenderId: "303110190986",
+  appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
+};
+let _db = null, RECLU_COL = null;
+try {
+  if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+  _db = firebase.firestore();
+  RECLU_COL = _db.collection('reclutamiento');
+} catch(e) { console.warn('Firestore init error:', e); }
+
+const ADMIN_PW = '8189';
+let _adminAuth = false;
+
+/* ─── FORM SUBMIT ─── */
+document.getElementById('submitBtn').addEventListener('click', function() {
+  const gamertag = document.getElementById('f-gamertag').value.trim();
+  const posicion  = document.getElementById('f-posicion').value;
+  const edadRaw   = document.getElementById('f-edad').value;
+  const edad      = parseInt(edadRaw, 10);
+  const dias      = [...document.querySelectorAll('.day-chip input:checked')].map(c => c.value);
+  const horario   = document.getElementById('f-horario').value.trim();
+
+  const valid = [
+    setErr('fg-gamertag', !gamertag),
+    setErr('fg-posicion', !posicion),
+    setErr('fg-edad', !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
+    setErr('fg-dias', dias.length === 0),
+  ].every(ok => ok);
+
+  if (!valid) return;
+
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const payload = {
+    gamertag, posicion, edad, dias,
+    horario: horario || null,
+    estado: 'pendiente',
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  const done = () => {
+    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('successCard').style.display = 'block';
+  };
+
+  if (RECLU_COL) {
+    RECLU_COL.add(payload).then(done).catch(() => done());
+  } else {
+    done();
+  }
+});
+
+function setErr(groupId, hasError) {
+  const g = document.getElementById(groupId);
+  if (hasError) g.classList.add('has-error');
+  else g.classList.remove('has-error');
+  return !hasError;
+}
+
+/* ─── ADMIN MODAL ─── */
+document.getElementById('adminAccessBtn').addEventListener('click', function() {
+  if (_adminAuth) { openAdminPanel(); return; }
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('pwInput').focus(), 60);
+});
+
+document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+document.getElementById('modalOkBtn').addEventListener('click', checkPassword);
+document.getElementById('pwInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPassword();
+});
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function checkPassword() {
+  if (document.getElementById('pwInput').value === ADMIN_PW) {
+    _adminAuth = true;
+    closeModal();
+    openAdminPanel();
+  } else {
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+/* ─── ADMIN PANEL ─── */
+document.getElementById('adminCloseBtn').addEventListener('click', function() {
+  document.getElementById('adminPanel').style.display = 'none';
+});
+document.getElementById('adminRefreshBtn').addEventListener('click', loadSubmissions);
+
+function openAdminPanel() {
+  document.getElementById('adminPanel').style.display = 'block';
+  loadSubmissions();
+}
+
+function loadSubmissions() {
+  document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Cargando...</td></tr>';
+  if (!RECLU_COL) {
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Firestore no disponible.</td></tr>';
+    return;
+  }
+  RECLU_COL.orderBy('timestamp', 'desc').get()
+    .then(snap => renderTable(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+    .catch(() => {
+      document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Error al cargar solicitudes.</td></tr>';
+    });
+}
+
+const ESTADOS = ['pendiente','en_revision','aceptado','rechazado'];
+const ESTADO_LBL = {pendiente:'Pendiente',en_revision:'En revisión',aceptado:'Aceptado',rechazado:'Rechazado'};
+
+function renderTable(docs) {
+  const n = docs.length;
+  document.getElementById('adminCount').textContent = n ? ` · ${n} solicitud${n !== 1 ? 'es' : ''}` : '';
+  if (!n) {
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">No hay solicitudes todavía.</td></tr>';
+    return;
+  }
+  document.getElementById('adminTbody').innerHTML = docs.map(d => {
+    const fecha = d.timestamp ? fmtDate(d.timestamp.toDate()) : '—';
+    const dias  = Array.isArray(d.dias) ? d.dias.join(', ') : '—';
+    const est   = d.estado || 'pendiente';
+    const opts  = ESTADOS.map(s => `<option value="${s}"${s===est?' selected':''}>${ESTADO_LBL[s]}</option>`).join('');
+    return `<tr data-id="${esc(d.id)}">
+      <td class="td-tag">${esc(d.gamertag||'—')}</td>
+      <td class="td-pos">${esc(d.posicion||'—')}</td>
+      <td>${d.edad||'—'}</td>
+      <td>${esc(dias)}</td>
+      <td>${esc(d.horario||'—')}</td>
+      <td><select class="status-sel s-${est}" onchange="updateEstado(this)">${opts}</select></td>
+      <td class="td-date">${fecha}</td>
+      <td><button class="del-btn" onclick="deleteSolicitud(this)" title="Eliminar">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function fmtDate(d) {
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  return `${dd}/${mm}/${yy}`;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateEstado(sel) {
+  const id = sel.closest('tr').dataset.id;
+  const est = sel.value;
+  sel.className = `status-sel s-${est}`;
+  if (RECLU_COL) RECLU_COL.doc(id).update({ estado: est }).catch(e => console.warn('Update error:', e));
+}
+
+function deleteSolicitud(btn) {
+  if (!confirm('¿Eliminar esta solicitud?')) return;
+  const id = btn.closest('tr').dataset.id;
+  if (RECLU_COL) {
+    RECLU_COL.doc(id).delete().then(loadSubmissions).catch(e => console.warn('Delete error:', e));
+  }
+}
+</script>
+<script src="layout.js?v=5"></script>
+<script src="mobile-nav.js?v=5"></script>
+</body>
+</html>
