@@ -624,6 +624,7 @@ let lineup          = { formation:'4-3-3', slots:{} };
 let currentPlayer   = null;
 let selectedSlotKey = null;
 let _savedResetDate = '';
+let _firestoreLoaded = false; // guard: never write before first snapshot
 
 /* ─── APPLY DATA (from Firestore or backup) ─── */
 function applyData(data) {
@@ -633,6 +634,7 @@ function applyData(data) {
   alwaysPresent   = data.alwaysPresent  || [];
   captain         = data.captain        || null;
   lineup          = data.lineup         || { formation:'4-3-3', slots:{} };
+  _firestoreLoaded = true;
 }
 
 /* ─── DAILY RESET (midnight GMT-3) ─── */
@@ -664,7 +666,8 @@ function loadState() {
         applyData(snap.data());
         checkDailyReset();
       } else {
-        saveState(); // first user — seed the document
+        _firestoreLoaded = true; // new doc — safe to seed
+        saveState();
       }
       render();
     }, err => console.warn('Firestore listen error:', err));
@@ -673,6 +676,7 @@ function loadState() {
 
 /* ─── SAVE STATE ─── */
 function saveState() {
+  if (!_firestoreLoaded) return; // never overwrite before first snapshot arrives
   const data = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
   if (CONV_DOC) {
     CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
