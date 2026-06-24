@@ -104,6 +104,17 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 }
 .add-arq-btn:hover{color:var(--text);border-color:var(--mid2);}
 .arq-col-labels{display:grid;grid-template-columns:1fr 140px 32px;gap:8px;margin-bottom:4px;}
+
+/* Experience entries */
+.exp-entries{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.exp-entry{display:grid;grid-template-columns:1fr 32px;gap:8px;align-items:center;}
+.exp-input{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;
+  outline:none;transition:border-color .15s;width:100%;
+}
+.exp-input::placeholder{color:var(--mid2);}
+.exp-input:focus{border-color:var(--gold);}
 .arq-col-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid2);padding-left:2px;}
 
 /* Disponibilidad checkbox */
@@ -245,6 +256,12 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="form-title">Solicitud de Prueba</div>
     <div class="form-desc">Completá todos los campos requeridos. Te contactamos para coordinar una prueba si cumplís el perfil.</div>
 
+    <div class="field-group" id="fg-nombre">
+      <label class="field-label" for="f-nombre">Nombre completo <span class="req">*</span></label>
+      <input class="field-input" id="f-nombre" type="text" placeholder="Tu nombre y apellido" maxlength="60" autocomplete="off">
+      <div class="field-error">Ingresá tu nombre completo.</div>
+    </div>
+
     <div class="field-group" id="fg-gamertag">
       <label class="field-label" for="f-gamertag">Gamertag <span class="req">*</span></label>
       <input class="field-input" id="f-gamertag" type="text" placeholder="Tu ID de jugador (PS / Xbox / PC)" maxlength="48" autocomplete="off" spellcheck="false">
@@ -284,6 +301,25 @@ tr:hover td{background:rgba(255,255,255,.02);}
         Agregar arquetipo
       </button>
       <div class="field-error">Agregá al menos un arquetipo.</div>
+    </div>
+
+    <div class="field-group" id="fg-ultimo-equipo">
+      <label class="field-label" for="f-ultimo-equipo">Último equipo <span class="req">*</span></label>
+      <input class="field-input" id="f-ultimo-equipo" type="text" placeholder="Nombre del club o 'Sin equipo previo'" maxlength="80" autocomplete="off">
+      <div class="field-error">Ingresá tu último equipo.</div>
+    </div>
+
+    <div class="field-group" id="fg-experiencias">
+      <label class="field-label">Experiencias destacadas</label>
+      <div class="arq-col-labels" style="grid-template-columns:1fr 32px;">
+        <span class="arq-col-lbl">Logro o experiencia</span>
+        <span class="arq-col-lbl"></span>
+      </div>
+      <div class="exp-entries" id="expEntries"></div>
+      <button type="button" class="add-arq-btn" id="addExpBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar experiencia
+      </button>
     </div>
 
     <div class="field-group" id="fg-disp">
@@ -334,17 +370,19 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <table>
         <thead>
           <tr>
-            <th>Gamertag</th>
+            <th>Nombre / Gamertag</th>
             <th>Edad</th>
             <th>Posiciones</th>
             <th>Arquetipos</th>
+            <th>Último equipo</th>
+            <th>Experiencias</th>
             <th>Estado</th>
             <th>Fecha</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="adminTbody">
-          <tr><td colspan="7" class="empty-state">Cargando...</td></tr>
+          <tr><td colspan="9" class="empty-state">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -443,6 +481,47 @@ function addArqEntry() {
 document.getElementById('addArqBtn').addEventListener('click', addArqEntry);
 addArqEntry(); // start with one row
 
+/* ─── EXPERIENCE BUILDER ─── */
+function makeExpEntry() {
+  const wrap = document.createElement('div');
+  wrap.className = 'exp-entry';
+
+  const inp = document.createElement('input');
+  inp.className = 'exp-input';
+  inp.type = 'text';
+  inp.placeholder = 'Ej: Campeón VPN T2, Top scorer 11x11, etc.';
+  inp.maxLength = 100;
+
+  const rmBtn = document.createElement('button');
+  rmBtn.type = 'button';
+  rmBtn.className = 'arq-remove';
+  rmBtn.title = 'Eliminar';
+  rmBtn.textContent = '✕';
+  rmBtn.addEventListener('click', () => {
+    wrap.remove();
+    updateExpRemoveButtons();
+  });
+
+  wrap.appendChild(inp);
+  wrap.appendChild(rmBtn);
+  return wrap;
+}
+
+function updateExpRemoveButtons() {
+  const entries = document.querySelectorAll('.exp-entry');
+  entries.forEach(e => {
+    e.querySelector('.arq-remove').style.visibility = entries.length > 1 ? 'visible' : 'hidden';
+  });
+}
+
+function addExpEntry() {
+  document.getElementById('expEntries').appendChild(makeExpEntry());
+  updateExpRemoveButtons();
+}
+
+document.getElementById('addExpBtn').addEventListener('click', addExpEntry);
+addExpEntry(); // start with one row
+
 /* ─── DISPONIBILIDAD CHECKBOX ─── */
 const dispCheck = document.getElementById('dispCheck');
 const dispInput = document.getElementById('f-disp');
@@ -454,23 +533,31 @@ dispCheck.addEventListener('click', function() {
 
 /* ─── FORM SUBMIT ─── */
 document.getElementById('submitBtn').addEventListener('click', function() {
-  const gamertag   = document.getElementById('f-gamertag').value.trim();
-  const edadRaw    = document.getElementById('f-edad').value;
-  const edad       = parseInt(edadRaw, 10);
-  const posiciones = [...document.querySelectorAll('.pos-chip.selected')].map(c => c.dataset.pos);
-  const disp       = dispInput.checked;
+  const nombre       = document.getElementById('f-nombre').value.trim();
+  const gamertag     = document.getElementById('f-gamertag').value.trim();
+  const edadRaw      = document.getElementById('f-edad').value;
+  const edad         = parseInt(edadRaw, 10);
+  const posiciones   = [...document.querySelectorAll('.pos-chip.selected')].map(c => c.dataset.pos);
+  const ultimoEquipo = document.getElementById('f-ultimo-equipo').value.trim();
+  const disp         = dispInput.checked;
 
   const arqEntries = [...document.querySelectorAll('.arq-entry')];
   const arquetipos = arqEntries
     .map(e => ({ nombre: e.querySelector('.arq-name').value.trim(), nivel: e.querySelector('.arq-niv').value }))
     .filter(a => a.nombre);
 
+  const experiencias = [...document.querySelectorAll('.exp-entry')]
+    .map(e => e.querySelector('.exp-input').value.trim())
+    .filter(Boolean);
+
   const valid = [
-    setErr('fg-gamertag',   !gamertag),
-    setErr('fg-edad',       !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
-    setErr('fg-posiciones', posiciones.length === 0),
-    setErr('fg-arquetipos', arquetipos.length === 0),
-    setErr('fg-disp',       !disp),
+    setErr('fg-nombre',        !nombre),
+    setErr('fg-gamertag',      !gamertag),
+    setErr('fg-edad',          !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
+    setErr('fg-posiciones',    posiciones.length === 0),
+    setErr('fg-arquetipos',    arquetipos.length === 0),
+    setErr('fg-ultimo-equipo', !ultimoEquipo),
+    setErr('fg-disp',          !disp),
   ].every(ok => ok);
 
   if (!valid) return;
@@ -480,7 +567,9 @@ document.getElementById('submitBtn').addEventListener('click', function() {
   btn.textContent = 'Enviando...';
 
   const payload = {
-    gamertag, edad, posiciones, arquetipos,
+    nombre, gamertag, edad, posiciones, arquetipos,
+    ultimoEquipo,
+    experiencias: experiencias.length ? experiencias : null,
     disponibilidad: true,
     estado: 'pendiente',
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -542,15 +631,15 @@ function openAdminPanel() {
 }
 
 function loadSubmissions() {
-  document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">Cargando...</td></tr>';
+  document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Cargando...</td></tr>';
   if (!RECLU_COL) {
-    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">Firestore no disponible.</td></tr>';
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Firestore no disponible.</td></tr>';
     return;
   }
   RECLU_COL.orderBy('timestamp', 'desc').get()
     .then(snap => renderTable(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
     .catch(() => {
-      document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">Error al cargar solicitudes.</td></tr>';
+      document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Error al cargar solicitudes.</td></tr>';
     });
 }
 
@@ -561,7 +650,7 @@ function renderTable(docs) {
   const n = docs.length;
   document.getElementById('adminCount').textContent = n ? ` · ${n} solicitud${n !== 1 ? 'es' : ''}` : '';
   if (!n) {
-    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">No hay solicitudes todavía.</td></tr>';
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">No hay solicitudes todavía.</td></tr>';
     return;
   }
   document.getElementById('adminTbody').innerHTML = docs.map(d => {
@@ -579,11 +668,19 @@ function renderTable(docs) {
         ).join('')}</div>`
       : '<span style="color:var(--mid)">—</span>';
 
+    const expHTML = Array.isArray(d.experiencias) && d.experiencias.length
+      ? `<ul style="margin:0;padding-left:14px;display:flex;flex-direction:column;gap:2px;">${d.experiencias.map(x => `<li style="font-size:12px;color:var(--text2);">${esc(x)}</li>`).join('')}</ul>`
+      : '<span style="color:var(--mid)">—</span>';
+
+    const nameTag = `<div style="font-size:12px;color:var(--mid);margin-top:2px;">${esc(d.gamertag||'')}</div>`;
+
     return `<tr data-id="${esc(d.id)}">
-      <td class="td-tag">${esc(d.gamertag||'—')}</td>
+      <td class="td-tag">${esc(d.nombre||d.gamertag||'—')}${d.nombre ? nameTag : ''}</td>
       <td>${d.edad||'—'}</td>
       <td>${posHTML}</td>
       <td>${arqHTML}</td>
+      <td style="font-size:12px;color:var(--text2);">${esc(d.ultimoEquipo||'—')}</td>
+      <td>${expHTML}</td>
       <td><select class="status-sel s-${est}" onchange="updateEstado(this)">${opts}</select></td>
       <td class="td-date">${fecha}</td>
       <td><button class="del-btn" onclick="deleteSolicitud(this)" title="Eliminar">✕</button></td>
