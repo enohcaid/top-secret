@@ -941,7 +941,7 @@ function renderPitch() {
         tok.innerHTML = '';
         const _sil = document.createElement('img');
         _sil.src = 'Renders/silueta-prueba.png';
-        _sil.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(1.6);transform-origin:top center;opacity:.55;';
+        _sil.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(2.7) translateY(0%);transform-origin:top center;opacity:.55;';
         tok.appendChild(_sil);
         const _bar = document.createElement('div'); _bar.className = 'stoken-bar';
         const _ginp = document.createElement('input');
@@ -1410,7 +1410,15 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
     ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
     if (_silImg) {
       ctx.globalAlpha = 0.55;
-      ctx.drawImage(_silImg, tx, ty, tokW, photoH);
+      const PHOTO_SCALE = 3.6;
+      const imgW = _silImg.naturalWidth, imgH = _silImg.naturalHeight;
+      const coverScale = Math.max(tokW / imgW, photoH / imgH);
+      let srcW = tokW / coverScale, srcH = photoH / coverScale;
+      let srcX = (imgW - srcW) / 2;
+      let srcY = 0;
+      srcW = srcW / PHOTO_SCALE; srcH = srcH / PHOTO_SCALE;
+      srcX += (tokW / coverScale - srcW) / 2;
+      ctx.drawImage(_silImg, srcX, srcY, srcW, srcH, tx, ty, tokW, photoH);
       ctx.globalAlpha = 1;
     } else {
       ctx.fillStyle = 'rgba(0,0,0,0.42)';
