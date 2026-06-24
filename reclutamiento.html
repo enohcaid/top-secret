@@ -87,6 +87,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
   transition:border-color .15s;
 }
 .arq-niv option{background:#1C1C1C;color:var(--text);}
+.arq-name.arq-niv{width:100%;}
 .arq-niv:focus{border-color:var(--gold);outline:none;}
 .arq-remove{
   width:32px;height:32px;border-radius:6px;border:1px solid rgba(239,68,68,.2);
@@ -291,7 +292,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="field-group" id="fg-arquetipos">
       <label class="field-label">Arquetipos <span class="req">*</span></label>
       <div class="arq-col-labels">
-        <span class="arq-col-lbl">Nombre del arquetipo</span>
+        <span class="arq-col-lbl">Arquetipo</span>
         <span class="arq-col-lbl">Nivel</span>
         <span class="arq-col-lbl"></span>
       </div>
@@ -434,16 +435,30 @@ document.querySelectorAll('.pos-chip').forEach(chip => {
 
 /* ─── ARCHETYPE BUILDER ─── */
 const NIV_OPTIONS = Array.from({length:96}, (_,i) => 95 - i);
+const ARQ_OPTIONS = [
+  'Paragoles / Muro',
+  'Portero Líbero / Guardameta Líbero',
+  'Precursor / Impulso',
+  'Jefe / Líder',
+  'Motor',
+  'Acechador / Amenaza',
+  'Reciclador / Nexo',
+  'Maestro / Guía',
+  'Creador / Artista',
+  'Chispa',
+  'Mago / Ilusionista',
+  'Rematador / Killer',
+  'Objetivo / Referencia',
+];
 
 function makeArqEntry() {
   const wrap = document.createElement('div');
   wrap.className = 'arq-entry';
 
-  const nameIn = document.createElement('input');
-  nameIn.className = 'arq-name';
-  nameIn.type = 'text';
-  nameIn.placeholder = 'Nombre del arquetipo';
-  nameIn.maxLength = 50;
+  const nameIn = document.createElement('select');
+  nameIn.className = 'arq-name arq-niv';
+  nameIn.innerHTML = '<option value="">Seleccionar arquetipo...</option>' +
+    ARQ_OPTIONS.map(a => `<option value="${a}">${a}</option>`).join('');
 
   const nivSel = document.createElement('select');
   nivSel.className = 'arq-niv';
