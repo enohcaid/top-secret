@@ -37,7 +37,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 .form-desc{font-size:13px;color:var(--mid);margin-bottom:28px;line-height:1.5;}
 
 /* Fields */
-.field-group{margin-bottom:22px;}
+.field-group{margin-bottom:24px;}
 .field-label{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-bottom:8px;}
 .field-label .req{color:var(--gold);margin-left:2px;}
 .field-input{
@@ -47,6 +47,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 }
 .field-input:focus{border-color:var(--gold);background:rgba(201,168,76,.05);}
 .field-input::placeholder{color:var(--mid2);}
+.field-input.narrow{max-width:160px;}
 select.field-input{
   cursor:pointer;-webkit-appearance:none;appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
@@ -54,26 +55,89 @@ select.field-input{
 }
 select.field-input option{background:#1C1C1C;color:var(--text);}
 
-/* Inline field (edad, horario) */
-.field-input.narrow{max-width:160px;}
-
 /* Validation */
-.field-error{font-size:11px;color:var(--red);margin-top:5px;display:none;}
+.field-error{font-size:11px;color:var(--red);margin-top:6px;display:none;}
 .field-group.has-error .field-input{border-color:var(--red);}
 .field-group.has-error .field-error{display:block;}
 
-/* Day chips */
-.day-chips{display:flex;flex-wrap:wrap;gap:8px;}
-.day-chip input{display:none;}
-.day-chip label{
-  display:inline-block;padding:7px 15px;border-radius:20px;
-  border:1px solid var(--border);background:rgba(255,255,255,.04);
-  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--mid);cursor:pointer;transition:all .15s;user-select:none;
+/* Positions builder */
+.pos-entries{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.pos-entry{display:grid;grid-template-columns:90px 1fr 130px 32px;gap:8px;align-items:center;}
+.pos-entry .field-input{padding:10px 10px;font-size:13px;}
+select.pos-sel{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;
+  padding:10px 30px 10px 10px;color:var(--text);font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:700;letter-spacing:.04em;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+  transition:border-color .15s;
 }
-.day-chip label:hover{border-color:var(--mid2);color:var(--text);}
-.day-chip input:checked+label{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
-.field-group.has-error .day-chip label{border-color:rgba(239,68,68,.4);}
+select.pos-sel option{background:#1C1C1C;color:var(--text);}
+select.pos-sel:focus{border-color:var(--gold);outline:none;}
+.arq-input{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;
+  outline:none;transition:border-color .15s;width:100%;
+}
+.arq-input::placeholder{color:var(--mid2);}
+.arq-input:focus{border-color:var(--gold);}
+select.niv-sel{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;
+  padding:10px 28px 10px 10px;color:var(--text);font-family:'Barlow',sans-serif;
+  font-size:12px;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;
+  transition:border-color .15s;width:100%;
+}
+select.niv-sel option{background:#1C1C1C;color:var(--text);}
+select.niv-sel:focus{border-color:var(--gold);outline:none;}
+.pos-remove{
+  width:32px;height:32px;border-radius:6px;border:1px solid rgba(239,68,68,.25);
+  background:none;color:rgba(239,68,68,.45);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .15s,background .15s,border-color .15s;flex-shrink:0;
+}
+.pos-remove:hover{color:var(--red);background:rgba(239,68,68,.1);border-color:var(--red);}
+.add-pos-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:none;border:1px dashed rgba(255,255,255,.2);border-radius:8px;
+  padding:9px 16px;color:var(--mid);font-size:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  transition:color .15s,border-color .15s;width:100%;justify-content:center;
+}
+.add-pos-btn:hover{color:var(--text);border-color:var(--mid2);}
+.pos-cols{display:grid;grid-template-columns:90px 1fr 130px;gap:6px;margin-bottom:4px;}
+.pos-col-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid2);padding-left:2px;}
+.field-group.has-error .pos-entries .pos-entry:first-child select.pos-sel,
+.field-group.has-error .pos-entries .pos-entry:only-child select.pos-sel{border-color:var(--red);}
+
+/* Disponibilidad checkbox */
+.disp-check{
+  display:flex;align-items:flex-start;gap:12px;padding:16px 18px;
+  background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;
+  cursor:pointer;transition:border-color .15s,background .15s;user-select:none;
+}
+.disp-check:hover{border-color:var(--mid2);background:rgba(255,255,255,.05);}
+.disp-check input[type=checkbox]{display:none;}
+.disp-box{
+  width:18px;height:18px;border-radius:4px;border:2px solid var(--mid2);
+  background:transparent;flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s,background .15s;
+}
+.disp-check input:checked~.disp-content .disp-box,
+.disp-check.checked .disp-box{border-color:var(--gold);background:var(--gold);}
+.disp-check.checked .disp-box::after{
+  content:'';display:block;width:5px;height:9px;
+  border:2px solid #111;border-top:none;border-left:none;
+  transform:rotate(45deg) translate(-1px,-1px);
+}
+.disp-content{display:flex;align-items:flex-start;gap:12px;width:100%;}
+.disp-text{font-size:14px;color:var(--text);line-height:1.4;}
+.disp-text strong{color:var(--gold);}
+.field-group.has-error .disp-check{border-color:rgba(239,68,68,.5);}
 
 /* Submit */
 .submit-btn{
@@ -98,7 +162,7 @@ select.field-input option{background:#1C1C1C;color:var(--text);}
 .success-title{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:900;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
 .success-msg{font-size:14px;color:var(--mid);line-height:1.6;max-width:340px;margin:0 auto;}
 
-/* Admin access link */
+/* Admin access */
 .admin-access{margin-top:24px;display:flex;justify-content:flex-end;}
 .admin-btn-link{
   background:none;border:1px solid var(--border);border-radius:6px;
@@ -116,10 +180,7 @@ select.field-input option{background:#1C1C1C;color:var(--text);}
   display:none;align-items:center;justify-content:center;
 }
 .modal-overlay.open{display:flex;}
-.modal-box{
-  background:#1C1C1C;border:1px solid var(--border);border-radius:12px;
-  padding:28px;width:320px;max-width:calc(100vw - 32px);
-}
+.modal-box{background:#1C1C1C;border:1px solid var(--border);border-radius:12px;padding:28px;width:320px;max-width:calc(100vw - 32px);}
 .modal-title{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;text-transform:uppercase;color:var(--text);margin-bottom:4px;}
 .modal-sub{font-size:12px;color:var(--mid);margin-bottom:18px;}
 .modal-input{
@@ -131,17 +192,9 @@ select.field-input option{background:#1C1C1C;color:var(--text);}
 .modal-input:focus{border-color:var(--gold);}
 .modal-error{font-size:11px;color:var(--red);margin-bottom:10px;display:none;}
 .modal-row{display:flex;gap:8px;}
-.modal-cancel{
-  flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;background:none;
-  color:var(--mid);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  cursor:pointer;transition:border-color .15s,color .15s;
-}
+.modal-cancel{flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--mid);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:border-color .15s,color .15s;}
 .modal-cancel:hover{border-color:var(--mid2);color:var(--text);}
-.modal-ok{
-  flex:2;padding:10px;background:var(--gold);border:none;border-radius:6px;
-  color:#111;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  cursor:pointer;transition:background .15s;
-}
+.modal-ok{flex:2;padding:10px;background:var(--gold);border:none;border-radius:6px;color:#111;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .15s;}
 .modal-ok:hover{background:var(--gold2);}
 
 /* Admin panel */
@@ -157,18 +210,18 @@ select.field-input option{background:#1C1C1C;color:var(--text);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 thead tr{background:rgba(255,255,255,.04);}
 th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);border-bottom:1px solid var(--border);white-space:nowrap;}
-td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,.02);}
 .td-tag{font-weight:600;color:var(--text);}
-.td-pos{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;color:var(--gold);}
 .td-date{color:var(--mid);font-size:11px;white-space:nowrap;}
-.status-sel{
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:4px;padding:4px 8px;font-size:11px;font-weight:700;
-  letter-spacing:.04em;text-transform:uppercase;cursor:pointer;outline:none;
-  font-family:'Barlow',sans-serif;
-}
+.td-disp{font-size:13px;}
+.pos-list{display:flex;flex-direction:column;gap:3px;}
+.pos-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;}
+.pos-pill .pp{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);letter-spacing:.04em;font-size:13px;}
+.pos-pill .pa{color:var(--text2);}
+.pos-pill .pn{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);border:1px solid var(--border);border-radius:3px;padding:1px 5px;}
+.status-sel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 8px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;outline:none;font-family:'Barlow',sans-serif;}
 .status-sel option{background:#1C1C1C;color:var(--text);}
 .s-pendiente{color:var(--yellow);}
 .s-en_revision{color:var(--blue);}
@@ -182,6 +235,10 @@ tr:hover td{background:rgba(255,255,255,.02);}
   .main{padding:24px 16px 80px;}
   .page-title{font-size:2.2rem;}
   .form-card{padding:22px 18px;}
+  .pos-entry{grid-template-columns:78px 1fr 32px;grid-template-rows:auto auto;}
+  .pos-entry .niv-sel{grid-column:1/3;}
+  .pos-cols{grid-template-columns:78px 1fr;}
+  .pos-cols .pos-col-lbl:last-child{display:none;}
   th,td{padding:9px 10px;}
 }
 </style>
@@ -204,43 +261,37 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <div class="field-error">Ingresá tu gamertag.</div>
     </div>
 
-    <div class="field-group" id="fg-posicion">
-      <label class="field-label" for="f-posicion">Posición preferida <span class="req">*</span></label>
-      <select class="field-input" id="f-posicion">
-        <option value="">Seleccionar...</option>
-        <option value="POR">POR — Portero</option>
-        <option value="DEF">DEF — Defensor Central</option>
-        <option value="LAT">LAT — Lateral</option>
-        <option value="MED">MED — Mediocampista</option>
-        <option value="DEL">DEL — Delantero</option>
-        <option value="IND">Indiferente</option>
-      </select>
-      <div class="field-error">Seleccioná una posición.</div>
-    </div>
-
     <div class="field-group" id="fg-edad">
       <label class="field-label" for="f-edad">Edad <span class="req">*</span></label>
       <input class="field-input narrow" id="f-edad" type="number" placeholder="Ej: 22" min="13" max="60">
       <div class="field-error">Ingresá una edad válida (13–60).</div>
     </div>
 
-    <div class="field-group" id="fg-dias">
-      <label class="field-label">Días disponibles <span class="req">*</span></label>
-      <div class="day-chips">
-        <div class="day-chip"><input type="checkbox" id="d-lun" value="Lun"><label for="d-lun">Lun</label></div>
-        <div class="day-chip"><input type="checkbox" id="d-mar" value="Mar"><label for="d-mar">Mar</label></div>
-        <div class="day-chip"><input type="checkbox" id="d-mie" value="Mié"><label for="d-mie">Mié</label></div>
-        <div class="day-chip"><input type="checkbox" id="d-jue" value="Jue"><label for="d-jue">Jue</label></div>
-        <div class="day-chip"><input type="checkbox" id="d-vie" value="Vie"><label for="d-vie">Vie</label></div>
-        <div class="day-chip"><input type="checkbox" id="d-sab" value="Sáb"><label for="d-sab">Sáb</label></div>
-        <div class="day-chip"><input type="checkbox" id="d-dom" value="Dom"><label for="d-dom">Dom</label></div>
+    <div class="field-group" id="fg-posiciones">
+      <label class="field-label">Posiciones y arquetipos <span class="req">*</span></label>
+      <div class="pos-cols">
+        <span class="pos-col-lbl">Posición</span>
+        <span class="pos-col-lbl">Arquetipo</span>
+        <span class="pos-col-lbl">Nivel</span>
       </div>
-      <div class="field-error">Seleccioná al menos un día.</div>
+      <div class="pos-entries" id="posEntries"></div>
+      <button type="button" class="add-pos-btn" id="addPosBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar posición
+      </button>
+      <div class="field-error">Agregá al menos una posición.</div>
     </div>
 
-    <div class="field-group">
-      <label class="field-label" for="f-horario">Horario estimado</label>
-      <input class="field-input narrow" id="f-horario" type="text" placeholder="Ej: 21hs a 00hs" maxlength="40">
+    <div class="field-group" id="fg-disp">
+      <label class="field-label">Disponibilidad <span class="req">*</span></label>
+      <label class="disp-check" id="dispCheck">
+        <input type="checkbox" id="f-disp">
+        <div class="disp-content">
+          <div class="disp-box" id="dispBox"></div>
+          <span class="disp-text">Tengo disponibilidad de <strong>Lunes a Jueves</strong> de <strong>22:30 a 00:30</strong></span>
+        </div>
+      </label>
+      <div class="field-error">Debes confirmar tu disponibilidad para continuar.</div>
     </div>
 
     <button class="submit-btn" id="submitBtn">Enviar solicitud</button>
@@ -266,7 +317,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
   <!-- ── ADMIN PANEL ── -->
   <div class="admin-panel" id="adminPanel">
     <div class="admin-panel-header">
-      <div style="display:flex;align-items:baseline;gap:0;">
+      <div style="display:flex;align-items:baseline;">
         <span class="admin-panel-title">Solicitudes</span>
         <span class="admin-count" id="adminCount"></span>
       </div>
@@ -282,17 +333,16 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <thead>
           <tr>
             <th>Gamertag</th>
-            <th>Pos</th>
             <th>Edad</th>
-            <th>Días</th>
-            <th>Horario</th>
+            <th>Posiciones</th>
+            <th>Disp.</th>
             <th>Estado</th>
             <th>Fecha</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="adminTbody">
-          <tr><td colspan="8" class="empty-state">Cargando...</td></tr>
+          <tr><td colspan="7" class="empty-state">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -334,20 +384,93 @@ try {
 const ADMIN_PW = '8189';
 let _adminAuth = false;
 
+/* ─── POSITIONS BUILDER ─── */
+const POS_OPTIONS = ['GK','DFC','LAT','MCD','MC','EXT','DC'];
+const NIV_OPTIONS = ['Básico','Intermedio','Avanzado','Elite'];
+
+function makePosEntry() {
+  const wrap = document.createElement('div');
+  wrap.className = 'pos-entry';
+
+  const posSel = document.createElement('select');
+  posSel.className = 'pos-sel field-input';
+  posSel.innerHTML = '<option value="">Pos.</option>' +
+    POS_OPTIONS.map(p => `<option value="${p}">${p}</option>`).join('');
+
+  const arqIn = document.createElement('input');
+  arqIn.className = 'arq-input';
+  arqIn.type = 'text';
+  arqIn.placeholder = 'Arquetipo';
+  arqIn.maxLength = 40;
+
+  const nivSel = document.createElement('select');
+  nivSel.className = 'niv-sel field-input';
+  nivSel.innerHTML = '<option value="">Nivel</option>' +
+    NIV_OPTIONS.map(n => `<option value="${n}">${n}</option>`).join('');
+
+  const rmBtn = document.createElement('button');
+  rmBtn.type = 'button';
+  rmBtn.className = 'pos-remove';
+  rmBtn.title = 'Eliminar';
+  rmBtn.textContent = '✕';
+  rmBtn.addEventListener('click', () => {
+    wrap.remove();
+    updateRemoveButtons();
+  });
+
+  wrap.appendChild(posSel);
+  wrap.appendChild(arqIn);
+  wrap.appendChild(nivSel);
+  wrap.appendChild(rmBtn);
+  return wrap;
+}
+
+function updateRemoveButtons() {
+  const entries = document.querySelectorAll('.pos-entry');
+  entries.forEach(e => {
+    e.querySelector('.pos-remove').style.visibility = entries.length > 1 ? 'visible' : 'hidden';
+  });
+}
+
+function addPosEntry() {
+  document.getElementById('posEntries').appendChild(makePosEntry());
+  updateRemoveButtons();
+}
+
+document.getElementById('addPosBtn').addEventListener('click', addPosEntry);
+
+addPosEntry(); // start with one row
+
+/* ─── DISPONIBILIDAD CHECKBOX ─── */
+const dispCheck = document.getElementById('dispCheck');
+const dispInput = document.getElementById('f-disp');
+const dispBox   = document.getElementById('dispBox');
+
+dispCheck.addEventListener('click', function() {
+  dispInput.checked = !dispInput.checked;
+  dispCheck.classList.toggle('checked', dispInput.checked);
+});
+
 /* ─── FORM SUBMIT ─── */
 document.getElementById('submitBtn').addEventListener('click', function() {
   const gamertag = document.getElementById('f-gamertag').value.trim();
-  const posicion  = document.getElementById('f-posicion').value;
-  const edadRaw   = document.getElementById('f-edad').value;
-  const edad      = parseInt(edadRaw, 10);
-  const dias      = [...document.querySelectorAll('.day-chip input:checked')].map(c => c.value);
-  const horario   = document.getElementById('f-horario').value.trim();
+  const edadRaw  = document.getElementById('f-edad').value;
+  const edad     = parseInt(edadRaw, 10);
+  const disp     = dispInput.checked;
+
+  const posEntries = [...document.querySelectorAll('.pos-entry')];
+  const posiciones = posEntries.map(e => ({
+    pos:      e.querySelector('.pos-sel').value,
+    arquetipo: e.querySelector('.arq-input').value.trim(),
+    nivel:    e.querySelector('.niv-sel').value,
+  }));
+  const posValid = posiciones.some(p => p.pos);
 
   const valid = [
-    setErr('fg-gamertag', !gamertag),
-    setErr('fg-posicion', !posicion),
-    setErr('fg-edad', !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
-    setErr('fg-dias', dias.length === 0),
+    setErr('fg-gamertag',  !gamertag),
+    setErr('fg-edad',      !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
+    setErr('fg-posiciones', !posValid),
+    setErr('fg-disp',      !disp),
   ].every(ok => ok);
 
   if (!valid) return;
@@ -357,8 +480,9 @@ document.getElementById('submitBtn').addEventListener('click', function() {
   btn.textContent = 'Enviando...';
 
   const payload = {
-    gamertag, posicion, edad, dias,
-    horario: horario || null,
+    gamertag, edad,
+    posiciones: posiciones.filter(p => p.pos),
+    disponibilidad: true,
     estado: 'pendiente',
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   };
@@ -390,19 +514,12 @@ document.getElementById('adminAccessBtn').addEventListener('click', function() {
   document.getElementById('modalOverlay').classList.add('open');
   setTimeout(() => document.getElementById('pwInput').focus(), 60);
 });
-
 document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
 document.getElementById('modalOkBtn').addEventListener('click', checkPassword);
-document.getElementById('pwInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') checkPassword();
-});
-document.getElementById('modalOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
 function checkPassword() {
   if (document.getElementById('pwInput').value === ADMIN_PW) {
@@ -417,9 +534,7 @@ function checkPassword() {
 }
 
 /* ─── ADMIN PANEL ─── */
-document.getElementById('adminCloseBtn').addEventListener('click', function() {
-  document.getElementById('adminPanel').style.display = 'none';
-});
+document.getElementById('adminCloseBtn').addEventListener('click', () => { document.getElementById('adminPanel').style.display = 'none'; });
 document.getElementById('adminRefreshBtn').addEventListener('click', loadSubmissions);
 
 function openAdminPanel() {
@@ -428,39 +543,45 @@ function openAdminPanel() {
 }
 
 function loadSubmissions() {
-  document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Cargando...</td></tr>';
+  document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">Cargando...</td></tr>';
   if (!RECLU_COL) {
-    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Firestore no disponible.</td></tr>';
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">Firestore no disponible.</td></tr>';
     return;
   }
   RECLU_COL.orderBy('timestamp', 'desc').get()
     .then(snap => renderTable(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
     .catch(() => {
-      document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Error al cargar solicitudes.</td></tr>';
+      document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">Error al cargar solicitudes.</td></tr>';
     });
 }
 
-const ESTADOS = ['pendiente','en_revision','aceptado','rechazado'];
+const ESTADOS   = ['pendiente','en_revision','aceptado','rechazado'];
 const ESTADO_LBL = {pendiente:'Pendiente',en_revision:'En revisión',aceptado:'Aceptado',rechazado:'Rechazado'};
 
 function renderTable(docs) {
   const n = docs.length;
   document.getElementById('adminCount').textContent = n ? ` · ${n} solicitud${n !== 1 ? 'es' : ''}` : '';
   if (!n) {
-    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">No hay solicitudes todavía.</td></tr>';
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="7" class="empty-state">No hay solicitudes todavía.</td></tr>';
     return;
   }
   document.getElementById('adminTbody').innerHTML = docs.map(d => {
     const fecha = d.timestamp ? fmtDate(d.timestamp.toDate()) : '—';
-    const dias  = Array.isArray(d.dias) ? d.dias.join(', ') : '—';
     const est   = d.estado || 'pendiente';
     const opts  = ESTADOS.map(s => `<option value="${s}"${s===est?' selected':''}>${ESTADO_LBL[s]}</option>`).join('');
+    const posHTML = Array.isArray(d.posiciones) && d.posiciones.length
+      ? `<div class="pos-list">${d.posiciones.map(p =>
+          `<div class="pos-pill"><span class="pp">${esc(p.pos)}</span>${p.arquetipo ? `<span class="pa">· ${esc(p.arquetipo)}</span>` : ''}${p.nivel ? `<span class="pn">${esc(p.nivel)}</span>` : ''}</div>`
+        ).join('')}</div>`
+      : `<span style="color:var(--mid)">—</span>`;
+    const dispHTML = d.disponibilidad
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+      : '<span style="color:var(--red)">✕</span>';
     return `<tr data-id="${esc(d.id)}">
       <td class="td-tag">${esc(d.gamertag||'—')}</td>
-      <td class="td-pos">${esc(d.posicion||'—')}</td>
       <td>${d.edad||'—'}</td>
-      <td>${esc(dias)}</td>
-      <td>${esc(d.horario||'—')}</td>
+      <td>${posHTML}</td>
+      <td class="td-disp">${dispHTML}</td>
       <td><select class="status-sel s-${est}" onchange="updateEstado(this)">${opts}</select></td>
       <td class="td-date">${fecha}</td>
       <td><button class="del-btn" onclick="deleteSolicitud(this)" title="Eliminar">✕</button></td>
@@ -469,10 +590,7 @@ function renderTable(docs) {
 }
 
 function fmtDate(d) {
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const yy = d.getFullYear();
-  return `${dd}/${mm}/${yy}`;
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
 function esc(s) {
@@ -489,9 +607,7 @@ function updateEstado(sel) {
 function deleteSolicitud(btn) {
   if (!confirm('¿Eliminar esta solicitud?')) return;
   const id = btn.closest('tr').dataset.id;
-  if (RECLU_COL) {
-    RECLU_COL.doc(id).delete().then(loadSubmissions).catch(e => console.warn('Delete error:', e));
-  }
+  if (RECLU_COL) RECLU_COL.doc(id).delete().then(loadSubmissions).catch(e => console.warn('Delete error:', e));
 }
 </script>
 <script src="layout.js?v=5"></script>
