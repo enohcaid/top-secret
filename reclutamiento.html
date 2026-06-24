@@ -557,9 +557,22 @@ document.getElementById('submitBtn').addEventListener('click', function() {
   const disp         = dispInput.checked;
 
   const arqEntries = [...document.querySelectorAll('.arq-entry')];
-  const arquetipos = arqEntries
-    .map(e => ({ nombre: e.querySelector('.arq-name').value.trim(), nivel: e.querySelector('.arq-niv').value }))
-    .filter(a => a.nombre);
+  let arqOk = true;
+  const arquetipos = [];
+  arqEntries.forEach(e => {
+    const nombre = e.querySelector('.arq-name').value;
+    const nivel  = e.querySelector('.arq-niv').value;
+    const nivEl  = e.querySelector('.arq-niv');
+    if (!nombre && !nivel) return; // empty row — skip
+    if (!nombre || !nivel) {
+      nivEl.style.borderColor = 'var(--red)';
+      arqOk = false;
+    } else {
+      nivEl.style.borderColor = '';
+      arquetipos.push({ nombre, nivel });
+    }
+  });
+  if (!arquetipos.length) arqOk = false;
 
   const experiencias = [...document.querySelectorAll('.exp-entry')]
     .map(e => e.querySelector('.exp-input').value.trim())
@@ -570,7 +583,7 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     setErr('fg-gamertag',      !gamertag),
     setErr('fg-edad',          !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
     setErr('fg-posiciones',    posiciones.length === 0),
-    setErr('fg-arquetipos',    arquetipos.length === 0),
+    setErr('fg-arquetipos',    !arqOk),
     setErr('fg-ultimo-equipo', !ultimoEquipo),
     setErr('fg-disp',          !disp),
   ].every(ok => ok);
