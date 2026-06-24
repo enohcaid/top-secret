@@ -48,70 +48,63 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 .field-input:focus{border-color:var(--gold);background:rgba(201,168,76,.05);}
 .field-input::placeholder{color:var(--mid2);}
 .field-input.narrow{max-width:160px;}
-select.field-input{
-  cursor:pointer;-webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
-}
-select.field-input option{background:#1C1C1C;color:var(--text);}
 
 /* Validation */
 .field-error{font-size:11px;color:var(--red);margin-top:6px;display:none;}
 .field-group.has-error .field-input{border-color:var(--red);}
 .field-group.has-error .field-error{display:block;}
 
-/* Positions builder */
-.pos-entries{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
-.pos-entry{display:grid;grid-template-columns:90px 1fr 130px 32px;gap:8px;align-items:center;}
-.pos-entry .field-input{padding:10px 10px;font-size:13px;}
-select.pos-sel{
-  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;
-  padding:10px 30px 10px 10px;color:var(--text);font-family:'Barlow Condensed',sans-serif;
-  font-size:13px;font-weight:700;letter-spacing:.04em;outline:none;cursor:pointer;
-  -webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;
-  transition:border-color .15s;
+/* Position chips */
+.pos-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.pos-chip{
+  padding:8px 16px;border-radius:6px;border:1px solid var(--border);
+  background:rgba(255,255,255,.04);font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--mid);cursor:pointer;transition:all .15s;user-select:none;
 }
-select.pos-sel option{background:#1C1C1C;color:var(--text);}
-select.pos-sel:focus{border-color:var(--gold);outline:none;}
-.arq-input{
+.pos-chip:hover{border-color:var(--mid2);color:var(--text);}
+.pos-chip.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);}
+.field-group.has-error .pos-chip{border-color:rgba(239,68,68,.3);}
+.field-group.has-error .pos-chip.selected{border-color:var(--gold);}
+
+/* Archetype builder */
+.arq-entries{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.arq-entry{display:grid;grid-template-columns:1fr 140px 32px;gap:8px;align-items:center;}
+.arq-name{
   background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;
   padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;
   outline:none;transition:border-color .15s;width:100%;
 }
-.arq-input::placeholder{color:var(--mid2);}
-.arq-input:focus{border-color:var(--gold);}
-select.niv-sel{
+.arq-name::placeholder{color:var(--mid2);}
+.arq-name:focus{border-color:var(--gold);}
+.arq-niv{
   background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;
   padding:10px 28px 10px 10px;color:var(--text);font-family:'Barlow',sans-serif;
-  font-size:12px;outline:none;cursor:pointer;
+  font-size:12px;outline:none;cursor:pointer;width:100%;
   -webkit-appearance:none;appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 7px center;
-  transition:border-color .15s;width:100%;
+  background-repeat:no-repeat;background-position:right 8px center;
+  transition:border-color .15s;
 }
-select.niv-sel option{background:#1C1C1C;color:var(--text);}
-select.niv-sel:focus{border-color:var(--gold);outline:none;}
-.pos-remove{
-  width:32px;height:32px;border-radius:6px;border:1px solid rgba(239,68,68,.25);
-  background:none;color:rgba(239,68,68,.45);cursor:pointer;font-size:14px;
-  display:flex;align-items:center;justify-content:center;
-  transition:color .15s,background .15s,border-color .15s;flex-shrink:0;
+.arq-niv option{background:#1C1C1C;color:var(--text);}
+.arq-niv:focus{border-color:var(--gold);outline:none;}
+.arq-remove{
+  width:32px;height:32px;border-radius:6px;border:1px solid rgba(239,68,68,.2);
+  background:none;color:rgba(239,68,68,.4);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:color .15s,background .15s,border-color .15s;
 }
-.pos-remove:hover{color:var(--red);background:rgba(239,68,68,.1);border-color:var(--red);}
-.add-pos-btn{
-  display:inline-flex;align-items:center;gap:6px;
-  background:none;border:1px dashed rgba(255,255,255,.2);border-radius:8px;
-  padding:9px 16px;color:var(--mid);font-size:12px;font-weight:700;
+.arq-remove:hover{color:var(--red);background:rgba(239,68,68,.1);border-color:var(--red);}
+.add-arq-btn{
+  display:inline-flex;align-items:center;gap:6px;justify-content:center;width:100%;
+  background:none;border:1px dashed rgba(255,255,255,.18);border-radius:8px;
+  padding:9px 16px;color:var(--mid);font-size:11px;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
-  transition:color .15s,border-color .15s;width:100%;justify-content:center;
+  transition:color .15s,border-color .15s;
 }
-.add-pos-btn:hover{color:var(--text);border-color:var(--mid2);}
-.pos-cols{display:grid;grid-template-columns:90px 1fr 130px;gap:6px;margin-bottom:4px;}
-.pos-col-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid2);padding-left:2px;}
-.field-group.has-error .pos-entries .pos-entry:first-child select.pos-sel,
-.field-group.has-error .pos-entries .pos-entry:only-child select.pos-sel{border-color:var(--red);}
+.add-arq-btn:hover{color:var(--text);border-color:var(--mid2);}
+.arq-col-labels{display:grid;grid-template-columns:1fr 140px 32px;gap:8px;margin-bottom:4px;}
+.arq-col-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid2);padding-left:2px;}
 
 /* Disponibilidad checkbox */
 .disp-check{
@@ -123,18 +116,16 @@ select.niv-sel:focus{border-color:var(--gold);outline:none;}
 .disp-check input[type=checkbox]{display:none;}
 .disp-box{
   width:18px;height:18px;border-radius:4px;border:2px solid var(--mid2);
-  background:transparent;flex-shrink:0;margin-top:1px;
+  background:transparent;flex-shrink:0;margin-top:2px;
   display:flex;align-items:center;justify-content:center;
   transition:border-color .15s,background .15s;
 }
-.disp-check input:checked~.disp-content .disp-box,
 .disp-check.checked .disp-box{border-color:var(--gold);background:var(--gold);}
 .disp-check.checked .disp-box::after{
   content:'';display:block;width:5px;height:9px;
   border:2px solid #111;border-top:none;border-left:none;
   transform:rotate(45deg) translate(-1px,-1px);
 }
-.disp-content{display:flex;align-items:flex-start;gap:12px;width:100%;}
 .disp-text{font-size:14px;color:var(--text);line-height:1.4;}
 .disp-text strong{color:var(--gold);}
 .field-group.has-error .disp-check{border-color:rgba(239,68,68,.5);}
@@ -215,12 +206,12 @@ tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,.02);}
 .td-tag{font-weight:600;color:var(--text);}
 .td-date{color:var(--mid);font-size:11px;white-space:nowrap;}
-.td-disp{font-size:13px;}
-.pos-list{display:flex;flex-direction:column;gap:3px;}
-.pos-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;}
-.pos-pill .pp{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);letter-spacing:.04em;font-size:13px;}
-.pos-pill .pa{color:var(--text2);}
-.pos-pill .pn{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);border:1px solid var(--border);border-radius:3px;padding:1px 5px;}
+.td-pos-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.td-pos-chip{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:2px 7px;}
+.arq-list{display:flex;flex-direction:column;gap:3px;}
+.arq-item{font-size:12px;color:var(--text2);}
+.arq-item .an{color:var(--text);font-weight:500;}
+.arq-item .al{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);border:1px solid var(--border);border-radius:3px;padding:1px 5px;margin-left:4px;}
 .status-sel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 8px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;outline:none;font-family:'Barlow',sans-serif;}
 .status-sel option{background:#1C1C1C;color:var(--text);}
 .s-pendiente{color:var(--yellow);}
@@ -235,10 +226,9 @@ tr:hover td{background:rgba(255,255,255,.02);}
   .main{padding:24px 16px 80px;}
   .page-title{font-size:2.2rem;}
   .form-card{padding:22px 18px;}
-  .pos-entry{grid-template-columns:78px 1fr 32px;grid-template-rows:auto auto;}
-  .pos-entry .niv-sel{grid-column:1/3;}
-  .pos-cols{grid-template-columns:78px 1fr;}
-  .pos-cols .pos-col-lbl:last-child{display:none;}
+  .arq-entry{grid-template-columns:1fr 32px;grid-template-rows:auto auto;}
+  .arq-entry .arq-niv{grid-column:1/2;}
+  .arq-col-labels .arq-col-lbl:nth-child(2){display:none;}
   th,td{padding:9px 10px;}
 }
 </style>
@@ -268,28 +258,40 @@ tr:hover td{background:rgba(255,255,255,.02);}
     </div>
 
     <div class="field-group" id="fg-posiciones">
-      <label class="field-label">Posiciones y arquetipos <span class="req">*</span></label>
-      <div class="pos-cols">
-        <span class="pos-col-lbl">Posición</span>
-        <span class="pos-col-lbl">Arquetipo</span>
-        <span class="pos-col-lbl">Nivel</span>
+      <label class="field-label">Posiciones <span class="req">*</span></label>
+      <div class="pos-chips" id="posChips">
+        <div class="pos-chip" data-pos="GK">GK</div>
+        <div class="pos-chip" data-pos="DFC">DFC</div>
+        <div class="pos-chip" data-pos="LAT">LAT</div>
+        <div class="pos-chip" data-pos="MCD">MCD</div>
+        <div class="pos-chip" data-pos="MC">MC</div>
+        <div class="pos-chip" data-pos="EXT">EXT</div>
+        <div class="pos-chip" data-pos="DC">DC</div>
       </div>
-      <div class="pos-entries" id="posEntries"></div>
-      <button type="button" class="add-pos-btn" id="addPosBtn">
+      <div class="field-error">Seleccioná al menos una posición.</div>
+    </div>
+
+    <div class="field-group" id="fg-arquetipos">
+      <label class="field-label">Arquetipos <span class="req">*</span></label>
+      <div class="arq-col-labels">
+        <span class="arq-col-lbl">Nombre del arquetipo</span>
+        <span class="arq-col-lbl">Nivel</span>
+        <span class="arq-col-lbl"></span>
+      </div>
+      <div class="arq-entries" id="arqEntries"></div>
+      <button type="button" class="add-arq-btn" id="addArqBtn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Agregar posición
+        Agregar arquetipo
       </button>
-      <div class="field-error">Agregá al menos una posición.</div>
+      <div class="field-error">Agregá al menos un arquetipo.</div>
     </div>
 
     <div class="field-group" id="fg-disp">
       <label class="field-label">Disponibilidad <span class="req">*</span></label>
       <label class="disp-check" id="dispCheck">
         <input type="checkbox" id="f-disp">
-        <div class="disp-content">
-          <div class="disp-box" id="dispBox"></div>
-          <span class="disp-text">Tengo disponibilidad de <strong>Lunes a Jueves</strong> de <strong>22:30 a 00:30</strong></span>
-        </div>
+        <div class="disp-box" id="dispBox"></div>
+        <span class="disp-text">Tengo disponibilidad de <strong>Lunes a Jueves</strong> de <strong>22:30 a 00:30</strong></span>
       </label>
       <div class="field-error">Debes confirmar tu disponibilidad para continuar.</div>
     </div>
@@ -335,7 +337,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
             <th>Gamertag</th>
             <th>Edad</th>
             <th>Posiciones</th>
-            <th>Disp.</th>
+            <th>Arquetipos</th>
             <th>Estado</th>
             <th>Fecha</th>
             <th></th>
@@ -384,67 +386,66 @@ try {
 const ADMIN_PW = '8189';
 let _adminAuth = false;
 
-/* ─── POSITIONS BUILDER ─── */
-const POS_OPTIONS = ['GK','DFC','LAT','MCD','MC','EXT','DC'];
+/* ─── POSITION CHIPS ─── */
+document.querySelectorAll('.pos-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    this.classList.toggle('selected');
+    document.getElementById('fg-posiciones').classList.remove('has-error');
+  });
+});
+
+/* ─── ARCHETYPE BUILDER ─── */
 const NIV_OPTIONS = ['Básico','Intermedio','Avanzado','Elite'];
 
-function makePosEntry() {
+function makeArqEntry() {
   const wrap = document.createElement('div');
-  wrap.className = 'pos-entry';
+  wrap.className = 'arq-entry';
 
-  const posSel = document.createElement('select');
-  posSel.className = 'pos-sel field-input';
-  posSel.innerHTML = '<option value="">Pos.</option>' +
-    POS_OPTIONS.map(p => `<option value="${p}">${p}</option>`).join('');
-
-  const arqIn = document.createElement('input');
-  arqIn.className = 'arq-input';
-  arqIn.type = 'text';
-  arqIn.placeholder = 'Arquetipo';
-  arqIn.maxLength = 40;
+  const nameIn = document.createElement('input');
+  nameIn.className = 'arq-name';
+  nameIn.type = 'text';
+  nameIn.placeholder = 'Nombre del arquetipo';
+  nameIn.maxLength = 50;
 
   const nivSel = document.createElement('select');
-  nivSel.className = 'niv-sel field-input';
+  nivSel.className = 'arq-niv';
   nivSel.innerHTML = '<option value="">Nivel</option>' +
     NIV_OPTIONS.map(n => `<option value="${n}">${n}</option>`).join('');
 
   const rmBtn = document.createElement('button');
   rmBtn.type = 'button';
-  rmBtn.className = 'pos-remove';
+  rmBtn.className = 'arq-remove';
   rmBtn.title = 'Eliminar';
   rmBtn.textContent = '✕';
   rmBtn.addEventListener('click', () => {
     wrap.remove();
-    updateRemoveButtons();
+    updateArqRemoveButtons();
   });
 
-  wrap.appendChild(posSel);
-  wrap.appendChild(arqIn);
+  wrap.appendChild(nameIn);
   wrap.appendChild(nivSel);
   wrap.appendChild(rmBtn);
   return wrap;
 }
 
-function updateRemoveButtons() {
-  const entries = document.querySelectorAll('.pos-entry');
+function updateArqRemoveButtons() {
+  const entries = document.querySelectorAll('.arq-entry');
   entries.forEach(e => {
-    e.querySelector('.pos-remove').style.visibility = entries.length > 1 ? 'visible' : 'hidden';
+    e.querySelector('.arq-remove').style.visibility = entries.length > 1 ? 'visible' : 'hidden';
   });
 }
 
-function addPosEntry() {
-  document.getElementById('posEntries').appendChild(makePosEntry());
-  updateRemoveButtons();
+function addArqEntry() {
+  document.getElementById('arqEntries').appendChild(makeArqEntry());
+  updateArqRemoveButtons();
 }
 
-document.getElementById('addPosBtn').addEventListener('click', addPosEntry);
-
-addPosEntry(); // start with one row
+document.getElementById('addArqBtn').addEventListener('click', addArqEntry);
+addArqEntry(); // start with one row
 
 /* ─── DISPONIBILIDAD CHECKBOX ─── */
 const dispCheck = document.getElementById('dispCheck');
 const dispInput = document.getElementById('f-disp');
-const dispBox   = document.getElementById('dispBox');
 
 dispCheck.addEventListener('click', function() {
   dispInput.checked = !dispInput.checked;
@@ -453,24 +454,23 @@ dispCheck.addEventListener('click', function() {
 
 /* ─── FORM SUBMIT ─── */
 document.getElementById('submitBtn').addEventListener('click', function() {
-  const gamertag = document.getElementById('f-gamertag').value.trim();
-  const edadRaw  = document.getElementById('f-edad').value;
-  const edad     = parseInt(edadRaw, 10);
-  const disp     = dispInput.checked;
+  const gamertag   = document.getElementById('f-gamertag').value.trim();
+  const edadRaw    = document.getElementById('f-edad').value;
+  const edad       = parseInt(edadRaw, 10);
+  const posiciones = [...document.querySelectorAll('.pos-chip.selected')].map(c => c.dataset.pos);
+  const disp       = dispInput.checked;
 
-  const posEntries = [...document.querySelectorAll('.pos-entry')];
-  const posiciones = posEntries.map(e => ({
-    pos:      e.querySelector('.pos-sel').value,
-    arquetipo: e.querySelector('.arq-input').value.trim(),
-    nivel:    e.querySelector('.niv-sel').value,
-  }));
-  const posValid = posiciones.some(p => p.pos);
+  const arqEntries = [...document.querySelectorAll('.arq-entry')];
+  const arquetipos = arqEntries
+    .map(e => ({ nombre: e.querySelector('.arq-name').value.trim(), nivel: e.querySelector('.arq-niv').value }))
+    .filter(a => a.nombre);
 
   const valid = [
-    setErr('fg-gamertag',  !gamertag),
-    setErr('fg-edad',      !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
-    setErr('fg-posiciones', !posValid),
-    setErr('fg-disp',      !disp),
+    setErr('fg-gamertag',   !gamertag),
+    setErr('fg-edad',       !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
+    setErr('fg-posiciones', posiciones.length === 0),
+    setErr('fg-arquetipos', arquetipos.length === 0),
+    setErr('fg-disp',       !disp),
   ].every(ok => ok);
 
   if (!valid) return;
@@ -480,8 +480,7 @@ document.getElementById('submitBtn').addEventListener('click', function() {
   btn.textContent = 'Enviando...';
 
   const payload = {
-    gamertag, edad,
-    posiciones: posiciones.filter(p => p.pos),
+    gamertag, edad, posiciones, arquetipos,
     disponibilidad: true,
     estado: 'pendiente',
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -555,7 +554,7 @@ function loadSubmissions() {
     });
 }
 
-const ESTADOS   = ['pendiente','en_revision','aceptado','rechazado'];
+const ESTADOS    = ['pendiente','en_revision','aceptado','rechazado'];
 const ESTADO_LBL = {pendiente:'Pendiente',en_revision:'En revisión',aceptado:'Aceptado',rechazado:'Rechazado'};
 
 function renderTable(docs) {
@@ -569,19 +568,22 @@ function renderTable(docs) {
     const fecha = d.timestamp ? fmtDate(d.timestamp.toDate()) : '—';
     const est   = d.estado || 'pendiente';
     const opts  = ESTADOS.map(s => `<option value="${s}"${s===est?' selected':''}>${ESTADO_LBL[s]}</option>`).join('');
+
     const posHTML = Array.isArray(d.posiciones) && d.posiciones.length
-      ? `<div class="pos-list">${d.posiciones.map(p =>
-          `<div class="pos-pill"><span class="pp">${esc(p.pos)}</span>${p.arquetipo ? `<span class="pa">· ${esc(p.arquetipo)}</span>` : ''}${p.nivel ? `<span class="pn">${esc(p.nivel)}</span>` : ''}</div>`
+      ? `<div class="td-pos-chips">${d.posiciones.map(p => `<span class="td-pos-chip">${esc(p)}</span>`).join('')}</div>`
+      : '<span style="color:var(--mid)">—</span>';
+
+    const arqHTML = Array.isArray(d.arquetipos) && d.arquetipos.length
+      ? `<div class="arq-list">${d.arquetipos.map(a =>
+          `<div class="arq-item"><span class="an">${esc(a.nombre||'—')}</span>${a.nivel ? `<span class="al">${esc(a.nivel)}</span>` : ''}</div>`
         ).join('')}</div>`
-      : `<span style="color:var(--mid)">—</span>`;
-    const dispHTML = d.disponibilidad
-      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-      : '<span style="color:var(--red)">✕</span>';
+      : '<span style="color:var(--mid)">—</span>';
+
     return `<tr data-id="${esc(d.id)}">
       <td class="td-tag">${esc(d.gamertag||'—')}</td>
       <td>${d.edad||'—'}</td>
       <td>${posHTML}</td>
-      <td class="td-disp">${dispHTML}</td>
+      <td>${arqHTML}</td>
       <td><select class="status-sel s-${est}" onchange="updateEstado(this)">${opts}</select></td>
       <td class="td-date">${fecha}</td>
       <td><button class="del-btn" onclick="deleteSolicitud(this)" title="Eliminar">✕</button></td>
