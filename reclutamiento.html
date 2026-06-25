@@ -975,8 +975,9 @@ function loadConfirmations() {
       body.innerHTML = '<div class="confirm-empty">No hay jugadores en lista.</div>';
       return;
     }
+    const hoy = _todayART();
     body.innerHTML = docs.map(d => {
-      const as = d.asistencia || '';
+      const as = d.asistenciaFecha === hoy ? (d.asistencia || '') : '';
       return `<div class="confirm-row" data-id="${esc(d.id)}">
         <span class="confirm-tag">${esc(d.gamertag || d.nombre || '—')}</span>
         <div class="confirm-btns">
@@ -990,6 +991,10 @@ function loadConfirmations() {
   });
 }
 
+function _todayART() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+}
+
 function setAsistencia(btn, valor) {
   const row = btn.closest('.confirm-row');
   const id = row.dataset.id;
@@ -997,13 +1002,14 @@ function setAsistencia(btn, valor) {
   const noBtn    = row.querySelector('.cb-no');
   const yaActivo = btn.classList.contains('active');
 
-  // Toggle: si ya estaba activo, limpiar; si no, activar
   const nuevo = yaActivo ? null : valor;
   estoyBtn.classList.toggle('active', nuevo === 'estoy');
   noBtn.classList.toggle('active', nuevo === 'no_estoy');
 
-  if (RECLU_COL) RECLU_COL.doc(id).update({ asistencia: nuevo || null })
-    .catch(e => console.warn('Asistencia error:', e));
+  if (RECLU_COL) RECLU_COL.doc(id).update({
+    asistencia: nuevo || null,
+    asistenciaFecha: nuevo ? _todayART() : null
+  }).catch(e => console.warn('Asistencia error:', e));
 }
 
 /* ─── EDIT MODAL ─── */
