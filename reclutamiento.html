@@ -448,10 +448,19 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-modal">
     <div class="confirm-header">
-      <span class="confirm-title">Asistencia a prueba</span>
-      <button class="confirm-close" id="confirmCloseBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <div>
+        <span class="confirm-title">Asistencia a prueba</span>
+        <div id="confirmFecha" style="font-size:11px;color:var(--mid);margin-top:2px;letter-spacing:.04em;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="admin-refresh" id="confirmShareBtn" style="border-color:rgba(74,158,255,.3);color:var(--blue);">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Link
+        </button>
+        <button class="confirm-close" id="confirmCloseBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
     <div class="confirm-body" id="confirmBody">
       <div class="confirm-empty">Cargando...</div>
@@ -951,16 +960,43 @@ function deleteSolicitud(btn) {
 }
 
 /* ─── CONFIRMACIÓN DE ASISTENCIA ─── */
-document.getElementById('confirmAccessBtn').addEventListener('click', () => {
+function openConfirmOverlay() {
+  const fecha = new Date().toLocaleDateString('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
+  document.getElementById('confirmFecha').textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
   document.getElementById('confirmOverlay').classList.add('open');
   loadConfirmations();
-});
+}
+
+document.getElementById('confirmAccessBtn').addEventListener('click', openConfirmOverlay);
+
 document.getElementById('confirmCloseBtn').addEventListener('click', () => {
   document.getElementById('confirmOverlay').classList.remove('open');
+  history.replaceState(null, '', location.pathname);
 });
 document.getElementById('confirmOverlay').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
+  if (e.target === this) {
+    this.classList.remove('open');
+    history.replaceState(null, '', location.pathname);
+  }
 });
+
+document.getElementById('confirmShareBtn').addEventListener('click', () => {
+  const url = location.href.split('#')[0] + '#asistencia';
+  navigator.clipboard.writeText(url).then(() => {
+    const t = document.getElementById('shareToast');
+    t.textContent = 'Link copiado al portapapeles';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }).catch(() => prompt('Copiá este link:', url));
+});
+
+if (location.hash === '#asistencia') {
+  history.replaceState(null, '', location.pathname);
+  setTimeout(openConfirmOverlay, 300);
+}
 
 function loadConfirmations() {
   const body = document.getElementById('confirmBody');
