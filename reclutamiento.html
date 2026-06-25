@@ -402,7 +402,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
 </div>
 
-<div class="share-toast" id="shareToast">Enlace copiado al portapapeles</div>
+<div class="share-toast" id="shareToast"></div>
 
 <!-- ── PASSWORD MODAL ── -->
 <div class="modal-overlay" id="modalOverlay">
@@ -662,16 +662,54 @@ function checkPassword() {
   }
 }
 
-/* ─── SHARE ─── */
-document.getElementById('shareBtn').addEventListener('click', function() {
-  const url = location.href.split('#')[0] + '#admin';
-  navigator.clipboard.writeText(url).then(() => {
+/* ─── SHARE (imagen de tabla) ─── */
+document.getElementById('shareBtn').addEventListener('click', async function() {
+  const btn = this;
+  const origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'Generando...';
+
+  const el = document.querySelector('.table-wrap');
+  const showToast = msg => {
     const t = document.getElementById('shareToast');
+    t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }).catch(() => {
-    prompt('Copiá este enlace:', url);
-  });
+    setTimeout(() => t.classList.remove('show'), 2800);
+  };
+
+  try {
+    const canvas = await html2canvas(el, {
+      backgroundColor: '#101318',
+      scale: 2,
+      useCORS: true,
+      logging: false
+    });
+
+    canvas.toBlob(async blob => {
+      // 1. Intentar copiar imagen al portapapeles
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        showToast('Imagen copiada al portapapeles');
+      } catch {
+        // 2. Fallback: descargar imagen
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reclutamiento-ts-${new Date().toISOString().slice(0, 10)}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Imagen descargada');
+      }
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+    }, 'image/png');
+  } catch (e) {
+    showToast('Error al generar imagen');
+    btn.disabled = false;
+    btn.innerHTML = origHTML;
+  }
 });
 
 /* ─── ADMIN PANEL ─── */
@@ -768,6 +806,7 @@ function deleteSolicitud(btn) {
   if (RECLU_COL) RECLU_COL.doc(id).delete().then(loadSubmissions).catch(e => console.warn('Delete error:', e));
 }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="layout.js?v=5"></script>
 <script src="mobile-nav.js?v=5"></script>
 </body>
