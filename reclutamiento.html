@@ -678,11 +678,14 @@ document.getElementById('shareBtn').addEventListener('click', async function() {
   };
 
   try {
+    if (typeof html2canvas === 'undefined') throw new Error('html2canvas no cargó');
     const canvas = await html2canvas(el, {
       backgroundColor: '#101318',
       scale: 2,
       useCORS: true,
-      logging: false
+      allowTaint: true,
+      logging: false,
+      foreignObjectRendering: false
     });
 
     canvas.toBlob(async blob => {
@@ -806,7 +809,7 @@ function deleteSolicitud(btn) {
   if (RECLU_COL) RECLU_COL.doc(id).delete().then(loadSubmissions).catch(e => console.warn('Delete error:', e));
 }
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="layout.js?v=5"></script>
 <script src="mobile-nav.js?v=5"></script>
 </body>
