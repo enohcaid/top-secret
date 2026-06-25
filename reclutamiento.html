@@ -735,7 +735,6 @@ document.getElementById('shareBtn').addEventListener('click', async function() {
   btn.disabled = true;
   btn.textContent = 'Generando...';
 
-  const el = document.querySelector('.table-wrap');
   const showToast = msg => {
     const t = document.getElementById('shareToast');
     t.textContent = msg;
@@ -745,22 +744,41 @@ document.getElementById('shareBtn').addEventListener('click', async function() {
 
   try {
     if (typeof html2canvas === 'undefined') throw new Error('html2canvas no cargó');
-    const canvas = await html2canvas(el, {
-      backgroundColor: '#101318',
+
+    // Capturar el panel completo (header + tabla entera, sin overflow)
+    const panel = document.getElementById('adminPanel');
+
+    // Ocultar columna de acciones y expandir overflow para capturar todo el ancho
+    const actionCells = panel.querySelectorAll('td:last-child, th:last-child');
+    actionCells.forEach(c => c.style.display = 'none');
+    const wrap = panel.querySelector('.table-wrap');
+    const prevOverflow = wrap ? wrap.style.overflow : '';
+    if (wrap) wrap.style.overflow = 'visible';
+
+    // Detectar color de fondo real según tema activo
+    const isLight = document.documentElement.classList.contains('light-mode');
+    const bgColor = isLight ? '#ffffff' : '#101318';
+
+    const canvas = await html2canvas(panel, {
+      backgroundColor: bgColor,
       scale: 2,
       useCORS: true,
       allowTaint: true,
       logging: false,
-      foreignObjectRendering: false
+      foreignObjectRendering: false,
+      width: panel.scrollWidth,
+      windowWidth: panel.scrollWidth + 40
     });
 
+    // Restaurar estado
+    actionCells.forEach(c => c.style.display = '');
+    if (wrap) wrap.style.overflow = prevOverflow;
+
     canvas.toBlob(async blob => {
-      // 1. Intentar copiar imagen al portapapeles
       try {
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
         showToast('Imagen copiada al portapapeles');
       } catch {
-        // 2. Fallback: descargar imagen
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -775,6 +793,7 @@ document.getElementById('shareBtn').addEventListener('click', async function() {
       btn.innerHTML = origHTML;
     }, 'image/png');
   } catch (e) {
+    console.warn('Share error:', e);
     showToast('Error al generar imagen');
     btn.disabled = false;
     btn.innerHTML = origHTML;
