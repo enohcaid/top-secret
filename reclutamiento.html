@@ -239,6 +239,16 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .s-rechazado{color:var(--red);}
 .del-btn{background:none;border:none;color:rgba(239,68,68,.35);cursor:pointer;padding:4px 7px;border-radius:4px;transition:color .15s,background .15s;font-size:13px;line-height:1;}
 .del-btn:hover{color:var(--red);background:rgba(239,68,68,.1);}
+.edit-btn{background:none;border:none;color:rgba(201,168,76,.4);cursor:pointer;padding:4px 7px;border-radius:4px;transition:color .15s,background .15s;font-size:13px;line-height:1;}
+.edit-btn:hover{color:var(--gold);background:rgba(201,168,76,.08);}
+.edit-exp-row{display:flex;gap:6px;margin-bottom:6px;}
+.edit-exp-row input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;}
+.edit-exp-row input:focus{outline:none;border-color:var(--gold);}
+.edit-exp-rem{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--mid);cursor:pointer;font-size:14px;font-weight:700;transition:color .15s;}
+.edit-exp-rem:hover{color:var(--red);}
+#editArqContainer .arq-entry{margin-bottom:8px;}
+#editPosiciones .pos-chip{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--mid2);cursor:pointer;transition:color .15s,background .15s,border-color .15s;}
+#editPosiciones .pos-chip.active{color:var(--gold);background:var(--gold-dim);border-color:rgba(201,168,76,.4);}
 .empty-state{padding:48px 24px;text-align:center;color:var(--mid);font-size:13px;}
 
 @media(max-width:640px){
@@ -403,6 +413,63 @@ tr:hover td{background:rgba(255,255,255,.02);}
 </div>
 
 <div class="share-toast" id="shareToast"></div>
+
+<!-- ── EDIT MODAL ── -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box" style="width:520px;max-height:90vh;overflow-y:auto;">
+    <input type="hidden" id="editId">
+    <div class="modal-title">Editar solicitud</div>
+    <div class="modal-sub" style="margin-bottom:20px;">Los cambios se guardan en Firestore.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div>
+        <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:5px;">Nombre completo</label>
+        <input class="modal-input" id="editNombre" type="text" placeholder="Nombre completo">
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:5px;">Gamertag</label>
+        <input class="modal-input" id="editGamertag" type="text" placeholder="Gamertag">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:80px 1fr;gap:12px;margin-bottom:14px;">
+      <div>
+        <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:5px;">Edad</label>
+        <input class="modal-input" id="editEdad" type="number" min="10" max="60" placeholder="Edad">
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:5px;">Último equipo</label>
+        <input class="modal-input" id="editUltimoEquipo" type="text" placeholder="Último equipo">
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:8px;">Posiciones</label>
+      <div id="editPosiciones" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);">Arquetipos</label>
+        <button type="button" onclick="addEditArq()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 10px;color:var(--mid);font-size:11px;font-weight:700;cursor:pointer;">+ Agregar</button>
+      </div>
+      <div id="editArqContainer"></div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);">Experiencias destacadas</label>
+        <button type="button" onclick="addEditExp()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 10px;color:var(--mid);font-size:11px;font-weight:700;cursor:pointer;">+ Agregar</button>
+      </div>
+      <div id="editExpContainer"></div>
+    </div>
+
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="document.getElementById('editModal').classList.remove('open')">Cancelar</button>
+      <button class="modal-ok" id="editSaveBtn" onclick="saveEdit()">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── PASSWORD MODAL ── -->
 <div class="modal-overlay" id="modalOverlay">
@@ -730,6 +797,8 @@ function openAdminPanel() {
   loadSubmissions();
 }
 
+let _submissions = [];
+
 function loadSubmissions() {
   document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Cargando...</td></tr>';
   if (!RECLU_COL) {
@@ -748,6 +817,7 @@ const ESTADO_LBL = {pendiente:'Pendiente',en_revision:'En revisión',aceptado:'A
 
 function renderTable(docs) {
   const n = docs.length;
+  _submissions = docs;
   document.getElementById('adminCount').textContent = n ? ` · ${n} solicitud${n !== 1 ? 'es' : ''}` : '';
   if (!n) {
     document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">No hay solicitudes todavía.</td></tr>';
@@ -783,7 +853,10 @@ function renderTable(docs) {
       <td>${expHTML}</td>
       <td><select class="status-sel s-${est}" onchange="updateEstado(this)">${opts}</select></td>
       <td class="td-date">${fecha}</td>
-      <td><button class="del-btn" onclick="deleteSolicitud(this)" title="Eliminar">✕</button></td>
+      <td style="white-space:nowrap;">
+        <button class="edit-btn" onclick="openEditModal(this)" title="Editar">✎</button>
+        <button class="del-btn" onclick="deleteSolicitud(this)" title="Eliminar">✕</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -807,6 +880,102 @@ function deleteSolicitud(btn) {
   if (!confirm('¿Eliminar esta solicitud?')) return;
   const id = btn.closest('tr').dataset.id;
   if (RECLU_COL) RECLU_COL.doc(id).delete().then(loadSubmissions).catch(e => console.warn('Delete error:', e));
+}
+
+/* ─── EDIT MODAL ─── */
+const POSICIONES_LIST = ['GK','DFC','LAT','MCD','MC','EXT','DC'];
+
+function openEditModal(btn) {
+  const id = btn.closest('tr').dataset.id;
+  const doc = _submissions.find(d => d.id === id);
+  if (!doc) return;
+
+  document.getElementById('editId').value = id;
+  document.getElementById('editNombre').value = doc.nombre || '';
+  document.getElementById('editGamertag').value = doc.gamertag || '';
+  document.getElementById('editEdad').value = doc.edad || '';
+  document.getElementById('editUltimoEquipo').value = doc.ultimoEquipo || '';
+
+  // Posiciones chips
+  const posEl = document.getElementById('editPosiciones');
+  posEl.innerHTML = '';
+  POSICIONES_LIST.forEach(p => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'pos-chip' + ((doc.posiciones||[]).includes(p) ? ' active' : '');
+    chip.textContent = p;
+    chip.onclick = () => chip.classList.toggle('active');
+    posEl.appendChild(chip);
+  });
+
+  // Arquetipos
+  const arqEl = document.getElementById('editArqContainer');
+  arqEl.innerHTML = '';
+  const arqs = Array.isArray(doc.arquetipos) && doc.arquetipos.length ? doc.arquetipos : [{}];
+  arqs.forEach(a => {
+    const entry = makeArqEntry();
+    if (a.nombre) entry.querySelector('.arq-name').value = a.nombre;
+    if (a.nivel)  entry.querySelector('.arq-niv').value  = a.nivel;
+    arqEl.appendChild(entry);
+  });
+
+  // Experiencias
+  const expEl = document.getElementById('editExpContainer');
+  expEl.innerHTML = '';
+  const exps = Array.isArray(doc.experiencias) && doc.experiencias.length ? doc.experiencias : [''];
+  exps.forEach(x => _addEditExpRow(expEl, x));
+
+  document.getElementById('editModal').classList.add('open');
+}
+
+function _addEditExpRow(container, value) {
+  const row = document.createElement('div');
+  row.className = 'edit-exp-row';
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.value = value || ''; inp.placeholder = 'Experiencia destacada...';
+  const rem = document.createElement('button');
+  rem.type = 'button'; rem.className = 'edit-exp-rem'; rem.textContent = '−';
+  rem.onclick = () => { if (container.children.length > 1) row.remove(); };
+  row.appendChild(inp); row.appendChild(rem);
+  container.appendChild(row);
+}
+
+function addEditArq() {
+  document.getElementById('editArqContainer').appendChild(makeArqEntry());
+}
+
+function addEditExp() {
+  _addEditExpRow(document.getElementById('editExpContainer'), '');
+}
+
+function saveEdit() {
+  const id = document.getElementById('editId').value;
+  const data = {
+    nombre:       document.getElementById('editNombre').value.trim(),
+    gamertag:     document.getElementById('editGamertag').value.trim(),
+    edad:         document.getElementById('editEdad').value.trim(),
+    ultimoEquipo: document.getElementById('editUltimoEquipo').value.trim(),
+    posiciones:   Array.from(document.querySelectorAll('#editPosiciones .pos-chip.active')).map(c => c.textContent),
+    arquetipos:   Array.from(document.querySelectorAll('#editArqContainer .arq-entry'))
+                    .map(e => ({ nombre: e.querySelector('.arq-name').value, nivel: e.querySelector('.arq-niv').value }))
+                    .filter(a => a.nombre),
+    experiencias: (() => {
+      const arr = Array.from(document.querySelectorAll('#editExpContainer .edit-exp-row input')).map(i => i.value.trim()).filter(Boolean);
+      return arr.length ? arr : null;
+    })(),
+  };
+
+  const saveBtn = document.getElementById('editSaveBtn');
+  saveBtn.disabled = true; saveBtn.textContent = 'Guardando...';
+
+  if (!RECLU_COL) return;
+  RECLU_COL.doc(id).update(data)
+    .then(() => {
+      document.getElementById('editModal').classList.remove('open');
+      loadSubmissions();
+    })
+    .catch(e => console.warn('Edit error:', e))
+    .finally(() => { saveBtn.disabled = false; saveBtn.textContent = 'Guardar'; });
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
