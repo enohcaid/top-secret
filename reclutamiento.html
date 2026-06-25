@@ -832,19 +832,19 @@ function renderTable(docs) {
       : '<span style="color:var(--mid)">—</span>';
 
     const arqHTML = Array.isArray(d.arquetipos) && d.arquetipos.length
-      ? `<div class="arq-list">${d.arquetipos.map(a =>
-          `<div class="arq-item"><span class="an">${esc(a.nombre||'—')}</span>${a.nivel ? `<span class="al">${esc(a.nivel)}</span>` : ''}</div>`
-        ).join('')}</div>`
+      ? `<div class="arq-list">${d.arquetipos.map(a => {
+          const nombre = esc((a.nombre||'—').split('/')[0].trim());
+          const nivel  = a.nivel || '95';
+          return `<div class="arq-item"><span class="an">${nombre}</span><span class="al">${nivel}</span></div>`;
+        }).join('')}</div>`
       : '<span style="color:var(--mid)">—</span>';
 
     const expHTML = Array.isArray(d.experiencias) && d.experiencias.length
       ? `<ul style="margin:0;padding-left:14px;display:flex;flex-direction:column;gap:2px;">${d.experiencias.map(x => `<li style="font-size:12px;color:var(--text2);">${esc(x)}</li>`).join('')}</ul>`
       : '<span style="color:var(--mid)">—</span>';
 
-    const nameTag = `<div style="font-size:12px;color:var(--mid);margin-top:2px;">${esc(d.gamertag||'')}</div>`;
-
     return `<tr data-id="${esc(d.id)}">
-      <td class="td-tag">${esc(d.nombre||d.gamertag||'—')}${d.nombre ? nameTag : ''}</td>
+      <td class="td-tag">${esc(d.gamertag||d.nombre||'—')}</td>
       <td>${d.edad||'—'}</td>
       <td>${posHTML}</td>
       <td>${arqHTML}</td>
