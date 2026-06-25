@@ -251,6 +251,31 @@ tr:hover td{background:rgba(255,255,255,.02);}
 #editPosiciones .pos-chip.active{color:var(--gold);background:var(--gold-dim);border-color:rgba(201,168,76,.4);}
 .empty-state{padding:48px 24px;text-align:center;color:var(--mid);font-size:13px;}
 
+/* ── CONFIRM BTN ── */
+.confirm-access-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.35);border-radius:8px;padding:8px 14px;color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .15s,border-color .15s;white-space:nowrap;}
+.confirm-access-btn:hover{background:rgba(62,207,142,.18);border-color:rgba(62,207,142,.6);}
+.page-header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+
+/* ── CONFIRM OVERLAY ── */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:800;align-items:center;justify-content:center;padding:20px;}
+.confirm-overlay.open{display:flex;}
+.confirm-modal{background:var(--card);border:1px solid var(--border);border-radius:14px;width:100%;max-width:420px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.confirm-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 16px;border-bottom:1px solid var(--border);}
+.confirm-title{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text);}
+.confirm-close{background:none;border:none;color:var(--mid);cursor:pointer;padding:4px;line-height:1;transition:color .15s;}
+.confirm-close:hover{color:var(--text);}
+.confirm-body{overflow-y:auto;padding:8px 0;}
+.confirm-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.04);}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-tag{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.04em;color:var(--text);}
+.confirm-btns{display:flex;gap:6px;flex-shrink:0;}
+.cb-estoy,.cb-no{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 11px;cursor:pointer;border:1px solid;transition:background .15s,color .15s,border-color .15s;}
+.cb-estoy{background:rgba(62,207,142,.08);border-color:rgba(62,207,142,.3);color:rgba(62,207,142,.55);}
+.cb-estoy.active{background:rgba(62,207,142,.2);border-color:var(--green);color:var(--green);}
+.cb-no{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.45);}
+.cb-no.active{background:rgba(239,68,68,.18);border-color:var(--red);color:var(--red);}
+.confirm-empty{padding:40px 20px;text-align:center;color:var(--mid);font-size:13px;}
+
 @media(max-width:640px){
   .main{padding:24px 16px 80px;}
   .page-title{font-size:2.2rem;}
@@ -265,8 +290,16 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <body>
 <div class="main">
 
-  <div class="page-eyebrow">Top Secret FC</div>
-  <h1 class="page-title">Reclutamiento</h1>
+  <div class="page-header-row">
+    <div>
+      <div class="page-eyebrow">Top Secret FC</div>
+      <h1 class="page-title">Reclutamiento</h1>
+    </div>
+    <button class="confirm-access-btn" id="confirmAccessBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Asistencia
+    </button>
+  </div>
   <p class="page-sub">Sumate al club. Completá el formulario y nos ponemos en contacto si tu perfil encaja.</p>
 
   <!-- ── FORM ── -->
@@ -409,6 +442,21 @@ tr:hover td{background:rgba(255,255,255,.02);}
     </div>
   </div>
 
+</div>
+
+<!-- ── CONFIRM OVERLAY ── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-modal">
+    <div class="confirm-header">
+      <span class="confirm-title">Asistencia a prueba</span>
+      <button class="confirm-close" id="confirmCloseBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="confirm-body" id="confirmBody">
+      <div class="confirm-empty">Cargando...</div>
+    </div>
+  </div>
 </div>
 
 <div class="share-toast" id="shareToast"></div>
@@ -900,6 +948,62 @@ function deleteSolicitud(btn) {
   if (!confirm('¿Eliminar esta solicitud?')) return;
   const id = btn.closest('tr').dataset.id;
   if (RECLU_COL) RECLU_COL.doc(id).delete().then(loadSubmissions).catch(e => console.warn('Delete error:', e));
+}
+
+/* ─── CONFIRMACIÓN DE ASISTENCIA ─── */
+document.getElementById('confirmAccessBtn').addEventListener('click', () => {
+  document.getElementById('confirmOverlay').classList.add('open');
+  loadConfirmations();
+});
+document.getElementById('confirmCloseBtn').addEventListener('click', () => {
+  document.getElementById('confirmOverlay').classList.remove('open');
+});
+document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+function loadConfirmations() {
+  const body = document.getElementById('confirmBody');
+  body.innerHTML = '<div class="confirm-empty">Cargando...</div>';
+  if (!RECLU_COL) {
+    body.innerHTML = '<div class="confirm-empty">Firestore no disponible.</div>';
+    return;
+  }
+  RECLU_COL.orderBy('timestamp', 'desc').get().then(snap => {
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!docs.length) {
+      body.innerHTML = '<div class="confirm-empty">No hay jugadores en lista.</div>';
+      return;
+    }
+    body.innerHTML = docs.map(d => {
+      const as = d.asistencia || '';
+      return `<div class="confirm-row" data-id="${esc(d.id)}">
+        <span class="confirm-tag">${esc(d.gamertag || d.nombre || '—')}</span>
+        <div class="confirm-btns">
+          <button class="cb-estoy${as === 'estoy' ? ' active' : ''}" onclick="setAsistencia(this,'estoy')">Estoy</button>
+          <button class="cb-no${as === 'no_estoy' ? ' active' : ''}" onclick="setAsistencia(this,'no_estoy')">No estoy</button>
+        </div>
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    body.innerHTML = '<div class="confirm-empty">Error al cargar.</div>';
+  });
+}
+
+function setAsistencia(btn, valor) {
+  const row = btn.closest('.confirm-row');
+  const id = row.dataset.id;
+  const estoyBtn = row.querySelector('.cb-estoy');
+  const noBtn    = row.querySelector('.cb-no');
+  const yaActivo = btn.classList.contains('active');
+
+  // Toggle: si ya estaba activo, limpiar; si no, activar
+  const nuevo = yaActivo ? null : valor;
+  estoyBtn.classList.toggle('active', nuevo === 'estoy');
+  noBtn.classList.toggle('active', nuevo === 'no_estoy');
+
+  if (RECLU_COL) RECLU_COL.doc(id).update({ asistencia: nuevo || null })
+    .catch(e => console.warn('Asistencia error:', e));
 }
 
 /* ─── EDIT MODAL ─── */
