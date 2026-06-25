@@ -969,7 +969,7 @@ function loadConfirmations() {
     body.innerHTML = '<div class="confirm-empty">Firestore no disponible.</div>';
     return;
   }
-  RECLU_COL.orderBy('timestamp', 'desc').get().then(snap => {
+  RECLU_COL.where('estado', 'in', ['pendiente', 'en_revision']).orderBy('timestamp', 'desc').get().then(snap => {
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (!docs.length) {
       body.innerHTML = '<div class="confirm-empty">No hay jugadores en lista.</div>';
