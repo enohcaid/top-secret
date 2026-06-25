@@ -396,15 +396,14 @@ tr:hover td{background:rgba(255,255,255,.02);}
             <th>Edad</th>
             <th>Posiciones</th>
             <th>Arquetipos</th>
-            <th>Último equipo</th>
-            <th>Experiencias</th>
+            <th>Equipo / Experiencias</th>
             <th>Estado</th>
             <th>Fecha</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="adminTbody">
-          <tr><td colspan="9" class="empty-state">Cargando...</td></tr>
+          <tr><td colspan="8" class="empty-state">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -800,15 +799,15 @@ function openAdminPanel() {
 let _submissions = [];
 
 function loadSubmissions() {
-  document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Cargando...</td></tr>';
+  document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Cargando...</td></tr>';
   if (!RECLU_COL) {
-    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Firestore no disponible.</td></tr>';
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Firestore no disponible.</td></tr>';
     return;
   }
   RECLU_COL.orderBy('timestamp', 'desc').get()
     .then(snap => renderTable(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
     .catch(() => {
-      document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Error al cargar solicitudes.</td></tr>';
+      document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Error al cargar solicitudes.</td></tr>';
     });
 }
 
@@ -820,7 +819,7 @@ function renderTable(docs) {
   _submissions = docs;
   document.getElementById('adminCount').textContent = n ? ` · ${n} solicitud${n !== 1 ? 'es' : ''}` : '';
   if (!n) {
-    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="9" class="empty-state">No hay solicitudes todavía.</td></tr>';
+    document.getElementById('adminTbody').innerHTML = '<tr><td colspan="8" class="empty-state">No hay solicitudes todavía.</td></tr>';
     return;
   }
   document.getElementById('adminTbody').innerHTML = docs.map(d => {
@@ -849,8 +848,10 @@ function renderTable(docs) {
       <td>${d.edad||'—'}</td>
       <td>${posHTML}</td>
       <td>${arqHTML}</td>
-      <td style="font-size:12px;color:var(--text2);">${esc(d.ultimoEquipo||'—')}</td>
-      <td>${expHTML}</td>
+      <td style="font-size:12px;color:var(--text2);">
+        ${d.ultimoEquipo ? `<div style="font-weight:600;color:var(--text);margin-bottom:${Array.isArray(d.experiencias)&&d.experiencias.length?'4px':'0'}">${esc(d.ultimoEquipo)}</div>` : ''}
+        ${expHTML}
+      </td>
       <td><select class="status-sel s-${est}" onchange="updateEstado(this)">${opts}</select></td>
       <td class="td-date">${fecha}</td>
       <td style="white-space:nowrap;">
