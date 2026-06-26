@@ -494,6 +494,7 @@ try {
 /* ─── CALENDAR MATCHES (today) ─── */
 let calCustom = [];
 let vpnFixtures = [];
+let inviernoMatches = [];
 
 // 11x11 T2 (VPG challengers-t3) team badges
 const _CVPG = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
@@ -583,6 +584,11 @@ fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
     vpnFixtures = Array.isArray(d) ? d : [];
     renderTodayMatchesPanel();
   }).catch(() => {});
+fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/copafacil-pretemporada')
+  .then(r => r.json()).then(d => {
+    inviernoMatches = Array.isArray(d.matches) ? d.matches : [];
+    renderTodayMatchesPanel();
+  }).catch(() => {});
 function getTodayMatches() {
   // Inject badges into calCustom entries
   const fromCustom = calCustom
@@ -610,7 +616,11 @@ function getTodayMatches() {
   const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase() === (v.rival||'').toLowerCase())
   );
-  return [...fromCustom, ...fromVpugT2, ...from11x11, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+  const fromInvierno = inviernoMatches
+    .filter(m => m.date === TODAY)
+    .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
+    .map(m => ({ league: 'VPUG', rival: m.rival, time: m.time, date: m.date, isHome: m.isHome, badge: m.rivalLogo || null }));
+  return [...fromCustom, ...fromVpugT2, ...from11x11, ...fromInvierno, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
   const wrap = document.getElementById('todayMatchesPanel');
