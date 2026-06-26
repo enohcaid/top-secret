@@ -3,6 +3,29 @@
 
 const NOTICIAS = [
   {
+    id: 'invierno-2026-semana2',
+    pinned: false,
+    category: 'Resultado',
+    title: 'Liga de Invierno: recuperación el jueves tras el golpe del martes — 6to en el Grupo B con 12 puntos',
+    date: '2026-06-26',
+    dateLabel: '26 de junio de 2026',
+    excerpt: 'Cuatro partidos entre el martes 23 y el jueves 25 de junio. Caída pesada ante Comunicaciones (1-4) y derrota ante InfinitX (0-1), pero respuesta inmediata el jueves: 1-0 a HF Giles y 3-0 a Team Valhalla. Top Secret cierra la semana sexto en el Grupo B con 12 puntos y Lautavester7 como máximo goleador del torneo.',
+    image: 'logos/Campeonato Invierno.png',
+    body: [
+      'Seis partidos disputados, 12 puntos y una semana que tuvo de todo. Top Secret FC completó las primeras tres jornadas del <strong>Campeonato de Invierno VPUG</strong> con un balance de <strong>4 victorias y 2 derrotas</strong> — 10 goles marcados, 8 recibidos y una posición de sexto en el Grupo B. Los puestos de clasificación están a un punto de diferencia de gol: Comunicaciones (quinto) tiene los mismos 12 PTS pero una mejor diferencia (+8 vs +2). El torneo tiene 21 fechas y se extienden hasta el 21 de julio — hay margen para corregir.',
+      '<strong>El martes 23 fue la peor noche del torneo.</strong> De visita ante Comunicaciones, uno de los rivales más exigentes del grupo, Top Secret cayó 4-1 sin respuesta. Un equipo que no cometió errores de los dos lados del campo y que ejecutó con eficiencia. En el segundo partido de la noche, en casa ante InfinitX, el equipo tampoco pudo anotar: 0-1. Seis puntos perdidos en una hora y media, la jornada más costosa en lo que va del torneo.',
+      '<strong>El jueves 25 fue la respuesta directa.</strong> Dos partidos, dos victorias, ningún gol en contra. Primero de visita ante HF Giles: 1-0, trabajo defensivo correcto y los tres puntos sin complicaciones. Después en casa ante Team Valhalla: <strong>3-0</strong>, el resultado más contundente de la semana y el más convincente del equipo en lo que va del torneo. La reacción fue inmediata — sin cicatriz, sin arrastre del martes.',
+      '<strong>Lautavester7 lidera la tabla goleadora con cuatro tantos</strong>, el número más alto de cualquier jugador de Top Secret en el Campeonato de Invierno. Su rendimiento ofensivo en el arranque del torneo es el punto más alto del equipo en producción individual. <strong>BlackPanther</strong> acumula dos asistencias en dos partidos jugados, cumpliendo su rol de generador desde las bandas. <strong>Cabers14</strong> y <strong>Huber236</strong> ya aportaron gol y asistencia cada uno en el debut — la contribución distribuida que marcó la primera jornada sigue siendo el modelo a replicar.',
+      'El lunes <strong>30 de junio</strong> llega la cuarta jornada. Primero de visita ante <strong>Big Ban FC</strong> a las 22:30, luego en casa ante <strong>Matreros eSp</strong> a las 23:00. Dos partidos donde recuperar la consistencia del jueves y acortar la diferencia con los clasificados del Grupo B. La segunda mitad del torneo empieza a definirse. 🖤⭐',
+    ],
+    shareCaption: '🖤 LIGA DE INVIERNO · SEMANA 2 · TOP SECRET FC\n\nMartes: 1-4 Comunicaciones · 0-1 InfinitX\nJueves: 1-0 HF Giles · 3-0 Team Valhalla\n\n6to en Grupo B · 12 PTS · Lautavester7: 4G en el torneo\n\nPróximo: lunes 30/6 vs Big Ban FC y Matreros eSp\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 INVIERNO 2026 · SEMANA 2\n\nMartes difícil, jueves de reacción.\n\n1-4 Comunicaciones · 0-1 InfinitX\n1-0 HF Giles · 3-0 Team Valhalla\n\n6to en Grupo B con 12 PTS. Lautavester7: 4G en el torneo.\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+      x:  '🖤 Top Secret FC cierra la semana con balance 2V-2D en la Liga de Invierno VPUG.\n\n1-4 vs Comunicaciones · 0-1 vs InfinitX\n1-0 vs HF Giles · 3-0 vs Team Valhalla\n\n6to en Grupo B · 12 PTS · Lautavester7 4G\n\n#TopSecretFC #VPUG',
+      fb: '🖤 LIGA DE INVIERNO · SEMANA 2 · TOP SECRET FC\n\nCuatro partidos entre el 23 y 25 de junio:\n\n❌ 1-4 vs Comunicaciones (visita)\n❌ 0-1 vs InfinitX (local)\n✅ 1-0 vs HF Giles (visita)\n✅ 3-0 vs Team Valhalla (local)\n\n📊 Balance acumulado: 4V · 0E · 2D · 12 PTS · 6to Grupo B\n🥇 Lautavester7: 4 goles (máximo artillero del torneo)\n🎯 BlackPanther: 2 asistencias\n\nPróxima jornada: lunes 30/6\n22:30 vs Big Ban FC · 23:00 vs Matreros eSp\n\nSeguinos en Instagram y X: @fctopsecret\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    },
+  },
+  {
     id: 'kits-t3-2026',
     pinned: true,
     category: 'Institución',
