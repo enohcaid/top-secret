@@ -1288,6 +1288,9 @@ function openRecruitPicker(slotKey) {
   const slot = formation?.find(s => s.key === slotKey);
   const mapped = slot ? (SLOT_TO_RECLU_POS[slot.l] || []) : [];
 
+  // Clear stale name so the slot shows blank while the picker is open
+  setGuestSlotName(slotKey, '');
+
   const title = document.getElementById('recruitPickerTitle');
   const list  = document.getElementById('recruitPickerList');
   title.textContent = slot ? ('Recluta para ' + slot.l) : 'Seleccioná un recluta';
@@ -1296,7 +1299,7 @@ function openRecruitPicker(slotKey) {
 
   RECLU_COL.where('estado', 'in', ['pendiente', 'en_revision']).get()
     .then(snap => {
-      const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
         .filter(d => !mapped.length || (d.posiciones || []).some(p => mapped.includes(p)))
         .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
@@ -1305,16 +1308,18 @@ function openRecruitPicker(slotKey) {
         return;
       }
       list.innerHTML = docs.map(d => {
-        const tag  = d.gamertag || d.nombre || '—';
-        const arq  = (d.arquetipos || []).map(a => (a.nombre||'').split('/')[0].trim() + ' ' + (a.nivel||'95')).join(' · ');
-        const key  = JSON.stringify(slotKey);
-        const gtag = JSON.stringify(tag);
-        return `<button class="reclu-pick-btn" onclick="selectRecruitForSlot(${key},${gtag})">
+        const tag = d.gamertag || d.nombre || '—';
+        const arq = (d.arquetipos || []).map(a => (a.nombre||'').split('/')[0].trim() + ' ' + (a.nivel||'95')).join(' · ');
+        return `<button class="reclu-pick-btn">
           <span class="rpb-tag">${_esc(tag)}</span>
           ${d.gamertag && d.nombre ? `<span class="rpb-name">${_esc(d.nombre)}</span>` : ''}
           ${arq ? `<span class="rpb-arq">${_esc(arq)}</span>` : ''}
         </button>`;
       }).join('');
+      list.querySelectorAll('.reclu-pick-btn').forEach((btn, i) => {
+        const tag = docs[i].gamertag || docs[i].nombre || '—';
+        btn.addEventListener('click', () => selectRecruitForSlot(slotKey, tag));
+      });
     })
     .catch(() => {
       list.innerHTML = '<p style="color:#e8502e;font-size:.8rem;text-align:center;padding:8px 0">Error al cargar</p>';
