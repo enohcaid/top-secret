@@ -177,6 +177,12 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .sopt-captain.is-captain{border-color:#1a90d9!important;background:rgba(26,144,217,.18)!important;color:#fff!important;}
 .modal-input{width:100%;background:#0a0b0e;border:1px solid #252a38;border-radius:8px;color:#dde1ec;font-family:'Barlow',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;margin-bottom:12px;}
 .modal-input:focus{border-color:var(--gold);}
+.reclu-pick-btn{display:flex;flex-direction:column;gap:2px;width:100%;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid #252a38;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s,border-color .15s;}
+.reclu-pick-btn:hover{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.3);}
+.rpb-tag{font-weight:700;font-size:.9rem;color:var(--gold);}
+.rpb-name{font-size:.73rem;color:#8b92aa;}
+.rpb-arq{font-size:.7rem;color:#6b7280;}
+#recruitPickerList{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;margin:12px 0;}
 .mbtns{display:flex;gap:8px;margin-top:4px;}
 .mbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px;border-radius:8px;border:1px solid #252a38;cursor:pointer;flex:1;transition:color .15s, background-color .15s, border-color .15s;}
 .mbtn-cancel{background:transparent;color:#8b92aa;}
@@ -369,6 +375,15 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
   </div>
 </div>
 
+<!-- RECRUIT PICKER MODAL -->
+<div class="overlay" id="recruitPickerOverlay" onclick="if(event.target===this)closeModal('recruitPickerOverlay')">
+  <div class="modal">
+    <h3 id="recruitPickerTitle">Seleccioná un recluta</h3>
+    <div id="recruitPickerList"></div>
+    <button class="mbtn mbtn-cancel" onclick="closeModal('recruitPickerOverlay')" style="width:100%">Cancelar</button>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 <div id="lightbox" class="lightbox" onclick="closeLightbox()"><img id="lightboxImg" src="" alt=""></div>
 
@@ -483,13 +498,25 @@ const FB_CONFIG = {
   messagingSenderId: "303110190986",
   appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
 };
-let _db = null, CONV_DOC = null, CAL_DOC_CONV = null;
+let _db = null, CONV_DOC = null, CAL_DOC_CONV = null, RECLU_COL = null;
 try {
   if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
   _db = firebase.firestore();
   CONV_DOC     = _db.collection('convocatoria').doc('state');
   CAL_DOC_CONV = _db.collection('calendario').doc('estado');
+  RECLU_COL    = _db.collection('reclutamiento');
 } catch(e) { console.warn('Firebase init error:', e); }
+
+// Map slot position labels → reclutamiento position codes
+const SLOT_TO_RECLU_POS = {
+  POR:['GK'],
+  DFD:['DFC'], DFC:['DFC'], DFI:['DFC'], DCI:['DFC'], DCD:['DFC'],
+  LD:['LAT'],  LI:['LAT'],
+  MCD:['MCD'], MVD:['MCD'], MVI:['MCD'],
+  MCI:['MC'],
+  ED:['EXT'],  EI:['EXT'],
+  DC:['DC'],
+};
 
 /* ─── CALENDAR MATCHES (today) ─── */
 let calCustom = [];
@@ -1087,6 +1114,7 @@ function dropOnSlot(key, name) {
   if (!p?.isGuest) Object.keys(lineup.slots).forEach(k => { if (lineup.slots[k] === name) delete lineup.slots[k]; });
   lineup.slots[key] = name;
   saveState(); render();
+  if (p?.isGuest) openRecruitPicker(key);
 }
 
 /* ─── SLOT SELECT ─── */
@@ -1113,7 +1141,9 @@ function assignPlayerToSelectedSlot(name) {
   const p = PLAYERS.find(p => p.name === name);
   if (!p?.isGuest) Object.keys(lineup.slots).forEach(k => { if (lineup.slots[k] === name) delete lineup.slots[k]; });
   lineup.slots[selectedSlotKey] = name;
+  const _guestKey = p?.isGuest ? selectedSlotKey : null;
   cancelSlotSelect(); saveState(); render();
+  if (_guestKey) openRecruitPicker(_guestKey);
 }
 
 /* ─── AUTO LINEUP ─── */
@@ -1249,6 +1279,52 @@ function saveRedStatus() {
   saveState();
   closeModal('motivoOverlay'); render();
   showToast(name + ' → Ausente');
+}
+
+/* ─── RECRUIT PICKER ─── */
+function openRecruitPicker(slotKey) {
+  if (!RECLU_COL) return;
+  const formation = FORMATIONS[lineup.formation];
+  const slot = formation?.find(s => s.key === slotKey);
+  const mapped = slot ? (SLOT_TO_RECLU_POS[slot.l] || []) : [];
+
+  const title = document.getElementById('recruitPickerTitle');
+  const list  = document.getElementById('recruitPickerList');
+  title.textContent = slot ? ('Recluta para ' + slot.l) : 'Seleccioná un recluta';
+  list.innerHTML = '<p style="color:#8b92aa;font-size:.8rem;text-align:center;padding:8px 0">Cargando...</p>';
+  document.getElementById('recruitPickerOverlay').classList.add('open');
+
+  RECLU_COL.where('estado', 'in', ['pendiente', 'en_revision']).get()
+    .then(snap => {
+      const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .filter(d => !mapped.length || (d.posiciones || []).some(p => mapped.includes(p)))
+        .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+      if (!docs.length) {
+        list.innerHTML = '<p style="color:#8b92aa;font-size:.8rem;text-align:center;padding:8px 0">No hay reclutas para esta posición</p>';
+        return;
+      }
+      list.innerHTML = docs.map(d => {
+        const tag  = d.gamertag || d.nombre || '—';
+        const arq  = (d.arquetipos || []).map(a => (a.nombre||'').split('/')[0].trim() + ' ' + (a.nivel||'95')).join(' · ');
+        const key  = JSON.stringify(slotKey);
+        const gtag = JSON.stringify(tag);
+        return `<button class="reclu-pick-btn" onclick="selectRecruitForSlot(${key},${gtag})">
+          <span class="rpb-tag">${_esc(tag)}</span>
+          ${d.gamertag && d.nombre ? `<span class="rpb-name">${_esc(d.nombre)}</span>` : ''}
+          ${arq ? `<span class="rpb-arq">${_esc(arq)}</span>` : ''}
+        </button>`;
+      }).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<p style="color:#e8502e;font-size:.8rem;text-align:center;padding:8px 0">Error al cargar</p>';
+    });
+}
+
+function selectRecruitForSlot(slotKey, gamertag) {
+  setGuestSlotName(slotKey, gamertag);
+  closeModal('recruitPickerOverlay');
+  render();
 }
 
 /* ─── COPY PLAYER LIST ─── */
