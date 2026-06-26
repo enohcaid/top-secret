@@ -839,7 +839,7 @@ async function promoverAceptados() {
     ]);
     const plantelActual = plantelSnap.exists ? (plantelSnap.data().jugadores || []) : [];
     const plantelNames  = new Set(plantelActual.map(j => j.name));
-    const nuevos = recluSnap.docs.map(d => d.data())
+    const nuevos = recluSnap.docs.map(d => ({ _id: d.id, ...d.data() }))
       .filter(d => d.gamertag && !plantelNames.has(d.gamertag));
 
     if (!nuevos.length) {
@@ -875,8 +875,11 @@ async function _confirmarPromover(plantelActual, nuevos) {
       num:    '',
     }));
     await PLANTEL_DOC.set({ jugadores: [...plantelActual, ...agregados] }, { merge: false });
+    // Marcar como en_plantel para que no vuelvan a aparecer como promovibles
+    await Promise.all(nuevos.map(d => RECLU_COL.doc(d._id).update({ estado: 'en_plantel' })));
     document.getElementById('promoteModal').classList.remove('open');
     showShareToast(`✓ ${nuevos.length} jugador${nuevos.length > 1 ? 'es' : ''} agregado${nuevos.length > 1 ? 's' : ''} al plantel`);
+    loadSubmissions();
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Reintentar';
   }
