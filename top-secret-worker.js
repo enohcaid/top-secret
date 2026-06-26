@@ -570,6 +570,46 @@ export default {
         }
       }
 
+      // ── RECLU EMAIL NOTIFICATION (/notify-reclu) ──
+      if (url.pathname === '/notify-reclu' && request.method === 'POST') {
+        const apiKey = env.RESEND_API_KEY;
+        if (!apiKey) return jsonResp({ ok: false, error: 'RESEND_API_KEY not set' });
+
+        let data;
+        try { data = await request.json(); } catch(e) { return jsonResp({ ok: false }, 400); }
+
+        const { nombre='—', gamertag='—', edad='—', posiciones=[], arquetipos=[], ultimoEquipo='—', experiencias=[] } = data;
+        const posText = posiciones.join(', ') || '—';
+        const arqText = arquetipos.map(a => `${a.nombre} (niv. ${a.nivel})`).join(', ') || '—';
+        const expText = experiencias.join(', ') || '—';
+
+        const html = `<h2 style="color:#c8a84b;font-family:sans-serif">Nueva solicitud — Top Secret FC</h2>
+<table style="font-family:sans-serif;font-size:14px;border-collapse:collapse;width:100%;max-width:520px">
+  <tr><td style="padding:6px 12px 6px 0;color:#666;white-space:nowrap">Gamertag</td><td style="padding:6px 0;font-weight:600">${gamertag}</td></tr>
+  <tr><td style="padding:6px 12px 6px 0;color:#666">Nombre</td><td style="padding:6px 0">${nombre}</td></tr>
+  <tr><td style="padding:6px 12px 6px 0;color:#666">Edad</td><td style="padding:6px 0">${edad}</td></tr>
+  <tr><td style="padding:6px 12px 6px 0;color:#666">Posiciones</td><td style="padding:6px 0">${posText}</td></tr>
+  <tr><td style="padding:6px 12px 6px 0;color:#666">Arquetipos</td><td style="padding:6px 0">${arqText}</td></tr>
+  <tr><td style="padding:6px 12px 6px 0;color:#666">Último equipo</td><td style="padding:6px 0">${ultimoEquipo}</td></tr>
+  <tr><td style="padding:6px 12px 6px 0;color:#666">Experiencias</td><td style="padding:6px 0">${expText}</td></tr>
+</table>
+<p style="font-family:sans-serif;font-size:12px;color:#999;margin-top:20px">Formulario de reclutamiento · Top Secret FC</p>`;
+
+        const resendResp = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Top Secret FC <onboarding@resend.dev>',
+            to: ['fctopsecret@gmail.com'],
+            subject: `[Reclutamiento] Nueva solicitud de ${gamertag}`,
+            html,
+          }),
+        });
+
+        const result = await resendResp.json();
+        return jsonResp({ ok: resendResp.ok, ...result });
+      }
+
       // ── VISIT COUNTER (/counter) ─────────────────
       if (url.pathname === '/counter') {
         const key = 'site:visits';
@@ -633,7 +673,7 @@ export default {
         });
       }
 
-      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url, GET /og' }, 404);
+      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url, GET /og, POST /notify-reclu' }, 404);
 
     } catch (err) {
       return jsonResp({ error: { message: err.message || 'Internal error' } }, 500);

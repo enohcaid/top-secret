@@ -224,6 +224,7 @@ td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-alig
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,.02);}
 .td-tag{font-weight:600;color:var(--text);}
+.td-tag-name{display:block;font-size:10px;font-weight:400;color:var(--mid);margin-top:2px;}
 .td-date{color:var(--mid);font-size:11px;white-space:nowrap;}
 .td-pos-chips{display:flex;flex-wrap:wrap;gap:4px;}
 .td-pos-chip{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:2px 7px;}
@@ -745,7 +746,18 @@ document.getElementById('submitBtn').addEventListener('click', function() {
   };
 
   if (RECLU_COL) {
-    RECLU_COL.add(payload).then(done).catch(() => done());
+    RECLU_COL.add(payload).then(() => {
+      fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/notify-reclu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: payload.nombre, gamertag: payload.gamertag, edad: payload.edad,
+          posiciones: payload.posiciones, arquetipos: payload.arquetipos,
+          ultimoEquipo: payload.ultimoEquipo, experiencias: payload.experiencias,
+        }),
+      }).catch(() => {});
+      done();
+    }).catch(() => done());
   } else {
     done();
   }
@@ -920,7 +932,7 @@ function renderTable(docs) {
       : '<span style="color:var(--mid)">—</span>';
 
     return `<tr data-id="${esc(d.id)}">
-      <td class="td-tag">${esc(d.gamertag||d.nombre||'—')}</td>
+      <td class="td-tag">${esc(d.gamertag||d.nombre||'—')}${d.gamertag && d.nombre ? `<span class="td-tag-name">${esc(d.nombre)}</span>` : ''}</td>
       <td>${d.edad||'—'}</td>
       <td>${posHTML}</td>
       <td>${arqHTML}</td>
