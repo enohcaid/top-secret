@@ -489,7 +489,7 @@ function brazosPath(key) {
 }
 
 const T2_CUTOFF = '2026-04-30';
-const T3_CUTOFF = '2026-06-30';
+const T3_CUTOFF = '2026-06-17';
 
 function frente3Path(key) { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente3.png`; }
 function frente2Path(key) { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente2.png`; }
@@ -658,7 +658,7 @@ async function loadPretemporada() {
       if (!playerStats[key]) playerStats[key] = { pj: 0, g: 0, a: 0, ratings: [], avgRating: 0 };
       playerStats[key].g  += p.goals || 0;
       playerStats[key].a  += p.assists || 0;
-      playerStats[key].pj += 1;
+      playerStats[key].pj += p.pj || played.length;
     });
 
     // Rebuild top performers with merged data
