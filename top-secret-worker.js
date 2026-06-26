@@ -553,7 +553,9 @@ export default {
               for (const [k, snap] of Object.entries(p.fs || {})) {
                 snapshots[k] = { goals: snap.ART || 0, assists: snap.ASS || 0 };
               }
-              return { name: p.name, goals: p.ART || 0, assists: p.ASS || 0, snapshots };
+              const dtParts = {};
+              (p.dt || '').split('#').forEach(part => { const eq = part.indexOf('='); if (eq > -1) dtParts[+part.slice(0,eq)] = +part.slice(eq+1); });
+              return { name: p.name, goals: p.ART || 0, assists: p.ASS || 0, pj: dtParts[2] || 0, snapshots };
             })
             .sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists) || b.goals - a.goals);
 

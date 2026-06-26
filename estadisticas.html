@@ -790,7 +790,7 @@ function loadMatches(){
 // ════════════════════════════════════════════
 let currentSeason = 3;
 const T2_CUTOFF = '2026-04-30';
-const T3_CUTOFF = '2026-06-30';
+const T3_CUTOFF = '2026-06-17';
 function seasonMatches() {
   const all = loadMatches();
   if (currentSeason === 1) return all.filter(m => !m.date || m.date <= T2_CUTOFF);
