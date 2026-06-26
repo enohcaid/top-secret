@@ -859,7 +859,8 @@ async function promoverAceptados() {
     btn.disabled = false; btn.textContent = 'Agregar al plantel';
     btn.onclick = () => _confirmarPromover(plantelActual, nuevos);
   } catch(e) {
-    desc.textContent = 'Error al cargar. Intentá de nuevo.';
+    console.error('promoverAceptados:', e);
+    desc.textContent = 'Error: ' + (e?.code || e?.message || String(e));
   }
 }
 
