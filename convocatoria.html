@@ -331,9 +331,24 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
     <h3>🟡 ¿A qué hora llegás?</h3>
     <p style="font-size:.76rem;color:#8b92aa;margin-bottom:12px">Indicá la hora estimada.</p>
     <input type="time" id="lateTimeInput" class="modal-input">
+    <p style="font-size:.76rem;color:#8b92aa;margin:12px 0 6px">Motivo (obligatorio)</p>
+    <input type="text" id="lateMotivoInput" class="modal-input" placeholder="ESCRIBÍ EL MOTIVO..." style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
     <div class="mbtns">
       <button class="mbtn mbtn-cancel" onclick="closeModal('lateOverlay')">Cancelar</button>
       <button class="mbtn mbtn-save" onclick="saveLateTime()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOTIVO MODAL (red / ausente hoy) -->
+<div class="overlay" id="motivoOverlay" onclick="if(event.target===this)closeModal('motivoOverlay')">
+  <div class="modal">
+    <h3>🔴 ¿Por qué no estás?</h3>
+    <p style="font-size:.76rem;color:#8b92aa;margin-bottom:12px">Motivo de ausencia (obligatorio).</p>
+    <input type="text" id="redMotivoInput" class="modal-input" placeholder="ESCRIBÍ EL MOTIVO..." style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+    <div class="mbtns">
+      <button class="mbtn mbtn-cancel" onclick="closeModal('motivoOverlay')">Cancelar</button>
+      <button class="mbtn mbtn-save" onclick="saveRedStatus()">Confirmar</button>
     </div>
   </div>
 </div>
@@ -344,6 +359,8 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
     <h3>⚫ ¿Hasta cuándo?</h3>
     <p style="font-size:.76rem;color:#8b92aa;margin-bottom:12px">Se marcará ausente hasta esta fecha.</p>
     <input type="date" id="blackDateInput" class="modal-input">
+    <p style="font-size:.76rem;color:#8b92aa;margin:12px 0 6px">Motivo (obligatorio)</p>
+    <input type="text" id="blackMotivoInput" class="modal-input" placeholder="ESCRIBÍ EL MOTIVO..." style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
     <div class="mbtns">
       <button class="mbtn mbtn-cancel" onclick="closeModal('blackOverlay')">Cancelar</button>
       <button class="mbtn mbtn-save" onclick="saveBlackDate()">Confirmar</button>
@@ -1146,8 +1163,9 @@ function toggleCaptain() {
 function confirmStatus(status) {
   const name = currentPlayer;
   closeModal('statusOverlay');
-  if (status === 'yellow') { document.getElementById('lateOverlay').classList.add('open'); return; }
-  if (status === 'black')  { document.getElementById('blackOverlay').classList.add('open'); return; }
+  if (status === 'yellow') { document.getElementById('lateMotivoInput').value = ''; document.getElementById('lateOverlay').classList.add('open'); return; }
+  if (status === 'red')    { document.getElementById('redMotivoInput').value = '';  document.getElementById('motivoOverlay').classList.add('open'); return; }
+  if (status === 'black')  { document.getElementById('blackMotivoInput').value = ''; document.getElementById('blackOverlay').classList.add('open'); return; }
 
   if (status === 'green_always') {
     if (!alwaysPresent.includes(name)) alwaysPresent.push(name);
@@ -1170,10 +1188,13 @@ function confirmStatus(status) {
 
 function saveLateTime() {
   const time = document.getElementById('lateTimeInput').value; if (!time) return;
+  const motivo = document.getElementById('lateMotivoInput').value.trim();
+  if (!motivo) { document.getElementById('lateMotivoInput').focus(); return; }
+  const note = 'Llega ~' + time + ' · ' + motivo;
   if (alwaysPresent.includes(currentPlayer)) {
-    dailyOverrides[currentPlayer] = { status:'yellow', note:'Llega ~'+time, day: TODAY };
+    dailyOverrides[currentPlayer] = { status:'yellow', note, day: TODAY };
   } else {
-    availability[currentPlayer] = { status:'yellow', note:'Llega ~'+time };
+    availability[currentPlayer] = { status:'yellow', note };
   }
   saveState();
   closeModal('lateOverlay'); render();
@@ -1182,11 +1203,11 @@ function saveLateTime() {
 
 function saveBlackDate() {
   const date = document.getElementById('blackDateInput').value; if (!date) return;
+  const motivo = document.getElementById('blackMotivoInput').value.trim();
+  if (!motivo) { document.getElementById('blackMotivoInput').focus(); return; }
   const d = new Date(date + 'T12:00:00');
   const fmt = d.getDate() + '/' + (d.getMonth() + 1);
-  // Vacation stored in availability for everyone — returnDate check handles expiry
-  availability[currentPlayer] = { status:'black', returnDate:date, note:'Vuelve '+fmt };
-  // Remove from alwaysPresent so "siempre disponible" set later takes precedence at reset
+  availability[currentPlayer] = { status:'black', returnDate:date, note:'Vuelve '+fmt+' · '+motivo };
   const _apIdx = alwaysPresent.indexOf(currentPlayer);
   if (_apIdx !== -1) alwaysPresent.splice(_apIdx, 1);
   delete dailyOverrides[currentPlayer];
@@ -1195,13 +1216,29 @@ function saveBlackDate() {
   showToast(currentPlayer + ' → Ausente hasta ' + fmt);
 }
 function saveBlackIndefinite() {
-  availability[currentPlayer] = { status:'black', returnDate:'9999-12-31', note:'Ausente (indef.)' };
+  const motivo = document.getElementById('blackMotivoInput').value.trim();
+  if (!motivo) { document.getElementById('blackMotivoInput').focus(); return; }
+  availability[currentPlayer] = { status:'black', returnDate:'9999-12-31', note:'Indef. · '+motivo };
   const _apIdx = alwaysPresent.indexOf(currentPlayer);
   if (_apIdx !== -1) alwaysPresent.splice(_apIdx, 1);
   delete dailyOverrides[currentPlayer];
   saveState();
   closeModal('blackOverlay'); render();
   showToast(currentPlayer + ' → Ausente por tiempo indefinido');
+}
+
+function saveRedStatus() {
+  const motivo = document.getElementById('redMotivoInput').value.trim();
+  if (!motivo) { document.getElementById('redMotivoInput').focus(); return; }
+  const name = currentPlayer;
+  if (alwaysPresent.includes(name)) {
+    dailyOverrides[name] = { status:'red', note:motivo, day: TODAY };
+  } else {
+    availability[name] = { status:'red', note:motivo };
+  }
+  saveState();
+  closeModal('motivoOverlay'); render();
+  showToast(name + ' → Ausente');
 }
 
 /* ─── COPY PLAYER LIST ─── */
