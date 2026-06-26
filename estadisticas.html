@@ -2228,10 +2228,10 @@ function closeModal(){
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
 
-// Init: cargar datos de la nube y renderizar temporada
 // Init: mostrar datos SEED de inmediato, luego sincronizar con nube
 renderSeason();
 cloudLoad().then(()=>renderSeason());
+switchStatsSeason(3);
 
 // ════════════════════════════════════════════
 // CLUB EA — Stats desde EA Sports API
