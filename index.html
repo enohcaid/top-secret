@@ -488,31 +488,41 @@ function brazosPath(key) {
   return `Renders/${folder}/Brazos.png`;
 }
 
-/* ── T2 PLAYER PHOTOS (Renders/T2-Frentes/) ── */
 const T2_CUTOFF = '2026-04-30';
 const T3_CUTOFF = '2026-06-30';
-const T2_PHOTO = {
-  'J. Martinez':'JUAN_MARTINEZ4','Juan_Martinez4':'JUAN_MARTINEZ4',
-  'lucasmatiakd':'LUCASMATI_AKD','Lucasmati_akd':'LUCASMATI_AKD',
-  'Lautavester7':'LAUTAVESTER7',
-  'BlackPanther':'BLACKPANTHER-CG','BlackPanther-CG':'BLACKPANTHER-CG',
-  'ciprimancini':'CIPRIMANCINI','CipriMancini':'CIPRIMANCINI',
-  'Guiidow':'GUIIDOW',
-  'AR ELTIO':'AR-ELTIO','AR_ELTIO':'AR-ELTIO',
-  'Pibu':'ZPIBU__','zPibu__':'ZPIBU__',
-  'Cabers14':'CABERS14',
-  'Alexisraies2':'ALEXIISRAIIES23','Alexisraies23':'ALEXIISRAIIES23',
-  'Buraa 07':'BURAA07','Buraa07':'BURAA07',
-  'pauloco10':'PAULOCO10',
-  'Agubostero7':'AGUBOSTERO7','Huber236':'HUBER236','RS32-DaniStone':'RS32-DANISTONE',
-};
-function t2PhotoPath(key) {
-  const fname = T2_PHOTO[key];
-  return fname ? `Renders/T2-Frentes/${fname}.png` : brazosPath(key);
+
+function frente3Path(key) { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente3.png`; }
+function frente2Path(key) { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente2.png`; }
+function frontePath(key)  { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente.png`; }
+
+function tryImages(paths, idx, onSuccess, onFail) {
+  if (idx >= paths.length) { onFail(); return; }
+  const img = new Image();
+  img.onload = () => onSuccess(paths[idx]);
+  img.onerror = () => tryImages(paths, idx + 1, onSuccess, onFail);
+  img.src = paths[idx];
 }
-const T3_PHOTO_KEYS = new Set(['Agubostero7','CipriMancini','Guiidow','Huber236','Juan_Martinez4','Lautavester7','rivarola90','slandaco9','zPibu__']);
-function t3PhotoPath(key) {
-  return T3_PHOTO_KEYS.has(key) ? `Renders/T3-Frentes/${key}.png` : t2PhotoPath(key);
+
+function loadTopAvatars() {
+  document.querySelectorAll('.top-av[data-key]').forEach(av => {
+    const key = av.dataset.key;
+    const initEl = av.querySelector('.top-av-init');
+    tryImages([frente3Path(key), frente2Path(key), frontePath(key)], 0,
+      src => {
+        const el = document.createElement('img');
+        el.src = src; el.alt = key;
+        av.insertBefore(el, initEl);
+        initEl.style.display = 'none';
+      },
+      () => {
+        const sil = document.createElement('img');
+        sil.src = 'Renders/silueta-prueba.png';
+        sil.style.opacity = '.45';
+        av.insertBefore(sil, initEl);
+        initEl.style.display = 'none';
+      }
+    );
+  });
 }
 
 /* ── COMPUTE AGGREGATE STATS (T3 — SEED matches + pretemporada via Worker) ── */
@@ -581,9 +591,8 @@ function buildTopCard(title, players, valFn, suffix) {
     const dispV = typeof v === 'number' && v % 1 !== 0 ? v.toFixed(2) : v;
     return `<div class="top-entry">
       <span class="top-rank ${rankClasses[i]}">${rankNums[i]}</span>
-      <div class="top-av" onclick="showPlayerModal('${k}')">
-        <img src="${t3PhotoPath(k)}" alt="${k}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="top-av-init" style="display:none">${k.charAt(0).toUpperCase()}</div>
+      <div class="top-av" data-key="${k}" onclick="showPlayerModal('${k}')">
+        <div class="top-av-init">${k.charAt(0).toUpperCase()}</div>
       </div>
       <div class="top-info">
         <div class="top-name">${k}</div>
@@ -604,6 +613,7 @@ topsGrid.innerHTML =
   buildTopCard('⚽ Goleadores',  top3G,   k => playerStats[k].g,          '') +
   buildTopCard('🅰️ Asistencias', top3A,   k => playerStats[k].a,          '') +
   buildTopCard('⭐ Calificación', top3Rat, k => playerStats[k].avgRating,  '★');
+loadTopAvatars();
 
 /* ── PRETEMPORADA — fetch & merge ── */
 const PRE_NAME_MAP = {
@@ -661,6 +671,7 @@ async function loadPretemporada() {
       buildTopCard('⚽ Goleadores',   newTopG, k => playerStats[k].g,         '') +
       buildTopCard('🅰️ Asistencias',  newTopA, k => playerStats[k].a,         '') +
       (newTopR.length ? buildTopCard('⭐ Calificación', newTopR, k => playerStats[k].avgRating, '★') : '');
+    loadTopAvatars();
 
     // Prepend pretemporada results to recent list
     const preList = document.getElementById('results-list');
@@ -831,7 +842,7 @@ function showPlayerModal(key) {
   const pos = ROSTER_POSN[key] || '';
   document.getElementById('playerModalBox').innerHTML =
     `<div class="pmob-img">
-       <img src="${t3PhotoPath(key)}" alt="${key}" onerror="this.style.display='none'">
+       <img id="pmob-photo-img" alt="${key}">
        <button class="pmob-close" onclick="closePlayerModal()">×</button>
      </div>
      <div class="pmob-body">
@@ -848,6 +859,11 @@ function showPlayerModal(key) {
        </div>
      </div>`;
   document.getElementById('playerModalOverlay').classList.add('open');
+  const modalImg = document.getElementById('pmob-photo-img');
+  tryImages([frente3Path(key), frente2Path(key), frontePath(key)], 0,
+    src => { modalImg.src = src; },
+    () => { modalImg.src = 'Renders/silueta-prueba.png'; modalImg.style.opacity = '.55'; }
+  );
 }
 function closePlayerModal() {
   document.getElementById('playerModalOverlay').classList.remove('open');

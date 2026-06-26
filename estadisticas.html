@@ -504,7 +504,7 @@ footer span{color:#C9A84C;}
     <span style="font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-right:4px;">Temporada</span>
     <button id="spill1" onclick="switchStatsSeason(1)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T1 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
     <button id="spill2" onclick="switchStatsSeason(2)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
-    <button id="spill3" onclick="switchStatsSeason(3)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--gold);color:#000;">PRÓXIMAMENTE</span></button>
+    <button id="spill3" onclick="switchStatsSeason(3)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--vpug);color:#000;">PRETEMPORADA</span></button>
   </div>
   <!-- statsSoon: shown when T3 is active (no data yet) -->
   <div id="statsSoon" style="display:block;">
@@ -2757,8 +2757,14 @@ function switchStatsSeason(n){
   const active=[s1,s2,s3][n-1];
   active.style.border='1px solid var(--gold)'; active.style.background='var(--gold-dim)'; active.style.color='var(--gold)';
   const soon=document.getElementById('statsSoon'), content=document.getElementById('statsContent');
-  if(n===3){ soon.style.display='block'; content.style.display='none'; return; }
   soon.style.display='none'; content.style.display='';
+  if(n===3){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    const preBtn=document.querySelector('.tab[onclick*="pre"]');
+    if(preBtn){ preBtn.classList.add('active'); document.getElementById('tab-pre').classList.add('active'); fetchPreStats(); }
+    return;
+  }
   renderSeason();
   const activeTab=document.querySelector('.tab.active');
   if(activeTab) activeTab.click();
