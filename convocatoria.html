@@ -498,14 +498,34 @@ const FB_CONFIG = {
   messagingSenderId: "303110190986",
   appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
 };
-let _db = null, CONV_DOC = null, CAL_DOC_CONV = null, RECLU_COL = null;
+let _db = null, CONV_DOC = null, CAL_DOC_CONV = null, RECLU_COL = null, PLANTEL_DOC = null;
 try {
   if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
   _db = firebase.firestore();
   CONV_DOC     = _db.collection('convocatoria').doc('state');
   CAL_DOC_CONV = _db.collection('calendario').doc('estado');
   RECLU_COL    = _db.collection('reclutamiento');
+  PLANTEL_DOC  = _db.collection('plantel').doc('activo');
 } catch(e) { console.warn('Firebase init error:', e); }
+
+// Load dynamically promoted players from Firestore and merge into PLAYERS
+function _loadPlantel() {
+  if (!PLANTEL_DOC) return;
+  PLANTEL_DOC.onSnapshot(snap => {
+    const base = PLAYERS.filter(p => !p.isRecluta);
+    PLAYERS.length = 0; base.forEach(p => PLAYERS.push(p));
+    if (snap.exists) {
+      const existingNames = new Set(PLAYERS.map(p => p.name));
+      (snap.data().jugadores || []).forEach(j => {
+        if (j.name && !existingNames.has(j.name)) {
+          PLAYERS.push({ name: j.name, pos: j.pos || 'DC', num: j.num || '', folder: null, isRecluta: true, nombre: j.nombre || '' });
+        }
+      });
+    }
+    render();
+  }, () => {});
+}
+_loadPlantel();
 
 // Map slot position labels → reclutamiento position codes
 const SLOT_TO_RECLU_POS = {
@@ -784,7 +804,7 @@ function tryImages(paths, idx, onSuccess, onFail) {
 
 /* ─── BUILD AVATAR (tries Brazos2 → Brazos → SVG crop) ─── */
 function buildAvatar(p, container) {
-  if (p.isGuest) {
+  if (p.isGuest || p.isRecluta) {
     container.innerHTML = `<div class="guest-sil"><svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:68%;height:68%;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#2a2a2a"/><path d="M4 56C4 38 36 38 36 56Z" fill="#2a2a2a"/></svg></div>`;
     return;
   }
@@ -1028,8 +1048,20 @@ function renderPitch() {
         tok.appendChild(bar);
       }
 
+      // Recluta sin foto: silueta + nombre
+      if (player.isRecluta) {
+        tok.innerHTML = '';
+        const _sil = document.createElement('img');
+        _sil.src = 'Renders/silueta-prueba.png';
+        _sil.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(2.7) translateY(0%);transform-origin:top center;opacity:.55;';
+        tok.appendChild(_sil);
+        const _bar = document.createElement('div'); _bar.className = 'stoken-bar';
+        const _nm = document.createElement('span'); _nm.className = 'stoken-name'; _nm.textContent = player.name;
+        _bar.appendChild(_nm); tok.appendChild(_bar);
+      }
+
       // Try Frente2 → Frente → Brazos2 → Brazos → SVG
-      if (!player.isGuest) tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
+      if (!player.isGuest && !player.isRecluta) tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => setPhoto(src),
         () => {
           tok.innerHTML = '';
@@ -1621,7 +1653,8 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       const assigned = lineup.slots[s.key];
       const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
       if (player) {
-        if (player.isGuest) { drawSilhouette(tx, ty); drawBar(tx, ty, { name: getGuestSlotName(s.key), num: '' }); }
+        if (player.isGuest)    { drawSilhouette(tx, ty); drawBar(tx, ty, { name: getGuestSlotName(s.key), num: '' }); }
+        else if (player.isRecluta) { drawSilhouette(tx, ty); drawBar(tx, ty, { name: player.name, num: '' }); }
         else { drawPlaceholder(tx, ty, player); drawBar(tx, ty, player); }
       } else { drawSilhouette(tx, ty); drawBar(tx, ty, { name: 'PRUEBA', num: '' }); }
     });
