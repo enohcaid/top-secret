@@ -2231,7 +2231,6 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 // Init: mostrar datos SEED de inmediato, luego sincronizar con nube
 renderSeason();
 cloudLoad().then(()=>renderSeason());
-switchStatsSeason(3);
 
 // ════════════════════════════════════════════
 // CLUB EA — Stats desde EA Sports API
@@ -2771,6 +2770,7 @@ function switchStatsSeason(n){
 }
 window.switchStatsSeason = switchStatsSeason;
 window.filterPlayers    = filterPlayers;
+switchStatsSeason(3);
 window.setLeague        = setLeague;
 window.setPlayerView    = setPlayerView;
 window.openPlayerModal  = openPlayerModal;
