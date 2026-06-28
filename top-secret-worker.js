@@ -11,6 +11,10 @@ const NOTICIAS_OG = {
     t: 'Top Secret FC presenta sus kits T3 con Nike — negro, blanco y amarillo',
     i: SITE + 'logos/T3%20Kits.png',
   },
+  'invierno-2026-j3j6': {
+    t: 'Invierno VPUG: caída el martes, doble victoria el jueves — el equipo se recompone',
+    i: SITE + 'logos/Campeonato%20Invierno.png',
+  },
   'invierno-2026-j1j2': {
     t: 'Campeonato de Invierno: Top Secret arranca con dos victorias — 2-1 y 3-2',
     i: SITE + 'logos/Campeonato%20Invierno.png',
