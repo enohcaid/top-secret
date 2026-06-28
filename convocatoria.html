@@ -1618,7 +1618,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
       const i1 = new Image();
       tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => { const im = new Image(); im.onload = () => drawPhoto(im, src); im.src = src; },
-        () => drawPhoto(null, null)
+        () => { drawSilhouette(tx, ty); drawBar(tx, ty, player); resolve(); }
       );
     })));
   } else {
