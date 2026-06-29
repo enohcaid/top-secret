@@ -616,17 +616,24 @@
     <p>Novedades y comunicados del club</p>
   </div>
 
-  <!-- Draft banner — visible only when KV has a pending draft -->
+  <!-- Trigger admin: aparece solo si hay draft, completamente discreto -->
+  <div id="draft-trigger" onclick="expandDraftBanner()" style="display:none;text-align:center;padding:10px 0 2px;cursor:pointer;opacity:.12;font-size:9px;letter-spacing:3px;color:var(--gold);user-select:none">▪ ▪ ▪</div>
+
+  <!-- Draft banner — plegado por defecto, se expande al click del trigger -->
   <div id="draft-banner" style="display:none">
     <div class="draft-banner">
       <div class="draft-banner-header">
         <span class="draft-banner-label">Borrador de hoy</span>
+        <button onclick="collapseDraftBanner()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;line-height:1;padding:0 4px" title="Plegar">╌</button>
       </div>
-      <div class="draft-banner-title" id="draft-title"></div>
-      <div class="draft-banner-meta" id="draft-meta"></div>
-      <div class="draft-banner-excerpt" id="draft-excerpt"></div>
-      <div class="draft-images" id="draft-images"></div>
-      <!-- Unlock row: visible hasta ingresar PIN correcto -->
+      <!-- Contenido: oculto hasta unlock -->
+      <div id="draft-content" style="display:none">
+        <div class="draft-banner-title" id="draft-title"></div>
+        <div class="draft-banner-meta" id="draft-meta"></div>
+        <div class="draft-banner-excerpt" id="draft-excerpt"></div>
+        <div class="draft-images" id="draft-images"></div>
+      </div>
+      <!-- Unlock row -->
       <div class="draft-actions" id="draft-unlock-row">
         <div class="pin-row">
           <input class="pin-input" id="draft-pin" type="password" maxlength="8" placeholder="PIN admin" inputmode="numeric"
@@ -1061,7 +1068,25 @@ function _renderDraftBanner(draft) {
   imagesEl.innerHTML = '';
   if (draft.imagePost)  imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imagePost}" alt="Post"></div><div class="draft-img-label">Post (1086×1448)</div></div>`;
   if (draft.imageStory) imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imageStory}" alt="Story"></div><div class="draft-img-label">Story (941×1672)</div></div>`;
-  document.getElementById('draft-banner').style.display = 'block';
+  // Solo muestra el trigger, NO el banner — el contenido queda oculto hasta unlock
+  document.getElementById('draft-trigger').style.display = 'block';
+}
+
+function expandDraftBanner() {
+  document.getElementById('draft-trigger').style.display = 'none';
+  document.getElementById('draft-banner').style.display  = 'block';
+  // Restablecer estado: unlock row visible, contenido y acciones ocultos
+  document.getElementById('draft-unlock-row').style.display = 'block';
+  document.getElementById('draft-content').style.display    = 'none';
+  document.getElementById('draft-actions').style.display    = 'none';
+  document.getElementById('draft-edit-wrap').style.display  = 'none';
+  _sessionPin = '';
+}
+
+function collapseDraftBanner() {
+  document.getElementById('draft-banner').style.display  = 'none';
+  document.getElementById('draft-trigger').style.display = 'block';
+  _sessionPin = '';
 }
 
 function _showPinErr(show) { document.getElementById('pin-error').style.display = show ? 'inline' : 'none'; }
@@ -1070,7 +1095,6 @@ let _sessionPin = '';
 async function unlockDraft() {
   const pin = (document.getElementById('draft-pin').value || '').trim();
   if (!pin) { _showPinErr(true); return; }
-  // Validate PIN with a no-op POST (empty update)
   const r = await fetch(_WORKER + '/draft-noticia', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + pin, 'Content-Type': 'application/json' },
@@ -1080,6 +1104,7 @@ async function unlockDraft() {
   _sessionPin = pin;
   _showPinErr(false);
   document.getElementById('draft-unlock-row').style.display = 'none';
+  document.getElementById('draft-content').style.display    = 'block';
   document.getElementById('draft-actions').style.display    = 'flex';
 }
 
@@ -1088,16 +1113,18 @@ async function publishDraft() {
   if (!r.ok) { alert('Error al publicar. Intentá de nuevo.'); return; }
   window._KV_NEWS = [{ ..._currentDraft, status: 'published', pinned: false }, ...window._KV_NEWS];
   renderAutoSection(window._KV_NEWS);
-  document.getElementById('draft-banner').style.display = 'none';
-  _currentDraft = null;
+  document.getElementById('draft-banner').style.display  = 'none';
+  document.getElementById('draft-trigger').style.display = 'none';
+  _currentDraft = null; _sessionPin = '';
 }
 
 async function discardDraft() {
   if (!confirm('¿Descartar el borrador de hoy?')) return;
   const r = await fetch(_WORKER + '/draft-noticia', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + _sessionPin } });
   if (!r.ok) { alert('Error al descartar.'); return; }
-  document.getElementById('draft-banner').style.display = 'none';
-  _currentDraft = null;
+  document.getElementById('draft-banner').style.display  = 'none';
+  document.getElementById('draft-trigger').style.display = 'none';
+  _currentDraft = null; _sessionPin = '';
 }
 
 function editDraft() {
