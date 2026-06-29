@@ -177,12 +177,30 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .sopt-captain.is-captain{border-color:#1a90d9!important;background:rgba(26,144,217,.18)!important;color:#fff!important;}
 .modal-input{width:100%;background:#0a0b0e;border:1px solid #252a38;border-radius:8px;color:#dde1ec;font-family:'Barlow',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;margin-bottom:12px;}
 .modal-input:focus{border-color:var(--gold);}
+.reclu-card-wrap{border-radius:8px;}
+.reclu-card-row{display:flex;gap:4px;align-items:flex-start;}
+.reclu-card-row .reclu-pick-btn{flex:1;}
 .reclu-pick-btn{display:flex;flex-direction:column;gap:2px;width:100%;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid #252a38;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s,border-color .15s;}
 .reclu-pick-btn:hover{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.3);}
 .rpb-tag{font-weight:700;font-size:.9rem;color:var(--gold);}
 .rpb-name{font-size:.73rem;color:#8b92aa;}
 .rpb-arq{font-size:.7rem;color:#6b7280;}
-#recruitPickerList{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;margin:12px 0;}
+.rpb-pos{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.rpb-chip{font-size:.62rem;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.06);color:#8b92aa;border:1px solid #252a38;}
+.rpb-chip.principal{background:rgba(201,168,76,.15);color:var(--gold);border-color:rgba(201,168,76,.4);}
+.rpb-edit-btn{background:rgba(255,255,255,.04);border:1px solid #252a38;border-radius:6px;color:#8b92aa;cursor:pointer;padding:6px 8px;font-size:.85rem;flex-shrink:0;transition:color .15s,border-color .15s;}
+.rpb-edit-btn:hover{color:var(--gold);border-color:rgba(201,168,76,.4);}
+.rpb-edit-panel{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.25);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
+.rpb-label{font-size:.6rem;color:#6b7280;font-family:'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase;}
+.rpb-chip-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
+.rpb-chip-sel{font-size:.65rem;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,.04);color:#8b92aa;border:1px solid #252a38;cursor:pointer;transition:background .12s,color .12s,border-color .12s;}
+.rpb-chip-sel.active{background:rgba(201,168,76,.2);color:var(--gold);border-color:rgba(201,168,76,.5);}
+.rpb-action-row{display:flex;gap:6px;margin-top:4px;}
+.rpb-save-btn{font-size:.7rem;font-weight:700;font-family:'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border-radius:5px;cursor:pointer;flex:1;transition:background .12s;}
+.rpb-save-btn.ok{background:rgba(62,207,142,.15);color:#3ecf8e;border:1px solid rgba(62,207,142,.3);}
+.rpb-save-btn.ok:hover{background:rgba(62,207,142,.25);}
+.rpb-save-btn.cancel{background:rgba(255,255,255,.04);color:#8b92aa;border:1px solid #252a38;}
+#recruitPickerList{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;margin:12px 0;}
 .mbtns{display:flex;gap:8px;margin-top:4px;}
 .mbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px;border-radius:8px;border:1px solid #252a38;cursor:pointer;flex:1;transition:color .15s, background-color .15s, border-color .15s;}
 .mbtn-cancel{background:transparent;color:#8b92aa;}
@@ -1287,13 +1305,17 @@ function saveRedStatus() {
 }
 
 /* ─── RECRUIT PICKER ─── */
+const POS_OPTIONS = ['GK','DFC','LAT','MCD','MC','EXT','DC'];
+const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let _currentPickerSlotKey = '';
+
 function openRecruitPicker(slotKey) {
   if (!RECLU_COL) return;
+  _currentPickerSlotKey = slotKey;
   const formation = FORMATIONS[lineup.formation];
   const slot = formation?.find(s => s.key === slotKey);
   const mapped = slot ? (SLOT_TO_RECLU_POS[slot.l] || []) : [];
 
-  // Clear stale name so the slot shows blank while the picker is open
   setGuestSlotName(slotKey, '');
 
   const title = document.getElementById('recruitPickerTitle');
@@ -1304,7 +1326,6 @@ function openRecruitPicker(slotKey) {
 
   RECLU_COL.where('estado', 'in', ['pendiente', 'en_revision']).get()
     .then(snap => {
-      const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
         .filter(d => !mapped.length ||
           (d.posicionPrincipal && mapped.includes(d.posicionPrincipal)) ||
@@ -1314,23 +1335,152 @@ function openRecruitPicker(slotKey) {
         list.innerHTML = '<p style="color:#8b92aa;font-size:.8rem;text-align:center;padding:8px 0">No hay reclutas para esta posición</p>';
         return;
       }
-      list.innerHTML = docs.map(d => {
-        const tag = d.gamertag || d.nombre || '—';
-        const arq = (d.arquetipos || []).map(a => (a.nombre||'').split('/')[0].trim() + ' ' + (a.nivel||'95')).join(' · ');
-        return `<button class="reclu-pick-btn">
-          <span class="rpb-tag">${_esc(tag)}</span>
-          ${d.gamertag && d.nombre ? `<span class="rpb-name">${_esc(d.nombre)}</span>` : ''}
-          ${arq ? `<span class="rpb-arq">${_esc(arq)}</span>` : ''}
-        </button>`;
-      }).join('');
-      list.querySelectorAll('.reclu-pick-btn').forEach((btn, i) => {
-        const tag = docs[i].gamertag || docs[i].nombre || '—';
-        btn.addEventListener('click', () => selectRecruitForSlot(slotKey, tag));
-      });
+      list.innerHTML = '';
+      docs.forEach(d => list.appendChild(_buildRecruitCard(d)));
     })
     .catch(() => {
       list.innerHTML = '<p style="color:#e8502e;font-size:.8rem;text-align:center;padding:8px 0">Error al cargar</p>';
     });
+}
+
+function _buildRecruitCard(d) {
+  const tag = d.gamertag || d.nombre || '—';
+  const arq = (d.arquetipos || []).map(a => (a.nombre||'').split('/')[0].trim() + ' ' + (a.nivel||'95')).join(' · ');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'reclu-card-wrap';
+
+  function renderView() {
+    wrap.innerHTML = '';
+    const row = document.createElement('div');
+    row.className = 'reclu-card-row';
+
+    const btn = document.createElement('button');
+    btn.className = 'reclu-pick-btn';
+    btn.innerHTML = `<span class="rpb-tag">${_esc(tag)}</span>${d.gamertag && d.nombre ? `<span class="rpb-name">${_esc(d.nombre)}</span>` : ''}${arq ? `<span class="rpb-arq">${_esc(arq)}</span>` : ''}`;
+
+    const posRow = document.createElement('div');
+    posRow.className = 'rpb-pos';
+    if (d.posicionPrincipal) {
+      const c = document.createElement('span');
+      c.className = 'rpb-chip principal';
+      c.textContent = d.posicionPrincipal;
+      posRow.appendChild(c);
+    }
+    (d.posiciones || []).forEach(p => {
+      const c = document.createElement('span');
+      c.className = 'rpb-chip';
+      c.textContent = p;
+      posRow.appendChild(c);
+    });
+    if (posRow.children.length) btn.appendChild(posRow);
+    btn.addEventListener('click', () => selectRecruitForSlot(_currentPickerSlotKey, tag));
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'rpb-edit-btn';
+    editBtn.textContent = '✎';
+    editBtn.title = 'Editar posiciones';
+    editBtn.addEventListener('click', e => { e.stopPropagation(); renderEdit(); });
+
+    row.appendChild(btn);
+    row.appendChild(editBtn);
+    wrap.appendChild(row);
+  }
+
+  function renderEdit() {
+    wrap.innerHTML = '';
+    const panel = document.createElement('div');
+    panel.className = 'rpb-edit-panel';
+
+    const header = document.createElement('span');
+    header.className = 'rpb-tag';
+    header.style.cssText = 'display:block;margin-bottom:6px';
+    header.textContent = tag;
+    panel.appendChild(header);
+
+    // Principal (single-select)
+    let selPrincipal = d.posicionPrincipal || null;
+    const pLabel = document.createElement('div');
+    pLabel.className = 'rpb-label';
+    pLabel.textContent = 'Posición principal';
+    panel.appendChild(pLabel);
+
+    const pRow = document.createElement('div');
+    pRow.className = 'rpb-chip-row';
+    POS_OPTIONS.forEach(pos => {
+      const c = document.createElement('button');
+      c.className = 'rpb-chip-sel' + (selPrincipal === pos ? ' active' : '');
+      c.textContent = pos;
+      c.addEventListener('click', () => {
+        selPrincipal = pos;
+        pRow.querySelectorAll('.rpb-chip-sel').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+      });
+      pRow.appendChild(c);
+    });
+    panel.appendChild(pRow);
+
+    // Secundarias (multi-select)
+    let selSecundarias = [...(d.posiciones || [])];
+    const sLabel = document.createElement('div');
+    sLabel.className = 'rpb-label';
+    sLabel.style.marginTop = '8px';
+    sLabel.textContent = 'Posiciones secundarias';
+    panel.appendChild(sLabel);
+
+    const sRow = document.createElement('div');
+    sRow.className = 'rpb-chip-row';
+    POS_OPTIONS.forEach(pos => {
+      const c = document.createElement('button');
+      c.className = 'rpb-chip-sel' + (selSecundarias.includes(pos) ? ' active' : '');
+      c.textContent = pos;
+      c.addEventListener('click', () => {
+        if (selSecundarias.includes(pos)) {
+          selSecundarias = selSecundarias.filter(p => p !== pos);
+          c.classList.remove('active');
+        } else {
+          selSecundarias.push(pos);
+          c.classList.add('active');
+        }
+      });
+      sRow.appendChild(c);
+    });
+    panel.appendChild(sRow);
+
+    // Actions
+    const actRow = document.createElement('div');
+    actRow.className = 'rpb-action-row';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'rpb-save-btn ok';
+    saveBtn.textContent = 'Guardar';
+    saveBtn.addEventListener('click', async () => {
+      saveBtn.textContent = '...';
+      saveBtn.disabled = true;
+      try {
+        await RECLU_COL.doc(d.id).update({ posicionPrincipal: selPrincipal || null, posiciones: selSecundarias });
+        d.posicionPrincipal = selPrincipal;
+        d.posiciones = selSecundarias;
+        renderView();
+      } catch(err) {
+        saveBtn.textContent = 'Error';
+        setTimeout(() => { saveBtn.textContent = 'Guardar'; saveBtn.disabled = false; }, 1500);
+      }
+    });
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'rpb-save-btn cancel';
+    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.addEventListener('click', renderView);
+
+    actRow.appendChild(saveBtn);
+    actRow.appendChild(cancelBtn);
+    panel.appendChild(actRow);
+    wrap.appendChild(panel);
+  }
+
+  renderView();
+  return wrap;
 }
 
 function selectRecruitForSlot(slotKey, gamertag) {
