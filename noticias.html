@@ -616,8 +616,8 @@
     <p>Novedades y comunicados del club</p>
   </div>
 
-  <!-- Trigger admin: aparece solo si hay draft, completamente discreto -->
-  <div id="draft-trigger" onclick="expandDraftBanner()" style="display:none;text-align:center;padding:10px 0 2px;cursor:pointer;opacity:.12;font-size:9px;letter-spacing:3px;color:var(--gold);user-select:none">▪ ▪ ▪</div>
+  <!-- Trigger admin: siempre visible pero discreto -->
+  <div id="draft-trigger" onclick="expandDraftBanner()" style="text-align:center;padding:10px 0 2px;cursor:pointer;opacity:.12;font-size:9px;letter-spacing:3px;color:var(--gold);user-select:none">▪ ▪ ▪</div>
 
   <!-- Draft banner — plegado por defecto, se expande al click del trigger -->
   <div id="draft-banner" style="display:none">
@@ -1068,19 +1068,17 @@ function _renderDraftBanner(draft) {
   imagesEl.innerHTML = '';
   if (draft.imagePost)  imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imagePost}" alt="Post"></div><div class="draft-img-label">Post (1086×1448)</div></div>`;
   if (draft.imageStory) imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imageStory}" alt="Story"></div><div class="draft-img-label">Story (941×1672)</div></div>`;
-  // Solo muestra el trigger, NO el banner — el contenido queda oculto hasta unlock
-  document.getElementById('draft-trigger').style.display = 'block';
 }
 
 function expandDraftBanner() {
   document.getElementById('draft-trigger').style.display = 'none';
   document.getElementById('draft-banner').style.display  = 'block';
-  // Restablecer estado: unlock row visible, contenido y acciones ocultos
   document.getElementById('draft-unlock-row').style.display = 'block';
   document.getElementById('draft-content').style.display    = 'none';
   document.getElementById('draft-actions').style.display    = 'none';
   document.getElementById('draft-edit-wrap').style.display  = 'none';
   _sessionPin = '';
+  document.getElementById('draft-pin').focus();
 }
 
 function collapseDraftBanner() {
@@ -1103,9 +1101,24 @@ async function unlockDraft() {
   if (r.status === 401) { _showPinErr(true); return; }
   _sessionPin = pin;
   _showPinErr(false);
+  // Si el draft no estaba precargado (no había KV al cargar la página), lo cargamos ahora
+  if (!_currentDraft) {
+    try {
+      const gr = await fetch(_WORKER + '/draft-noticia');
+      if (gr.ok) {
+        const { draft } = await gr.json();
+        if (draft) { _currentDraft = draft; _renderDraftBanner(draft); }
+      }
+    } catch(e) {}
+  }
   document.getElementById('draft-unlock-row').style.display = 'none';
-  document.getElementById('draft-content').style.display    = 'block';
-  document.getElementById('draft-actions').style.display    = 'flex';
+  if (_currentDraft) {
+    document.getElementById('draft-content').style.display = 'block';
+    document.getElementById('draft-actions').style.display = 'flex';
+  } else {
+    document.getElementById('draft-content').innerHTML = '<p style="color:var(--mid);font-size:.88rem">No hay borrador pendiente.</p>';
+    document.getElementById('draft-content').style.display = 'block';
+  }
 }
 
 async function publishDraft() {
