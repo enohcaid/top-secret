@@ -34,65 +34,135 @@ function extractMentionedPlayers(draft) {
   return PLAYERS_WITH_RENDERS.filter(p => text.includes(p));
 }
 
+function buildScene(draft, mentionedPlayers) {
+  const title    = draft.title || '';
+  const bodyText = (draft.body || []).join(' ').replace(/<[^>]+>/g, ' ');
+  const full     = (title + ' ' + bodyText).toLowerCase();
+  const category = draft.category || 'Análisis';
+  const players  = mentionedPlayers.join(', ') || null;
+
+  const is = (re) => re.test(full);
+
+  if (category === 'Resultado' && is(/victoria|triunfo|ganamos|goleada/)) {
+    return {
+      scene: 'dramatic victory celebration, stadium lights exploding, crowd energy, night match atmosphere',
+      action: players
+        ? `${players} celebrating a goal — arms raised, pure euphoria, explosive energy`
+        : 'footballers celebrating in triumph, arms raised, intense stadium atmosphere',
+    };
+  }
+
+  if (category === 'Resultado' && is(/derrota|perdimos|caída/)) {
+    return {
+      scene: 'post-defeat silence, stadium emptying, dramatic low golden light',
+      action: players
+        ? `${players} head down in disappointment, seated on pitch or bench, somber`
+        : 'footballer seated head down on pitch after defeat, stadium lights fading',
+    };
+  }
+
+  if (is(/baja|lesion|lesionad|indefinid|reposo|contractura|distens|sobrecarga/)) {
+    const injuredPlayer = players ? players.split(',')[0].trim() : null;
+    const others = players && mentionedPlayers.length > 1
+      ? mentionedPlayers.slice(1).join(', ')
+      : null;
+    return {
+      scene: 'medical room or dugout, player receiving treatment, moody professional sports atmosphere',
+      action: injuredPlayer
+        ? `${injuredPlayer} sidelined with visible injury (bandaged leg, ice pack), seated on bench with a determined expression despite the setback${others ? `; ${others} standing nearby showing support` : ''}`
+        : 'footballer sidelined with injury, medical tape, seated, determined despite setback',
+    };
+  }
+
+  if (is(/candidato|incorporaci|refuerzo|reclutamiento|evaluac|ficha/)) {
+    return {
+      scene: 'professional football scouting scene, coaches with clipboards, floodlit training pitch',
+      action: players
+        ? `${players} in evaluation stance on pitch, coaches observing analytically in background, intense professional tryout atmosphere`
+        : 'club directors and scouts evaluating candidates on a floodlit training pitch, professional scouting atmosphere',
+    };
+  }
+
+  if (is(/selecci[oó]n|mundial|albiceleste|eliminatoria|copa am/)) {
+    return {
+      scene: 'Argentine national football pride, World Cup atmosphere, blue and white glory mixed with dark elite aesthetics',
+      action: players
+        ? `${players} in club uniform, Argentine flag as background element, pride and national passion`
+        : 'Argentine football national pride, celestial blue and white colors blending with dark elite club aesthetic',
+    };
+  }
+
+  if (is(/fixture|rival|pr[oó]ximo|juega|enfrenta|fecha/)) {
+    return {
+      scene: 'pre-match tunnel walk, dramatic stadium entry, anticipation and intensity before kickoff',
+      action: players
+        ? `${players} walking out of the tunnel in match-ready focus, stadium lights ahead, intense pre-game energy`
+        : 'players emerging from tunnel, focused and determined, stadium roaring ahead',
+    };
+  }
+
+  if (is(/estad[íi]stica|rendimiento|an[aá]lisis|posici[oó]n|tabla/)) {
+    return {
+      scene: 'tactical analysis editorial, data-driven sports media aesthetic, strategic intensity',
+      action: players
+        ? `${players} in sharp editorial portrait, dominant and focused, analytical sports magazine style`
+        : 'football tactical elements as graphic background (pitch lines, formations), elite sports editorial composition',
+    };
+  }
+
+  // Default: institutional / generic editorial
+  return {
+    scene: 'elite Argentine esports football club, prestige and professionalism, dark cinematic atmosphere',
+    action: players
+      ? `${players} in powerful editorial portrait pose, dominant club identity`
+      : 'Top Secret FC club crest and uniform as hero visual, sleek dark editorial design',
+  };
+}
+
 function buildPrompt(draft, format, mentionedPlayers) {
   const isStory  = format === 'story';
-  const category = draft.category || 'Análisis';
+  const { scene, action } = buildScene(draft, mentionedPlayers);
 
-  const dimensions = isStory
+  // Branding strip: bottom for post (player fills top), top for story (player fills center-bottom)
+  const brandPosition = isStory ? 'en la parte SUPERIOR' : 'en la parte INFERIOR';
+  const dimensions    = isStory
     ? '941x1672 (vertical/portrait, formato historia)'
     : '1086x1448 (ligeramente vertical, formato post)';
 
-  const categoryInstructions = {
-    'Resultado': `
-- Ambiente: celebración, victoria/derrota futbolística, estadio nocturno con luces
-- Si hay jugadores del plantel mencionados, ponelos en posición heroica/activa`,
-    'Análisis': `
-- Ambiente: sala de análisis táctica, pizarrón, profesionalismo técnico
-- Composición editorial seria y elegante`,
-    'Fixture': `
-- Ambiente: anticipación, luces de estadio, tensión previa al partido
-- Composición que transmita expectativa`,
-    'Selección': `
-- Ambiente: orgullo nacional argentino, celeste y blanco
-- Podés mezclar los colores nacionales con el negro/dorado del club`,
-    'Institución': `
-- Ambiente: anuncio institucional, élite, organización profesional
-- Foco en la identidad del club`,
-  };
-  const catInstr = categoryInstructions[category] || categoryInstructions['Análisis'];
+  const playerBlock = mentionedPlayers.length > 0
+    ? `JUGADORES (usá sus renders subidos al proyecto):
+${mentionedPlayers.map(p => `- ${p}: ${action}`).join('\n')}`
+    : `Sin jugadores específicos:
+${action}`;
 
-  let playerInstr = '';
-  if (mentionedPlayers.length > 0) {
-    playerInstr = `
-JUGADORES A DESTACAR (usá sus renders del proyecto):
-${mentionedPlayers.map(p => `- ${p}`).join('\n')}
-Incorporá su imagen de forma creativa y editorial, con el uniforme negro/dorado del club.`;
-  } else {
-    playerInstr = `
-No hay jugadores específicos para destacar. Usá el uniforme del club como elemento visual
-junto al logo. Podés usar siluetas o composición abstracta deportiva.`;
-  }
+  return `Creá una imagen editorial deportiva para Top Secret FC, club de fútbol virtual argentino.
 
-  return `Creá una imagen editorial para el club de fútbol virtual argentino Top Secret FC.
-
-SPECS TÉCNICAS:
+═══ SPECS TÉCNICAS ═══
 - Dimensiones: ${dimensions}
-- Fondo negro profundo (#0a0b0e)
-- Acentos y detalles dorados (#C8A84B)
-- NO incluyas texto en la imagen
-- NO incluyas escudos o logos de otros clubes
+- Fondo negro profundo (#0a0b0e), acentos dorados (#C8A84B)
+- Estilo: editorial deportivo de élite, oscuro, cinematográfico, como portada de revista deportiva
 
-IDENTIDAD VISUAL (usá los archivos del proyecto):
-- Logo: usá el logo de Top Secret FC (blanco o versión completa según conveniencia)
-- Uniforme: negro con detalles dorados (disponible en el proyecto)
-- Estilo: editorial deportivo moderno, oscuro, minimalista, de élite
-${catInstr}
-${playerInstr}
+═══ ELEMENTO DE MARCA FIJO (siempre igual en todas las imágenes) ═══
+${brandPosition} de la imagen, incluí una franja horizontal delgada con:
+  • Fondo negro (#0a0b0e) con un borde/línea fina dorada (#C8A84B) separándola del resto
+  • Texto en tipografía condensada, mayúsculas, dorada: "NOTICIAS | TOP SECRET FC"
+  • Estilo limpio y profesional — como los banners de ESPN o Fox Sports pero con identidad oscura de élite
+  • Podés sumar el logo pequeño del club al costado del texto si mejora la composición
 
-CONTEXTO DE LA NOTA:
+═══ ESCENA Y ACCIÓN ═══
+Atmósfera: ${scene}
+${playerBlock}
+
+═══ IDENTIDAD VISUAL (usá los archivos del proyecto) ═══
+- Logo Top Secret FC: incluilo de forma natural en la composición
+- Uniforme negro con detalles dorados del club
+- NO incluyas escudos ni logos de otros clubes
+- El logo/escudo del club SÍ debe aparecer (además de la franja de marca)
+
+═══ CONTEXTO DE LA NOTA ═══
 "${draft.title}"
 
-La imagen debe transmitir identidad élite y profesional. Que se vea como la portada de una revista deportiva de primer nivel.`;
+La imagen tiene que contar visualmente de qué trata la nota. Que un hincha la vea y entienda el tema sin leer nada.`;
 }
 
 async function waitForGeneratedImage(page) {
@@ -201,10 +271,7 @@ async function sendPromptInProject(page, prompt) {
 async function generateImage(page, draft, format, mentionedPlayers) {
   const now      = new Date();
   const dateStr  = draft.date || now.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
-  const artNow   = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-  const hh       = String(artNow.getHours()).padStart(2, '0');
-  const mm       = String(artNow.getMinutes()).padStart(2, '0');
-  const filename   = `${dateStr}_${hh}${mm}_${format}.png`;
+  const filename   = `${dateStr}_${format}.png`;
   const outputPath = path.join(OUTPUT_DIR, filename);
 
   console.log(`\nGenerando imagen ${format.toUpperCase()}...`);
@@ -222,13 +289,14 @@ function gitPushImages(postFile, storyFile) {
   const run = (cmd) => execSync(cmd, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
 
   try {
-    run(`git add "Renders/Daily News/${postFile}" "Renders/Daily News/${storyFile}"`);
+    run('git add "Renders/Daily News/"');
     const status = run('git status --porcelain');
     if (!status) {
       console.log('  Git: sin cambios para commitear.');
       return;
     }
-    run(`git commit -m "feat: imagenes diarias ${postFile.split('_')[0]}"`);
+    const date = postFile.split('_')[0];
+    run(`git commit -m "feat: imagenes diarias ${date}"`);
     run('git push');
     console.log('  Git: imagenes pusheadas a GitHub.');
   } catch (e) {
