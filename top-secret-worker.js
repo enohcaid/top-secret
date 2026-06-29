@@ -680,23 +680,47 @@ export default {
       }
 
       // ── NOTICIAS DRAFT (GET | POST | DELETE /draft-noticia) ──────────────────
+      // Draft is stored in Firestore news/draft (agent can write there directly).
+      // Worker reads/deletes it from Firestore; browser uses this endpoint.
       if (url.pathname === '/draft-noticia') {
+        const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
+
         if (request.method === 'GET') {
-          const draft = await env.TS_KV.get('draft_noticia', 'json');
-          return jsonResp({ draft: draft || null });
+          const fsResp = await fetch(FS_DRAFT);
+          if (!fsResp.ok) return jsonResp({ draft: null });
+          const doc = await fsResp.json();
+          if (doc.error) return jsonResp({ draft: null });
+          try {
+            const draft = JSON.parse(doc.fields?.data?.stringValue || 'null');
+            return jsonResp({ draft });
+          } catch(e) {
+            return jsonResp({ draft: null });
+          }
         }
+
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
         if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+
         if (request.method === 'DELETE') {
-          await env.TS_KV.delete('draft_noticia');
+          await fetch(FS_DRAFT, { method: 'DELETE' });
           return jsonResp({ ok: true });
         }
+
         if (request.method === 'POST') {
           let updates;
           try { updates = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
-          const existing = await env.TS_KV.get('draft_noticia', 'json');
+          const fsResp = await fetch(FS_DRAFT);
+          if (!fsResp.ok) return jsonResp({ error: 'No draft exists' }, 404);
+          const doc = await fsResp.json();
+          let existing;
+          try { existing = JSON.parse(doc.fields?.data?.stringValue || 'null'); } catch(e) { existing = null; }
           if (!existing) return jsonResp({ error: 'No draft exists' }, 404);
-          await env.TS_KV.put('draft_noticia', JSON.stringify({ ...existing, ...updates }));
+          const merged = { ...existing, ...updates };
+          await fetch(FS_DRAFT, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fields: { data: { stringValue: JSON.stringify(merged) } } }),
+          });
           return jsonResp({ ok: true });
         }
       }
@@ -705,12 +729,17 @@ export default {
       if (url.pathname === '/publish-noticia' && request.method === 'POST') {
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
         if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
-        const draft = await env.TS_KV.get('draft_noticia', 'json');
+        const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
+        const fsResp = await fetch(FS_DRAFT);
+        if (!fsResp.ok) return jsonResp({ error: 'No draft to publish' }, 404);
+        const doc = await fsResp.json();
+        let draft;
+        try { draft = JSON.parse(doc.fields?.data?.stringValue || 'null'); } catch(e) { draft = null; }
         if (!draft) return jsonResp({ error: 'No draft to publish' }, 404);
         const published = { ...draft, status: 'published', publishedAt: new Date().toISOString() };
         const existing = (await env.TS_KV.get('published_noticias', 'json')) || [];
         await env.TS_KV.put('published_noticias', JSON.stringify([published, ...existing.filter(n => n.id !== published.id)]));
-        await env.TS_KV.delete('draft_noticia');
+        await fetch(FS_DRAFT, { method: 'DELETE' });
         return jsonResp({ ok: true, id: published.id });
       }
 
@@ -720,7 +749,110 @@ export default {
         return jsonResp({ articles });
       }
 
-      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url, GET /og, POST /notify-reclu, GET|POST|DELETE /draft-noticia, POST /publish-noticia, GET /published-noticias' }, 404);
+      // ── CONVOCATORIA STATUS (/convocatoria-status) ────────────────────────────
+      if (url.pathname === '/convocatoria-status' && request.method === 'GET') {
+        const fsUrl = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/convocatoria/state';
+        const resp = await fetch(fsUrl, { cf: { cacheTtl: 60, cacheEverything: true } });
+        if (!resp.ok) return jsonResp({ error: 'Firestore error', status: resp.status }, 502);
+        const doc = await resp.json();
+
+        function parseFs(v) {
+          if (!v) return null;
+          if ('stringValue'  in v) return v.stringValue;
+          if ('integerValue' in v) return parseInt(v.integerValue);
+          if ('doubleValue'  in v) return v.doubleValue;
+          if ('booleanValue' in v) return v.booleanValue;
+          if ('nullValue'    in v) return null;
+          if ('mapValue'     in v) {
+            const out = {};
+            for (const [k, val] of Object.entries(v.mapValue.fields || {})) out[k] = parseFs(val);
+            return out;
+          }
+          if ('arrayValue' in v) return (v.arrayValue.values || []).map(parseFs);
+          return null;
+        }
+
+        const fields = doc.fields || {};
+        const rawAvail  = parseFs(fields.availability) || {};
+        const alwaysPresent = parseFs(fields.alwaysPresent) || [];
+        const captain   = parseFs(fields.captain) || null;
+        const TODAY     = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+
+        const absences = {};
+        for (const [name, data] of Object.entries(rawAvail)) {
+          if (!data || !data.status) continue;
+          if (data.status === 'black') {
+            const isIndef  = !data.returnDate || data.returnDate >= '9999';
+            const isActive = data.returnDate && data.returnDate > TODAY;
+            if (isIndef || isActive) {
+              absences[name] = { status: 'baja', indefinida: isIndef, hasta: isIndef ? null : data.returnDate };
+            }
+          } else if (data.status === 'red') {
+            absences[name] = { status: 'ausente_hoy' };
+          }
+        }
+
+        return jsonResp({ absences, alwaysPresent, captain, today: TODAY });
+      }
+
+      // ── RECLUTAMIENTO ACTIVO (/reclutamiento-activo) ──────────────────────────
+      if (url.pathname === '/reclutamiento-activo' && request.method === 'GET') {
+        const fsUrl = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/reclutamiento?pageSize=50';
+        const resp = await fetch(fsUrl, { cf: { cacheTtl: 300, cacheEverything: true } });
+        if (!resp.ok) return jsonResp({ error: 'Firestore error', status: resp.status }, 502);
+        const data = await resp.json();
+
+        function parseFsV(v) {
+          if (!v) return null;
+          if ('stringValue'  in v) return v.stringValue;
+          if ('integerValue' in v) return parseInt(v.integerValue);
+          if ('booleanValue' in v) return v.booleanValue;
+          if ('nullValue'    in v) return null;
+          if ('mapValue'     in v) {
+            const out = {};
+            for (const [k, val] of Object.entries(v.mapValue.fields || {})) out[k] = parseFsV(val);
+            return out;
+          }
+          if ('arrayValue' in v) return (v.arrayValue.values || []).map(parseFsV);
+          return null;
+        }
+
+        const docs = data.documents || [];
+        const activos = docs
+          .map(doc => { const f = {}; for (const [k, v] of Object.entries(doc.fields || {})) f[k] = parseFsV(v); return f; })
+          .filter(f => f.estado === 'pendiente' || f.estado === 'en_revision');
+
+        return jsonResp({
+          count: activos.length,
+          players: activos.map(p => ({ gamertag: p.gamertag, posicion: p.posicion || (Array.isArray(p.posiciones) ? p.posiciones[0] : p.posiciones), estado: p.estado })),
+        });
+      }
+
+      // ── CLUB EVENTS LOG (/log-event) ──────────────────────────────────────────
+      if (url.pathname === '/log-event') {
+        if (request.method === 'GET') {
+          const log = (await env.TS_KV.get('club_events_log', 'json')) || [];
+          return jsonResp({ events: log });
+        }
+        if (request.method === 'POST') {
+          const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+          if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+          let body;
+          try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
+          const { type, summary, date } = body;
+          if (!type || !summary) return jsonResp({ error: 'Missing type or summary' }, 400);
+          const log = (await env.TS_KV.get('club_events_log', 'json')) || [];
+          const entry = {
+            type, summary,
+            date: date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }),
+            addedAt: new Date().toISOString(),
+          };
+          await env.TS_KV.put('club_events_log', JSON.stringify([entry, ...log].slice(0, 100)));
+          return jsonResp({ ok: true, entry });
+        }
+      }
+
+      return jsonResp({ error: 'Not found' }, 404);
 
     } catch (err) {
       return jsonResp({ error: { message: err.message || 'Internal error' } }, 500);
