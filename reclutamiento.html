@@ -332,8 +332,22 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <div class="field-error">Ingresá una edad válida (13–60).</div>
     </div>
 
+    <div class="field-group" id="fg-posicion-principal">
+      <label class="field-label">Posición principal <span class="req">*</span></label>
+      <div class="pos-chips" id="posPrincipalChips">
+        <div class="pos-chip" data-pos="GK">GK</div>
+        <div class="pos-chip" data-pos="DFC">DFC</div>
+        <div class="pos-chip" data-pos="LAT">LAT</div>
+        <div class="pos-chip" data-pos="MCD">MCD</div>
+        <div class="pos-chip" data-pos="MC">MC</div>
+        <div class="pos-chip" data-pos="EXT">EXT</div>
+        <div class="pos-chip" data-pos="DC">DC</div>
+      </div>
+      <div class="field-error">Seleccioná tu posición principal.</div>
+    </div>
+
     <div class="field-group" id="fg-posiciones">
-      <label class="field-label">Posiciones <span class="req">*</span></label>
+      <label class="field-label">Posiciones secundarias <span class="req">*</span></label>
       <div class="pos-chips" id="posChips">
         <div class="pos-chip" data-pos="GK">GK</div>
         <div class="pos-chip" data-pos="DFC">DFC</div>
@@ -343,7 +357,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div class="pos-chip" data-pos="EXT">EXT</div>
         <div class="pos-chip" data-pos="DC">DC</div>
       </div>
-      <div class="field-error">Seleccioná al menos una posición.</div>
+      <div class="field-error">Seleccioná al menos una posición secundaria.</div>
     </div>
 
     <div class="field-group" id="fg-arquetipos">
@@ -587,7 +601,16 @@ const ADMIN_PW = '8189';
 let _adminAuth = false;
 
 /* ─── POSITION CHIPS ─── */
-document.querySelectorAll('.pos-chip').forEach(chip => {
+// Posición principal: radio (solo una)
+document.querySelectorAll('#posPrincipalChips .pos-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('#posPrincipalChips .pos-chip').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+    document.getElementById('fg-posicion-principal').classList.remove('has-error');
+  });
+});
+// Posiciones secundarias: multi-select
+document.querySelectorAll('#posChips .pos-chip').forEach(chip => {
   chip.addEventListener('click', function() {
     this.classList.toggle('selected');
     document.getElementById('fg-posiciones').classList.remove('has-error');
@@ -713,7 +736,8 @@ document.getElementById('submitBtn').addEventListener('click', function() {
   const gamertag     = document.getElementById('f-gamertag').value.trim();
   const edadRaw      = document.getElementById('f-edad').value;
   const edad         = parseInt(edadRaw, 10);
-  const posiciones   = [...document.querySelectorAll('.pos-chip.selected')].map(c => c.dataset.pos);
+  const posicionPrincipal = document.querySelector('#posPrincipalChips .pos-chip.selected')?.dataset.pos || '';
+  const posiciones        = [...document.querySelectorAll('#posChips .pos-chip.selected')].map(c => c.dataset.pos);
   const ultimoEquipo = document.getElementById('f-ultimo-equipo').value.trim();
   const disp         = dispInput.checked;
 
@@ -741,9 +765,10 @@ document.getElementById('submitBtn').addEventListener('click', function() {
 
   const valid = [
     setErr('fg-nombre',        !nombre),
-    setErr('fg-gamertag',      !gamertag),
-    setErr('fg-edad',          !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
-    setErr('fg-posiciones',    posiciones.length === 0),
+    setErr('fg-gamertag',           !gamertag),
+    setErr('fg-edad',               !edadRaw || isNaN(edad) || edad < 13 || edad > 60),
+    setErr('fg-posicion-principal', !posicionPrincipal),
+    setErr('fg-posiciones',         posiciones.length === 0),
     setErr('fg-arquetipos',    !arqOk),
     setErr('fg-ultimo-equipo', !ultimoEquipo),
     setErr('fg-disp',          !disp),
@@ -756,7 +781,7 @@ document.getElementById('submitBtn').addEventListener('click', function() {
   btn.textContent = 'Enviando...';
 
   const payload = {
-    nombre, gamertag, edad, posiciones, arquetipos,
+    nombre, gamertag, edad, posicionPrincipal, posiciones, arquetipos,
     ultimoEquipo,
     experiencias: experiencias.length ? experiencias : null,
     disponibilidad: true,
@@ -776,7 +801,7 @@ document.getElementById('submitBtn').addEventListener('click', function() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nombre: payload.nombre, gamertag: payload.gamertag, edad: payload.edad,
-          posiciones: payload.posiciones, arquetipos: payload.arquetipos,
+          posicionPrincipal: payload.posicionPrincipal, posiciones: payload.posiciones, arquetipos: payload.arquetipos,
           ultimoEquipo: payload.ultimoEquipo, experiencias: payload.experiencias,
         }),
       }).catch(() => {});
