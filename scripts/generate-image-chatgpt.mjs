@@ -19,7 +19,7 @@ const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40
 // Jugadores con renders disponibles en el proyecto (T3-Frentes)
 const PLAYERS_WITH_RENDERS = [
   'CipriMancini', 'Guiidow', 'Huber236', 'Juan_Martinez4',
-  'Lautavester7', 'rivarola90', 'slandaco9', 'zPibu__',
+  'Lautavester7', 'rivarola90', 'slandaco9',
 ];
 
 async function fetchDraft() {
@@ -242,29 +242,30 @@ async function downloadImage(page, imgUrl, outputPath) {
 }
 
 async function sendPromptInProject(page, prompt) {
-  // Navigate to the Top Secret FC project
   await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForTimeout(3000);
 
-  // The project page has a chat input — same contenteditable as regular chats
   const input = page.locator('div[contenteditable="true"], p[data-placeholder]').first();
   await input.waitFor({ state: 'visible', timeout: 20000 });
   await input.click();
   await page.waitForTimeout(500);
 
-  // Clear any existing text and type the prompt
+  // Clear any existing text
   await page.keyboard.press('Control+a');
   await page.keyboard.press('Delete');
   await page.waitForTimeout(200);
-  await input.type(prompt, { delay: 3 });
-  await page.waitForTimeout(800);
 
-  // Send
+  // Paste via clipboard — preserves \n as Shift+Enter in ChatGPT's contenteditable
+  await page.evaluate(async (text) => { await navigator.clipboard.writeText(text); }, prompt);
+  await page.keyboard.press('Control+v');
+  await page.waitForTimeout(1000);
+
+  // Send with the button (never press Enter directly — it submits)
   const sendBtn = page.locator('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]').first();
   if (await sendBtn.count() > 0) {
     await sendBtn.click();
   } else {
-    await input.press('Enter');
+    await page.keyboard.press('Enter');
   }
 }
 

@@ -372,7 +372,6 @@ const PLAYERS = [
   { name:'Alexisraies23', pos:'DFC', num:3,  folder:'Alexisraies23'},
   { name:'Cabers14',        pos:'DFC', num:4,  folder:'Cabers14'       },
   { name:'Huber236',        pos:'LD',  num:8,  folder:'Huber236'       },
-  { name:'zPibu__',         pos:'LI',  num:30, folder:'zPibu__'        },
   { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4' },
   { name:'RS32-DaniStone',  pos:'MCI', num:13, folder:'RS32-DaniStone' },
   { name:'CipriMancini',    pos:'MVD', num:32, folder:'CipriMancini'   },
@@ -393,7 +392,6 @@ const CROP_DATA = {
   'Juan_Martinez4': {iW:100.2,iH:56.4,oX:43.7,oY:7.2 },
   'Lautavester7':   {iW:121.2,iH:68.1,oX:67.5,oY:13.0},
   'cansitrGd22_':   {iW:121.2,iH:68.1,oX:60.6,oY:13.0},
-  'zPibu__':        {iW:121.2,iH:68.1,oX:60.2,oY:13.0},
   'Lucasmati_akd':  {iW:68.1, iH:68.1, oX:27.6,oY:13.0},
 };
 
@@ -1101,7 +1099,7 @@ function autoLineup() {
   lineup.formation = '4-3-3';
   lineup.slots = {
     'GK':'slandaco9','RB':'Huber236','CB1':'Alexisraies23',
-    'CB2':'Cabers14','LB':'zPibu__','RM':'Juan_Martinez4','CM':'Guiidow',
+    'CB2':'Cabers14','LB':null,'RM':'Juan_Martinez4','CM':'Guiidow',
     'LM':'CipriMancini','RW':'BlackPanther-CG','CF':'Lucasmati_akd','LW':'Lautavester7',
   };
   saveState(); render();
