@@ -8,6 +8,7 @@
  */
 
 import { chromium } from 'playwright';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -216,6 +217,25 @@ async function generateImage(page, draft, format, mentionedPlayers) {
   return filename;
 }
 
+function gitPushImages(postFile, storyFile) {
+  const repoRoot = path.resolve('.');
+  const run = (cmd) => execSync(cmd, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+
+  try {
+    run(`git add "Renders/Daily News/${postFile}" "Renders/Daily News/${storyFile}"`);
+    const status = run('git status --porcelain');
+    if (!status) {
+      console.log('  Git: sin cambios para commitear.');
+      return;
+    }
+    run(`git commit -m "feat: imagenes diarias ${postFile.split('_')[0]}"`);
+    run('git push');
+    console.log('  Git: imagenes pusheadas a GitHub.');
+  } catch (e) {
+    console.warn('  Git push falló (no crítico):', e.message.split('\n')[0]);
+  }
+}
+
 async function updateDraft(draft, postFile, storyFile) {
   const updated = {
     ...draft,
@@ -262,6 +282,7 @@ async function main() {
     const postFile  = await generateImage(page, draft, 'post', mentioned);
     const storyFile = await generateImage(page, draft, 'story', mentioned);
     await updateDraft(draft, postFile, storyFile);
+    gitPushImages(postFile, storyFile);
 
     console.log('\n✓ Listo.');
     console.log('  Post: ', postFile);
