@@ -1057,6 +1057,7 @@ function _renderDraftBanner(draft) {
 
 function _getPin() { return (document.getElementById('draft-pin').value || '').trim(); }
 function _showPinErr(show) { document.getElementById('pin-error').style.display = show ? 'inline' : 'none'; }
+let _editPin = '';
 
 async function publishDraft() {
   const pin = _getPin(); if (!pin) { _showPinErr(true); return; }
@@ -1082,27 +1083,32 @@ async function discardDraft() {
 
 function editDraft() {
   if (!_currentDraft) return;
+  const pin = _getPin();
+  if (!pin) { _showPinErr(true); return; }
+  _showPinErr(false);
+  _editPin = pin;
   document.getElementById('draft-edit-title').value = _currentDraft.title || '';
   document.getElementById('draft-edit-body').value  = (_currentDraft.body || []).join('\n');
-  document.getElementById('draft-edit-wrap').style.display    = 'block';
-  document.getElementById('draft-actions').style.display = 'none';
+  document.getElementById('draft-edit-wrap').style.display = 'block';
+  document.getElementById('draft-actions').style.display   = 'none';
 }
 
 function cancelDraftEdit() {
-  document.getElementById('draft-edit-wrap').style.display    = 'none';
-  document.getElementById('draft-actions').style.display = 'flex';
+  _editPin = '';
+  document.getElementById('draft-edit-wrap').style.display = 'none';
+  document.getElementById('draft-actions').style.display   = 'flex';
 }
 
 async function saveDraftEdit() {
-  const pin = _getPin(); if (!pin) { _showPinErr(true); cancelDraftEdit(); return; }
+  if (!_editPin) { _showPinErr(true); cancelDraftEdit(); return; }
   const newTitle = document.getElementById('draft-edit-title').value.trim();
   const newBody  = document.getElementById('draft-edit-body').value.split('\n').filter(s => s.trim());
   const r = await fetch(_WORKER + '/draft-noticia', {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + pin, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + _editPin, 'Content-Type': 'application/json' },
     body: JSON.stringify({ title: newTitle, body: newBody }),
   });
-  if (r.status === 401) { _showPinErr(true); return; }
+  if (r.status === 401) { _showPinErr(true); cancelDraftEdit(); return; }
   _currentDraft = { ..._currentDraft, title: newTitle, body: newBody };
   _renderDraftBanner(_currentDraft);
   cancelDraftEdit();
