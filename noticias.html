@@ -478,6 +478,129 @@
       border-color: rgba(0,0,0,.2);
     }
     html.light-mode .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Draft banner ── */
+    .draft-banner {
+      background: var(--gray);
+      border: 1px solid var(--gold);
+      border-radius: 4px;
+      padding: 24px 28px;
+      margin-bottom: 32px;
+    }
+    .draft-banner-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .draft-banner-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: #000;
+      padding: 3px 9px;
+      border-radius: 2px;
+    }
+    .draft-banner-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .draft-banner-meta {
+      font-size: .78rem;
+      color: var(--mid);
+      margin-bottom: 10px;
+    }
+    .draft-banner-excerpt {
+      font-size: .88rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,.7);
+      margin-bottom: 18px;
+    }
+    .draft-images {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .draft-img-wrap {
+      border-radius: 4px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border);
+    }
+    .draft-img-wrap img { display: block; height: 150px; width: auto; object-fit: contain; }
+    .draft-img-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--mid);
+      padding: 4px 8px;
+      text-align: center;
+    }
+    .draft-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn-danger {
+      background: transparent;
+      color: #e8502e;
+      border: 1px solid #e8502e;
+      cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .85rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 3px;
+      transition: background .15s, color .15s;
+    }
+    .btn-danger:hover { background: #e8502e; color: #fff; }
+    .pin-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .pin-input {
+      width: 88px;
+      background: var(--black);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .pin-input:focus { outline: none; border-color: var(--gold); }
+    .pin-error { color: #e8502e; font-size: .78rem; font-weight: 600; display: none; }
+    .draft-edit-wrap { display: none; margin-top: 16px; }
+    .draft-edit-title-input, .draft-edit-body-input {
+      width: 100%;
+      background: var(--black);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: #fff;
+      font-family: 'Barlow', sans-serif;
+      font-size: .88rem;
+      line-height: 1.5;
+      padding: 10px 12px;
+      resize: vertical;
+      margin-bottom: 8px;
+    }
+    .draft-edit-title-input:focus, .draft-edit-body-input:focus { outline: none; border-color: var(--gold); }
+    .draft-edit-actions { display: flex; gap: 8px; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -491,6 +614,36 @@
   <div class="page-header">
     <h1>Noti<span>cias</span></h1>
     <p>Novedades y comunicados del club</p>
+  </div>
+
+  <!-- Draft banner — visible only when KV has a pending draft -->
+  <div id="draft-banner" style="display:none">
+    <div class="draft-banner">
+      <div class="draft-banner-header">
+        <span class="draft-banner-label">Borrador de hoy</span>
+      </div>
+      <div class="draft-banner-title" id="draft-title"></div>
+      <div class="draft-banner-meta" id="draft-meta"></div>
+      <div class="draft-banner-excerpt" id="draft-excerpt"></div>
+      <div class="draft-images" id="draft-images"></div>
+      <div class="draft-edit-wrap" id="draft-edit-wrap">
+        <input class="draft-edit-title-input" id="draft-edit-title" type="text" placeholder="Título">
+        <textarea class="draft-edit-body-input" id="draft-edit-body" rows="8" placeholder="Cuerpo del artículo (HTML, un párrafo por línea)"></textarea>
+        <div class="draft-edit-actions">
+          <button class="btn-primary" onclick="saveDraftEdit()">Guardar cambios</button>
+          <button class="btn-secondary" onclick="cancelDraftEdit()">Cancelar</button>
+        </div>
+      </div>
+      <div class="draft-actions" id="draft-actions">
+        <div class="pin-row">
+          <input class="pin-input" id="draft-pin" type="password" maxlength="8" placeholder="PIN" inputmode="numeric">
+          <button class="btn-primary" onclick="publishDraft()">Publicar</button>
+          <button class="btn-secondary" onclick="editDraft()">Editar</button>
+          <button class="btn-danger" onclick="discardDraft()">Descartar</button>
+        </div>
+        <span class="pin-error" id="pin-error">PIN incorrecto</span>
+      </div>
+    </div>
   </div>
 
   <!-- Featured card injected by JS -->
@@ -572,6 +725,7 @@
 // NOTICIAS data is loaded from noticias-data.js
 // Auto-generated result news populated by the module script below
 window._AUTO_NEWS = [];
+window._KV_NEWS   = [];
 
 // ── SHARE STATE ──────────────────────────────────────────────────────────────
 let _shareNews = null;
@@ -579,7 +733,7 @@ const BASE_URL = 'https://enohcaid.github.io/top-secret/noticias.html';
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 function allNews() {
-  return [...NOTICIAS, ...(window._AUTO_NEWS || [])];
+  return [...NOTICIAS, ...(window._AUTO_NEWS || []), ...(window._KV_NEWS || [])];
 }
 
 function findNews(id) {
@@ -861,6 +1015,100 @@ document.getElementById('share-overlay').addEventListener('click', function(e) {
 init();
 const _initHash = location.hash.slice(1);
 if (_initHash && findNews(_initHash)) openArticle(_initHash);
+
+// ── KV DRAFT BANNER ──────────────────────────────────────────────────────────
+const _WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+let _currentDraft = null;
+
+async function loadKvContent() {
+  // Load published KV articles and merge into grid
+  try {
+    const r = await fetch(_WORKER + '/published-noticias');
+    if (r.ok) {
+      const { articles } = await r.json();
+      if (articles && articles.length) {
+        window._KV_NEWS = articles.map(a => ({ ...a, pinned: false }));
+        renderAutoSection(window._KV_NEWS);
+      }
+    }
+  } catch(e) {}
+
+  // Load pending draft
+  try {
+    const r = await fetch(_WORKER + '/draft-noticia');
+    if (!r.ok) return;
+    const { draft } = await r.json();
+    if (!draft) return;
+    _currentDraft = draft;
+    _renderDraftBanner(draft);
+  } catch(e) {}
+}
+
+function _renderDraftBanner(draft) {
+  document.getElementById('draft-title').textContent   = draft.title   || '';
+  document.getElementById('draft-meta').textContent    = (draft.dateLabel || draft.date) + (draft.category ? ' · ' + draft.category : '');
+  document.getElementById('draft-excerpt').textContent = draft.excerpt  || '';
+  const imagesEl = document.getElementById('draft-images');
+  imagesEl.innerHTML = '';
+  if (draft.imagePost)  imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imagePost}" alt="Post"></div><div class="draft-img-label">Post (1086×1448)</div></div>`;
+  if (draft.imageStory) imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imageStory}" alt="Story"></div><div class="draft-img-label">Story (941×1672)</div></div>`;
+  document.getElementById('draft-banner').style.display = 'block';
+}
+
+function _getPin() { return (document.getElementById('draft-pin').value || '').trim(); }
+function _showPinErr(show) { document.getElementById('pin-error').style.display = show ? 'inline' : 'none'; }
+
+async function publishDraft() {
+  const pin = _getPin(); if (!pin) { _showPinErr(true); return; }
+  _showPinErr(false);
+  const r = await fetch(_WORKER + '/publish-noticia', { method: 'POST', headers: { 'Authorization': 'Bearer ' + pin } });
+  if (r.status === 401) { _showPinErr(true); return; }
+  if (!r.ok) { alert('Error al publicar. Intentá de nuevo.'); return; }
+  window._KV_NEWS = [{ ..._currentDraft, status: 'published', pinned: false }, ...window._KV_NEWS];
+  renderAutoSection(window._KV_NEWS);
+  document.getElementById('draft-banner').style.display = 'none';
+  _currentDraft = null;
+}
+
+async function discardDraft() {
+  const pin = _getPin(); if (!pin) { _showPinErr(true); return; }
+  _showPinErr(false);
+  if (!confirm('¿Descartar el borrador de hoy?')) return;
+  const r = await fetch(_WORKER + '/draft-noticia', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + pin } });
+  if (r.status === 401) { _showPinErr(true); return; }
+  document.getElementById('draft-banner').style.display = 'none';
+  _currentDraft = null;
+}
+
+function editDraft() {
+  if (!_currentDraft) return;
+  document.getElementById('draft-edit-title').value = _currentDraft.title || '';
+  document.getElementById('draft-edit-body').value  = (_currentDraft.body || []).join('\n');
+  document.getElementById('draft-edit-wrap').style.display    = 'block';
+  document.getElementById('draft-actions').style.display = 'none';
+}
+
+function cancelDraftEdit() {
+  document.getElementById('draft-edit-wrap').style.display    = 'none';
+  document.getElementById('draft-actions').style.display = 'flex';
+}
+
+async function saveDraftEdit() {
+  const pin = _getPin(); if (!pin) { _showPinErr(true); cancelDraftEdit(); return; }
+  const newTitle = document.getElementById('draft-edit-title').value.trim();
+  const newBody  = document.getElementById('draft-edit-body').value.split('\n').filter(s => s.trim());
+  const r = await fetch(_WORKER + '/draft-noticia', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + pin, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: newTitle, body: newBody }),
+  });
+  if (r.status === 401) { _showPinErr(true); return; }
+  _currentDraft = { ..._currentDraft, title: newTitle, body: newBody };
+  _renderDraftBanner(_currentDraft);
+  cancelDraftEdit();
+}
+
+loadKvContent();
 </script>
 
 <script type="module">

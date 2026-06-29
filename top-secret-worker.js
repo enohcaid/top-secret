@@ -679,7 +679,48 @@ export default {
         });
       }
 
-      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url, GET /og, POST /notify-reclu' }, 404);
+      // ── NOTICIAS DRAFT (GET | POST | DELETE /draft-noticia) ──────────────────
+      if (url.pathname === '/draft-noticia') {
+        if (request.method === 'GET') {
+          const draft = await env.TS_KV.get('draft_noticia', 'json');
+          return jsonResp({ draft: draft || null });
+        }
+        const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        if (request.method === 'DELETE') {
+          await env.TS_KV.delete('draft_noticia');
+          return jsonResp({ ok: true });
+        }
+        if (request.method === 'POST') {
+          let updates;
+          try { updates = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
+          const existing = await env.TS_KV.get('draft_noticia', 'json');
+          if (!existing) return jsonResp({ error: 'No draft exists' }, 404);
+          await env.TS_KV.put('draft_noticia', JSON.stringify({ ...existing, ...updates }));
+          return jsonResp({ ok: true });
+        }
+      }
+
+      // ── PUBLISH DRAFT (POST /publish-noticia) ────────────────────────────────
+      if (url.pathname === '/publish-noticia' && request.method === 'POST') {
+        const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        const draft = await env.TS_KV.get('draft_noticia', 'json');
+        if (!draft) return jsonResp({ error: 'No draft to publish' }, 404);
+        const published = { ...draft, status: 'published', publishedAt: new Date().toISOString() };
+        const existing = (await env.TS_KV.get('published_noticias', 'json')) || [];
+        await env.TS_KV.put('published_noticias', JSON.stringify([published, ...existing.filter(n => n.id !== published.id)]));
+        await env.TS_KV.delete('draft_noticia');
+        return jsonResp({ ok: true, id: published.id });
+      }
+
+      // ── PUBLISHED NOTICIAS (GET /published-noticias) ─────────────────────────
+      if (url.pathname === '/published-noticias' && request.method === 'GET') {
+        const articles = (await env.TS_KV.get('published_noticias', 'json')) || [];
+        return jsonResp({ articles });
+      }
+
+      return jsonResp({ error: 'Not found — endpoints: POST / (Gemini), GET|POST /kv, GET /vpn-results, GET /vpn-fixtures, GET /vpn-table, GET /ea, GET /fetch-url, GET /og, POST /notify-reclu, GET|POST|DELETE /draft-noticia, POST /publish-noticia, GET /published-noticias' }, 404);
 
     } catch (err) {
       return jsonResp({ error: { message: err.message || 'Internal error' } }, 500);
