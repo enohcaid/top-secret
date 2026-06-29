@@ -1,7 +1,8 @@
 /**
  * Genera imágenes para la noticia diaria de Top Secret FC usando ChatGPT.
- * Primera vez: abre el browser para que el usuario inicie sesión en ChatGPT.
- * Siguientes veces: usa cookies guardadas automáticamente.
+ * Usa el proyecto "TOP Secret FC" en ChatGPT, que tiene subidos el logo,
+ * uniformes y renders de jugadores (T3-Frentes). Conecta al Chrome del
+ * usuario via CDP en localhost:9222.
  *
  * Uso: node scripts/generate-image-chatgpt.mjs
  */
@@ -12,54 +13,92 @@ import path from 'path';
 
 const FIRESTORE_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const OUTPUT_DIR      = path.resolve('Renders/Daily News');
-const SESSION_FILE    = path.resolve('scripts/.chatgpt-session.json');
+const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
+
+// Jugadores con renders disponibles en el proyecto (T3-Frentes)
+const PLAYERS_WITH_RENDERS = [
+  'CipriMancini', 'Guiidow', 'Huber236', 'Juan_Martinez4',
+  'Lautavester7', 'rivarola90', 'slandaco9', 'zPibu__',
+];
 
 async function fetchDraft() {
-  const res  = await fetch(FIRESTORE_DRAFT);
-  const doc  = await res.json();
+  const res = await fetch(FIRESTORE_DRAFT);
+  const doc = await res.json();
   if (doc.error) throw new Error('No hay draft en Firestore: ' + doc.error.message);
   return JSON.parse(doc.fields.data.stringValue);
 }
 
-function buildPrompt(draft, format) {
+function extractMentionedPlayers(draft) {
+  const text = [draft.title, draft.excerpt, ...(draft.body || [])].join(' ');
+  return PLAYERS_WITH_RENDERS.filter(p => text.includes(p));
+}
+
+function buildPrompt(draft, format, mentionedPlayers) {
   const isStory  = format === 'story';
   const category = draft.category || 'Análisis';
 
-  const moods = {
-    'Resultado':   'dramatic sports celebration, football pitch atmosphere at night, lights, intensity',
-    'Análisis':    'tactical sports analysis, professional football media editorial',
-    'Fixture':     'upcoming match anticipation, stadium lights, dramatic atmosphere',
-    'Selección':   'Argentine national football, celestial blue and white, national pride and passion',
-    'Institución': 'elite esports club announcement, prestige, professional organization',
+  const dimensions = isStory
+    ? '941x1672 (vertical/portrait, formato historia)'
+    : '1086x1448 (ligeramente vertical, formato post)';
+
+  const categoryInstructions = {
+    'Resultado': `
+- Ambiente: celebración, victoria/derrota futbolística, estadio nocturno con luces
+- Si hay jugadores del plantel mencionados, ponelos en posición heroica/activa`,
+    'Análisis': `
+- Ambiente: sala de análisis táctica, pizarrón, profesionalismo técnico
+- Composición editorial seria y elegante`,
+    'Fixture': `
+- Ambiente: anticipación, luces de estadio, tensión previa al partido
+- Composición que transmita expectativa`,
+    'Selección': `
+- Ambiente: orgullo nacional argentino, celeste y blanco
+- Podés mezclar los colores nacionales con el negro/dorado del club`,
+    'Institución': `
+- Ambiente: anuncio institucional, élite, organización profesional
+- Foco en la identidad del club`,
   };
-  const mood = moods[category] || moods['Análisis'];
-  const orientation = isStory
-    ? 'vertical portrait format 941x1672, tall composition, space at top for title and bottom for logo'
-    : 'slightly vertical format 1086x1448, centered bold composition';
+  const catInstr = categoryInstructions[category] || categoryInstructions['Análisis'];
 
-  return `Generá una imagen editorial deportiva para el club de fútbol virtual argentino Top Secret FC.
+  let playerInstr = '';
+  if (mentionedPlayers.length > 0) {
+    playerInstr = `
+JUGADORES A DESTACAR (usá sus renders del proyecto):
+${mentionedPlayers.map(p => `- ${p}`).join('\n')}
+Incorporá su imagen de forma creativa y editorial, con el uniforme negro/dorado del club.`;
+  } else {
+    playerInstr = `
+No hay jugadores específicos para destacar. Usá el uniforme del club como elemento visual
+junto al logo. Podés usar siluetas o composición abstracta deportiva.`;
+  }
 
-Diseño:
+  return `Creá una imagen editorial para el club de fútbol virtual argentino Top Secret FC.
+
+SPECS TÉCNICAS:
+- Dimensiones: ${dimensions}
 - Fondo negro profundo (#0a0b0e)
-- Detalles y acentos dorados (#C8A84B)
-- Estilo: editorial deportivo moderno, oscuro, minimalista, de élite
-- Atmósfera: ${mood}
-- ${orientation}
+- Acentos y detalles dorados (#C8A84B)
 - NO incluyas texto en la imagen
-- NO incluyas escudos de otros clubes
+- NO incluyas escudos o logos de otros clubes
 
-Contexto de la nota: "${draft.title}"
+IDENTIDAD VISUAL (usá los archivos del proyecto):
+- Logo: usá el logo de Top Secret FC (blanco o versión completa según conveniencia)
+- Uniforme: negro con detalles dorados (disponible en el proyecto)
+- Estilo: editorial deportivo moderno, oscuro, minimalista, de élite
+${catInstr}
+${playerInstr}
 
-La imagen debe transmitir identidad élite y profesional. Fondo predominantemente negro con toques dorados estratégicos.`;
+CONTEXTO DE LA NOTA:
+"${draft.title}"
+
+La imagen debe transmitir identidad élite y profesional. Que se vea como la portada de una revista deportiva de primer nivel.`;
 }
 
 async function waitForGeneratedImage(page) {
-  console.log('  Esperando que ChatGPT genere la imagen (hasta 6 min)...');
-
-  // Disable any page-level default timeout so our manual loop controls timing
+  console.log('  Esperando imagen (hasta 6 min)...');
   page.setDefaultTimeout(0);
 
-  await page.screenshot({ path: 'Renders/Daily News/debug-after-send.png', fullPage: false });
+  await page.screenshot({ path: path.join(OUTPUT_DIR, 'debug-after-send.png'), fullPage: false });
 
   const TIMEOUT_MS = 6 * 60 * 1000;
   const POLL_MS    = 4000;
@@ -87,7 +126,7 @@ async function waitForGeneratedImage(page) {
     });
 
     if (imgSrc) {
-      console.log('\n  Imagen detectada en el DOM.');
+      console.log('\n  Imagen detectada.');
       return imgSrc;
     }
 
@@ -96,13 +135,12 @@ async function waitForGeneratedImage(page) {
     await page.waitForTimeout(POLL_MS);
   }
 
-  await page.screenshot({ path: 'Renders/Daily News/debug-timeout.png', fullPage: true });
+  await page.screenshot({ path: path.join(OUTPUT_DIR, 'debug-timeout.png'), fullPage: true });
   throw new Error('Timeout (6 min) esperando imagen. Screenshot en debug-timeout.png');
 }
 
 async function downloadImage(page, imgUrl, outputPath) {
   if (imgUrl.startsWith('blob:')) {
-    // Blob URLs: canvas trick to extract pixels
     const buffer = await page.evaluate(async (url) => {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -132,59 +170,46 @@ async function downloadImage(page, imgUrl, outputPath) {
   console.log('  Guardada:', outputPath);
 }
 
-async function sendPromptAndWait(page, prompt) {
-  // Navigate to a fresh chat
-  await page.goto('https://chatgpt.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForTimeout(4000);
+async function sendPromptInProject(page, prompt) {
+  // Navigate to the Top Secret FC project
+  await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForTimeout(3000);
 
-  // Find the visible contenteditable input (ChatGPT uses a hidden fallback textarea + visible div)
-  const input = page.locator('div[contenteditable="true"]').first();
-  await input.waitFor({ state: 'visible', timeout: 30000 });
+  // The project page has a chat input — same contenteditable as regular chats
+  const input = page.locator('div[contenteditable="true"], p[data-placeholder]').first();
+  await input.waitFor({ state: 'visible', timeout: 20000 });
   await input.click();
   await page.waitForTimeout(500);
 
-  // Clear and type
-  await input.evaluate((el, text) => {
-    el.focus();
-    el.innerText = '';
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-  }, prompt);
-
-  // Use clipboard paste for reliable input of long text
-  await page.evaluate((text) => {
-    navigator.clipboard.writeText(text).catch(() => {});
-  }, prompt);
+  // Clear any existing text and type the prompt
   await page.keyboard.press('Control+a');
   await page.keyboard.press('Delete');
   await page.waitForTimeout(200);
-  // Type the text directly
-  await input.type(prompt, { delay: 5 });
-  await page.waitForTimeout(1000);
+  await input.type(prompt, { delay: 3 });
+  await page.waitForTimeout(800);
 
   // Send
   const sendBtn = page.locator('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]').first();
-  const hasSendBtn = await sendBtn.count() > 0;
-  if (hasSendBtn) {
+  if (await sendBtn.count() > 0) {
     await sendBtn.click();
   } else {
     await input.press('Enter');
   }
 }
 
-async function generateImage(page, draft, format) {
+async function generateImage(page, draft, format, mentionedPlayers) {
   const now      = new Date();
   const dateStr  = draft.date || now.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   const artNow   = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
   const hh       = String(artNow.getHours()).padStart(2, '0');
   const mm       = String(artNow.getMinutes()).padStart(2, '0');
-  const timeStr  = `${hh}${mm}`;
-  const filename   = `${dateStr}_${timeStr}_${format}.png`;
+  const filename   = `${dateStr}_${hh}${mm}_${format}.png`;
   const outputPath = path.join(OUTPUT_DIR, filename);
 
   console.log(`\nGenerando imagen ${format.toUpperCase()}...`);
-  const prompt = buildPrompt(draft, format);
+  const prompt = buildPrompt(draft, format, mentionedPlayers);
 
-  await sendPromptAndWait(page, prompt);
+  await sendPromptInProject(page, prompt);
   const imgUrl = await waitForGeneratedImage(page);
   await downloadImage(page, imgUrl, outputPath);
 
@@ -200,9 +225,9 @@ async function updateDraft(draft, postFile, storyFile) {
   };
   const payload = { fields: { data: { stringValue: JSON.stringify(updated) } } };
   await fetch(FIRESTORE_DRAFT, {
-    method: 'PATCH',
+    method:  'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body:    JSON.stringify(payload),
   });
   console.log('\nDraft actualizado en Firestore.');
 }
@@ -215,33 +240,34 @@ async function main() {
   console.log('Título:', draft.title);
   console.log('Fecha:', draft.date);
 
-  // Connect to already-running Chrome (launched with --remote-debugging-port=9222)
-  console.log('Conectando al Chrome abierto...');
-  const browser  = await chromium.connectOverCDP('http://localhost:9222');
-  const contexts = browser.contexts();
-  const context  = contexts[0];
+  const mentioned = extractMentionedPlayers(draft);
+  if (mentioned.length > 0) {
+    console.log('Jugadores mencionados con renders:', mentioned.join(', '));
+  } else {
+    console.log('Sin jugadores específicos — composición institucional.');
+  }
 
-  // Use existing page or open new one
+  console.log('Conectando al Chrome abierto...');
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const context = browser.contexts()[0];
+
   let page = context.pages().find(p => p.url().includes('chatgpt.com'));
   if (!page) {
     page = await context.newPage();
-    await page.goto('https://chatgpt.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(3000);
   }
-  // Disable default timeout so waitForGeneratedImage's manual loop is authoritative
   page.setDefaultTimeout(0);
-  console.log('Conectado a ChatGPT.');
+  console.log('Conectado.');
 
   try {
-    const postFile  = await generateImage(page, draft, 'post');
-    const storyFile = await generateImage(page, draft, 'story');
+    const postFile  = await generateImage(page, draft, 'post', mentioned);
+    const storyFile = await generateImage(page, draft, 'story', mentioned);
     await updateDraft(draft, postFile, storyFile);
 
     console.log('\n✓ Listo.');
     console.log('  Post: ', postFile);
     console.log('  Story:', storyFile);
   } finally {
-    await browser.close(); // disconnect only, Chrome keeps running
+    await browser.close();
   }
 }
 
