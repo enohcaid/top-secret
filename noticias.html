@@ -626,6 +626,24 @@
       <div class="draft-banner-meta" id="draft-meta"></div>
       <div class="draft-banner-excerpt" id="draft-excerpt"></div>
       <div class="draft-images" id="draft-images"></div>
+      <!-- Unlock row: visible hasta ingresar PIN correcto -->
+      <div class="draft-actions" id="draft-unlock-row">
+        <div class="pin-row">
+          <input class="pin-input" id="draft-pin" type="password" maxlength="8" placeholder="PIN admin" inputmode="numeric"
+                 onkeydown="if(event.key==='Enter')unlockDraft()">
+          <button class="btn-secondary" onclick="unlockDraft()">Desbloquear</button>
+        </div>
+        <span class="pin-error" id="pin-error">PIN incorrecto</span>
+      </div>
+      <!-- Acciones: visibles sólo después de desbloquear -->
+      <div class="draft-actions" id="draft-actions" style="display:none">
+        <div class="pin-row">
+          <button class="btn-primary" onclick="publishDraft()">Publicar</button>
+          <button class="btn-secondary" onclick="editDraft()">Editar</button>
+          <button class="btn-danger" onclick="discardDraft()">Descartar</button>
+        </div>
+      </div>
+      <!-- Formulario de edición -->
       <div class="draft-edit-wrap" id="draft-edit-wrap">
         <input class="draft-edit-title-input" id="draft-edit-title" type="text" placeholder="Título">
         <textarea class="draft-edit-body-input" id="draft-edit-body" rows="8" placeholder="Cuerpo del artículo (HTML, un párrafo por línea)"></textarea>
@@ -633,15 +651,6 @@
           <button class="btn-primary" onclick="saveDraftEdit()">Guardar cambios</button>
           <button class="btn-secondary" onclick="cancelDraftEdit()">Cancelar</button>
         </div>
-      </div>
-      <div class="draft-actions" id="draft-actions">
-        <div class="pin-row">
-          <input class="pin-input" id="draft-pin" type="password" maxlength="8" placeholder="PIN" inputmode="numeric">
-          <button class="btn-primary" onclick="publishDraft()">Publicar</button>
-          <button class="btn-secondary" onclick="editDraft()">Editar</button>
-          <button class="btn-danger" onclick="discardDraft()">Descartar</button>
-        </div>
-        <span class="pin-error" id="pin-error">PIN incorrecto</span>
       </div>
     </div>
   </div>
@@ -1055,15 +1064,27 @@ function _renderDraftBanner(draft) {
   document.getElementById('draft-banner').style.display = 'block';
 }
 
-function _getPin() { return (document.getElementById('draft-pin').value || '').trim(); }
 function _showPinErr(show) { document.getElementById('pin-error').style.display = show ? 'inline' : 'none'; }
-let _editPin = '';
+let _sessionPin = '';
+
+async function unlockDraft() {
+  const pin = (document.getElementById('draft-pin').value || '').trim();
+  if (!pin) { _showPinErr(true); return; }
+  // Validate PIN with a no-op POST (empty update)
+  const r = await fetch(_WORKER + '/draft-noticia', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + pin, 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+  if (r.status === 401) { _showPinErr(true); return; }
+  _sessionPin = pin;
+  _showPinErr(false);
+  document.getElementById('draft-unlock-row').style.display = 'none';
+  document.getElementById('draft-actions').style.display    = 'flex';
+}
 
 async function publishDraft() {
-  const pin = _getPin(); if (!pin) { _showPinErr(true); return; }
-  _showPinErr(false);
-  const r = await fetch(_WORKER + '/publish-noticia', { method: 'POST', headers: { 'Authorization': 'Bearer ' + pin } });
-  if (r.status === 401) { _showPinErr(true); return; }
+  const r = await fetch(_WORKER + '/publish-noticia', { method: 'POST', headers: { 'Authorization': 'Bearer ' + _sessionPin } });
   if (!r.ok) { alert('Error al publicar. Intentá de nuevo.'); return; }
   window._KV_NEWS = [{ ..._currentDraft, status: 'published', pinned: false }, ...window._KV_NEWS];
   renderAutoSection(window._KV_NEWS);
@@ -1072,43 +1093,35 @@ async function publishDraft() {
 }
 
 async function discardDraft() {
-  const pin = _getPin(); if (!pin) { _showPinErr(true); return; }
-  _showPinErr(false);
   if (!confirm('¿Descartar el borrador de hoy?')) return;
-  const r = await fetch(_WORKER + '/draft-noticia', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + pin } });
-  if (r.status === 401) { _showPinErr(true); return; }
+  const r = await fetch(_WORKER + '/draft-noticia', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + _sessionPin } });
+  if (!r.ok) { alert('Error al descartar.'); return; }
   document.getElementById('draft-banner').style.display = 'none';
   _currentDraft = null;
 }
 
 function editDraft() {
   if (!_currentDraft) return;
-  const pin = _getPin();
-  if (!pin) { _showPinErr(true); return; }
-  _showPinErr(false);
-  _editPin = pin;
-  document.getElementById('draft-edit-title').value = _currentDraft.title || '';
-  document.getElementById('draft-edit-body').value  = (_currentDraft.body || []).join('\n');
+  document.getElementById('draft-edit-title').value       = _currentDraft.title || '';
+  document.getElementById('draft-edit-body').value        = (_currentDraft.body || []).join('\n');
   document.getElementById('draft-edit-wrap').style.display = 'block';
-  document.getElementById('draft-actions').style.display   = 'none';
+  document.getElementById('draft-actions').style.display  = 'none';
 }
 
 function cancelDraftEdit() {
-  _editPin = '';
   document.getElementById('draft-edit-wrap').style.display = 'none';
   document.getElementById('draft-actions').style.display   = 'flex';
 }
 
 async function saveDraftEdit() {
-  if (!_editPin) { _showPinErr(true); cancelDraftEdit(); return; }
   const newTitle = document.getElementById('draft-edit-title').value.trim();
   const newBody  = document.getElementById('draft-edit-body').value.split('\n').filter(s => s.trim());
   const r = await fetch(_WORKER + '/draft-noticia', {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + _editPin, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + _sessionPin, 'Content-Type': 'application/json' },
     body: JSON.stringify({ title: newTitle, body: newBody }),
   });
-  if (r.status === 401) { _showPinErr(true); cancelDraftEdit(); return; }
+  if (!r.ok) { alert('Error al guardar.'); return; }
   _currentDraft = { ..._currentDraft, title: newTitle, body: newBody };
   _renderDraftBanner(_currentDraft);
   cancelDraftEdit();
