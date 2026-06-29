@@ -13,7 +13,7 @@ const NOTICIAS_OG = {
   },
   'invierno-2026-j3j6': {
     t: 'Invierno VPUG: caída el martes, doble victoria el jueves — el equipo se recompone',
-    i: SITE + 'logos/Campeonato%20Invierno.png',
+    i: SITE + 'logos/Resumen%20sem1%20invierno.png',
   },
   'invierno-2026-j1j2': {
     t: 'Campeonato de Invierno: Top Secret arranca con dos victorias — 2-1 y 3-2',

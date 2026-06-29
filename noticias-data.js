@@ -33,7 +33,7 @@ const NOTICIAS = [
     date: '2026-06-26',
     dateLabel: '26 de junio de 2026',
     excerpt: 'Fechas 3 a 6 del Campeonato de Invierno. Tras un martes para olvidar (1-4 y 0-1), Top Secret respondió el jueves con dos victorias al hilo: 1-0 a HF Giles y 3-0 a Team Valhalla. Lautavester7 emerge como máximo artillero del torneo con 4 goles.',
-    image: 'logos/Campeonato Invierno.png',
+    image: 'logos/Resumen sem1 invierno.png',
     body: [
       'Si la semana inaugural del <strong>Campeonato de Invierno VPUG</strong> había dejado una imagen impecable — seis puntos, cinco goleadores distintos, cero dudas —, el martes 23 de junio llegó para complicar el panorama. Dos partidos, dos derrotas: <strong>1-4 de visitante ante Comunicaciones</strong> y <strong>0-1 en casa contra InfinitX</strong>. La primera caída del torneo llegó doble y en la misma noche.',
       'El jueves 25 no admitió más margen de error. Top Secret salió a resolver y lo hizo con claridad: <strong>1-0 de visitante ante HF Giles</strong> y <strong>3-0 en casa ante Team Valhalla</strong>. Cuatro goles en dos partidos, cero en contra, y la respuesta que el torneo exigía. El equipo no dejó que las dos derrotas del martes definieran la semana.',
