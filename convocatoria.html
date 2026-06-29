@@ -1306,7 +1306,9 @@ function openRecruitPicker(slotKey) {
     .then(snap => {
       const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-        .filter(d => !mapped.length || (d.posiciones || []).some(p => mapped.includes(p)))
+        .filter(d => !mapped.length ||
+          (d.posicionPrincipal && mapped.includes(d.posicionPrincipal)) ||
+          (d.posiciones || []).some(p => mapped.includes(p)))
         .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
       if (!docs.length) {
         list.innerHTML = '<p style="color:#8b92aa;font-size:.8rem;text-align:center;padding:8px 0">No hay reclutas para esta posición</p>';
