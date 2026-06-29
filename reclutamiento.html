@@ -234,6 +234,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .td-date{color:var(--mid);font-size:11px;white-space:nowrap;}
 .td-pos-chips{display:flex;flex-wrap:wrap;gap:4px;}
 .td-pos-chip{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:2px 7px;}
+.td-pos-chip.sec{color:var(--mid2);background:rgba(255,255,255,.04);border-color:var(--border);}
 .arq-list{display:flex;flex-direction:column;gap:3px;}
 .arq-item{font-size:12px;color:var(--text2);}
 .arq-item .an{color:var(--text);font-weight:500;}
@@ -254,8 +255,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .edit-exp-rem{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--mid);cursor:pointer;font-size:14px;font-weight:700;transition:color .15s;}
 .edit-exp-rem:hover{color:var(--red);}
 #editArqContainer .arq-entry{margin-bottom:8px;}
-#editPosiciones .pos-chip{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--mid2);cursor:pointer;transition:color .15s,background .15s,border-color .15s;}
-#editPosiciones .pos-chip.active{color:var(--gold);background:var(--gold-dim);border-color:rgba(201,168,76,.4);}
+#editPosicionPrincipal .pos-chip,#editPosiciones .pos-chip{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--mid2);cursor:pointer;transition:color .15s,background .15s,border-color .15s;}
+#editPosicionPrincipal .pos-chip.active,#editPosiciones .pos-chip.active{color:var(--gold);background:var(--gold-dim);border-color:rgba(201,168,76,.4);}
 .empty-state{padding:48px 24px;text-align:center;color:var(--mid);font-size:13px;}
 
 /* ── CONFIRM BTN ── */
@@ -525,7 +526,12 @@ tr:hover td{background:rgba(255,255,255,.02);}
     </div>
 
     <div style="margin-bottom:14px;">
-      <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:8px;">Posiciones</label>
+      <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:8px;">Posición principal</label>
+      <div id="editPosicionPrincipal" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:8px;">Posiciones secundarias</label>
       <div id="editPosiciones" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
 
@@ -1028,8 +1034,11 @@ function renderTable(docs) {
     const est   = d.estado || 'pendiente';
     const opts  = ESTADOS.map(s => `<option value="${s}"${s===est?' selected':''}>${ESTADO_LBL[s]}</option>`).join('');
 
-    const posHTML = Array.isArray(d.posiciones) && d.posiciones.length
-      ? `<div class="td-pos-chips">${d.posiciones.map(p => `<span class="td-pos-chip">${esc(p)}</span>`).join('')}</div>`
+    const prinHTML = d.posicionPrincipal ? `<span class="td-pos-chip">${esc(d.posicionPrincipal)}</span>` : '';
+    const secHTML  = Array.isArray(d.posiciones) && d.posiciones.length
+      ? d.posiciones.map(p => `<span class="td-pos-chip sec">${esc(p)}</span>`).join('') : '';
+    const posHTML  = (prinHTML || secHTML)
+      ? `<div class="td-pos-chips">${prinHTML}${secHTML}</div>`
       : '<span style="color:var(--mid)">—</span>';
 
     const arqHTML = Array.isArray(d.arquetipos) && d.arquetipos.length
@@ -1188,7 +1197,22 @@ function openEditModal(btn) {
   document.getElementById('editEdad').value = doc.edad || '';
   document.getElementById('editUltimoEquipo').value = doc.ultimoEquipo || '';
 
-  // Posiciones chips
+  // Posición principal (single-select)
+  const prinEl = document.getElementById('editPosicionPrincipal');
+  prinEl.innerHTML = '';
+  POSICIONES_LIST.forEach(p => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'pos-chip' + (doc.posicionPrincipal === p ? ' active' : '');
+    chip.textContent = p;
+    chip.onclick = () => {
+      prinEl.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    };
+    prinEl.appendChild(chip);
+  });
+
+  // Posiciones secundarias (multi-select)
   const posEl = document.getElementById('editPosiciones');
   posEl.innerHTML = '';
   POSICIONES_LIST.forEach(p => {
@@ -1247,7 +1271,8 @@ function saveEdit() {
     gamertag:     document.getElementById('editGamertag').value.trim(),
     edad:         document.getElementById('editEdad').value.trim(),
     ultimoEquipo: document.getElementById('editUltimoEquipo').value.trim(),
-    posiciones:   Array.from(document.querySelectorAll('#editPosiciones .pos-chip.active')).map(c => c.textContent),
+    posicionPrincipal: document.querySelector('#editPosicionPrincipal .pos-chip.active')?.textContent || '',
+    posiciones:        Array.from(document.querySelectorAll('#editPosiciones .pos-chip.active')).map(c => c.textContent),
     arquetipos:   Array.from(document.querySelectorAll('#editArqContainer .arq-entry'))
                     .map(e => ({ nombre: e.querySelector('.arq-name').value, nivel: e.querySelector('.arq-niv').value }))
                     .filter(a => a.nombre),
