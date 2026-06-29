@@ -3,3 +3,8 @@ reportes/
 Renders/T2-Frentes/
 Renders/T3-Frentes/
 PRPs/
+.gstack/
+scripts/.chrome-profile/
+scripts/.chatgpt-session.json
+node_modules/
+package-lock.json
