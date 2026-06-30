@@ -764,6 +764,24 @@ function renderNewsCol(el, news) {
 renderNewsCol(document.getElementById('ns-latest'), latestNews);
 renderNewsCol(document.getElementById('ns-pinned'), pinnedNews || allNews[1]);
 
+/* ── Fetch published articles from KV and update strip if newer ── */
+(async () => {
+  try {
+    const r = await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/published-noticias');
+    if (!r.ok) return;
+    const { articles } = await r.json();
+    if (!articles || !articles.length) return;
+    const kvNews = articles.map(a => ({ ...a, pinned: false, noStrip: false }));
+    const merged = [...kvNews, ...manualNews, ...autoNews]
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const mStrip  = merged.filter(n => !n.noStrip);
+    const mPinned = mStrip.find(n => n.pinned);
+    const mLatest = mStrip.find(n => n !== mPinned);
+    renderNewsCol(document.getElementById('ns-latest'), mLatest);
+    renderNewsCol(document.getElementById('ns-pinned'), mPinned || merged[1]);
+  } catch (e) { /* mantiene el render local si falla el fetch */ }
+})();
+
 /* ── LIGA POSITIONS ── */
 (async function(){
   const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
