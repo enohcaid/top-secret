@@ -725,6 +725,39 @@ export default {
         }
       }
 
+      // ── PERSIST DRAFT IMAGE (POST /persist-draft-image) ───────────────────────
+      // Canva's export URLs are temporary signed S3 links that expire in hours.
+      // The cloud agent calls this right after exporting so the bytes get stored
+      // in KV under a stable key, served back via a URL that never expires.
+      if (url.pathname === '/persist-draft-image' && request.method === 'POST') {
+        const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        let body;
+        try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
+        const { url: srcUrl, slot } = body || {};
+        if (!srcUrl || !['post', 'story'].includes(slot)) return jsonResp({ error: 'Missing url or invalid slot' }, 400);
+        try {
+          const resp = await fetch(srcUrl);
+          if (!resp.ok) return jsonResp({ error: 'Source fetch failed', status: resp.status }, 502);
+          const buf = await resp.arrayBuffer();
+          await env.TS_KV.put(`draft_img_${slot}`, buf);
+          return jsonResp({ ok: true, url: `${url.origin}/draft-image?slot=${slot}&t=${Date.now()}` });
+        } catch(e) {
+          return jsonResp({ error: e.message }, 502);
+        }
+      }
+
+      // ── SERVE DRAFT IMAGE (GET /draft-image) ──────────────────────────────────
+      if (url.pathname === '/draft-image' && request.method === 'GET') {
+        const slot = url.searchParams.get('slot');
+        if (!['post', 'story'].includes(slot)) return jsonResp({ error: 'Invalid slot' }, 400);
+        const buf = await env.TS_KV.get(`draft_img_${slot}`, 'arrayBuffer');
+        if (!buf) return jsonResp({ error: 'No image' }, 404);
+        return new Response(buf, {
+          headers: { 'Content-Type': 'image/png', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=300' },
+        });
+      }
+
       // ── PUBLISH DRAFT (POST /publish-noticia) ────────────────────────────────
       if (url.pathname === '/publish-noticia' && request.method === 'POST') {
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
