@@ -119,15 +119,8 @@ function buildScene(draft, mentionedPlayers) {
   };
 }
 
-function buildPrompt(draft, format, mentionedPlayers) {
-  const isStory  = format === 'story';
+function buildPrompt(draft, mentionedPlayers) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
-
-  // Branding strip: bottom for post (player fills top), top for story (player fills center-bottom)
-  const brandPosition = isStory ? 'en la parte SUPERIOR' : 'en la parte INFERIOR';
-  const dimensions    = isStory
-    ? '941x1672 (vertical/portrait, formato historia)'
-    : '1086x1448 (ligeramente vertical, formato post)';
 
   const playerBlock = mentionedPlayers.length > 0
     ? `JUGADORES (usá sus renders subidos al proyecto):
@@ -138,12 +131,12 @@ ${action}`;
   return `Creá una imagen editorial deportiva para Top Secret FC, club de fútbol virtual argentino.
 
 ═══ SPECS TÉCNICAS ═══
-- Dimensiones: ${dimensions}
+- Dimensiones: 1086x1448 (ligeramente vertical, formato post)
 - Fondo negro profundo (#0a0b0e), acentos dorados (#C8A84B)
 - Estilo: editorial deportivo de élite, oscuro, cinematográfico, como portada de revista deportiva
 
-═══ ELEMENTO DE MARCA FIJO (siempre igual en todas las imágenes) ═══
-${brandPosition} de la imagen, incluí una franja horizontal delgada con:
+═══ ELEMENTO DE MARCA FIJO ═══
+En la parte INFERIOR de la imagen, incluí una franja horizontal delgada con:
   • Fondo negro (#0a0b0e) con un borde/línea fina dorada (#C8A84B) separándola del resto
   • Texto en tipografía condensada, mayúsculas, dorada: "NOTICIAS | TOP SECRET FC"
   • Estilo limpio y profesional — como los banners de ESPN o Fox Sports pero con identidad oscura de élite
@@ -165,7 +158,15 @@ ${playerBlock}
 La imagen tiene que contar visualmente de qué trata la nota. Que un hincha la vea y entienda el tema sin leer nada.`;
 }
 
-async function waitForGeneratedImage(page) {
+function buildResizePrompt() {
+  return `Tomá la imagen que acabás de generar y recreala en formato vertical historia (941x1672, orientación retrato/portrait), pensada para Instagram Stories.
+
+Mantené EXACTAMENTE la misma escena, el mismo personaje/jugador, la misma pose, los mismos colores y el mismo estilo editorial — es la MISMA pieza, solo adaptada a un encuadre vertical más alto y angosto.
+
+Único cambio de composición: movés la franja de marca "NOTICIAS | TOP SECRET FC" a la parte SUPERIOR de la imagen (en el post estaba abajo), y reacomodás el resto de la escena para que ocupe bien el espacio vertical. No cambies el tema, el contenido ni el mensaje de la imagen.`;
+}
+
+async function waitForGeneratedImage(page, excludeSrcs = []) {
   console.log('  Esperando imagen (hasta 6 min)...');
   page.setDefaultTimeout(0);
 
@@ -176,10 +177,11 @@ async function waitForGeneratedImage(page) {
   const start      = Date.now();
 
   while (Date.now() - start < TIMEOUT_MS) {
-    const imgSrc = await page.evaluate(() => {
+    const imgSrc = await page.evaluate((excludeSrcs) => {
       const imgs = [...document.querySelectorAll('img')].reverse();
       for (const img of imgs) {
         const src = img.src || '';
+        if (excludeSrcs.includes(src)) continue;
         if (
           img.complete &&
           img.naturalWidth  > 300 &&
@@ -194,7 +196,7 @@ async function waitForGeneratedImage(page) {
         }
       }
       return null;
-    });
+    }, excludeSrcs);
 
     if (imgSrc) {
       console.log('\n  Imagen detectada.');
@@ -241,9 +243,11 @@ async function downloadImage(page, imgUrl, outputPath) {
   console.log('  Guardada:', outputPath);
 }
 
-async function sendPromptInProject(page, prompt) {
-  await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForTimeout(3000);
+async function sendPromptInProject(page, prompt, { freshChat = true } = {}) {
+  if (freshChat) {
+    await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(3000);
+  }
 
   const input = page.locator('div[contenteditable="true"], p[data-placeholder]').first();
   await input.waitFor({ state: 'visible', timeout: 20000 });
@@ -269,20 +273,19 @@ async function sendPromptInProject(page, prompt) {
   }
 }
 
-async function generateImage(page, draft, format, mentionedPlayers) {
+async function generateImage(page, draft, format, prompt, { freshChat, excludeSrcs }) {
   const now      = new Date();
   const dateStr  = draft.date || now.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   const filename   = `${dateStr}_${format}.png`;
   const outputPath = path.join(OUTPUT_DIR, filename);
 
   console.log(`\nGenerando imagen ${format.toUpperCase()}...`);
-  const prompt = buildPrompt(draft, format, mentionedPlayers);
 
-  await sendPromptInProject(page, prompt);
-  const imgUrl = await waitForGeneratedImage(page);
+  await sendPromptInProject(page, prompt, { freshChat });
+  const imgUrl = await waitForGeneratedImage(page, excludeSrcs);
   await downloadImage(page, imgUrl, outputPath);
 
-  return filename;
+  return { filename, imgUrl };
 }
 
 function gitPushImages(postFile, storyFile) {
@@ -348,8 +351,16 @@ async function main() {
   console.log('Conectado.');
 
   try {
-    const postFile  = await generateImage(page, draft, 'post', mentioned);
-    const storyFile = await generateImage(page, draft, 'story', mentioned);
+    const postPrompt = buildPrompt(draft, mentioned);
+    const { filename: postFile, imgUrl: postImgUrl } = await generateImage(
+      page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [] }
+    );
+
+    const storyPrompt = buildResizePrompt();
+    const { filename: storyFile } = await generateImage(
+      page, draft, 'story', storyPrompt, { freshChat: false, excludeSrcs: [postImgUrl] }
+    );
+
     await updateDraft(draft, postFile, storyFile);
     gitPushImages(postFile, storyFile);
 
