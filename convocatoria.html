@@ -208,6 +208,11 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);padding:10px 22px;border-radius:10px;font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:600;opacity:0;transition:transform .28s, opacity .28s;z-index:9999;pointer-events:none;white-space:nowrap;background:rgba(17,17,17,.95);color:var(--gold);border:1px solid var(--gold);}
+.num-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:14px 0;}
+.num-btn{padding:9px 0;border-radius:6px;border:1px solid var(--border);background:var(--gray);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;}
+.num-btn:hover:not(:disabled){background:var(--gold);color:#111;}
+.num-btn:disabled{opacity:.25;cursor:not-allowed;}
+.num-btn.current{border-color:var(--gold);color:var(--gold);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ── AVATAR PHOTO ── */
@@ -344,8 +349,19 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
       <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
       <button class="sopt" onclick="confirmStatus('black')">🟠 Ausente varios días…</button>
       <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()">🅱️ Asignar como capitán</button>
+      <button class="sopt" onclick="openNumberPicker(currentPlayer)">🔢 Elegir número</button>
     </div>
     <button class="mbtn mbtn-cancel" onclick="closeModal('statusOverlay')" style="width:100%;margin-top:10px">Cancelar</button>
+  </div>
+</div>
+
+<!-- NUMBER PICKER -->
+<div class="overlay" id="numOverlay" onclick="if(event.target===this)closeModal('numOverlay')">
+  <div class="modal">
+    <h3 id="numPickerTitle" style="margin-bottom:4px">Elegir número</h3>
+    <p style="font-size:.72rem;color:#8b92aa;margin-bottom:0">Los tomados aparecen deshabilitados.</p>
+    <div id="numGrid" class="num-grid"></div>
+    <button class="mbtn mbtn-cancel" onclick="closeModal('numOverlay')" style="width:100%;margin-top:6px">Cancelar</button>
   </div>
 </div>
 
@@ -423,6 +439,9 @@ const PLAYERS = [
   { name:'RS32-DaniStone',  pos:'MCI', num:13, folder:'RS32-DaniStone' },
   { name:'CipriMancini',    pos:'MVD', num:32, folder:'CipriMancini'   },
   { name:'Guiidow',         pos:'MCI', num:20, folder:'Guiidow'        },
+  { name:'ringhiio',        pos:'DFC', num:'', folder:null },
+  { name:'ramiro',          pos:'DC',  num:'', folder:null },
+  { name:'eli_no_skills',   pos:'MCI', num:'', folder:null },
   { name:'Prueba',          pos:'MCD', num:'', folder:null, isGuest:true },
   { name:'BlackPanther-CG', pos:'ED',  num:11, folder:'BlackPanther-CG'},
   { name:'Lautavester7',    pos:'EI',  num:7,  folder:'Lautavester7'   },
@@ -530,8 +549,11 @@ function _loadPlantel() {
     const base = PLAYERS.filter(p => !p.isRecluta);
     PLAYERS.length = 0; base.forEach(p => PLAYERS.push(p));
     if (snap.exists) {
+      const data = snap.data();
+      const numOverrides = data.numeros || {};
+      PLAYERS.forEach(p => { if (numOverrides[p.name] != null) p.num = numOverrides[p.name]; });
       const existingNames = new Set(PLAYERS.map(p => p.name));
-      (snap.data().jugadores || []).forEach(j => {
+      (data.jugadores || []).forEach(j => {
         if (j.name && !existingNames.has(j.name)) {
           PLAYERS.push({ name: j.name, pos: j.pos || 'DC', num: j.num || '', folder: null, isRecluta: true, nombre: j.nombre || '' });
         }
@@ -1221,6 +1243,51 @@ function toggleCaptain() {
   captain = (captain === currentPlayer) ? null : currentPlayer;
   saveState(); closeModal('statusOverlay'); render();
   showToast(captain ? captain + ' es el capitán 🅱️' : 'Capitanía removida');
+}
+
+function openNumberPicker(name) {
+  closeModal('statusOverlay');
+  const p = PLAYERS.find(pl => pl.name === name);
+  const takenNums = new Set(
+    PLAYERS.filter(pl => pl.name !== name)
+      .map(pl => Number(pl.num))
+      .filter(n => n > 0)
+  );
+  document.getElementById('numPickerTitle').textContent = 'Número — ' + name;
+  const grid = document.getElementById('numGrid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 30; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn' + (Number(p.num) === i ? ' current' : '');
+    btn.textContent = i;
+    if (takenNums.has(i)) {
+      btn.disabled = true;
+    } else {
+      btn.onclick = () => savePlayerNumber(name, i);
+    }
+    grid.appendChild(btn);
+  }
+  document.getElementById('numOverlay').classList.add('open');
+}
+
+async function savePlayerNumber(name, num) {
+  if (!PLANTEL_DOC) return;
+  const p = PLAYERS.find(pl => pl.name === name);
+  if (!p) return;
+  try {
+    if (p.isRecluta) {
+      const snap = await PLANTEL_DOC.get();
+      const jugadores = snap.exists ? (snap.data().jugadores || []) : [];
+      const updated = jugadores.map(j => j.name === name ? { ...j, num } : j);
+      await PLANTEL_DOC.set({ jugadores: updated }, { merge: true });
+    } else {
+      await PLANTEL_DOC.set({ numeros: { [name]: num } }, { merge: true });
+    }
+    closeModal('numOverlay');
+    showToast('#' + num + ' asignado a ' + name);
+  } catch(e) {
+    showToast('Error al guardar número');
+  }
 }
 
 function confirmStatus(status) {
