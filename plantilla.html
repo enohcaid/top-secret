@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --black:   #111111;
@@ -880,6 +882,7 @@ function switchSeason(n, btn) {
   const t3 = document.getElementById('t3-content');
   t1.style.display = 'none'; t2.style.display = 'none'; t3.style.display = 'none';
   closePanel(false);
+  _currentSeason = n;
   if (n === 1) { t1.style.display = ''; renderGrid(currentFilter); }
   else if (n === 2) { t2.style.display = 'block'; renderGrid2(currentFilter2); }
   else { t3.style.display = 'block'; renderGrid3(currentFilter3); }
@@ -1090,7 +1093,33 @@ gsap.to('.season-bar', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0
 gsap.to('.pos-filter', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0.34});
 
 /* ─── INIT ─── */
+let _currentSeason = 3;
 renderGrid3('all');
+
+/* ─── NUMBER OVERRIDES FROM FIRESTORE ─── */
+(function() {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp({
+      apiKey: "AIzaSyCv6mEqLKrh7RJbhvGJMzqt2a4mmIJm1z0",
+      authDomain: "top-secret-fc.firebaseapp.com",
+      projectId: "top-secret-fc",
+      storageBucket: "top-secret-fc.firebasestorage.app",
+      messagingSenderId: "303110190986",
+      appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
+    });
+    firebase.firestore().collection('plantel').doc('activo').onSnapshot(snap => {
+      if (!snap.exists) return;
+      const numeros = snap.data().numeros || {};
+      if (!Object.keys(numeros).length) return;
+      [ROSTER, ROSTER_T2, ROSTER_T3].forEach(roster =>
+        roster.forEach(p => { if (numeros[p.key] != null) p.num = String(numeros[p.key]); })
+      );
+      if (_currentSeason === 1)      renderGrid(currentFilter);
+      else if (_currentSeason === 2) renderGrid2(currentFilter2);
+      else                           renderGrid3(currentFilter3);
+    });
+  } catch(e) { console.warn('Firestore num overrides:', e); }
+})();
 
 // Deep link: plantilla.html?player=KEY
 (function(){
