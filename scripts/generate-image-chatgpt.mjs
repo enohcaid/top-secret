@@ -12,15 +12,84 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-const FIRESTORE_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
+const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
+const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
 const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
 
-// Jugadores con renders disponibles en el proyecto (T3-Frentes)
-const PLAYERS_WITH_RENDERS = [
-  'CipriMancini', 'Guiidow', 'Huber236', 'Juan_Martinez4',
-  'Lautavester7', 'rivarola90', 'slandaco9',
+// Pool de estilos visuales rotativos — nunca se repite en los últimos 5 usos
+const IMAGE_STYLES = [
+  { id: 'RETRATO_DRAMATICO',
+    label: 'Retrato dramático',
+    prompt: 'Tight close-up dramatic portrait. Single spotlight cutting through deep darkness, face partially sculpted by shadow. Ultra-cinematic and intimate — negative space is part of the composition.' },
+  { id: 'ESTADIO_NOCTURNO',
+    label: 'Estadio nocturno',
+    prompt: 'Wide epic establishing shot. Massive night stadium in the background with floodlights blazing. The subject feels powerful but the venue dwarfs everything — atmospheric, cinematic, grand scale.' },
+  { id: 'EDITORIAL_REVISTA',
+    label: 'Editorial de revista',
+    prompt: 'High-fashion sports editorial, clean magazine-cover composition. Strong negative space, subject styled like a prestige cover athlete — think ESPN The Magazine meets Vogue Sports.' },
+  { id: 'ACCION_DINAMICA',
+    label: 'Acción dinámica',
+    prompt: 'Explosive freeze-frame action shot. Motion blur on extremities, particle effects and kinetic energy bursting outward, peak-moment intensity frozen in time. Speed and impact.' },
+  { id: 'POSTER_CONCEPTUAL',
+    label: 'Póster conceptual',
+    prompt: 'Bold graphic poster art. Diagonal composition, abstract football geometry mixed with photorealistic elements, almost illustrative. A statement piece that reads as both fine art and sports media.' },
+  { id: 'VESTUARIO_INTIMO',
+    label: 'Vestuario íntimo',
+    prompt: 'Raw behind-the-scenes atmosphere. Tunnel or locker room setting, low warm practical lighting, gritty authenticity. Pre-match or post-match tension you can almost feel.' },
+  { id: 'CONTRALUZ_EPICO',
+    label: 'Contraluz épico',
+    prompt: 'Powerful contre-jour backlight. Subject in dramatic silhouette against blazing stadium lights — god-ray effect, almost mythological in scale. Shadow and light as the main characters.' },
+  { id: 'CROMATICO_DORADO',
+    label: 'Cromático dorado',
+    prompt: 'Gold and black as the dominant palette — metallic luxury aesthetic, rich textures. The look of a championship trophy or elite award ceremony. Prestigious, heavy, winning.' },
+  { id: 'MINIMALISTA_GEOMETRICO',
+    label: 'Minimalista geométrico',
+    prompt: 'Minimalist geometric composition. Strong lines, bold shapes, very little visual noise. The subject isolated against a near-black background with a single geometric gold accent element.' },
+  { id: 'CINEMATICO_LLUVIA',
+    label: 'Cinemático lluvia',
+    prompt: 'Cinematic rain atmosphere. Wet pitch reflections, dramatic rain streaks, neon-lit puddles mixing gold and dark tones. Gritty and moody — like a sports film scene shot in Argentina.' },
 ];
+
+// Jugadores con renders en el proyecto de ChatGPT (carpeta T3-Frentes)
+// Agregar el archivo PNG a Renders/T3-Frentes/ + subirlo al proyecto de ChatGPT es suficiente
+const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');
+const PLAYERS_WITH_RENDERS = fs.readdirSync(T3_FRENTES_DIR)
+  .filter(f => /\.(png|jpg)$/i.test(f))
+  .map(f => f.replace(/\.(png|jpg)$/i, ''));
+
+async function fetchStyleHistory() {
+  try {
+    const res = await fetch(FIRESTORE_STYLE_HISTORY);
+    const doc = await res.json();
+    if (doc.error) return [];
+    const values = doc.fields?.entries?.arrayValue?.values || [];
+    return values.map(v => ({
+      style: v.mapValue.fields.style.stringValue,
+      date:  v.mapValue.fields.date.stringValue,
+    }));
+  } catch { return []; }
+}
+
+function pickStyle(history) {
+  const recentIds = new Set(history.slice(0, 5).map(h => h.style));
+  const available = IMAGE_STYLES.filter(s => !recentIds.has(s.id));
+  const pool = available.length > 0 ? available : IMAGE_STYLES;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+async function saveStyleHistory(styleId, date, history) {
+  const updated = [{ style: styleId, date }, ...history].slice(0, 10);
+  const values = updated.map(e => ({ mapValue: { fields: {
+    style: { stringValue: e.style },
+    date:  { stringValue: e.date  },
+  }}}));
+  await fetch(FIRESTORE_STYLE_HISTORY, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: { entries: { arrayValue: { values } } } }),
+  });
+}
 
 async function fetchDraft() {
   const res = await fetch(FIRESTORE_DRAFT);
@@ -119,7 +188,7 @@ function buildScene(draft, mentionedPlayers) {
   };
 }
 
-function buildPrompt(draft, mentionedPlayers) {
+function buildPrompt(draft, mentionedPlayers, style) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
 
   const playerBlock = mentionedPlayers.length > 0
@@ -133,7 +202,10 @@ ${action}`;
 ═══ SPECS TÉCNICAS ═══
 - Dimensiones: 1086x1448 (ligeramente vertical, formato post)
 - Fondo negro profundo (#0a0b0e), acentos dorados (#C8A84B)
-- Estilo: editorial deportivo de élite, oscuro, cinematográfico, como portada de revista deportiva
+
+═══ ESTILO VISUAL DEL DÍA ═══
+${style.prompt}
+Aplicá este estilo como base compositiva. Mantené siempre la paleta oscura con acentos dorados de Top Secret FC.
 
 ═══ ELEMENTO DE MARCA FIJO ═══
 En la parte INFERIOR de la imagen, incluí una franja horizontal delgada con:
@@ -350,8 +422,13 @@ async function main() {
   page.setDefaultTimeout(0);
   console.log('Conectado.');
 
+  const dateStr      = draft.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+  const styleHistory = await fetchStyleHistory();
+  const chosenStyle  = pickStyle(styleHistory);
+  console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
+
   try {
-    const postPrompt = buildPrompt(draft, mentioned);
+    const postPrompt = buildPrompt(draft, mentioned, chosenStyle);
     const { filename: postFile, imgUrl: postImgUrl } = await generateImage(
       page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [] }
     );
@@ -362,11 +439,13 @@ async function main() {
     );
 
     await updateDraft(draft, postFile, storyFile);
+    await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
     gitPushImages(postFile, storyFile);
 
     console.log('\n✓ Listo.');
     console.log('  Post: ', postFile);
     console.log('  Story:', storyFile);
+    console.log('  Estilo guardado en Firestore.');
   } finally {
     await browser.close();
   }
