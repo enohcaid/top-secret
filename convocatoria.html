@@ -1256,7 +1256,7 @@ function openNumberPicker(name) {
   document.getElementById('numPickerTitle').textContent = 'Número — ' + name;
   const grid = document.getElementById('numGrid');
   grid.innerHTML = '';
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 99; i++) {
     const btn = document.createElement('button');
     btn.className = 'num-btn' + (Number(p.num) === i ? ' current' : '');
     btn.textContent = i;
