@@ -147,8 +147,9 @@ export default {
         if (request.method === 'GET') {
           const key = url.searchParams.get('key');
           if (!key) return jsonResp({ error: 'Missing key' }, 400);
-          const value = await env.TS_KV.get(key, 'json');
-          return jsonResp(value || []);
+          let value = null;
+          try { const raw = await env.TS_KV.get(key, 'text'); if (raw) value = JSON.parse(raw); } catch(e) {}
+          return jsonResp(value ?? []);
         }
 
         if (request.method === 'POST') {
@@ -770,15 +771,20 @@ export default {
         try { draft = JSON.parse(doc.fields?.data?.stringValue || 'null'); } catch(e) { draft = null; }
         if (!draft) return jsonResp({ error: 'No draft to publish' }, 404);
         const published = { ...draft, status: 'published', publishedAt: new Date().toISOString() };
-        const existing = (await env.TS_KV.get('published_noticias', 'json')) || [];
-        await env.TS_KV.put('published_noticias', JSON.stringify([published, ...existing.filter(n => n.id !== published.id)]));
+        let existing = [];
+        try { const raw = await env.TS_KV.get('published_noticias', 'text'); if (raw) existing = JSON.parse(raw); } catch(e) {}
+        if (existing.some(n => n.id === published.id)) {
+          return jsonResp({ error: `ID '${published.id}' ya está publicado. Cambiá el id del draft antes de publicar.` }, 409);
+        }
+        await env.TS_KV.put('published_noticias', JSON.stringify([published, ...existing]));
         await fetch(FS_DRAFT, { method: 'DELETE' });
         return jsonResp({ ok: true, id: published.id });
       }
 
       // ── PUBLISHED NOTICIAS (GET /published-noticias) ─────────────────────────
       if (url.pathname === '/published-noticias' && request.method === 'GET') {
-        const articles = (await env.TS_KV.get('published_noticias', 'json')) || [];
+        let articles = [];
+        try { const raw = await env.TS_KV.get('published_noticias', 'text'); if (raw) articles = JSON.parse(raw); } catch(e) {}
         return jsonResp({ articles });
       }
 
