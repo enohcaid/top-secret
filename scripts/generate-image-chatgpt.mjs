@@ -232,7 +232,7 @@ ${playerBlock}
 
 ═══ IDENTIDAD VISUAL (usá los archivos del proyecto) ═══
 - Logo Top Secret FC: incluilo de forma natural en la composición
-- Uniforme negro con detalles dorados del club
+- INDUMENTARIA: el proyecto tiene la imagen "Indumentaria TOP Secret T3.png" con todos los kits disponibles (local negro, alternativo blanco, tercer kit amarillo). Elegí el kit que mejor sirva a la escena y al estilo del día — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual.
 - NO incluyas escudos ni logos de otros clubes
 - El logo/escudo del club SÍ debe aparecer (además de la franja de marca)
 
