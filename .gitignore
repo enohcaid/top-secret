@@ -6,5 +6,6 @@ PRPs/
 .gstack/
 scripts/.chrome-profile/
 scripts/.chatgpt-session.json
+scripts/*.log
 node_modules/
 package-lock.json
