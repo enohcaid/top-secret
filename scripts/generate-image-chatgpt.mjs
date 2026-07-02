@@ -404,6 +404,16 @@ async function main() {
   console.log('Título:', draft.title);
   console.log('Fecha:', draft.date);
 
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+  if (draft.date !== today) {
+    console.log(`Draft es de ${draft.date}, no de hoy (${today}). Esperando nuevo draft del cron.`);
+    return;
+  }
+  if (draft.imagePost) {
+    console.log('El draft ya tiene imágenes. Nada que hacer.');
+    return;
+  }
+
   const mentioned = extractMentionedPlayers(draft);
   if (mentioned.length > 0) {
     console.log('Jugadores mencionados con renders:', mentioned.join(', '));
@@ -412,7 +422,14 @@ async function main() {
   }
 
   console.log('Conectando al Chrome abierto...');
-  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  let browser;
+  try {
+    browser = await chromium.connectOverCDP('http://localhost:9222');
+  } catch(e) {
+    console.error('Chrome no está disponible en localhost:9222.');
+    console.error('Abrí Chrome con: chrome.exe --remote-debugging-port=9222');
+    process.exit(1);
+  }
   const context = browser.contexts()[0];
 
   let page = context.pages().find(p => p.url().includes('chatgpt.com'));
