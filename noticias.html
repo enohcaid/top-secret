@@ -813,16 +813,19 @@ function init() {
   renderGrid(rest);
 }
 
-function renderAutoSection(items) {
-  if (!items || !items.length) return;
+function renderAutoSection() {
+  // Siempre combinar ambas fuentes para que un re-render no borre a la otra
+  const allAuto = [...(window._KV_NEWS || []), ...(window._AUTO_NEWS || [])];
   const existingIds = new Set(NOTICIAS.map(n => n.id));
-  const autoItems = items.filter(n => !existingIds.has(n.id));
-  if (!autoItems.length) return;
+  const autoItems = allAuto.filter(n => !existingIds.has(n.id));
+  // Deduplicar por id (KV tiene prioridad por estar primero)
+  const seen = new Set();
+  const unique = autoItems.filter(n => { if (seen.has(n.id)) return false; seen.add(n.id); return true; });
+  if (!unique.length) return;
 
-  // Merge noticias manuales (no pinned) con auto-news y ordenar por fecha desc
   const pinned = NOTICIAS.find(n => n.pinned);
   const nonPinned = NOTICIAS.filter(n => n !== pinned);
-  const merged = [...nonPinned, ...autoItems].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const merged = [...nonPinned, ...unique].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   const wrap = document.getElementById('other-news-wrap');
   const grid = document.getElementById('news-grid');
@@ -1044,7 +1047,7 @@ async function loadKvContent() {
       const { articles } = await r.json();
       if (articles && articles.length) {
         window._KV_NEWS = articles.map(a => ({ ...a, pinned: false }));
-        renderAutoSection(window._KV_NEWS);
+        renderAutoSection();
       }
     }
   } catch(e) {}
@@ -1125,7 +1128,7 @@ async function publishDraft() {
   const r = await fetch(_WORKER + '/publish-noticia', { method: 'POST', headers: { 'Authorization': 'Bearer ' + _sessionPin } });
   if (!r.ok) { alert('Error al publicar. Intentá de nuevo.'); return; }
   window._KV_NEWS = [{ ..._currentDraft, status: 'published', pinned: false }, ...window._KV_NEWS.filter(n => n.id !== _currentDraft.id)];
-  renderAutoSection(window._KV_NEWS);
+  renderAutoSection();
   document.getElementById('draft-banner').style.display  = 'none';
   document.getElementById('draft-trigger').style.display = 'none';
   _currentDraft = null; _sessionPin = '';
@@ -1174,7 +1177,7 @@ loadKvContent();
 import { generateMatchNews } from './auto-noticias.js';
 import { SEED_MATCHES } from './seed_matches.js';
 window._AUTO_NEWS = generateMatchNews(SEED_MATCHES);
-renderAutoSection(window._AUTO_NEWS);
+renderAutoSection();
 const _h = location.hash.slice(1);
 if (_h && !document.getElementById('article-overlay').classList.contains('open') && findNews(_h)) openArticle(_h);
 </script>
