@@ -704,6 +704,7 @@ function brazos2Path(p)  { return `Renders/${renderFolder(p)}/Brazos2.png`; }
 function frente2Path(p)  { return `Renders/${renderFolder(p)}/Frente2.png`; }
 function brazos3Path(p)  { return `Renders/${renderFolder(p)}/Brazos3.png`; }
 function frente3Path(p)  { return `Renders/${renderFolder(p)}/Frente3.png`; }
+function pose3Path(p)    { return `Renders/${renderFolder(p)}/Pose3.png`; }
 function svgPath(p)      { return `Renders/${p.key}.svg`; }
 
 /* ─── COMPUTE STATS ─── */
@@ -949,7 +950,7 @@ function openPanel(p, card) {
   img.className = 'pp-photo';
   img.alt = p.key;
   const ppFallbacks = isT3
-    ? [brazos3Path(p), brazos2Path(p), brazosPath(p)]
+    ? [pose3Path(p), brazos3Path(p), brazos2Path(p), brazosPath(p)]
     : [brazos2Path(p), brazosPath(p)];
   let ppFi = 0;
   img.onerror = function() {
