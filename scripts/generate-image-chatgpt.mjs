@@ -112,6 +112,16 @@ function buildScene(draft, mentionedPlayers) {
 
   const is = (re) => re.test(full);
 
+  // Entrevista — patrón "Jugador: 'frase'" en el título o palabras clave
+  if (/^[^:]+:\s*["""«]/.test(title) || is(/entrevista|mano a mano|nos cont[oó]|en sus propias palabras/)) {
+    return {
+      scene: 'exclusive press interview or training ground media session, intimate and professional atmosphere',
+      action: players
+        ? `${players} in a confident interview pose — direct eye contact, relaxed, charismatic. Think post-match press conference or prestige sports editorial shoot`
+        : 'footballer in an exclusive press interview, confident and relaxed, professional sports media setting',
+    };
+  }
+
   if (category === 'Resultado' && is(/victoria|triunfo|ganamos|goleada/)) {
     return {
       scene: 'dramatic victory celebration, stadium lights exploding, crowd energy, night match atmosphere',
@@ -130,7 +140,9 @@ function buildScene(draft, mentionedPlayers) {
     };
   }
 
-  if (is(/baja|lesion|lesionad|indefinid|reposo|contractura|distens|sobrecarga/)) {
+  // Lesión solo domina si es el tema central (título o excerpt lo mencionan)
+  const titleExcerpt = (title + ' ' + (draft.excerpt || '')).toLowerCase();
+  if (/baja|lesion|lesionad|indefinid|reposo|contractura|distens|sobrecarga/.test(titleExcerpt)) {
     const injuredPlayer = players ? players.split(',')[0].trim() : null;
     const others = players && mentionedPlayers.length > 1
       ? mentionedPlayers.slice(1).join(', ')
