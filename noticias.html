@@ -1124,7 +1124,7 @@ async function unlockDraft() {
 async function publishDraft() {
   const r = await fetch(_WORKER + '/publish-noticia', { method: 'POST', headers: { 'Authorization': 'Bearer ' + _sessionPin } });
   if (!r.ok) { alert('Error al publicar. Intentá de nuevo.'); return; }
-  window._KV_NEWS = [{ ..._currentDraft, status: 'published', pinned: false }, ...window._KV_NEWS];
+  window._KV_NEWS = [{ ..._currentDraft, status: 'published', pinned: false }, ...window._KV_NEWS.filter(n => n.id !== _currentDraft.id)];
   renderAutoSection(window._KV_NEWS);
   document.getElementById('draft-banner').style.display  = 'none';
   document.getElementById('draft-trigger').style.display = 'none';
