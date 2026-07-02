@@ -441,7 +441,6 @@ const PLAYERS = [
   { name:'Prueba',          pos:'MCD', num:'', folder:null, isGuest:true },
   { name:'BlackPanther-CG', pos:'ED',  num:11, folder:'BlackPanther-CG'},
   { name:'Lautavester7',    pos:'EI',  num:7,  folder:'Lautavester7'   },
-  { name:'Lucasmati_akd',   pos:'DC',  num:9,  folder:'Lucasmati_akd'  },
   { name:'Yxotx',           pos:'DC',  num:99, folder:'Yxotx'          },
 ];
 
@@ -454,7 +453,6 @@ const CROP_DATA = {
   'Juan_Martinez4': {iW:100.2,iH:56.4,oX:43.7,oY:7.2 },
   'Lautavester7':   {iW:121.2,iH:68.1,oX:67.5,oY:13.0},
   'cansitrGd22_':   {iW:121.2,iH:68.1,oX:60.6,oY:13.0},
-  'Lucasmati_akd':  {iW:68.1, iH:68.1, oX:27.6,oY:13.0},
 };
 
 /* ─── GUEST PLAYER NAMES (per slot, persisted in localStorage) ─── */
@@ -1193,7 +1191,7 @@ function autoLineup() {
   lineup.slots = {
     'GK':'slandaco9','RB':'Huber236','CB1':'Alexisraies23',
     'CB2':'Cabers14','LB':null,'RM':'Juan_Martinez4','CM':'Guiidow',
-    'LM':'CipriMancini','RW':'BlackPanther-CG','CF':'Lucasmati_akd','LW':'Lautavester7',
+    'LM':'CipriMancini','RW':'BlackPanther-CG','CF':null,'LW':'Lautavester7',
   };
   saveState(); render();
   showToast('Alineación cargada ⚡');
