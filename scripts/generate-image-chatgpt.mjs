@@ -18,37 +18,48 @@ const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
 
 // Pool de estilos visuales rotativos — nunca se repite en los últimos 5 usos
+// Cada estilo define su propia paleta de FONDO y DISEÑO — nunca del uniforme del jugador
 const IMAGE_STYLES = [
   { id: 'RETRATO_DRAMATICO',
     label: 'Retrato dramático',
+    palette: 'deep black background, single cold blue-white spotlight, no color tinting on the subject',
     prompt: 'Tight close-up dramatic portrait. Single spotlight cutting through deep darkness, face partially sculpted by shadow. Ultra-cinematic and intimate — negative space is part of the composition.' },
   { id: 'ESTADIO_NOCTURNO',
     label: 'Estadio nocturno',
+    palette: 'night blue sky, stadium floodlights in whites and pale yellows, electric atmosphere',
     prompt: 'Wide epic establishing shot. Massive night stadium in the background with floodlights blazing. The subject feels powerful but the venue dwarfs everything — atmospheric, cinematic, grand scale.' },
   { id: 'EDITORIAL_REVISTA',
     label: 'Editorial de revista',
+    palette: 'clean white or off-white background, silver and charcoal design elements, prestige sports magazine aesthetic',
     prompt: 'High-fashion sports editorial, clean magazine-cover composition. Strong negative space, subject styled like a prestige cover athlete — think ESPN The Magazine meets Vogue Sports.' },
   { id: 'ACCION_DINAMICA',
     label: 'Acción dinámica',
+    palette: 'dark background with emerald green pitch reflections, electric particle effects, kinetic energy in whites and greens',
     prompt: 'Explosive freeze-frame action shot. Motion blur on extremities, particle effects and kinetic energy bursting outward, peak-moment intensity frozen in time. Speed and impact.' },
   { id: 'POSTER_CONCEPTUAL',
     label: 'Póster conceptual',
+    palette: 'deep navy blue and black background, sharp white graphic lines, abstract geometric accents in electric blue',
     prompt: 'Bold graphic poster art. Diagonal composition, abstract football geometry mixed with photorealistic elements, almost illustrative. A statement piece that reads as both fine art and sports media.' },
   { id: 'VESTUARIO_INTIMO',
     label: 'Vestuario íntimo',
+    palette: 'warm amber and orange practical lighting, dark concrete walls, raw and authentic atmosphere',
     prompt: 'Raw behind-the-scenes atmosphere. Tunnel or locker room setting, low warm practical lighting, gritty authenticity. Pre-match or post-match tension you can almost feel.' },
   { id: 'CONTRALUZ_EPICO',
     label: 'Contraluz épico',
+    palette: 'blazing white-yellow backlight creating silhouette, god-ray effect, rim light only — minimal color saturation',
     prompt: 'Powerful contre-jour backlight. Subject in dramatic silhouette against blazing stadium lights — god-ray effect, almost mythological in scale. Shadow and light as the main characters.' },
   { id: 'CROMATICO_DORADO',
     label: 'Cromático dorado',
-    prompt: 'Gold and black as the dominant palette — metallic luxury aesthetic, rich textures. The look of a championship trophy or elite award ceremony. Prestigious, heavy, winning.' },
+    palette: 'gold (#C8A84B) and black as the background and graphic design palette — metallic luxury aesthetic in the environment and design elements only, NOT on the player',
+    prompt: 'Gold and black as the dominant design palette — metallic luxury in the background, graphic elements, and atmosphere. The look of a championship trophy or elite award ceremony. Prestigious, heavy, winning.' },
   { id: 'MINIMALISTA_GEOMETRICO',
     label: 'Minimalista geométrico',
-    prompt: 'Minimalist geometric composition. Strong lines, bold shapes, very little visual noise. The subject isolated against a near-black background with a single geometric gold accent element.' },
+    palette: 'near-black background (#0a0b0e), single thin geometric gold accent line, very little visual noise',
+    prompt: 'Minimalist geometric composition. Strong lines, bold shapes, very little visual noise. The subject isolated against a near-black background with a single geometric accent element.' },
   { id: 'CINEMATICO_LLUVIA',
     label: 'Cinemático lluvia',
-    prompt: 'Cinematic rain atmosphere. Wet pitch reflections, dramatic rain streaks, neon-lit puddles mixing gold and dark tones. Gritty and moody — like a sports film scene shot in Argentina.' },
+    palette: 'wet pitch with cyan and teal neon reflections, rain streaks, moody dark atmosphere with cool color temperature',
+    prompt: 'Cinematic rain atmosphere. Wet pitch reflections, dramatic rain streaks, neon-lit puddles in cool teal and cyan tones. Gritty and moody — like a sports film scene shot in Argentina.' },
 ];
 
 // Jugadores con renders en el proyecto de ChatGPT (carpeta T3-Frentes)
@@ -211,13 +222,15 @@ ${action}`;
 
   return `Creá una imagen editorial deportiva para Top Secret FC, club de fútbol virtual argentino.
 
+⚠️ CRÍTICO — UNIFORME: Si usás los renders de jugadores del proyecto, NO los modifiques ni alteres. Usá exactamente los archivos subidos tal cual. Los colores del uniforme del jugador son intocables — el dorado, el azul, el blanco o cualquier color que aparezca en el diseño de la imagen se aplica únicamente al FONDO, a elementos gráficos y al ambiente, NUNCA sobre el kit del jugador.
+
 ═══ SPECS TÉCNICAS ═══
 - Dimensiones: 1086x1448 (ligeramente vertical, formato post)
-- Fondo negro profundo (#0a0b0e), acentos dorados (#C8A84B)
+- Paleta del día (fondo y diseño gráfico, no el uniforme): ${style.palette}
 
 ═══ ESTILO VISUAL DEL DÍA ═══
 ${style.prompt}
-Aplicá este estilo como base compositiva. Mantené siempre la paleta oscura con acentos dorados de Top Secret FC.
+Aplicá este estilo como base compositiva. La paleta de colores define el AMBIENTE y el DISEÑO de la imagen — el uniforme del jugador queda exactamente como en los renders.
 
 ═══ ELEMENTO DE MARCA FIJO ═══
 En la parte INFERIOR de la imagen, incluí una franja horizontal delgada con:
@@ -232,7 +245,7 @@ ${playerBlock}
 
 ═══ IDENTIDAD VISUAL (usá los archivos del proyecto) ═══
 - Logo Top Secret FC: incluilo de forma natural en la composición
-- INDUMENTARIA: el proyecto tiene la imagen "Indumentaria TOP Secret T3.png" con todos los kits disponibles (local negro, alternativo blanco, tercer kit amarillo). Elegí el kit que mejor sirva a la escena y al estilo del día — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual.
+- INDUMENTARIA: el proyecto tiene la imagen "Indumentaria TOP Secret T3.png" con todos los kits disponibles (local negro, alternativo blanco, tercer kit amarillo). Elegí el kit que mejor sirva a la escena y al estilo del día — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual. IMPORTANTE: el kit define el color del uniforme, y ese color no debe ser modificado por la paleta del fondo.
 - NO incluyas escudos ni logos de otros clubes
 - El logo/escudo del club SÍ debe aparecer (además de la franja de marca)
 
