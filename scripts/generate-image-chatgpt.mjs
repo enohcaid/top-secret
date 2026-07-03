@@ -202,6 +202,15 @@ function buildScene(draft, mentionedPlayers) {
     };
   }
 
+  if (is(/mil seguidores|1000 seguidores|hito|aniversario|comunidad|logro institucional/)) {
+    return {
+      scene: 'milestone celebration, stadium bathed in golden light, confetti explosion, community triumph atmosphere — the feeling of a club reaching a landmark moment',
+      action: players
+        ? `${players} in triumphant celebration pose, arms raised, pure joy — milestone achievement energy`
+        : 'Top Secret FC club crest as the hero element, surrounded by celebration light effects — confetti, golden light rays, stadium floodlights — milestone achievement composition',
+    };
+  }
+
   // Default: institutional / generic editorial
   return {
     scene: 'elite Argentine esports football club, prestige and professionalism, dark cinematic atmosphere',
