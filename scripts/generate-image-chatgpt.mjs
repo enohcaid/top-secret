@@ -258,9 +258,14 @@ ${playerBlock}
 - NO incluyas escudos ni logos de otros clubes
 - El logo/escudo del club SÍ debe aparecer (además de la franja de marca)
 
-═══ CONTEXTO DE LA NOTA ═══
+═══ TITULAR EN LA IMAGEN ═══
+Incluí el siguiente título como texto prominente en la imagen — en letras GRANDES, bold, condensed, mayúsculas — estilo tapa de diario deportivo o revista de fútbol. El texto debe ser inmediatamente legible y ocupar un lugar central o dominante en la composición:
+
 "${draft.title}"
 
+Si el título es largo, podés dividirlo en dos líneas o quedarte con las palabras más impactantes. El objetivo es que alguien que pase rápido por la imagen entienda de qué se trata sin leer el artículo. El color del texto debe contrastar fuerte con el fondo — blanco puro, dorado (#C8A84B), o el que mejor funcione según la paleta del día.
+
+═══ CONTEXTO DE LA NOTA ═══
 La imagen tiene que contar visualmente de qué trata la nota. Que un hincha la vea y entienda el tema sin leer nada.`;
 }
 
