@@ -733,8 +733,52 @@ let selectedSlotKey = null;
 let _savedResetDate = '';
 let _firestoreLoaded = false; // guard: never write before first snapshot
 
-/* ─── APPLY DATA (from Firestore or backup) ─── */
-function applyData(data) {
+/* ─── LOCAL BACKUP (localStorage — fallback contra corrupción de Firestore) ─── */
+const _BACKUP_KEY = 'conv_state_backup';
+
+function _saveBackup(data) {
+  try {
+    localStorage.setItem(_BACKUP_KEY, JSON.stringify({ ...data, _backedUpAt: Date.now() }));
+  } catch(e) {}
+}
+
+function _loadBackup() {
+  try {
+    const raw = localStorage.getItem(_BACKUP_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+// Detecta datos incompletos de Firestore y los repara con el backup local
+function _mergeWithBackup(fsData) {
+  const bk = _loadBackup();
+  if (!bk) return fsData;
+  const merged = { ...fsData };
+
+  // Restaurar alwaysPresent si Firestore lo perdió
+  if (!(fsData.alwaysPresent && fsData.alwaysPresent.length > 0)
+      && bk.alwaysPresent && bk.alwaysPresent.length > 0) {
+    console.warn('[conv] alwaysPresent vacío en Firestore — restaurado desde backup local');
+    merged.alwaysPresent = bk.alwaysPresent;
+  }
+
+  // Restaurar bajas (black con returnDate futuro) que Firestore perdió
+  const bkAv = bk.availability || {};
+  const mergedAv = { ...(fsData.availability || {}) };
+  for (const [name, state] of Object.entries(bkAv)) {
+    if (state.status === 'black' && state.returnDate && state.returnDate > TODAY && !mergedAv[name]) {
+      console.warn(`[conv] Baja de ${name} restaurada desde backup local`);
+      mergedAv[name] = state;
+    }
+  }
+  merged.availability = mergedAv;
+
+  return merged;
+}
+
+/* ─── APPLY DATA (from Firestore, merged with local backup) ─── */
+function applyData(rawData) {
+  const data     = _mergeWithBackup(rawData);
   _savedResetDate = data.resetDate      || '';
   availability    = data.availability   || {};
   dailyOverrides  = data.dailyOverrides || {};
@@ -789,6 +833,7 @@ function saveState() {
   if (CONV_DOC) {
     CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
   }
+  _saveBackup(data); // espejo local en cada guardado
 }
 
 /* ─── STATUS ─── */
