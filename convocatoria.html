@@ -533,8 +533,8 @@ let _db = null, CONV_DOC = null, BACKUP_DOC = null, CAL_DOC_CONV = null, RECLU_C
 try {
   if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
   _db = firebase.firestore();
-  CONV_DOC     = _db.collection('convocatoria').doc('state');
-  BACKUP_DOC   = _db.collection('convocatoria').doc('permanent');
+  CONV_DOC   = _db.collection('convocatoria').doc('state');
+  BACKUP_DOC = _db.collection('convocatoria').doc('backup');
   CAL_DOC_CONV = _db.collection('calendario').doc('estado');
   RECLU_COL    = _db.collection('reclutamiento');
   PLANTEL_DOC  = _db.collection('plantel').doc('activo');
@@ -735,63 +735,37 @@ let selectedSlotKey = null;
 let _savedResetDate = '';
 let _firestoreLoaded = false; // guard: never write before first snapshot
 
-/* ─── FIRESTORE BACKUP (convocatoria/permanent) ─── */
-// Guarda solo los datos que NUNCA deben resetearse: alwaysPresent + bajas de largo plazo
-let _permanentBackup = null; // cargado una vez al inicio
+/* ─── FIRESTORE BACKUP (convocatoria/backup) ─── */
+let _backup = null; // cargado una vez al inicio, antes del listener principal
 
-async function _loadPermanentBackup() {
+async function _loadBackup() {
   if (!BACKUP_DOC) return;
   try {
     const snap = await BACKUP_DOC.get();
-    if (snap.exists) _permanentBackup = snap.data();
+    if (snap.exists) _backup = snap.data();
   } catch(e) { console.warn('[conv] backup load error:', e); }
 }
 
-function _savePermanentBackup() {
-  if (!BACKUP_DOC || !alwaysPresent.length) return;
-  const longTermAbsences = {};
-  for (const [name, state] of Object.entries(availability)) {
-    if (state.status === 'black' && state.returnDate && state.returnDate > TODAY) {
-      longTermAbsences[name] = state;
-    }
-  }
-  BACKUP_DOC.set({ alwaysPresent, availability: longTermAbsences, savedAt: new Date().toISOString() })
+function _saveBackup() {
+  if (!BACKUP_DOC || !alwaysPresent.length) return; // no guardar estado vacío/corrupto
+  BACKUP_DOC.set({ availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY, savedAt: new Date().toISOString() })
     .catch(e => console.warn('[conv] backup write error:', e));
 }
 
-// Detecta estado corrupto y lo repara con el backup
-function _mergeWithPermanent(rawData) {
-  if (!_permanentBackup) return { data: rawData, corrected: false };
-  const fsAv  = rawData.availability || {};
-  const bkAv  = _permanentBackup.availability || {};
-  const bkAP  = _permanentBackup.alwaysPresent || [];
-  let corrected = false;
-  const merged  = { ...rawData };
-
-  // Restaurar alwaysPresent si Firestore lo perdió completamente
-  if (!(rawData.alwaysPresent && rawData.alwaysPresent.length) && bkAP.length) {
-    console.warn('[conv] alwaysPresent vacío — restaurado desde convocatoria/permanent');
-    merged.alwaysPresent = bkAP;
-    corrected = true;
+// Estado vacío = 0 jugadores en alwaysPresent Y en availability → claramente corrupto
+function _mergeWithBackup(rawData) {
+  if (!_backup) return { data: rawData, corrected: false };
+  const totalPlayers = (rawData.alwaysPresent || []).length + Object.keys(rawData.availability || {}).length;
+  if (totalPlayers === 0 && (_backup.alwaysPresent || []).length > 0) {
+    console.warn('[conv] Estado vacío detectado — restaurando backup completo desde convocatoria/backup');
+    return { data: _backup, corrected: true };
   }
-
-  // Restaurar bajas de largo plazo que Firestore perdió
-  const mergedAv = { ...fsAv };
-  for (const [name, state] of Object.entries(bkAv)) {
-    if (state.status === 'black' && state.returnDate && state.returnDate > TODAY && !mergedAv[name]) {
-      console.warn(`[conv] Baja de ${name} restaurada desde convocatoria/permanent`);
-      mergedAv[name] = state;
-      corrected = true;
-    }
-  }
-  merged.availability = mergedAv;
-
-  return { data: merged, corrected };
+  return { data: rawData, corrected: false };
 }
 
-/* ─── APPLY DATA (from Firestore, merged with permanent backup) ─── */
+/* ─── APPLY DATA (from Firestore, with backup fallback) ─── */
 function applyData(rawData) {
-  const { data, corrected } = _mergeWithPermanent(rawData);
+  const { data, corrected } = _mergeWithBackup(rawData);
   _savedResetDate = data.resetDate      || '';
   availability    = data.availability   || {};
   dailyOverrides  = data.dailyOverrides || {};
@@ -851,7 +825,7 @@ function saveState() {
   if (CONV_DOC) {
     CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
   }
-  _savePermanentBackup(); // actualiza convocatoria/permanent en cada guardado
+  _saveBackup();
 }
 
 /* ─── STATUS ─── */
@@ -1970,7 +1944,7 @@ gsap.set('.page-header > *', { opacity:0, y:18 });
 gsap.set('.kpi-card', { opacity:0, y:14 });
 
 /* ─── INIT ─── */
-_loadPermanentBackup().then(() => loadState());
+_loadBackup().then(() => loadState());
 renderDateTag();
 render();
 scheduleMidnightReset();
