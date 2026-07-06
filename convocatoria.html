@@ -211,6 +211,7 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .num-btn:disabled{opacity:.25;cursor:not-allowed;}
 .num-btn.current{border-color:var(--gold);color:var(--gold);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.warn{background:rgba(30,15,0,.97);color:#f97316;border-color:#f97316;white-space:normal;max-width:min(420px,90vw);text-align:center;line-height:1.4;}
 
 /* ── AVATAR PHOTO ── */
 .av-photo{width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(1.65) translateY(4%);transform-origin:top center;}
@@ -828,7 +829,10 @@ function loadState() {
     CONV_DOC.onSnapshot(snap => {
       if (snap.exists) {
         const corrected = applyData(snap.data());
-        if (corrected) saveState(); // re-persiste el estado corregido en Firestore
+        if (corrected) {
+          saveState();
+          showToast('Estado corrupto detectado — datos restaurados desde backup. Verificá los estados del plantel.', 'warn', 9000);
+        }
         checkDailyReset();
       } else {
         _firestoreLoaded = true; // new doc — safe to seed
@@ -1643,12 +1647,12 @@ function closeModal(id) {
 
 /* ─── TOAST ─── */
 let toastTimer;
-function showToast(msg, type = '') {
+function showToast(msg, type = '', ms = 2800) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast' + (type ? ' ' + type : '');
   clearTimeout(toastTimer);
   requestAnimationFrame(() => { t.classList.add('show'); });
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  toastTimer = setTimeout(() => t.classList.remove('show'), ms);
 }
 
 /* ─── SHARE ─── */
