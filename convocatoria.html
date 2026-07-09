@@ -347,6 +347,7 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
       <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
       <button class="sopt" onclick="confirmStatus('black')">🟠 Ausente varios días…</button>
       <button class="sopt" onclick="openNumberPicker(currentPlayer)">🔢 Elegir número</button>
+      <button class="sopt" onclick="clearPlayerStatus()" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.65)">⬜ Limpiar estado</button>
     </div>
     <button class="mbtn mbtn-cancel" onclick="closeModal('statusOverlay')" style="width:100%;margin-top:10px">Cancelar</button>
   </div>
@@ -1387,6 +1388,18 @@ function saveRedStatus() {
   saveState();
   closeModal('motivoOverlay'); render();
   showToast(name + ' → Ausente');
+}
+
+function clearPlayerStatus() {
+  const name = currentPlayer;
+  closeModal('statusOverlay');
+  delete availability[name];
+  const idx = alwaysPresent.indexOf(name);
+  if (idx !== -1) alwaysPresent.splice(idx, 1);
+  delete dailyOverrides[name];
+  saveState();
+  render();
+  showToast(name + ' → Sin confirmar');
 }
 
 /* ─── RECRUIT PICKER ─── */
