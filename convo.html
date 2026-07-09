@@ -557,6 +557,31 @@ const VPUG_T2_SCHEDULE = [
   {date:'2026-06-11',time:'23:30',league:'VPUG',rival:'Suda eSports',          isHome:false},
   {date:'2026-06-11',time:'23:59',league:'VPUG',rival:'Nueva Chicago eSports', isHome:true },
 ];
+// Campeonato de Invierno VPUG (hardcoded fallback; fetch enriquece con badges)
+const INVIERNO_SCHEDULE = [
+  {date:'2026-06-18',time:'22:30',league:'VPUG',rival:'Black Mamba AC',            isHome:false},
+  {date:'2026-06-18',time:'23:00',league:'VPUG',rival:'Vikings Team',              isHome:true },
+  {date:'2026-06-23',time:'22:30',league:'VPUG',rival:'Comunicaciones',            isHome:false},
+  {date:'2026-06-23',time:'23:00',league:'VPUG',rival:'InfinitX',                  isHome:true },
+  {date:'2026-06-25',time:'22:30',league:'VPUG',rival:'Adrenalina FC',             isHome:false},
+  {date:'2026-06-25',time:'23:00',league:'VPUG',rival:'Team Valhalla',             isHome:true },
+  {date:'2026-06-30',time:'22:30',league:'VPUG',rival:'Big Ban FC',                isHome:false},
+  {date:'2026-06-30',time:'23:00',league:'VPUG',rival:'Matreros eSp',              isHome:true },
+  {date:'2026-07-02',time:'22:30',league:'VPUG',rival:'Villa Dalmine eSports',     isHome:false},
+  {date:'2026-07-02',time:'23:00',league:'VPUG',rival:'Talleres Reserva',          isHome:true },
+  {date:'2026-07-07',time:'22:30',league:'VPUG',rival:'Vultur Sports',             isHome:false},
+  {date:'2026-07-07',time:'23:00',league:'VPUG',rival:'Almirante Brown eSports',   isHome:true },
+  {date:'2026-07-09',time:'22:30',league:'VPUG',rival:'Gallito 1708',              isHome:false},
+  {date:'2026-07-09',time:'23:00',league:'VPUG',rival:'CA Estrella Roja',          isHome:true },
+  {date:'2026-07-14',time:'22:30',league:'VPUG',rival:'La Union FC',               isHome:false},
+  {date:'2026-07-14',time:'23:00',league:'VPUG',rival:'BNA San Jorge',             isHome:true },
+  {date:'2026-07-16',time:'22:30',league:'VPUG',rival:'Ojo al Piojo FC',           isHome:false},
+  {date:'2026-07-16',time:'23:00',league:'VPUG',rival:'Olimpo eSports',            isHome:false},
+  {date:'2026-07-21',time:'22:30',league:'VPUG',rival:'All Boys Reserva',          isHome:true },
+  {date:'2026-07-21',time:'23:00',league:'VPUG',rival:'Inter de BS AS',            isHome:false},
+  {date:'2026-07-21',time:'23:30',league:'VPUG',rival:'El Gallo FC',               isHome:true },
+];
+
 // 11x11 T2 schedule
 const E11_T3_SCHEDULE = [
   {date:'2026-05-19',time:'23:00',league:'11x11',rival:'Los Waxiturros',         isHome:true },
@@ -615,10 +640,13 @@ function getTodayMatches() {
   const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase() === (v.rival||'').toLowerCase())
   );
-  const fromInvierno = inviernoMatches
+  const fromInvierno = INVIERNO_SCHEDULE
     .filter(m => m.date === TODAY)
     .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({ league: 'VPUG', rival: m.rival, time: m.time, date: m.date, isHome: m.isHome, badge: m.rivalLogo || null }));
+    .map(m => {
+      const dyn = inviernoMatches.find(d => d.rival === m.rival && d.date === m.date);
+      return { ...m, badge: dyn?.rivalLogo || null };
+    });
   return [...fromCustom, ...fromVpugT2, ...from11x11, ...fromInvierno, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
