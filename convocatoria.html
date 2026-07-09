@@ -1326,13 +1326,12 @@ function confirmStatus(status) {
   }
 
   if (alwaysPresent.includes(name)) {
-    // Daily override only — alwaysPresent stays intact; resets automatically next day
-    dailyOverrides[name] = { status, day: TODAY };
-  } else {
-    availability[name] = { status };
+    alwaysPresent.splice(alwaysPresent.indexOf(name), 1);
+    delete dailyOverrides[name];
   }
+  availability[name] = { status };
   saveState();
-  render(); showToast(name + ' → ' + (status === 'green' ? 'Presente' : 'Ausente'));
+  render(); showToast(name + ' → ' + (status === 'green' ? 'Presente (ya no siempre)' : 'Ausente'));
 }
 
 function saveLateTime() {
