@@ -847,11 +847,17 @@ function loadState() {
 
 /* ─── SAVE STATE ─── */
 function saveState() {
-  if (!_firestoreLoaded) return; // never overwrite before first snapshot arrives
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return; // no writes in local testing
+  if (!_firestoreLoaded) {
+    showToast('Conectando… esperá un momento y volvé a guardar', 'warn', 4000);
+    return;
+  }
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
   const data = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
   if (CONV_DOC) {
-    CONV_DOC.set(data).catch(e => console.warn('Firestore write error:', e));
+    CONV_DOC.set(data).catch(e => {
+      console.warn('Firestore write error:', e);
+      showToast('Error al guardar. Verificá tu conexión e intentá de nuevo.', 'warn', 5000);
+    });
   }
   _saveBackup();
 }
@@ -1655,7 +1661,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
 
 /* ─── MODALS ─── */
 function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
+  const el = document.getElementById(id);
+  el.classList.remove('open');
+  el.style.paddingBottom = '';
 }
 
 /* ─── TOAST ─── */
@@ -1981,6 +1989,16 @@ function _download(blob, name) {
 /* ─── PAGE LOAD ANIMATION ─── */
 gsap.set('.page-header > *', { opacity:0, y:18 });
 gsap.set('.kpi-card', { opacity:0, y:14 });
+
+/* ─── MOBILE: empujar overlay cuando aparece el teclado virtual ─── */
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const offset = window.innerHeight - window.visualViewport.offsetTop - window.visualViewport.height;
+    document.querySelectorAll('.overlay.open').forEach(el => {
+      el.style.paddingBottom = offset > 50 ? offset + 'px' : '';
+    });
+  });
+}
 
 /* ─── INIT ─── */
 _loadBackup().then(() => loadState());

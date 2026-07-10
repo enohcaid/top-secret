@@ -1309,7 +1309,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
 
 /* ─── MODALS ─── */
 function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
+  const el = document.getElementById(id);
+  el.classList.remove('open');
+  el.style.paddingBottom = '';
 }
 
 /* ─── TOAST ─── */
@@ -1641,6 +1643,16 @@ function _download(blob, name) {
 /* ─── PAGE LOAD ANIMATION ─── */
 gsap.set('.page-header > *', { opacity:0, y:18 });
 gsap.set('.kpi-card', { opacity:0, y:14 });
+
+/* ─── MOBILE: empujar overlay cuando aparece el teclado virtual ─── */
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const offset = window.innerHeight - window.visualViewport.offsetTop - window.visualViewport.height;
+    document.querySelectorAll('.overlay.open').forEach(el => {
+      el.style.paddingBottom = offset > 50 ? offset + 'px' : '';
+    });
+  });
+}
 
 /* ─── INIT ─── */
 _loadBackup().then(() => loadState());
