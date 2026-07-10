@@ -601,6 +601,107 @@
     }
     .draft-edit-title-input:focus, .draft-edit-body-input:focus { outline: none; border-color: var(--gold); }
     .draft-edit-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+    /* ── Regen overlay ── */
+    .regen-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.88);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .regen-overlay.open { display: flex; }
+    .regen-panel {
+      background: var(--gray);
+      border: 1px solid rgba(201,168,76,.5);
+      border-radius: 6px;
+      padding: 44px 40px;
+      max-width: 480px;
+      width: 92%;
+      text-align: center;
+    }
+    .regen-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .regen-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(201,168,76,.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: regen-spin .8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes regen-spin { to { transform: rotate(360deg); } }
+    .regen-phase-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 8px;
+    }
+    .regen-detail {
+      color: rgba(255,255,255,.45);
+      font-size: .82rem;
+      line-height: 1.5;
+      margin-bottom: 6px;
+      min-height: 1.2em;
+    }
+    .regen-elapsed {
+      color: rgba(255,255,255,.25);
+      font-size: .75rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: .05em;
+    }
+    .regen-error-msg {
+      color: #e8502e;
+      font-size: .85rem;
+      margin-bottom: 20px;
+    }
+    .regen-confirm-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-align: left;
+    }
+    .regen-confirm-excerpt {
+      font-size: .82rem;
+      color: rgba(255,255,255,.55);
+      text-align: left;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .regen-confirm-imgs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .regen-confirm-imgs img {
+      height: 120px;
+      width: auto;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      object-fit: contain;
+    }
+    .regen-confirm-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .regen-confirm-actions .btn-primary  { width: 100%; }
+    .regen-confirm-actions .btn-secondary { width: 100%; }
+    .regen-confirm-actions .btn-danger    { width: 100%; }
   </style>
 </head>
 <body>
@@ -647,6 +748,7 @@
         <div class="pin-row">
           <button class="btn-primary" onclick="publishDraft()">Publicar</button>
           <button class="btn-secondary" onclick="editDraft()">Editar</button>
+          <button class="btn-secondary" onclick="regenDraft()" title="Borrar esta noticia y generar una nueva">Regenerar</button>
           <button class="btn-danger" onclick="discardDraft()">Descartar</button>
         </div>
       </div>
@@ -671,6 +773,41 @@
     <div class="news-grid" id="news-grid"></div>
   </div>
 
+</div>
+
+<!-- Regen overlay -->
+<div class="regen-overlay" id="regen-overlay">
+  <div class="regen-panel" id="regen-panel">
+    <!-- Phase: processing -->
+    <div id="regen-processing">
+      <div class="regen-label">Top Secret FC · Redacción</div>
+      <div class="regen-spinner"></div>
+      <div class="regen-phase-title" id="regen-phase-title">Generando artículo...</div>
+      <div class="regen-detail" id="regen-detail">El agente está recopilando datos del club</div>
+      <div class="regen-elapsed" id="regen-elapsed"></div>
+    </div>
+    <!-- Phase: error -->
+    <div id="regen-error" style="display:none">
+      <div class="regen-label">Error</div>
+      <div class="regen-error-msg" id="regen-error-msg"></div>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn-secondary" onclick="regenDraft()">Reintentar</button>
+        <button class="btn-danger" onclick="closeRegenOverlay()">Cancelar</button>
+      </div>
+    </div>
+    <!-- Phase: confirm -->
+    <div id="regen-confirm" style="display:none">
+      <div class="regen-label">Nueva noticia lista</div>
+      <div class="regen-confirm-title" id="regen-confirm-title"></div>
+      <div class="regen-confirm-excerpt" id="regen-confirm-excerpt"></div>
+      <div class="regen-confirm-imgs" id="regen-confirm-imgs"></div>
+      <div class="regen-confirm-actions">
+        <button class="btn-primary" onclick="acceptRegen()">Publicar esta noticia</button>
+        <button class="btn-secondary" onclick="regenDraft()">Generar otra</button>
+        <button class="btn-danger" onclick="closeRegenOverlay()">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Article modal -->
@@ -1171,6 +1308,125 @@ async function saveDraftEdit() {
 }
 
 loadKvContent();
+
+// ── REGEN PIPELINE ────────────────────────────────────────────────────────────
+let _regenInterval = null;
+let _regenStart    = 0;
+
+async function regenDraft() {
+  // Close any open confirm state, reset UI to processing
+  _showRegenPhase('processing');
+  document.getElementById('regen-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const r = await fetch(_WORKER + '/request-regen', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _sessionPin },
+    });
+    if (!r.ok) {
+      _showRegenError(r.status === 401 ? 'PIN incorrecto.' : 'Error al disparar la regeneración.');
+      return;
+    }
+  } catch(e) {
+    _showRegenError('Sin conexión con el servidor.');
+    return;
+  }
+
+  _currentDraft = null;
+  _regenStart   = Date.now();
+  if (_regenInterval) clearInterval(_regenInterval);
+
+  _regenInterval = setInterval(_regenTick, 5000);
+  _regenElapsedTick();
+}
+
+async function _regenTick() {
+  const elapsed = Math.round((Date.now() - _regenStart) / 1000);
+
+  // Timeout after 20 minutes
+  if (elapsed > 1200) {
+    clearInterval(_regenInterval);
+    _regenInterval = null;
+    _showRegenError('El proceso tardó demasiado. Revisá el log local y reintentá.');
+    return;
+  }
+
+  try {
+    const r = await fetch(_WORKER + '/draft-noticia');
+    if (!r.ok) return;
+    const { draft } = await r.json();
+
+    if (!draft) {
+      // Still generating article
+      document.getElementById('regen-phase-title').textContent = 'Generando artículo...';
+      document.getElementById('regen-detail').textContent = 'El agente está recopilando datos del club';
+      return;
+    }
+
+    _currentDraft = draft;
+
+    if (!draft.imagePost) {
+      // Article ready, waiting for images
+      document.getElementById('regen-phase-title').textContent = 'Generando imágenes...';
+      document.getElementById('regen-detail').textContent = `"${draft.title}"`;
+    } else {
+      // Everything ready → confirmation
+      clearInterval(_regenInterval);
+      _regenInterval = null;
+      _showRegenConfirm(draft);
+    }
+  } catch(e) {}
+}
+
+function _regenElapsedTick() {
+  const el = document.getElementById('regen-elapsed');
+  if (!el) return;
+  const tick = () => {
+    if (!document.getElementById('regen-overlay').classList.contains('open')) return;
+    const s = Math.round((Date.now() - _regenStart) / 1000);
+    el.textContent = s > 0 ? `${s}s` : '';
+    setTimeout(tick, 1000);
+  };
+  setTimeout(tick, 1000);
+}
+
+function _showRegenPhase(phase) {
+  document.getElementById('regen-processing').style.display = phase === 'processing' ? 'block' : 'none';
+  document.getElementById('regen-error').style.display      = phase === 'error'      ? 'block' : 'none';
+  document.getElementById('regen-confirm').style.display    = phase === 'confirm'    ? 'block' : 'none';
+}
+
+function _showRegenError(msg) {
+  _showRegenPhase('error');
+  document.getElementById('regen-error-msg').textContent = msg;
+}
+
+function _showRegenConfirm(draft) {
+  _showRegenPhase('confirm');
+  document.getElementById('regen-confirm-title').textContent   = draft.title   || '';
+  document.getElementById('regen-confirm-excerpt').textContent = draft.excerpt || '';
+  const imgs = document.getElementById('regen-confirm-imgs');
+  imgs.innerHTML = '';
+  if (draft.imagePost)  imgs.innerHTML += `<img src="${draft.imagePost}"  alt="Post">`;
+  if (draft.imageStory) imgs.innerHTML += `<img src="${draft.imageStory}" alt="Story">`;
+  _renderDraftBanner(draft);
+}
+
+async function acceptRegen() {
+  await publishDraft();
+  closeRegenOverlay();
+}
+
+function closeRegenOverlay() {
+  if (_regenInterval) { clearInterval(_regenInterval); _regenInterval = null; }
+  document.getElementById('regen-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('regen-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeRegenOverlay();
+});
 </script>
 
 <script type="module">

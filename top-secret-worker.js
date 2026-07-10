@@ -680,6 +680,30 @@ export default {
         });
       }
 
+      // ── REGEN REQUEST (POST /request-regen | GET+DELETE /regen-flag) ─────────
+      // Browser POSTs to /request-regen (PIN-gated) to kick off a full pipeline
+      // regeneration. The local watch-regen.ps1 polls /regen-flag and runs the
+      // cloud agent + image generation when it sees the flag set.
+      if (url.pathname === '/request-regen' && request.method === 'POST') {
+        const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
+        await fetch(FS_DRAFT, { method: 'DELETE' });
+        await env.TS_KV.put('regen_request', JSON.stringify({ requested: true, at: new Date().toISOString() }));
+        return jsonResp({ ok: true });
+      }
+
+      if (url.pathname === '/regen-flag') {
+        if (request.method === 'GET') {
+          const flag = await env.TS_KV.get('regen_request', 'json');
+          return jsonResp(flag || { requested: false });
+        }
+        if (request.method === 'DELETE') {
+          await env.TS_KV.delete('regen_request');
+          return jsonResp({ ok: true });
+        }
+      }
+
       // ── NOTICIAS DRAFT (GET | POST | DELETE /draft-noticia) ──────────────────
       // Draft is stored in Firestore news/draft (agent can write there directly).
       // Worker reads/deletes it from Firestore; browser uses this endpoint.

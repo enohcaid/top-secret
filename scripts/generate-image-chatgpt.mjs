@@ -4,18 +4,39 @@
  * uniformes y renders de jugadores (T3-Frentes). Conecta al Chrome del
  * usuario via CDP en localhost:9222.
  *
- * Uso: node scripts/generate-image-chatgpt.mjs
+ * Uso:
+ *   node scripts/generate-image-chatgpt.mjs                              # automático (9:15)
+ *   node scripts/generate-image-chatgpt.mjs --review                    # loop de revisión interactiva
+ *   node scripts/generate-image-chatgpt.mjs --review --feedback "texto" # revisión con dirección inicial
+ *   node scripts/generate-image-chatgpt.mjs --force                     # regenerar sin loop
  */
 
 import { chromium } from 'playwright';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { createInterface } from 'readline';
 
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
 const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
+const MAX_ATTEMPTS    = 3;
+
+const EVAL_PROMPT = `Sos el Director Creativo de Top Secret FC, club de fútbol virtual argentino de élite.
+
+Evaluá si esta imagen representa correctamente la identidad visual del club.
+
+IDENTIDAD DEL CLUB:
+- Paleta de ambiente: negro (#0a0b0e) dominante, dorado (#C8A84B) como acento
+- Estética editorial oscura y cinematográfica — nivel ESPN/Fox Sports premium
+- El uniforme del jugador debe verse nítido, sin alteraciones de color
+- Composición que transmita profesionalismo y pertenencia a un club de élite
+- El texto del titular debe ser legible y de impacto
+
+Respondé ÚNICAMENTE con uno de estos dos formatos (nada más):
+APROBADA - [motivo breve]
+RECHAZADA - [qué falla específicamente, en una línea accionable para el generador de imágenes]`;
 
 // Pool de estilos visuales rotativos — nunca se repite en los últimos 5 usos
 // Cada estilo define su propia paleta de FONDO y DISEÑO — nunca del uniforme del jugador
@@ -61,6 +82,18 @@ const IMAGE_STYLES = [
     palette: 'wet pitch with cyan and teal neon reflections, rain streaks, moody dark atmosphere with cool color temperature',
     prompt: 'Cinematic rain atmosphere. Wet pitch reflections, dramatic rain streaks, neon-lit puddles in cool teal and cyan tones. Gritty and moody — like a sports film scene shot in Argentina.' },
 ];
+
+// ── CLI flags ─────────────────────────────────────────────────────────────────
+// --review      : loop interactivo de revisión hasta aprobar las imágenes
+// --force       : regenerar aunque el draft ya tenga imágenes (implícito en --review)
+// --story-only  : omite el post (usa el existente), genera solo la story
+// --feedback    : dirección inicial para la generación (texto entre comillas)
+const _args         = process.argv.slice(2);
+const FLAG_FORCE    = _args.includes('--force') || _args.includes('--review') || _args.includes('--story-only');
+const FLAG_REVIEW   = _args.includes('--review');
+const FLAG_STORY    = _args.includes('--story-only');
+const _fbIdx        = _args.indexOf('--feedback');
+const FLAG_FEEDBACK = _fbIdx >= 0 ? _args[_fbIdx + 1] : null;
 
 // Jugadores con renders en el proyecto de ChatGPT (carpeta T3-Frentes)
 // Agregar el archivo PNG a Renders/T3-Frentes/ + subirlo al proyecto de ChatGPT es suficiente
@@ -220,7 +253,7 @@ function buildScene(draft, mentionedPlayers) {
   };
 }
 
-function buildPrompt(draft, mentionedPlayers, style) {
+function buildPrompt(draft, mentionedPlayers, style, correction = null) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
 
   const playerBlock = mentionedPlayers.length > 0
@@ -266,7 +299,12 @@ Incluí el siguiente título como texto prominente en la imagen — en letras GR
 Si el título es largo, podés dividirlo en dos líneas o quedarte con las palabras más impactantes. El objetivo es que alguien que pase rápido por la imagen entienda de qué se trata sin leer el artículo. El color del texto debe contrastar fuerte con el fondo — blanco puro, dorado (#C8A84B), o el que mejor funcione según la paleta del día.
 
 ═══ CONTEXTO DE LA NOTA ═══
-La imagen tiene que contar visualmente de qué trata la nota. Que un hincha la vea y entienda el tema sin leer nada.`;
+La imagen tiene que contar visualmente de qué trata la nota. Que un hincha la vea y entienda el tema sin leer nada.${correction ? `
+
+═══ CORRECCIÓN vs. VERSIÓN ANTERIOR ═══
+La imagen generada anteriormente no cumplió con la identidad visual del club. Tené en cuenta este feedback para la nueva versión:
+"${correction}"
+Este punto debe ser claramente diferente y mejor en la imagen nueva.` : ''}`;
 }
 
 function buildResizePrompt() {
@@ -278,12 +316,12 @@ Mantené EXACTAMENTE la misma escena, el mismo personaje/jugador, la misma pose,
 }
 
 async function waitForGeneratedImage(page, excludeSrcs = []) {
-  console.log('  Esperando imagen (hasta 6 min)...');
+  console.log('  Esperando imagen (hasta 15 min)...');
   page.setDefaultTimeout(0);
 
   await page.screenshot({ path: path.join(OUTPUT_DIR, 'debug-after-send.png'), fullPage: false });
 
-  const TIMEOUT_MS = 6 * 60 * 1000;
+  const TIMEOUT_MS = 15 * 60 * 1000;
   const POLL_MS    = 4000;
   const start      = Date.now();
 
@@ -320,7 +358,7 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
   }
 
   await page.screenshot({ path: path.join(OUTPUT_DIR, 'debug-timeout.png'), fullPage: true });
-  throw new Error('Timeout (6 min) esperando imagen. Screenshot en debug-timeout.png');
+  throw new Error('Timeout (15 min) esperando imagen. Screenshot en debug-timeout.png');
 }
 
 async function downloadImage(page, imgUrl, outputPath) {
@@ -354,11 +392,42 @@ async function downloadImage(page, imgUrl, outputPath) {
   console.log('  Guardada:', outputPath);
 }
 
+async function ensureNormalQuality(page) {
+  try {
+    const clicked = await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('button')]
+        .find(b => b.textContent?.trim() === 'Alta');
+      if (btn) { btn.click(); return true; }
+      return false;
+    });
+
+    if (!clicked) return;
+
+    await page.waitForTimeout(800);
+
+    const selected = await page.evaluate(() => {
+      const opt = [...document.querySelectorAll('[role="option"], [role="menuitem"], li, button')]
+        .find(el => ['Normal', 'Estándar', 'Standard'].includes(el.textContent?.trim()));
+      if (opt) { opt.click(); return opt.textContent?.trim(); }
+      return null;
+    });
+
+    if (selected) {
+      console.log(`  Calidad: ${selected} (evita o3 reasoning).`);
+      await page.waitForTimeout(400);
+    } else {
+      await page.keyboard.press('Escape');
+    }
+  } catch { /* quality change optional */ }
+}
+
 async function sendPromptInProject(page, prompt, { freshChat = true } = {}) {
   if (freshChat) {
     await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
   }
+
+  await ensureNormalQuality(page);
 
   const input = page.locator('div[contenteditable="true"], p[data-placeholder]').first();
   await input.waitFor({ state: 'visible', timeout: 20000 });
@@ -435,6 +504,101 @@ async function updateDraft(draft, postFile, storyFile) {
   console.log('\nDraft actualizado en Firestore.');
 }
 
+// ── AI evaluation via ChatGPT Vision ─────────────────────────────────────────
+async function waitForTextResponse(page) {
+  const TIMEOUT_MS = 3 * 60 * 1000;
+  const STABLE_MS  = 2500;
+  const POLL_MS    = 1000;
+  const start = Date.now();
+  let lastText = '';
+  let stableAt = 0;
+
+  while (Date.now() - start < TIMEOUT_MS) {
+    const text = await page.evaluate(() => {
+      const msgs = [...document.querySelectorAll('[data-message-author-role="assistant"]')];
+      return msgs[msgs.length - 1]?.textContent?.trim() || '';
+    });
+
+    if (text && text !== lastText) {
+      lastText = text;
+      stableAt = Date.now();
+    } else if (text && text === lastText && stableAt && (Date.now() - stableAt) > STABLE_MS) {
+      return text;
+    }
+
+    await page.waitForTimeout(POLL_MS);
+  }
+  throw new Error('Timeout esperando respuesta de evaluación (3 min)');
+}
+
+async function evaluateImage(context, imagePath) {
+  console.log('\n  Evaluando imagen con ChatGPT Vision...');
+  const page = await context.newPage();
+  page.setDefaultTimeout(0);
+
+  try {
+    await page.goto('https://chatgpt.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(3000);
+
+    // Adjuntar imagen: primero via input[type="file"] directo, luego via file chooser
+    const fileInput = page.locator('input[type="file"]').first();
+    if (await fileInput.count() > 0) {
+      await fileInput.setInputFiles(imagePath);
+      await page.waitForTimeout(2000);
+    } else {
+      const attachSelectors = [
+        'button[aria-label*="ttach"]',
+        'button[aria-label*="djuntar"]',
+        'button[aria-label*="rchivo"]',
+        'button[data-testid*="attach"]',
+        'button[aria-label*="File"]',
+        'label[for*="file"]',
+      ].join(', ');
+      const [fileChooser] = await Promise.all([
+        page.waitForEvent('filechooser', { timeout: 15000 }),
+        page.locator(attachSelectors).first().click(),
+      ]);
+      await fileChooser.setFiles(imagePath);
+      await page.waitForTimeout(2000);
+    }
+
+    // Enviar prompt de evaluación
+    const input = page.locator('div[contenteditable="true"], p[data-placeholder]').first();
+    await input.waitFor({ state: 'visible', timeout: 10000 });
+    await input.click();
+    await page.evaluate(async (text) => { await navigator.clipboard.writeText(text); }, EVAL_PROMPT);
+    await page.keyboard.press('Control+v');
+    await page.waitForTimeout(800);
+
+    const sendBtn = page.locator('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]').first();
+    await sendBtn.click();
+
+    const response = await waitForTextResponse(page);
+    console.log('  Resultado:', response.split('\n')[0].slice(0, 120));
+    return response;
+  } finally {
+    await page.close();
+  }
+}
+
+// ── Review helpers ────────────────────────────────────────────────────────────
+function openImages(...filenames) {
+  for (const f of filenames) {
+    const abs = path.join(OUTPUT_DIR, f);
+    if (fs.existsSync(abs)) execSync(`start "" "${abs}"`, { cwd: path.resolve('.'), stdio: 'ignore' });
+  }
+}
+
+async function askYesNo(question) {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise(resolve => rl.question(question, a => { rl.close(); resolve(a.trim().toLowerCase() === 's'); }));
+}
+
+async function askInput(question) {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise(resolve => rl.question(question, a => { rl.close(); resolve(a.trim()); }));
+}
+
 async function main() {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -448,8 +612,8 @@ async function main() {
     console.log(`Draft es de ${draft.date}, no de hoy (${today}). Esperando nuevo draft del cron.`);
     return;
   }
-  if (draft.imagePost) {
-    console.log('El draft ya tiene imágenes. Nada que hacer.');
+  if (draft.imagePost && !FLAG_FORCE) {
+    console.log('El draft ya tiene imágenes. Usá --force o --review para regenerar.');
     return;
   }
 
@@ -483,25 +647,72 @@ async function main() {
   const chosenStyle  = pickStyle(styleHistory);
   console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
 
+  let correction     = FLAG_FEEDBACK;
+  let lastPostFile   = `${dateStr}_post.png`;
+  let lastPostImgUrl = null;
+
   try {
-    const postPrompt = buildPrompt(draft, mentioned, chosenStyle);
-    const { filename: postFile, imgUrl: postImgUrl } = await generateImage(
-      page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [] }
-    );
+    if (FLAG_STORY) {
+      const existingPost = path.join(OUTPUT_DIR, lastPostFile);
+      if (!fs.existsSync(existingPost)) {
+        throw new Error(`--story-only: no existe ${lastPostFile}. Generá el post primero.`);
+      }
+      console.log(`\nUsando post existente: ${lastPostFile}`);
+    }
 
-    const storyPrompt = buildResizePrompt();
+    // Loop solo sobre el post hasta aprobarlo
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !FLAG_STORY; attempt++) {
+      if (attempt > 1) console.log(`\nIntento ${attempt}/${MAX_ATTEMPTS}...`);
+
+      const postPrompt = buildPrompt(draft, mentioned, chosenStyle, correction);
+      const { filename: postFile, imgUrl: postImgUrl } = await generateImage(
+        page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [] }
+      );
+      lastPostFile   = postFile;
+      lastPostImgUrl = postImgUrl;
+
+      if (FLAG_REVIEW) {
+        // Revisión humana interactiva
+        console.log(`\n  Post: Renders/Daily News/${postFile}`);
+        openImages(postFile);
+        const ok = await askYesNo('\n¿La imagen está bien? [s/N]: ');
+        if (ok) break;
+        correction = await askInput('¿Qué corregir para la próxima versión?: ');
+        if (!correction) console.log('Sin feedback — regenerando con el mismo prompt.');
+        if (attempt === MAX_ATTEMPTS) console.log('Máximo de intentos alcanzado — usando esta versión.');
+      } else {
+        // Evaluación automática con ChatGPT Vision
+        let evalResponse = null;
+        try {
+          evalResponse = await evaluateImage(context, path.join(OUTPUT_DIR, postFile));
+        } catch (evalErr) {
+          console.log(`  Evaluación falló (${evalErr.message.split('\n')[0]}) — aceptando imagen.`);
+        }
+
+        const approved = !evalResponse || /^aprobada/i.test(evalResponse.trim());
+
+        if (approved || attempt === MAX_ATTEMPTS) {
+          if (evalResponse && !approved) console.log('  Máximo de intentos alcanzado — usando última versión.');
+          break;
+        }
+
+        correction = evalResponse.replace(/^rechazada\s*[-–]\s*/i, '').trim();
+        console.log(`  Corrección: "${correction}"`);
+      }
+    }
+
+    // Story se genera una sola vez, a partir del post aprobado
     const { filename: storyFile } = await generateImage(
-      page, draft, 'story', storyPrompt, { freshChat: false, excludeSrcs: [postImgUrl] }
+      page, draft, 'story', buildResizePrompt(), { freshChat: false, excludeSrcs: [lastPostImgUrl] }
     );
 
-    await updateDraft(draft, postFile, storyFile);
+    await updateDraft(draft, lastPostFile, storyFile);
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
-    gitPushImages(postFile, storyFile);
+    gitPushImages(lastPostFile, storyFile);
 
     console.log('\n✓ Listo.');
-    console.log('  Post: ', postFile);
+    console.log('  Post: ', lastPostFile);
     console.log('  Story:', storyFile);
-    console.log('  Estilo guardado en Firestore.');
   } finally {
     await browser.close();
   }
