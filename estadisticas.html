@@ -495,7 +495,7 @@ footer span{color:#C9A84C;}
 <div class="page-header">
   <div class="page-eyebrow">Estadísticas · Top Secret FC</div>
   <h1 class="page-title">Centro de <span>Estadísticas</span></h1>
-  <p class="page-sub">Datos en la nube · IA extrae stats automáticamente · rendimiento del plantel</p>
+  <p class="page-sub">Cada partido, cada gol, cada rating · el rendimiento del plantel en detalle</p>
 </div>
 
 <div class="wrap">
@@ -1216,9 +1216,9 @@ function renderSeason(){
   const scored   = matches.reduce((s,m)=>{ const sc=parseScore(m.match_result); return s+(sc?sc.own:0); },0);
   const conceded = matches.reduce((s,m)=>{ const sc=parseScore(m.match_result); return s+(sc?sc.rival:0); },0);
   kpiRow.innerHTML = [
-    {val:matches.length,         lbl:'Partidos',    color:'var(--gold)'},
-    {val:scored+':'+conceded,    lbl:'Goles F/C',   color:'var(--win)'},
-    {val:wins+'-'+draws+'-'+losses, lbl:'V · E · D', color:wins>losses?'var(--win)':losses>wins?'var(--loss)':'var(--draw)'},
+    {val:matches.length,         lbl:'Partidos',    color:'var(--text)'},
+    {val:scored+':'+conceded,    lbl:'Goles F/C',   color:'var(--text)'},
+    {val:wins+'-'+draws+'-'+losses, lbl:'V · E · D', color:wins>losses?'var(--win)':losses>wins?'var(--loss)':'var(--muted)'},
     {val:teamAvgRating!=null?teamAvgRating.toFixed(1):'—', lbl:'Rating Prom.', color:vrColor(teamAvgRating)},
   ].map(k=>`<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`).join('');
 
@@ -3014,11 +3014,12 @@ window.ceaSortBy        = ceaSortBy;
     const gf     = played.reduce((s,m) => s + (m.tsGoals||0), 0);
     const gc     = played.reduce((s,m) => s + (m.rivGoals||0), 0);
 
+    // Color solo donde hay semántica deportiva (V/GF/GC) — el resto en tinta base
     kpiRow.innerHTML = [
       {val: _preStats.matches.length, lbl: 'Fechas',     color: 'var(--muted)'},
-      {val: played.length,            lbl: 'Jugados',    color: 'var(--gold)'},
+      {val: played.length,            lbl: 'Jugados',    color: 'var(--text)'},
       {val: wins,                     lbl: 'Victorias',  color: 'var(--win)'},
-      {val: `${draws}E ${losses}D`,   lbl: 'Empates/Der',color: 'var(--draw)'},
+      {val: `${draws}E ${losses}D`,   lbl: 'Empates/Der',color: 'var(--muted)'},
       {val: gf,                       lbl: 'Goles a Favor', color: 'var(--win)'},
       {val: gc,                       lbl: 'Goles en Contra', color: 'var(--loss)'},
     ].map(k => `<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`).join('');
@@ -3132,7 +3133,7 @@ window.ceaSortBy        = ceaSortBy;
 })(); // end IIFE
 
 </script>
-<script src="layout.js?v=6"></script>
-<script src="mobile-nav.js?v=6"></script>
+<script src="layout.js?v=7"></script>
+<script src="mobile-nav.js?v=7"></script>
 </body>
 </html>

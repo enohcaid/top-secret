@@ -270,11 +270,11 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <span class="sb-label">T2 2026</span>
       <span class="sb-sub">Finalizada</span>
     </button>
-    <button class="season-btn active" id="sbtn-t3" onclick="switchSeason('t3',this)">
+    <button class="season-btn" id="sbtn-t3" onclick="switchSeason('t3',this)">
       <span class="sb-label">T3 2026</span>
       <span class="sb-sub">Próximamente</span>
     </button>
-    <button class="season-btn" id="sbtn-pre" onclick="switchSeason('pre',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
+    <button class="season-btn active" id="sbtn-pre" onclick="switchSeason('pre',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
       <span class="sb-label">Pretemporada</span>
       <span class="sb-sub">Invierno VPUG</span>
     </button>
@@ -348,7 +348,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
   </div>
 
   <!-- ════════════ TEMPORADA 3 ════════════ -->
-  <div id="s-t3">
+  <div id="s-t3" style="display:none">
     <div style="text-align:center;padding:56px 16px;color:var(--muted);">
       <div style="font-size:2.2rem;font-weight:800;color:var(--gold);letter-spacing:.06em;">T3 · 2026</div>
       <div style="margin-top:8px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
@@ -357,7 +357,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
   </div>
 
   <!-- ════════════ PRETEMPORADA ════════════ -->
-  <div id="s-pre" style="display:none">
+  <div id="s-pre">
     <div class="t1-badge" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);">
       CAMPEONATO DE INVIERNO VPUG · EN CURSO
     </div>
@@ -595,6 +595,9 @@ function renderTable(tableId, data, accentColor) {
 }
 
 /* ── SEASON SWITCH ── */
+// Pretemporada es el default (única temporada con datos en vivo) — cargarla ya
+fetchPretemporada();
+
 function switchSeason(season, btn) {
   document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -775,7 +778,7 @@ fetchT2E11();
 
 
 </script>
-<script src="layout.js?v=6"></script>
-<script src="mobile-nav.js?v=6"></script>
+<script src="layout.js?v=7"></script>
+<script src="mobile-nav.js?v=7"></script>
 </body>
 </html>

@@ -10,8 +10,9 @@
 
   const stored = localStorage.getItem(THEME_KEY);
   if (stored === 'light') htmlEl.classList.add('light-mode');
-  else if (stored === 'dark') { /* dark: no class, original look */ }
-  else htmlEl.classList.add('t3-mode'); // null o 't3' → T3 es el nuevo default
+  else if (stored === 'dark') { /* dark plata: no class, look original */ }
+  else if (stored === 't3') htmlEl.classList.add('t3-mode');
+  else htmlEl.classList.add('cls-mode'); // null o 'cls' → Clasificado (negro+dorado) es el default
 
   const PAGES = [
     { url: 'index.html',        label: 'Inicio', svg: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>' },
@@ -133,6 +134,88 @@
     html.t3-mode #ts-mobile-nav a.ts-mbn-active { color: #4a9eff !important; }
 
     /* ────────────────────────────────────────────────────────────────────────
+       CLASIFICADO — default: negro cálido + dorado comprometido.
+       La identidad del club (kits negro/dorado, "Top Secret" = expediente).
+    ──────────────────────────────────────────────────────────────────────── */
+    html.cls-mode {
+      --gold:     #C8A84B;
+      --gold2:    #E0C979;
+      --gold-dim: rgba(200,168,75,.12);
+      --black:    #0B0A07;
+      --gray:     #16130B;
+      --card:     #16130B;
+      --card2:    #1D1910;
+      --bg:       #0B0A07;
+      --border:   rgba(200,168,75,.16);
+      --border2:  rgba(200,168,75,.24);
+      --text:     #F2EEE0;
+      --text2:    rgba(242,238,224,.6);
+      --mid:      rgba(242,238,224,.42);
+      --mid2:     rgba(242,238,224,.28);
+      --muted:    rgba(242,238,224,.42);
+      --muted2:   rgba(242,238,224,.28);
+      --white:    #F7F4EA;
+    }
+    html.cls-mode body { background: #0B0A07; color: #F2EEE0; }
+    html.cls-mode .topbar { background: #0B0A07; border-bottom: 3px solid #C8A84B; }
+    html.cls-mode .tb-brand-name { color: #F2EEE0; }
+    html.cls-mode .tb-brand-name span { color: #C8A84B; }
+    html.cls-mode .tb-sep { background: rgba(200,168,75,.25); }
+    html.cls-mode .tb-counter { background: rgba(200,168,75,.08); border-color: rgba(200,168,75,.3); color: #C8A84B; }
+    html.cls-mode .tb-theme-btn { border-color: rgba(200,168,75,.3); color: rgba(242,238,224,.55); }
+    html.cls-mode .tb-theme-btn:hover { color: #C8A84B; border-color: rgba(200,168,75,.6); background: rgba(200,168,75,.08); }
+    html.cls-mode .sidebar-left { background: #0B0A07; border-right-color: rgba(200,168,75,.14); }
+    html.cls-mode .sl-link { color: rgba(242,238,224,.34); }
+    html.cls-mode .sl-link:hover { background: rgba(200,168,75,.08); color: rgba(242,238,224,.85); }
+    html.cls-mode .sl-link.active { background: rgba(200,168,75,.14); color: #C8A84B; }
+    html.cls-mode .sidebar-right { background: #0B0A07; border-left-color: rgba(200,168,75,.12); }
+    html.cls-mode .sr-icon { color: rgba(242,238,224,.38); }
+    html.cls-mode .sr-icon:hover { color: #C8A84B; }
+
+    /* Sello de expediente: los badges de sección hablan el idioma "clasificado" */
+    html.cls-mode .section-badge,
+    html.cls-mode .ph-eyebrow,
+    html.cls-mode .page-eyebrow {
+      color: #C8A84B; border: 1px solid rgba(200,168,75,.45);
+      padding: 3px 10px; border-radius: 2px; letter-spacing: .22em;
+      box-shadow: inset 0 0 0 1px rgba(11,10,7,.9), inset 0 0 0 2px rgba(200,168,75,.2);
+      background: rgba(200,168,75,.04); display: inline-block;
+      font-weight: 700; text-transform: uppercase;
+    }
+    html.cls-mode .section-line { background: linear-gradient(90deg, rgba(200,168,75,.35), transparent) !important; height: 1px !important; }
+
+    /* Calendario */
+    html.cls-mode .week-strip-wrap { background: rgba(11,10,7,.97) !important; }
+    html.cls-mode .month-title-row:hover { background: rgba(200,168,75,.05) !important; }
+    html.cls-mode .result-box.win  { border-color: rgba(34,197,94,.35)  !important; background: rgba(34,197,94,.04)  !important; }
+    html.cls-mode .result-box.loss { border-color: rgba(239,68,68,.35)  !important; background: rgba(239,68,68,.04)  !important; }
+    html.cls-mode .result-box.draw { border-color: rgba(245,197,24,.35) !important; background: rgba(245,197,24,.04) !important; }
+
+    /* Stats panel */
+    html.cls-mode .sp-panel { background: #16130B !important; }
+    html.cls-mode .sp-score-box, html.cls-mode .sp-ts { background: #0B0A07 !important; }
+
+    /* Convocatoria */
+    html.cls-mode .pname { color: #F2EEE0 !important; }
+    html.cls-mode .pitch-hint { color: rgba(242,238,224,.35) !important; }
+    html.cls-mode .stoken.empty { background: rgba(200,168,75,.05) !important; border-color: rgba(200,168,75,.25) !important; color: rgba(242,238,224,.3) !important; }
+    html.cls-mode .always-badge { color: #C8A84B !important; }
+
+    /* Mobile nav */
+    html.cls-mode #ts-mobile-nav { background: #0B0A07 !important; border-top-color: rgba(200,168,75,.35) !important; }
+    html.cls-mode #ts-mobile-nav a.ts-mbn-active { color: #C8A84B !important; }
+
+    /* Accesibilidad de movimiento — global, todos los temas */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────
        LIGHT MODE — applied when <html class="light-mode">
     ──────────────────────────────────────────────────────────────────────── */
     html.light-mode {
@@ -197,34 +280,39 @@
   const MOON_SVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   const SUN_SVG  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
   const T3_SVG   = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
+  const CLS_SVG  = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'; // escudo — Clasificado
 
   const LOGO_DARK  = 'logos/Top Secret white.png';
   const LOGO_LIGHT = 'Top-Secret.png';
   const LOGO_T3    = 'logos/TOP Secret Blue.png';
+  const LOGO_CLS   = 'logos/Top Secret white.png';
 
   // ── Theme helpers ──────────────────────────────────────────────────────────
   function getTheme() {
     const s = localStorage.getItem(THEME_KEY);
-    if (s === 'light' || s === 'dark') return s;
-    return 't3';
+    if (s === 'light' || s === 'dark' || s === 't3') return s;
+    return 'cls';
   }
 
   function themeIcon(theme) {
     if (theme === 'light') return SUN_SVG;
     if (theme === 'dark')  return MOON_SVG;
-    return T3_SVG;
+    if (theme === 't3')    return T3_SVG;
+    return CLS_SVG;
   }
 
   function themeLogo(theme) {
     if (theme === 'light') return LOGO_LIGHT;
     if (theme === 't3')    return LOGO_T3;
-    return LOGO_DARK;
+    if (theme === 'dark')  return LOGO_DARK;
+    return LOGO_CLS;
   }
 
   function applyTheme(theme) {
-    htmlEl.classList.remove('light-mode', 't3-mode');
+    htmlEl.classList.remove('light-mode', 't3-mode', 'cls-mode');
     if (theme === 'light') htmlEl.classList.add('light-mode');
     if (theme === 't3')    htmlEl.classList.add('t3-mode');
+    if (theme === 'cls')   htmlEl.classList.add('cls-mode');
     localStorage.setItem(THEME_KEY, theme);
     const icon = document.getElementById('tb-theme-icon');
     const logo = document.getElementById('tb-logo');
@@ -233,7 +321,7 @@
   }
 
   function cycleTheme() {
-    const next = { t3: 'dark', dark: 'light', light: 't3' }[getTheme()];
+    const next = { cls: 't3', t3: 'dark', dark: 'light', light: 'cls' }[getTheme()];
     applyTheme(next);
   }
 

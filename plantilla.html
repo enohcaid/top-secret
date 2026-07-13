@@ -455,7 +455,7 @@ footer span { color: var(--gold); }
 <!-- TOPBAR -->
 <!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="ph-eyebrow">Temporada 2 · 2026</div>
+  <div class="ph-eyebrow" id="ph-eyebrow">Temporada 3 · 2026</div>
   <h1 class="ph-title">El <span>Plantel</span></h1>
   <p class="ph-sub">Top Secret Football Club</p>
 </div>
@@ -884,6 +884,8 @@ function switchSeason(n, btn) {
   t1.style.display = 'none'; t2.style.display = 'none'; t3.style.display = 'none';
   closePanel(false);
   _currentSeason = n;
+  const eyebrow = document.getElementById('ph-eyebrow');
+  if (eyebrow) eyebrow.textContent = 'Temporada ' + n + ' · 2026';
   if (n === 1) { t1.style.display = ''; renderGrid(currentFilter); }
   else if (n === 2) { t2.style.display = 'block'; renderGrid2(currentFilter2); }
   else { t3.style.display = 'block'; renderGrid3(currentFilter3); }
@@ -1132,7 +1134,7 @@ renderGrid3('all');
   }, 400);
 })();
 </script>
-<script src="layout.js?v=6"></script>
-<script src="mobile-nav.js?v=6"></script>
+<script src="layout.js?v=7"></script>
+<script src="mobile-nav.js?v=7"></script>
 </body>
 </html>
