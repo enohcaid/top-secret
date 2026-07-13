@@ -39,11 +39,9 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 /* ── KPI BAR ── */
 .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
 .kpi-card{background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:14px 16px;position:relative;}
-.kpi-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
-.kpi-card.k-green::before{background:var(--green);}
-.kpi-card.k-yellow::before{background:var(--yellow);}
-.kpi-card.k-red::before{background:var(--red);}
-.kpi-card.k-mid::before{background:var(--mid);}
+.kpi-card.k-green{border-color:rgba(34,197,94,.28);background:linear-gradient(160deg,rgba(34,197,94,.06),var(--gray) 60%);}
+.kpi-card.k-yellow{border-color:rgba(245,197,24,.28);background:linear-gradient(160deg,rgba(245,197,24,.06),var(--gray) 60%);}
+.kpi-card.k-red{border-color:rgba(239,68,68,.28);background:linear-gradient(160deg,rgba(239,68,68,.06),var(--gray) 60%);}
 .kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:900;line-height:1;}
 .kpi-card.k-green .kpi-val{color:var(--green);}
 .kpi-card.k-yellow .kpi-val{color:var(--yellow);}
@@ -66,23 +64,23 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .pos-label{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);padding:10px 2px 4px;}
 .pcard{
   display:flex;align-items:center;gap:10px;
-  background:var(--gray);border:1px solid var(--border);border-left:3px solid var(--border);
+  background:var(--gray);border:1px solid var(--border);
   border-radius:8px;padding:9px 12px;margin-bottom:4px;
   cursor:grab;user-select:none;-webkit-tap-highlight-color:transparent;
-  transition:background .15s, border-left-color .15s;
+  transition:background-color .15s, border-color .15s;
 }
 .pcard:hover,.pcard:active{background:var(--gray);}
-.pcard.green{border-left-color:var(--green);}
-.pcard.always{border-left-color:#4a9eff;}
-.pcard.yellow{border-left-color:var(--yellow);}
-.pcard.red{border-left-color:var(--red);opacity:.6;}
-.pcard.black{border-left-color:#f97316;opacity:.6;}
+.pcard.green{border-color:rgba(34,197,94,.32);background:linear-gradient(90deg,rgba(34,197,94,.05),var(--gray) 45%);}
+.pcard.always{border-color:rgba(74,158,255,.32);background:linear-gradient(90deg,rgba(74,158,255,.05),var(--gray) 45%);}
+.pcard.yellow{border-color:rgba(245,197,24,.32);background:linear-gradient(90deg,rgba(245,197,24,.05),var(--gray) 45%);}
+.pcard.red{border-color:rgba(239,68,68,.3);opacity:.6;}
+.pcard.black{border-color:rgba(249,115,22,.3);opacity:.6;}
 .pcard.green .pnum{color:var(--green);}
 .pcard.always .pnum{color:#4a9eff;}
 .pcard.yellow .pnum{color:var(--yellow);}
 .pcard.red .pnum{color:var(--red);}
 .pcard.black .pnum{color:#f97316;}
-.pcard.assignable{border-left-color:var(--gold);cursor:pointer;background:rgba(201,168,76,.06);}
+.pcard.assignable{border-color:rgba(201,168,76,.4);cursor:pointer;background:rgba(201,168,76,.06);}
 .pnum{font-family:'Barlow Condensed',sans-serif;font-size:1.45rem;font-weight:800;line-height:1;color:var(--mid);min-width:28px;text-align:center;flex-shrink:0;}
 .pavatar{width:46px;height:46px;border-radius:6px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);background:var(--gray);position:relative;}
 .pinfo{flex:1;min-width:0;}
@@ -175,6 +173,11 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .sopt-captain{border-color:rgba(26,144,217,.35)!important;color:#1a90d9!important;}
 .sopt-captain:hover{border-color:#1a90d9!important;background:rgba(26,144,217,.08)!important;}
 .sopt-captain.is-captain{border-color:#1a90d9!important;background:rgba(26,144,217,.18)!important;color:#fff!important;}
+.sopt .sdot{margin-left:0;}
+.sopt-cap-ic,.sopt-num-ic{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;font-size:.62rem;font-weight:900;margin-right:8px;flex-shrink:0;}
+.sopt-cap-ic{background:rgba(26,144,217,.18);color:#1a90d9;border:1px solid rgba(26,144,217,.4);}
+.sopt-captain.is-captain .sopt-cap-ic{background:#1a90d9;color:#fff;}
+.sopt-num-ic{background:rgba(255,255,255,.06);color:var(--mid);border:1px solid var(--border);}
 .modal-input{width:100%;background:#0a0b0e;border:1px solid #252a38;border-radius:8px;color:#dde1ec;font-family:'Barlow',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;margin-bottom:12px;}
 .modal-input:focus{border-color:var(--gold);}
 .reclu-card-wrap{border-radius:8px;}
@@ -297,8 +300,8 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
     </div>
     <div class="section-head-right">
       <span>Armado</span>
-      <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px">📋 Copiar lista</button>
-      <button class="share-btn" id="shareBtn" onclick="doShare()">📸 Compartir</button>
+      <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar lista</button>
+      <button class="share-btn" id="shareBtn" onclick="doShare()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
     </div>
   </div>
 
@@ -344,14 +347,14 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
   <div class="modal">
     <div class="mph" id="mph"></div>
     <div class="sopts">
-      <button class="sopt" onclick="confirmStatus('green')">🟢 Presente hoy</button>
-      <button class="sopt sopt-always" onclick="confirmStatus('green_always')">🔵 Siempre presente <span style="font-size:.72rem;color:#4a9eff;font-weight:400">(todos los días)</span></button>
-      <button class="sopt" onclick="confirmStatus('yellow')">🟡 Llego tarde…</button>
-      <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
-      <button class="sopt" onclick="confirmStatus('black')">🟠 Ausente varios días…</button>
-      <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()">🅱️ Asignar como capitán</button>
-      <button class="sopt" onclick="openNumberPicker(currentPlayer)">🔢 Elegir número</button>
-      <button class="sopt" onclick="clearPlayerStatus()" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.65)">⬜ Limpiar estado</button>
+      <button class="sopt" onclick="confirmStatus('green')"><span class="sdot sg" style="margin:0 8px 0 0"></span>Presente hoy</button>
+      <button class="sopt sopt-always" onclick="confirmStatus('green_always')"><span class="sdot sa" style="margin:0 8px 0 0"></span>Siempre presente <span style="font-size:.72rem;color:#4a9eff;font-weight:400">(todos los días)</span></button>
+      <button class="sopt" onclick="confirmStatus('yellow')"><span class="sdot sy" style="margin:0 8px 0 0"></span>Llego tarde…</button>
+      <button class="sopt" onclick="confirmStatus('red')"><span class="sdot sr" style="margin:0 8px 0 0"></span>Ausente hoy</button>
+      <button class="sopt" onclick="confirmStatus('black')"><span class="sdot sb" style="margin:0 8px 0 0"></span>Ausente varios días…</button>
+      <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()"><span class="sopt-cap-ic">C</span>Asignar como capitán</button>
+      <button class="sopt" onclick="openNumberPicker(currentPlayer)"><span class="sopt-num-ic">#</span>Elegir número</button>
+      <button class="sopt" onclick="clearPlayerStatus()" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.65)"><span class="sdot" style="margin:0 8px 0 0;background:transparent;border:1.5px solid rgba(239,68,68,.5)"></span>Limpiar estado</button>
     </div>
     <button class="mbtn mbtn-cancel" onclick="closeModal('statusOverlay')" style="width:100%;margin-top:10px">Cancelar</button>
   </div>
@@ -1309,10 +1312,10 @@ function openStatusModal(name) {
   // Actualizar botón capitán
   const capBtn = document.getElementById('captainBtn');
   if (captain === name) {
-    capBtn.textContent = '🅱️ Quitar capitanía';
+    capBtn.innerHTML = '<span class="sopt-cap-ic">C</span>Quitar capitanía';
     capBtn.classList.add('is-captain');
   } else {
-    capBtn.textContent = '🅱️ Asignar como capitán';
+    capBtn.innerHTML = '<span class="sopt-cap-ic">C</span>Asignar como capitán';
     capBtn.classList.remove('is-captain');
   }
   document.getElementById('statusOverlay').classList.add('open');
@@ -1321,7 +1324,7 @@ function openStatusModal(name) {
 function toggleCaptain() {
   captain = (captain === currentPlayer) ? null : currentPlayer;
   saveState(); closeModal('statusOverlay'); render();
-  showToast(captain ? captain + ' es el capitán 🅱️' : 'Capitanía removida');
+  showToast(captain ? captain + ' es el nuevo capitán' : 'Capitanía removida');
 }
 
 function openNumberPicker(name) {
@@ -2051,7 +2054,7 @@ if (!EDIT_MODE) {
   document.head.appendChild(styleRO);
 }
 </script>
-<script src="layout.js?v=6"></script>
-<script src="mobile-nav.js?v=6"></script>
+<script src="layout.js?v=7"></script>
+<script src="mobile-nav.js?v=7"></script>
 </body>
 </html>
