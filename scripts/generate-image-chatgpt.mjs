@@ -395,6 +395,38 @@ async function downloadImage(page, imgUrl, outputPath) {
   console.log('  Guardada:', outputPath);
 }
 
+// ── Limpieza de chats ─────────────────────────────────────────────────────────
+// Cada generación crea un chat en ChatGPT. Después de descargar la imagen (o al
+// descartar un intento) se elimina para no acumular conversaciones basura.
+function currentChatId(page) {
+  const m = page.url().match(/\/c\/([a-zA-Z0-9-]{10,})/);
+  return m ? m[1] : null;
+}
+
+async function deleteChatById(page, convId) {
+  if (!convId) return false;
+  try {
+    const ok = await page.evaluate(async (id) => {
+      const sess  = await fetch('/api/auth/session').then(r => r.json()).catch(() => null);
+      const token = sess?.accessToken;
+      if (!token) return false;
+      const res = await fetch('/backend-api/conversation/' + id, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body:    JSON.stringify({ is_visible: false }),
+      });
+      return res.ok;
+    }, convId);
+    console.log(ok
+      ? `  Chat ${convId.slice(0, 8)}… eliminado de ChatGPT.`
+      : '  Chat: no se pudo eliminar (no crítico).');
+    return ok;
+  } catch (e) {
+    console.log('  Chat: error al eliminar (no crítico):', e.message.split('\n')[0]);
+    return false;
+  }
+}
+
 async function ensureNormalQuality(page) {
   try {
     const clicked = await page.evaluate(() => {
@@ -580,6 +612,7 @@ async function evaluateImage(context, imagePath) {
     console.log('  Resultado:', response.split('\n')[0].slice(0, 120));
     return response;
   } finally {
+    await deleteChatById(page, currentChatId(page)).catch(() => {}); // chat de evaluación
     await page.close();
   }
 }
@@ -676,6 +709,7 @@ async function main() {
       } catch (genErr) {
         console.log(`  Error técnico (intento ${attempt}/${MAX_ATTEMPTS}): ${genErr.message.split('\n')[0]}`);
         if (attempt === MAX_ATTEMPTS) throw genErr;
+        await deleteChatById(page, currentChatId(page)); // chat del intento fallido
         await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(3000);
         continue;
@@ -692,6 +726,7 @@ async function main() {
         correction = await askInput('¿Qué corregir para la próxima versión?: ');
         if (!correction) console.log('Sin feedback — regenerando con el mismo prompt.');
         if (attempt === MAX_ATTEMPTS) console.log('Máximo de intentos alcanzado — usando esta versión.');
+        else await deleteChatById(page, currentChatId(page)); // chat del intento descartado
       } else {
         // Evaluación automática con ChatGPT Vision
         let evalResponse = null;
@@ -710,6 +745,7 @@ async function main() {
 
         correction = evalResponse.replace(/^rechazada\s*[-–]\s*/i, '').trim();
         console.log(`  Corrección: "${correction}"`);
+        await deleteChatById(page, currentChatId(page)); // chat del intento rechazado
       }
     }
 
@@ -727,6 +763,9 @@ async function main() {
         await page.waitForTimeout(5000);
       }
     }
+
+    // Imágenes descargadas — el chat de generación ya no hace falta
+    await deleteChatById(page, currentChatId(page));
 
     await updateDraft(draft, lastPostFile, storyFile);
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);

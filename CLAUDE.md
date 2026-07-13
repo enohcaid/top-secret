@@ -94,15 +94,16 @@ Source lives in this repo; **edits require redeploying** (credentials/commands i
 - `/vpn-table`, `/vpn-results`, `/vpn-fixtures`, `/vpug-table` (hardcoded fallback), `/copafacil-pretemporada` — standings/results proxies used by `posiciones.html`. 11x11 is fetched directly: `https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2`
 - `/counter` — visit counter (GET reads, POST increments)
 - `/og?id=<article>` — OG meta HTML for sharing news; driven by the `NOTICIAS_OG` map at the top of the file
-- `/draft-noticia`, `/publish-noticia`, `/persist-draft-image`, `/draft-image`, `/request-regen`, `/regen-flag` — daily news pipeline
+- `/draft-noticia`, `/publish-noticia`, `/persist-draft-image`, `/draft-image`, `/request-regen`, `/regen-flag`, `/discard-flag` — daily news pipeline. Discarding a draft (`DELETE /draft-noticia`) also queues its generated images for deletion via `/discard-flag`
 - `/notify-reclu`, `/reclutamiento-activo`, `/convocatoria-status`, `/img-proxy`, `/ea`, `/kv`, `/log-event`
 
 ### Daily News Pipeline (automated)
 
 1. A scheduled cloud agent (09:15 ART) writes the day's article to Firestore `news/draft`.
-2. Windows Task Scheduler runs `scripts/run-daily-images.ps1` → `scripts/generate-image-chatgpt.mjs`: drives a logged-in Chrome (CDP on `localhost:9222`, profile in `scripts/.chrome-profile/`, gitignored) against the ChatGPT project "TOP Secret FC" (has club logo, kits, and T3-Frentes renders uploaded), generates post/story images with style rotation + AI review loop, saves to `Renders/Daily News/`, commits and pushes.
-3. `scripts/watch-regen.ps1` polls the Worker `/regen-flag` every minute so the browser can request a full regen.
+2. Windows Task Scheduler runs `scripts/run-daily-images.ps1` → `scripts/generate-image-chatgpt.mjs`: drives a logged-in Chrome (CDP on `localhost:9222`, profile in `scripts/.chrome-profile/`, gitignored) against the ChatGPT project "TOP Secret FC" (has club logo, kits, and T3-Frentes renders uploaded), generates post/story images with style rotation + AI review loop, saves to `Renders/Daily News/`, commits and pushes. Every ChatGPT chat the pipeline creates (generation attempts, evals) is deleted after its image is downloaded or the attempt is rejected.
+3. `scripts/watch-regen.ps1` polls the Worker every minute: `/discard-flag` (news discarded in the browser → deletes its images locally and from GitHub) and `/regen-flag` (browser requested a full regen → re-runs the article agent + image pipeline).
 4. `scripts/*.vbs` are hidden-window launchers for Task Scheduler.
+5. **`.ps1` files with non-ASCII text must be UTF-8 WITH BOM** — PowerShell 5.1 reads BOM-less files as CP1252 and em-dashes silently break parsing (this made `watch-regen.ps1` a no-op for weeks). ASCII-only scripts like `run-daily-images.ps1` are safe either way.
 
 ### Assets
 
