@@ -172,6 +172,9 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .sopt:hover{border-color:#8b92aa;background:#13161e;}
 .sopt-always{border-color:rgba(74,158,255,.35)!important;color:#4a9eff!important;}
 .sopt-always:hover{border-color:#4a9eff!important;background:rgba(74,158,255,.08)!important;}
+.sopt-captain{border-color:rgba(26,144,217,.35)!important;color:#1a90d9!important;}
+.sopt-captain:hover{border-color:#1a90d9!important;background:rgba(26,144,217,.08)!important;}
+.sopt-captain.is-captain{border-color:#1a90d9!important;background:rgba(26,144,217,.18)!important;color:#fff!important;}
 .modal-input{width:100%;background:#0a0b0e;border:1px solid #252a38;border-radius:8px;color:#dde1ec;font-family:'Barlow',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;margin-bottom:12px;}
 .modal-input:focus{border-color:var(--gold);}
 .reclu-card-wrap{border-radius:8px;}
@@ -346,6 +349,7 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
       <button class="sopt" onclick="confirmStatus('yellow')">🟡 Llego tarde…</button>
       <button class="sopt" onclick="confirmStatus('red')">🔴 Ausente hoy</button>
       <button class="sopt" onclick="confirmStatus('black')">🟠 Ausente varios días…</button>
+      <button class="sopt sopt-captain" id="captainBtn" onclick="toggleCaptain()">🅱️ Asignar como capitán</button>
       <button class="sopt" onclick="openNumberPicker(currentPlayer)">🔢 Elegir número</button>
       <button class="sopt" onclick="clearPlayerStatus()" style="border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.65)">⬜ Limpiar estado</button>
     </div>
@@ -753,6 +757,12 @@ function renderTodayMatchesPanel() {
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
 const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
 
+/* ─── EDIT MODE ───
+   Link directo (convocatoria.html) → editable.
+   Desde la barra de navegación se entra con ?vista → solo lectura:
+   sin escrituras a Firestore y sin controles de edición. */
+const EDIT_MODE = !new URLSearchParams(location.search).has('vista');
+
 let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
 let dailyOverrides  = {};   // { name: {status, day, note?} } — alwaysPresent daily overrides
 let alwaysPresent   = [];   // players always present unless overridden
@@ -775,6 +785,7 @@ async function _loadBackup() {
 }
 
 function _saveBackup() {
+  if (!EDIT_MODE) return; // modo vista: nunca escribe
   if (!BACKUP_DOC || !alwaysPresent.length) return; // no guardar estado vacío/corrupto
   BACKUP_DOC.set({ availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY, savedAt: new Date().toISOString() })
     .catch(e => console.warn('[conv] backup write error:', e));
@@ -847,6 +858,7 @@ function loadState() {
 
 /* ─── SAVE STATE ─── */
 function saveState() {
+  if (!EDIT_MODE) return; // modo vista: nunca escribe
   if (!_firestoreLoaded) {
     showToast('Conectando… esperá un momento y volvé a guardar', 'warn', 4000);
     return;
@@ -1294,7 +1306,22 @@ function openStatusModal(name) {
   txt.appendChild(nm); txt.appendChild(sub);
   if (note) { const nd = document.createElement('div'); nd.style.cssText = 'font-size:.7rem;color:var(--yellow);font-weight:600;margin-top:2px;'; nd.textContent = note; txt.appendChild(nd); }
   mph.appendChild(av); mph.appendChild(txt);
+  // Actualizar botón capitán
+  const capBtn = document.getElementById('captainBtn');
+  if (captain === name) {
+    capBtn.textContent = '🅱️ Quitar capitanía';
+    capBtn.classList.add('is-captain');
+  } else {
+    capBtn.textContent = '🅱️ Asignar como capitán';
+    capBtn.classList.remove('is-captain');
+  }
   document.getElementById('statusOverlay').classList.add('open');
+}
+
+function toggleCaptain() {
+  captain = (captain === currentPlayer) ? null : currentPlayer;
+  saveState(); closeModal('statusOverlay'); render();
+  showToast(captain ? captain + ' es el capitán 🅱️' : 'Capitanía removida');
 }
 
 function openNumberPicker(name) {
@@ -2009,8 +2036,22 @@ scheduleMidnightReset();
 /* ─── Animate after render ─── */
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
 gsap.to('.kpi-card', { opacity:1, y:0, duration:0.45, stagger:0.07, ease:'power2.out', delay:0.3 });
+
+/* ─── MODO VISTA (?vista) — bloquear controles de edición ───
+   El backstop real es el guard de EDIT_MODE en saveState()/_saveBackup():
+   aunque algo se escape del CSS, nada se persiste en Firestore.
+   Copiar lista y Compartir quedan activos (son acciones de lectura). */
+if (!EDIT_MODE) {
+  const styleRO = document.createElement('style');
+  styleRO.textContent = `
+    .pcard, .slot, .assign-banner { pointer-events:none !important; }
+    .pcard, .slot { cursor:default !important; }
+    .fbar, .pitch-hint { display:none !important; }
+  `;
+  document.head.appendChild(styleRO);
+}
 </script>
-<script src="layout.js?v=5"></script>
-<script src="mobile-nav.js?v=5"></script>
+<script src="layout.js?v=6"></script>
+<script src="mobile-nav.js?v=6"></script>
 </body>
 </html>
