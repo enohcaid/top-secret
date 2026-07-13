@@ -96,10 +96,11 @@ Source lives in this repo; **edits require redeploying** (credentials/commands i
 - `/og?id=<article>` — OG meta HTML for sharing news; driven by the `NOTICIAS_OG` map at the top of the file
 - `/draft-noticia`, `/publish-noticia`, `/persist-draft-image`, `/draft-image`, `/request-regen`, `/regen-flag`, `/discard-flag` — daily news pipeline. Discarding a draft (`DELETE /draft-noticia`) also queues its generated images for deletion via `/discard-flag`
 - `/notify-reclu`, `/reclutamiento-activo`, `/convocatoria-status`, `/img-proxy`, `/ea`, `/kv`, `/log-event`
+- Admin endpoints (publish/discard/edit draft, regen) require `env.ADMIN_PIN` — a Worker **secret** with no default in code (the old public `8189` fallback was removed 2026-07-13; the user types the PIN in the noticias UI). The client-side gates in calendario/reclutamiento are cosmetic and separate.
 
 ### Daily News Pipeline (automated)
 
-1. A scheduled cloud agent (09:15 ART) writes the day's article to Firestore `news/draft`.
+1. A scheduled cloud agent (09:15 ART, routine `trig_01Kz9ev31E5WfSN2mkVrHq7a`) writes the day's article to Firestore `news/draft`, including an `imageBrief` field (visual scene description) that the image generator uses directly (keyword-regex `buildScene` is the fallback). `run-daily-images.ps1` waits up to 45 min for today's draft before generating.
 2. Windows Task Scheduler runs `scripts/run-daily-images.ps1` → `scripts/generate-image-chatgpt.mjs`: drives a logged-in Chrome (CDP on `localhost:9222`, profile in `scripts/.chrome-profile/`, gitignored) against the ChatGPT project "TOP Secret FC" (has club logo, kits, and T3-Frentes renders uploaded), generates post/story images with style rotation + AI review loop, saves to `Renders/Daily News/`, commits and pushes. Every ChatGPT chat the pipeline creates (generation attempts, evals) is deleted after its image is downloaded or the attempt is rejected.
 3. `scripts/watch-regen.ps1` polls the Worker every minute: `/discard-flag` (news discarded in the browser → deletes its images locally and from GitHub) and `/regen-flag` (browser requested a full regen → re-runs the article agent + image pipeline).
 4. `scripts/*.vbs` are hidden-window launchers for Task Scheduler.

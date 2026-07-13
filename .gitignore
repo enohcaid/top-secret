@@ -12,3 +12,4 @@ package-lock.json
 
 # temp/scratch
 tmp_*
+scripts/debug-*.png

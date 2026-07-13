@@ -637,7 +637,25 @@ export default {
       // Article data comes from the NOTICIAS_OG map above — no KV, no query params.
       if (url.pathname.startsWith('/og') && request.method === 'GET') {
         const articleId = decodeURIComponent(url.pathname.slice(4).replace(/^\//, ''));
-        const article = NOTICIAS_OG[articleId];
+        let article = NOTICIAS_OG[articleId];
+
+        // Fallback: noticias publicadas por el pipeline diario (KV) — así los
+        // links compartidos de las diarias tienen preview sin mantener el mapa manual
+        if (!article) {
+          try {
+            const raw = await env.TS_KV.get('published_noticias', 'text');
+            if (raw) {
+              const pub = JSON.parse(raw).find(n => n.id === articleId);
+              if (pub && pub.title) {
+                let img = pub.imagePost || pub.image || '';
+                if (img && !/^https?:\/\//.test(img)) {
+                  img = SITE + img.split('/').map(encodeURIComponent).join('/');
+                }
+                article = { t: pub.title, i: img };
+              }
+            }
+          } catch(e) { /* KV ilegible — sigue al redirect sin preview */ }
+        }
 
         if (!article) {
           // Unknown article — redirect to noticias without a preview
@@ -686,7 +704,7 @@ export default {
       // cloud agent + image generation when it sees the flag set.
       if (url.pathname === '/request-regen' && request.method === 'POST') {
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
-        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
         await fetch(FS_DRAFT, { method: 'DELETE' });
         await env.TS_KV.put('regen_request', JSON.stringify({ requested: true, at: new Date().toISOString() }));
@@ -738,7 +756,7 @@ export default {
         }
 
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
-        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
 
         if (request.method === 'DELETE') {
           // Descarte real (no publicación ni regen): capturar las imágenes ya
@@ -791,7 +809,7 @@ export default {
       // in KV under a stable key, served back via a URL that never expires.
       if (url.pathname === '/persist-draft-image' && request.method === 'POST') {
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
-        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         let body;
         try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
         const { url: srcUrl, slot } = body || {};
@@ -821,7 +839,7 @@ export default {
       // ── PUBLISH DRAFT (POST /publish-noticia) ────────────────────────────────
       if (url.pathname === '/publish-noticia' && request.method === 'POST') {
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
-        if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+        if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
         const fsResp = await fetch(FS_DRAFT);
         if (!fsResp.ok) return jsonResp({ error: 'No draft to publish' }, 404);
@@ -934,7 +952,7 @@ export default {
         }
         if (request.method === 'POST') {
           const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
-          if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
+          if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
           let body;
           try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
           const { type, summary, date } = body;
