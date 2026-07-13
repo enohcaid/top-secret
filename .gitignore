@@ -9,3 +9,6 @@ scripts/.chatgpt-session.json
 scripts/*.log
 node_modules/
 package-lock.json
+
+# temp/scratch
+tmp_*
