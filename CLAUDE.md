@@ -30,8 +30,8 @@ Three layers:
 | `plantilla.html` | Squad roster (position filters, player cards from `Renders/`) |
 | `estadisticas.html` | Per-match and per-player stats |
 | `calendario.html` | Match calendar; admin editing writes to Firestore `calendario/estado` |
-| `convo.html` | Call-up/lineup tool (**current version, linked in nav**) |
-| `convocatoria.html` | Older call-up variant, still deployed — don't delete, but new work goes in `convo.html` |
+| `convocatoria.html` | Call-up/lineup tool. **Two modes**: plain URL (direct link only, never linked in the UI) = full editor; `?vista` (what the nav links to) = read-only — `EDIT_MODE` gates all Firestore writes (`saveState`/`_saveBackup`) and hides edit controls |
+| `convo.html` | Retired 2026-07-13 — now just redirects to `convocatoria.html?vista` (it was the public read-only copy) |
 | `posiciones.html` | Live league standings (fetched via Worker/API) |
 | `noticias.html` | News feed + article view (`?id=<article-id>`) |
 | `reclutamiento.html` | Recruitment form (posts to Worker `/notify-reclu`) |
