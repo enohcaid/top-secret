@@ -20,23 +20,37 @@ import { createInterface } from 'readline';
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
 const OUTPUT_DIR      = path.resolve('Renders/Daily News');
+const DEBUG_DIR       = path.resolve('scripts'); // screenshots de debug fuera de Daily News (no se commitean)
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
 const MAX_ATTEMPTS    = 3;
 
-const EVAL_PROMPT = `Sos el Director Creativo de Top Secret FC, club de fútbol virtual argentino de élite.
+// El evaluador debe juzgar contra el ESTILO DEL DÍA, no contra una paleta fija:
+// exigir siempre negro+dorado haría rechazar imágenes correctas de estilos claros
+// (editorial revista, lluvia teal, estadio azul, etc.).
+function buildEvalPrompt(style, draft) {
+  return `Sos el Director Creativo de Top Secret FC, club de fútbol virtual argentino de élite.
 
-Evaluá si esta imagen representa correctamente la identidad visual del club.
+Evaluá si esta imagen sirve para publicar la noticia de hoy en redes.
 
-IDENTIDAD DEL CLUB:
-- Paleta de ambiente: negro (#0a0b0e) dominante, dorado (#C8A84B) como acento
-- Estética editorial oscura y cinematográfica — nivel ESPN/Fox Sports premium
-- El uniforme del jugador debe verse nítido, sin alteraciones de color
-- Composición que transmita profesionalismo y pertenencia a un club de élite
-- El texto del titular debe ser legible y de impacto
+NOTICIA DE HOY: "${draft.title || ''}"
+
+ESTILO VISUAL ELEGIDO PARA HOY: ${style.label}
+- Paleta esperada del AMBIENTE (fondo y diseño): ${style.palette}
+- Dirección de arte: ${style.prompt}
+
+CRITERIOS (todos deben cumplirse):
+- El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
+- El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
+- Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
+- La imagen comunica visualmente el tema de la noticia
+- Si hay texto/titular, es legible y con ortografía correcta
+- Sin franja/barra de marca en el borde inferior, sin watermarks
+- Anatomía correcta (manos, proporciones, caras)
 
 Respondé ÚNICAMENTE con uno de estos dos formatos (nada más):
 APROBADA - [motivo breve]
 RECHAZADA - [qué falla específicamente, en una línea accionable para el generador de imágenes]`;
+}
 
 // Pool de estilos visuales rotativos — nunca se repite en los últimos 5 usos
 // Cada estilo define su propia paleta de FONDO y DISEÑO — nunca del uniforme del jugador
@@ -115,10 +129,32 @@ async function fetchStyleHistory() {
   } catch { return []; }
 }
 
-function pickStyle(history) {
+// Afinidad tema→estilos: dentro de los no usados recientemente, se prefieren
+// estilos coherentes con el tono de la noticia. Si ninguno está disponible,
+// cae al pool completo (la rotación anti-repetición siempre manda).
+const STYLE_AFFINITY = [
+  { match: (d, t) => /victoria|triunfo|goleada|ganamos|campe[oó]n|ascenso/.test(t),
+    styles: ['ESTADIO_NOCTURNO', 'ACCION_DINAMICA', 'CROMATICO_DORADO', 'CONTRALUZ_EPICO'] },
+  { match: (d, t) => /derrota|perdimos|ca[ií]da|golpe/.test(t),
+    styles: ['CINEMATICO_LLUVIA', 'CONTRALUZ_EPICO', 'VESTUARIO_INTIMO', 'RETRATO_DRAMATICO'] },
+  { match: (d, t) => /entrevista|mano a mano|nos cont[oó]/.test(t) || (d.category || '') === 'Entrevista',
+    styles: ['RETRATO_DRAMATICO', 'EDITORIAL_REVISTA', 'VESTUARIO_INTIMO'] },
+  { match: (d, t) => (d.category || '') === 'Institución' || /kits?|indumentaria|sponsor|marca|aniversario/.test(t),
+    styles: ['EDITORIAL_REVISTA', 'MINIMALISTA_GEOMETRICO', 'CROMATICO_DORADO', 'POSTER_CONCEPTUAL'] },
+];
+
+function pickStyle(history, draft = {}) {
   const recentIds = new Set(history.slice(0, 5).map(h => h.style));
   const available = IMAGE_STYLES.filter(s => !recentIds.has(s.id));
-  const pool = available.length > 0 ? available : IMAGE_STYLES;
+  let pool = available.length > 0 ? available : IMAGE_STYLES;
+
+  const text = ((draft.title || '') + ' ' + (draft.excerpt || '')).toLowerCase();
+  const affinity = STYLE_AFFINITY.find(a => a.match(draft, text));
+  if (affinity) {
+    const preferred = pool.filter(s => affinity.styles.includes(s.id));
+    if (preferred.length > 0) pool = preferred;
+  }
+
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -148,6 +184,18 @@ function extractMentionedPlayers(draft) {
 }
 
 function buildScene(draft, mentionedPlayers) {
+  // Si el agente que escribió el artículo dejó un brief visual explícito en el
+  // draft (campo imageBrief), es más preciso que cualquier heurística de keywords.
+  if (draft.imageBrief && typeof draft.imageBrief === 'string' && draft.imageBrief.trim().length > 10) {
+    const players = mentionedPlayers.join(', ');
+    return {
+      scene: draft.imageBrief.trim(),
+      action: players
+        ? `${players} como protagonista(s) de la escena descrita, con sus renders del proyecto`
+        : 'composición institucional según la escena descrita',
+    };
+  }
+
   const title    = draft.title || '';
   const bodyText = (draft.body || []).join(' ').replace(/<[^>]+>/g, ' ');
   const full     = (title + ' ' + bodyText).toLowerCase();
@@ -322,7 +370,7 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
   console.log('  Esperando imagen (hasta 15 min)...');
   page.setDefaultTimeout(0);
 
-  await page.screenshot({ path: path.join(OUTPUT_DIR, 'debug-after-send.png'), fullPage: false });
+  await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-after-send.png'), fullPage: false });
 
   const TIMEOUT_MS = 15 * 60 * 1000;
   const POLL_MS    = 4000;
@@ -360,8 +408,8 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
     await page.waitForTimeout(POLL_MS);
   }
 
-  await page.screenshot({ path: path.join(OUTPUT_DIR, 'debug-timeout.png'), fullPage: true });
-  throw new Error('Timeout (15 min) esperando imagen. Screenshot en debug-timeout.png');
+  await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-timeout.png'), fullPage: true });
+  throw new Error('Timeout (15 min) esperando imagen. Screenshot en scripts/debug-timeout.png');
 }
 
 async function downloadImage(page, imgUrl, outputPath) {
@@ -508,8 +556,12 @@ function gitPushImages(postFile, storyFile) {
   const run = (cmd) => execSync(cmd, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
 
   try {
-    run('git add "Renders/Daily News/"');
-    const status = run('git status --porcelain');
+    // Solo los archivos del día — nunca la carpeta entera, para no arrastrar
+    // otros cambios pendientes del working tree.
+    const files = [postFile, storyFile].filter(Boolean)
+      .map(f => `"Renders/Daily News/${f}"`).join(' ');
+    run(`git add ${files}`);
+    const status = run('git status --porcelain --cached');
     if (!status) {
       console.log('  Git: sin cambios para commitear.');
       return;
@@ -524,8 +576,17 @@ function gitPushImages(postFile, storyFile) {
 }
 
 async function updateDraft(draft, postFile, storyFile) {
+  // Re-leer el draft antes de escribir: el usuario puede haber editado el texto
+  // desde el browser mientras se generaban las imágenes — solo se tocan los
+  // campos de imagen, nunca se pisa el contenido.
+  let fresh = draft;
+  try { fresh = await fetchDraft(); } catch (e) { /* si no se puede leer, usa la copia local */ }
+  if (fresh.date !== draft.date || fresh.id !== draft.id) {
+    console.log('\nEl draft cambió durante la generación (regen/descarte) — no se actualiza Firestore.');
+    return;
+  }
   const updated = {
-    ...draft,
+    ...fresh,
     imagePost:  `Renders/Daily News/${postFile}`,
     imageStory: `Renders/Daily News/${storyFile}`,
     image:      `Renders/Daily News/${postFile}`,
@@ -566,7 +627,7 @@ async function waitForTextResponse(page) {
   throw new Error('Timeout esperando respuesta de evaluación (3 min)');
 }
 
-async function evaluateImage(context, imagePath) {
+async function evaluateImage(context, imagePath, evalPrompt) {
   console.log('\n  Evaluando imagen con ChatGPT Vision...');
   const page = await context.newPage();
   page.setDefaultTimeout(0);
@@ -601,7 +662,7 @@ async function evaluateImage(context, imagePath) {
     const input = page.locator('div[contenteditable="true"], p[data-placeholder]').first();
     await input.waitFor({ state: 'visible', timeout: 10000 });
     await input.click();
-    await page.evaluate(async (text) => { await navigator.clipboard.writeText(text); }, EVAL_PROMPT);
+    await page.evaluate(async (text) => { await navigator.clipboard.writeText(text); }, evalPrompt);
     await page.keyboard.press('Control+v');
     await page.waitForTimeout(800);
 
@@ -680,8 +741,10 @@ async function main() {
 
   const dateStr      = draft.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   const styleHistory = await fetchStyleHistory();
-  const chosenStyle  = pickStyle(styleHistory);
+  const chosenStyle  = pickStyle(styleHistory, draft);
+  const evalPrompt   = buildEvalPrompt(chosenStyle, draft);
   console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
+  if (draft.imageBrief) console.log(`Brief visual del artículo: ${draft.imageBrief.slice(0, 100)}...`);
 
   let correction     = FLAG_FEEDBACK;
   let lastPostFile   = `${dateStr}_post.png`;
@@ -731,7 +794,7 @@ async function main() {
         // Evaluación automática con ChatGPT Vision
         let evalResponse = null;
         try {
-          evalResponse = await evaluateImage(context, path.join(OUTPUT_DIR, postFile));
+          evalResponse = await evaluateImage(context, path.join(OUTPUT_DIR, postFile), evalPrompt);
         } catch (evalErr) {
           console.log(`  Evaluación falló (${evalErr.message.split('\n')[0]}) — aceptando imagen.`);
         }
@@ -749,19 +812,40 @@ async function main() {
       }
     }
 
-    // Story se genera a partir del post aprobado, con hasta 2 intentos
+    // Story se genera a partir del post aprobado. También pasa por el evaluador
+    // (una corrección como máximo — el post ya fijó escena y estilo).
     let storyFile;
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    const storyExclude    = [lastPostImgUrl];
+    let storyCorrection = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      let storyImgUrl;
       try {
-        ({ filename: storyFile } = await generateImage(
-          page, draft, 'story', buildResizePrompt(), { freshChat: false, excludeSrcs: [lastPostImgUrl] }
+        const storyPrompt = buildResizePrompt() +
+          (storyCorrection ? `\n\nCORRECCIÓN sobre la versión anterior: ${storyCorrection}` : '');
+        ({ filename: storyFile, imgUrl: storyImgUrl } = await generateImage(
+          page, draft, 'story', storyPrompt, { freshChat: false, excludeSrcs: storyExclude }
         ));
-        break;
       } catch (genErr) {
-        console.log(`  Error generando story (intento ${attempt}/2): ${genErr.message.split('\n')[0]}`);
-        if (attempt === 2) throw genErr;
+        console.log(`  Error generando story (intento ${attempt}/3): ${genErr.message.split('\n')[0]}`);
+        if (attempt === 3) throw genErr;
         await page.waitForTimeout(5000);
+        continue;
       }
+      storyExclude.push(storyImgUrl);
+
+      // En modo review el humano ya dirige; y una sola corrección automática alcanza
+      if (FLAG_REVIEW || storyCorrection !== null || attempt === 3) break;
+
+      let storyEval = null;
+      try {
+        storyEval = await evaluateImage(context, path.join(OUTPUT_DIR, storyFile), evalPrompt);
+      } catch (evalErr) {
+        console.log(`  Evaluación de story falló (${evalErr.message.split('\n')[0]}) — aceptando.`);
+      }
+      if (!storyEval || /^aprobada/i.test(storyEval.trim())) break;
+
+      storyCorrection = storyEval.replace(/^rechazada\s*[-–]\s*/i, '').trim();
+      console.log(`  Story rechazada: "${storyCorrection}" — regenerando.`);
     }
 
     // Imágenes descargadas — el chat de generación ya no hace falta
