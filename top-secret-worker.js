@@ -704,6 +704,20 @@ export default {
         }
       }
 
+      // ── DISCARD FLAG (GET | DELETE /discard-flag) ─────────────────────────────
+      // Seteado al descartar un draft (DELETE /draft-noticia). watch-regen.ps1 lo
+      // consulta cada minuto y borra las imágenes listadas del repo local + GitHub.
+      if (url.pathname === '/discard-flag') {
+        if (request.method === 'GET') {
+          const flag = await env.TS_KV.get('discard_cleanup', 'json');
+          return jsonResp(flag || { requested: false });
+        }
+        if (request.method === 'DELETE') {
+          await env.TS_KV.delete('discard_cleanup');
+          return jsonResp({ ok: true });
+        }
+      }
+
       // ── NOTICIAS DRAFT (GET | POST | DELETE /draft-noticia) ──────────────────
       // Draft is stored in Firestore news/draft (agent can write there directly).
       // Worker reads/deletes it from Firestore; browser uses this endpoint.
@@ -727,7 +741,28 @@ export default {
         if (pin !== (env.ADMIN_PIN || '8189')) return jsonResp({ error: 'Unauthorized' }, 401);
 
         if (request.method === 'DELETE') {
+          // Descarte real (no publicación ni regen): capturar las imágenes ya
+          // generadas para que el watcher local las borre del repo y de Daily News.
+          let cleanup = null;
+          try {
+            const fsResp = await fetch(FS_DRAFT);
+            if (fsResp.ok) {
+              const doc = await fsResp.json();
+              const draft = JSON.parse(doc.fields?.data?.stringValue || 'null');
+              if (draft) {
+                const files = [...new Set(
+                  [draft.imagePost, draft.imageStory, draft.image]
+                    .filter(f => typeof f === 'string' && f.startsWith('Renders/Daily News/') && !f.includes('..'))
+                )];
+                if (!files.length && draft.date) {
+                  files.push(`Renders/Daily News/${draft.date}_post.png`, `Renders/Daily News/${draft.date}_story.png`);
+                }
+                if (files.length) cleanup = { requested: true, date: draft.date || null, files, at: new Date().toISOString() };
+              }
+            }
+          } catch(e) { /* sin draft legible — no hay nada que limpiar */ }
           await fetch(FS_DRAFT, { method: 'DELETE' });
+          if (cleanup) await env.TS_KV.put('discard_cleanup', JSON.stringify(cleanup));
           return jsonResp({ ok: true });
         }
 

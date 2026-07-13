@@ -1,6 +1,8 @@
-# Corre via Task Scheduler cada 1 minuto.
-# Cuando el browser pide regenerar la noticia del día, este script lo detecta,
-# dispara el agente cloud (artículo) y después genera las imágenes localmente.
+﻿# Corre via Task Scheduler cada 1 minuto.
+# 1) Si el browser descartó la noticia del día → borra sus imágenes del repo
+#    local (Renders/Daily News) y de GitHub.
+# 2) Si el browser pidió regenerar la noticia → dispara el agente cloud
+#    (artículo) y después genera las imágenes localmente.
 
 $ErrorActionPreference = 'Stop'
 $repoRoot   = 'D:\proyectos\top-secret'
@@ -11,6 +13,53 @@ $triggerId  = 'trig_01Kz9ev31E5WfSN2mkVrHq7a'
 function Log($msg) {
     $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
     "$ts [watch-regen] $msg" | Add-Content $logFile
+}
+
+# ── PASO 0: Limpieza de imágenes de noticias descartadas ─────────────────────
+try {
+    $discard = Invoke-RestMethod "$worker/discard-flag" -TimeoutSec 10
+} catch {
+    $discard = $null
+}
+
+if ($discard -and $discard.requested) {
+    Log "Noticia descartada ($($discard.date)) — eliminando imágenes generadas"
+
+    # Limpiar el flag primero para evitar doble ejecución
+    try { Invoke-RestMethod "$worker/discard-flag" -Method DELETE -TimeoutSec 10 | Out-Null }
+    catch { Log "Advertencia: no se pudo limpiar discard-flag: $_" }
+
+    $removed = @()
+    foreach ($rel in $discard.files) {
+        # Solo se tocan archivos dentro de Renders/Daily News, sin path traversal
+        if ($rel -notlike 'Renders/Daily News/*' -or $rel -match '\.\.') {
+            Log "Ignorado (fuera de Daily News): $rel"
+            continue
+        }
+        $abs = Join-Path $repoRoot ($rel -replace '/', '\')
+        if (Test-Path $abs) {
+            try { Remove-Item $abs -Force -Confirm:$false; $removed += $rel; Log "Borrado local: $rel" }
+            catch { Log "Error borrando ${rel}: $_" }
+        } else {
+            Log "No existe localmente: $rel"
+        }
+    }
+
+    if ($removed.Count -gt 0) {
+        # git escribe progreso a stderr; con EAP Stop eso lanza excepción falsa.
+        # Se baja a Continue y se valida con $LASTEXITCODE.
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        git -C $repoRoot add -A -- "Renders/Daily News" *> $null
+        git -C $repoRoot commit -m "chore: elimina imagenes de noticia descartada $($discard.date)" *> $null
+        $commitOk = ($LASTEXITCODE -eq 0)
+        git -C $repoRoot push *> $null
+        $pushOk = ($LASTEXITCODE -eq 0)
+        $ErrorActionPreference = $prevEap
+        if ($commitOk -and $pushOk) { Log "Repo actualizado: $($removed.Count) imagen(es) eliminadas de GitHub" }
+        elseif ($commitOk)          { Log "Commit hecho pero push falló (exit $LASTEXITCODE) — reintentará en el próximo push" }
+        else                        { Log "git commit falló — imágenes borradas solo localmente" }
+    }
 }
 
 # Verificar si hay pedido de regeneración pendiente
