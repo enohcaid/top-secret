@@ -10,11 +10,11 @@
 <meta property="og:title" content="Top Secret FC · Club Oficial">
 <meta property="og:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 3 en curso.">
 <meta property="og:url" content="https://enohcaid.github.io/top-secret/">
-<meta property="og:image" content="https://enohcaid.github.io/top-secret/logos/og-home.png">
+<meta property="og:image" content="https://enohcaid.github.io/top-secret/logos/og-home.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Top Secret FC · Club Oficial">
 <meta name="twitter:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 3 en curso.">
-<meta name="twitter:image" content="https://enohcaid.github.io/top-secret/logos/og-home.png">
+<meta name="twitter:image" content="https://enohcaid.github.io/top-secret/logos/og-home.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -323,7 +323,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       </div>
     </div>
     <div class="hero-visual">
-      <img class="hero-photo" id="hero-img-a" src="logos/Facha 0.png" alt="Top Secret FC">
+      <img class="hero-photo" id="hero-img-a" src="logos/Facha 0.webp" alt="Top Secret FC">
       <img class="hero-photo" id="hero-img-b" alt="Top Secret FC" style="opacity:0">
       <div class="hero-photo-fade"></div>
       <div class="hero-slider-ui">
@@ -630,6 +630,7 @@ const PRE_NAME_MAP = {
   'cabrera14':'Cabers14', 'huber236':'Huber236', 'agusbostero':'Agubostero7',
   'lautavester7':'Lautavester7', 'pibu':'zPibu__',
   'ciprimancini':'CipriMancini', 'black panther':'BlackPanther-CG',
+  'eii no skill':'Eli_No-SKILL', 'J.Martinez':'Juan_Martinez4',
 };
 
 async function loadPretemporada() {
@@ -936,7 +937,7 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   const imgB   = document.getElementById('hero-img-b');
   const dotsEl = document.getElementById('hero-dots');
 
-  const images = ['logos/Facha 0.png','logos/Facha 1.png','logos/Facha 2.png','logos/Facha 3.png'];
+  const images = ['logos/Facha 0.webp','logos/Facha 1.webp','logos/Facha 2.webp','logos/Facha 3.webp'];
 
   if (images.length <= 1) return;
 

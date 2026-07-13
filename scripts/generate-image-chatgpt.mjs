@@ -257,14 +257,15 @@ function buildPrompt(draft, mentionedPlayers, style, correction = null) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
 
   const playerBlock = mentionedPlayers.length > 0
-    ? `JUGADORES (usá sus renders subidos al proyecto):
-${mentionedPlayers.map(p => `- ${p}: ${action}`).join('\n')}`
-    : `Sin jugadores específicos:
+    ? `JUGADORES MENCIONADOS EN ESTA NOTICIA (son nuestros jugadores):
+Los archivos de sus renders ya están subidos al proyecto. El nombre de cada archivo coincide exactamente con el gamertag del jugador. DEBÉS usar esos renders como referencia visual directa — no inventes su apariencia.
+${mentionedPlayers.map(p => `- ${p} → render en el proyecto: "${p}.png" → ${action}`).join('\n')}`
+    : `Sin jugadores específicos — composición institucional:
 ${action}`;
 
-  return `Creá una imagen editorial deportiva para Top Secret FC, club de fútbol virtual argentino.
+  return `Creá una imagen editorial deportiva para Top Secret FC, un club argentino de fútbol virtual (esports). Todos los jugadores que se mencionan en las noticias son NUESTROS PROPIOS JUGADORES — tenés sus renders subidos al proyecto para usarlos como referencia visual.
 
-⚠️ CRÍTICO — UNIFORME: Si usás los renders de jugadores del proyecto, NO los modifiques ni alteres. Usá exactamente los archivos subidos tal cual. Los colores del uniforme del jugador son intocables — el dorado, el azul, el blanco o cualquier color que aparezca en el diseño de la imagen se aplica únicamente al FONDO, a elementos gráficos y al ambiente, NUNCA sobre el kit del jugador.
+⚠️ CRÍTICO — RENDERS Y UNIFORME: Los archivos de renders son imágenes de referencia de nuestros jugadores reales. Si un jugador aparece mencionado, DEBÉS usar su render del proyecto para representarlo — no inventes su cara ni apariencia. El uniforme que aparece en el render es intocable: los colores del kit del jugador no deben ser modificados por la paleta del fondo ni por el estilo del día. La paleta aplica SOLO al ambiente, fondo y elementos gráficos.
 
 ═══ SPECS TÉCNICAS ═══
 - Dimensiones: 1086x1448 (ligeramente vertical, formato post)
@@ -274,22 +275,24 @@ ${action}`;
 ${style.prompt}
 Aplicá este estilo como base compositiva. La paleta de colores define el AMBIENTE y el DISEÑO de la imagen — el uniforme del jugador queda exactamente como en los renders.
 
-═══ ELEMENTO DE MARCA FIJO ═══
-En la parte INFERIOR de la imagen, incluí una franja horizontal delgada con:
-  • Fondo negro (#0a0b0e) con un borde/línea fina dorada (#C8A84B) separándola del resto
-  • Texto en tipografía condensada, mayúsculas, dorada: "NOTICIAS | TOP SECRET FC"
-  • Estilo limpio y profesional — como los banners de ESPN o Fox Sports pero con identidad oscura de élite
-  • Podés sumar el logo pequeño del club al costado del texto si mejora la composición
-
 ═══ ESCENA Y ACCIÓN ═══
 Atmósfera: ${scene}
 ${playerBlock}
 
-═══ IDENTIDAD VISUAL (usá los archivos del proyecto) ═══
-- Logo Top Secret FC: incluilo de forma natural en la composición
-- INDUMENTARIA: el proyecto tiene la imagen "Indumentaria TOP Secret T3.png" con todos los kits disponibles (local negro, alternativo blanco, tercer kit amarillo). Elegí el kit que mejor sirva a la escena y al estilo del día — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual. IMPORTANTE: el kit define el color del uniforme, y ese color no debe ser modificado por la paleta del fondo.
-- NO incluyas escudos ni logos de otros clubes
-- El logo/escudo del club SÍ debe aparecer (además de la franja de marca)
+═══ ARCHIVOS DEL PROYECTO — REFERENCIAS OBLIGATORIAS ═══
+Estos archivos ya están subidos al proyecto ChatGPT. Usá cada uno según su función:
+
+• "Top-Secret.png" → es el escudo oficial de Top Secret FC. Incorporalo en la composición.
+
+• "Indumentaria TOP Secret T3.png" → referencia de los tres kits del club:
+  - Local: camiseta negra
+  - Alternativo: camiseta blanca
+  - Tercer kit: camiseta amarilla
+  Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual.
+
+• Renders de jugadores (carpeta T3-Frentes en el proyecto): cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores. Si el jugador aparece mencionado en la noticia, ese archivo es la referencia visual obligatoria para representarlo en la imagen.
+
+⚠️ No incluyas logos ni escudos de otros clubes.
 
 ═══ TITULAR EN LA IMAGEN ═══
 Incluí el siguiente título como texto prominente en la imagen — en letras GRANDES, bold, condensed, mayúsculas — estilo tapa de diario deportivo o revista de fútbol. El texto debe ser inmediatamente legible y ocupar un lugar central o dominante en la composición:
@@ -312,7 +315,7 @@ function buildResizePrompt() {
 
 Mantené EXACTAMENTE la misma escena, el mismo personaje/jugador, la misma pose, los mismos colores y el mismo estilo editorial — es la MISMA pieza, solo adaptada a un encuadre vertical más alto y angosto.
 
-Único cambio de composición: movés la franja de marca "NOTICIAS | TOP SECRET FC" a la parte SUPERIOR de la imagen (en el post estaba abajo), y reacomodás el resto de la escena para que ocupe bien el espacio vertical. No cambies el tema, el contenido ni el mensaje de la imagen.`;
+Único cambio es de composición: reacomodá la escena para que ocupe bien el espacio vertical más alto y angosto. No cambies el tema, el contenido ni el mensaje de la imagen.`;
 }
 
 async function waitForGeneratedImage(page, excludeSrcs = []) {
@@ -664,10 +667,19 @@ async function main() {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !FLAG_STORY; attempt++) {
       if (attempt > 1) console.log(`\nIntento ${attempt}/${MAX_ATTEMPTS}...`);
 
-      const postPrompt = buildPrompt(draft, mentioned, chosenStyle, correction);
-      const { filename: postFile, imgUrl: postImgUrl } = await generateImage(
-        page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [] }
-      );
+      let postFile, postImgUrl;
+      try {
+        const postPrompt = buildPrompt(draft, mentioned, chosenStyle, correction);
+        ({ filename: postFile, imgUrl: postImgUrl } = await generateImage(
+          page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [] }
+        ));
+      } catch (genErr) {
+        console.log(`  Error técnico (intento ${attempt}/${MAX_ATTEMPTS}): ${genErr.message.split('\n')[0]}`);
+        if (attempt === MAX_ATTEMPTS) throw genErr;
+        await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await page.waitForTimeout(3000);
+        continue;
+      }
       lastPostFile   = postFile;
       lastPostImgUrl = postImgUrl;
 
@@ -701,10 +713,20 @@ async function main() {
       }
     }
 
-    // Story se genera una sola vez, a partir del post aprobado
-    const { filename: storyFile } = await generateImage(
-      page, draft, 'story', buildResizePrompt(), { freshChat: false, excludeSrcs: [lastPostImgUrl] }
-    );
+    // Story se genera a partir del post aprobado, con hasta 2 intentos
+    let storyFile;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        ({ filename: storyFile } = await generateImage(
+          page, draft, 'story', buildResizePrompt(), { freshChat: false, excludeSrcs: [lastPostImgUrl] }
+        ));
+        break;
+      } catch (genErr) {
+        console.log(`  Error generando story (intento ${attempt}/2): ${genErr.message.split('\n')[0]}`);
+        if (attempt === 2) throw genErr;
+        await page.waitForTimeout(5000);
+      }
+    }
 
     await updateDraft(draft, lastPostFile, storyFile);
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
