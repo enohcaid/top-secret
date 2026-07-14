@@ -12,7 +12,7 @@ $triggerId  = 'trig_01Kz9ev31E5WfSN2mkVrHq7a'
 
 function Log($msg) {
     $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    "$ts [watch-regen] $msg" | Add-Content $logFile
+    "$ts [watch-regen] $msg" | Add-Content $logFile -Encoding UTF8
 }
 
 # ── PASO 0: Limpieza de imágenes de noticias descartadas ─────────────────────
@@ -66,7 +66,14 @@ if ($discard -and $discard.requested) {
 try {
     $flag = Invoke-RestMethod "$worker/regen-flag" -TimeoutSec 10
 } catch {
-    Log "Error consultando regen-flag: $_"
+    # Corre cada minuto: sin red (PC suspendida, wifi caído) esto llenaba el
+    # log con miles de líneas idénticas. Loguear como máximo una vez cada 30 min.
+    $marker = "$repoRoot\scripts\.last-neterr"
+    $silent = (Test-Path $marker) -and ((Get-Date) - (Get-Item $marker).LastWriteTime).TotalMinutes -lt 30
+    if (-not $silent) {
+        Log "Error consultando regen-flag: $_"
+        New-Item -ItemType File -Path $marker -Force | Out-Null
+    }
     exit 0
 }
 
@@ -84,7 +91,9 @@ try {
 # ── PASO 1: Disparar agente de artículo via Claude Code CLI ──────────────────
 Log "Disparando agente cloud para artículo..."
 try {
-    $claudeOutput = & claude -p "Usa la herramienta RemoteTrigger para disparar el trigger de Top Secret FC noticias ahora mismo. El trigger_id es: $triggerId. Accion: run. No hagas nada mas." --non-interactive 2>&1
+    # Nota: claude -p ya es no-interactivo; el flag --non-interactive no existe
+    # y hacía fallar el disparo del agente.
+    $claudeOutput = & claude -p "Usa la herramienta RemoteTrigger para disparar el trigger de Top Secret FC noticias ahora mismo. El trigger_id es: $triggerId. Accion: run. No hagas nada mas." 2>&1
     Log "Agente disparado: $($claudeOutput | Select-Object -First 3 | Out-String)"
 } catch {
     Log "Error disparando agente: $_"
@@ -139,5 +148,7 @@ if (-not (Test-CDP)) {
     Start-Sleep -Seconds 12
 }
 
-node scripts/generate-image-chatgpt.mjs *>> $logFile
+# cmd /c en vez de *>> : PowerShell 5.1 redirige a UTF-16 y mezclaba encodings
+# en el log; cmd escribe los bytes UTF-8 de node tal cual.
+cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
 Log "Pipeline completo."
