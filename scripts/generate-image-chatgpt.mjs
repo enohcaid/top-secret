@@ -24,13 +24,21 @@ const DEBUG_DIR       = path.resolve('scripts'); // screenshots de debug fuera d
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
 const MAX_ATTEMPTS    = 3;
 
+// Referencias visuales que se ADJUNTAN a cada mensaje de generación.
+// Los archivos del proyecto de ChatGPT no llegan de forma confiable al
+// generador de imágenes (por eso inventaba escudos) — los adjuntos sí.
+const CREST_PATH = path.resolve('Top-Secret.png');
+const KITS_PATH  = path.resolve('logos/Indumentaria TOP Secret T3.png');
+
 // El evaluador debe juzgar contra el ESTILO DEL DÍA, no contra una paleta fija:
 // exigir siempre negro+dorado haría rechazar imágenes correctas de estilos claros
 // (editorial revista, lluvia teal, estadio azul, etc.).
 function buildEvalPrompt(style, draft) {
   return `Sos el Director Creativo de Top Secret FC, club de fútbol virtual argentino de élite.
 
-Evaluá si esta imagen sirve para publicar la noticia de hoy en redes.
+Te adjunto DOS imágenes: la PRIMERA es la imagen a evaluar; la SEGUNDA es el escudo oficial del club (referencia — insignia circular metálica plateada/negra con un espía de sombrero y anteojos).
+
+Evaluá si la PRIMERA imagen sirve para publicar la noticia de hoy en redes.
 
 NOTICIA DE HOY: "${draft.title || ''}"
 
@@ -39,6 +47,7 @@ ESTILO VISUAL ELEGIDO PARA HOY: ${style.label}
 - Dirección de arte: ${style.prompt}
 
 CRITERIOS (todos deben cumplirse):
+- Si aparece el escudo del club, es EXACTAMENTE el de la segunda imagen adjunta (circular, plateado/negro, espía con sombrero). Un escudo inventado, rediseñado o recoloreado = RECHAZADA sí o sí
 - El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
 - Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
@@ -306,8 +315,8 @@ function buildPrompt(draft, mentionedPlayers, style, correction = null) {
 
   const playerBlock = mentionedPlayers.length > 0
     ? `JUGADORES MENCIONADOS EN ESTA NOTICIA (son nuestros jugadores):
-Los archivos de sus renders ya están subidos al proyecto. El nombre de cada archivo coincide exactamente con el gamertag del jugador. DEBÉS usar esos renders como referencia visual directa — no inventes su apariencia.
-${mentionedPlayers.map(p => `- ${p} → render en el proyecto: "${p}.png" → ${action}`).join('\n')}`
+Sus renders van ADJUNTOS a este mensaje. El nombre de cada archivo coincide exactamente con el gamertag del jugador. DEBÉS usar esos renders como referencia visual directa — no inventes su apariencia.
+${mentionedPlayers.map(p => `- ${p} → render adjunto: "${p}.png" → ${action}`).join('\n')}`
     : `Sin jugadores específicos — composición institucional:
 ${action}`;
 
@@ -327,20 +336,20 @@ Aplicá este estilo como base compositiva. La paleta de colores define el AMBIEN
 Atmósfera: ${scene}
 ${playerBlock}
 
-═══ ARCHIVOS DEL PROYECTO — REFERENCIAS OBLIGATORIAS ═══
-Estos archivos ya están subidos al proyecto ChatGPT. Usá cada uno según su función:
+═══ IMÁGENES ADJUNTAS A ESTE MENSAJE — REFERENCIAS OBLIGATORIAS ═══
+Las imágenes adjuntas a este mensaje son las referencias visuales oficiales del club. Usá cada una según su función:
 
-• "Top-Secret.png" → es el escudo oficial de Top Secret FC. Incorporalo en la composición.
+• "Top-Secret.png" (adjunto) → es el ÚNICO escudo válido de Top Secret FC: insignia CIRCULAR metálica en plateado y negro, con un espía (sombrero fedora y anteojos oscuros) en el centro y el texto "TOP SECRET" arriba y "FOOTBALL CLUB" abajo. Reproducilo EXACTAMENTE como está en la imagen adjunta — mismo diseño, misma forma circular, mismos colores plateados/negros. PROHIBIDO rediseñarlo, recolorearlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros colores).
 
-• "Indumentaria TOP Secret T3.png" → referencia de los tres kits del club:
+• "Indumentaria TOP Secret T3.png" (adjunto) → referencia de los tres kits del club:
   - Local: camiseta negra
   - Alternativo: camiseta blanca
   - Tercer kit: camiseta amarilla
-  Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual.
+  Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual. Reproducí el diseño del kit tal cual la referencia.
 
-• Renders de jugadores (carpeta T3-Frentes en el proyecto): cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores. Si el jugador aparece mencionado en la noticia, ese archivo es la referencia visual obligatoria para representarlo en la imagen.
+• Renders de jugadores adjuntos: cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores — referencia obligatoria para su cara, físico y apariencia.
 
-⚠️ No incluyas logos ni escudos de otros clubes.
+⚠️ No incluyas logos ni escudos de otros clubes, y no inventes ningún elemento de marca que no esté en los adjuntos.
 
 ═══ TITULAR EN LA IMAGEN ═══
 Incluí el siguiente título como texto prominente en la imagen — en letras GRANDES, bold, condensed, mayúsculas — estilo tapa de diario deportivo o revista de fútbol. El texto debe ser inmediatamente legible y ocupar un lugar central o dominante en la composición:
@@ -543,7 +552,7 @@ async function ensureNormalQuality(page) {
   } catch { /* quality change optional */ }
 }
 
-async function sendPromptInProject(page, prompt, { freshChat = true } = {}) {
+async function sendPromptInProject(page, prompt, { freshChat = true, attachments = [] } = {}) {
   if (freshChat) {
     await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
@@ -565,6 +574,19 @@ async function sendPromptInProject(page, prompt, { freshChat = true } = {}) {
 
   const input = page.locator('div[contenteditable="true"], p[data-placeholder]').first();
   await input.waitFor({ state: 'visible', timeout: 20000 });
+
+  // Adjuntar las referencias visuales AL MENSAJE: los archivos del proyecto
+  // no llegan al generador de imágenes de forma confiable (inventaba escudos).
+  if (attachments.length > 0) {
+    const existing = attachments.filter(f => fs.existsSync(f));
+    if (existing.length > 0) {
+      const fileInput = page.locator('input[type="file"]').first();
+      await fileInput.setInputFiles(existing);
+      console.log(`  Adjuntos: ${existing.map(f => path.basename(f)).join(', ')}`);
+      await page.waitForTimeout(3000);
+    }
+  }
+
   await input.click();
   await page.waitForTimeout(500);
 
@@ -581,13 +603,20 @@ async function sendPromptInProject(page, prompt, { freshChat = true } = {}) {
   // Send with the button (never press Enter directly — it submits)
   const sendBtn = page.locator('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]').first();
   if (await sendBtn.count() > 0) {
-    await sendBtn.click();
+    if (attachments.length > 0) {
+      // El botón queda deshabilitado hasta que terminan de subir los adjuntos
+      await page.waitForFunction(() => {
+        const b = document.querySelector('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]');
+        return b && !b.disabled;
+      }, { timeout: 90000 }).catch(() => {});
+    }
+    await sendBtn.click({ timeout: 30000 });
   } else {
     await page.keyboard.press('Enter');
   }
 }
 
-async function generateImage(page, draft, format, prompt, { freshChat, excludeSrcs }) {
+async function generateImage(page, draft, format, prompt, { freshChat, excludeSrcs, attachments = [] }) {
   const now      = new Date();
   const dateStr  = draft.date || now.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   const filename   = `${dateStr}_${format}.png`;
@@ -595,7 +624,7 @@ async function generateImage(page, draft, format, prompt, { freshChat, excludeSr
 
   console.log(`\nGenerando imagen ${format.toUpperCase()}...`);
 
-  await sendPromptInProject(page, prompt, { freshChat });
+  await sendPromptInProject(page, prompt, { freshChat, attachments });
   const imgUrl = await waitForGeneratedImage(page, excludeSrcs);
   await downloadImage(page, imgUrl, outputPath);
 
@@ -700,10 +729,11 @@ async function evaluateImage(context, imagePath, evalPrompt) {
     await page.goto('https://chatgpt.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
 
-    // Adjuntar imagen: primero via input[type="file"] directo, luego via file chooser
+    // Adjuntar la imagen a evaluar + el escudo oficial como referencia
+    const evalFiles = [imagePath, CREST_PATH].filter(f => fs.existsSync(f));
     const fileInput = page.locator('input[type="file"]').first();
     if (await fileInput.count() > 0) {
-      await fileInput.setInputFiles(imagePath);
+      await fileInput.setInputFiles(evalFiles);
       await page.waitForTimeout(2000);
     } else {
       const attachSelectors = [
@@ -718,7 +748,7 @@ async function evaluateImage(context, imagePath, evalPrompt) {
         page.waitForEvent('filechooser', { timeout: 15000 }),
         page.locator(attachSelectors).first().click(),
       ]);
-      await fileChooser.setFiles(imagePath);
+      await fileChooser.setFiles(evalFiles);
       await page.waitForTimeout(2000);
     }
 
@@ -730,8 +760,13 @@ async function evaluateImage(context, imagePath, evalPrompt) {
     await page.keyboard.press('Control+v');
     await page.waitForTimeout(800);
 
+    // Esperar a que terminen de subir los adjuntos (botón deshabilitado mientras)
+    await page.waitForFunction(() => {
+      const b = document.querySelector('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]');
+      return b && !b.disabled;
+    }, { timeout: 60000 }).catch(() => {});
     const sendBtn = page.locator('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]').first();
-    await sendBtn.click();
+    await sendBtn.click({ timeout: 30000 });
 
     const response = await waitForTextResponse(page);
     console.log('  Resultado:', response.split('\n')[0].slice(0, 120));
@@ -830,8 +865,18 @@ async function main() {
       let postFile, postImgUrl;
       try {
         const postPrompt = buildPrompt(draft, mentioned, chosenStyle, correction);
+        // Referencias visuales adjuntas al mensaje: escudo + kits + renders
+        // de los jugadores mencionados
+        const refAttachments = [
+          CREST_PATH,
+          KITS_PATH,
+          ...mentioned.map(p => {
+            const png = path.join(T3_FRENTES_DIR, `${p}.png`);
+            return fs.existsSync(png) ? png : path.join(T3_FRENTES_DIR, `${p}.jpg`);
+          }),
+        ];
         ({ filename: postFile, imgUrl: postImgUrl } = await generateImage(
-          page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [] }
+          page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [], attachments: refAttachments }
         ));
       } catch (genErr) {
         console.log(`  Error técnico (intento ${attempt}/${MAX_ATTEMPTS}): ${genErr.message.split('\n')[0]}`);
