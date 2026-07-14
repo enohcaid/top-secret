@@ -372,13 +372,21 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
 
   await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-after-send.png'), fullPage: false });
 
-  const TIMEOUT_MS = 15 * 60 * 1000;
-  const POLL_MS    = 4000;
-  const start      = Date.now();
+  const TIMEOUT_MS  = 15 * 60 * 1000;
+  const POLL_MS     = 4000;
+  // Si la respuesta terminó (sin streaming) y no apareció imagen, no tiene
+  // sentido seguir esperando el timeout completo — ChatGPT contestó texto
+  // (límite de generación, rechazo, pregunta) en vez de generar.
+  const DONE_GRACE_MS = 20 * 1000;
+  const start       = Date.now();
+  let   sawStreaming = false;
+  let   doneSince    = 0;
+  let   lastProgress = 0;
 
   while (Date.now() - start < TIMEOUT_MS) {
-    const imgSrc = await page.evaluate((excludeSrcs) => {
+    const state = await page.evaluate((excludeSrcs) => {
       const imgs = [...document.querySelectorAll('img')].reverse();
+      let imgSrc = null;
       for (const img of imgs) {
         const src = img.src || '';
         if (excludeSrcs.includes(src)) continue;
@@ -392,19 +400,44 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
            src.includes('estuary/content') ||
            src.startsWith('blob:'))
         ) {
-          return src;
+          imgSrc = src;
+          break;
         }
       }
-      return null;
+      const streaming = !!document.querySelector(
+        'button[data-testid="stop-button"], button[aria-label*="Stop"], button[aria-label*="Detener"]'
+      );
+      const msgs = [...document.querySelectorAll('[data-message-author-role="assistant"]')];
+      const lastText = msgs[msgs.length - 1]?.textContent?.trim().slice(0, 300) || '';
+      return { imgSrc, streaming, lastText };
     }, excludeSrcs);
 
-    if (imgSrc) {
+    if (state.imgSrc) {
       console.log('\n  Imagen detectada.');
-      return imgSrc;
+      return state.imgSrc;
+    }
+
+    if (state.streaming) {
+      sawStreaming = true;
+      doneSince    = 0;
+    } else if (sawStreaming) {
+      // La respuesta terminó sin imagen — dar una gracia corta por si la
+      // imagen tarda unos segundos en montarse en el DOM, y cortar.
+      if (!doneSince) doneSince = Date.now();
+      if (Date.now() - doneSince > DONE_GRACE_MS) {
+        await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-timeout.png'), fullPage: true });
+        throw new Error(`ChatGPT respondió sin generar imagen: "${state.lastText.slice(0, 180)}"`);
+      }
     }
 
     const elapsed = Math.round((Date.now() - start) / 1000);
-    process.stdout.write(`\r  Generando... ${elapsed}s`);
+    if (process.stdout.isTTY) {
+      process.stdout.write(`\r  Generando... ${elapsed}s`);
+    } else if (elapsed - lastProgress >= 60) {
+      // Sin TTY (log de Task Scheduler): una línea por minuto, no cada 4s
+      console.log(`  Generando... ${elapsed}s`);
+      lastProgress = elapsed;
+    }
     await page.waitForTimeout(POLL_MS);
   }
 
@@ -489,16 +522,22 @@ async function ensureNormalQuality(page) {
     await page.waitForTimeout(800);
 
     const selected = await page.evaluate(() => {
-      const opt = [...document.querySelectorAll('[role="option"], [role="menuitem"], li, button')]
-        .find(el => ['Normal', 'Estándar', 'Standard'].includes(el.textContent?.trim()));
-      if (opt) { opt.click(); return opt.textContent?.trim(); }
+      // El menú actual ofrece Baja/Media/Alta — "Media" genera en 1-3 min
+      // vs 5-15 min de "Alta". Se mantienen los nombres viejos por si la UI vuelve.
+      const wanted = ['Media', 'Medium', 'Normal', 'Estándar', 'Standard'];
+      const opts = [...document.querySelectorAll('[role="option"], [role="menuitem"], [role="menuitemradio"], li, button, div[data-radix-collection-item]')];
+      for (const name of wanted) {
+        const opt = opts.find(el => el.textContent?.trim() === name);
+        if (opt) { opt.click(); return name; }
+      }
       return null;
     });
 
     if (selected) {
-      console.log(`  Calidad: ${selected} (evita o3 reasoning).`);
+      console.log(`  Calidad: ${selected} (mucho más rápido que Alta).`);
       await page.waitForTimeout(400);
     } else {
+      console.log('  Calidad: no se pudo cambiar de Alta — la generación será lenta.');
       await page.keyboard.press('Escape');
     }
   } catch { /* quality change optional */ }
@@ -508,6 +547,18 @@ async function sendPromptInProject(page, prompt, { freshChat = true } = {}) {
   if (freshChat) {
     await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
+  } else {
+    // Si quedó una generación colgada del intento anterior, frenarla antes
+    // de reenviar — el composer no acepta mensajes mientras hay streaming.
+    const stopped = await page.evaluate(() => {
+      const btn = document.querySelector('button[data-testid="stop-button"], button[aria-label*="Stop"], button[aria-label*="Detener"]');
+      if (btn) { btn.click(); return true; }
+      return false;
+    });
+    if (stopped) {
+      console.log('  Generación anterior colgada — detenida antes de reintentar.');
+      await page.waitForTimeout(2000);
+    }
   }
 
   await ensureNormalQuality(page);
@@ -609,6 +660,11 @@ async function waitForTextResponse(page) {
   let lastText = '';
   let stableAt = 0;
 
+  // Solo cuenta como respuesta un veredicto real. Mientras ChatGPT procesa
+  // la imagen muestra estados como "Analizando imagen" que también aparecen
+  // en textContent — tomarlos como veredicto causaba rechazos falsos.
+  const hasVerdict = (t) => /(APROBADA|RECHAZADA)\s*[-–:]/i.test(t) || /^(APROBADA|RECHAZADA)\b/i.test(t.trim());
+
   while (Date.now() - start < TIMEOUT_MS) {
     const text = await page.evaluate(() => {
       const msgs = [...document.querySelectorAll('[data-message-author-role="assistant"]')];
@@ -619,12 +675,20 @@ async function waitForTextResponse(page) {
       lastText = text;
       stableAt = Date.now();
     } else if (text && text === lastText && stableAt && (Date.now() - stableAt) > STABLE_MS) {
-      return text;
+      if (hasVerdict(text)) {
+        // Quedarse con la línea del veredicto (puede venir precedida de
+        // texto de estado o razonamiento)
+        const m = text.match(/(APROBADA|RECHAZADA)\s*[-–:]?\s*.*/i);
+        return m ? m[0] : text;
+      }
+      // Texto estable pero sin veredicto (p.ej. "Analizando imagen"):
+      // seguir esperando hasta que llegue la respuesta real.
+      stableAt = Date.now();
     }
 
     await page.waitForTimeout(POLL_MS);
   }
-  throw new Error('Timeout esperando respuesta de evaluación (3 min)');
+  throw new Error('Timeout esperando veredicto APROBADA/RECHAZADA (3 min)');
 }
 
 async function evaluateImage(context, imagePath, evalPrompt) {
@@ -827,7 +891,7 @@ async function main() {
         ));
       } catch (genErr) {
         console.log(`  Error generando story (intento ${attempt}/3): ${genErr.message.split('\n')[0]}`);
-        if (attempt === 3) throw genErr;
+        if (attempt === 3) { storyFile = null; break; }
         await page.waitForTimeout(5000);
         continue;
       }
@@ -846,6 +910,15 @@ async function main() {
 
       storyCorrection = storyEval.replace(/^rechazada\s*[-–]\s*/i, '').trim();
       console.log(`  Story rechazada: "${storyCorrection}" — regenerando.`);
+    }
+
+    // Si la story no salió, usar el post como story: perder el formato vertical
+    // es mucho mejor que perder el día entero (antes acá se abortaba todo y el
+    // post aprobado nunca se publicaba).
+    if (!storyFile) {
+      storyFile = `${dateStr}_story.png`;
+      fs.copyFileSync(path.join(OUTPUT_DIR, lastPostFile), path.join(OUTPUT_DIR, storyFile));
+      console.log('  Story falló en todos los intentos — usando el post como story.');
     }
 
     // Imágenes descargadas — el chat de generación ya no hace falta

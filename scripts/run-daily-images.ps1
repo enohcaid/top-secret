@@ -12,7 +12,7 @@ $chromeExe  = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 
 function Log($msg) {
     $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    "$ts [run-daily] $msg" | Add-Content $logFile
+    "$ts [run-daily] $msg" | Add-Content $logFile -Encoding UTF8
 }
 
 # Esperar a que el agente cloud haya dejado el draft de HOY (max 45 min).
@@ -62,4 +62,6 @@ if (-not (Test-CDP)) {
 }
 
 Set-Location $repoRoot
-node scripts/generate-image-chatgpt.mjs *>> "$repoRoot\scripts\daily-images.log"
+# cmd /c en vez de *>> : PowerShell 5.1 redirige a UTF-16 y mezclaba encodings
+# en el log; cmd escribe los bytes UTF-8 de node tal cual.
+cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
