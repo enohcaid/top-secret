@@ -50,7 +50,7 @@ ESTILO VISUAL ELEGIDO PARA HOY: ${style.label}
 - Dirección de arte: ${style.prompt}
 
 CRITERIOS (todos deben cumplirse):
-- Si aparece el escudo del club, es EXACTAMENTE el de la segunda imagen adjunta (circular, plateado/negro, espía con sombrero). Un escudo inventado, rediseñado o recoloreado = RECHAZADA sí o sí
+- Si aparece el escudo del club, su DISEÑO es el de la segunda imagen adjunta: circular, con el espía de sombrero y anteojos, texto "TOP SECRET" / "FOOTBALL CLUB". Un escudo de diseño distinto (otra forma, estrellas, otro ícono) = RECHAZADA sí o sí. PERO: que la luz ambiental de la escena tiña el escudo (dorado en luz cálida, azulado de noche) es fotografía normal y NO es motivo de rechazo
 - El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
 - Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
