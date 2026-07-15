@@ -339,7 +339,9 @@ Atmósfera: ${scene}
 ${playerBlock}
 
 ═══ IMÁGENES ADJUNTAS A ESTE MENSAJE — REFERENCIAS OBLIGATORIAS ═══
-Las imágenes adjuntas a este mensaje son las referencias visuales oficiales del club. Usá cada una según su función:
+⚠️ Los adjuntos son SOLO referencias visuales para copiar el diseño del escudo, del kit y las caras de los jugadores. NO son el contenido ni el layout de la imagen: no hagas un catálogo, una grilla de productos, un mosaico ni una reproducción de los adjuntos. La imagen a crear es la ESCENA de la noticia descrita arriba.
+
+Usá cada adjunto según su función:
 
 • "Top-Secret.png" (adjunto) → es el ÚNICO escudo válido de Top Secret FC: insignia CIRCULAR metálica en plateado y negro, con un espía (sombrero fedora y anteojos oscuros) en el centro y el texto "TOP SECRET" arriba y "FOOTBALL CLUB" abajo. Reproducilo EXACTAMENTE como está en la imagen adjunta — mismo diseño, misma forma circular, mismos colores plateados/negros. PROHIBIDO rediseñarlo, recolorearlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros colores).
 
