@@ -387,6 +387,18 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
 
   await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-after-send.png'), fullPage: false });
 
+  // Snapshot de las imágenes ya presentes (adjuntos recién enviados, imágenes
+  // previas del chat): la generada siempre aparece DESPUÉS de este punto, así
+  // que todo lo que exista ahora queda excluido, viva donde viva en el DOM.
+  const preExisting = await page.evaluate(() => {
+    return [...document.querySelectorAll('img')]
+      .map(i => i.src || '')
+      .filter(s => s.includes('oaiusercontent') || s.includes('files.openai') ||
+                   s.includes('openai.com/files') || s.includes('estuary/content') ||
+                   s.startsWith('blob:'));
+  });
+  excludeSrcs = [...excludeSrcs, ...preExisting];
+
   const TIMEOUT_MS  = 15 * 60 * 1000;
   const POLL_MS     = 4000;
   // Si la respuesta terminó (sin streaming) y no apareció imagen, no tiene
@@ -400,14 +412,16 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
 
   while (Date.now() - start < TIMEOUT_MS) {
     const state = await page.evaluate((excludeSrcs) => {
-      // SOLO imágenes dentro de mensajes del asistente: los adjuntos que
-      // subimos aparecen como <img> en el mensaje del usuario y el detector
-      // los confundía con la imagen generada (descargaba el adjunto mismo).
-      const imgs = [...document.querySelectorAll('[data-message-author-role="assistant"] img')].reverse();
+      // Excluir imágenes del mensaje del USUARIO (los adjuntos que subimos
+      // aparecen ahí y el detector los confundía con la imagen generada).
+      // No se puede exigir contenedor "assistant": la imagen generada se
+      // renderiza fuera de ese wrapper en el DOM actual de ChatGPT.
+      const imgs = [...document.querySelectorAll('img')].reverse();
       let imgSrc = null;
       for (const img of imgs) {
         const src = img.src || '';
         if (excludeSrcs.includes(src)) continue;
+        if (img.closest('[data-message-author-role="user"]')) continue;
         if (
           img.complete &&
           img.naturalWidth  > 300 &&
