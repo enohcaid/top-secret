@@ -542,39 +542,30 @@ async function deleteChatById(page, convId) {
   }
 }
 
+// El dropdown "Alta" del composer es el selector de INTELIGENCIA del modelo
+// (Instantánea/Media/Alta), no calidad de imagen. "Alta" suma minutos de
+// razonamiento antes de cada generación. Son menús Radix: solo responden a
+// clicks reales de Playwright, no a element.click() desde JS.
 async function ensureNormalQuality(page) {
   try {
-    const clicked = await page.evaluate(() => {
-      const btn = [...document.querySelectorAll('button')]
-        .find(b => b.textContent?.trim() === 'Alta');
-      if (btn) { btn.click(); return true; }
-      return false;
-    });
+    const trigger = page.locator('button').filter({ hasText: /^Alta$/ }).first();
+    if (await trigger.count() === 0) return; // ya está en Media/Instantánea u otra UI
 
-    if (!clicked) return;
-
+    await trigger.click({ timeout: 5000 });
     await page.waitForTimeout(800);
 
-    const selected = await page.evaluate(() => {
-      // El menú actual ofrece Baja/Media/Alta — "Media" genera en 1-3 min
-      // vs 5-15 min de "Alta". Se mantienen los nombres viejos por si la UI vuelve.
-      const wanted = ['Media', 'Medium', 'Normal', 'Estándar', 'Standard'];
-      const opts = [...document.querySelectorAll('[role="option"], [role="menuitem"], [role="menuitemradio"], li, button, div[data-radix-collection-item]')];
-      for (const name of wanted) {
-        const opt = opts.find(el => el.textContent?.trim() === name);
-        if (opt) { opt.click(); return name; }
-      }
-      return null;
-    });
-
-    if (selected) {
-      console.log(`  Calidad: ${selected} (mucho más rápido que Alta).`);
+    const media = page.locator('[role="menuitemradio"]').filter({ hasText: /^Media$/ }).first();
+    if (await media.count() > 0) {
+      await media.click({ timeout: 5000 });
+      console.log('  Inteligencia: Media (evita el razonamiento lento de Alta).');
       await page.waitForTimeout(400);
     } else {
-      console.log('  Calidad: no se pudo cambiar de Alta — la generación será lenta.');
+      console.log('  Selector de inteligencia: opción Media no encontrada — sigue en Alta.');
       await page.keyboard.press('Escape');
     }
-  } catch { /* quality change optional */ }
+  } catch {
+    try { await page.keyboard.press('Escape'); } catch { /* menú ya cerrado */ }
+  }
 }
 
 async function sendPromptInProject(page, prompt, { freshChat = true, attachments = [] } = {}) {
@@ -666,7 +657,8 @@ function gitPushImages(postFile, storyFile) {
     const files = [postFile, storyFile].filter(Boolean)
       .map(f => `"Renders/Daily News/${f}"`).join(' ');
     run(`git add ${files}`);
-    const status = run('git status --porcelain --cached');
+    // git status no acepta --cached (fallaba siempre y el push nunca corría)
+    const status = run('git diff --cached --name-only');
     if (!status) {
       console.log('  Git: sin cambios para commitear.');
       return;
