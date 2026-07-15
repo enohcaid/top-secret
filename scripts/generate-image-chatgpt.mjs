@@ -1,8 +1,9 @@
 /**
  * Genera imágenes para la noticia diaria de Top Secret FC usando ChatGPT.
- * Usa el proyecto "TOP Secret FC" en ChatGPT, que tiene subidos el logo,
- * uniformes y renders de jugadores (T3-Frentes). Conecta al Chrome del
- * usuario via CDP en localhost:9222.
+ * Usa el proyecto "TOP Secret FC" en ChatGPT y adjunta a cada mensaje las
+ * referencias visuales desde el repo local (escudo, indumentaria y renders
+ * de Renders/T3-Frentes/) — los archivos del proyecto no llegan al generador
+ * de imágenes. Conecta al Chrome del usuario via CDP en localhost:9222.
  *
  * Uso:
  *   node scripts/generate-image-chatgpt.mjs                              # automático (9:15)
@@ -118,8 +119,9 @@ const FLAG_STORY    = _args.includes('--story-only');
 const _fbIdx        = _args.indexOf('--feedback');
 const FLAG_FEEDBACK = _fbIdx >= 0 ? _args[_fbIdx + 1] : null;
 
-// Jugadores con renders en el proyecto de ChatGPT (carpeta T3-Frentes)
-// Agregar el archivo PNG a Renders/T3-Frentes/ + subirlo al proyecto de ChatGPT es suficiente
+// Jugadores con render disponible (Renders/T3-Frentes/ local)
+// Basta con agregar el PNG acá — se adjunta al mensaje de generación; ya no
+// hace falta subirlo al proyecto de ChatGPT
 const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');
 const PLAYERS_WITH_RENDERS = fs.readdirSync(T3_FRENTES_DIR)
   .filter(f => /\.(png|jpg)$/i.test(f))
