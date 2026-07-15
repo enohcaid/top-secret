@@ -53,6 +53,7 @@ CRITERIOS (todos deben cumplirse):
 - Si aparece el escudo del club, su DISEÑO es el de la segunda imagen adjunta: circular, con el espía de sombrero y anteojos, texto "TOP SECRET" / "FOOTBALL CLUB". Un escudo de diseño distinto (otra forma, estrellas, otro ícono) = RECHAZADA sí o sí. PERO: que la luz ambiental de la escena tiña el escudo (dorado en luz cálida, azulado de noche) es fotografía normal y NO es motivo de rechazo
 - El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
+- La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA
 - Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
 - La imagen comunica visualmente el tema de la noticia
 - Si hay texto/titular, es legible y con ortografía correcta
@@ -352,6 +353,7 @@ Usá cada adjunto según su función:
   - Alternativo: camiseta blanca
   - Tercer kit: camiseta amarilla
   Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual. Reproducí el diseño del kit tal cual la referencia.
+  ⚠️ Los ÚNICOS colores de camiseta válidos son esos tres: NEGRO, BLANCO o AMARILLO. Una camiseta azul, roja, bordó o de cualquier otro color es un ERROR — el club no tiene kits de otros colores.
 
 • Renders de jugadores adjuntos: cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores — referencia obligatoria para su cara, físico y apariencia.
 
