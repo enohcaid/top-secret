@@ -398,7 +398,7 @@ Mantené EXACTAMENTE la misma escena, el mismo personaje/jugador, la misma pose,
 }
 
 async function waitForGeneratedImage(page, excludeSrcs = []) {
-  console.log('  Esperando imagen (hasta 15 min)...');
+  console.log('  Esperando imagen (hasta 25 min)...');
   page.setDefaultTimeout(0);
 
   await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-after-send.png'), fullPage: false });
@@ -415,7 +415,7 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
   });
   excludeSrcs = [...excludeSrcs, ...preExisting];
 
-  const TIMEOUT_MS  = 15 * 60 * 1000;
+  const TIMEOUT_MS  = 25 * 60 * 1000;
   const POLL_MS     = 4000;
   // Si la respuesta terminó (sin streaming) y no apareció imagen, no tiene
   // sentido seguir esperando el timeout completo — ChatGPT contestó texto
@@ -490,7 +490,7 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
   }
 
   await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-timeout.png'), fullPage: true });
-  throw new Error('Timeout (15 min) esperando imagen. Screenshot en scripts/debug-timeout.png');
+  throw new Error('Timeout (25 min) esperando imagen. Screenshot en scripts/debug-timeout.png');
 }
 
 async function downloadImage(page, imgUrl, outputPath) {
