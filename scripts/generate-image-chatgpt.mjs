@@ -55,6 +55,7 @@ CRITERIOS (todos deben cumplirse):
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
 - La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA
 - Dorsales: si se ve un número de camiseta, los dígitos están bien formados, en orientación correcta y NO espejados ni invertidos (un "01" donde debería decir "10", dígitos al revés como en un reflejo, números deformes) = RECHAZADA
+- La camiseta NO tiene sponsors comerciales reales (AIA, Emirates, Adidas, Nike, etc.) ni es el diseño reconocible del kit de un club real (Tottenham, Real Madrid, Boca, etc.). Una camiseta que parece la réplica de un equipo real con sponsor = RECHAZADA
 - Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
 - La imagen comunica visualmente el tema de la noticia
 - Si hay texto/titular, es legible y con ortografía correcta
@@ -355,6 +356,7 @@ Usá cada adjunto según su función:
   - Tercer kit: camiseta amarilla
   Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual. Reproducí el diseño del kit tal cual la referencia.
   ⚠️ Los ÚNICOS colores de camiseta válidos son esos tres: NEGRO, BLANCO o AMARILLO. Una camiseta azul, roja, bordó o de cualquier otro color es un ERROR — el club no tiene kits de otros colores.
+  ⚠️ La camiseta NO lleva sponsors comerciales (nada de "AIA", "Emirates", "Fly Emirates" ni marcas deportivas como Nike/Adidas) y NO es el kit de ningún club real: no copies el diseño de la camiseta del Tottenham, Real Madrid ni ningún equipo existente. Reproducí ÚNICAMENTE el diseño del adjunto "T3 Kits.png".
 
 • Renders de jugadores adjuntos: cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores — referencia obligatoria para su cara, físico y apariencia.
 
