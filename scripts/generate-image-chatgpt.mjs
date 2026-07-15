@@ -29,6 +29,7 @@ const MAX_ATTEMPTS    = 3;
 // Los archivos del proyecto de ChatGPT no llegan de forma confiable al
 // generador de imágenes (por eso inventaba escudos) — los adjuntos sí.
 const CREST_PATH = path.resolve('Top-Secret.png');
+const CREST_WHITE_PATH = path.resolve('logos/Top Secret white.png');
 // T3 Kits.png (tres kits puestos en jugadores) y no el póster-catálogo de
 // indumentaria: una infografía densa como referencia contamina la generación.
 const KITS_PATH  = path.resolve('logos/T3 Kits.png');
@@ -37,6 +38,7 @@ const KITS_PATH  = path.resolve('logos/T3 Kits.png');
 // exigir siempre negro+dorado haría rechazar imágenes correctas de estilos claros
 // (editorial revista, lluvia teal, estadio azul, etc.).
 function buildEvalPrompt(style, draft) {
+  const isSeleccion = /^selecc/i.test(draft.category || '');
   return `Sos el Director Creativo de Top Secret FC, club de fútbol virtual argentino de élite.
 
 Te adjunto DOS imágenes: la PRIMERA es la imagen a evaluar; la SEGUNDA es el escudo oficial del club (referencia — insignia circular metálica plateada/negra con un espía de sombrero y anteojos).
@@ -50,10 +52,12 @@ ESTILO VISUAL ELEGIDO PARA HOY: ${style.label}
 - Dirección de arte: ${style.prompt}
 
 CRITERIOS (todos deben cumplirse):
-- Si aparece el escudo del club, su DISEÑO es el de la segunda imagen adjunta: circular, con el espía de sombrero y anteojos, texto "TOP SECRET" / "FOOTBALL CLUB". Un escudo de diseño distinto (otra forma, estrellas, otro ícono) = RECHAZADA sí o sí. PERO: que la luz ambiental de la escena tiña el escudo (dorado en luz cálida, azulado de noche) es fotografía normal y NO es motivo de rechazo
+- Si aparece el escudo del club, su DISEÑO es el de la segunda imagen adjunta: circular, con el espía de sombrero y anteojos, texto "TOP SECRET" / "FOOTBALL CLUB". La versión monocromática BLANCA plana del MISMO diseño también es válida (se usa como elemento gráfico). Un escudo de diseño distinto (otra forma, estrellas, otro ícono) = RECHAZADA sí o sí. PERO: que la luz ambiental de la escena tiña el escudo (dorado en luz cálida, azulado de noche) es fotografía normal y NO es motivo de rechazo
 - El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
-- La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA
+${isSeleccion
+  ? '- Esta noticia es de la Selección Argentina: la camiseta CELESTE Y BLANCA de la Selección es VÁLIDA para jugadores o elementos que representen a la Selección. Si aparece un jugador de Top Secret como jugador del club, su camiseta es de los kits oficiales: NEGRA, BLANCA o AMARILLA'
+  : '- La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA'}
 - Dorsales: si se ve un número de camiseta, los dígitos están bien formados, en orientación correcta y NO espejados ni invertidos (un "01" donde debería decir "10", dígitos al revés como en un reflejo, números deformes) = RECHAZADA
 - La camiseta NO tiene sponsors comerciales reales (AIA, Emirates, Adidas, Nike, etc.) ni es el diseño reconocible del kit de un club real (Tottenham, Real Madrid, Boca, etc.). Una camiseta que parece la réplica de un equipo real con sponsor = RECHAZADA
 - Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
@@ -319,6 +323,7 @@ function buildScene(draft, mentionedPlayers) {
 
 function buildPrompt(draft, mentionedPlayers, style, correction = null) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
+  const isSeleccion = /^selecc/i.test(draft.category || '');
 
   const playerBlock = mentionedPlayers.length > 0
     ? `JUGADORES MENCIONADOS EN ESTA NOTICIA (son nuestros jugadores):
@@ -348,7 +353,10 @@ ${playerBlock}
 
 Usá cada adjunto según su función:
 
-• "Top-Secret.png" (adjunto) → es el ÚNICO escudo válido de Top Secret FC: insignia CIRCULAR metálica en plateado y negro, con un espía (sombrero fedora y anteojos oscuros) en el centro y el texto "TOP SECRET" arriba y "FOOTBALL CLUB" abajo. Reproducilo EXACTAMENTE como está en la imagen adjunta — mismo diseño, misma forma circular, mismos colores plateados/negros. PROHIBIDO rediseñarlo, recolorearlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros colores).
+• "Top-Secret.png" y "Top Secret white.png" (adjuntos) → son las DOS únicas versiones válidas del escudo de Top Secret FC. El diseño es el mismo en ambas: insignia CIRCULAR con un espía (sombrero fedora y anteojos oscuros) en el centro y el texto "TOP SECRET" arriba y "FOOTBALL CLUB" abajo.
+  - "Top Secret white.png": versión monocromática blanca plana — PREFERILA cuando el escudo funciona como elemento gráfico de la composición (placa, marca de agua, esquina, overlay), porque es menos invasiva y se integra mejor al diseño.
+  - "Top-Secret.png": versión metálica plateada/negra — usala cuando el escudo es un objeto físico de la escena (banderín, parche en la camiseta, trofeo, pared del vestuario).
+  Reproducí el diseño EXACTAMENTE como en los adjuntos. PROHIBIDO rediseñarlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros diseños).
 
 • "T3 Kits.png" (adjunto) → referencia de los tres kits del club:
   - Local: camiseta negra
@@ -356,7 +364,8 @@ Usá cada adjunto según su función:
   - Tercer kit: camiseta amarilla
   Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual. Reproducí el diseño del kit tal cual la referencia.
   ⚠️ Los ÚNICOS colores de camiseta válidos son esos tres: NEGRO, BLANCO o AMARILLO. Una camiseta azul, roja, bordó o de cualquier otro color es un ERROR — el club no tiene kits de otros colores.
-  ⚠️ La camiseta NO lleva sponsors comerciales (nada de "AIA", "Emirates", "Fly Emirates" ni marcas deportivas como Nike/Adidas) y NO es el kit de ningún club real: no copies el diseño de la camiseta del Tottenham, Real Madrid ni ningún equipo existente. Reproducí ÚNICAMENTE el diseño del adjunto "T3 Kits.png".
+  ⚠️ La camiseta NO lleva sponsors comerciales (nada de "AIA", "Emirates", "Fly Emirates" ni marcas deportivas como Nike/Adidas) y NO es el kit de ningún club real: no copies el diseño de la camiseta del Tottenham, Real Madrid ni ningún equipo existente. Reproducí ÚNICAMENTE el diseño del adjunto "T3 Kits.png".${isSeleccion ? `
+  ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: esta nota es sobre la Selección Argentina. La camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA y preferible para jugadores o elementos que representen a la Selección (siempre sin sponsors ni logos de marcas). Los kits del club aplican solo si aparece un jugador de Top Secret representando al club (por ejemplo, el plantel mirando el partido).` : ''}
 
 • Renders de jugadores adjuntos: cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores — referencia obligatoria para su cara, físico y apariencia.
 
@@ -891,6 +900,7 @@ async function main() {
         // de los jugadores mencionados
         const refAttachments = [
           CREST_PATH,
+          CREST_WHITE_PATH,
           KITS_PATH,
           ...mentioned.map(p => {
             const png = path.join(T3_FRENTES_DIR, `${p}.png`);
