@@ -29,7 +29,9 @@ const MAX_ATTEMPTS    = 3;
 // Los archivos del proyecto de ChatGPT no llegan de forma confiable al
 // generador de imágenes (por eso inventaba escudos) — los adjuntos sí.
 const CREST_PATH = path.resolve('Top-Secret.png');
-const KITS_PATH  = path.resolve('logos/Indumentaria TOP Secret T3.png');
+// T3 Kits.png (tres kits puestos en jugadores) y no el póster-catálogo de
+// indumentaria: una infografía densa como referencia contamina la generación.
+const KITS_PATH  = path.resolve('logos/T3 Kits.png');
 
 // El evaluador debe juzgar contra el ESTILO DEL DÍA, no contra una paleta fija:
 // exigir siempre negro+dorado haría rechazar imágenes correctas de estilos claros
@@ -345,7 +347,7 @@ Usá cada adjunto según su función:
 
 • "Top-Secret.png" (adjunto) → es el ÚNICO escudo válido de Top Secret FC: insignia CIRCULAR metálica en plateado y negro, con un espía (sombrero fedora y anteojos oscuros) en el centro y el texto "TOP SECRET" arriba y "FOOTBALL CLUB" abajo. Reproducilo EXACTAMENTE como está en la imagen adjunta — mismo diseño, misma forma circular, mismos colores plateados/negros. PROHIBIDO rediseñarlo, recolorearlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros colores).
 
-• "Indumentaria TOP Secret T3.png" (adjunto) → referencia de los tres kits del club:
+• "T3 Kits.png" (adjunto) → referencia de los tres kits del club:
   - Local: camiseta negra
   - Alternativo: camiseta blanca
   - Tercer kit: camiseta amarilla
@@ -398,7 +400,10 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
 
   while (Date.now() - start < TIMEOUT_MS) {
     const state = await page.evaluate((excludeSrcs) => {
-      const imgs = [...document.querySelectorAll('img')].reverse();
+      // SOLO imágenes dentro de mensajes del asistente: los adjuntos que
+      // subimos aparecen como <img> en el mensaje del usuario y el detector
+      // los confundía con la imagen generada (descargaba el adjunto mismo).
+      const imgs = [...document.querySelectorAll('[data-message-author-role="assistant"] img')].reverse();
       let imgSrc = null;
       for (const img of imgs) {
         const src = img.src || '';
