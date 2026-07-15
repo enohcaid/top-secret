@@ -54,6 +54,7 @@ CRITERIOS (todos deben cumplirse):
 - El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
 - La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA
+- Dorsales: si se ve un número de camiseta, los dígitos están bien formados, en orientación correcta y NO espejados ni invertidos (un "01" donde debería decir "10", dígitos al revés como en un reflejo, números deformes) = RECHAZADA
 - Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
 - La imagen comunica visualmente el tema de la noticia
 - Si hay texto/titular, es legible y con ortografía correcta
@@ -356,6 +357,8 @@ Usá cada adjunto según su función:
   ⚠️ Los ÚNICOS colores de camiseta válidos son esos tres: NEGRO, BLANCO o AMARILLO. Una camiseta azul, roja, bordó o de cualquier otro color es un ERROR — el club no tiene kits de otros colores.
 
 • Renders de jugadores adjuntos: cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores — referencia obligatoria para su cara, físico y apariencia.
+
+⚠️ DORSALES: si el render de un jugador muestra su número de camiseta, reproducilo EXACTAMENTE — mismos dígitos, en el mismo orden. PROHIBIDO espejar o invertir los dígitos de un dorsal (ej. "10" convertido en "01") e intercambiar números entre jugadores. Si no tenés referencia del número de un jugador, no muestres un dorsal prominente inventado.
 
 ⚠️ No incluyas logos ni escudos de otros clubes, y no inventes ningún elemento de marca que no esté en los adjuntos.
 
