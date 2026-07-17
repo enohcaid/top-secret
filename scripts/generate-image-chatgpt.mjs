@@ -39,6 +39,15 @@ const KITS_PATH  = path.resolve('logos/T3 Kits.png');
 // (editorial revista, lluvia teal, estadio azul, etc.).
 function buildEvalPrompt(style, draft) {
   const isSeleccion = /^selecc/i.test(draft.category || '');
+  const mentioned = extractMentionedPlayers(draft);
+  const identityBlock = mentioned.length > 0
+    ? `
+JUGADORES DE ESTA NOTICIA — identidad visual correcta (rasgos → nombre y dorsal):
+${mentioned.map(playerIdentityLine).join('\n')}
+- Si en la imagen aparece un nombre o dorsal de esta lista sobre un jugador cuyos rasgos NO coinciden (otro pelo, otra piel, sin la máscara/anteojos que corresponden), o un mismo jugador mezcla rasgos de dos de la lista = RECHAZADA
+- Un jugador prominente con rasgos distintivos (afro, dreadlocks, máscara, pelo de color) que no corresponde a ninguno de la lista y lleva nombre o dorsal legible = RECHAZADA
+`
+    : '';
   return `Sos el Director Creativo de Top Secret FC, club de fútbol virtual argentino de élite.
 
 Te adjunto DOS imágenes: la PRIMERA es la imagen a evaluar; la SEGUNDA es el escudo oficial del club (referencia — insignia circular metálica plateada/negra con un espía de sombrero y anteojos).
@@ -46,7 +55,7 @@ Te adjunto DOS imágenes: la PRIMERA es la imagen a evaluar; la SEGUNDA es el es
 Evaluá si la PRIMERA imagen sirve para publicar la noticia de hoy en redes.
 
 NOTICIA DE HOY: "${draft.title || ''}"
-
+${identityBlock}
 ESTILO VISUAL ELEGIDO PARA HOY: ${style.label}
 - Paleta esperada del AMBIENTE (fondo y diseño): ${style.palette}
 - Dirección de arte: ${style.prompt}
@@ -135,6 +144,40 @@ const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');
 const PLAYERS_WITH_RENDERS = fs.readdirSync(T3_FRENTES_DIR)
   .filter(f => /\.(png|jpg)$/i.test(f))
   .map(f => f.replace(/\.(png|jpg)$/i, ''));
+
+// Rasgos físicos de cada render — el generador de imágenes de ChatGPT NO ve los
+// nombres de archivo de los adjuntos, así que el mapeo cara→gamertag tiene que
+// viajar como TEXTO en el prompt o mezcla identidades (nombres/dorsales sobre el
+// jugador equivocado, pasó el 2026-07-16). dorsal:null = no confirmado, no mostrarlo.
+const PLAYER_TRAITS = {
+  'Alexisraies23':   { dorsal: 3,    desc: 'piel morena, dreadlocks negros hasta los hombros, barba negra, anteojos deportivos celestes, venda blanca en la mano izquierda' },
+  'BlackPanther-CG': { dorsal: 11,   desc: 'piel morena, pelo muy corto rosa/magenta, máscara de calavera blanca cubriendo nariz y boca, brazos completamente tatuados' },
+  'Cabers14':        { dorsal: 4,    desc: 'piel muy oscura, dreadlocks negros largos y sueltos, máscara de calavera blanca cubriendo nariz y boca, mangas largas negras' },
+  'CipriMancini':    { dorsal: 32,   desc: 'piel trigueña, AFRO AZUL gigante y esponjoso, anteojos deportivos oscuros, cuello y brazos tatuados, manga blanca en el brazo derecho' },
+  'Eli_No-SKILL':    { dorsal: 10,   desc: 'piel oscura, pelo corto blanco/plateado, máscara celeste cubriendo nariz y boca, guantes de arquero blancos, mangas largas' },
+  'fedeavv9':        { dorsal: 9,    desc: 'piel trigueña, pelo corto rubio platinado, muy tatuado en cuello, brazos y piernas, venda blanca en la muñeca izquierda' },
+  'Guiidow':         { dorsal: 20,   desc: 'piel trigueña, pelo oscuro rapado a los costados con cresta corta, chivita fina, cara descubierta sin anteojos ni máscara' },
+  'Huber236':        { dorsal: 8,    desc: 'piel clara, pelo negro abundante peinado hacia arriba, barba negra completa y prolija, mangas largas negras' },
+  'Ivan_Cabj_La12':  { dorsal: 12,   desc: 'ARQUERO: camiseta de arquero magenta y pantalón largo negro, piel clara, pelo negro corto, barba corta, anteojos deportivos azules, brazos tatuados en tinta azul, guantes de arquero con puño amarillo' },
+  'Juan_Martinez4':  { dorsal: 6,    desc: 'piel clara, pelo rubio con raya al costado, barba castaña prolija, cinta de capitán en el brazo, mangas largas negras' },
+  'Lautavester7':    { dorsal: 7,    desc: 'piel oscura, pelo muy corto con tinte azul claro, barba negra tupida, visor deportivo verde espejado' },
+  'Ramiro4588':      { dorsal: 96,   desc: 'piel morena, pelo negro corto tipo afro bajo, chivita, anteojos deportivos con lente dorada espejada' },
+  'Ringhiio':        { dorsal: 70,   desc: 'piel trigueña, melena despeinada VIOLETA, anteojos de sol negros' },
+  'rivarola90':      { dorsal: 2,    desc: 'piel oscura, melena gris plateada hasta los hombros con vincha negra, chivita canosa, mangas largas oscuras' },
+  'RS32-DaniStone':  { dorsal: 13,   desc: 'piel clara, pelo revuelto turquesa/verde agua, máscara celeste cubriendo nariz y boca, anteojos, una manga azul en el brazo derecho' },
+  'slandaco9':       { dorsal: null, desc: 'ARQUERO: camiseta de arquero rosa/magenta y pantalón largo negro, piel clara, pelo negro lacio hasta los hombros, cara descubierta, guantes de arquero con puño amarillo' },
+  'Sxrcoo':          { dorsal: 5,    desc: 'piel muy oscura, AFRO BLANCO/canoso gigante, visor deportivo amarillo-verde, chivita blanca, muñequeras blancas' },
+  'Yxotx':           { dorsal: 99,   desc: 'piel oscura, dreadlocks rubio ceniza/grisáceos con vincha negra, máscara de calavera blanca cubriendo nariz y boca, guantes blancos' },
+};
+
+function playerIdentityLine(p) {
+  const t = PLAYER_TRAITS[p];
+  if (!t) return `- ${p}`;
+  const dorsal = t.dorsal !== null
+    ? `dorsal ${t.dorsal}, nombre en camiseta "${p.toUpperCase()}"`
+    : 'dorsal NO confirmado — no le muestres número ni nombre en la espalda';
+  return `- ${p} → ${t.desc} → ${dorsal}`;
+}
 
 async function fetchStyleHistory() {
   try {
@@ -327,8 +370,16 @@ function buildPrompt(draft, mentionedPlayers, style, correction = null) {
 
   const playerBlock = mentionedPlayers.length > 0
     ? `JUGADORES MENCIONADOS EN ESTA NOTICIA (son nuestros jugadores):
-Sus renders van ADJUNTOS a este mensaje. El nombre de cada archivo coincide exactamente con el gamertag del jugador. DEBÉS usar esos renders como referencia visual directa — no inventes su apariencia.
-${mentionedPlayers.map(p => `- ${p} → render adjunto: "${p}.png" → ${action}`).join('\n')}`
+Sus renders van ADJUNTOS a este mensaje como referencia visual directa — no inventes su apariencia.
+Acción: ${action}
+
+⚠️ IDENTIDAD — LEÉ ESTO ANTES DE DIBUJAR NOMBRES O DORSALES: los adjuntos NO llevan el nombre del jugador, así que identificá cada render por sus RASGOS FÍSICOS según esta lista. Cada nombre y dorsal SOLO puede aparecer sobre el jugador cuyos rasgos coinciden — un nombre o número sobre otro jugador es un ERROR grave:
+${mentionedPlayers.map(playerIdentityLine).join('\n')}
+
+Reglas de identidad:
+- Si mostrás el nombre o el dorsal de un jugador, tienen que estar sobre el cuerpo cuyos rasgos coinciden con la lista (pelo, piel, barba, máscara, anteojos). NUNCA mezcles rasgos de dos jugadores en uno.
+- No inventes jugadores extra con rasgos distintivos (afros, dreadlocks, máscaras, pelo de colores) que no estén en la lista. Si necesitás relleno, usá jugadores genéricos vistos de espaldas o fuera de foco, SIN nombre ni dorsal legible.
+- Si no estás seguro de qué jugador es, mostralo SIN nombre ni dorsal antes que etiquetarlo mal.`
     : `Sin jugadores específicos — composición institucional:
 ${action}`;
 
@@ -367,9 +418,10 @@ Usá cada adjunto según su función:
   ⚠️ La camiseta NO lleva sponsors comerciales (nada de "AIA", "Emirates", "Fly Emirates" ni marcas deportivas como Nike/Adidas) y NO es el kit de ningún club real: no copies el diseño de la camiseta del Tottenham, Real Madrid ni ningún equipo existente. Reproducí ÚNICAMENTE el diseño del adjunto "T3 Kits.png".${isSeleccion ? `
   ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: esta nota es sobre la Selección Argentina. La camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA y preferible para jugadores o elementos que representen a la Selección (siempre sin sponsors ni logos de marcas). Los kits del club aplican solo si aparece un jugador de Top Secret representando al club (por ejemplo, el plantel mirando el partido).` : ''}
 
-• Renders de jugadores adjuntos: cada archivo "[gamertag].png" es el render visual de uno de nuestros jugadores — referencia obligatoria para su cara, físico y apariencia.
+• Renders de jugadores adjuntos: cada render es la referencia obligatoria de la CARA, el PELO, la PIEL, los accesorios (máscaras, anteojos, vinchas, vendas) y el físico de uno de nuestros jugadores. Identificá cuál es cuál por los rasgos de la lista de IDENTIDAD de arriba.
+  ⚠️ El uniforme que se ve EN LOS RENDERS viene del videojuego y trae sponsors falsos (Nike, AIA, kit del Tottenham) — eso NO se copia JAMÁS. La camiseta del jugador en tu imagen sale ÚNICAMENTE de "T3 Kits.png". Del render tomás la persona; del kit de referencia tomás la ropa.
 
-⚠️ DORSALES: si el render de un jugador muestra su número de camiseta, reproducilo EXACTAMENTE — mismos dígitos, en el mismo orden. PROHIBIDO espejar o invertir los dígitos de un dorsal (ej. "10" convertido en "01") e intercambiar números entre jugadores. Si no tenés referencia del número de un jugador, no muestres un dorsal prominente inventado.
+⚠️ DORSALES Y NOMBRES: usá EXACTAMENTE los dorsales y nombres de la lista de IDENTIDAD — mismos dígitos, en el mismo orden, sobre el jugador correcto. PROHIBIDO espejar o invertir dígitos (ej. "10" convertido en "01"), intercambiar números o nombres entre jugadores, e inventar dorsales que no estén en la lista.
 
 ⚠️ No incluyas logos ni escudos de otros clubes, y no inventes ningún elemento de marca que no esté en los adjuntos.
 
