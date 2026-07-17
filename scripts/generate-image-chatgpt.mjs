@@ -241,9 +241,17 @@ async function fetchDraft() {
   return JSON.parse(doc.fields.data.stringValue);
 }
 
+// Máximo de jugadores en escena: cada render extra es un adjunto más que
+// procesar (generación más pesada/lenta) y una identidad más que ChatGPT
+// puede mezclar. Se priorizan los primeros mencionados en la nota.
+const MAX_FEATURED_PLAYERS = 3;
+
 function extractMentionedPlayers(draft) {
   const text = [draft.title, draft.excerpt, ...(draft.body || [])].join(' ');
-  return PLAYERS_WITH_RENDERS.filter(p => text.includes(p));
+  return PLAYERS_WITH_RENDERS
+    .filter(p => text.includes(p))
+    .sort((a, b) => text.indexOf(a) - text.indexOf(b))
+    .slice(0, MAX_FEATURED_PLAYERS);
 }
 
 function buildScene(draft, mentionedPlayers) {
