@@ -68,7 +68,7 @@ ${isSeleccion
   : '- La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA'}
 - Dorsales: si se ve un número de camiseta, los dígitos están bien formados, en orientación correcta y NO espejados ni invertidos (un "01" donde debería decir "10", dígitos al revés como en un reflejo, números deformes) = RECHAZADA
 - La camiseta NO tiene sponsors comerciales reales (AIA, Emirates, Adidas, Nike, etc.) ni es el diseño reconocible del kit de un club real (Tottenham, Real Madrid, Boca, etc.). Una camiseta que parece la réplica de un equipo real con sponsor = RECHAZADA
-- Estética editorial cinematográfica — nivel ESPN/Fox Sports premium, sin aspecto plástico de IA
+- FORMATO "EXPEDIENTE TOP SECRET": la imagen respeta el sistema visual del club — fondo negro carbón con textura de papel/archivo, grano de película, sello "TOP SECRET" estampado, tipografía stencil/typewriter, un solo color de acento. Si parece un póster genérico de IA (explosiones de partículas, humo o luces de colores, lens flares plásticos, fondo de estadio brillante) = RECHAZADA
 - La imagen comunica visualmente el tema de la noticia
 - Si hay texto/titular, es legible y con ortografía correcta
 - Sin franja/barra de marca en el borde inferior, sin watermarks
@@ -79,50 +79,48 @@ APROBADA - [motivo breve]
 RECHAZADA - [qué falla específicamente, en una línea accionable para el generador de imágenes]`;
 }
 
-// Pool de estilos visuales rotativos — nunca se repite en los últimos 5 usos
-// Cada estilo define su propia paleta de FONDO y DISEÑO — nunca del uniforme del jugador
+// Formato de marca "EXPEDIENTE TOP SECRET" (elegido 2026-07-17): todas las
+// imágenes comparten el mismo sistema visual de dossier clasificado/espionaje.
+// La rotación ya no cambia de estética — solo varía la PIEZA dentro del sistema.
 const IMAGE_STYLES = [
-  { id: 'RETRATO_DRAMATICO',
-    label: 'Retrato dramático',
-    palette: 'deep black background, single cold blue-white spotlight, no color tinting on the subject',
-    prompt: 'Tight close-up dramatic portrait. Single spotlight cutting through deep darkness, face partially sculpted by shadow. Ultra-cinematic and intimate — negative space is part of the composition.' },
-  { id: 'ESTADIO_NOCTURNO',
-    label: 'Estadio nocturno',
-    palette: 'night blue sky, stadium floodlights in whites and pale yellows, electric atmosphere',
-    prompt: 'Wide epic establishing shot. Massive night stadium in the background with floodlights blazing. The subject feels powerful but the venue dwarfs everything — atmospheric, cinematic, grand scale.' },
-  { id: 'EDITORIAL_REVISTA',
-    label: 'Editorial de revista',
-    palette: 'clean white or off-white background, silver and charcoal design elements, prestige sports magazine aesthetic',
-    prompt: 'High-fashion sports editorial, clean magazine-cover composition. Strong negative space, subject styled like a prestige cover athlete — think ESPN The Magazine meets Vogue Sports.' },
-  { id: 'ACCION_DINAMICA',
-    label: 'Acción dinámica',
-    palette: 'dark background with emerald green pitch reflections, electric particle effects, kinetic energy in whites and greens',
-    prompt: 'Explosive freeze-frame action shot. Motion blur on extremities, particle effects and kinetic energy bursting outward, peak-moment intensity frozen in time. Speed and impact.' },
-  { id: 'POSTER_CONCEPTUAL',
-    label: 'Póster conceptual',
-    palette: 'deep navy blue and black background, sharp white graphic lines, abstract geometric accents in electric blue',
-    prompt: 'Bold graphic poster art. Diagonal composition, abstract football geometry mixed with photorealistic elements, almost illustrative. A statement piece that reads as both fine art and sports media.' },
-  { id: 'VESTUARIO_INTIMO',
-    label: 'Vestuario íntimo',
-    palette: 'warm amber and orange practical lighting, dark concrete walls, raw and authentic atmosphere',
-    prompt: 'Raw behind-the-scenes atmosphere. Tunnel or locker room setting, low warm practical lighting, gritty authenticity. Pre-match or post-match tension you can almost feel.' },
-  { id: 'CONTRALUZ_EPICO',
-    label: 'Contraluz épico',
-    palette: 'blazing white-yellow backlight creating silhouette, god-ray effect, rim light only — minimal color saturation',
-    prompt: 'Powerful contre-jour backlight. Subject in dramatic silhouette against blazing stadium lights — god-ray effect, almost mythological in scale. Shadow and light as the main characters.' },
-  { id: 'CROMATICO_DORADO',
-    label: 'Cromático dorado',
-    palette: 'gold (#C8A84B) and black as the background and graphic design palette — metallic luxury aesthetic in the environment and design elements only, NOT on the player',
-    prompt: 'Gold and black as the dominant design palette — metallic luxury in the background, graphic elements, and atmosphere. The look of a championship trophy or elite award ceremony. Prestigious, heavy, winning.' },
-  { id: 'MINIMALISTA_GEOMETRICO',
-    label: 'Minimalista geométrico',
-    palette: 'near-black background (#0a0b0e), single thin geometric gold accent line, very little visual noise',
-    prompt: 'Minimalist geometric composition. Strong lines, bold shapes, very little visual noise. The subject isolated against a near-black background with a single geometric accent element.' },
-  { id: 'CINEMATICO_LLUVIA',
-    label: 'Cinemático lluvia',
-    palette: 'wet pitch with cyan and teal neon reflections, rain streaks, moody dark atmosphere with cool color temperature',
-    prompt: 'Cinematic rain atmosphere. Wet pitch reflections, dramatic rain streaks, neon-lit puddles in cool teal and cyan tones. Gritty and moody — like a sports film scene shot in Argentina.' },
+  { id: 'EXPEDIENTE_FICHA',
+    label: 'Expediente — Ficha de agente',
+    palette: 'carbón negro con textura de papel de archivo, blanco y grises; acento único DORADO #C8A84B en sellos y subrayados',
+    prompt: 'Ficha de agente clasificada: retrato frontal del jugador con flash duro directo, estilo foto de credencial/archivo policial pero heroica, pegada a la carpeta con un clip metálico. Alrededor, campos de ficha en tipografía typewriter (alias, posición) parcialmente censurados con barras negras.' },
+  { id: 'EXPEDIENTE_VIGILANCIA',
+    label: 'Expediente — Foto de vigilancia',
+    palette: 'noche azulada monocromática con acento único AZUL #4a9eff; grano alto, negros profundos',
+    prompt: 'Foto de vigilancia nocturna con teleobjetivo: el jugador captado en acción o caminando, grano de película alto, ligero desenfoque de movimiento, marcas de encuadre y cruz de mira sutiles, timestamp typewriter en una esquina. La foto está impresa y pegada dentro del expediente.' },
+  { id: 'EXPEDIENTE_DOSSIER',
+    label: 'Expediente — Dossier abierto',
+    palette: 'carbón y papel envejecido, blanco y negro; acento único DORADO #C8A84B',
+    prompt: 'Carpeta de dossier abierta vista desde arriba: una foto principal grande del/los jugador(es) pegada con clip, una o dos fotos secundarias pequeñas tipo polaroid, notas manuscritas censuradas, sellos estampados. Composición de escritorio de agencia de inteligencia, luz de lámpara puntual.' },
+  { id: 'EXPEDIENTE_OPERATIVO',
+    label: 'Expediente — Operativo en cancha',
+    palette: 'blanco y negro de alto contraste con acento único DORADO #C8A84B en sellos y titular',
+    prompt: 'Foto de acción del partido tratada como documento de archivo: jugada congelada con grano de película grueso, revelado duro en blanco y negro, sello TOP SECRET estampado encima en diagonal, borde de fotografía impresa con fecha typewriter.' },
+  { id: 'EXPEDIENTE_COMUNICADO',
+    label: 'Expediente — Comunicado oficial',
+    palette: 'negro carbón y blanco, composición tipográfica dominante; acento único AZUL #4a9eff',
+    prompt: 'Comunicado oficial de la agencia: pieza dominada por la tipografía — titular stencil enorme ocupando la mayor parte, membrete del club arriba, una única foto chica del jugador o del escudo abajo como anexo, líneas de texto censuradas con barras negras como textura gráfica.' },
 ];
+
+// Bloque de identidad visual constante — se inyecta en TODOS los prompts de
+// generación. La variación del día elige la pieza; esto define el sistema.
+function brandFormatBlock(draft) {
+  const code = `TS-${draft.date || ''}`;
+  return `═══ FORMATO DE MARCA — "EXPEDIENTE TOP SECRET" (OBLIGATORIO SIEMPRE) ═══
+Toda imagen de noticias del club pertenece al mismo sistema visual: un EXPEDIENTE CLASIFICADO de una agencia de espionaje (coherente con el escudo del espía). Elementos invariables:
+- Fondo negro carbón con textura sutil de papel/carpeta de archivo. Nada de degradados brillantes ni fondos de estadio genéricos.
+- Sello estampado "TOP SECRET" tipo tampón de tinta desgastado, semitransparente, integrado a la composición (una sola vez).
+- Etiqueta de expediente con el código "${code}" en tipografía typewriter, pequeña, cerca de un borde.
+- Tipografía: titular en STENCIL o condensed bold mayúsculas; textos secundarios en typewriter/monoespaciada. Nada de tipografías futuristas de videojuego.
+- Tratamiento fotográfico: grano de película visible, flash duro o luz puntual, viñeta — la foto parece tomada y archivada por un agente real, NO un render 3D pulido.
+- Recursos gráficos permitidos: barras de censura negras, clips metálicos, esquinas de carpeta, texto "CONFIDENCIAL", marcas de registro de imprenta.
+- Paleta: blanco/negro/grises + UN SOLO color de acento por pieza (el que indica la variación del día). Nunca más de un color de acento.
+- El escudo del club (versión blanca plana) SIEMPRE presente, pequeño y discreto, en la esquina inferior.
+PROHIBIDO (rompe el formato): explosiones de partículas, humo o luces de colores, lens flares plásticos, look de póster de videojuego o de imagen de IA genérica.`;
+}
 
 // ── CLI flags ─────────────────────────────────────────────────────────────────
 // --review      : loop interactivo de revisión hasta aprobar las imágenes
@@ -439,9 +437,11 @@ ${action}`;
 - Dimensiones: 1086x1448 (ligeramente vertical, formato post)
 - Paleta del día (fondo y diseño gráfico, no el uniforme): ${style.palette}
 
-═══ ESTILO VISUAL DEL DÍA ═══
+${brandFormatBlock(draft)}
+
+═══ PIEZA DEL DÍA (variación dentro del formato) ═══
 ${style.prompt}
-Aplicá este estilo como base compositiva. La paleta de colores define el AMBIENTE y el DISEÑO de la imagen — el uniforme del jugador queda exactamente como en los renders.
+Aplicá esta pieza como base compositiva, siempre dentro del FORMATO DE MARCA de arriba. La paleta define el AMBIENTE y el DISEÑO de la imagen — el kit del jugador es el canónico descrito abajo, nunca teñido por la paleta.
 
 ═══ ESCENA Y ACCIÓN ═══
 Atmósfera: ${scene}
@@ -475,7 +475,7 @@ Usá cada adjunto según su función:
 ⚠️ No incluyas logos ni escudos de otros clubes, y no inventes ningún elemento de marca que no esté en los adjuntos.
 
 ═══ TITULAR EN LA IMAGEN ═══
-Incluí el siguiente título como texto prominente en la imagen — en letras GRANDES, bold, condensed, mayúsculas — estilo tapa de diario deportivo o revista de fútbol. El texto debe ser inmediatamente legible y ocupar un lugar central o dominante en la composición:
+Incluí el siguiente título como texto prominente en la imagen — en letras GRANDES, mayúsculas, en tipografía STENCIL o condensed bold (según la pieza del día), como si fuera el rótulo del expediente. El texto debe ser inmediatamente legible y ocupar un lugar dominante en la composición:
 
 "${draft.title}"
 
