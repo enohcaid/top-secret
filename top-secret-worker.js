@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'mundial-2026-finalissima': {
+    t: '"Ganamos la final": Argentina tumbó a Inglaterra y el domingo va por la Finalíssima ante España',
+    i: SITE + 'logos/Noticia%20WC2026%2017-7.png',
+  },
   'kits-t3-2026': {
     t: 'Top Secret FC presenta sus kits T3 con Nike — negro, blanco y amarillo',
     i: SITE + 'logos/T3%20Kits.png',
