@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'mundial-2026-finalissima',
+    pinned: false,
+    category: 'Selección',
+    title: '"Ganamos la final": Argentina tumbó a Inglaterra y el domingo va por la Finalíssima ante España',
+    date: '2026-07-17',
+    dateLabel: '17 de julio de 2026',
+    excerpt: 'Remontada épica en Atlanta: Argentina le dio vuelta el partido a Inglaterra con goles de Enzo Fernández y Lautaro Martínez sobre el final y jugará su segunda final de Mundial consecutiva. El domingo, España en el MetLife.',
+    image: 'logos/Noticia WC2026 17-7.webp',
+    body: [
+      'Había partidos que valían una final, y el del miércoles en Atlanta era uno de ellos. <strong>Argentina 2, Inglaterra 1</strong> — pero el resultado no cuenta la película. La Selección estuvo abajo en el marcador durante casi todo el partido, contra un rival que manejó los tiempos y pareció tener la clasificación controlada. Hasta que llegaron los minutos donde los equipos grandes se hacen grandes.',
+      '<strong>Enzo Fernández a los 85 y Lautaro Martínez en el 90+2.</strong> Dos golpes en siete minutos para dar vuelta una semifinal de Mundial contra Inglaterra. La remontada no tiene precedentes en la historia reciente de la Selección: nunca había revertido un resultado adverso en una instancia de este calibre. Y el premio es enorme — <strong>segunda final de Mundial consecutiva</strong>, algo que ninguna generación argentina había logrado.',
+      'Del otro lado del cuadro, <strong>España despachó 2-0 a Francia</strong> y espera en la final del <strong>domingo 19 de julio en el MetLife Stadium</strong>. Campeón del mundo vigente contra campeón de Europa vigente: la que todos llamaban "la Finalíssima" cuando parecía un cruce imposible, ahora tiene fecha, sede y los dos mejores equipos del ciclo frente a frente. No hay manera de pedir más.',
+      'En el vestuario de Top Secret la semifinal se vivió como se viven estas cosas en cualquier vestuario argentino: en grupo, a los gritos, y con la promesa de que el domingo se repite. Ya lo había dicho el capitán en la nota de ayer — <em>la final de la Selección carga las pilas, no distrae</em>. El domingo se para el país, y este club es parte del país. <strong>Vamos Argentina.</strong> 🖤⭐',
+    ],
+    shareCaption: '🇦🇷 GANAMOS LA FINAL, AHORA VAMOS POR LA FINALÍSSIMA\n\nArgentina 2-1 Inglaterra: remontada épica con goles de Enzo Fernández (85\') y Lautaro Martínez (90+2\').\n\nDomingo 19/7 · Final vs España · MetLife Stadium\n\n#VamosArgentina #Mundial2026 #TopSecretFC',
+    shareCaptions: {
+      ig: '🇦🇷 A LA FINAL DEL MUNDO\n\nArgentina 2-1 Inglaterra. Enzo (85\') y Lautaro (90+2\') para la remontada más épica.\n\nDomingo: la Finalíssima vs España.\n\nSeguinos → @fctopsecret\n\n#VamosArgentina #Mundial2026 #TopSecretFC',
+      x:  '🇦🇷 Ganamos la final. Ahora vamos por la Finalíssima.\n\nArgentina 2-1 Inglaterra — Enzo 85\', Lautaro 90+2\'. Segunda final de Mundial consecutiva.\n\nDomingo 19/7 vs España.\n\n#VamosArgentina #Mundial2026',
+      fb: '🇦🇷 GANAMOS LA FINAL, AHORA VAMOS POR LA FINALÍSSIMA\n\nArgentina le dio vuelta la semifinal a Inglaterra en Atlanta:\n\n⚽ Enzo Fernández (85\')\n⚽ Lautaro Martínez (90+2\')\n\nSegunda final de Mundial consecutiva. El domingo 19/7, España en el MetLife Stadium.\n\nEl domingo se para el país. Vamos Argentina.\n\nSeguinos en Instagram y X: @fctopsecret\n\n#VamosArgentina #Mundial2026 #TopSecretFC',
+    },
+  },
+  {
     id: 'kits-t3-2026',
     pinned: true,
     category: 'Institución',
