@@ -37,9 +37,8 @@ const KITS_PATH  = path.resolve('logos/T3 Kits.png');
 // El evaluador debe juzgar contra el ESTILO DEL DÍA, no contra una paleta fija:
 // exigir siempre negro+dorado haría rechazar imágenes correctas de estilos claros
 // (editorial revista, lluvia teal, estadio azul, etc.).
-function buildEvalPrompt(style, draft) {
+function buildEvalPrompt(style, draft, mentioned) {
   const isSeleccion = /^selecc/i.test(draft.category || '');
-  const mentioned = extractMentionedPlayers(draft);
   const identityBlock = mentioned.length > 0
     ? `
 JUGADORES DE ESTA NOTICIA — identidad visual correcta (rasgos → nombre y dorsal):
@@ -243,15 +242,56 @@ async function fetchDraft() {
 
 // Máximo de jugadores en escena: cada render extra es un adjunto más que
 // procesar (generación más pesada/lenta) y una identidad más que ChatGPT
-// puede mezclar. Se priorizan los primeros mencionados en la nota.
+// puede mezclar.
 const MAX_FEATURED_PLAYERS = 3;
 
 function extractMentionedPlayers(draft) {
   const text = [draft.title, draft.excerpt, ...(draft.body || [])].join(' ');
   return PLAYERS_WITH_RENDERS
     .filter(p => text.includes(p))
-    .sort((a, b) => text.indexOf(a) - text.indexOf(b))
+    .sort((a, b) => text.indexOf(a) - text.indexOf(b));
+}
+
+// Rotación de protagonistas: entre los mencionados en la nota se priorizan los
+// que hace más tiempo no aparecen en una imagen (historial en Firestore), para
+// no mostrar siempre a los mismos. Empate → orden de aparición en la nota.
+function selectFeaturedPlayers(allMentioned, featuredHistory) {
+  const lastFeatured = new Map(); // player -> índice en el historial (0 = ayer)
+  featuredHistory.forEach((e, i) => {
+    if (!lastFeatured.has(e.player)) lastFeatured.set(e.player, i);
+  });
+  const recency = p => lastFeatured.has(p) ? lastFeatured.get(p) : Infinity;
+  return [...allMentioned]
+    .sort((a, b) => recency(b) - recency(a) || allMentioned.indexOf(a) - allMentioned.indexOf(b))
     .slice(0, MAX_FEATURED_PLAYERS);
+}
+
+const FIRESTORE_FEATURED_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/featured_players_history';
+
+async function fetchFeaturedHistory() {
+  try {
+    const res = await fetch(FIRESTORE_FEATURED_HISTORY);
+    const doc = await res.json();
+    if (doc.error) return [];
+    const values = doc.fields?.entries?.arrayValue?.values || [];
+    return values.map(v => ({
+      player: v.mapValue.fields.player.stringValue,
+      date:   v.mapValue.fields.date.stringValue,
+    }));
+  } catch { return []; }
+}
+
+async function saveFeaturedHistory(players, date, history) {
+  const updated = [...players.map(p => ({ player: p, date })), ...history].slice(0, 40);
+  const values = updated.map(e => ({ mapValue: { fields: {
+    player: { stringValue: e.player },
+    date:   { stringValue: e.date   },
+  }}}));
+  await fetch(FIRESTORE_FEATURED_HISTORY, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: { entries: { arrayValue: { values } } } }),
+  }).catch(() => {});
 }
 
 function buildScene(draft, mentionedPlayers) {
@@ -417,13 +457,14 @@ Usá cada adjunto según su función:
   - "Top-Secret.png": versión metálica plateada/negra — usala cuando el escudo es un objeto físico de la escena (banderín, parche en la camiseta, trofeo, pared del vestuario).
   Reproducí el diseño EXACTAMENTE como en los adjuntos. PROHIBIDO rediseñarlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros diseños).
 
-• "T3 Kits.png" (adjunto) → referencia de los tres kits del club:
-  - Local: camiseta negra
-  - Alternativo: camiseta blanca
-  - Tercer kit: camiseta amarilla
-  Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual. Reproducí el diseño del kit tal cual la referencia.
+• "T3 Kits.png" (adjunto) → referencia SOLO de silueta, corte y color de los tres kits.
+  ⚠️ Ese póster viene del videojuego y trae un sponsor "AIA" y logos Nike QUE NO EXISTEN en el kit real del club — NO los copies. El diseño CANÓNICO de cada kit es el que sigue (este texto manda por sobre la imagen):
+  - KIT LOCAL (negro): camiseta negra de textura sutil, cuello redondo negro; el ÚNICO gráfico del pecho es el escudo circular del club. Short negro con dorsal blanco. Medias negras con "TSFC" en blanco.
+  - KIT ALTERNATIVO (blanco): camiseta blanca con hombros y mangas raglán azul marino y cuello azul marino; escudo del club en el pecho. Short blanco con dorsal azul marino. Medias blancas con puño azul marino y "TSFC".
+  - TERCER KIT (amarillo): camiseta amarilla con cuello en V azul marino y vivos azul marino; escudo del club en el pecho. Short amarillo con dorsal azul marino. Medias amarillas con "TSFC".
+  Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual.
   ⚠️ Los ÚNICOS colores de camiseta válidos son esos tres: NEGRO, BLANCO o AMARILLO. Una camiseta azul, roja, bordó o de cualquier otro color es un ERROR — el club no tiene kits de otros colores.
-  ⚠️ La camiseta NO lleva sponsors comerciales (nada de "AIA", "Emirates", "Fly Emirates" ni marcas deportivas como Nike/Adidas) y NO es el kit de ningún club real: no copies el diseño de la camiseta del Tottenham, Real Madrid ni ningún equipo existente. Reproducí ÚNICAMENTE el diseño del adjunto "T3 Kits.png".${isSeleccion ? `
+  ⚠️ En el pecho NO hay texto de sponsor (nada de "AIA", "Emirates" ni ningún otro) y NO hay swoosh de Nike ni logo de ninguna marca deportiva en camiseta, short ni medias. El único logo permitido en la ropa es el escudo de Top Secret FC. El kit tampoco es el de ningún club real (Tottenham, Real Madrid, Boca ni ninguno).${isSeleccion ? `
   ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: esta nota es sobre la Selección Argentina. La camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA y preferible para jugadores o elementos que representen a la Selección (siempre sin sponsors ni logos de marcas). Los kits del club aplican solo si aparece un jugador de Top Secret representando al club (por ejemplo, el plantel mirando el partido).` : ''}
 
 • Renders de jugadores adjuntos: cada render es la referencia obligatoria de la CARA, el PELO, la PIEL, los accesorios (máscaras, anteojos, vinchas, vendas) y el físico de uno de nuestros jugadores. Identificá cuál es cuál por los rasgos de la lista de IDENTIDAD de arriba.
@@ -904,9 +945,12 @@ async function main() {
     return;
   }
 
-  const mentioned = extractMentionedPlayers(draft);
+  const allMentioned    = extractMentionedPlayers(draft);
+  const featuredHistory = await fetchFeaturedHistory();
+  const mentioned       = selectFeaturedPlayers(allMentioned, featuredHistory);
   if (mentioned.length > 0) {
-    console.log('Jugadores mencionados con renders:', mentioned.join(', '));
+    console.log('Jugadores mencionados con renders:', allMentioned.join(', '));
+    console.log('Protagonistas de la imagen (rotación):', mentioned.join(', '));
   } else {
     console.log('Sin jugadores específicos — composición institucional.');
   }
@@ -932,7 +976,7 @@ async function main() {
   const dateStr      = draft.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   const styleHistory = await fetchStyleHistory();
   const chosenStyle  = pickStyle(styleHistory, draft);
-  const evalPrompt   = buildEvalPrompt(chosenStyle, draft);
+  const evalPrompt   = buildEvalPrompt(chosenStyle, draft, mentioned);
   console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
   if (draft.imageBrief) console.log(`Brief visual del artículo: ${draft.imageBrief.slice(0, 100)}...`);
 
@@ -1063,6 +1107,7 @@ async function main() {
 
     await updateDraft(draft, lastPostFile, storyFile);
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
+    if (mentioned.length > 0) await saveFeaturedHistory(mentioned, dateStr, featuredHistory);
     gitPushImages(lastPostFile, storyFile);
 
     console.log('\n✓ Listo.');
