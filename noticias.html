@@ -548,6 +548,11 @@
       padding: 4px 8px;
       text-align: center;
     }
+    .draft-img-label a {
+      color: var(--gold);
+      text-decoration: underline;
+      cursor: pointer;
+    }
     .draft-actions {
       display: flex;
       gap: 10px;
@@ -1002,6 +1007,7 @@ function openArticle(id) {
   document.getElementById('am-actions').innerHTML = `
     <button class="btn-primary" onclick="closeArticle(); openShare('${n.id}')">Compartir</button>
     <button class="btn-secondary" onclick="copyLink('${n.id}')">Copiar link</button>
+    ${n.imageStory ? `<button class="btn-secondary" onclick="downloadImage('${n.imageStory.replace(/'/g, "\\'")}', '${n.id}_story')">Descargar historia</button>` : ''}
   `;
   document.getElementById('article-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1011,6 +1017,26 @@ function closeArticle() {
   if (location.hash) history.pushState(null, '', location.pathname + location.search);
   document.getElementById('article-overlay').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+// Descarga una imagen del sitio (misma origin en GitHub Pages) como archivo.
+// Fallback: si el fetch falla (p. ej. URL externa), abre la imagen en otra pestaña.
+async function downloadImage(src, baseName) {
+  try {
+    const res = await fetch(src);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const ext  = (src.split('.').pop() || 'png').split('?')[0].toLowerCase();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${baseName}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  } catch (e) {
+    window.open(src, '_blank');
+  }
 }
 
 function copyLink(id) {
@@ -1206,8 +1232,8 @@ function _renderDraftBanner(draft) {
   document.getElementById('draft-excerpt').textContent = draft.excerpt  || '';
   const imagesEl = document.getElementById('draft-images');
   imagesEl.innerHTML = '';
-  if (draft.imagePost)  imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imagePost}" alt="Post"></div><div class="draft-img-label">Post (1086×1448)</div></div>`;
-  if (draft.imageStory) imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imageStory}" alt="Story"></div><div class="draft-img-label">Story (941×1672)</div></div>`;
+  if (draft.imagePost)  imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imagePost}" alt="Post"></div><div class="draft-img-label">Post (1086×1448) · <a href="#" onclick="event.preventDefault(); downloadImage('${draft.imagePost.replace(/'/g, "\\'")}', '${(draft.id || 'draft')}_post')">Descargar</a></div></div>`;
+  if (draft.imageStory) imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imageStory}" alt="Story"></div><div class="draft-img-label">Story (941×1672) · <a href="#" onclick="event.preventDefault(); downloadImage('${draft.imageStory.replace(/'/g, "\\'")}', '${(draft.id || 'draft')}_story')">Descargar</a></div></div>`;
 }
 
 function expandDraftBanner() {
