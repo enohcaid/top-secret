@@ -17,6 +17,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { createInterface } from 'readline';
+import sharp from 'sharp';
 
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
@@ -24,6 +25,17 @@ const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const DEBUG_DIR       = path.resolve('scripts'); // screenshots de debug fuera de Daily News (no se commitean)
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
 const MAX_ATTEMPTS    = 3;
+// ChatGPT ignora los píxeles pedidos en texto y a veces devuelve el post en la
+// misma proporción angosta de la story (bug 2026-07-20: las dos imágenes
+// salieron 941x1672). Esto es un chequeo MECÁNICO sobre los píxeles reales
+// —no depende del criterio del evaluador visual— antes de aceptar cada pieza.
+const POST_MIN_RATIO  = 0.68; // ancho/alto por debajo de esto = parece story, no post
+const STORY_MAX_RATIO = 0.68; // ancho/alto por encima de esto = parece post, no story
+
+async function imageRatio(filePath) {
+  const meta = await sharp(filePath).metadata();
+  return { width: meta.width, height: meta.height, ratio: meta.width / meta.height };
+}
 
 // Referencias visuales que se ADJUNTAN a cada mensaje de generación.
 // Los archivos del proyecto de ChatGPT no llegan de forma confiable al
@@ -434,7 +446,8 @@ ${action}`;
 ⚠️ CRÍTICO — RENDERS Y UNIFORME: Los archivos de renders son imágenes de referencia de nuestros jugadores reales. Si un jugador aparece mencionado, DEBÉS usar su render del proyecto para representarlo — no inventes su cara ni apariencia. El uniforme que aparece en el render es intocable: los colores del kit del jugador no deben ser modificados por la paleta del fondo ni por el estilo del día. La paleta aplica SOLO al ambiente, fondo y elementos gráficos.
 
 ═══ SPECS TÉCNICAS ═══
-- Dimensiones: 1086x1448 (ligeramente vertical, formato post)
+- Formato: POST de feed de Instagram — proporción 4:5 (el ancho es aproximadamente el 80% del alto). Un encuadre CLARAMENTE MÁS ANCHO Y MÁS CUADRADO que una Story.
+  ⚠️ PROHIBIDO el encuadre extra alto y angosto de pantalla completa de celular (proporción 9:16, tipo Story de Instagram/Reel) — ese formato es exclusivo de la versión Story, que se genera DESPUÉS a partir de esta imagen. Esta es la versión ANCHA.
 - Paleta del día (fondo y diseño gráfico, no el uniforme): ${style.palette}
 
 ${brandFormatBlock(draft)}
@@ -491,11 +504,13 @@ Este punto debe ser claramente diferente y mejor en la imagen nueva.` : ''}`;
 }
 
 function buildResizePrompt() {
-  return `Tomá la imagen que acabás de generar y recreala en formato vertical historia (941x1672, orientación retrato/portrait), pensada para Instagram Stories.
+  return `Tomá la imagen que acabás de generar y recreala en formato Instagram STORY: pantalla completa de celular, proporción 9:16.
 
-Mantené EXACTAMENTE la misma escena, el mismo personaje/jugador, la misma pose, los mismos colores y el mismo estilo editorial — es la MISMA pieza, solo adaptada a un encuadre vertical más alto y angosto.
+⚠️ Esta versión tiene que ser NOTORIAMENTE MÁS ALTA Y ANGOSTA que la imagen anterior — el post que acabás de generar era ancho, proporción 4:5. Si esta versión sale con una proporción parecida a la del post, está MAL: tiene que ser un encuadre vertical mucho más extremo, tipo pantalla completa de un celular en mano.
 
-Único cambio es de composición: reacomodá la escena para que ocupe bien el espacio vertical más alto y angosto. No cambies el tema, el contenido ni el mensaje de la imagen.`;
+Mantené EXACTAMENTE la misma escena, el mismo personaje/jugador, la misma pose, los mismos colores y el mismo estilo editorial — es la MISMA pieza, solo adaptada a un encuadre vertical mucho más alto y angosto.
+
+Único cambio es de composición: reacomodá la escena para que ocupe bien el espacio vertical extremo. No cambies el tema, el contenido ni el mensaje de la imagen.`;
 }
 
 async function waitForGeneratedImage(page, excludeSrcs = []) {
@@ -1025,6 +1040,15 @@ async function main() {
       lastPostFile   = postFile;
       lastPostImgUrl = postImgUrl;
 
+      // Chequeo mecánico de proporción — sobre los píxeles reales, no sobre lo
+      // que dice el prompt (ChatGPT lo ignora seguido y devuelve el post con
+      // la misma proporción angosta que la story; ver POST_MIN_RATIO arriba).
+      const postDims = await imageRatio(path.join(OUTPUT_DIR, postFile));
+      const wrongPostFormat = postDims.ratio < POST_MIN_RATIO;
+      if (wrongPostFormat) {
+        console.log(`  ⚠ Formato incorrecto: post salió ${postDims.width}x${postDims.height} (proporción ${postDims.ratio.toFixed(2)}) — parece story, no post.`);
+      }
+
       if (FLAG_REVIEW) {
         // Revisión humana interactiva
         console.log(`\n  Post: Renders/Daily News/${postFile}`);
@@ -1035,7 +1059,14 @@ async function main() {
         if (!correction) console.log('Sin feedback — regenerando con el mismo prompt.');
         if (attempt === MAX_ATTEMPTS) console.log('Máximo de intentos alcanzado — usando esta versión.');
         else await deleteChatById(page, currentChatId(page)); // chat del intento descartado
+      } else if (wrongPostFormat && attempt < MAX_ATTEMPTS) {
+        // Rechazo técnico por proporción — ni vale la pena gastar una llamada
+        // de evaluación visual, el problema es medible en los píxeles.
+        correction = `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — MUY angosta y alta, formato Story. Necesito el formato POST: notoriamente MÁS ANCHO Y MÁS CUADRADO, proporción 4:5, nunca el encuadre extra alto de una Story.`;
+        console.log(`  Corrección: "${correction}"`);
+        await deleteChatById(page, currentChatId(page));
       } else {
+        if (wrongPostFormat) console.log('  Máximo de intentos alcanzado — usando última versión igual (formato incorrecto).');
         // Evaluación automática con ChatGPT Vision
         let evalResponse = null;
         try {
@@ -1078,8 +1109,25 @@ async function main() {
       }
       storyExclude.push(storyImgUrl);
 
+      // Mismo chequeo mecánico que el post, en espejo: la story tiene que ser
+      // notoriamente más angosta, no una repetición del post en otra pestaña.
+      const storyDims = await imageRatio(path.join(OUTPUT_DIR, storyFile));
+      const wrongStoryFormat = storyDims.ratio > STORY_MAX_RATIO;
+      if (wrongStoryFormat) {
+        console.log(`  ⚠ Formato incorrecto: story salió ${storyDims.width}x${storyDims.height} (proporción ${storyDims.ratio.toFixed(2)}) — parece post, no story.`);
+      }
+
       // En modo review el humano ya dirige; y una sola corrección automática alcanza
-      if (FLAG_REVIEW || storyCorrection !== null || attempt === 3) break;
+      if (FLAG_REVIEW || storyCorrection !== null || attempt === 3) {
+        if (wrongStoryFormat && attempt === 3) console.log('  Máximo de intentos alcanzado — usando última versión igual (formato incorrecto).');
+        break;
+      }
+
+      if (wrongStoryFormat) {
+        storyCorrection = `La imagen anterior salió en proporción ${storyDims.ratio.toFixed(2)} (${storyDims.width}x${storyDims.height}) — parece un post, no una story. Necesito el formato STORY: mucho MÁS ALTO Y ANGOSTO, proporción 9:16, pantalla completa de celular.`;
+        console.log(`  Corrección: "${storyCorrection}"`);
+        continue;
+      }
 
       let storyEval = null;
       try {
