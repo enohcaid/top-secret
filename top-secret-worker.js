@@ -456,7 +456,8 @@ export default {
         const TS_KEY = '-OvQetM8ROfp55aARizV';
 
         // Fixed schedule: Tue & Thu, 2 rounds/day at 22:30 and 23:00
-        // Exception: R21 moved to Tue Jul 21 at 23:30 — triple date to close the tournament
+        // Exception: R17/R18 (Thu Jul 16) postponed to Tue Jul 21.
+        // Exception: R19-R21 (Tue Jul 21, triple date to close the tournament) postponed to Thu Jul 23.
         const SCHEDULE = [
           null,                        // index 0 unused
           {date:'2026-06-18',time:'22:30'}, // R1
@@ -475,11 +476,11 @@ export default {
           {date:'2026-07-09',time:'23:00'}, // R14
           {date:'2026-07-14',time:'22:30'}, // R15
           {date:'2026-07-14',time:'23:00'}, // R16
-          {date:'2026-07-16',time:'22:30'}, // R17
-          {date:'2026-07-16',time:'23:00'}, // R18
-          {date:'2026-07-21',time:'22:30'}, // R19
-          {date:'2026-07-21',time:'23:00'}, // R20
-          {date:'2026-07-21',time:'23:30'}, // R21 — triple fecha de cierre
+          {date:'2026-07-21',time:'22:30'}, // R17
+          {date:'2026-07-21',time:'23:00'}, // R18
+          {date:'2026-07-23',time:'22:30'}, // R19
+          {date:'2026-07-23',time:'23:00'}, // R20
+          {date:'2026-07-23',time:'23:30'}, // R21 — triple fecha de cierre
         ];
 
         // Logo fallback for teams not registered in CopáFácil but known from VPG
