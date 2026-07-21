@@ -155,6 +155,12 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 1. Make the change (both `PAGES` lists if nav changed).
 2. Bump `?v=N` on every page's script tags. Commit.
 
+**Reprogramar una fecha del Campeonato de Invierno VPUG (pretemporada)**
+1. Edit the `SCHEDULE` array in `top-secret-worker.js` (`/copafacil-pretemporada` handler) — this is the single source of truth for round dates/times; both `calendario.html` and `convocatoria.html` fetch it live. Redeploy the Worker.
+2. Also update the matching entries in `INVIERNO_SCHEDULE` in `convocatoria.html` — it's only a pre-fetch fallback (used for an instant before the live fetch resolves), so a stale date there is low-risk but should still match.
+3. **Push to `main`** — GitHub Pages only serves what's pushed; a local commit alone leaves the live site stale (this bit us: `convocatoria.html` kept showing the old triple date until pushed).
+4. If a match result needs correcting and the external CopáFácil API hasn't caught up (e.g. wrong/missing score), use `RESULT_OVERRIDES` in the same Worker handler rather than editing `SEED_MATCHES` — this bracket's data is API-driven, not part of `SEED_MATCHES`.
+
 ## PRP Workflow
 
 For larger features: `/generate-prp <feature>` → review the PRP in `PRPs/` (gitignored, local) → `/execute-prp PRPs/<feature>.md`. Existing PRPs: daily news automation, T3 theme, T2→T3 transition.

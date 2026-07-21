@@ -730,13 +730,13 @@ function getTodayMatches() {
   const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase() === (v.rival||'').toLowerCase())
   );
-  const fromInvierno = INVIERNO_SCHEDULE
+  // Prefer live dates/rivals from the Worker (single source of truth for reprogramaciones);
+  // INVIERNO_SCHEDULE is only a pre-fetch fallback so the panel isn't empty on first paint.
+  const inviernoSource = inviernoMatches.length ? inviernoMatches : INVIERNO_SCHEDULE;
+  const fromInvierno = inviernoSource
     .filter(m => m.date === TODAY)
     .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => {
-      const dyn = inviernoMatches.find(d => d.rival === m.rival && d.date === m.date);
-      return { ...m, badge: dyn?.rivalLogo || null };
-    });
+    .map(m => ({ ...m, league: 'VPUG', badge: m.rivalLogo || VPUG_T2_BADGES[m.rival] || null }));
   return [...fromCustom, ...fromVpugT2, ...from11x11, ...fromInvierno, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
