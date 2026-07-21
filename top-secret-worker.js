@@ -483,6 +483,12 @@ export default {
           {date:'2026-07-23',time:'23:30'}, // R21 — triple fecha de cierre
         ];
 
+        // Manual result overrides for matches the external API doesn't reflect correctly
+        // R17 — Ojo al Piojo FC dio de baja el equipo del torneo: W.O. a favor de Top Secret
+        const RESULT_OVERRIDES = {
+          17: { tsGoals: 1, rivGoals: 0, note: 'W.O.' },
+        };
+
         // Logo fallback for teams not registered in CopáFácil but known from VPG
         const VPG_CDN = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
         const LOGO_FALLBACK = {
@@ -536,10 +542,11 @@ export default {
             const isHome    = m.team1 === TS_KEY;
             const rivalKey  = isHome ? m.team2 : m.team1;
             const rival     = teams[rivalKey] || {};
-            const tsGoals   = isHome ? (m.dt?.qt_g1 ?? 0) : (m.dt?.qt_g2 ?? 0);
-            const rivGoals  = isHome ? (m.dt?.qt_g2 ?? 0) : (m.dt?.qt_g1 ?? 0);
-            const finished  = !!m.finished;
             const round     = roundMap[m.m_set];
+            const override  = RESULT_OVERRIDES[round] || null;
+            const tsGoals   = override ? override.tsGoals : isHome ? (m.dt?.qt_g1 ?? 0) : (m.dt?.qt_g2 ?? 0);
+            const rivGoals  = override ? override.rivGoals : isHome ? (m.dt?.qt_g2 ?? 0) : (m.dt?.qt_g1 ?? 0);
+            const finished  = override ? true : !!m.finished;
             const sched     = SCHEDULE[round] || null;
             const result    = !finished ? null : tsGoals > rivGoals ? 'win' : tsGoals < rivGoals ? 'loss' : 'draw';
 
@@ -550,6 +557,7 @@ export default {
               rival: rival.name || '?',
               rivalLogo: rival.logo || null,
               isHome, tsGoals, rivGoals, finished, result,
+              note: override?.note || null,
             });
           }
 
