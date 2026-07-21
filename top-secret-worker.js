@@ -484,10 +484,7 @@ export default {
         ];
 
         // Manual result overrides for matches the external API doesn't reflect correctly
-        // R17 — Ojo al Piojo FC dio de baja el equipo del torneo: W.O. a favor de Top Secret
-        const RESULT_OVERRIDES = {
-          17: { tsGoals: 1, rivGoals: 0, note: 'W.O.' },
-        };
+        const RESULT_OVERRIDES = {};
 
         // Logo fallback for teams not registered in CopáFácil but known from VPG
         const VPG_CDN = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
@@ -546,7 +543,9 @@ export default {
             const override  = RESULT_OVERRIDES[round] || null;
             const tsGoals   = override ? override.tsGoals : isHome ? (m.dt?.qt_g1 ?? 0) : (m.dt?.qt_g2 ?? 0);
             const rivGoals  = override ? override.rivGoals : isHome ? (m.dt?.qt_g2 ?? 0) : (m.dt?.qt_g1 ?? 0);
-            const finished  = override ? true : !!m.finished;
+            // m.finished can be set before a score is entered (placeholder) — only treat as
+            // finished once an actual score exists, otherwise it wrongly shows a 0-0 result.
+            const finished  = override ? true : !!m.finished && !!m.dt;
             const sched     = SCHEDULE[round] || null;
             const result    = !finished ? null : tsGoals > rivGoals ? 'win' : tsGoals < rivGoals ? 'loss' : 'draw';
 
