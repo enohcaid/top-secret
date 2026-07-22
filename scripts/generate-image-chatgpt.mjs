@@ -18,6 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import { createInterface } from 'readline';
 import sharp from 'sharp';
+import { pathToFileURL } from 'url';
 
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
@@ -1165,4 +1166,23 @@ async function main() {
   }
 }
 
-main().catch(e => { console.error('Error:', e.message); process.exit(1); });
+// Solo corre el pipeline diario cuando se invoca directamente (node
+// generate-image-chatgpt.mjs); permite importar las funciones de abajo
+// desde un one-off (p.ej. scripts/fix-story-once.mjs) sin disparar main().
+const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isDirectRun) {
+  main().catch(e => { console.error('Error:', e.message); process.exit(1); });
+}
+
+export {
+  IMAGE_STYLES,
+  PROJECT_URL,
+  imageRatio,
+  buildEvalPrompt,
+  buildResizePrompt,
+  generateImage,
+  evaluateImage,
+  deleteChatById,
+  currentChatId,
+  gitPushImages,
+};
