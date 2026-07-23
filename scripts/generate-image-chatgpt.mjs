@@ -154,9 +154,17 @@ const FLAG_FEEDBACK = _fbIdx >= 0 ? _args[_fbIdx + 1] : null;
 // Basta con agregar el PNG acá — se adjunta al mensaje de generación; ya no
 // hace falta subirlo al proyecto de ChatGPT
 const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');
+
+// Jugadores con licencia/baja temporal: siguen en el plantel y su render se
+// mantiene en T3-Frentes/, pero no se los usa como protagonistas de imágenes
+// de noticias hasta nuevo aviso. Sacar del array cuando vuelvan a estar disponibles.
+// - BlackPanther-CG: con licencia desde 2026-07-23, hasta nuevo aviso.
+const PLAYERS_ON_LEAVE = ['BlackPanther-CG'];
+
 const PLAYERS_WITH_RENDERS = fs.readdirSync(T3_FRENTES_DIR)
   .filter(f => /\.(png|jpg)$/i.test(f))
-  .map(f => f.replace(/\.(png|jpg)$/i, ''));
+  .map(f => f.replace(/\.(png|jpg)$/i, ''))
+  .filter(p => !PLAYERS_ON_LEAVE.includes(p));
 
 // Rasgos físicos de cada render — el generador de imágenes de ChatGPT NO ve los
 // nombres de archivo de los adjuntos, así que el mapeo cara→gamertag tiene que
