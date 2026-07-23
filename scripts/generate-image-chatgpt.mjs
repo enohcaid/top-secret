@@ -28,9 +28,12 @@ const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40
 const MAX_ATTEMPTS    = 3;
 // ChatGPT ignora los píxeles pedidos en texto y a veces devuelve el post en la
 // misma proporción angosta de la story (bug 2026-07-20: las dos imágenes
-// salieron 941x1672). Esto es un chequeo MECÁNICO sobre los píxeles reales
-// —no depende del criterio del evaluador visual— antes de aceptar cada pieza.
+// salieron 941x1672), o directamente APAISADO/horizontal (bug 2026-07-20 a
+// 2026-07-23: posts saliendo 1402x1122, ratio 1.25 — ancho > alto). Esto es un
+// chequeo MECÁNICO sobre los píxeles reales —no depende del criterio del
+// evaluador visual— antes de aceptar cada pieza.
 const POST_MIN_RATIO  = 0.68; // ancho/alto por debajo de esto = parece story, no post
+const POST_MAX_RATIO  = 0.90; // ancho/alto por encima de esto = apaisado/horizontal, no post
 const STORY_MAX_RATIO = 0.68; // ancho/alto por encima de esto = parece post, no story
 
 async function imageRatio(filePath) {
@@ -446,8 +449,9 @@ ${action}`;
 ⚠️ CRÍTICO — RENDERS Y UNIFORME: Los archivos de renders son imágenes de referencia de nuestros jugadores reales. Si un jugador aparece mencionado, DEBÉS usar su render del proyecto para representarlo — no inventes su cara ni apariencia. El uniforme que aparece en el render es intocable: los colores del kit del jugador no deben ser modificados por la paleta del fondo ni por el estilo del día. La paleta aplica SOLO al ambiente, fondo y elementos gráficos.
 
 ═══ SPECS TÉCNICAS ═══
-- Formato: POST de feed de Instagram — proporción 4:5 (el ancho es aproximadamente el 80% del alto). Un encuadre CLARAMENTE MÁS ANCHO Y MÁS CUADRADO que una Story.
-  ⚠️ PROHIBIDO el encuadre extra alto y angosto de pantalla completa de celular (proporción 9:16, tipo Story de Instagram/Reel) — ese formato es exclusivo de la versión Story, que se genera DESPUÉS a partir de esta imagen. Esta es la versión ANCHA.
+- Formato: POST de feed de Instagram — proporción 4:5, VERTICAL: el ancho es aproximadamente el 80% del alto (ej. 1086×1448 px). SIGUE SIENDO MÁS ALTO QUE ANCHO, solo menos extremo que una Story.
+  ⚠️ PROHIBIDO el encuadre extra alto y angosto de pantalla completa de celular (proporción 9:16, tipo Story de Instagram/Reel) — ese formato es exclusivo de la versión Story, que se genera DESPUÉS a partir de esta imagen.
+  ⚠️ PROHIBIDO TAMBIÉN el encuadre APAISADO/HORIZONTAL (ancho mayor que el alto, tipo panorámica o 16:9) — el post NUNCA es más ancho que alto. "Más ancho que la Story" significa menos angosto, no horizontal.
 - Paleta del día (fondo y diseño gráfico, no el uniforme): ${style.palette}
 
 ${brandFormatBlock(draft)}
@@ -1044,9 +1048,11 @@ async function main() {
       // que dice el prompt (ChatGPT lo ignora seguido y devuelve el post con
       // la misma proporción angosta que la story; ver POST_MIN_RATIO arriba).
       const postDims = await imageRatio(path.join(OUTPUT_DIR, postFile));
-      const wrongPostFormat = postDims.ratio < POST_MIN_RATIO;
+      const postTooNarrow = postDims.ratio < POST_MIN_RATIO;
+      const postTooWide   = postDims.ratio > POST_MAX_RATIO;
+      const wrongPostFormat = postTooNarrow || postTooWide;
       if (wrongPostFormat) {
-        console.log(`  ⚠ Formato incorrecto: post salió ${postDims.width}x${postDims.height} (proporción ${postDims.ratio.toFixed(2)}) — parece story, no post.`);
+        console.log(`  ⚠ Formato incorrecto: post salió ${postDims.width}x${postDims.height} (proporción ${postDims.ratio.toFixed(2)}) — ${postTooNarrow ? 'parece story, no post' : 'apaisado/horizontal, no post'}.`);
       }
 
       if (FLAG_REVIEW) {
@@ -1062,7 +1068,9 @@ async function main() {
       } else if (wrongPostFormat && attempt < MAX_ATTEMPTS) {
         // Rechazo técnico por proporción — ni vale la pena gastar una llamada
         // de evaluación visual, el problema es medible en los píxeles.
-        correction = `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — MUY angosta y alta, formato Story. Necesito el formato POST: notoriamente MÁS ANCHO Y MÁS CUADRADO, proporción 4:5, nunca el encuadre extra alto de una Story.`;
+        correction = postTooNarrow
+          ? `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — MUY angosta y alta, formato Story. Necesito el formato POST: notoriamente MÁS ANCHO Y MÁS CUADRADO, proporción 4:5, nunca el encuadre extra alto de una Story.`
+          : `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — APAISADA/HORIZONTAL, el ancho es mayor que el alto. Eso está mal: el post SIGUE SIENDO VERTICAL, más alto que ancho, proporción 4:5 (ej. 1086x1448), nunca panorámico.`;
         console.log(`  Corrección: "${correction}"`);
         await deleteChatById(page, currentChatId(page));
       } else {
@@ -1177,9 +1185,26 @@ if (isDirectRun) {
 export {
   IMAGE_STYLES,
   PROJECT_URL,
+  MAX_ATTEMPTS,
+  POST_MIN_RATIO,
+  POST_MAX_RATIO,
+  STORY_MAX_RATIO,
+  CREST_PATH,
+  CREST_WHITE_PATH,
+  KITS_PATH,
+  T3_FRENTES_DIR,
+  PLAYERS_WITH_RENDERS,
   imageRatio,
   buildEvalPrompt,
   buildResizePrompt,
+  buildPrompt,
+  pickStyle,
+  fetchStyleHistory,
+  saveStyleHistory,
+  extractMentionedPlayers,
+  selectFeaturedPlayers,
+  fetchFeaturedHistory,
+  saveFeaturedHistory,
   generateImage,
   evaluateImage,
   deleteChatById,
