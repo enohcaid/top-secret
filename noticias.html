@@ -1107,10 +1107,26 @@ function getCaption() {
   return document.getElementById('share-caption').value;
 }
 
+// Límite real de Instagram para el texto de una publicación (caption).
+const IG_CAPTION_LIMIT = 2200;
+
+function fullArticleText(n) {
+  if (!n.body || !n.body.length) return '';
+  const bodyText = n.body.map(p => String(p).replace(/<[^>]+>/g, '').trim()).join('\n\n');
+  return `${n.title}\n\n${bodyText}`;
+}
+
 function platformCaption(key) {
   if (!_shareNews) return '';
-  const base = (_shareNews.shareCaptions || {})[key] || _shareNews.shareCaption || '';
   const url = BASE_URL + '#' + _shareNews.id;
+  // Instagram: si la nota completa entra en el límite de caption, se comparte
+  // entera en vez del resumen corto — así no hace falta abrir el link.
+  if (key === 'ig') {
+    const full = fullArticleText(_shareNews);
+    const withLink = full && (full + '\n\n🔗 ' + url);
+    if (withLink && withLink.length <= IG_CAPTION_LIMIT) return withLink;
+  }
+  const base = (_shareNews.shareCaptions || {})[key] || _shareNews.shareCaption || '';
   return base + '\n\n🔗 ' + url;
 }
 
