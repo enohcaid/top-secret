@@ -151,6 +151,12 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 1. Create `Renders/<gamertag>/` with renders (PNG, transparent background — review each image visually before committing).
 2. Add to `plantilla.html` roster data with the gamertag verbatim.
 
+**Player leaves the club**
+1. Remove them from the roster data in `plantilla.html` (`ROSTER_T3`) and `convocatoria.html` (`PLAYERS` array, and any hardcoded slot in `autoLineup()`).
+2. Delete `Renders/T3-Frentes/<gamertag>.png` (gitignored, local-only) and their entry in `PLAYER_TRAITS` in `scripts/generate-image-chatgpt.mjs` — this is what stops the daily news image generator from picking them as a featured player. **Never delete `Renders/<gamertag>/`** (the per-player render source folder) — historical archive, same as any other ex-player.
+3. Remove their row from the table in `scripts/chatgpt-project-instructions.md` and update the same instructions in the live ChatGPT project (this file is only a mirror).
+4. The article-writing routine (the scheduled cloud agent that drafts `news/draft`) is external to this repo and can still write an ex-player's name into an article's text from stale knowledge — steps 1-3 only stop them from appearing as an image protagonist, not from being mentioned in prose. If that happens, discard/regenerate the draft.
+
 **Edit shared UI (`layout.js` / `mobile-nav.js`)**
 1. Make the change (both `PAGES` lists if nav changed).
 2. Bump `?v=N` on every page's script tags. Commit.

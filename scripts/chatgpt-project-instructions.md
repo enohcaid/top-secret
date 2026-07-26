@@ -4,7 +4,7 @@ Copia versionada de las instrucciones cargadas en el proyecto de ChatGPT que gen
 las imágenes de noticias diarias (ver `generate-image-chatgpt.mjs`, que manda el
 prompt dinámico con estilo del día + escena). Si se editan en ChatGPT, actualizar acá.
 
-Última actualización: 2026-07-21
+Última actualización: 2026-07-25
 
 ---
 
@@ -23,7 +23,6 @@ Cada render del proyecto se llama exactamente igual que el gamertag del jugador.
 
 | # | Gamertag | Pos | Render |
 |---|---|---|---|
-| 52 | slandaco9 | POR | slandaco9.png |
 | 12 | Ivan_Cabj_La12 | POR | Ivan_Cabj_La12.png |
 | 2 | rivarola90 | DFC | rivarola90.png |
 | 3 | Alexisraies23 | DFC | Alexisraies23.png |
