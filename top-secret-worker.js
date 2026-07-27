@@ -481,6 +481,7 @@ export default {
           {date:'2026-07-23',time:'22:30'}, // R19
           {date:'2026-07-23',time:'23:00'}, // R20
           {date:'2026-07-23',time:'23:30'}, // R21 — triple fecha de cierre
+          {home:{date:'2026-07-28',time:'23:00'}, away:{date:'2026-07-28',time:'23:30'}}, // R22 — Cuartos de Final vs Polenta Fria (ida local, vuelta visitante)
         ];
 
         // Manual result overrides for matches the external API doesn't reflect correctly
@@ -546,7 +547,8 @@ export default {
             // m.finished can be set before a score is entered (placeholder) — only treat as
             // finished once an actual score exists, otherwise it wrongly shows a 0-0 result.
             const finished  = override ? true : !!m.finished && !!m.dt;
-            const sched     = SCHEDULE[round] || null;
+            const schedRaw  = SCHEDULE[round] || null;
+            const sched     = schedRaw && (schedRaw.home || schedRaw.away) ? (isHome ? schedRaw.home : schedRaw.away) : schedRaw;
             const result    = !finished ? null : tsGoals > rivGoals ? 'win' : tsGoals < rivGoals ? 'loss' : 'draw';
 
             tsMatches.push({
