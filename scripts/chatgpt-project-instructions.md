@@ -37,7 +37,7 @@ Cada render del proyecto se llama exactamente igual que el gamertag del jugador.
 | 11 | BlackPanther-CG | ED | BlackPanther-CG.png |
 | 9 | fedeavv9 | DC | fedeavv9.png |
 | 96 | Ramiro4588 | DC | Ramiro4588.png |
-| 99 | Yxotx | DC | Yxotx.png |
+| 99 | yzytx0 | DC | yzytx0.png |
 
 Si el dorsal es visible en la imagen, tiene que ser el número de esta tabla.
 Si la noticia no menciona jugadores → composición institucional: el escudo como elemento héroe con gráfica deportiva abstracta.
