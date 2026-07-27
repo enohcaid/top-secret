@@ -186,7 +186,7 @@ const PLAYER_TRAITS = {
   'Ringhiio':        { dorsal: 70,   desc: 'piel trigueña, melena despeinada VIOLETA, anteojos de sol negros' },
   'rivarola90':      { dorsal: 2,    desc: 'piel oscura, melena gris plateada hasta los hombros con vincha negra, chivita canosa, mangas largas oscuras' },
   'RS32-DaniStone':  { dorsal: 13,   desc: 'piel clara, pelo revuelto turquesa/verde agua, máscara celeste cubriendo nariz y boca, anteojos, una manga azul en el brazo derecho' },
-  'Yxotx':           { dorsal: 99,   desc: 'piel oscura, dreadlocks rubio ceniza/grisáceos con vincha negra, máscara de calavera blanca cubriendo nariz y boca, guantes blancos' },
+  'yzytx0':          { dorsal: 99,   desc: 'piel oscura, dreadlocks rubio ceniza/grisáceos con vincha negra, máscara de calavera blanca cubriendo nariz y boca, guantes blancos' },
 };
 
 function playerIdentityLine(p) {
