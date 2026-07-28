@@ -878,7 +878,7 @@ async function waitForTextResponse(page) {
   throw new Error('Timeout esperando veredicto APROBADA/RECHAZADA (3 min)');
 }
 
-async function evaluateImage(context, imagePath, evalPrompt) {
+async function evaluateImage(context, imagePath, evalPrompt, extraRefs = []) {
   console.log('\n  Evaluando imagen con ChatGPT Vision...');
   const page = await context.newPage();
   page.setDefaultTimeout(0);
@@ -887,8 +887,9 @@ async function evaluateImage(context, imagePath, evalPrompt) {
     await page.goto('https://chatgpt.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
 
-    // Adjuntar la imagen a evaluar + el escudo oficial como referencia
-    const evalFiles = [imagePath, CREST_PATH].filter(f => fs.existsSync(f));
+    // Adjuntar la imagen a evaluar + el escudo oficial + referencias extra (p.ej.
+    // fotos in-game del jugador, para comparar identidad contra la fuente real).
+    const evalFiles = [imagePath, CREST_PATH, ...extraRefs].filter(f => fs.existsSync(f));
     const fileInput = page.locator('input[type="file"]').first();
     if (await fileInput.count() > 0) {
       await fileInput.setInputFiles(evalFiles);
