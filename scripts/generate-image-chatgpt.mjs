@@ -22,6 +22,7 @@ import { pathToFileURL } from 'url';
 
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
+const FIRESTORE_PLANTEL      = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/plantel/activo';
 const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const DEBUG_DIR       = path.resolve('scripts'); // screenshots de debug fuera de Daily News (no se commitean)
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
@@ -189,11 +190,33 @@ const PLAYER_TRAITS = {
   'yzytx0':          { dorsal: 99,   desc: 'piel oscura, dreadlocks rubio ceniza/grisáceos con vincha negra, máscara de calavera blanca cubriendo nariz y boca, guantes blancos' },
 };
 
+// Dorsales vigentes desde Firestore (plantel/activo.numeros) — la misma fuente
+// que usan convocatoria.html y plantilla.html, así que un cambio de número
+// hecho ahí (picker de convocatoria) llega acá sin tocar código. Se completa
+// una vez por corrida en main() vía fetchJerseyOverrides(); default {} si falla.
+let JERSEY_OVERRIDES = {};
+
+async function fetchJerseyOverrides() {
+  try {
+    const res = await fetch(FIRESTORE_PLANTEL);
+    const doc = await res.json();
+    if (doc.error) return {};
+    const fields = doc.fields?.numeros?.mapValue?.fields || {};
+    const overrides = {};
+    for (const [name, v] of Object.entries(fields)) {
+      const n = v.integerValue ?? v.stringValue ?? v.doubleValue;
+      if (n != null) overrides[name] = Number(n);
+    }
+    return overrides;
+  } catch { return {}; }
+}
+
 function playerIdentityLine(p) {
   const t = PLAYER_TRAITS[p];
   if (!t) return `- ${p}`;
-  const dorsal = t.dorsal !== null
-    ? `dorsal ${t.dorsal}, nombre en camiseta "${p.toUpperCase()}"`
+  const dorsalNum = JERSEY_OVERRIDES[p] ?? t.dorsal;
+  const dorsal = dorsalNum !== null && dorsalNum !== undefined
+    ? `dorsal ${dorsalNum}, nombre en camiseta "${p.toUpperCase()}"`
     : 'dorsal NO confirmado — no le muestres número ni nombre en la espalda';
   return `- ${p} → ${t.desc} → ${dorsal}`;
 }
@@ -957,6 +980,8 @@ async function askInput(question) {
 async function main() {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
+  JERSEY_OVERRIDES = await fetchJerseyOverrides();
+
   console.log('Leyendo draft...');
   const draft = await fetchDraft();
   console.log('Título:', draft.title);
@@ -1218,4 +1243,5 @@ export {
   deleteChatById,
   currentChatId,
   gitPushImages,
+  fetchJerseyOverrides,
 };
