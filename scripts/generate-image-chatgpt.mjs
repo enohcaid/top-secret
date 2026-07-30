@@ -173,7 +173,7 @@ const PLAYERS_WITH_RENDERS = fs.readdirSync(T3_FRENTES_DIR)
 const PLAYER_TRAITS = {
   'Alexisraies23':   { dorsal: 3,    desc: 'piel morena, dreadlocks negros hasta los hombros, barba negra, anteojos deportivos celestes, venda blanca en la mano izquierda' },
   'BlackPanther-CG': { dorsal: 11,   desc: 'piel morena, pelo muy corto rosa/magenta, máscara de calavera blanca cubriendo nariz y boca, brazos completamente tatuados' },
-  'Cabers14':        { dorsal: 4,    desc: 'piel muy oscura, dreadlocks negros largos y sueltos, máscara de calavera blanca cubriendo nariz y boca, mangas largas negras' },
+  'Cabers14':        { dorsal: 5,    desc: 'piel muy oscura, dreadlocks negros largos y sueltos, máscara de calavera blanca cubriendo nariz y boca, mangas largas negras' },
   'CipriMancini':    { dorsal: 32,   desc: 'piel trigueña, AFRO AZUL gigante y esponjoso, anteojos deportivos oscuros, cuello y brazos tatuados, manga blanca en el brazo derecho' },
   'Eli_No-SKILL':    { dorsal: 10,   desc: 'piel oscura, pelo corto blanco/plateado, máscara celeste cubriendo nariz y boca, guantes de arquero blancos, mangas largas' },
   'fedeavv9':        { dorsal: 9,    desc: 'piel trigueña, pelo corto rubio platinado, muy tatuado en cuello, brazos y piernas, venda blanca en la muñeca izquierda' },

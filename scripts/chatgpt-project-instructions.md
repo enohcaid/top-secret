@@ -26,7 +26,7 @@ Cada render del proyecto se llama exactamente igual que el gamertag del jugador.
 | 12 | Ivan_Cabj_La12 | POR | Ivan_Cabj_La12.png |
 | 2 | rivarola90 | DFC | rivarola90.png |
 | 3 | Alexisraies23 | DFC | Alexisraies23.png |
-| 4 | Cabers14 | DFC | Cabers14.png |
+| 5 | Cabers14 | DFC | Cabers14.png |
 | 8 | Huber236 | LD | Huber236.png |
 | 6 | Juan_Martinez4 | MCD | Juan_Martinez4.png |
 | 13 | RS32-DaniStone | MCI | RS32-DaniStone.png |
