@@ -4,7 +4,7 @@ Copia versionada de las instrucciones cargadas en el proyecto de ChatGPT que gen
 las imágenes de noticias diarias (ver `generate-image-chatgpt.mjs`, que manda el
 prompt dinámico con estilo del día + escena). Si se editan en ChatGPT, actualizar acá.
 
-Última actualización: 2026-07-25
+Última actualización: 2026-07-30
 
 ---
 
@@ -38,6 +38,10 @@ Cada render del proyecto se llama exactamente igual que el gamertag del jugador.
 | 9 | fedeavv9 | DC | fedeavv9.png |
 | 96 | Ramiro4588 | DC | Ramiro4588.png |
 | 99 | yzytx0 | DC | yzytx0.png |
+| 55 | CAT_FEL | DFC | CAT_FEL.png |
+| 18 | Juanchyroman08 | ED | Juanchyroman08.png |
+| 22 | Lil_Dekuroko | MCI | Lil_Dekuroko.png |
+| 30 | Mauriii-_1891 | MCI | Mauriii-_1891.png |
 
 Si el dorsal es visible en la imagen, tiene que ser el número de esta tabla.
 Si la noticia no menciona jugadores → composición institucional: el escudo como elemento héroe con gráfica deportiva abstracta.
