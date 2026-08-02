@@ -7,6 +7,14 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'plantel-t3-2026': {
+    t: 'Presentamos el plantel completo de Top Secret FC para la Temporada 3',
+    i: SITE + 'logos/' + encodeURIComponent('Presentación Plantel T3.png'),
+  },
+  'fichajes-t3-2026': {
+    t: 'Once caras nuevas: Top Secret FC confirma sus refuerzos para la Temporada 3',
+    i: SITE + 'logos/10.png',
+  },
   'mundial-2026-finalissima': {
     t: '"Ganamos la final": Argentina tumbó a Inglaterra y el domingo va por la Finalíssima ante España',
     i: SITE + 'logos/Noticia%20WC2026%2017-7.png',
