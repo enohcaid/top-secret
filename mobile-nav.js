@@ -22,8 +22,27 @@
   const style = document.createElement('style');
   style.textContent = `
     @media(max-width:640px){
-      /* Hide sidebars */
-      .sidebar-left, .sidebar-right { display:none !important; }
+      /* Hide left nav sidebar; the right one (social bubbles) gets
+         repositioned into a compact floating cluster instead of hidden. */
+      .sidebar-left { display:none !important; }
+      .sidebar-right {
+        top: auto !important;
+        bottom: 72px !important;
+        right: 8px !important;
+        height: auto !important;
+        width: auto !important;
+        padding: 0 !important;
+        gap: 10px !important;
+        z-index: 490 !important;
+      }
+      .sidebar-right .sr-icon {
+        width: 36px !important;
+        height: 36px !important;
+      }
+      .sidebar-right .sr-icon svg {
+        width: 17px !important;
+        height: 17px !important;
+      }
 
       /* Reset body padding from sidebars; keep topbar; add room for bottom nav */
       body {
