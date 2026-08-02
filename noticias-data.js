@@ -4,7 +4,7 @@
 const NOTICIAS = [
   {
     id: 'plantel-t3-2026',
-    pinned: false,
+    pinned: true,
     category: 'Institución',
     title: 'Presentamos el plantel completo de Top Secret FC para la Temporada 3',
     date: '2026-08-02',
@@ -76,7 +76,7 @@ const NOTICIAS = [
   },
   {
     id: 'kits-t3-2026',
-    pinned: true,
+    pinned: false,
     category: 'Institución',
     title: 'Nueva temporada, nueva marca: Top Secret FC presenta sus kits T3 con Nike',
     date: '2026-06-22',
