@@ -184,6 +184,7 @@ const PLAYER_TRAITS = {
   'Ivan_Cabj_La12':  { dorsal: 12,   desc: 'ARQUERO: camiseta de arquero magenta y pantalón largo negro, piel clara, pelo negro corto, barba corta, anteojos deportivos azules, brazos tatuados en tinta azul, guantes de arquero con puño amarillo' },
   'Juanchyroman08':  { dorsal: 18,   desc: 'piel clara, pelo largo azul asomando bajo una gorra gris puesta al revés, dos franjas azules pintadas bajo los ojos, tatuaje tribal azul en el brazo izquierdo, tatuaje en la pantorrilla derecha' },
   'Juan_Martinez4':  { dorsal: 6,    desc: 'piel clara, pelo rubio con raya al costado, barba castaña prolija, cinta de capitán en el brazo, mangas largas negras' },
+  'kee_viin03':      { dorsal: 21,   desc: 'piel oscura, afro grande y voluminoso teñido de rojo/rosa intenso, sin barba, contextura atlética' },
   'Lautavester7':    { dorsal: 7,    desc: 'piel oscura, pelo muy corto con tinte azul claro, barba negra tupida, visor deportivo verde espejado' },
   'Lil_Dekuroko':    { dorsal: 22,   desc: 'piel morena, pelo corto rizado teñido rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca, tatuaje en el antebrazo derecho' },
   'Mauriii-_1891':   { dorsal: 30,   desc: 'piel morena, pelo corto rizado teñido rubio platinado, cara descubierta sin anteojos, sin máscara ni barba' },
