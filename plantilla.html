@@ -160,19 +160,20 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 }
 .cf-posn { font-size: .66rem; color: var(--mid); letter-spacing: .04em; margin-top: 2px; }
 .cf-right { flex-shrink: 0; margin-left: 6px; padding-top: 3px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.cf-badges { display: flex; align-items: center; gap: 5px; }
 .flag-circle {
-  width: 20px; height: 20px; border-radius: 50%; overflow: hidden;
+  width: 24px; height: 24px; border-radius: 50%; overflow: hidden;
   border: 1.5px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.12);
   flex-shrink: 0;
 }
 .flag-circle img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
 .plataforma-badge {
-  width: 20px; height: 20px; border-radius: 50%; overflow: hidden;
+  width: 24px; height: 24px; border-radius: 50%; overflow: hidden;
   border: 1.5px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.12);
   flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   background: var(--gray); color: var(--mid);
 }
-.plataforma-badge svg { width: 11px; height: 11px; }
+.plataforma-badge svg { width: 14px; height: 14px; }
 .pos-badge {
   display: inline-block; padding: 3px 8px; border-radius: 4px;
   font-size: .6rem; font-weight: 700; letter-spacing: .1em;
@@ -847,8 +848,10 @@ function buildCard(p, useV2 = false, useV3 = false) {
       </div>
       <div class="cf-right">
         <span class="pos-badge">${p.pos}</span>
-        <div class="flag-circle"><img src="https://flagcdn.com/w40/${p.nat||'ar'}.png" alt="${NAT_NAMES[p.nat] || 'Argentina'}"></div>
-        ${plataformaBadge(p)}
+        <div class="cf-badges">
+          ${plataformaBadge(p)}
+          <div class="flag-circle"><img src="https://flagcdn.com/w40/${p.nat||'ar'}.png" alt="${NAT_NAMES[p.nat] || 'Argentina'}"></div>
+        </div>
       </div>
     </div>`;
 
