@@ -166,6 +166,13 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   flex-shrink: 0;
 }
 .flag-circle img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.plataforma-badge {
+  width: 20px; height: 20px; border-radius: 50%; overflow: hidden;
+  border: 1.5px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--gray); color: var(--mid);
+}
+.plataforma-badge svg { width: 11px; height: 11px; }
 .pos-badge {
   display: inline-block; padding: 3px 8px; border-radius: 4px;
   font-size: .6rem; font-weight: 700; letter-spacing: .1em;
@@ -683,28 +690,39 @@ const ROSTER_T2 = [
 /* ─── NACIONALIDADES (flag-circle) ─── */
 const NAT_NAMES = { ar:'Argentina', uy:'Uruguay', co:'Colombia', cl:'Chile' };
 
+/* ─── PLATAFORMA (plataforma-badge) ─── */
+const PLATAFORMA_ICONS = {
+  ps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>',
+  pc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/></svg>',
+};
+const PLATAFORMA_NOMBRES = { ps: 'PlayStation', pc: 'PC' };
+function plataformaBadge(p) {
+  if (!p.plataforma || !PLATAFORMA_ICONS[p.plataforma]) return '';
+  return `<div class="plataforma-badge" title="${PLATAFORMA_NOMBRES[p.plataforma]}">${PLATAFORMA_ICONS[p.plataforma]}</div>`;
+}
+
 /* ─── ROSTER T3 ─── */
 const ROSTER_T3 = [
-  {key:'Ivan_Cabj_La12', pos:'POR', posn:'Portero',         num:'12', nvl:'—', arq:'—', build:'—', stats:[], total:0},
-  {key:'rivarola90',     pos:'DEF', posn:'Defensa central', num:'2',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
-  {key:'Alexisraies23',  pos:'DEF', posn:'Defensa central', num:'3',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
-  {key:'Cabers14',       pos:'DEF', posn:'Defensa central', num:'5',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
-  {key:'CAT_FEL',        pos:'DEF', posn:'Defensa central', num:'55', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'cl'},
-  {key:'Huber236',       pos:'LAT', posn:'Lateral',         num:'8',  nvl:'—', arq:'—', build:'—', stats:[], total:0},
-  {key:'Guiidow',        pos:'LAT', posn:'Lateral',         num:'20', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
-  {key:'Ramiro4588',     pos:'LAT', posn:'Lateral',         num:'96', nvl:'—', arq:'—', build:'—', stats:[], total:0},
-  {key:'Juan_Martinez4', pos:'MED', posn:'Mediocampista',   num:'6',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
-  {key:'RS32-DaniStone', pos:'MED', posn:'Mediocampista',   num:'13', nvl:'—', arq:'—', build:'—', stats:[], total:0},
-  {key:'CipriMancini',   pos:'MED', posn:'Mediocampista',   num:'32', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
-  {key:'Eli_No-SKILL',   pos:'MED', posn:'Mediocampista',   num:'10', nvl:'—', arq:'—', build:'—', stats:[], total:0},
-  {key:'Lil_Dekuroko',   pos:'MED', posn:'Mediocampista',   num:'22', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'co'},
-  {key:'Mauriii-_1891',  pos:'MED', posn:'Mediocampista',   num:'30', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'uy'},
-  {key:'BlackPanther-CG',pos:'DEL', posn:'Extremo',         num:'11', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, nat:'uy'},
-  {key:'Lautavester7',   pos:'DEL', posn:'Extremo',         num:'7',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
-  {key:'yzytx0',         pos:'DEL', posn:'Extremo',         num:'99', nvl:'—', arq:'—', build:'—', stats:[], total:0},
+  {key:'Ivan_Cabj_La12', pos:'POR', posn:'Portero',         num:'12', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
+  {key:'rivarola90',     pos:'DEF', posn:'Defensa central', num:'2',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'ps'},
+  {key:'Alexisraies23',  pos:'DEF', posn:'Defensa central', num:'3',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
+  {key:'Cabers14',       pos:'DEF', posn:'Defensa central', num:'5',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
+  {key:'CAT_FEL',        pos:'DEF', posn:'Defensa central', num:'55', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'cl', plataforma:'ps'},
+  {key:'Huber236',       pos:'LAT', posn:'Lateral',         num:'8',  nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
+  {key:'Guiidow',        pos:'LAT', posn:'Lateral',         num:'20', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'ps'},
+  {key:'Ramiro4588',     pos:'LAT', posn:'Lateral',         num:'96', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
+  {key:'Juan_Martinez4', pos:'MED', posn:'Mediocampista',   num:'6',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'ps'},
+  {key:'RS32-DaniStone', pos:'MED', posn:'Mediocampista',   num:'13', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
+  {key:'CipriMancini',   pos:'MED', posn:'Mediocampista',   num:'32', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
+  {key:'Eli_No-SKILL',   pos:'MED', posn:'Mediocampista',   num:'10', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
+  {key:'Lil_Dekuroko',   pos:'MED', posn:'Mediocampista',   num:'22', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'co', plataforma:'ps'},
+  {key:'Mauriii-_1891',  pos:'MED', posn:'Mediocampista',   num:'30', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'uy', plataforma:'ps'},
+  {key:'BlackPanther-CG',pos:'DEL', posn:'Extremo',         num:'11', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, nat:'uy', plataforma:'ps'},
+  {key:'Lautavester7',   pos:'DEL', posn:'Extremo',         num:'7',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
+  {key:'yzytx0',         pos:'DEL', posn:'Extremo',         num:'99', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'pc'},
   {key:'Juanchyroman08', pos:'DEL', posn:'Extremo',         num:'18', nvl:'—', arq:'—', build:'—', stats:[], total:0},
-  {key:'fedeavv9',       pos:'DEL', posn:'Delantero',       num:'9',  nvl:'—', arq:'—', build:'—', stats:[], total:0},
-  {key:'kee_viin03',     pos:'DEL', posn:'Delantero',       num:'21', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true},
+  {key:'fedeavv9',       pos:'DEL', posn:'Delantero',       num:'9',  nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'pc'},
+  {key:'kee_viin03',     pos:'DEL', posn:'Delantero',       num:'21', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'ps'},
 ];
 
 /* ─── PATHS ─── */
@@ -829,6 +847,7 @@ function buildCard(p, useV2 = false, useV3 = false) {
       <div class="cf-right">
         <span class="pos-badge">${p.pos}</span>
         <div class="flag-circle"><img src="https://flagcdn.com/w40/${p.nat||'ar'}.png" alt="${NAT_NAMES[p.nat] || 'Argentina'}"></div>
+        ${plataformaBadge(p)}
       </div>
     </div>`;
 
