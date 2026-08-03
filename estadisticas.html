@@ -504,14 +504,14 @@ footer span{color:#C9A84C;}
     <span style="font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-right:4px;">Temporada</span>
     <button id="spill1" onclick="switchStatsSeason(1)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T1 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
     <button id="spill2" onclick="switchStatsSeason(2)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
-    <button id="spill3" onclick="switchStatsSeason(3)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--vpug);color:#000;">PRETEMPORADA</span></button>
+    <button id="spill3" onclick="switchStatsSeason(3)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">PRÓXIMAMENTE</span></button>
   </div>
   <!-- statsSoon: shown when T3 is active (no data yet) -->
   <div id="statsSoon" style="display:block;">
     <div style="text-align:center;padding:56px 16px;color:var(--muted);">
       <div style="font-size:2.2rem;font-weight:800;color:var(--gold);letter-spacing:.06em;">T3 · 2026</div>
       <div style="margin-top:8px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
-      <div style="margin-top:10px;font-size:.8rem;">La Temporada 3 comenzará en julio 2026</div>
+      <div style="margin-top:10px;font-size:.8rem;">Los fixtures de la Temporada 3 se publican en los próximos días</div>
     </div>
   </div>
   <div id="statsContent" style="display:none;">
@@ -521,7 +521,6 @@ footer span{color:#C9A84C;}
     <button class="tab" onclick="switchTab('history',this)">Historial</button>
     <button class="tab" onclick="switchTab('clubea',this)">Club EA</button>
     <button class="tab" onclick="switchTab('torneos',this)">Torneos</button>
-    <button class="tab" onclick="switchTab('pre',this)" style="color:var(--vpug);">Pretemporada</button>
   </div>
 
   <!-- ── TAB TEMPORADA ── -->
@@ -659,12 +658,6 @@ footer span{color:#C9A84C;}
     <div class="league-filter" id="tetTorneoFilter" style="display:none"></div>
     <div class="kpi-row" id="tetKpiRow"></div>
     <div class="season-grid" id="tetSeasonGrid"></div>
-  </div>
-
-  <!-- ── TAB PRETEMPORADA ── -->
-  <div class="tab-content" id="tab-pre">
-    <div class="kpi-row" id="preKpiRow"></div>
-    <div class="season-grid" id="preGrid"></div>
   </div>
 
   <div class="tab-content" id="tab-clubea">
@@ -808,7 +801,6 @@ function switchTab(name, btn){
   if(name==='season')  renderSeason();
   if(name==='players') renderPlayers('all');
   if(name==='history') renderHistory();
-  if(name==='pre')     window.fetchPreStats?.();
 }
 
 // ════════════════════════════════════════════
@@ -2755,14 +2747,11 @@ function switchStatsSeason(n){
   const active=[s1,s2,s3][n-1];
   active.style.border='1px solid var(--gold)'; active.style.background='var(--gold-dim)'; active.style.color='var(--gold)';
   const soon=document.getElementById('statsSoon'), content=document.getElementById('statsContent');
-  soon.style.display='none'; content.style.display='';
   if(n===3){
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-    const preBtn=document.querySelector('.tab[onclick*="pre"]');
-    if(preBtn){ preBtn.classList.add('active'); document.getElementById('tab-pre').classList.add('active'); window.fetchPreStats?.(); }
+    soon.style.display=''; content.style.display='none';
     return;
   }
+  soon.style.display='none'; content.style.display='';
   renderSeason();
   const activeTab=document.querySelector('.tab.active');
   if(activeTab) activeTab.click();
@@ -2979,155 +2968,6 @@ window.ceaSortBy        = ceaSortBy;
 
   }
 
-  // ════════════════════════════════════════════
-  // PRETEMPORADA (Campeonato de Invierno VPUG)
-  // ════════════════════════════════════════════
-  let _preStats = null;
-
-  async function fetchPreStats() {
-    const kpiRow = document.getElementById('preKpiRow');
-    const grid   = document.getElementById('preGrid');
-    if (_preStats) { renderPreStats(); return; }
-    kpiRow.innerHTML = '<div style="grid-column:1/-1;padding:32px;color:var(--muted);font-size:.85rem;text-align:center;">Cargando...</div>';
-    grid.innerHTML   = '';
-    try {
-      const resp = await fetch(WORKER_URL + '/copafacil-pretemporada');
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      _preStats = await resp.json();
-    } catch(e) {
-      kpiRow.innerHTML = '';
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠</div><div class="empty-title">Error al cargar datos</div><div class="empty-sub">${e.message}</div></div>`;
-      return;
-    }
-    renderPreStats();
-  }
-
-  function renderPreStats() {
-    if (!_preStats) return;
-    const kpiRow = document.getElementById('preKpiRow');
-    const grid   = document.getElementById('preGrid');
-
-    const played = _preStats.matches.filter(m => m.finished);
-    const wins   = played.filter(m => m.result === 'win').length;
-    const draws  = played.filter(m => m.result === 'draw').length;
-    const losses = played.filter(m => m.result === 'loss').length;
-    const gf     = played.reduce((s,m) => s + (m.tsGoals||0), 0);
-    const gc     = played.reduce((s,m) => s + (m.rivGoals||0), 0);
-
-    // Color solo donde hay semántica deportiva (V/GF/GC) — el resto en tinta base
-    kpiRow.innerHTML = [
-      {val: _preStats.matches.length, lbl: 'Fechas',     color: 'var(--muted)'},
-      {val: played.length,            lbl: 'Jugados',    color: 'var(--text)'},
-      {val: wins,                     lbl: 'Victorias',  color: 'var(--win)'},
-      {val: `${draws}E ${losses}D`,   lbl: 'Empates/Der',color: 'var(--muted)'},
-      {val: gf,                       lbl: 'Goles a Favor', color: 'var(--win)'},
-      {val: gc,                       lbl: 'Goles en Contra', color: 'var(--loss)'},
-    ].map(k => `<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`).join('');
-
-    // ── Group B standings ──
-    const groupB = (_preStats.standings && _preStats.standings.B) ? _preStats.standings.B : [];
-    const standingRows = groupB.map((t, i) => {
-      const isTS = t.us || (t.name && t.name.toLowerCase().includes('secret'));
-      const rowStyle   = isTS ? 'background:rgba(62,207,142,.06);' : '';
-      const nameWeight = isTS ? 'font-weight:800;color:var(--vpug);' : '';
-      const posCls     = i === 0 ? ' gold' : i === 1 ? ' silver' : i === 2 ? ' bronze' : '';
-      return `<tr style="${rowStyle}">
-        <td class="rank-pos${posCls}">${i+1}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:10px;">
-            ${t.logo ? `<img src="${t.logo}" style="width:22px;height:22px;object-fit:contain;border-radius:3px;background:var(--card2);flex-shrink:0;" onerror="this.style.display='none'">` : ''}
-            <span style="${nameWeight}">${t.name||'—'}</span>
-          </div>
-        </td>
-        <td style="text-align:center">${t.gp||0}</td>
-        <td style="text-align:center">${t.w||0}</td>
-        <td style="text-align:center">${t.d||0}</td>
-        <td style="text-align:center">${t.l||0}</td>
-        <td style="text-align:center">${t.gf||0}</td>
-        <td style="text-align:center">${t.gc||0}</td>
-        <td style="text-align:center">${(t.gd>=0?'+':'')}${t.gd||0}</td>
-        <td style="text-align:center;font-weight:800;color:var(--gold)">${t.pts||0}</td>
-      </tr>`;
-    }).join('');
-
-    const standingsBlock = groupB.length ? `<div class="season-block full">
-      <div class="sb-header"><span class="sb-icon">📊</span><h3>Grupo B · Campeonato de Invierno VPUG</h3></div>
-      <div style="overflow-x:auto;padding:0 4px 4px;">
-        <table class="rank-table" style="min-width:480px;">
-          <thead><tr style="font-size:.63rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;">
-            <th style="width:32px;padding:6px 16px;">#</th>
-            <th style="text-align:left;padding:6px 16px;">Equipo</th>
-            <th style="text-align:center;padding:6px 8px;">PJ</th>
-            <th style="text-align:center;padding:6px 8px;">G</th>
-            <th style="text-align:center;padding:6px 8px;">E</th>
-            <th style="text-align:center;padding:6px 8px;">P</th>
-            <th style="text-align:center;padding:6px 8px;">GF</th>
-            <th style="text-align:center;padding:6px 8px;">GC</th>
-            <th style="text-align:center;padding:6px 8px;">DG</th>
-            <th style="text-align:center;padding:6px 8px;">Pts</th>
-          </tr></thead>
-          <tbody>${standingRows}</tbody>
-        </table>
-      </div>
-    </div>` : '';
-
-    // ── Match history ──
-    const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    function fmtD(d){ const dt=new Date(d+'T12:00:00'); return `${dt.getDate()} ${MESES[dt.getMonth()]}`; }
-
-    const matchRows = _preStats.matches.map(m => {
-      const wl  = m.result || '';
-      const lbl = {win:'V', draw:'E', loss:'D'}[wl] || '';
-      const scoreStr = m.finished ? `${m.tsGoals} – ${m.rivGoals}` : '—';
-      return `<div class="result-row">
-        <div>
-          <div class="res-rival">J${m.round} · vs ${m.rival}${lbl?` <span class="wld-badge ${wl}">${lbl}</span>`:''}</div>
-          <div class="res-date">${fmtD(m.date)} · ${m.time||''} · ${m.isHome?'Local':'Visita'}</div>
-        </div>
-        <span class="res-league vpug">VPUG</span>
-        <span class="res-score ${wl}">${scoreStr}</span>
-      </div>`;
-    }).join('');
-
-    const historyBlock = `<div class="season-block full">
-      <div class="sb-header"><span class="sb-icon">📋</span><h3>Historial de Partidos</h3></div>
-      <div class="result-list">${matchRows}</div>
-    </div>`;
-
-    // Player stats block (goals + assists from CopáFácil player API)
-    const players = (_preStats.players || []).filter(p => p.goals > 0 || p.assists > 0);
-    let playersBlock = '';
-    if (players.length) {
-      const playerRows = players.map((p, i) => {
-        const gStr = p.goals   ? `<span style="color:var(--win);font-weight:800">${p.goals}G</span>`  : '';
-        const aStr = p.assists ? `<span style="color:var(--gold);font-weight:700">${p.assists}A</span>` : '';
-        return `<tr>
-          <td style="padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;color:var(--muted2)">${i+1}</td>
-          <td style="padding:8px 8px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700">${p.name}</td>
-          <td style="padding:8px 8px;text-align:center;font-size:.85rem">${gStr}</td>
-          <td style="padding:8px 8px;text-align:center;font-size:.85rem">${aStr}</td>
-        </tr>`;
-      }).join('');
-      playersBlock = `<div class="season-block full">
-        <div class="sb-header"><span class="sb-icon">⚽</span><h3>Goles y Asistencias</h3></div>
-        <div style="overflow-x:auto;padding:0 4px 8px;">
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr style="font-size:.63rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.06)">
-              <th style="text-align:left;padding:6px 16px">#</th>
-              <th style="text-align:left;padding:6px 8px">Jugador</th>
-              <th style="text-align:center;padding:6px 8px">Goles</th>
-              <th style="text-align:center;padding:6px 8px">Asist.</th>
-            </tr></thead>
-            <tbody>${playerRows}</tbody>
-          </table>
-        </div>
-      </div>`;
-    }
-
-    grid.innerHTML = standingsBlock + historyBlock + playersBlock;
-  }
-
-  window.fetchPreStats = fetchPreStats;
   switchStatsSeason(3);
 
 })(); // end IIFE
