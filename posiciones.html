@@ -272,7 +272,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
     </button>
     <button class="season-btn active" id="sbtn-t3" onclick="switchSeason('t3',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
       <span class="sb-label">T3 2026</span>
-      <span class="sb-sub">Próximamente</span>
+      <span class="sb-sub">En curso</span>
     </button>
   </div>
 
@@ -345,10 +345,34 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
 
   <!-- ════════════ TEMPORADA 3 ════════════ -->
   <div id="s-t3">
-    <div style="text-align:center;padding:56px 16px;color:var(--muted);">
-      <div style="font-size:2.2rem;font-weight:800;color:var(--gold);letter-spacing:.06em;">T3 · 2026</div>
-      <div style="margin-top:8px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
-      <div style="margin-top:10px;font-size:.8rem;">Los fixtures de la Temporada 3 se publican en los próximos días</div>
+    <div class="tabs">
+      <button class="tab active" data-league="vpn"  onclick="switchTab('vpn','t3',this)">VPN</button>
+      <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t3',this)">VPUG</button>
+      <button class="tab"        data-league="e11"  onclick="switchTab('e11','t3',this)">11x11</button>
+    </div>
+
+    <!-- VPN T3 -->
+    <div class="tab-pane active" id="t3-pane-vpn">
+      <div class="table-wrap"><table class="standings-table" id="t3-vpn-table"></table></div>
+    </div>
+
+    <!-- VPUG T3 -->
+    <div class="tab-pane" id="t3-pane-vpug">
+      <div style="text-align:center;padding:56px 16px;color:var(--muted);">
+        <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
+        <div style="margin-top:10px;font-size:.8rem;">La tabla de la Temporada 3 se publica cuando arranque la fase regular de VPUG</div>
+      </div>
+    </div>
+
+    <!-- 11x11 T3 -->
+    <div class="tab-pane" id="t3-pane-e11">
+      <div class="group-header">Grupo 1</div>
+      <div class="table-wrap"><table class="standings-table" id="t3-e11-g1-table"></table></div>
+      <div class="group-header">Grupo 2</div>
+      <div class="table-wrap"><table class="standings-table" id="t3-e11-g2-table"></table></div>
+      <div class="zone-legend" style="margin-top:16px">
+        <div class="zl-item"><span class="zone-dot" style="background:var(--e11)"></span>Clasificado a Playoff</div>
+      </div>
     </div>
   </div>
 </div>
@@ -372,7 +396,8 @@ window.addEventListener('DOMContentLoaded', () => {
 const WORKER_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const VPN_URL  = WORKER_BASE + '/vpn-table';
 const VPUG_URL = WORKER_BASE + '/vpug-table';
-const E11_GROUPS_URL = 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/';
+const E11_GROUPS_URL_T2 = 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/';
+const E11_GROUPS_URL_T3 = 'https://api.virtualprogaming.com/public/tournaments/CHALLENGERS-T4/groups/?season=1';
 
 const VPUG_T2_DATA = [
   {name:'TOP Secret',           abbr:'TOP', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, us:true, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMurZRTaYIDhkHTacb.png?alt=media&token=1'},
@@ -435,6 +460,32 @@ const VPN_T1_DATA = [
   {name:"La ResaKa",               abbr:"RsK", gp:19, w:2,  d:5, l:12, gf:21, gc:45, gd:-24, pts:11, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/fc81dad1a3f07d8a6b64e21f30f0704c_thumb.png"},
   {name:"Almirante Brown eSport",  abbr:"ALM", gp:19, w:1,  d:0, l:18, gf:9,  gc:48, gd:-39, pts:3,  logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/d73c1f44aee85a6730f0143baff406a4_thumb.png"},
   {name:"Team Ceniza",             abbr:"TCE", gp:19, w:0,  d:0, l:19, gf:0,  gc:19, gd:-19, pts:0,  logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/bb1cd50452b4d3b0f28a7415c1ba73e2_thumb.png"},
+];
+
+// VPN T2 (Liga Argentina 1ra División, season 6395) — temporada finalizada, tabla congelada.
+// El endpoint /vpn-table del Worker ahora apunta a la temporada en curso (T3, 2da Division);
+// esta tabla queda como snapshot estatico para no perder el historial de T2.
+const VPN_T2_DATA = [
+  {name:"San Jorge de Tucuman", abbr:"SJT", gp:19, w:13, d:2, l:4, gf:39, gc:20, gd:19, pts:41, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/3ad24487b1acdb570648de7e1b74b1c4_thumb.png"},
+  {name:"CAI Esports", abbr:"CAI", gp:19, w:12, d:3, l:4, gf:41, gc:28, gd:13, pts:39, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/e233240f06fe484dce79857afbc77b4e_thumb.png"},
+  {name:"San Lorenzo Esports", abbr:"SLO", gp:19, w:11, d:4, l:4, gf:28, gc:11, gd:17, pts:37, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/445461dd7198b181ee324a134b1a3507_thumb.png"},
+  {name:"Hacha eSports", abbr:"HES", gp:19, w:12, d:1, l:6, gf:34, gc:31, gd:3, pts:37, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/9546a732f0ed2863ffc14243a88070ac_thumb.png"},
+  {name:"Real Black", abbr:"RBK", gp:19, w:11, d:2, l:6, gf:47, gc:31, gd:16, pts:35, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/3fe27386523e81ebdbf8ad260ac036ee_thumb.png"},
+  {name:"BNA San Jorge", abbr:"BNA", gp:19, w:10, d:3, l:6, gf:35, gc:21, gd:14, pts:33, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/fd9882c9643b941b9e096696e8251f6f_thumb.png"},
+  {name:"Bugadores Do Elite", abbr:"BDE", gp:19, w:9, d:6, l:4, gf:21, gc:9, gd:12, pts:33, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/091659a8c81c8960e635f606b7222c28_thumb.png"},
+  {name:"Estudiantes LP", abbr:"EST", gp:19, w:9, d:5, l:5, gf:32, gc:24, gd:8, pts:32, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/0dfd7138f334c4a2f929db6f8308944c_thumb.png"},
+  {name:"Instituto Esports", abbr:"IAC", gp:19, w:9, d:3, l:7, gf:34, gc:36, gd:-2, pts:30, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/cb78feee2f66e4a92f6951688c6f9c20_thumb.png"},
+  {name:"Chacarita Esports", abbr:"CEP", gp:19, w:7, d:8, l:4, gf:40, gc:25, gd:15, pts:29, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/471a0d9ab3e744a788c3ab941c8d7787_thumb.png"},
+  {name:"Aesma Gaming", abbr:"AEG", gp:19, w:8, d:5, l:6, gf:24, gc:25, gd:-1, pts:29, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/daa20413dcbfc518c90db1661a727aaf_thumb.png"},
+  {name:"FCO Kannabiense", abbr:"FCO", gp:19, w:8, d:4, l:7, gf:24, gc:25, gd:-1, pts:28, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/1cab9a840028164e12748c777b73783c_thumb.png"},
+  {name:"Comunicaciones", abbr:"CCC", gp:19, w:6, d:5, l:8, gf:27, gc:34, gd:-7, pts:23, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/2b40094d80de05b2f6d75e62541464f9_thumb.png"},
+  {name:"Belgrano Esports", abbr:"CBE", gp:19, w:6, d:5, l:8, gf:20, gc:35, gd:-15, pts:23, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/238af9152db6292d0572d0c24512bcf7_thumb.png"},
+  {name:"InfinitX", abbr:"INF", gp:19, w:6, d:4, l:9, gf:27, gc:27, gd:0, pts:22, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/fb3abd33372047f8f95ffdf1b85c9440_thumb.png"},
+  {name:"Talleres Esports", abbr:"CAT", gp:19, w:4, d:7, l:8, gf:23, gc:24, gd:-1, pts:19, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/5adcfb724faca2bf9f66296f4af84ed7_thumb.png"},
+  {name:"Nueva Chicago eSports", abbr:"NCH", gp:19, w:4, d:4, l:11, gf:22, gc:29, gd:-7, pts:16, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/633176c7c630787658d1ed70a4ffba42_thumb.png"},
+  {name:"Escuela Vieja", abbr:"ESC", gp:19, w:3, d:2, l:14, gf:18, gc:52, gd:-34, pts:11, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/8d89f72e10e4e729733e96fd3fc62b49_thumb.png"},
+  {name:"Monoidales", abbr:"MON", gp:19, w:2, d:3, l:14, gf:12, gc:33, gd:-21, pts:9, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/3524f24b6b3b3a5e0f87082eb2960712_thumb.png"},
+  {name:"TOP Secret", abbr:"TOP", gp:19, w:1, d:2, l:16, gf:24, gc:52, gd:-28, pts:5, us:true, logo:"https://www.virtualpronetwork.com/api/media/images/teamlogos/a2a3f8adaad49ef85faa99771d647716_thumb.png"},
 ];
 
 const E11_DATA = [
@@ -640,7 +691,7 @@ const E11_FALLBACK_G2 = [
 async function fetchT2E11() {
   let g1, g2;
   try {
-    const r = await fetch(E11_GROUPS_URL);
+    const r = await fetch(E11_GROUPS_URL_T2);
     if (!r.ok) throw new Error(r.status);
     const raw = await r.json();
     // raw is an array of 2 arrays: [group1_teams, group2_teams]
@@ -657,25 +708,77 @@ async function fetchT2E11() {
 }
 
 /* ── FETCH & RENDER T2 VPN ── */
-async function fetchT2VPN() {
+function renderT2VPN() {
+  renderTable('t2-vpn-table', VPN_T2_DATA, 'var(--vpn)');
+  gsap.to('#t2-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+}
+
+/* ── FETCH & RENDER T3 VPN (Liga Argentina 2da División) ── */
+async function fetchT3VPN() {
   try {
     const r = await fetch(VPN_URL);
     if (!r.ok) throw new Error(r.status);
     const raw = await r.json();
     const data = normVPN(Array.isArray(raw) ? raw : []);
-    renderTable('t2-vpn-table', data, 'var(--vpn)');
-    gsap.to('#t2-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+    renderTable('t3-vpn-table', data, 'var(--vpn)');
+    gsap.to('#t3-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
   } catch(e) {
-    const table = document.getElementById('t2-vpn-table');
+    const table = document.getElementById('t3-vpn-table');
     if (table) table.innerHTML = '<tbody><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--mid)">No se pudo cargar la tabla. Intentá más tarde.</td></tr></tbody>';
   }
 }
 
+/* ── FETCH & RENDER T3 11x11 (CHALLENGERS #4, 2 grupos) ── */
+const E11_T3_FALLBACK_G1 = [
+  {name:'Sub 21 CF',              abbr:'Sub', logo:VPG_LOGO+'admin_eaba7052-0cc9-4e41-8565-1a30736c24d9/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Comunicaciones eSports', abbr:'COM', logo:VPG_LOGO+'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Parke Avellane',         abbr:'PKA', logo:VPG_LOGO+'admin_9596d0a8-192b-4d0c-ac39-00904c60220b/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'IACC Cantera',           abbr:'IAC', logo:VPG_LOGO+'admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Camioneros eSports',     abbr:'CAM', logo:VPG_LOGO+'admin_e5ab2259-7ae3-47ce-a6c7-bc479b7bff72/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Top Secret',             abbr:'TOP', logo:VPG_LOGO+'admin_fdad592e-b51e-49c8-a6f0-7a4516541c6a/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:true},
+  {name:'Deportivo Ballester',    abbr:'BAL', logo:VPG_LOGO+'admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Interzonal A',           abbr:'BYE', logo:VPG_LOGO+'admin_22f4d8b1-33cb-4346-9bca-a64b9de5850f/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Olimpo Esports',         abbr:'OLI', logo:VPG_LOGO+'admin_b993e784-2fac-4459-bc68-db298ab57240/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Cambaceres',             abbr:'CAM', logo:VPG_LOGO+'admin_0418078a-b62c-4e2e-9656-6ace007d73f7/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+];
+const E11_T3_FALLBACK_G2 = [
+  {name:'All Boys',               abbr:'ALB', logo:VPG_LOGO+'admin_9d643667-da1a-4878-923c-88713acb1625/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Instituto Reserva',      abbr:'INS', logo:VPG_LOGO+'admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Al Hueso',               abbr:'ALH', logo:VPG_LOGO+'admin_f5f16329-ab63-4796-95a7-3f329a18aeb4/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Los Picantes eSports',   abbr:'LP',  logo:VPG_LOGO+'admin_f47091ff-af62-4f7f-bdb4-9aba143c3bef/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'4BDOMIFL4NES',           abbr:'ABD', logo:VPG_LOGO+'admin_d926fffb-49b9-44a2-8230-f2a44400927e/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'InfinitX',               abbr:'INF', logo:VPG_LOGO+'admin_37b001c9-d56a-43bd-9706-1a914d1b35d3/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Interzonal B',           abbr:'BYE', logo:VPG_LOGO+'admin_1d18cc24-d598-4e69-b935-26b8dcac16d5/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Altoke Perro',           abbr:'ATP', logo:VPG_LOGO+'admin_7e8994de-82a6-412a-8e55-c3a3306a1f2a/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Reserva Eterna FC',      abbr:'RET', logo:VPG_LOGO+'admin_cd482684-10e5-4766-9581-0ba5a3e1534f/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+  {name:'Miskymayu FC',           abbr:'MYM', logo:VPG_LOGO+'admin_a999e7e3-6547-4c32-9aaa-336d510245ee/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
+];
+
+async function fetchT3E11() {
+  let g1, g2;
+  try {
+    const r = await fetch(E11_GROUPS_URL_T3);
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    g1 = normE11(Array.isArray(raw[0]) ? raw[0] : Object.values(raw[0] || {}));
+    g2 = normE11(Array.isArray(raw[1]) ? raw[1] : Object.values(raw[1] || {}));
+    if (!g1.length || !g2.length) throw new Error('empty');
+  } catch(e) {
+    g1 = E11_T3_FALLBACK_G1;
+    g2 = E11_T3_FALLBACK_G2;
+  }
+  renderTable('t3-e11-g1-table', g1, 'var(--e11)');
+  renderTable('t3-e11-g2-table', g2, 'var(--e11)');
+  gsap.to('#t3-e11-g1-table tbody tr, #t3-e11-g2-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+}
+
 /* ── INIT ── */
 renderT1();
-fetchT2VPN();
+renderT2VPN();
 fetchT2VPUG();
 fetchT2E11();
+fetchT3VPN();
+fetchT3E11();
 
 
 
