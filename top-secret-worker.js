@@ -15,6 +15,10 @@ const NOTICIAS_OG = {
     t: 'Once caras nuevas: Top Secret FC confirma sus refuerzos para la Temporada 3',
     i: SITE + 'logos/10.png',
   },
+  'fixture-vpn-t3-2026': {
+    t: 'Ya tenemos fixture: 19 partidos en la Liga Argentina 2da División VPN',
+    i: SITE + 'logos/' + encodeURIComponent('Fixture VPN T3.png'),
+  },
   'mundial-2026-finalissima': {
     t: '"Ganamos la final": Argentina tumbó a Inglaterra y el domingo va por la Finalíssima ante España',
     i: SITE + 'logos/Noticia%20WC2026%2017-7.png',
