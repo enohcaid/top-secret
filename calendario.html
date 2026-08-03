@@ -1999,14 +1999,20 @@ function renderNextHero() {
 }
 
 // Returns true if a custom entry is already covered by a RAW entry (same rival+league,
-// same date OR RAW entry has a confirmed result). Prevents duplicate calendar cards
-// when playoff/rescheduled matches that were once custom get added to RAW.
+// same date, or a RAW entry within ~2 weeks that already has a confirmed result —
+// covers reschedules). Prevents duplicate calendar cards when playoff/rescheduled
+// matches that were once custom get added to RAW. Bounded to a short window so a
+// rival faced in an earlier season (with an old result) doesn't hide a new custom
+// fixture against the same rival months later.
 function customIsInRaw(cm) {
   return RAW.some((_, i) => {
     const r = getMatch(i);
     if (cm.league && r.league !== cm.league) return false;
     if (!rivalMatch(r.rival, cm.rival)) return false;
-    return r.date === cm.date || !!r.result || !!results[i];
+    if (r.date === cm.date) return true;
+    if (!r.result && !results[i]) return false;
+    const dayDiff = Math.abs(new Date(r.date) - new Date(cm.date)) / 86400000;
+    return dayDiff <= 14;
   });
 }
 
