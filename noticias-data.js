@@ -47,6 +47,28 @@ const NOTICIAS = [
     },
   },
   {
+    id: 'fixture-11x11-t3-2026',
+    pinned: false,
+    category: 'Fixture',
+    title: 'Fixture confirmado: 18 partidos en el Challengers #4 de 11x11',
+    date: '2026-08-03',
+    dateLabel: '3 de agosto de 2026',
+    excerpt: 'Virtual Pro Gaming publicó el fixture de la Zona 1 del Challengers #4. Top Secret FC jugará 18 partidos, ida y vuelta contra los 9 rivales de su zona, arrancando el martes.',
+    image: 'logos/Fixture 11x11 T3.png',
+    body: [
+      'Ya está confirmado el calendario del <strong>Challengers #4</strong>, el torneo de 11x11 de Virtual Pro Gaming Argentina. Top Secret FC quedó en la <strong>Zona 1</strong> junto a IACC Cantera, Cambaceres, Interzonal A, Sub 21 CF, Olimpo Esports, Comunicaciones eSports, Deportivo Ballester, Parke Avellane y Camioneros eSports.',
+      'El formato es ida y vuelta contra cada rival de la zona: <strong>18 partidos</strong> en total. El debut es el martes 4 de agosto, con doble fecha: IACC Cantera (Local · 23:00) y Cambaceres (Visita · 23:30).',
+      'El fixture se extiende hasta el <strong>1 de septiembre</strong>, con dos jornadas por semana (martes y jueves). El objetivo es meterse entre los mejores de la zona y avanzar a la siguiente fase.',
+      'El calendario completo ya está cargado en el sitio. Seguí cada jornada y no te pierdas ningún resultado. 🖤⭐',
+    ],
+    shareCaption: '📋 FIXTURE 11x11 · CHALLENGERS #4\n\nTop Secret FC ya tiene calendario en la Zona 1:\n\n🗓️ 18 partidos\n📅 4 de agosto → 1 de septiembre\n🏆 Challengers #4 · 11x11 Argentina\n\nEl debut es el martes, con doble jornada. ¡Vamos! 🖤⭐\n\n#TopSecretFC #11x11 #Fixture',
+    shareCaptions: {
+      ig: '📋 FIXTURE 11x11 · CHALLENGERS #4 🖤\n\n18 partidos. Zona 1.\n\nArrancamos el martes, con doble jornada ⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #11x11 #Temporada3 #EAFCClubsPro #Fixture',
+      x:  '📋 Ya tenemos fixture en el Challengers #4 de 11x11.\n\n18 partidos entre el 4/08 y el 1/09, Zona 1.\n\nArrancamos el martes 🖤⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #11x11 #Temporada3',
+      fb: '📋 FIXTURE 11x11 · CHALLENGERS #4\n\nVirtual Pro Gaming publicó el calendario completo y Top Secret FC tiene 18 partidos por delante en la Zona 1.\n\n🗓️ 4 de agosto al 1 de septiembre\n🏆 Challengers #4 · 11x11 Argentina\n\nArrancamos el martes, con doble jornada. ¡Vamos Top Secret FC! 🖤⭐\n\n#TopSecretFC #11x11 #Temporada3 #EAFCClubsPro',
+    },
+  },
+  {
     id: 'fichajes-t3-2026',
     pinned: false,
     category: 'Fichajes',
