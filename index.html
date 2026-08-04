@@ -544,7 +544,9 @@ document.getElementById('sq-gpg').textContent   = gpg + ' por partido';
 const keys = Object.keys(playerStats);
 const top3G   = keys.filter(k=>playerStats[k].g>0).sort((a,b)=>playerStats[b].g-playerStats[a].g).slice(0,5);
 const top3A   = keys.filter(k=>playerStats[k].a>0).sort((a,b)=>playerStats[b].a-playerStats[a].a).slice(0,5);
-const top3Rat = keys.filter(k=>playerStats[k].pj>=3).sort((a,b)=>playerStats[b].avgRating-playerStats[a].avgRating).slice(0,5);
+const ratQualified = keys.filter(k=>playerStats[k].pj>=3);
+const top3Rat = (ratQualified.length ? ratQualified : keys.filter(k=>playerStats[k].ratings.length>0))
+  .sort((a,b)=>playerStats[b].avgRating-playerStats[a].avgRating).slice(0,5);
 
 const rankClasses = ['gold','silver','bronze','',''];
 const rankNums    = ['1','2','3','4','5'];
