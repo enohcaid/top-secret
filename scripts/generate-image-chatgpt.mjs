@@ -84,7 +84,6 @@ ${isSeleccion
   ? '- Esta noticia es de la Selección Argentina: la camiseta CELESTE Y BLANCA de la Selección es VÁLIDA para jugadores o elementos que representen a la Selección. Si aparece un jugador de Top Secret como jugador del club, su camiseta es de los kits oficiales: NEGRA, BLANCA o AMARILLA'
   : '- La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA'}
 - Dorsales: si se ve un número de camiseta, los dígitos están bien formados, en orientación correcta y NO espejados ni invertidos (un "01" donde debería decir "10", dígitos al revés como en un reflejo, números deformes) = RECHAZADA
-- La camiseta NO tiene sponsors comerciales reales (AIA, Emirates, Adidas, Nike, etc.) ni es el diseño reconocible del kit de un club real (Tottenham, Real Madrid, Boca, etc.). Una camiseta que parece la réplica de un equipo real con sponsor = RECHAZADA
 - FORMATO "EXPEDIENTE TOP SECRET": la imagen respeta el sistema visual del club — fondo negro carbón con textura de papel/archivo, grano de película, sello "TOP SECRET" estampado, tipografía stencil/typewriter, un solo color de acento. Si parece un póster genérico de IA (explosiones de partículas, humo o luces de colores, lens flares plásticos, fondo de estadio brillante) = RECHAZADA
 - La imagen comunica visualmente el tema de la noticia
 - Si hay texto/titular, es legible y con ortografía correcta
