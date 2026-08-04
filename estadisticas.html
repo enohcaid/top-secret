@@ -1410,10 +1410,8 @@ const consistBlock = (()=>{
   })();
 const eficienciaBlock = tsMatches.length>=3 ? (()=>{
     const scored_real = matches.reduce((s,m)=>{
-      if(!m.match_result) return s;
-      const pts = m.match_result.split('-');
-      const ts  = m.isHome===false ? +pts[1] : +pts[0];
-      return s + (isNaN(ts)?0:ts);
+      const sc = parseScore(m.match_result);
+      return s + (sc ? sc.own : 0);
     },0);
     const xg_total = +tsMatches.reduce((s,m)=>s+(m.team_stats.goles_esperados||0),0).toFixed(1);
     const pj_res   = matches.filter(m=>m.match_result).length;
@@ -1445,19 +1443,19 @@ const ligaBlock = (()=>{
     const lColors = {'VPN':'var(--vpn)','VPUG':'var(--vpug)','11x11':'var(--e11)'};
     const lMatches = liga => matches.filter(m=>m.league===liga);
     const lPlayed  = liga => lMatches(liga).filter(m=>m.match_result);
-    const lWins    = liga => lPlayed(liga).filter(m=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; const r=m.isHome===false?+p[0]:+p[1]; return ts>r; }).length;
-    const lGF      = liga => lPlayed(liga).reduce((s,m)=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; return s+(isNaN(ts)?0:ts); },0);
+    const lWins    = liga => lPlayed(liga).filter(m=>{ const s=parseScore(m.match_result); return s && s.own>s.rival; }).length;
+    const lGF      = liga => lPlayed(liga).reduce((s,m)=>{ const sc=parseScore(m.match_result); return s+(sc?sc.own:0); },0);
     const lAvgRat  = liga => { const rs=lMatches(liga).flatMap(m=>(m.players||[]).map(p=>p.rating).filter(v=>v!=null)); return rs.length?+(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(2):null; };
     return `<div class="season-block full">
       <div class="sb-header"><span class="sb-icon">🏆</span><h3>Rendimiento por liga</h3></div>
       <table class="rank-table">${ligas.map(lg=>{
         const pl=lPlayed(lg).length, w=lWins(lg), gf=lGF(lg), ar=lAvgRat(lg);
-        const pts=w*3+(lPlayed(lg).filter(m=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; const r=m.isHome===false?+p[0]:+p[1]; return ts===r; }).length);
+        const draws_count = lPlayed(lg).filter(m=>{ const s=parseScore(m.match_result); return s && s.own===s.rival; }).length;
+        const pts=w*3+draws_count;
         const lPosesion = liga => {
           const vals = lMatches(liga).filter(m=>m.team_stats&&m.team_stats.posesion!=null).map(m=>m.team_stats.posesion);
           return vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(0) : null;
         };
-        const draws_count = lPlayed(lg).filter(m=>{ const p=m.match_result.split('-'); const ts=m.isHome===false?+p[1]:+p[0]; const r=m.isHome===false?+p[0]:+p[1]; return ts===r; }).length;
         const pos = lPosesion(lg);
         return `<tr>
           <td><span class="league-badge badge-${lg==='VPN'?'vpn':lg==='VPUG'?'vpug':'e11'}">${lg}</span></td>
