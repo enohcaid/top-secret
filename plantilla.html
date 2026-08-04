@@ -788,8 +788,9 @@ function computeRankings(stats, rosterKeys) {
 
 /* ─── INIT DATA ─── */
 const T2_CUTOFF    = '2026-04-30';
-const T3_CUTOFF    = '2026-06-17';
-const T2_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T2_CUTOFF && m.date <= T3_CUTOFF);
+const T2_END       = '2026-06-17'; // fin de T2 (no confundir con el arranque de T3 — entre medio quedo la pretemporada VPUG, no cuenta para ninguna)
+const T3_CUTOFF    = '2026-08-02'; // arranque real de la T3 (VPN/11x11)
+const T2_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T2_CUTOFF && m.date <= T2_END);
 const T3_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T3_CUTOFF);
 const ROSTER_T2_KEYS = ROSTER_T2.map(r => r.key);
 const ROSTER_T3_KEYS = ROSTER_T3.map(r => r.key);
