@@ -504,7 +504,7 @@ footer span{color:#C9A84C;}
     <span style="font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-right:4px;">Temporada</span>
     <button id="spill1" onclick="switchStatsSeason(1)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T1 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
     <button id="spill2" onclick="switchStatsSeason(2)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--muted);cursor:pointer;">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">FINALIZADA</span></button>
-    <button id="spill3" onclick="switchStatsSeason(3)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">PRÓXIMAMENTE</span></button>
+    <button id="spill3" onclick="switchStatsSeason(3)" style="padding:6px 16px;border-radius:20px;border:1px solid var(--gold);background:var(--gold-dim);font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--gold);cursor:pointer;">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;background:var(--border2);color:var(--muted2);">EN CURSO</span></button>
   </div>
   <!-- statsSoon: shown when T3 is active (no data yet) -->
   <div id="statsSoon" style="display:block;">
@@ -712,22 +712,26 @@ const WORKER_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const KV_KEY     = 'ts_matches_v1';   // clave en el KV del worker
 
 const ROSTER = [
-  {name:'Woolfyboyzx2',    pos:'POR'},
-  {name:'pauloco10',       pos:'POR'},
-  {name:'Zurdo-_CABJ12',   pos:'DEF'},
-  {name:'Agubostero7',     pos:'DEF'},
+  {name:'Ivan_Cabj_La12',  pos:'POR'},
+  {name:'rivarola90',      pos:'DEF'},
   {name:'Alexisraies23',   pos:'DEF'},
   {name:'Cabers14',        pos:'DEF'},
-  {name:'RS32-DaniStone',  pos:'MED'},
-  {name:'Juan_Martinez4',  pos:'MED'},
-  {name:'CipriMancini',    pos:'MED'},
-  {name:'Buraa07',         pos:'MED'},
+  {name:'CAT_FEL',         pos:'DEF'},
   {name:'Huber236',        pos:'LAT'},
-  {name:'zPibu__',         pos:'LAT'},
-  {name:'Guiidow',         pos:'MED'},
+  {name:'Guiidow',         pos:'LAT'},
+  {name:'Ramiro4588',      pos:'LAT'},
+  {name:'Juan_Martinez4',  pos:'MED'},
+  {name:'RS32-DaniStone',  pos:'MED'},
+  {name:'CipriMancini',    pos:'MED'},
+  {name:'Eli_No-SKILL',    pos:'MED'},
+  {name:'Lil_Dekuroko',    pos:'MED'},
+  {name:'Mauriii-_1891',   pos:'MED'},
   {name:'BlackPanther-CG', pos:'DEL'},
-  {name:'cansitrGd22_',    pos:'DEL'},
   {name:'Lautavester7',    pos:'DEL'},
+  {name:'yzytx0',          pos:'DEL'},
+  {name:'Juanchyroman08',  pos:'DEL'},
+  {name:'fedeavv9',        pos:'DEL'},
+  {name:'kee_viin03',      pos:'DEL'},
 ];
 
 
@@ -782,11 +786,12 @@ function loadMatches(){
 // ════════════════════════════════════════════
 let currentSeason = 3;
 const T2_CUTOFF = '2026-04-30';
-const T3_CUTOFF = '2026-06-17';
+const T2_END    = '2026-06-17'; // fin de T2 (no confundir con el arranque de T3 — entre medio quedo la pretemporada VPUG, no cuenta para ninguna)
+const T3_CUTOFF = '2026-08-02'; // arranque real de la T3 (VPN/11x11)
 function seasonMatches() {
   const all = loadMatches();
   if (currentSeason === 1) return all.filter(m => !m.date || m.date <= T2_CUTOFF);
-  if (currentSeason === 2) return all.filter(m => m.date && m.date > T2_CUTOFF && m.date <= T3_CUTOFF);
+  if (currentSeason === 2) return all.filter(m => m.date && m.date > T2_CUTOFF && m.date <= T2_END);
   return all.filter(m => m.date && m.date > T3_CUTOFF);
 }
 
@@ -2747,7 +2752,7 @@ function switchStatsSeason(n){
   const active=[s1,s2,s3][n-1];
   active.style.border='1px solid var(--gold)'; active.style.background='var(--gold-dim)'; active.style.color='var(--gold)';
   const soon=document.getElementById('statsSoon'), content=document.getElementById('statsContent');
-  if(n===3){
+  if(n===3 && seasonMatches().length===0){
     soon.style.display=''; content.style.display='none';
     return;
   }
