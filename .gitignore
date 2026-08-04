@@ -13,6 +13,7 @@ package-lock.json
 
 # temp/scratch
 tmp_*
+scratch_video/
 scripts/debug-*.png
 scripts/.last-neterr
 .impeccable/
