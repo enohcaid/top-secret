@@ -5,7 +5,7 @@
 //   node scripts/extract-goal-clips.mjs --url <twitch-vod-url> [opciones]
 //
 // Opciones:
-//   --out <dir>        carpeta de salida (default: scratch_video/clips)
+//   --out <dir>        carpeta de salida (default: Clips/<nombre sacado de la URL>)
 //   --start <seg>       inicio del rango a descargar/analizar (segundos)
 //   --end <seg>         fin del rango
 //   --interval <seg>    cada cuanto muestrear el marcador (default: 2)
@@ -41,7 +41,8 @@ if (!url) {
   process.exit(1);
 }
 
-const outDir = path.resolve(getArg('out', 'scratch_video/clips'));
+const vodId = (url.match(/videos\/(\d+)/) || [])[1] || 'vod';
+const outDir = path.resolve(getArg('out', `Clips/${vodId}`));
 const start = getArg('start');
 const end = getArg('end');
 const interval = parseFloat(getArg('interval', '2'));
