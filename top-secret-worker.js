@@ -19,6 +19,10 @@ const NOTICIAS_OG = {
     t: 'Ya tenemos fixture: 19 partidos en la Liga Argentina 2da División VPN',
     i: SITE + 'logos/' + encodeURIComponent('Fixture VPN T3.png'),
   },
+  'fixture-11x11-t3-2026': {
+    t: 'Fixture confirmado: 18 partidos en el Challengers #4 de 11x11',
+    i: SITE + 'logos/' + encodeURIComponent('Fixture 11x11 T3.png'),
+  },
   'mundial-2026-finalissima': {
     t: '"Ganamos la final": Argentina tumbó a Inglaterra y el domingo va por la Finalíssima ante España',
     i: SITE + 'logos/Noticia%20WC2026%2017-7.png',
