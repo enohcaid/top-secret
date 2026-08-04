@@ -700,7 +700,7 @@ footer span{color:#C9A84C;}
 </div>
 </div><!-- /statsContent -->
 
-<footer><p>Top Secret <span>Football Club</span> · Estadísticas · Temporada 1 · 2026</p></footer>
+<footer><p>Top Secret <span>Football Club</span> · Estadísticas · Temporada 3 · 2026</p></footer>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -1287,11 +1287,11 @@ function renderSeason(){
     const pasesPP       = +(tsSum('pases')/n).toFixed(0);
     const precPases     = tsAvg('precision_pases');
     const xg            = tsAvg('goles_esperados');
-    const interc        = +(tsSum('intercepciones')/n).toFixed(1);
+    const interc        = tsAvg('intercepciones');
     const regates       = tsAvg('regates_exito');
-    const paradas       = +(tsSum('paradas')/n).toFixed(1);
-    const faltas        = +(tsSum('faltas')/n).toFixed(1);
-    const corneres      = +(tsSum('corneres')/n).toFixed(1);
+    const paradas       = tsAvg('paradas');
+    const faltas        = tsAvg('faltas');
+    const corneres      = tsAvg('corneres');
     const totalEntr     = tsSum('entradas');
     const pctTackles    = totalEntr>0 ? Math.round(tsSum('entradas_exito')/totalEntr*100) : null;
 
@@ -1370,6 +1370,7 @@ function renderSeason(){
       .filter(p=>p.games>=3 && (p.goals+p.assists)>0)
       .map(p=>({...p, impact:+((p.goals+p.assists)/p.games).toFixed(2)}))
       .sort((a,b)=>b.impact-a.impact).slice(0,6);
+    if (!sorted.length) return '';
     const maxV = sorted[0]?.impact || 1;
     return `<div class="season-block">
       <div class="sb-header"><span class="sb-icon">🔥</span><h3>Impacto ofensivo</h3></div>
@@ -1394,6 +1395,7 @@ const consistBlock = (()=>{
         return {...p, std, meanR:+(mean||0).toFixed(2)};
       })
       .sort((a,b)=>a.std-b.std).slice(0,6);
+    if (!sorted.length) return '';
     const maxStd = Math.max(...sorted.map(p=>p.std)) || 1;
     return `<div class="season-block">
       <div class="sb-header"><span class="sb-icon">📐</span><h3>Consistencia</h3></div>
@@ -2926,8 +2928,8 @@ window.ceaSortBy        = ceaSortBy;
           {lbl:'Pases / partido',     val: +(tsSum('pases')/n).toFixed(0), pct: Math.min(100, tsSum('pases')/n/300*100),color:'#4a9eff',     unit:''},
           {lbl:'Precisión de pases',  val: tsAvg('precision_pases'), pct: tsAvg('precision_pases'),                     color:'#4a9eff',     unit:'%'},
           {lbl:'Regates con éxito',   val: tsAvg('regates_exito'),   pct: tsAvg('regates_exito'),                       color:'var(--gold)', unit:'%'},
-          {lbl:'Paradas del arco',    val: +(tsSum('paradas')/n).toFixed(1), pct: Math.min(100, tsSum('paradas')/n/6*100), color:'var(--muted)', unit:''},
-          {lbl:'Faltas cometidas',    val: +(tsSum('faltas')/n).toFixed(1),  pct: Math.min(100, tsSum('faltas')/n/10*100), color:'var(--loss)',  unit:''},
+          {lbl:'Paradas del arco',    val: tsAvg('paradas'), pct: tsAvg('paradas')!=null ? Math.min(100, tsAvg('paradas')/6*100) : 0, color:'var(--muted)', unit:''},
+          {lbl:'Faltas cometidas',    val: tsAvg('faltas'),  pct: tsAvg('faltas')!=null ? Math.min(100, tsAvg('faltas')/10*100) : 0, color:'var(--loss)',  unit:''},
           ...(tsSum('entradas') > 0 ? [{lbl:'Éxito en tackles', val: Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), pct: Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), color:'#7c6fff', unit:'%'}] : []),
         ].filter(s => s.val != null);
         if (barStats.length) {

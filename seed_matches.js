@@ -1729,7 +1729,7 @@ const SEED_MATCHES = [
 
   // Fecha 1 VPN T3 - Ysh Fc - 3 Ago 2026 (Local, 2-0, Victoria)
   {rival:'Ysh Fc', league:'VPN', date:'2026-08-03', isHome:true, match_result:'2-0', uploadedAt:'2026-08-04T00:00:00.000Z', notes:'',
-  team_stats:{posesion:null,tiros:7,tiros_arco:null,goles_esperados:null,pases:223,precision_pases:88,entradas:26,entradas_exito:10,intercepciones:null,paradas:null,faltas:0,fuera_juego:3,corneres:null,regates_exito:148,precision_tiro:71},
+  team_stats:{posesion:null,tiros:7,tiros_arco:null,goles_esperados:null,pases:223,precision_pases:88,entradas:26,entradas_exito:10,intercepciones:null,paradas:null,faltas:0,fuera_juego:3,corneres:null,regates_exito:94,precision_tiro:71},
   players:[
     {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'EI',  rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
@@ -1746,7 +1746,7 @@ const SEED_MATCHES = [
 
   // Fecha 2 VPN T3 - Al-Yateh FC - 3 Ago 2026 (Visita, 1-0, Victoria)
   {rival:'Al-Yateh FC', league:'VPN', date:'2026-08-03', isHome:false, match_result:'1-0', uploadedAt:'2026-08-04T00:30:00.000Z', notes:'',
-  team_stats:{posesion:null,tiros:5,tiros_arco:null,goles_esperados:null,pases:168,precision_pases:83,entradas:14,entradas_exito:4,intercepciones:null,paradas:null,faltas:2,fuera_juego:0,corneres:null,regates_exito:116,precision_tiro:60},
+  team_stats:{posesion:null,tiros:5,tiros_arco:null,goles_esperados:null,pases:168,precision_pases:83,entradas:14,entradas_exito:4,intercepciones:null,paradas:null,faltas:2,fuera_juego:0,corneres:null,regates_exito:92,precision_tiro:60},
   players:[
     {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'EI',  rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
