@@ -15,8 +15,15 @@
 //                       el layout de EA FC Clubs Pro visto en cabers1414: "32:56:258:58",
 //                       son los dos dígitos del marcador en la esquina sup. izquierda)
 //   --threshold <n>     diferencia media de píxel (0-255) para considerar cambio (default: 35)
-//   --skip-start <seg>  segundos a saltar antes de analizar (evita el lobby/menú
-//                       previo al kickoff, que no tiene el HUD y genera falsos positivos)
+//   --skip-start <seg>  segundos a saltar antes de analizar (default: 0). El
+//                       lobby/menú previo al kickoff no tiene el HUD del marcador
+//                       y puede generar algunos falsos positivos (diffs altos por
+//                       animaciones de menú) — se probó autodetectar el kickoff
+//                       por señales de píxel (estabilidad, contraste, tinte verde
+//                       del lobby) y ninguna resultó confiable entre streams
+//                       distintos, así que queda manual. Sin --skip-start, el
+//                       umbral (--threshold) + revisión manual de los clips
+//                       filtran el ruido de lobby igual.
 //   --merge-gap <seg>   separación máxima entre picos para tratarlos como un solo evento (default: 10)
 //
 // El video fuente se descarga una sola vez en <out>/_work/source.mp4 y se reutiliza
@@ -51,8 +58,6 @@ const post = parseFloat(getArg('post', '12'));
 const cropSpec = getArg('crop', '32:56:258:58');
 const threshold = parseFloat(getArg('threshold', '35'));
 const mergeGap = parseFloat(getArg('merge-gap', '10'));
-// El lobby/menú previo al kickoff no tiene el HUD del marcador y genera falsos
-// positivos constantes; conviene arrancar el análisis después del pitido inicial.
 const skipStart = parseFloat(getArg('skip-start', '0'));
 
 fs.mkdirSync(outDir, { recursive: true });
@@ -82,10 +87,11 @@ if (!fs.existsSync(sourceFile)) {
   console.log('Video fuente ya descargado, reutilizando:', sourceFile);
 }
 
+const [cw, ch, cx, cy] = cropSpec.split(':').map(Number);
+
 // 2. Extraer frames de baja resolución recortados sobre el marcador.
 fs.rmSync(framesDir, { recursive: true, force: true });
 fs.mkdirSync(framesDir, { recursive: true });
-const [cw, ch, cx, cy] = cropSpec.split(':').map(Number);
 run(
   ffmpegPath,
   [
