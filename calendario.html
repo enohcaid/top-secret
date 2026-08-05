@@ -1946,7 +1946,13 @@ function renderNextHero() {
   custom.forEach((m, ci) => {
     if (m.date < today || (m.tipo && m.tipo !== 'partido')) return;
     if (customIsInRaw(m)) return;
-    upcoming.push({m, id: 'c'+ci});
+    let mm = m;
+    if (!mm.badge) {
+      if (mm.league === 'VPUG')  mm = {...mm, badge: vpugBadge(mm.rival)};
+      if (mm.league === 'VPN')   mm = {...mm, badge: vpnBadge(mm.rival)};
+      if (mm.league === '11x11') mm = {...mm, badge: e11Badge(mm.rival)};
+    }
+    upcoming.push({m: mm, id: 'c'+ci});
   });
   // Include pretemporada upcoming matches (from CopáFácil via Worker)
   if (_preData) {

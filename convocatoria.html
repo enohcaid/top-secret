@@ -726,6 +726,10 @@ function getTodayMatches() {
       if (m.badge) return m;
       if (m.league === 'VPUG')  return {...m, badge: VPUG_T2_BADGES[m.rival]||null};
       if (m.league === '11x11') return {...m, badge: E11_T3_BADGES[m.rival]||null};
+      if (m.league === 'VPN') {
+        const live = vpnFixtures.find(v => (v.rival||'').toLowerCase().trim() === (m.rival||'').toLowerCase().trim());
+        return {...m, badge: (live && live.badge) || null};
+      }
       return m;
     });
   const fromVpn = vpnFixtures
