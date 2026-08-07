@@ -705,34 +705,17 @@ footer span{color:#C9A84C;}
 
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
+import { ROSTER_T3 } from './roster.js';
 // ════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════
 const WORKER_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const KV_KEY     = 'ts_matches_v1';   // clave en el KV del worker
 
-const ROSTER = [
-  {name:'Ivan_Cabj_La12',  pos:'POR'},
-  {name:'rivarola90',      pos:'DEF'},
-  {name:'Alexisraies23',   pos:'DEF'},
-  {name:'Cabers14',        pos:'DEF'},
-  {name:'CAT_FEL',         pos:'DEF'},
-  {name:'Huber236',        pos:'LAT'},
-  {name:'Guiidow',         pos:'LAT'},
-  {name:'Ramiro4588',      pos:'LAT'},
-  {name:'Juan_Martinez4',  pos:'MED'},
-  {name:'RS32-DaniStone',  pos:'MED'},
-  {name:'CipriMancini',    pos:'MED'},
-  {name:'Eli_No-SKILL',    pos:'MED'},
-  {name:'Lil_Dekuroko',    pos:'MED'},
-  {name:'Mauriii-_1891',   pos:'MED'},
-  {name:'BlackPanther-CG', pos:'DEL'},
-  {name:'Lautavester7',    pos:'DEL'},
-  {name:'yzytx0',          pos:'DEL'},
-  {name:'Juanchyroman08',  pos:'DEL'},
-  {name:'fedeavv9',        pos:'DEL'},
-  {name:'kee_viin03',      pos:'DEL'},
-];
+// Plantel: derivado de roster.js (fuente única, compartida con plantilla.html)
+// en vez de una copia a mano — evita que se desactualice sola cuando entra o
+// sale un jugador (ver memoria del proyecto: "rosters hardcodeados desactualizados").
+const ROSTER = ROSTER_T3.map(p => ({name: p.key, pos: p.pos}));
 
 
 // ════════════════════════════════════════════
@@ -1167,6 +1150,89 @@ function drawLineChart(canvasId, labels, values, color){
 }
 
 // ════════════════════════════════════════════
+// HELPERS COMPARTIDOS — team stats bars & rankings
+// (usados por la vista de Temporada y la de Torneos; antes estaban
+// duplicados en los dos lugares, lo que hizo que el bug de regates_exito
+// hubiera que arreglarlo dos veces)
+// ════════════════════════════════════════════
+
+// regates_exito se cargó como PORCENTAJE (0-100) hasta esta fecha; desde
+// acá en adelante es una CANTIDAD absoluta de regates exitosos (convención
+// documentada en CLAUDE.md / la rutina nocturna). Mezclar ambas escalas en
+// un mismo promedio no tiene sentido, así que la métrica "Regates" solo
+// se calcula con partidos de la convención nueva.
+const REGATES_COUNT_SINCE = '2026-08-04';
+
+// Tiros al arco: usa el dato real si existe. Si no hay ni tiros_arco ni
+// precision_tiro, NO inventamos una tasa (antes asumía 70% en silencio) —
+// devolvemos null y ese partido queda afuera del promedio/gráfico.
+function tirosArcoDerivado(m){
+  const t = m.team_stats;
+  if(t.tiros_arco!=null) return +t.tiros_arco.toFixed(1);
+  if(t.tiros!=null && t.precision_tiro!=null) return +(t.tiros*t.precision_tiro/100).toFixed(1);
+  return null;
+}
+
+function computeStatsBars(tsMatches){
+  const ts = tsMatches.map(m=>m.team_stats);
+  const n  = tsMatches.length;
+  const tsAvg = key => { const v=ts.map(t=>t[key]).filter(v=>v!=null); return v.length ? +(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1) : null; };
+  const tsSum = key => ts.reduce((s,t)=>s+(t[key]||0),0);
+  const interc    = tsAvg('intercepciones');
+  const regates   = tsAvg('regates_exito');
+  const paradas   = tsAvg('paradas');
+  const faltas    = tsAvg('faltas');
+  const corneres  = tsAvg('corneres');
+  const pasesPP   = +(tsSum('pases')/n).toFixed(0);
+  const precPases = tsAvg('precision_pases');
+  const totalEntr = tsSum('entradas');
+
+  const regatesMatches = tsMatches.filter(m=>m.date>=REGATES_COUNT_SINCE && m.team_stats.regates_exito!=null);
+  const regatesAvg = regatesMatches.length ? +(regatesMatches.reduce((s,m)=>s+m.team_stats.regates_exito,0)/regatesMatches.length).toFixed(1) : null;
+
+  return [
+    {lbl:'Pases / partido',    val:pasesPP,    pct:Math.min(100,pasesPP/300*100), color:'#4a9eff',     unit:'',  n},
+    {lbl:'Precisión de pases', val:precPases,  pct:precPases,                      color:'#4a9eff',     unit:'%', n},
+    {lbl:'Intercepciones',     val:interc,     pct:Math.min(100,interc/30*100),    color:'#7c6fff',     unit:'',  n},
+    {lbl:'Regates exitosos',   val:regatesAvg, pct:regatesAvg!=null?Math.min(100,regatesAvg/150*100):0, color:'var(--gold)', unit:'', n:regatesMatches.length},
+    {lbl:'Paradas del arco',   val:paradas,    pct:Math.min(100,paradas/5*100),    color:'var(--muted)', unit:'', n},
+    {lbl:'Córneres',           val:corneres,   pct:Math.min(100,corneres/8*100),   color:'var(--muted)', unit:'', n},
+    {lbl:'Faltas cometidas',   val:faltas,     pct:Math.min(100,faltas/10*100),    color:'var(--loss)',  unit:'', n},
+    ...(totalEntr>0 ? [{lbl:'Éxito en tackles', val:Math.round(tsSum('entradas_exito')/totalEntr*100), pct:Math.round(tsSum('entradas_exito')/totalEntr*100), color:'#7c6fff', unit:'%', n}] : []),
+  ].filter(s=>s.val!=null);
+}
+
+function renderStatsBarsHTML(tsMatches){
+  return computeStatsBars(tsMatches).map(s =>
+    '<div class="ts2-row" title="' + s.n + ' partido' + (s.n!==1?'s':'') + ' con dato">' +
+      '<span class="ts2-lbl">' + s.lbl + '</span>' +
+      '<div class="ts2-track"><div class="ts2-fill" style="width:' + s.pct + '%;background:' + s.color + '"></div></div>' +
+      '<span class="ts2-val" style="color:' + s.color + '">' + s.val + s.unit + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+// Ranking de jugadores (top 6) reutilizado por Temporada y Torneos.
+function rankBlock(title, icon, rows, valFn, valLabel, color, subFn, id){
+  const sorted=[...rows].filter(p=>valFn(p)!=null&&valFn(p)>0).sort((a,b)=>valFn(b)-valFn(a)).slice(0,6);
+  const maxV=valFn(sorted[0]||{goals:1})||1;
+  const posC=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+  return `<div class="season-block">
+    <div class="sb-header"><span class="sb-icon">${icon}</span><h3>${title}</h3></div>
+    <table class="rank-table">${sorted.map((p,i)=>`<tr>
+      <td class="rank-pos ${posC(i)}">${i+1}</td>
+      <td><div class="rank-name">${p.name}</div>
+        <div class="rank-bar-wrap"><div class="rank-bar-track">
+          <div class="rank-bar-fill" style="width:${Math.round(valFn(p)/maxV*100)}%;background:${color}"></div>
+        </div></div></td>
+      <td><div class="rank-val" style="color:${color}">${typeof valFn(p)==='number'&&!Number.isInteger(valFn(p))?valFn(p).toFixed(1):valFn(p)}</div>
+          <div class="rank-sub">${subFn?subFn(p):valLabel}</div></td>
+    </tr>`).join('')}</table>
+    ${id?`<div class="chart-wrap"><canvas class="chart" id="${id}"></canvas></div>`:''}
+  </div>`;
+}
+
+// ════════════════════════════════════════════
 // TAB TEMPORADA
 // ════════════════════════════════════════════
 function renderSeason(){
@@ -1219,25 +1285,7 @@ function renderSeason(){
     {val:teamAvgRating!=null?teamAvgRating.toFixed(1):'—', lbl:'Rating Prom.', color:vrColor(teamAvgRating)},
   ].map(k=>`<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`).join('');
 
-  // Rank helper
-  function rankBlock(title, icon, rows, valFn, valLabel, color, subFn, id){
-    const sorted=[...players].filter(p=>valFn(p)!=null&&valFn(p)>0).sort((a,b)=>valFn(b)-valFn(a)).slice(0,6);
-    const maxV=valFn(sorted[0]||{goals:1})||1;
-    const posC=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    return `<div class="season-block">
-      <div class="sb-header"><span class="sb-icon">${icon}</span><h3>${title}</h3></div>
-      <table class="rank-table">${sorted.map((p,i)=>`<tr>
-        <td class="rank-pos ${posC(i)}">${i+1}</td>
-        <td><div class="rank-name">${p.name}</div>
-          <div class="rank-bar-wrap"><div class="rank-bar-track">
-            <div class="rank-bar-fill" style="width:${Math.round(valFn(p)/maxV*100)}%;background:${color}"></div>
-          </div></div></td>
-        <td><div class="rank-val" style="color:${color}">${typeof valFn(p)==='number'&&!Number.isInteger(valFn(p))?valFn(p).toFixed(1):valFn(p)}</div>
-            <div class="rank-sub">${subFn?subFn(p):valLabel}</div></td>
-      </tr>`).join('')}</table>
-      ${id?`<div class="chart-wrap"><canvas class="chart" id="${id}"></canvas></div>`:''}
-    </div>`;
-  }
+  // rankBlock: función compartida a nivel de módulo (ver arriba de renderSeason)
 
   // Results list
   const resultsHTML = `<div class="season-block full">
@@ -1281,40 +1329,16 @@ function renderSeason(){
     // Valores calculados
     const posesion      = tsAvg('posesion');
     const tirosPP       = +(tsSum('tiros')/n).toFixed(1);
-    // tiros_arco derivado: usar campo directo si existe, sino tiros×precisión/100
-    const tirosArcoPP   = +((tsMatches.reduce((s,m)=>{ const t=m.team_stats; if(t.tiros_arco!=null) return s+t.tiros_arco; if(t.tiros!=null&&t.precision_tiro!=null) return s+(t.tiros*t.precision_tiro/100); return s+(t.tiros||0)*0.7; },0))/n).toFixed(1);
+    // tiros_arco derivado: promedio solo sobre partidos con dato real (nunca inventado)
+    const arcoValsHero  = tsMatches.map(tirosArcoDerivado).filter(v=>v!=null);
+    const tirosArcoPP   = arcoValsHero.length ? +(arcoValsHero.reduce((a,b)=>a+b,0)/arcoValsHero.length).toFixed(1) : null;
     const precTiro      = tsAvg('precision_tiro');
-    const pasesPP       = +(tsSum('pases')/n).toFixed(0);
-    const precPases     = tsAvg('precision_pases');
     const xg            = tsAvg('goles_esperados');
-    const interc        = tsAvg('intercepciones');
-    const regates       = tsAvg('regates_exito');
-    const paradas       = tsAvg('paradas');
-    const faltas        = tsAvg('faltas');
-    const corneres      = tsAvg('corneres');
     const totalEntr     = tsSum('entradas');
     const pctTackles    = totalEntr>0 ? Math.round(tsSum('entradas_exito')/totalEntr*100) : null;
 
-    // Barras de stats secundarias
-    const barStats = [
-      {lbl:'Pases / partido',    val:pasesPP,   pct:Math.min(100,pasesPP/300*100),    color:'#4a9eff', unit:''},
-      {lbl:'Precisión de pases', val:precPases, pct:precPases,                         color:'#4a9eff', unit:'%'},
-      {lbl:'Intercepciones',     val:interc,    pct:Math.min(100,interc/30*100),        color:'#7c6fff', unit:''},
-      {lbl:'Regates con éxito',  val:regates,   pct:regates,                            color:'var(--gold)', unit:'%'},
-      {lbl:'Paradas del arco',   val:paradas,   pct:Math.min(100,paradas/5*100),        color:'var(--muted)', unit:''},
-      {lbl:'Córneres',           val:corneres,  pct:Math.min(100,corneres/8*100),       color:'var(--muted)', unit:''},
-      {lbl:'Faltas cometidas',   val:faltas,    pct:Math.min(100,faltas/10*100),        color:'var(--loss)',  unit:''},
-      // Presión defensiva
-      ...(tsSum('entradas')>0 ? [{lbl:'Éxito en tackles',  val:Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), pct:Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), color:'#7c6fff', unit:'%'}] : []),
-    ].filter(s=>s.val!=null);
-
-    const barHTML = barStats.map(s =>
-      '<div class="ts2-row">' +
-        '<span class="ts2-lbl">' + s.lbl + '</span>' +
-        '<div class="ts2-track"><div class="ts2-fill" style="width:' + s.pct + '%;background:' + s.color + '"></div></div>' +
-        '<span class="ts2-val" style="color:' + s.color + '">' + s.val + s.unit + '</span>' +
-      '</div>'
-    ).join('');
+    // Barras de stats secundarias (helper compartido con la vista de Torneos)
+    const barHTML = renderStatsBarsHTML(tsMatches);
 
     teamStatsBlock =
       // ── Fila 1: KPIs grandes ──
@@ -1527,13 +1551,11 @@ const ligaBlock = (()=>{
       const ta  = key => { const v=ts2.map(t=>t[key]).filter(v=>v!=null); return v.length ? v.reduce((s,x)=>s+x,0)/v.length : null; };
       const tn  = tsMatches.length;
       const posVal = ta('posesion') || 50;
-      const tirosT = +(ts2.reduce((s,t)=>s+(t.tiros||0),0)/tn).toFixed(1);
-      // Derivar tiros al arco: usar tiros_arco si existe, sino tiros × precision_tiro/100
-      const arcosT = +(ts2.reduce((s,t)=>{
-        if(t.tiros_arco!=null) return s+t.tiros_arco;
-        if(t.tiros!=null && t.precision_tiro!=null) return s+(t.tiros*t.precision_tiro/100);
-        return s+(t.tiros||0)*0.7;
-      },0)/tn).toFixed(1);
+      // Tiros al arco: promedio solo sobre partidos con dato real (nunca inventado);
+      // tirosT usa el MISMO subconjunto para que "al arco" + "fuera" sumen el total real.
+      const arcoMatches = tsMatches.filter(m=>tirosArcoDerivado(m)!=null);
+      const arcosT = arcoMatches.length ? +(arcoMatches.reduce((s,m)=>s+tirosArcoDerivado(m),0)/arcoMatches.length).toFixed(1) : 0;
+      const tirosT = arcoMatches.length ? +(arcoMatches.reduce((s,m)=>s+(m.team_stats.tiros||0),0)/arcoMatches.length).toFixed(1) : 0;
 
       // Helper: render breakdown panel
       function renderBreakdown(panelId, matchList, keyFn, label, color, unit){
@@ -1562,13 +1584,15 @@ const ligaBlock = (()=>{
       }
 
       // Radar axes data
+      const regatesRadarMatches = tsMatches.filter(m=>m.date>=REGATES_COUNT_SINCE && m.team_stats.regates_exito!=null);
+      const regatesRadarAvg = regatesRadarMatches.length ? regatesRadarMatches.reduce((s,m)=>s+m.team_stats.regates_exito,0)/regatesRadarMatches.length : 0;
       const radarAxes = [
         {lbl:'Ataque',    val: Math.min(100,((ta('goles_esperados')||0)/7)*100), key:'goles_esperados', unit:'',  color:'#e8502e', unitSuffix:' xG'},
         {lbl:'Precisión', val: ta('precision_tiro')||0,           key:'precision_tiro', unit:'%', color:'#3ecf8e'},
         {lbl:'Posesión',  val: posVal,                            key:'posesion',       unit:'%', color:'#c8a84b'},
         {lbl:'Pases',     val: ta('precision_pases')||0,          key:'precision_pases',unit:'%', color:'#4a9eff'},
         {lbl:'Defensa',   val: Math.min(100,((ta('intercepciones')||0)/25)*100), key:'intercepciones', unit:'', color:'#7c6fff'},
-        {lbl:'Regates',   val: ta('regates_exito')||0,            key:'regates_exito',  unit:'%', color:'#f5c518'},
+        {lbl:'Regates',   val: Math.min(100, regatesRadarAvg/150*100), key:'regates_exito', unit:'', color:'#f5c518'},
       ];
 
       let selectedRadarAxis = -1;
@@ -1579,7 +1603,9 @@ const ligaBlock = (()=>{
         if(!axPanel) return;
         if(selIdx < 0){ axPanel.classList.remove('open'); return; }
         const ax = radarAxes[selIdx];
-        const matchList = tsMatches.filter(m=>m.team_stats[ax.key]!=null);
+        // Regates: solo partidos de la convención "cantidad" (ver REGATES_COUNT_SINCE) —
+        // los anteriores tienen un porcentaje guardado en el mismo campo, no son comparables.
+        const matchList = tsMatches.filter(m=>m.team_stats[ax.key]!=null && (ax.key!=='regates_exito' || m.date>=REGATES_COUNT_SINCE));
         const maxV = Math.max(...matchList.map(m=>m.team_stats[ax.key]||0), 1);
         const bRows = matchList.map(m => {
           const val = m.team_stats[ax.key];
@@ -1604,15 +1630,10 @@ const ligaBlock = (()=>{
         if(idx===0) renderBreakdown('bdPosesion', tsMatches, m=>m.team_stats.posesion, 'Posesión', '#c8a84b', '%');
         else        renderBreakdown('bdPosesion', tsMatches, m=>100-m.team_stats.posesion, 'Posesión rival', '#2a2f42', '%');
       });
-      const arcosDerivadoFn = m => {
-        const t = m.team_stats;
-        if(t.tiros_arco!=null) return +t.tiros_arco.toFixed(1);
-        if(t.tiros!=null && t.precision_tiro!=null) return +(t.tiros*t.precision_tiro/100).toFixed(1);
-        return +(t.tiros||0)*0.7;
-      };
+      const arcosDerivadoFn = tirosArcoDerivado; // sin dato real → null (no se inventa)
       const fueraDerivadoFn = m => {
         const arcos = arcosDerivadoFn(m);
-        return Math.max(0, +((m.team_stats.tiros||0) - arcos).toFixed(1));
+        return arcos==null ? null : Math.max(0, +((m.team_stats.tiros||0) - arcos).toFixed(1));
       };
       drawDonut('chartTiros', arcosT, Math.max(0,tirosT-arcosT), ['#3ecf8e','#1e2230'], 160, idx => {
         if(idx===0) renderBreakdown('bdTiros', tsMatches, arcosDerivadoFn, 'Tiros al arco', '#3ecf8e', '');
@@ -1982,16 +2003,17 @@ Para team_stats extraé estos campos si están visibles (usá null si no aparece
 - pases: total de pases
 - precision_pases: % precisión de pases
 - entradas: total de entradas/tackles del equipo
+- entradas_exito: CANTIDAD de entradas exitosas (no %) — si la imagen muestra "Entradas: 26" y "Tasa de éxito: 38%", calculá entradas_exito = round(26 * 0.38)
 - intercepciones: total de intercepciones del equipo
 - paradas: paradas del arquero
 - faltas: faltas cometidas
 - corneres: córneres a favor
-- regates_exito: % de regates con éxito
+- regates_exito: CANTIDAD de regates exitosos (NO el porcentaje) — si la imagen muestra "Regates: 134" y "Tasa de éxito: 88%", calculá regates_exito = round(134 * 0.88). Nunca pongas el número de la tasa de éxito directamente en este campo.
 - precision_tiro: % de precisión de tiro
 
 El campo "matched" SIEMPRE debe ser el nombre exacto del plantel. Si un valor no es legible usá null.
 Devolvé ÚNICAMENTE JSON válido sin markdown, con esta estructura completa:
-{"players":[{"name":"apodo","matched":"nombre exacto","played_pos":"MCD","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"team_stats":{"posesion":62,"tiros":13,"tiros_arco":9,"goles_esperados":6.1,"pases":208,"precision_pases":88,"entradas":null,"intercepciones":18,"paradas":null,"faltas":null,"corneres":null,"regates_exito":91,"precision_tiro":69},"match_result":"6-0","notes":""}
+{"players":[{"name":"apodo","matched":"nombre exacto","played_pos":"MCD","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"team_stats":{"posesion":62,"tiros":13,"tiros_arco":9,"goles_esperados":6.1,"pases":208,"precision_pases":88,"entradas":24,"entradas_exito":9,"intercepciones":18,"paradas":null,"faltas":null,"corneres":null,"regates_exito":118,"precision_tiro":69},"match_result":"6-0","notes":""}
 El campo "played_pos" es la posición en la que jugó (columna POS de la tabla), exactamente como aparece (ej: MCD, EI, DC, DFI, PO, etc).
 Si no hay datos de equipo en la imagen, omití el campo team_stats.
 Si no hay jugadores en la imagen, devolvé "players":[].
@@ -2895,51 +2917,19 @@ window.ceaSortBy        = ceaSortBy;
       });
       const players = Object.values(pm).filter(p => p.games > 0);
 
-      function rankBlock(title, icon, rows, valFn, valLabel, color, subFn) {
-        const sorted = [...rows].filter(p => valFn(p) != null && valFn(p) > 0).sort((a,b) => valFn(b) - valFn(a)).slice(0, 6);
-        if (!sorted.length) return '';
-        const maxV = valFn(sorted[0]) || 1;
-        const posC = i => i===0?'gold':i===1?'silver':i===2?'bronze':'';
-        return `<div class="season-block">
-          <div class="sb-header"><span class="sb-icon">${icon}</span><h3>${title}</h3></div>
-          <table class="rank-table">${sorted.map((p,i) => `<tr>
-            <td class="rank-pos ${posC(i)}">${i+1}</td>
-            <td><div class="rank-name">${p.name}</div>
-              <div class="rank-bar-wrap"><div class="rank-bar-track">
-                <div class="rank-bar-fill" style="width:${Math.round(valFn(p)/maxV*100)}%;background:${color}"></div>
-              </div></div></td>
-            <td><div class="rank-val" style="color:${color}">${typeof valFn(p)==='number'&&!Number.isInteger(valFn(p))?valFn(p).toFixed(1):valFn(p)}</div>
-                <div class="rank-sub">${subFn ? subFn(p) : valLabel}</div></td>
-          </tr>`).join('')}</table>
-        </div>`;
-      }
+      // rankBlock y las barras de team stats usan los helpers compartidos con Temporada
+      // (ver arriba de renderSeason) — evita que un fix como el de regates_exito
+      // haya que aplicarlo dos veces.
 
       // Team stats bars
       const tsMatches = matches.filter(m => m.team_stats);
       let teamStatsBlock = '';
       if (tsMatches.length) {
-        const ts = tsMatches.map(m => m.team_stats);
-        const n = tsMatches.length;
-        const tsAvg = key => { const v = ts.map(t => t[key]).filter(v => v != null); return v.length ? +(v.reduce((s,x) => s+x, 0) / v.length).toFixed(1) : null; };
-        const tsSum = key => ts.reduce((s,t) => s + (t[key]||0), 0);
-        const barStats = [
-          {lbl:'Posesión promedio',   val: tsAvg('posesion'),       pct: tsAvg('posesion'),                             color:'var(--gold)',  unit:'%'},
-          {lbl:'Tiros / partido',     val: +(tsSum('tiros')/n).toFixed(1), pct: Math.min(100, tsSum('tiros')/n/15*100), color:'var(--win)',   unit:''},
-          {lbl:'Pases / partido',     val: +(tsSum('pases')/n).toFixed(0), pct: Math.min(100, tsSum('pases')/n/300*100),color:'#4a9eff',     unit:''},
-          {lbl:'Precisión de pases',  val: tsAvg('precision_pases'), pct: tsAvg('precision_pases'),                     color:'#4a9eff',     unit:'%'},
-          {lbl:'Regates con éxito',   val: tsAvg('regates_exito'),   pct: tsAvg('regates_exito'),                       color:'var(--gold)', unit:'%'},
-          {lbl:'Paradas del arco',    val: tsAvg('paradas'), pct: tsAvg('paradas')!=null ? Math.min(100, tsAvg('paradas')/6*100) : 0, color:'var(--muted)', unit:''},
-          {lbl:'Faltas cometidas',    val: tsAvg('faltas'),  pct: tsAvg('faltas')!=null ? Math.min(100, tsAvg('faltas')/10*100) : 0, color:'var(--loss)',  unit:''},
-          ...(tsSum('entradas') > 0 ? [{lbl:'Éxito en tackles', val: Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), pct: Math.round(tsSum('entradas_exito')/tsSum('entradas')*100), color:'#7c6fff', unit:'%'}] : []),
-        ].filter(s => s.val != null);
-        if (barStats.length) {
+        const barHTML = renderStatsBarsHTML(tsMatches);
+        if (barHTML) {
           teamStatsBlock = `<div class="season-block full">
             <div class="sb-header"><span class="sb-icon">🎮</span><h3>Estadísticas del equipo</h3></div>
-            <div class="ts-bars-grid">${barStats.map(s =>
-              `<div class="ts2-row"><span class="ts2-lbl">${s.lbl}</span>
-               <div class="ts2-track"><div class="ts2-fill" style="width:${s.pct}%;background:${s.color}"></div></div>
-               <span class="ts2-val" style="color:${s.color}">${s.val}${s.unit}</span></div>`
-            ).join('')}</div>
+            <div class="ts-bars-grid">${barHTML}</div>
           </div>`;
         }
       }
