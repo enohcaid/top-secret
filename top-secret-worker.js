@@ -8,7 +8,7 @@
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
   'youtube-resumen-semanal-1': {
-    t: 'Top Secret FC estrena canal de YouTube con el Resumen Semanal #1',
+    t: '¡Estamos en YouTube! Top Secret FC inaugura su canal oficial con el Resumen Semanal #1',
     i: SITE + 'logos/' + encodeURIComponent('Resumen Semanal 1.png'),
   },
   'plantel-t3-2026': {

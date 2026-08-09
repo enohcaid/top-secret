@@ -70,7 +70,7 @@
     }
     @media (max-width: 760px) {
       .featured-card { grid-template-columns: 1fr; }
-      .featured-photo { min-height: 260px; order: -1; }
+      .featured-photo, .featured-video { min-height: 260px; order: -1; }
     }
     .featured-text {
       padding: 48px 40px;
@@ -177,6 +177,18 @@
       inset: 0;
       background: linear-gradient(to right, #111111 0%, transparent 40%);
       pointer-events: none;
+    }
+    .featured-video {
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+    .featured-video iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
     }
 
     /* ── Section heading ── */
@@ -738,7 +750,7 @@
 <body>
 
 <script src="noticias-data.js"></script>
-<script src="layout.js?v=8"></script>
+<script src="layout.js?v=9"></script>
 
 <div class="page-wrap">
 
@@ -934,6 +946,14 @@ function formatDate(iso) {
 
 function renderFeatured(n) {
   const slot = document.getElementById('featured-slot');
+  const media = n.videoId
+    ? `<div class="featured-video">
+         <iframe src="https://www.youtube.com/embed/${n.videoId}" title="${n.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+       </div>`
+    : `<div class="featured-photo">
+         <img src="${n.image}" alt="${n.title}" onerror="this.parentElement.style.background='#1a1a1a'">
+         <div class="featured-photo-gradient"></div>
+       </div>`;
   slot.innerHTML = `
     <div class="featured-card">
       <div class="featured-text">
@@ -949,10 +969,7 @@ function renderFeatured(n) {
           <button class="btn-secondary" onclick="openShare('${n.id}')">Compartir</button>
         </div>
       </div>
-      <div class="featured-photo">
-        <img src="${n.image}" alt="${n.title}" onerror="this.parentElement.style.background='#1a1a1a'">
-        <div class="featured-photo-gradient"></div>
-      </div>
+      ${media}
     </div>
   `;
 }
