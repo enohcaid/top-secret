@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'youtube-resumen-semanal-1': {
+    t: 'Top Secret FC estrena canal de YouTube con el Resumen Semanal #1',
+    i: SITE + 'logos/' + encodeURIComponent('Resumen Semanal 1.png'),
+  },
   'plantel-t3-2026': {
     t: 'Presentamos el plantel completo de Top Secret FC para la Temporada 3',
     i: SITE + 'logos/' + encodeURIComponent('Presentación Plantel T3.png'),
