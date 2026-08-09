@@ -70,7 +70,18 @@
     }
     @media (max-width: 760px) {
       .featured-card { grid-template-columns: 1fr; }
-      .featured-photo, .featured-video { min-height: 260px; order: -1; }
+      .featured-photo { min-height: 260px; order: -1; }
+    }
+    /* Noticia con video: apilado a todo el ancho (video arriba, texto abajo)
+       en vez del grid 2 columnas, para que el video se vea grande sin
+       necesidad de pantalla completa. */
+    .featured-card.has-video {
+      display: flex;
+      flex-direction: column;
+      min-height: unset;
+    }
+    .featured-card.has-video .featured-text {
+      padding: 32px 40px 40px;
     }
     .featured-text {
       padding: 48px 40px;
@@ -182,6 +193,9 @@
       position: relative;
       overflow: hidden;
       background: #000;
+      order: -1;
+      width: 100%;
+      aspect-ratio: 16 / 9;
     }
     .featured-video iframe {
       position: absolute;
@@ -955,7 +969,7 @@ function renderFeatured(n) {
          <div class="featured-photo-gradient"></div>
        </div>`;
   slot.innerHTML = `
-    <div class="featured-card">
+    <div class="featured-card${n.videoId ? ' has-video' : ''}">
       <div class="featured-text">
         <div class="featured-eyebrow">
           <span class="pill-pinned">📌 Fijado</span>
