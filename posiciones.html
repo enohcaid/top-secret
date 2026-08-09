@@ -358,10 +358,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
 
     <!-- VPUG T3 -->
     <div class="tab-pane" id="t3-pane-vpug">
-      <div style="text-align:center;padding:56px 16px;color:var(--muted);">
-        <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);">PRÓXIMAMENTE</div>
-        <div style="margin-top:10px;font-size:.8rem;">La tabla de la Temporada 3 se publica cuando arranque la fase regular de VPUG</div>
-      </div>
+      <div class="table-wrap"><table class="standings-table" id="t3-vpug-table"></table></div>
     </div>
 
     <!-- 11x11 T3 -->
@@ -396,6 +393,7 @@ window.addEventListener('DOMContentLoaded', () => {
 const WORKER_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const VPN_URL  = WORKER_BASE + '/vpn-table';
 const VPUG_URL = WORKER_BASE + '/vpug-table';
+const VPUG_T3_URL = WORKER_BASE + '/vpug-table-t3';
 const E11_GROUPS_URL_T2 = 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/';
 const E11_GROUPS_URL_T3 = 'https://api.virtualprogaming.com/public/tournaments/CHALLENGERS-T4/groups/?season=1';
 
@@ -418,6 +416,28 @@ const VPUG_T2_DATA = [
   {name:'United Mito',          abbr:'UNM', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvCo5TroXXRQESh8X.png?alt=media&token=1'},
   {name:'Villa Dalmine eSports',abbr:'VDE', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMusnJNuTqdPlqecqy.png?alt=media&token=1'},
   {name:'4BDOMIFL4NES',         abbr:'4BD', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMv3twVIiqprWZaFrj.png?alt=media&token=1'},
+];
+
+// #1 Primera División VPUG (T6 CopáFácil) — temporada regular, arrancó 2026-08-10 (fallback si /vpug-table-t3 falla)
+const VPUG_T3_DATA = [
+  {name:'TOP Secret',        gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, us:true, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQetM8ROfp55aARizV.png?alt=media&token=1&m=1781803529172'},
+  {name:'All Boys eSp',        gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fh6z9%2Fteams%2F-OlZaxMFjlVs5_rNMfbA.png?alt=media&token=1&m=1771279886020'},
+  {name:'Colon SL',            gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2F7zxj%2Fteams%2F-OmWPzqBjj1QCR6oNHIq.png?alt=media&token=1&m=1786214093523'},
+  {name:'Atlético Moneiro',    gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJ8gO1MV4MpdIkj31.png?alt=media&token=1&m=1777384209613'},
+  {name:'Germinal eSports',    gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJFPe1ZweZc87RIxz.png?alt=media&token=1&m=1777384309012'},
+  {name:'Nueva Chicago',       gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJG4wNcts0vozc6_Q.png?alt=media&token=1&m=1777384491268'},
+  {name:'4BDOMIFL4NES',        gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJHNtZzsN6pGKzstV.png?alt=media&token=1&m=1777384517795'},
+  {name:'Real MarcianoFC',     gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJK2phXP4iCdiats2.png?alt=media&token=1&m=1777383674107'},
+  {name:'InfinitX',            gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuhE-u1E66GmHygQ8.png?alt=media&token=1&m=1778519186424'},
+  {name:'I.A.C.C Cantera',     gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuw6E8LdYHDoCUr1l.png?alt=media&token=1&m=1778519091798'},
+  {name:'Ysh FC',              gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2F7zxj%2Fteams%2F-OsMvxM6Umv8kNMPo0Xa.png?alt=media&token=1&m=1785718482709'},
+  {name:'San Miguel eSports',  gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fl2fb%2Fteams%2F-Osl6TMQmCXINP2THWYM.png?alt=media&token=1&m=1778942125257'},
+  {name:'Deportivo Moron',     gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fl2fb%2Fteams%2F-Osl76Pr_C10tVEcf6jZ.png?alt=media&token=1&m=1778999664645'},
+  {name:'Argentino de Merlo',  gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2F6w2f%2Fteams%2F-OsqaWiCI-o32hNoVxCB.png?alt=media&token=1&m=1779040380037'},
+  {name:'Hacha eSports',       gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQbx98GunA039zp-bH.png?alt=media&token=1&m=1781803912247'},
+  {name:'United Mito',         gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQc3HN0-1ALKiuvvQK.png?alt=media&token=1&m=1781803881039'},
+  {name:'Temperley eSports',   gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQc6Ze0TMTfq1T1qlS.png?alt=media&token=1&m=1782828958852'},
+  {name:'Olimpo eSports',      gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQevHLY6602L6O9nnC.png?alt=media&token=1&m=1781806115693'},
 ];
 
 const VPUG_DATA = [
@@ -662,6 +682,22 @@ async function fetchT2VPUG() {
   }
 }
 
+/* ── FETCH & RENDER T3 VPUG ── */
+async function fetchT3VPUG() {
+  try {
+    const r = await fetch(VPUG_T3_URL);
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    const data = normVPUG(Array.isArray(raw) ? raw : []);
+    if (!data.length) throw new Error('empty');
+    renderTable('t3-vpug-table', data, 'var(--vpug)');
+    gsap.to('#t3-vpug-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  } catch(e) {
+    renderTable('t3-vpug-table', VPUG_T3_DATA, 'var(--vpug)');
+    gsap.to('#t3-vpug-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  }
+}
+
 /* ── FETCH & RENDER T2 11x11 (2 grupos) ── */
 const E11_FALLBACK_G1 = [
   {name:'Comunicaciones eSports', abbr:'COM', logo:VPG_LOGO+'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public', gp:0,w:0,d:0,l:0,gf:0,gc:0,gd:0,pts:0,us:false},
@@ -779,6 +815,7 @@ fetchT2VPUG();
 fetchT2E11();
 fetchT3VPN();
 fetchT3E11();
+fetchT3VPUG();
 
 
 
