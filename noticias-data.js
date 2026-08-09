@@ -3,8 +3,30 @@
 
 const NOTICIAS = [
   {
-    id: 'plantel-t3-2026',
+    id: 'youtube-resumen-semanal-1',
     pinned: true,
+    category: 'Multimedia',
+    title: 'Top Secret FC estrena canal de YouTube con el Resumen Semanal #1',
+    date: '2026-08-09',
+    dateLabel: '9 de agosto de 2026',
+    excerpt: 'El club lanza su canal oficial de YouTube para subir compilaciones de goles y contenido de video del equipo. Arrancamos con el Resumen Semanal #1: todos los goles de la primera semana de la Temporada 3.',
+    image: 'logos/Resumen Semanal 1.png',
+    body: [
+      'Top Secret FC ya tiene <strong>canal oficial de YouTube</strong>. De ahora en más, ahí va a estar el contenido en video del club: compilaciones de goles, jugadas destacadas y todo lo que pase dentro de la cancha semana a semana.',
+      '<div class="video-embed"><iframe src="https://www.youtube.com/embed/GGgiX_QBIh4" title="Resumen Semanal #1 - Top Secret FC" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>',
+      'Para arrancar, subimos el <strong>Resumen Semanal #1</strong>: todos los goles de Top Secret FC en la primera semana de la Temporada 3, en un solo video.',
+      'Suscribite al canal para no perderte ningún resumen: <a href="https://www.youtube.com/@TOPSecretFC" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700;">youtube.com/@TOPSecretFC</a> 🖤⭐',
+    ],
+    shareCaption: '🎥 NUEVO CANAL DE YOUTUBE · TOP SECRET FC\n\nYa está online el canal oficial del club. Arrancamos con el Resumen Semanal #1: todos los goles de la primera semana de la Temporada 3.\n\n▶️ https://youtu.be/GGgiX_QBIh4\n\nSuscribite → https://www.youtube.com/@TOPSecretFC\n\n#TopSecretFC #Temporada3 #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🎥 NUEVO CANAL DE YOUTUBE 🖤\n\nArrancamos con el Resumen Semanal #1: todos los goles de la primera semana de la T3.\n\nSuscribite → @TOPSecretFC en YouTube\n\n#TopSecretFC #Temporada3 #EAFCClubsPro',
+      x:  '🎥 Top Secret FC ya tiene canal de YouTube.\n\nArrancamos con el Resumen Semanal #1: todos los goles de la primera semana de la T3.\n\n▶️ https://youtu.be/GGgiX_QBIh4\n\n#TopSecretFC #Temporada3',
+      fb: '🎥 NUEVO CANAL DE YOUTUBE · TOP SECRET FC\n\nEl club estrena su canal oficial de YouTube para subir compilaciones de goles y contenido de video del equipo.\n\nArrancamos con el Resumen Semanal #1: todos los goles de la primera semana de la Temporada 3.\n\n▶️ Mirá el video: https://youtu.be/GGgiX_QBIh4\n\n🔔 Suscribite: https://www.youtube.com/@TOPSecretFC\n\n#TopSecretFC #Temporada3 #EAFCClubsPro',
+    },
+  },
+  {
+    id: 'plantel-t3-2026',
+    pinned: false,
     category: 'Institución',
     title: 'Presentamos el plantel completo de Top Secret FC para la Temporada 3',
     date: '2026-08-02',
