@@ -1,5 +1,14 @@
-// Prototipo: detecta cambios en el marcador (goles) en un VOD de Twitch y
-// extrae clips candidatos alrededor de cada cambio para revisión manual.
+// Detecta momentos destacados (goles, atajadas, jugadas) en un VOD de Twitch
+// por cambios de pixel sobre el recorte del marcador, y extrae un clip
+// candidato por cada uno para revisión manual.
+//
+// NOTA (2026-08-09): se probaron 3 heurísticas de clasificación automática
+// GOL/JUGADA basadas en comparar píxeles del marcador (ver historial de git
+// de este archivo) y ninguna dio resultados confiables — demasiados falsos
+// positivos y negativos. Se descartó ese camino. Para identificar goles
+// puntuales, la vía que sí funcionó fue pedirle a Claude que mire los
+// fotogramas directamente (visión real, no heurística de píxeles) — pedirlo
+// en el momento en vez de tratar de automatizarlo sin supervisión.
 //
 // Uso:
 //   node scripts/extract-goal-clips.mjs --url <twitch-vod-url> [opciones]
@@ -109,11 +118,9 @@ const files = fs.readdirSync(framesDir).filter(f => f.endsWith('.png')).sort();
 console.log(`Frames muestreados: ${files.length}`);
 
 const diffs = [];
-const bufs = []; // se conservan para la clasificación GOL/JUGADA del paso 4b
 let prevBuf = null;
 for (let i = 0; i < files.length; i++) {
   const buf = await sharp(path.join(framesDir, files[i])).raw().grayscale().toBuffer();
-  bufs.push(buf);
   if (prevBuf) {
     let sum = 0;
     for (let p = 0; p < buf.length; p++) sum += Math.abs(buf[p] - prevBuf[p]);
@@ -123,12 +130,6 @@ for (let i = 0; i < files.length; i++) {
     diffs.push(0);
   }
   prevBuf = buf;
-}
-
-function meanAbsDiff(a, b) {
-  let sum = 0;
-  for (let p = 0; p < a.length; p++) sum += Math.abs(a[p] - b[p]);
-  return sum / a.length;
 }
 
 // 4. Agrupar frames con diferencia > threshold en eventos (candidatos a jugada
@@ -156,57 +157,13 @@ console.log(events.map(e => {
   return `${fmt(e.start)}-${fmt(e.end)}`;
 }).join(', '));
 
-// 4b. Clasificar cada evento en GOL (el marcador quedó distinto de un lado a otro
-// del pico, "asentado" fuera de la animación de cambio) o JUGADA (el pico fue una
-// repetición/corte de cámara u otra animación que pasó por encima del recorte del
-// marcador, pero el marcador volvió al mismo valor de antes). Esto NO lee el valor
-// numérico del marcador (no hay OCR ni templates de dígitos, cero dependencias
-// nuevas) — solo compara si el "estado asentado" antes y después del evento es
-// igual o distinto, así que es una señal de "cambió/no cambió", no el score exacto.
-function frameIdxAtTime(t) {
-  const i = Math.round((t - skipStart) / interval);
-  return Math.max(0, Math.min(bufs.length - 1, i));
-}
-// Las repeticiones/animaciones de gol duran un tiempo variable — un offset fijo
-// (stable-gap) a veces cae todavía dentro de la repetición y compara dos frames
-// "en movimiento" en vez de dos frames asentados. Mejor: caminar en la serie de
-// diffs ya calculada hasta encontrar dos muestras consecutivas con diff bajo
-// (señal de que el HUD volvió a estar quieto), en vez de un tiempo fijo.
-const maxSearchSamples = Math.round(30 / interval); // no vagar más de ~30s buscando estabilidad
-function findStableBefore(idx) {
-  const limit = Math.max(0, idx - maxSearchSamples);
-  for (let i = idx; i > limit; i--) {
-    if (diffs[i] <= threshold / 2 && diffs[i - 1] <= threshold / 2) return i;
-  }
-  return Math.max(0, idx);
-}
-function findStableAfter(idx) {
-  const limit = Math.min(diffs.length - 1, idx + maxSearchSamples);
-  for (let i = idx; i < limit; i++) {
-    if (diffs[i] <= threshold / 2 && diffs[i + 1] <= threshold / 2) return i;
-  }
-  return Math.min(diffs.length - 1, idx);
-}
-for (const e of events) {
-  const startIdx = frameIdxAtTime(e.start);
-  const endIdx = frameIdxAtTime(e.end);
-  const beforeIdx = findStableBefore(Math.max(0, startIdx - 1));
-  const afterIdx = findStableAfter(Math.min(diffs.length - 1, endIdx + 1));
-  const settledDiff = meanAbsDiff(bufs[beforeIdx], bufs[afterIdx]);
-  e.tag = settledDiff > threshold ? 'GOL' : 'jugada';
-  e.settledDiff = +settledDiff.toFixed(1);
-}
-const golCount = events.filter(e => e.tag === 'GOL').length;
-console.log(`Clasificados como GOL (marcador cambió): ${golCount} de ${events.length}`);
-
 // 5. Cortar un clip por evento (con padding), copia de stream (rápido, sin recodificar).
-// El tag GOL/jugada va en el nombre del archivo para poder filtrar sin abrir cada video.
 const manifest = [];
 for (let i = 0; i < events.length; i++) {
-  const { start: evStart, end: evEnd, tag, settledDiff } = events[i];
+  const { start: evStart, end: evEnd } = events[i];
   const clipStart = Math.max(0, evStart - pre);
   const clipDuration = (evEnd - evStart) + pre + post;
-  const outFile = path.join(outDir, `clip_${String(i + 1).padStart(2, '0')}_${Math.floor(evStart)}s_${tag}.mp4`);
+  const outFile = path.join(outDir, `clip_${String(i + 1).padStart(2, '0')}_${Math.floor(evStart)}s.mp4`);
   run(
     ffmpegPath,
     [
@@ -219,7 +176,7 @@ for (let i = 0; i < events.length; i++) {
     ],
     `clip-${i + 1}`
   );
-  manifest.push({ event_start_s: evStart, event_end_s: evEnd, tag, settled_diff: settledDiff, clip: outFile });
+  manifest.push({ event_start_s: evStart, event_end_s: evEnd, clip: outFile });
 }
 
 fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
@@ -227,4 +184,4 @@ fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, nu
 console.log('Limpiando frames temporales (se conserva el video fuente para reuso)...');
 fs.rmSync(framesDir, { recursive: true, force: true });
 
-console.log(`\nListo. ${manifest.length} clips en ${outDir} (${golCount} marcados _GOL, ${manifest.length - golCount} _jugada)`);
+console.log(`\nListo. ${manifest.length} clips en ${outDir}`);
