@@ -890,6 +890,10 @@ body{padding-top:64px;}
         <option value="">— Sin especificar —</option>
       </select>
     </div>
+    <div class="field" id="addRoundField">
+      <label>Jornada (opcional)</label>
+      <input type="number" id="addRound" min="1" placeholder="Ej: 3" style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.92rem;padding:9px 12px;outline:none;width:100%;">
+    </div>
     <div class="field" id="addNotesField" style="display:none">
       <label>Descripción</label>
       <input type="text" id="addNotes" placeholder="Ej: Entrenamiento táctico">
@@ -2808,6 +2812,7 @@ function refreshAddType(){
   document.getElementById('addLeagueField').style.display    = isPartido ? '' : 'none';
   document.getElementById('addRivalField').style.display     = isPartido ? '' : 'none';
   document.getElementById('addInstanciaField').style.display = isPartido ? '' : 'none';
+  document.getElementById('addRoundField').style.display     = isPartido ? '' : 'none';
   document.getElementById('addHomeField').style.display      = isPartido ? '' : 'none';
   document.getElementById('addNotesField').style.display     = !isPartido ? '' : 'none';
 }
@@ -2831,6 +2836,8 @@ function saveAdd(){
     entry.league   = document.getElementById('addLeague').value;
     entry.instancia= document.getElementById('addInstancia').value;
     entry.isHome   = addHomeVal;
+    const roundVal = document.getElementById('addRound').value;
+    if (roundVal) entry.round = parseInt(roundVal, 10);
   } else {
     entry.notes = document.getElementById('addNotes').value.trim();
   }
