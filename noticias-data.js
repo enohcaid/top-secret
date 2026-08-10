@@ -4,7 +4,7 @@
 const NOTICIAS = [
   {
     id: 'comunicado-colombia-2026',
-    pinned: true,
+    pinned: false,
     category: 'Institución',
     title: 'Comunicado oficial: Top Secret FC junto a Colombia',
     date: '2026-08-10',
@@ -49,7 +49,7 @@ const NOTICIAS = [
   },
   {
     id: 'youtube-resumen-semanal-1',
-    pinned: false,
+    pinned: true,
     category: 'Multimedia',
     videoId: 'GGgiX_QBIh4',
     title: '¡Estamos en YouTube! Top Secret FC inaugura su canal oficial con el Resumen Semanal #1',
