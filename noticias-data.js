@@ -3,6 +3,29 @@
 
 const NOTICIAS = [
   {
+    id: 'fixture-vpug-t6-2026',
+    pinned: false,
+    category: 'Fixture',
+    title: 'Fixture confirmado: 17 partidos en la Primera División VPUG, Temporada 6',
+    date: '2026-08-10',
+    dateLabel: '10 de agosto de 2026',
+    excerpt: 'CopáFácil publicó el calendario completo de la Primera División VPUG. Top Secret FC jugará 17 partidos a lo largo de la Temporada 6, con debut hoy mismo de visitante ante Nueva Chicago.',
+    image: 'logos/Fixture VPUG T3.png',
+    body: [
+      'Ya está oficial. CopáFácil publicó el calendario completo de <strong>#1 Primera División VPUG (Temporada 6)</strong> y Top Secret FC tiene por delante <strong>17 partidos</strong>, todos a ida única.',
+      'El debut es hoy mismo, de visitante ante <strong>Nueva Chicago</strong> (22:30hs). Un arranque directo, sin margen para acomodarse.',
+      'El fixture se extiende hasta el <strong>7 de septiembre</strong>, con rivales como Deportivo Moron, Real MarcianoFC, InfinitX, Germinal eSports, Argentino de Merlo, Hacha eSports, Olimpo eSports, Ysh FC, Atlético Moneiro, United Mito, Temperley eSports y Colon SL, entre otros. Diecisiete jornadas, todas a las 22:30hs, de lunes a jueves.',
+      'El plantel llega con la base de la Temporada 3 y las ganas intactas de sumar en las tres ligas del club.',
+      'El fixture completo está disponible en el calendario del sitio. Seguí cada jornada y no te pierdas ningún resultado. 🖤⭐',
+    ],
+    shareCaption: '📋 FIXTURE OFICIAL · VPUG TEMPORADA 6\n\nTop Secret FC ya tiene calendario en la Primera División VPUG:\n\n🗓️ 17 partidos, ida única\n📅 10 de agosto → 7 de septiembre\n🏆 CopáFácil · VPUG\n\nEl debut es HOY, de visitante ante Nueva Chicago. ¡Vamos! 🖤⭐\n\n#TopSecretFC #VPUG #Fixture',
+    shareCaptions: {
+      ig: '📋 FIXTURE OFICIAL · VPUG T6 🖤\n\n17 partidos. Primera División VPUG.\n\nEl debut es HOY, de visitante ⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPUG #Temporada3 #EAFCClubsPro #Fixture',
+      x:  '📋 Ya tenemos fixture en la Primera División VPUG.\n\n17 partidos entre el 10/08 y el 07/09.\n\nEl debut es hoy, de visitante ante Nueva Chicago 🖤⭐\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPUG #Temporada3',
+      fb: '📋 FIXTURE OFICIAL · VPUG TEMPORADA 6\n\nCopáFácil publicó el calendario completo y Top Secret FC tiene 17 partidos por delante en la Primera División VPUG.\n\n🗓️ 10 de agosto al 7 de septiembre\n🏆 CopáFácil · VPUG\n\nEl debut es hoy, de visitante ante Nueva Chicago. ¡Vamos Top Secret FC! 🖤⭐\n\n#TopSecretFC #VPUG #Temporada3 #EAFCClubsPro',
+    },
+  },
+  {
     id: 'youtube-resumen-semanal-1',
     pinned: true,
     category: 'Multimedia',

@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'fixture-vpug-t6-2026': {
+    t: 'Fixture confirmado: 17 partidos en la Primera División VPUG, Temporada 6',
+    i: SITE + 'logos/' + encodeURIComponent('Fixture VPUG T3.png'),
+  },
   'youtube-resumen-semanal-1': {
     t: '¡Estamos en YouTube! Top Secret FC inaugura su canal oficial con el Resumen Semanal #1',
     i: SITE + 'logos/' + encodeURIComponent('Resumen Semanal 1.png'),
