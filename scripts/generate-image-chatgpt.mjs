@@ -541,14 +541,16 @@ La imagen generada anteriormente no cumplió con la identidad visual del club. T
 Este punto debe ser claramente diferente y mejor en la imagen nueva.` : ''}`;
 }
 
+// Frase corta nativa: es el mismo mensaje que manda la UI de ChatGPT al elegir
+// "Historia 9:16" en el selector de "Relación de aspecto" de una imagen ya
+// generada. Probado en vivo (2026-08-10): da proporción casi exacta (0.5628
+// vs 0.5625 real) manteniendo fielmente la composición del post — mucho más
+// confiable que la instrucción larga anterior (ver bug de formato post=story,
+// 2026-07-20, en project_topsecret_tareas_imagenes memoria). El chequeo
+// mecánico de proporción (STORY_MAX_RATIO) y el reintento con corrección
+// siguen como red de seguridad por si alguna vez falla.
 function buildResizePrompt() {
-  return `Tomá la imagen que acabás de generar y recreala en formato Instagram STORY: pantalla completa de celular, proporción 9:16.
-
-⚠️ Esta versión tiene que ser NOTORIAMENTE MÁS ALTA Y ANGOSTA que la imagen anterior — el post que acabás de generar era ancho, proporción 4:5. Si esta versión sale con una proporción parecida a la del post, está MAL: tiene que ser un encuadre vertical mucho más extremo, tipo pantalla completa de un celular en mano.
-
-Mantené EXACTAMENTE la misma escena, el mismo personaje/jugador, la misma pose, los mismos colores y el mismo estilo editorial — es la MISMA pieza, solo adaptada a un encuadre vertical mucho más alto y angosto.
-
-Único cambio es de composición: reacomodá la escena para que ocupe bien el espacio vertical extremo. No cambies el tema, el contenido ni el mensaje de la imagen.`;
+  return `Usa la relación de aspecto 9:16`;
 }
 
 async function waitForGeneratedImage(page, excludeSrcs = []) {
