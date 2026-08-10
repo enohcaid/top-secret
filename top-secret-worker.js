@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'comunicado-colombia-2026': {
+    t: 'Comunicado oficial: Top Secret FC junto a Colombia',
+    i: SITE + 'logos/' + encodeURIComponent('Comunicado Colombia.png'),
+  },
   'fixture-vpug-t6-2026': {
     t: 'Fixture confirmado: 17 partidos en la Primera División VPUG, Temporada 6',
     i: SITE + 'logos/' + encodeURIComponent('Fixture VPUG T3.png'),

@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'comunicado-colombia-2026',
+    pinned: true,
+    category: 'Institución',
+    title: 'Comunicado oficial: Top Secret FC junto a Colombia',
+    date: '2026-08-10',
+    dateLabel: '10 de agosto de 2026',
+    excerpt: 'Ante el terremoto que golpeó a Colombia este 10 de agosto, el club expresa sus condolencias y su apoyo al pueblo colombiano, con una mención especial a Lil_Dekuroko, nuestro compañero colombiano en el plantel.',
+    image: 'logos/Comunicado Colombia.png',
+    body: [
+      'Ante el terremoto de magnitud 7,4 que golpeó a Colombia este 10 de agosto, dejando numerosas víctimas fatales y heridos en Cali, Pereira, Manizales, Quibdó y otras regiones del país, desde <strong>Top Secret FC</strong> queremos expresar nuestras condolencias a las familias de las víctimas y todo nuestro apoyo al pueblo colombiano en este momento tan doloroso.',
+      'Como parte de la comunidad del fútbol virtual, nos sentimos cerca de cada jugador, club y aficionado colombiano. Un abrazo especial para <strong>Lil_Dekuroko</strong>, nuestro compañero colombiano en el plantel, y para su familia y sus seres queridos en este momento tan difícil.',
+      'Deseamos una pronta recuperación a los heridos y fuerza a quienes hoy atraviesan esta tragedia.',
+      'Nuestro pensamiento está con Colombia.',
+    ],
+    shareCaption: 'COMUNICADO OFICIAL\n\nAnte el terremoto que golpeó a Colombia este 10 de agosto, Top Secret FC expresa sus condolencias a las víctimas y todo su apoyo al pueblo colombiano.\n\nUn abrazo especial para Lil_Dekuroko y su familia.\n\nNuestro pensamiento está con Colombia.\n\nTop Secret FC',
+    shareCaptions: {
+      ig: 'COMUNICADO OFICIAL\n\nNuestras condolencias a las víctimas del terremoto en Colombia y todo nuestro apoyo al pueblo colombiano. Un abrazo especial para Lil_Dekuroko y su familia.\n\nNuestro pensamiento está con Colombia.',
+      x:  'COMUNICADO OFICIAL · Top Secret FC\n\nNuestras condolencias a las víctimas del terremoto en Colombia y todo nuestro apoyo al pueblo colombiano. Un abrazo especial para Lil_Dekuroko y su familia.\n\nNuestro pensamiento está con Colombia.',
+      fb: 'COMUNICADO OFICIAL\n\nAnte el terremoto de magnitud 7,4 que golpeó a Colombia este 10 de agosto, Top Secret FC expresa sus condolencias a las familias de las víctimas y todo su apoyo al pueblo colombiano.\n\nUn abrazo especial para Lil_Dekuroko, nuestro compañero colombiano en el plantel, y para su familia en este momento tan difícil.\n\nNuestro pensamiento está con Colombia.\n\nTop Secret FC',
+    },
+  },
+  {
     id: 'fixture-vpug-t6-2026',
     pinned: false,
     category: 'Fixture',
@@ -27,7 +49,7 @@ const NOTICIAS = [
   },
   {
     id: 'youtube-resumen-semanal-1',
-    pinned: true,
+    pinned: false,
     category: 'Multimedia',
     videoId: 'GGgiX_QBIh4',
     title: '¡Estamos en YouTube! Top Secret FC inaugura su canal oficial con el Resumen Semanal #1',
