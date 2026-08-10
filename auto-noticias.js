@@ -53,12 +53,20 @@ function formatDateLabel(iso) {
 const LEAGUE_LABEL = { VPN: 'Liga VPN', VPUG: 'VPUG', '11x11': '11x11' };
 const RES_EMOJI    = { win: '✅', draw: '➖', loss: '❌' };
 
+// Desde el arranque de la Temporada 3 (2026-08-03) el pipeline diario cubre
+// cada resultado con un artículo real (imagen generada por IA, publicado vía
+// KV) — no generar más el fallback genérico de este módulo a partir de esa
+// fecha, para no duplicar noticias. Las fechas anteriores (T1/T2) sí siguen
+// generándose: son la única cobertura que existe de esos partidos.
+const AUTO_NEWS_CUTOFF = '2026-08-03';
+
 // ── Main export ───────────────────────────────────────────────────────────────
 export function generateMatchNews(matches) {
   const byDate = {};
   matches.forEach(m => {
     if (!m.match_result) return;
     const d = m.date || '1970-01-01';
+    if (d >= AUTO_NEWS_CUTOFF) return;
     (byDate[d] = byDate[d] || []).push(m);
   });
 
