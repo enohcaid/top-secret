@@ -855,6 +855,7 @@ let currentPlayer   = null;
 let selectedSlotKey = null;
 let _savedResetDate = '';
 let _firestoreLoaded = false; // guard: never write before first snapshot
+let _baseline = { availability:{}, dailyOverrides:{}, alwaysPresent:[], captain:null, lineup:{formation:'4-3-3',slots:{}}, resetDate:'' }; // last known server state, used to diff on save
 
 /* ─── FIRESTORE BACKUP (convocatoria/backup) ─── */
 let _backup = null; // cargado una vez al inicio, antes del listener principal
@@ -894,6 +895,18 @@ function applyData(rawData) {
   alwaysPresent   = data.alwaysPresent  || [];
   captain         = data.captain        || null;
   lineup          = data.lineup         || { formation:'4-3-3', slots:{} };
+  // Baseline = lo que el servidor realmente tiene persistido ahora mismo.
+  // Si hubo corrección por backup, la baseline sigue siendo el doc corrupto (rawData),
+  // así el próximo saveState() detecta la diferencia completa y la restaura de verdad.
+  const baselineSource = corrected ? rawData : data;
+  _baseline = {
+    availability:   { ...(baselineSource.availability   || {}) },
+    dailyOverrides: { ...(baselineSource.dailyOverrides || {}) },
+    alwaysPresent:  [ ...(baselineSource.alwaysPresent  || []) ],
+    captain:        baselineSource.captain != null ? baselineSource.captain : null,
+    lineup:         JSON.parse(JSON.stringify(baselineSource.lineup || { formation:'4-3-3', slots:{} })),
+    resetDate:      baselineSource.resetDate || '',
+  };
   _firestoreLoaded = true;
   return corrected;
 }
@@ -932,14 +945,40 @@ function loadState() {
         checkDailyReset();
       } else {
         _firestoreLoaded = true; // new doc — safe to seed
-        saveState();
+        const seed = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
+        CONV_DOC.set(seed).catch(e => console.warn('[conv] seed write error:', e));
+        _baseline = {
+          availability:   { ...availability },
+          dailyOverrides: { ...dailyOverrides },
+          alwaysPresent:  [ ...alwaysPresent ],
+          captain, lineup: JSON.parse(JSON.stringify(lineup)), resetDate: TODAY,
+        };
       }
       render();
     }, err => console.warn('Firestore listen error:', err));
   }
 }
 
-/* ─── SAVE STATE ─── */
+/* ─── SAVE STATE ───
+   Escribe SOLO lo que cambió respecto a la última foto conocida del servidor (_baseline),
+   usando update() con paths puntuales en vez de set() del documento entero.
+   Así, si esta pestaña tiene datos desactualizados de OTRO jugador (por lag de red,
+   una pestaña que quedó en segundo plano, etc.), guardar el propio estado no borra
+   lo que los demás ya cargaron. Ver incidente 2026-08-11: un set() completo desde
+   una copia local vieja pisaba dailyOverrides de todo el plantel. */
+function _pushMapDiff(fieldName, localMap, baseMap, args) {
+  const keys = new Set([...Object.keys(localMap || {}), ...Object.keys(baseMap || {})]);
+  keys.forEach(key => {
+    const hasLocal = Object.prototype.hasOwnProperty.call(localMap || {}, key);
+    const hasBase  = Object.prototype.hasOwnProperty.call(baseMap  || {}, key);
+    if (!hasLocal && hasBase) {
+      args.push(new firebase.firestore.FieldPath(fieldName, key), firebase.firestore.FieldValue.delete());
+    } else if (hasLocal && (!hasBase || JSON.stringify(localMap[key]) !== JSON.stringify(baseMap[key]))) {
+      args.push(new firebase.firestore.FieldPath(fieldName, key), localMap[key]);
+    }
+  });
+}
+
 function saveState() {
   if (!EDIT_MODE) return; // modo vista: nunca escribe
   if (!_firestoreLoaded) {
@@ -947,12 +986,28 @@ function saveState() {
     return;
   }
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
-  const data = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
   if (CONV_DOC) {
-    CONV_DOC.set(data).catch(e => {
-      console.warn('Firestore write error:', e);
-      showToast('Error al guardar. Verificá tu conexión e intentá de nuevo.', 'warn', 5000);
-    });
+    const args = [];
+    _pushMapDiff('availability',   availability,   _baseline.availability,   args);
+    _pushMapDiff('dailyOverrides', dailyOverrides, _baseline.dailyOverrides, args);
+    if (JSON.stringify(alwaysPresent) !== JSON.stringify(_baseline.alwaysPresent)) args.push('alwaysPresent', alwaysPresent);
+    if (captain !== _baseline.captain) args.push('captain', captain);
+    if (JSON.stringify(lineup) !== JSON.stringify(_baseline.lineup)) args.push('lineup', lineup);
+    if (TODAY !== _baseline.resetDate) args.push('resetDate', TODAY);
+
+    if (args.length) {
+      CONV_DOC.update(...args).then(() => {
+        _baseline = {
+          availability:   { ...availability },
+          dailyOverrides: { ...dailyOverrides },
+          alwaysPresent:  [ ...alwaysPresent ],
+          captain, lineup: JSON.parse(JSON.stringify(lineup)), resetDate: TODAY,
+        };
+      }).catch(e => {
+        console.warn('Firestore write error:', e);
+        showToast('Error al guardar. Verificá tu conexión e intentá de nuevo.', 'warn', 5000);
+      });
+    }
   }
   _saveBackup();
 }
@@ -2115,6 +2170,16 @@ _loadBackup().then(() => loadState());
 renderDateTag();
 render();
 scheduleMidnightReset();
+
+// Pestaña que quedó en segundo plano (el navegador congela los timers ahí,
+// scheduleMidnightReset no dispara): al volver a foco, si la fecha real ya
+// cambió pero esta pestaña sigue con el TODAY viejo, recargar en vez de dejar
+// que checkDailyReset() actúe con una fecha desactualizada.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  const fresh = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
+  if (fresh !== TODAY) location.reload();
+});
 
 /* ─── Animate after render ─── */
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
