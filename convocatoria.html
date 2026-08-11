@@ -836,6 +836,14 @@ function renderTodayMatchesPanel() {
     </div>`).join('');
 }
 
+/* ─── BUILD VERSION ───
+   Bump esto en cada deploy que toque la lógica de guardado/estado de esta página.
+   checkForNewBuild() lo usa para forzar el reload de pestañas que quedaron
+   abiertas con una versión vieja del script (ver incidente 2026-08-11: una
+   pestaña vieja siguió pisando el documento entero varios minutos después
+   de un deploy que ya lo arreglaba). */
+const BUILD_VERSION = '2026-08-11T21:20:00-03:00';
+
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
 const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
@@ -2174,12 +2182,35 @@ scheduleMidnightReset();
 // Pestaña que quedó en segundo plano (el navegador congela los timers ahí,
 // scheduleMidnightReset no dispara): al volver a foco, si la fecha real ya
 // cambió pero esta pestaña sigue con el TODAY viejo, recargar en vez de dejar
-// que checkDailyReset() actúe con una fecha desactualizada.
+// que checkDailyReset() actúe con una fecha desactualizada. Aprovechamos el
+// mismo momento para chequear si hay un deploy más nuevo (ver checkForNewBuild).
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   const fresh = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
-  if (fresh !== TODAY) location.reload();
+  if (fresh !== TODAY) { location.reload(); return; }
+  checkForNewBuild();
 });
+
+/* ─── AUTO-RELOAD EN DEPLOY NUEVO ───
+   Una pestaña que quedó abierta sigue corriendo el JS viejo aunque el archivo
+   en GitHub Pages ya se haya actualizado — recargar la página no la afecta.
+   Esto chequea periódicamente si el HTML servido tiene un BUILD_VERSION distinto
+   al que esta pestaña cargó, y si es así, recarga sola. Evita que una pestaña
+   vieja siga escribiendo con lógica desactualizada (o directamente rota) después
+   de un fix. */
+async function checkForNewBuild() {
+  try {
+    const res = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) return;
+    const html = await res.text();
+    const m = html.match(/BUILD_VERSION\s*=\s*'([^']+)'/);
+    if (m && m[1] !== BUILD_VERSION) {
+      console.warn('[conv] nueva versión detectada, recargando…', BUILD_VERSION, '→', m[1]);
+      location.reload();
+    }
+  } catch (e) { /* sin conexión momentánea: no hacer nada, se reintenta en el próximo ciclo */ }
+}
+setInterval(checkForNewBuild, 3 * 60 * 1000); // cada 3 min
 
 /* ─── Animate after render ─── */
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
