@@ -15,6 +15,7 @@
 import { chromium } from 'playwright';
 import { execSync } from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { createInterface } from 'readline';
 import sharp from 'sharp';
@@ -22,6 +23,7 @@ import { pathToFileURL } from 'url';
 
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
+const FIRESTORE_KIT_HISTORY  = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/kit_color_history';
 const FIRESTORE_PLANTEL      = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/plantel/activo';
 const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const DEBUG_DIR       = path.resolve('scripts'); // screenshots de debug fuera de Daily News (no se commitean)
@@ -51,10 +53,82 @@ const CREST_WHITE_PATH = path.resolve('logos/Top Secret white.png');
 // indumentaria: una infografía densa como referencia contamina la generación.
 const KITS_PATH  = path.resolve('logos/T3 Kits.png');
 
+// Adjuntar las TRES fotos de kit juntas y dejar que ChatGPT "elija" salía mal
+// seguido (mezclaba elementos entre kits, o directamente copiaba el kit falso
+// del render del jugador — sponsor "AIA" y swoosh de Nike incluidos). Ahora el
+// SCRIPT elige un solo color por corrida y recorta SOLO esa figura de
+// "T3 Kits.png" (los tres kits están en una fila a lo ancho de la imagen
+// 941×1672 — coordenadas medidas a mano sobre ese archivo, recortar de nuevo
+// si se reemplaza el poster de kits).
+const KIT_CROP_TOP    = 385;
+const KIT_CROP_BOTTOM = 1580;
+const KIT_COLORS = [
+  {
+    id: 'negro', label: 'negro',
+    x: 308, w: 325,
+    desc: 'camiseta negra de textura sutil, cuello redondo negro; escudo circular del club a la izquierda del pecho, sponsor "AIA" en el centro del pecho y swoosh de Nike a la derecha (igual que en la foto de referencia — son elementos reales del kit, no se quitan). Short negro con dorsal blanco y swoosh de Nike. Medias negras con "TSFC" y swoosh de Nike.',
+  },
+  {
+    id: 'blanco', label: 'blanco',
+    x: 0, w: 305,
+    desc: 'camiseta blanca con hombros y mangas raglán azul marino y cuello azul marino; escudo circular del club a la izquierda del pecho, sponsor "AIA" en rojo en el centro del pecho y swoosh de Nike a la derecha (igual que en la foto de referencia — son elementos reales del kit, no se quitan). Short blanco con dorsal azul marino y swoosh de Nike. Medias blancas con puño azul marino, "TSFC" y swoosh de Nike.',
+  },
+  {
+    id: 'amarillo', label: 'amarillo',
+    x: 633, w: 308,
+    desc: 'camiseta amarilla con cuello en V azul marino y vivos azul marino; escudo circular del club a la izquierda del pecho, sponsor "AIA" en el centro del pecho y swoosh de Nike a la derecha (igual que en la foto de referencia — son elementos reales del kit, no se quitan). Short amarillo con dorsal azul marino y swoosh de Nike. Medias amarillas con "TSFC" y swoosh de Nike.',
+  },
+];
+
+async function cropKitImage(kitId) {
+  const kit = KIT_COLORS.find(k => k.id === kitId);
+  if (!kit) throw new Error(`Color de kit desconocido: ${kitId}`);
+  const outPath = path.join(os.tmpdir(), `ts-kit-${kit.id}.png`);
+  await sharp(KITS_PATH)
+    .extract({ left: kit.x, top: KIT_CROP_TOP, width: kit.w, height: KIT_CROP_BOTTOM - KIT_CROP_TOP })
+    .toFile(outPath);
+  return outPath;
+}
+
+async function fetchKitHistory() {
+  try {
+    const res = await fetch(FIRESTORE_KIT_HISTORY);
+    const doc = await res.json();
+    if (doc.error) return [];
+    const values = doc.fields?.entries?.arrayValue?.values || [];
+    return values.map(v => ({
+      kit:  v.mapValue.fields.kit.stringValue,
+      date: v.mapValue.fields.date.stringValue,
+    }));
+  } catch { return []; }
+}
+
+// El script elige el kit (nunca ChatGPT) — rotación simple anti-repetición
+// contra las últimas 2 corridas, igual criterio que pickStyle().
+function pickKitColor(history) {
+  const recentIds = new Set(history.slice(0, 2).map(h => h.kit));
+  const available = KIT_COLORS.filter(k => !recentIds.has(k.id));
+  const pool = available.length > 0 ? available : KIT_COLORS;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+async function saveKitHistory(kitId, date, history) {
+  const updated = [{ kit: kitId, date }, ...history].slice(0, 10);
+  const values = updated.map(e => ({ mapValue: { fields: {
+    kit:  { stringValue: e.kit },
+    date: { stringValue: e.date },
+  }}}));
+  await fetch(FIRESTORE_KIT_HISTORY, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: { entries: { arrayValue: { values } } } }),
+  });
+}
+
 // El evaluador debe juzgar contra el ESTILO DEL DÍA, no contra una paleta fija:
 // exigir siempre negro+dorado haría rechazar imágenes correctas de estilos claros
 // (editorial revista, lluvia teal, estadio azul, etc.).
-function buildEvalPrompt(style, draft, mentioned) {
+function buildEvalPrompt(style, draft, mentioned, kit) {
   const isSeleccion = /^selecc/i.test(draft.category || '');
   const identityBlock = mentioned.length > 0
     ? `
@@ -81,8 +155,9 @@ CRITERIOS (todos deben cumplirse):
 - El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
 ${isSeleccion
-  ? '- Esta noticia es de la Selección Argentina: la camiseta CELESTE Y BLANCA de la Selección es VÁLIDA para jugadores o elementos que representen a la Selección. Si aparece un jugador de Top Secret como jugador del club, su camiseta es de los kits oficiales: NEGRA, BLANCA o AMARILLA'
-  : '- La camiseta de Top Secret es de uno de los tres kits oficiales: NEGRA, BLANCA o AMARILLA. Una camiseta azul o de cualquier otro color = RECHAZADA'}
+  ? `- Esta noticia es de la Selección Argentina: la camiseta CELESTE Y BLANCA de la Selección es VÁLIDA para jugadores o elementos que representen a la Selección. Si aparece un jugador de Top Secret como jugador del club, su camiseta tiene que ser la del kit ${kit.label.toUpperCase()} de hoy (ningún otro color del club, ni azul/rojo/otro) = si no, RECHAZADA`
+  : `- El kit de HOY es el ${kit.label.toUpperCase()} — ninguna otra camiseta del club (ni negra si hoy es blanco/amarillo, ni ningún otro color) es válida = RECHAZADA si el color no coincide`}
+- El sponsor "AIA" en el pecho y el swoosh de Nike SON parte real y esperada del kit — su presencia es correcta y NO es motivo de rechazo. Lo que SÍ es RECHAZADA: cualquier sponsor distinto de "AIA", cualquier logo de marca deportiva que no sea Nike, o el escudo/identidad de un club real (Tottenham, Real Madrid, Boca, etc.) en vez del escudo de Top Secret FC
 - Dorsales: si se ve un número de camiseta, los dígitos están bien formados, en orientación correcta y NO espejados ni invertidos (un "01" donde debería decir "10", dígitos al revés como en un reflejo, números deformes) = RECHAZADA
 - FORMATO "EXPEDIENTE TOP SECRET": la imagen respeta el sistema visual del club — fondo negro carbón con textura de papel/archivo, grano de película, sello "TOP SECRET" estampado, tipografía stencil/typewriter, un solo color de acento. Si parece un póster genérico de IA (explosiones de partículas, humo o luces de colores, lens flares plásticos, fondo de estadio brillante) = RECHAZADA
 - La imagen comunica visualmente el tema de la noticia
@@ -459,7 +534,7 @@ function buildScene(draft, mentionedPlayers) {
   };
 }
 
-function buildPrompt(draft, mentionedPlayers, style, correction = null) {
+function buildPrompt(draft, mentionedPlayers, style, kit, correction = null) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
   const isSeleccion = /^selecc/i.test(draft.category || '');
 
@@ -508,18 +583,14 @@ Usá cada adjunto según su función:
   - "Top-Secret.png": versión metálica plateada/negra — usala cuando el escudo es un objeto físico de la escena (banderín, parche en la camiseta, trofeo, pared del vestuario).
   Reproducí el diseño EXACTAMENTE como en los adjuntos. PROHIBIDO rediseñarlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros diseños).
 
-• "T3 Kits.png" (adjunto) → referencia SOLO de silueta, corte y color de los tres kits.
-  ⚠️ Ese póster viene del videojuego y trae un sponsor "AIA" y logos Nike QUE NO EXISTEN en el kit real del club — NO los copies. El diseño CANÓNICO de cada kit es el que sigue (este texto manda por sobre la imagen):
-  - KIT LOCAL (negro): camiseta negra de textura sutil, cuello redondo negro; el ÚNICO gráfico del pecho es el escudo circular del club. Short negro con dorsal blanco. Medias negras con "TSFC" en blanco.
-  - KIT ALTERNATIVO (blanco): camiseta blanca con hombros y mangas raglán azul marino y cuello azul marino; escudo del club en el pecho. Short blanco con dorsal azul marino. Medias blancas con puño azul marino y "TSFC".
-  - TERCER KIT (amarillo): camiseta amarilla con cuello en V azul marino y vivos azul marino; escudo del club en el pecho. Short amarillo con dorsal azul marino. Medias amarillas con "TSFC".
-  Elegí el kit que mejor encaje con la escena y el estilo del día. Variá — no uses siempre el negro. El blanco y el amarillo dan mucha variedad visual.
-  ⚠️ Los ÚNICOS colores de camiseta válidos son esos tres: NEGRO, BLANCO o AMARILLO. Una camiseta azul, roja, bordó o de cualquier otro color es un ERROR — el club no tiene kits de otros colores.
-  ⚠️ En el pecho NO hay texto de sponsor (nada de "AIA", "Emirates" ni ningún otro) y NO hay swoosh de Nike ni logo de ninguna marca deportiva en camiseta, short ni medias. El único logo permitido en la ropa es el escudo de Top Secret FC. El kit tampoco es el de ningún club real (Tottenham, Real Madrid, Boca ni ninguno).${isSeleccion ? `
-  ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: esta nota es sobre la Selección Argentina. La camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA y preferible para jugadores o elementos que representen a la Selección (siempre sin sponsors ni logos de marcas). Los kits del club aplican solo si aparece un jugador de Top Secret representando al club (por ejemplo, el plantel mirando el partido).` : ''}
+• Foto de kit adjunta (una sola persona, camiseta ${kit.label}) → referencia de silueta, corte, color Y BRANDING del uniforme de HOY. Ya está decidido por producción que la nota de hoy usa el kit ${kit.label} — no hay otra opción, no menciones ni muestres los otros colores. El diseño CANÓNICO de este kit es el que sigue (este texto manda por sobre la imagen adjunta si hay alguna diferencia menor, pero el sponsor y el logo SÍ hay que reproducirlos):
+  ${kit.desc}
+  ⚠️ El sponsor "AIA" en el pecho y el swoosh de Nike son parte REAL y oficial de la identidad del club (Nike es el proveedor técnico, AIA el sponsor principal) — SIEMPRE tienen que aparecer, reproducilos fielmente tal como están en la foto de referencia. NO los quites, NO los reemplaces por otro sponsor ni por espacio en blanco.
+  ⚠️ El color de la camiseta es ${kit.label.toUpperCase()} y NINGÚN OTRO — no lo cambies por negro/blanco/amarillo alternativo, azul, rojo, bordó ni ningún otro color. El único escudo de club en la ropa es el de Top Secret FC (nunca el de un club real como Tottenham, Real Madrid o Boca).${isSeleccion ? `
+  ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: esta nota es sobre la Selección Argentina. La camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA y preferible para jugadores o elementos que representen a la Selección (sin el sponsor AIA, esa es la camiseta de la Selección real). El kit ${kit.label} del club (con AIA y Nike) aplica solo si aparece un jugador de Top Secret representando al club (por ejemplo, el plantel mirando el partido).` : ''}
 
 • Renders de jugadores adjuntos: cada render es la referencia obligatoria de la CARA, el PELO, la PIEL, los accesorios (máscaras, anteojos, vinchas, vendas) y el físico de uno de nuestros jugadores. Identificá cuál es cuál por los rasgos de la lista de IDENTIDAD de arriba.
-  ⚠️ El uniforme que se ve EN LOS RENDERS viene del videojuego y trae sponsors falsos (Nike, AIA, kit del Tottenham) — eso NO se copia JAMÁS. La camiseta del jugador en tu imagen sale ÚNICAMENTE de "T3 Kits.png". Del render tomás la persona; del kit de referencia tomás la ropa.
+  La camiseta del jugador en tu imagen sale de la foto de kit ${kit.label} adjunta (incluyendo el sponsor AIA y el swoosh de Nike, como se indicó arriba), no la inventes de cero. Del render tomás la persona (cara, pelo, piel, accesorios); del kit de referencia tomás la ropa completa con su branding.
 
 ⚠️ DORSALES Y NOMBRES: usá EXACTAMENTE los dorsales y nombres de la lista de IDENTIDAD — mismos dígitos, en el mismo orden, sobre el jugador correcto. PROHIBIDO espejar o invertir dígitos (ej. "10" convertido en "01"), intercambiar números o nombres entre jugadores, e inventar dorsales que no estén en la lista.
 
@@ -1034,8 +1105,12 @@ async function main() {
   const dateStr      = draft.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   const styleHistory = await fetchStyleHistory();
   const chosenStyle  = pickStyle(styleHistory, draft);
-  const evalPrompt   = buildEvalPrompt(chosenStyle, draft, mentioned);
+  const kitHistory   = await fetchKitHistory();
+  const chosenKit    = pickKitColor(kitHistory);
+  const kitCropPath  = await cropKitImage(chosenKit.id);
+  const evalPrompt   = buildEvalPrompt(chosenStyle, draft, mentioned, chosenKit);
   console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
+  console.log(`Kit del día: ${chosenKit.label}`);
   if (draft.imageBrief) console.log(`Brief visual del artículo: ${draft.imageBrief.slice(0, 100)}...`);
 
   let correction     = FLAG_FEEDBACK;
@@ -1057,13 +1132,14 @@ async function main() {
 
       let postFile, postImgUrl;
       try {
-        const postPrompt = buildPrompt(draft, mentioned, chosenStyle, correction);
-        // Referencias visuales adjuntas al mensaje: escudo + kits + renders
-        // de los jugadores mencionados
+        const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction);
+        // Referencias visuales adjuntas al mensaje: escudo + kit del día (ya
+        // recortado a una sola prenda, no las tres) + renders de los
+        // jugadores mencionados
         const refAttachments = [
           CREST_PATH,
           CREST_WHITE_PATH,
-          KITS_PATH,
+          kitCropPath,
           ...mentioned.map(p => {
             const png = path.join(T3_FRENTES_DIR, `${p}.png`);
             return fs.existsSync(png) ? png : path.join(T3_FRENTES_DIR, `${p}.jpg`);
@@ -1202,6 +1278,7 @@ async function main() {
 
     await updateDraft(draft, lastPostFile, storyFile);
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
+    await saveKitHistory(chosenKit.id, dateStr, kitHistory);
     if (mentioned.length > 0) await saveFeaturedHistory(mentioned, dateStr, featuredHistory);
     gitPushImages(lastPostFile, storyFile);
 
@@ -1231,6 +1308,11 @@ export {
   CREST_PATH,
   CREST_WHITE_PATH,
   KITS_PATH,
+  KIT_COLORS,
+  cropKitImage,
+  pickKitColor,
+  fetchKitHistory,
+  saveKitHistory,
   T3_FRENTES_DIR,
   PLAYERS_WITH_RENDERS,
   imageRatio,
