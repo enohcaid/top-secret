@@ -156,6 +156,7 @@ const FETCH_ALLOWED_DOMAINS = [
   'virtualprogaming.com',
   'copafacil-web.firebaseio.com',
   'copafacil.gg',
+  'copafacil-storage.b-cdn.net',
   'challonge.com',
   'toornament.com',
   'smash.gg',
