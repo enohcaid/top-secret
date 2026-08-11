@@ -876,7 +876,14 @@ async function sendPromptInProject(page, prompt, { freshChat = true, attachments
 async function generateImage(page, draft, format, prompt, { freshChat, excludeSrcs, attachments = [] }) {
   const now      = new Date();
   const dateStr  = draft.date || now.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
-  const filename   = `${dateStr}_${format}.png`;
+  // Usar draft.id (único por artículo) en vez de solo la fecha — dos noticias
+  // publicadas el mismo día pisaban el mismo archivo 2026-08-11_post.png,
+  // así que la segunda corrida sobreescribía las imágenes de la primera
+  // noticia ya publicada (bug real 2026-08-11). Los scripts one-off que
+  // llaman generateImage con un draft sintético (solo {date}) siguen
+  // funcionando igual, porque no tienen id y caen al fallback de fecha.
+  const fileSlug   = (draft.id || dateStr).replace(/[^a-zA-Z0-9_-]/g, '-');
+  const filename   = `${fileSlug}_${format}.png`;
   const outputPath = path.join(OUTPUT_DIR, filename);
 
   console.log(`\nGenerando imagen ${format.toUpperCase()}...`);
@@ -1103,6 +1110,7 @@ async function main() {
   console.log('Conectado.');
 
   const dateStr      = draft.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+  const fileSlug     = (draft.id || dateStr).replace(/[^a-zA-Z0-9_-]/g, '-');
   const styleHistory = await fetchStyleHistory();
   const chosenStyle  = pickStyle(styleHistory, draft);
   const kitHistory   = await fetchKitHistory();
@@ -1114,7 +1122,7 @@ async function main() {
   if (draft.imageBrief) console.log(`Brief visual del artículo: ${draft.imageBrief.slice(0, 100)}...`);
 
   let correction     = FLAG_FEEDBACK;
-  let lastPostFile   = `${dateStr}_post.png`;
+  let lastPostFile   = `${fileSlug}_post.png`;
   let lastPostImgUrl = null;
 
   try {
@@ -1268,7 +1276,7 @@ async function main() {
     // es mucho mejor que perder el día entero (antes acá se abortaba todo y el
     // post aprobado nunca se publicaba).
     if (!storyFile) {
-      storyFile = `${dateStr}_story.png`;
+      storyFile = `${fileSlug}_story.png`;
       fs.copyFileSync(path.join(OUTPUT_DIR, lastPostFile), path.join(OUTPUT_DIR, storyFile));
       console.log('  Story falló en todos los intentos — usando el post como story.');
     }
