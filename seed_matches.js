@@ -1931,6 +1931,23 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:4.0, goals:0, assists:0, passes:3,   pass_accuracy:67, distance_km:6.9, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 2 VPUG T6 - Deportivo Moron - 11 Ago 2026 (Local, 0-2, Derrota)
+  {rival:'Deportivo Moron', league:'VPUG', date:'2026-08-11', isHome:true, match_result:'0-2', uploadedAt:'2026-08-12T02:33:00.000Z', notes:'',
+  team_stats:{posesion:60,tiros:7,tiros_arco:null,goles_esperados:2.9,pases:220,precision_pases:87,entradas:16,entradas_exito:3,intercepciones:null,paradas:6,faltas:0,fuera_juego:2,corneres:4,regates_exito:156,precision_tiro:57},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:33,  pass_accuracy:85,  distance_km:18.3, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'EI',  rating:5.9, goals:0, assists:0, passes:13,  pass_accuracy:69,  distance_km:17.6, sprints:null, tackles:null, interceptions:null},
+    {name:'Kee_viin03',     matched:'kee_viin03',        played_pos:'DC',  rating:5.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'ED',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Mauriii1891',    matched:'Mauriii-_1891',     played_pos:'MCI', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Martinez',    matched:'Ramiro4588',        played_pos:'MCD', rating:7.5, goals:0, assists:0, passes:23,  pass_accuracy:100, distance_km:18.4, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DFI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Riva',           matched:'rivarola90',        played_pos:'DFC', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DFD', rating:6.9, goals:0, assists:0, passes:23,  pass_accuracy:96,  distance_km:18.1, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.7, goals:0, assists:0, passes:6,   pass_accuracy:83,  distance_km:7.3,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
