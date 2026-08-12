@@ -845,7 +845,7 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-08-12T16:20:00-03:00';
+const BUILD_VERSION = '2026-08-12T17:25:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
@@ -886,9 +886,15 @@ function _saveBackup() {
     .catch(e => console.warn('[conv] backup write error:', e));
 }
 
-// Estado vacío = 0 jugadores en alwaysPresent Y en availability → claramente corrupto
+// Estado vacío = 0 jugadores en alwaysPresent Y en availability → claramente corrupto.
+// Solo se chequea en el PRIMER snapshot de la sesión: a mitad de sesión, availability
+// puede legítimamente pasar por 0 (ej. justo después de checkDailyReset(), o mientras
+// un admin va limpiando estados uno por uno) y no es corrupción — tratarlo como tal
+// pisaba estados reales con una foto vieja del backup (incidente 2026-08-12).
+let _corruptionCheckDone = false;
 function _mergeWithBackup(rawData) {
-  if (!_backup) return { data: rawData, corrected: false };
+  if (_corruptionCheckDone || !_backup) return { data: rawData, corrected: false };
+  _corruptionCheckDone = true;
   const totalPlayers = (rawData.alwaysPresent || []).length + Object.keys(rawData.availability || {}).length;
   if (totalPlayers === 0 && (_backup.alwaysPresent || []).length > 0) {
     console.warn('[conv] Estado vacío detectado — restaurando backup completo desde convocatoria/backup');
@@ -922,9 +928,16 @@ function applyData(rawData) {
   return corrected;
 }
 
-/* ─── DAILY RESET (midnight GMT-3) ─── */
+/* ─── DAILY RESET (midnight GMT-3) ───
+   Usa >= en vez de !== a propósito: TODAY es un const fijado en el momento en que ESTA
+   pestaña cargó. Una pestaña vieja que quedó abierta desde el día anterior (nunca perdió
+   foco, así que el watchdog de visibilitychange nunca la recargó) sigue teniendo un TODAY
+   desactualizado, MÁS VIEJO que el resetDate que el servidor ya tiene. Con !== esa pestaña
+   volvía a "resetear" (perder) estados que otros ya habían cargado para el día correcto,
+   y encima reescribía resetDate hacia atrás — incidente 2026-08-12: "se resetean los
+   estados todo el tiempo". Con >=, una pestaña atrasada nunca pisa un resetDate más nuevo. */
 function checkDailyReset() {
-  if (_savedResetDate === TODAY) return;
+  if (_savedResetDate >= TODAY) return;
   // New day — clear daily statuses but preserve ongoing vacations (black with future returnDate)
   Object.keys(availability).forEach(name => {
     const a = availability[name];
@@ -1011,7 +1024,9 @@ function saveState() {
     if (JSON.stringify(alwaysPresent) !== JSON.stringify(_baseline.alwaysPresent)) args.push('alwaysPresent', alwaysPresent);
     if (captain !== _baseline.captain) args.push('captain', captain);
     if (JSON.stringify(lineup) !== JSON.stringify(_baseline.lineup)) args.push('lineup', lineup);
-    if (TODAY !== _baseline.resetDate) args.push('resetDate', TODAY);
+    // > y no !==: una pestaña vieja (TODAY desactualizado) nunca debe poder pisar hacia
+    // atrás un resetDate que el servidor ya tiene más adelantado (ver checkDailyReset()).
+    if (TODAY > _baseline.resetDate) args.push('resetDate', TODAY);
 
     if (args.length) {
       CONV_DOC.update(...args).then(() => {
