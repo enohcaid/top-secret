@@ -1948,6 +1948,40 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.7, goals:0, assists:0, passes:6,   pass_accuracy:83,  distance_km:7.3,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 5 11x11 T3 - Olimpo Esports - 11 Ago 2026 (Visita, 3-1, Victoria)
+  {rival:'Olimpo Esports', league:'11x11', date:'2026-08-11', isHome:false, match_result:'3-1', uploadedAt:'2026-08-12T03:00:00.000Z', notes:'',
+  team_stats:{posesion:53,tiros:5,tiros_arco:null,goles_esperados:3.3,pases:182,precision_pases:83,entradas:27,entradas_exito:6,intercepciones:null,paradas:0,faltas:0,fuera_juego:0,corneres:1,regates_exito:138,precision_tiro:100},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'EI',  rating:8.6, goals:3, assists:0, passes:10,  pass_accuracy:70,  distance_km:18.2, sprints:null, tackles:null, interceptions:null},
+    {name:'Kee_viin03',     matched:'kee_viin03',        played_pos:'DC',  rating:6.4, goals:0, assists:0, passes:12,  pass_accuracy:92,  distance_km:18.6, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'ED',  rating:6.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Mauriii1891',    matched:'Mauriii-_1891',     played_pos:'MCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Martinez',    matched:'Ramiro4588',        played_pos:'MCD', rating:8.1, goals:0, assists:1, passes:19,  pass_accuracy:89,  distance_km:18.4, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DFI', rating:7.0, goals:0, assists:0, passes:16,  pass_accuracy:69,  distance_km:18.1, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DCI', rating:7.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Riva',           matched:'rivarola90',        played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DFD', rating:6.4, goals:0, assists:0, passes:12,  pass_accuracy:92,  distance_km:17.6, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.3, goals:0, assists:0, passes:6,   pass_accuracy:100, distance_km:6.7,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 6 11x11 T3 - Comunicaciones eSports - 11 Ago 2026 (Visita, 1-2, Derrota)
+  {rival:'Comunicaciones eSports', league:'11x11', date:'2026-08-11', isHome:false, match_result:'1-2', uploadedAt:'2026-08-12T03:00:00.000Z', notes:'',
+  team_stats:{posesion:61,tiros:3,tiros_arco:null,goles_esperados:0.8,pases:197,precision_pases:87,entradas:16,entradas_exito:3,intercepciones:null,paradas:6,faltas:1,fuera_juego:0,corneres:1,regates_exito:145,precision_tiro:33},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:24,  pass_accuracy:79,  distance_km:18.8, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'EI',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Kee_viin03',     matched:'kee_viin03',        played_pos:'DC',  rating:5.8, goals:0, assists:0, passes:7,   pass_accuracy:71,  distance_km:19.0, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'ED',  rating:6.6, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Mauriii1891',    matched:'Mauriii-_1891',     played_pos:'MCI', rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Martinez',    matched:'Ramiro4588',        played_pos:'MCD', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DFI', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DCI', rating:7.1, goals:0, assists:0, passes:23,  pass_accuracy:96,  distance_km:17.0, sprints:null, tackles:null, interceptions:null},
+    {name:'Riva',           matched:'rivarola90',        played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DFD', rating:7.3, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.2, goals:0, assists:0, passes:14,  pass_accuracy:86,  distance_km:7.9,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
