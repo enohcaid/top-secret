@@ -845,7 +845,7 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-08-12T17:25:00-03:00';
+const BUILD_VERSION = '2026-08-12T20:37:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
@@ -946,7 +946,7 @@ function checkDailyReset() {
   });
   // dailyOverrides expire naturally (checked against TODAY in getStatus), but clean them anyway
   dailyOverrides = {};
-  saveState();
+  saveState('daily-reset');
 }
 
 function scheduleMidnightReset() {
@@ -963,7 +963,7 @@ function loadState() {
       if (snap.exists) {
         const corrected = applyData(snap.data());
         if (corrected) {
-          saveState();
+          saveState('backup-restore');
           showToast('Estado corrupto detectado — datos restaurados desde backup. Verificá los estados del plantel.', 'warn', 9000);
         }
         checkDailyReset();
@@ -997,20 +997,27 @@ function loadState() {
    una pestaña que quedó en segundo plano, etc.), guardar el propio estado no borra
    lo que los demás ya cargaron. Ver incidente 2026-08-11: un set() completo desde
    una copia local vieja pisaba dailyOverrides de todo el plantel. */
-function _pushMapDiff(fieldName, localMap, baseMap, args) {
+function _pushMapDiff(fieldName, localMap, baseMap, args, deletedKeysOut) {
   const keys = new Set([...Object.keys(localMap || {}), ...Object.keys(baseMap || {})]);
   keys.forEach(key => {
     const hasLocal = Object.prototype.hasOwnProperty.call(localMap || {}, key);
     const hasBase  = Object.prototype.hasOwnProperty.call(baseMap  || {}, key);
     if (!hasLocal && hasBase) {
       args.push(new firebase.firestore.FieldPath(fieldName, key), firebase.firestore.FieldValue.delete());
+      if (deletedKeysOut) deletedKeysOut.push(fieldName + '.' + key);
     } else if (hasLocal && (!hasBase || JSON.stringify(localMap[key]) !== JSON.stringify(baseMap[key]))) {
       args.push(new firebase.firestore.FieldPath(fieldName, key), localMap[key]);
     }
   });
 }
 
-function saveState() {
+/* `source` distingue quién pidió el guardado: 'daily-reset' y 'backup-restore' son las
+   únicas operaciones que legítimamente borran varias claves de golpe. Cualquier otro
+   guardado (una acción normal de un admin, que solo toca UN jugador) que termine
+   borrando 2+ claves de availability/dailyOverrides es sospechoso — se vio "se resetean
+   los estados" repetirse en 2026-08-12 sin poder identificar la causa exacta, así que
+   esto deja rastro (toast visible + consola) para la próxima vez en vez de adivinar. */
+function saveState(source) {
   if (!EDIT_MODE) return; // modo vista: nunca escribe
   if (!_firestoreLoaded) {
     showToast('Conectando… esperá un momento y volvé a guardar', 'warn', 4000);
@@ -1019,14 +1026,20 @@ function saveState() {
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
   if (CONV_DOC) {
     const args = [];
-    _pushMapDiff('availability',   availability,   _baseline.availability,   args);
-    _pushMapDiff('dailyOverrides', dailyOverrides, _baseline.dailyOverrides, args);
+    const deletedKeys = [];
+    _pushMapDiff('availability',   availability,   _baseline.availability,   args, deletedKeys);
+    _pushMapDiff('dailyOverrides', dailyOverrides, _baseline.dailyOverrides, args, deletedKeys);
     if (JSON.stringify(alwaysPresent) !== JSON.stringify(_baseline.alwaysPresent)) args.push('alwaysPresent', alwaysPresent);
     if (captain !== _baseline.captain) args.push('captain', captain);
     if (JSON.stringify(lineup) !== JSON.stringify(_baseline.lineup)) args.push('lineup', lineup);
     // > y no !==: una pestaña vieja (TODAY desactualizado) nunca debe poder pisar hacia
     // atrás un resetDate que el servidor ya tiene más adelantado (ver checkDailyReset()).
     if (TODAY > _baseline.resetDate) args.push('resetDate', TODAY);
+
+    if (deletedKeys.length >= 2 && source !== 'daily-reset' && source !== 'backup-restore') {
+      console.warn('[conv] BORRADO MASIVO INESPERADO', { source, deletedKeys, TODAY, savedResetDate: _savedResetDate, buildVersion: BUILD_VERSION, at: new Date().toISOString() });
+      showToast('⚠️ Se detectó un borrado inusual de ' + deletedKeys.length + ' estados. Avisá a soporte con la hora exacta.', 'warn', 12000);
+    }
 
     if (args.length) {
       CONV_DOC.update(...args).then(() => {
