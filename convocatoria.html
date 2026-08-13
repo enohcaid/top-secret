@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -543,6 +544,13 @@ const FB_CONFIG = {
   appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
 };
 let _db = null, CONV_DOC = null, BACKUP_DOC = null, CAL_DOC_CONV = null, RECLU_COL = null, PLANTEL_DOC = null;
+/* _authReady: gatea saveState() igual que _firestoreLoaded. Las reglas de Firestore
+   exigen request.auth != null para escribir en convocatoria/* (2026-08-13, ver
+   incidente de resets recurrentes) — sin esto, un guardado disparado en la ventana
+   de milisegundos antes de que signInAnonymously() resuelva fallaría con
+   permission-denied. Es login silencioso: no hay pantalla, no pide nada al usuario,
+   pasa solo apenas carga la página. */
+let _authReady = false;
 try {
   if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
   _db = firebase.firestore();
@@ -551,6 +559,9 @@ try {
   CAL_DOC_CONV = _db.collection('calendario').doc('estado');
   RECLU_COL    = _db.collection('reclutamiento');
   PLANTEL_DOC  = _db.collection('plantel').doc('activo');
+  firebase.auth().signInAnonymously()
+    .then(() => { _authReady = true; })
+    .catch(e => { console.warn('[conv] anonymous sign-in error:', e); });
 } catch(e) { console.warn('Firebase init error:', e); }
 
 // Load dynamically promoted players from Firestore and merge into PLAYERS
@@ -845,7 +856,7 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-08-12T22:35:00-03:00';
+const BUILD_VERSION = '2026-08-13T19:15:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
@@ -1030,6 +1041,10 @@ function _pushMapDiff(fieldName, localMap, baseMap, args, deletedKeysOut) {
 function saveState(source) {
   if (!EDIT_MODE) return; // modo vista: nunca escribe
   if (!_firestoreLoaded) {
+    showToast('Conectando… esperá un momento y volvé a guardar', 'warn', 4000);
+    return;
+  }
+  if (!_authReady) {
     showToast('Conectando… esperá un momento y volvé a guardar', 'warn', 4000);
     return;
   }
