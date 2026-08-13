@@ -1043,8 +1043,60 @@ export default {
     } catch (err) {
       return jsonResp({ error: { message: err.message || 'Internal error' } }, 500);
     }
+  },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dailyConvocatoriaReset());
   }
 };
+
+// ── CONVOCATORIA — reset diario server-side (Cron Trigger, 03:05 UTC = 00:05 ART) ──
+// Antes esto lo decidía cada pestaña de convocatoria.html comparando su propio TODAY
+// (una fecha fijada una sola vez al cargar la página) contra resetDate. Una pestaña
+// que quedó abierta sin recargar seguía firmando cada guardado con esa fecha vieja —
+// incidente 2026-08-12: una pestaña escribió resetDate 2 días para atrás y "revivió"
+// estados que ya deberían haber expirado. El link editable de convocatoria.html
+// circuló más de lo previsto, así que no hay forma de saber cuántas pestañas viejas
+// siguen sueltas por ahí ni de forzarlas a recargar. Mover "qué día es hoy" acá evita
+// depender de que algún navegador ajeno esté actualizado o siquiera abierto: el cron
+// corre con el reloj de Cloudflare, no con el de la pestaña de nadie.
+async function dailyConvocatoriaReset() {
+  const FS_STATE = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/convocatoria/state';
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+  try {
+    const resp = await fetch(FS_STATE);
+    if (!resp.ok) return;
+    const doc = await resp.json();
+    const resetDate = doc.fields?.resetDate?.stringValue || '';
+    if (resetDate >= today) return; // ya al día (o el cron ya corrió hoy)
+
+    // Conservar solo las ausencias "black" (vacación/baja) todavía vigentes;
+    // todo lo demás (rojo/amarillo/verde del día anterior) expira.
+    const availFields = doc.fields?.availability?.mapValue?.fields || {};
+    const keptAvailability = {};
+    for (const [name, val] of Object.entries(availFields)) {
+      const f = val.mapValue?.fields || {};
+      if (f.status?.stringValue === 'black' && f.returnDate?.stringValue > today) {
+        keptAvailability[name] = val;
+      }
+    }
+
+    await fetch(
+      FS_STATE + '?updateMask.fieldPaths=availability&updateMask.fieldPaths=dailyOverrides&updateMask.fieldPaths=resetDate',
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            availability:   { mapValue: { fields: keptAvailability } },
+            dailyOverrides: { mapValue: {} },
+            resetDate:      { stringValue: today },
+          },
+        }),
+      }
+    );
+  } catch (e) { /* se reintenta en el próximo disparo del cron */ }
+}
 
 function jsonResp(data, status = 200) {
   return new Response(JSON.stringify(data), {
