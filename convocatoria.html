@@ -537,8 +537,8 @@ function getPosLabel(pos){ return POS_LABEL[pos] || pos; }
 
 /* ─── SLOT LABELS (ES) — para copiar el equipo en cancha ─── */
 const SLOT_LABEL_ES = {
-  '4-3-3': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
-    RM:'Volante derecho', CM:'Volante central', LM:'Volante izquierdo', RW:'Extremo derecho', CF:'Delantero centro', LW:'Extremo izquierdo' },
+  '4-3-3': { GK:'Arquero', RB:'Lateral derecho', CB1:'Defensor derecho', CB2:'Defensor izquierdo', LB:'Lateral izquierdo',
+    RM:'Medio derecho', CM:'Medio defensivo', LM:'Medio izquierdo', RW:'Extremo derecho', CF:'Delantero centro', LW:'Extremo izquierdo' },
   '4-4-2': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
     RM:'Volante derecho', CM1:'Volante central', CM2:'Volante central', LM:'Volante izquierdo', ST1:'Delantero', ST2:'Delantero' },
   '4-2-3-1': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
@@ -549,6 +549,12 @@ const SLOT_LABEL_ES = {
     RM:'Carrilero derecho', CM1:'Volante', CM2:'Volante', LM:'Carrilero izquierdo', RW:'Extremo derecho', CF:'Delantero centro', LW:'Extremo izquierdo' },
   '4-1-2-1-2': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
     CDM:'Volante central', CM1:'Volante', CM2:'Volante', CAM:'Mediapunta', ST1:'Delantero', ST2:'Delantero' },
+};
+
+/* Orden fijo pedido para "Copiar equipo" (por ahora solo 4-3-3, la formación por
+   defecto) — el resto de las formaciones sigue el orden natural de FORMATIONS. */
+const COPY_ORDER_ES = {
+  '4-3-3': ['GK','RB','LB','CB1','CB2','CM','RM','LM','RW','LW','CF'],
 };
 
 /* ─── FIREBASE ─── */
@@ -1908,8 +1914,10 @@ function copyPlayerList() {
 function copyLineup() {
   const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
   const labels = SLOT_LABEL_ES[lineup.formation] || {};
+  const order = COPY_ORDER_ES[lineup.formation];
+  const orderedSlots = order ? order.map(k => slots.find(s => s.key === k)).filter(Boolean) : slots;
   const lines = [];
-  slots.forEach(s => {
+  orderedSlots.forEach(s => {
     const assigned = lineup.slots[s.key];
     if (!assigned) return;
     const label = labels[s.key] || getPosLabel(s.l);
