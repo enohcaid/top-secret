@@ -87,6 +87,8 @@ Single source of truth for historical match data. ES module exporting `SEED_MATC
 
 Pages use the Firebase compat SDK 10.12.0 (`convo`, `convocatoria`, `estadisticas`, `plantilla`, `reclutamiento`) or the modular ESM SDK (`calendario`). All Firestore reads have local fallbacks — the site must keep working read-only if Firestore is down.
 
+**Security Rules (2026-08-13)**: no longer a single open wildcard. Reads stay open (`if true`) for every collection. Writes are open (`if true`) per-collection for `calendario`, `reclutamiento`, `plantel`, `news`, `torneos` — **but `convocatoria` writes require `request.auth != null`** (Firebase Anonymous Auth, silent — `convocatoria.html` calls `signInAnonymously()` on load, no login screen). This closed a recurring incident where an old/stale copy of `convocatoria.html` kept writing bogus `resetDate`/`dailyOverrides` values indefinitely; now any write without a valid auth token is rejected outright by Firestore itself. Because rules moved from one blanket wildcard to an explicit per-collection allowlist, **a brand-new Firestore collection needs its own `match` block added to the rules or its writes will silently 403** — this used to work with zero rules changes. The Worker's `dailyConvocatoriaReset()` cron (see below) also authenticates this way, via anonymous sign-in against Identity Toolkit with the project's public Web API key (not a service account — cached in `TS_KV` under `conv_auth_token`, ~55min TTL).
+
 ### Cloudflare Worker — `top-secret-worker.js`
 
 Source lives in this repo; **edits require redeploying** (credentials/commands in memory: "Cloudflare Worker deploy config"). Key routes:
@@ -97,6 +99,7 @@ Source lives in this repo; **edits require redeploying** (credentials/commands i
 - `/draft-noticia`, `/publish-noticia`, `/persist-draft-image`, `/draft-image`, `/request-regen`, `/regen-flag`, `/discard-flag` — daily news pipeline. Discarding a draft (`DELETE /draft-noticia`) also queues its generated images for deletion via `/discard-flag`
 - `/notify-reclu`, `/reclutamiento-activo`, `/convocatoria-status`, `/img-proxy`, `/ea`, `/kv`, `/log-event`
 - Admin endpoints (publish/discard/edit draft, regen) require `env.ADMIN_PIN` — a Worker **secret** with no default in code (the old public `8189` fallback was removed 2026-07-13; the user types the PIN in the noticias UI). The client-side gates in calendario/reclutamiento are cosmetic and separate.
+- **Cron Trigger** (`scheduled()` handler, `* * * * *` — every minute): `dailyConvocatoriaReset()` keeps `convocatoria/state` correct server-side (clears expired `dailyOverrides`/`availability`, advances `resetDate`) independent of any browser tab's clock. Authenticates via anonymous Firebase sign-in (see Security Rules note above). Registering/changing the schedule is a separate Cloudflare API call from deploying the script — `PUT .../workers/scripts/top-secret-proxy/schedules` with a JSON **array** body like `[{"cron":"* * * * *"}]` (not `{"crons":[...]}`, that 400s).
 
 ### Daily News Pipeline (automated)
 
