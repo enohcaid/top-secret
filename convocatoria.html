@@ -845,11 +845,25 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-08-12T20:37:00-03:00';
+const BUILD_VERSION = '2026-08-12T22:24:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
-const TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
+let TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
+/* TODAY se resincroniza sola cada 1 min, independientemente de los watchdogs de reload
+   (medianoche / visibilitychange / checkForNewBuild). Prueba directa en Firestore
+   (2026-08-12 22:22 ART): una pestaña escribió resetDate="2026-08-10" — 2 DÍAS para
+   atrás — pese a los tres watchdogs, o sea que ninguno alcanzó a recargarla (celular
+   con la pestaña suspendida en 2do plano, probablemente). Como TODAY era un const fijo
+   al cargar, esa pestaña seguía firmando cada guardado (dailyOverrides, resetDate, etc.)
+   con la fecha vieja — y una fecha vieja en dailyOverrides hace que CUALQUIER pestaña
+   fresca la vea "vencida" e ignore el estado, mostrando el jugador en su default (verde).
+   Esto es la causa real de "los estados de disponibilidad se resetean". new Date() lee
+   el reloj real del sistema pase lo que pase con la pestaña, así que este intervalo la
+   autocorrige sin depender de que ningún reload dispare. */
+setInterval(() => {
+  TODAY = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
+}, 60 * 1000);
 
 /* ─── EDIT MODE ───
    Link directo (convocatoria.html) → editable.
