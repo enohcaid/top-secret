@@ -1134,34 +1134,59 @@ async function main() {
       console.log(`\nUsando post existente: ${lastPostFile}`);
     }
 
-    // Loop solo sobre el post hasta aprobarlo
+    // Loop solo sobre el post hasta aprobarlo.
+    // IMPORTANTE: las correcciones (kit mal, proporción mal, etc.) se mandan
+    // COMO SEGUIMIENTO DEL MISMO CHAT (freshChat:false), nunca en un chat
+    // nuevo. Empíricamente el chat nuevo con el prompt completo repetido
+    // vuelve a caer en el mismo error (ej. kit negro por defecto pese al
+    // texto pidiendo blanco/amarillo) — visto 2 veces seguidas (2026-08-13).
+    // La story, que SÍ continúa el chat para su corrección, corrige bien en
+    // 1-2 intentos. Un pedido corto de "arreglá esto puntual" sobre la imagen
+    // ya generada es mucho más confiable que repetir el prompt gigante desde
+    // cero cada vez.
+    let postChatOpen = false;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !FLAG_STORY; attempt++) {
       if (attempt > 1) console.log(`\nIntento ${attempt}/${MAX_ATTEMPTS}...`);
 
       let postFile, postImgUrl;
       try {
-        const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction);
-        // Referencias visuales adjuntas al mensaje: escudo + kit del día (ya
-        // recortado a una sola prenda, no las tres) + renders de los
-        // jugadores mencionados
-        const refAttachments = [
-          CREST_PATH,
-          CREST_WHITE_PATH,
-          kitCropPath,
-          ...mentioned.map(p => {
-            const png = path.join(T3_FRENTES_DIR, `${p}.png`);
-            return fs.existsSync(png) ? png : path.join(T3_FRENTES_DIR, `${p}.jpg`);
-          }),
-        ];
-        ({ filename: postFile, imgUrl: postImgUrl } = await generateImage(
-          page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [], attachments: refAttachments }
-        ));
+        let sendOpts;
+        if (postChatOpen) {
+          // Seguimiento del mismo chat: pedido corto y puntual, sin repetir
+          // todo el prompt ni reenviar adjuntos (ya están en el contexto).
+          const followUp = correction
+            ? `La imagen anterior no sirve todavía. Corregí ESTO puntualmente, sin cambiar el resto de la composición, la escena, el título ni el layout:\n"${correction}"`
+            : `La imagen anterior no sirve. Generá una versión nueva, distinta, manteniendo la misma escena, título y layout.`;
+          sendOpts = { freshChat: false, excludeSrcs: [lastPostImgUrl], attachments: [] };
+          ({ filename: postFile, imgUrl: postImgUrl } = await generateImage(
+            page, draft, 'post', followUp, sendOpts
+          ));
+        } else {
+          const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction);
+          // Referencias visuales adjuntas al mensaje: escudo + kit del día (ya
+          // recortado a una sola prenda, no las tres) + renders de los
+          // jugadores mencionados
+          const refAttachments = [
+            CREST_PATH,
+            CREST_WHITE_PATH,
+            kitCropPath,
+            ...mentioned.map(p => {
+              const png = path.join(T3_FRENTES_DIR, `${p}.png`);
+              return fs.existsSync(png) ? png : path.join(T3_FRENTES_DIR, `${p}.jpg`);
+            }),
+          ];
+          ({ filename: postFile, imgUrl: postImgUrl } = await generateImage(
+            page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [], attachments: refAttachments }
+          ));
+          postChatOpen = true;
+        }
       } catch (genErr) {
         console.log(`  Error técnico (intento ${attempt}/${MAX_ATTEMPTS}): ${genErr.message.split('\n')[0]}`);
         if (attempt === MAX_ATTEMPTS) throw genErr;
         await deleteChatById(page, currentChatId(page)); // chat del intento fallido
         await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(3000);
+        postChatOpen = false;
         continue;
       }
       lastPostFile   = postFile;
@@ -1185,9 +1210,8 @@ async function main() {
         const ok = await askYesNo('\n¿La imagen está bien? [s/N]: ');
         if (ok) break;
         correction = await askInput('¿Qué corregir para la próxima versión?: ');
-        if (!correction) console.log('Sin feedback — regenerando con el mismo prompt.');
+        if (!correction) console.log('Sin feedback — pidiendo una nueva versión en el mismo chat.');
         if (attempt === MAX_ATTEMPTS) console.log('Máximo de intentos alcanzado — usando esta versión.');
-        else await deleteChatById(page, currentChatId(page)); // chat del intento descartado
       } else if (wrongPostFormat && attempt < MAX_ATTEMPTS) {
         // Rechazo técnico por proporción — ni vale la pena gastar una llamada
         // de evaluación visual, el problema es medible en los píxeles.
@@ -1195,7 +1219,6 @@ async function main() {
           ? `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — MUY angosta y alta, formato Story. Necesito el formato POST: notoriamente MÁS ANCHO Y MÁS CUADRADO, proporción 4:5, nunca el encuadre extra alto de una Story.`
           : `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — APAISADA/HORIZONTAL, el ancho es mayor que el alto. Eso está mal: el post SIGUE SIENDO VERTICAL, más alto que ancho, proporción 4:5 (ej. 1086x1448), nunca panorámico.`;
         console.log(`  Corrección: "${correction}"`);
-        await deleteChatById(page, currentChatId(page));
       } else {
         if (wrongPostFormat) console.log('  Máximo de intentos alcanzado — usando última versión igual (formato incorrecto).');
         // Evaluación automática con ChatGPT Vision
@@ -1215,7 +1238,6 @@ async function main() {
 
         correction = evalResponse.replace(/^rechazada\s*[-–]\s*/i, '').trim();
         console.log(`  Corrección: "${correction}"`);
-        await deleteChatById(page, currentChatId(page)); // chat del intento rechazado
       }
     }
 
