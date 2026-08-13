@@ -1050,16 +1050,27 @@ export default {
   }
 };
 
-// ── CONVOCATORIA — reset diario server-side (Cron Trigger, 03:05 UTC = 00:05 ART) ──
+// ── CONVOCATORIA — reset diario server-side (Cron Trigger, cada 10 min) ──────
 // Antes esto lo decidía cada pestaña de convocatoria.html comparando su propio TODAY
 // (una fecha fijada una sola vez al cargar la página) contra resetDate. Una pestaña
 // que quedó abierta sin recargar seguía firmando cada guardado con esa fecha vieja —
 // incidente 2026-08-12: una pestaña escribió resetDate 2 días para atrás y "revivió"
-// estados que ya deberían haber expirado. El link editable de convocatoria.html
-// circuló más de lo previsto, así que no hay forma de saber cuántas pestañas viejas
-// siguen sueltas por ahí ni de forzarlas a recargar. Mover "qué día es hoy" acá evita
-// depender de que algún navegador ajeno esté actualizado o siquiera abierto: el cron
-// corre con el reloj de Cloudflare, no con el de la pestaña de nadie.
+// estados que ya deberían haber expirado, DOS VECES en la misma noche (una a las
+// 21:00 ART, otra a las 22:56 ART, 20 min después de corregirla a mano) — o sea que
+// no es una pestaña vieja aislada, es alguien usando activamente una versión vieja
+// de la página. El link editable circuló más de lo previsto y no hay forma de
+// rastrear ni forzar a esas pestañas a actualizarse, así que un cron UNA VEZ POR DÍA
+// no alcanza: entre corrida y corrida esa pestaña puede volver a ensuciar el
+// documento durante horas. Este cron corre cada 10 min y hace DOS cosas:
+//   1) SIEMPRE (sin importar resetDate): tira cualquier entrada de dailyOverrides
+//      cuyo `day` no sea el de hoy — esto neutraliza en minutos, no en un día
+//      entero, cualquier estado que una pestaña vieja/activa siga escribiendo con
+//      una fecha incorrecta.
+//   2) Si resetDate quedó desalineado con hoy (el caso "es un día nuevo" real, o
+//      una pestaña vieja lo pisó hacia atrás): además limpia `availability` (deja
+//      solo vacaciones "black" todavía vigentes, ya que esos entries no tienen
+//      campo `day` para poder limpiarlos de forma incremental) y fija resetDate=hoy.
+// Nunca toca alwaysPresent/captain/lineup.
 async function dailyConvocatoriaReset() {
   const FS_STATE = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/convocatoria/state';
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
@@ -1068,31 +1079,44 @@ async function dailyConvocatoriaReset() {
     if (!resp.ok) return;
     const doc = await resp.json();
     const resetDate = doc.fields?.resetDate?.stringValue || '';
-    if (resetDate >= today) return; // ya al día (o el cron ya corrió hoy)
 
-    // Conservar solo las ausencias "black" (vacación/baja) todavía vigentes;
-    // todo lo demás (rojo/amarillo/verde del día anterior) expira.
-    const availFields = doc.fields?.availability?.mapValue?.fields || {};
-    const keptAvailability = {};
-    for (const [name, val] of Object.entries(availFields)) {
+    const overrideFields = doc.fields?.dailyOverrides?.mapValue?.fields || {};
+    const keptOverrides = {};
+    let overridesChanged = false;
+    for (const [name, val] of Object.entries(overrideFields)) {
       const f = val.mapValue?.fields || {};
-      if (f.status?.stringValue === 'black' && f.returnDate?.stringValue > today) {
-        keptAvailability[name] = val;
+      if (f.day?.stringValue === today) keptOverrides[name] = val;
+      else overridesChanged = true;
+    }
+
+    const needsDayReset = resetDate !== today;
+    if (!overridesChanged && !needsDayReset) return; // nada para corregir
+
+    const fieldPaths = ['dailyOverrides'];
+    const fields = { dailyOverrides: { mapValue: { fields: keptOverrides } } };
+
+    if (needsDayReset) {
+      // Conservar solo las ausencias "black" (vacación/baja) todavía vigentes;
+      // todo lo demás (rojo/amarillo/verde de un día anterior) expira.
+      const availFields = doc.fields?.availability?.mapValue?.fields || {};
+      const keptAvailability = {};
+      for (const [name, val] of Object.entries(availFields)) {
+        const f = val.mapValue?.fields || {};
+        if (f.status?.stringValue === 'black' && f.returnDate?.stringValue > today) {
+          keptAvailability[name] = val;
+        }
       }
+      fieldPaths.push('availability', 'resetDate');
+      fields.availability = { mapValue: { fields: keptAvailability } };
+      fields.resetDate = { stringValue: today };
     }
 
     await fetch(
-      FS_STATE + '?updateMask.fieldPaths=availability&updateMask.fieldPaths=dailyOverrides&updateMask.fieldPaths=resetDate',
+      FS_STATE + '?' + fieldPaths.map(p => 'updateMask.fieldPaths=' + p).join('&'),
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fields: {
-            availability:   { mapValue: { fields: keptAvailability } },
-            dailyOverrides: { mapValue: {} },
-            resetDate:      { stringValue: today },
-          },
-        }),
+        body: JSON.stringify({ fields }),
       }
     );
   } catch (e) { /* se reintenta en el próximo disparo del cron */ }
