@@ -1050,18 +1050,19 @@ export default {
   }
 };
 
-// ── CONVOCATORIA — reset diario server-side (Cron Trigger, cada 10 min) ──────
+// ── CONVOCATORIA — reset diario server-side (Cron Trigger, cada 1 min) ───────
 // Antes esto lo decidía cada pestaña de convocatoria.html comparando su propio TODAY
 // (una fecha fijada una sola vez al cargar la página) contra resetDate. Una pestaña
 // que quedó abierta sin recargar seguía firmando cada guardado con esa fecha vieja —
-// incidente 2026-08-12: una pestaña escribió resetDate 2 días para atrás y "revivió"
-// estados que ya deberían haber expirado, DOS VECES en la misma noche (una a las
-// 21:00 ART, otra a las 22:56 ART, 20 min después de corregirla a mano) — o sea que
-// no es una pestaña vieja aislada, es alguien usando activamente una versión vieja
-// de la página. El link editable circuló más de lo previsto y no hay forma de
-// rastrear ni forzar a esas pestañas a actualizarse, así que un cron UNA VEZ POR DÍA
-// no alcanza: entre corrida y corrida esa pestaña puede volver a ensuciar el
-// documento durante horas. Este cron corre cada 10 min y hace DOS cosas:
+// incidente 2026-08-12/13: una pestaña escribió resetDate para atrás TRES veces en
+// menos de 24hs (21:00, 22:56, y de nuevo 23:53 ART), cada vez unos minutos después
+// de haberse corregido — o sea que no es una pestaña vieja aislada, es alguien usando
+// activamente una versión vieja de la página, de forma recurrente. Empezó en 00:05
+// ART (una vez por día) → subió a cada 10 min (confirmado que se autocorregía, pero
+// dejaba una ventana de hasta ~10 min con datos mal mostrados) → esto corre cada 1
+// min: el trabajo es liviano (1 GET siempre, 1 PATCH solo si hace falta corregir
+// algo), así que no hay motivo para no ir al mínimo que permite Cloudflare. Hace DOS
+// cosas en cada corrida:
 //   1) SIEMPRE (sin importar resetDate): tira cualquier entrada de dailyOverrides
 //      cuyo `day` no sea el de hoy — esto neutraliza en minutos, no en un día
 //      entero, cualquier estado que una pestaña vieja/activa siga escribiendo con
