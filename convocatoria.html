@@ -305,6 +305,7 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
     <div class="section-head-right">
       <span>Armado</span>
       <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar lista</button>
+      <button class="share-btn" id="copyLineupBtn" onclick="copyLineup()" style="margin-right:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar equipo</button>
       <button class="share-btn" id="shareBtn" onclick="doShare()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
     </div>
   </div>
@@ -533,6 +534,22 @@ const POS_LABEL = {
   DC:'Delantero Centro',ED:'Extremo Derecho',EI:'Extremo Izquierdo',
 };
 function getPosLabel(pos){ return POS_LABEL[pos] || pos; }
+
+/* ─── SLOT LABELS (ES) — para copiar el equipo en cancha ─── */
+const SLOT_LABEL_ES = {
+  '4-3-3': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
+    RM:'Volante derecho', CM:'Volante central', LM:'Volante izquierdo', RW:'Extremo derecho', CF:'Delantero centro', LW:'Extremo izquierdo' },
+  '4-4-2': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
+    RM:'Volante derecho', CM1:'Volante central', CM2:'Volante central', LM:'Volante izquierdo', ST1:'Delantero', ST2:'Delantero' },
+  '4-2-3-1': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
+    CDM1:'Volante central', CDM2:'Volante central', RAM:'Mediapunta derecho', CAM:'Mediapunta central', LAM:'Mediapunta izquierdo', CF:'Delantero centro' },
+  '3-5-2': { GK:'Arquero', CB1:'Defensor central', CB2:'Defensor central', CB3:'Defensor central',
+    RM:'Carrilero derecho', CM1:'Volante', CM2:'Volante central', CM3:'Volante', LM:'Carrilero izquierdo', ST1:'Delantero', ST2:'Delantero' },
+  '3-4-3': { GK:'Arquero', CB1:'Defensor central', CB2:'Defensor central', CB3:'Defensor central',
+    RM:'Carrilero derecho', CM1:'Volante', CM2:'Volante', LM:'Carrilero izquierdo', RW:'Extremo derecho', CF:'Delantero centro', LW:'Extremo izquierdo' },
+  '4-1-2-1-2': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
+    CDM:'Volante central', CM1:'Volante', CM2:'Volante', CAM:'Mediapunta', ST1:'Delantero', ST2:'Delantero' },
+};
 
 /* ─── FIREBASE ─── */
 const FB_CONFIG = {
@@ -1881,6 +1898,26 @@ function copyPlayerList() {
   });
   navigator.clipboard.writeText(lines.join('\n')).then(() => {
     const btn = document.getElementById('copyListBtn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => btn.textContent = orig, 1800);
+  });
+}
+
+/* ─── COPY LINEUP (equipo en cancha) ─── */
+function copyLineup() {
+  const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
+  const labels = SLOT_LABEL_ES[lineup.formation] || {};
+  const lines = [];
+  slots.forEach(s => {
+    const assigned = lineup.slots[s.key];
+    if (!assigned) return;
+    const label = labels[s.key] || getPosLabel(s.l);
+    lines.push(`${label}: "${assigned}"`);
+  });
+  if (!lines.length) { showToast('No hay equipo armado para copiar'); return; }
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = document.getElementById('copyLineupBtn');
     const orig = btn.textContent;
     btn.textContent = '✓ Copiado';
     setTimeout(() => btn.textContent = orig, 1800);
