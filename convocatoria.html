@@ -845,7 +845,7 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-08-12T22:24:00-03:00';
+const BUILD_VERSION = '2026-08-12T22:35:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
@@ -942,26 +942,22 @@ function applyData(rawData) {
   return corrected;
 }
 
-/* ─── DAILY RESET (midnight GMT-3) ───
-   Usa >= en vez de !== a propósito: TODAY es un const fijado en el momento en que ESTA
-   pestaña cargó. Una pestaña vieja que quedó abierta desde el día anterior (nunca perdió
-   foco, así que el watchdog de visibilitychange nunca la recargó) sigue teniendo un TODAY
-   desactualizado, MÁS VIEJO que el resetDate que el servidor ya tiene. Con !== esa pestaña
-   volvía a "resetear" (perder) estados que otros ya habían cargado para el día correcto,
-   y encima reescribía resetDate hacia atrás — incidente 2026-08-12: "se resetean los
-   estados todo el tiempo". Con >=, una pestaña atrasada nunca pisa un resetDate más nuevo. */
-function checkDailyReset() {
-  if (_savedResetDate >= TODAY) return;
-  // New day — clear daily statuses but preserve ongoing vacations (black with future returnDate)
-  Object.keys(availability).forEach(name => {
-    const a = availability[name];
-    if (a.status === 'black' && a.returnDate && a.returnDate > TODAY) return;
-    delete availability[name];
-  });
-  // dailyOverrides expire naturally (checked against TODAY in getStatus), but clean them anyway
-  dailyOverrides = {};
-  saveState('daily-reset');
-}
+/* ─── DAILY RESET ───
+   RETIRADO 2026-08-12: esto vivía acá y decidía "es un día nuevo, hay que borrar"
+   comparando contra el TODAY de CADA pestaña individual — un const fijado una sola
+   vez al cargar la página. El link editable de convocatoria.html circuló más de lo
+   pensado, así que hay un número desconocido de pestañas viejas sueltas por ahí que
+   nunca se van a recargar; cualquiera de ellas, con un TODAY congelado en el pasado,
+   podía volver a "resetear" (borrar) estados ya cargados por otros y hasta reescribir
+   resetDate hacia atrás (confirmado en Firestore: una pestaña escribió resetDate 2
+   días para atrás). Ya no hay forma de arreglar esto desde el cliente sin depender de
+   que ESA pestaña en particular se actualice, así que la decisión se movió a un Cron
+   Trigger del Worker (dailyConvocatoriaReset() en top-secret-worker.js, corre con el
+   reloj de Cloudflare a las 00:05 ART) — ninguna pestaña, vieja o nueva, escribe más
+   el reset diario. Los overrides vencidos (día distinto a hoy) ya se ignoraban para
+   mostrar en getStatus()/getNote(), así que ocultarlos seguía funcionando incluso los
+   minutos entre la medianoche real y que el cron corra. */
+function checkDailyReset() {}
 
 function scheduleMidnightReset() {
   const now = new Date();
