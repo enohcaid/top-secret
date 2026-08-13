@@ -1046,7 +1046,7 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(dailyConvocatoriaReset());
+    ctx.waitUntil(dailyConvocatoriaReset(env));
   }
 };
 
@@ -1072,7 +1072,32 @@ export default {
 //      solo vacaciones "black" todavía vigentes, ya que esos entries no tienen
 //      campo `day` para poder limpiarlos de forma incremental) y fija resetDate=hoy.
 // Nunca toca alwaysPresent/captain/lineup.
-async function dailyConvocatoriaReset() {
+//
+// AUTENTICACIÓN DEL CRON (2026-08-13): las reglas de Firestore pasaron a exigir
+// request.auth != null para escribir en convocatoria/* (ver CLAUDE.md / incidente de
+// resets). El cron necesita autenticarse igual que el cliente, pero SIN cuenta de
+// servicio (decisión explícita del usuario): usa sign-in anónimo por REST contra
+// Identity Toolkit con la Web API key del proyecto — es pública (ya va embebida en
+// convocatoria.html), no un secreto. El ID token se cachea en TS_KV ~55 min (por
+// debajo de la expiración real de 1h) para no pedir uno nuevo en cada corrida de 1 min.
+const FIREBASE_WEB_API_KEY = 'AIzaSyAzjOjdspr1SRMiX88ge0AuoKirrsJB17M';
+async function getConvocatoriaAuthToken(env) {
+  try {
+    const cached = await env.TS_KV.get('conv_auth_token', 'text');
+    if (cached) return cached;
+  } catch (e) {}
+  const resp = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_WEB_API_KEY}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ returnSecureToken: true }) }
+  );
+  if (!resp.ok) throw new Error('anonymous sign-in failed: ' + resp.status);
+  const data = await resp.json();
+  if (!data.idToken) throw new Error('no idToken in sign-in response');
+  try { await env.TS_KV.put('conv_auth_token', data.idToken, { expirationTtl: 55 * 60 }); } catch (e) {}
+  return data.idToken;
+}
+
+async function dailyConvocatoriaReset(env) {
   const FS_STATE = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/convocatoria/state';
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   try {
@@ -1112,11 +1137,12 @@ async function dailyConvocatoriaReset() {
       fields.resetDate = { stringValue: today };
     }
 
+    const token = await getConvocatoriaAuthToken(env);
     await fetch(
       FS_STATE + '?' + fieldPaths.map(p => 'updateMask.fieldPaths=' + p).join('&'),
       {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({ fields }),
       }
     );
