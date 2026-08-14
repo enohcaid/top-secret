@@ -771,12 +771,13 @@ const INVIERNO_SCHEDULE = [
 // 2026-08-13: la liga adelanto el partido MD9 (TOP SECRET vs Camioneros, antes 08-18 23:00) a
 // 13/08 23:59, agregando una 3ra fecha ese dia (ya jugada, cargada en seed_matches.js). MD7-9
 // confirmados contra la fuente en vivo.
-// 2026-08-14: sacar MD9 de 08-18 dejo a MD10 sola ese dia (rompiendo el patron de 2 partidos
-// por fecha). La fuente en vivo (VPG) todavia no referfleja ningun corrimiento en MD10-18 mas
-// alla de eso, pero a pedido del usuario se reacomodo manualmente MD10 en adelante para volver
-// al patron de a pares, corriendo todo un lugar (el partido impar que sobra queda solo al final,
-// 09-01, en vez de al principio). Si la liga publica fechas oficiales distintas para MD10-18,
-// esas mandan por sobre este reacomodo manual.
+// 2026-08-14: reacomodado dos veces a pedido del usuario, ninguna confirmada por la fuente
+// en vivo (VPG) mas alla de MD7-9 (13/08, ya jugada). Primero se habia corrido MD10 en
+// adelante de a pares (patron viejo de 2 x fecha); despues el usuario pidio agrupar todo
+// en 3 fechas triples (MD10-12, MD13-15, MD16-18), por sospechar que la liga va a jugar asi
+// de ahora en mas. Fechas elegidas cada ~1 semana (18/08, 25/08, 01/09) siguiendo el mismo
+// espaciado semanal que ya tenian. Es una proyeccion, no un dato confirmado — si la liga
+// publica fechas oficiales distintas para MD10-18, esas mandan por sobre este reacomodo.
 const E11_T3_SCHEDULE = [
   {date:'2026-08-04',time:'23:00',league:'11x11',rival:'IACC Cantera',           isHome:true },
   {date:'2026-08-04',time:'23:30',league:'11x11',rival:'Cambaceres',             isHome:false},
@@ -789,13 +790,13 @@ const E11_T3_SCHEDULE = [
   {date:'2026-08-13',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:true },
   {date:'2026-08-18',time:'23:00',league:'11x11',rival:'IACC Cantera',           isHome:false},
   {date:'2026-08-18',time:'23:30',league:'11x11',rival:'Cambaceres',             isHome:true },
-  {date:'2026-08-20',time:'23:00',league:'11x11',rival:'Interzonal A',           isHome:false},
-  {date:'2026-08-20',time:'23:30',league:'11x11',rival:'Sub 21 CF',              isHome:false},
-  {date:'2026-08-25',time:'23:00',league:'11x11',rival:'Olimpo Esports',         isHome:true },
-  {date:'2026-08-25',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
-  {date:'2026-08-27',time:'23:00',league:'11x11',rival:'Deportivo Ballester',    isHome:false},
-  {date:'2026-08-27',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
-  {date:'2026-09-01',time:'23:00',league:'11x11',rival:'Camioneros eSports',     isHome:false},
+  {date:'2026-08-18',time:'23:59',league:'11x11',rival:'Interzonal A',           isHome:false},
+  {date:'2026-08-25',time:'23:00',league:'11x11',rival:'Sub 21 CF',              isHome:false},
+  {date:'2026-08-25',time:'23:30',league:'11x11',rival:'Olimpo Esports',         isHome:true },
+  {date:'2026-08-25',time:'23:59',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
+  {date:'2026-09-01',time:'23:00',league:'11x11',rival:'Deportivo Ballester',    isHome:false},
+  {date:'2026-09-01',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
+  {date:'2026-09-01',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:false},
 ];
 let _shareLogo = null;
 const _shareLogoReady = new Promise(res => {
