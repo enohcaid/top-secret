@@ -2101,6 +2101,11 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.6, goals:0, assists:0, passes:8,   pass_accuracy:88,  distance_km:7.7,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 7 VPUG T3 - InfinitX - 13 Ago 2026 (Local, 1-0, W.O. Victoria)
+  {rival:'InfinitX', league:'VPUG', date:'2026-08-13', isHome:true, match_result:'1-0', uploadedAt:'2026-08-14T04:15:00.000Z', notes:'W.O.',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
+
 ];
 
 
