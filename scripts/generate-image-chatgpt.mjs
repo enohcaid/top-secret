@@ -21,6 +21,7 @@ import { createInterface } from 'readline';
 import sharp from 'sharp';
 import { pathToFileURL } from 'url';
 
+const WORKER_BASE             = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
 const FIRESTORE_KIT_HISTORY  = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/kit_color_history';
@@ -1079,6 +1080,33 @@ async function main() {
   if (draft.imagePost && !FLAG_FORCE) {
     console.log('El draft ya tiene imágenes. Usá --force o --review para regenerar.');
     return;
+  }
+
+  // Evitar colisión de id con una nota YA PUBLICADA el mismo día (pasó el
+  // 2026-08-14: dos notas con id 'auto-2026-08-14' se pisaron las imágenes
+  // porque el nombre de archivo se arma con draft.id). El id lo pone la
+  // rutina cloud y no siempre lo desambigua sola, así que la última línea
+  // de defensa es acá: si el id ya está publicado, sufijarlo antes de
+  // generar cualquier imagen.
+  try {
+    const publishedRes = await fetch(`${WORKER_BASE}/published-noticias`);
+    const publishedData = await publishedRes.json();
+    const publishedIds = new Set((publishedData.articles || []).map(a => a.id));
+    if (publishedIds.has(draft.id)) {
+      let n = 2;
+      let candidate = `${draft.id}-${n}`;
+      while (publishedIds.has(candidate)) { n++; candidate = `${draft.id}-${n}`; }
+      console.log(`Id '${draft.id}' ya está publicado hoy — renombrando este draft a '${candidate}' para no pisar sus imágenes.`);
+      draft.id = candidate;
+      const payload = { fields: { data: { stringValue: JSON.stringify(draft) } } };
+      await fetch(FIRESTORE_DRAFT, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+    }
+  } catch (e) {
+    console.log('No se pudo chequear colisión de id contra published-noticias (siguiendo igual):', e.message);
   }
 
   const allMentioned    = extractMentionedPlayers(draft);
