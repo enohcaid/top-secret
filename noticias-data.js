@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'fichajes-full-boxxing-ltemp30148-2026',
+    pinned: false,
+    category: 'Institución',
+    title: 'Nuevos fichajes: Full_boxxing_ y lTemp30148 se suman al plantel',
+    date: '2026-08-16',
+    dateLabel: '16 de agosto de 2026',
+    excerpt: 'Top Secret FC anuncia la incorporación de Full_boxxing_ (#14, MCD) y lTemp30148 (#16, DC), que se suman al plantel para reforzar mediocampo y ataque.',
+    image: 'logos/NUEVOS FICHAJES.webp',
+    body: [
+      '<strong>Top Secret FC</strong> anuncia dos nuevas incorporaciones al plantel: <strong>Full_boxxing_</strong> y <strong>lTemp30148</strong> ya son parte del club.',
+      '<strong>Full_boxxing_</strong> vestirá la camiseta <strong>#14</strong> y se suma como mediocampista central, aportando recorrido y presencia en la mitad de la cancha.',
+      '<strong>lTemp30148</strong> llega con la <strong>#16</strong> para reforzar el ataque como delantero centro, sumando una opción más de gol al plantel.',
+      'Ambos ya entrenan con el grupo y quedan a disposición para las próximas convocatorias en las tres ligas del club. Bienvenidos a Top Secret FC. 🖤⭐',
+    ],
+    shareCaption: '🖤 NUEVOS FICHAJES · TOP SECRET FC\n\nFull_boxxing_ (#14, MCD) y lTemp30148 (#16, DC) ya son parte del plantel.\n\n¡Bienvenidos al club! 🖤⭐\n\n#TopSecretFC #Temporada3 #Fichajes',
+    shareCaptions: {
+      ig: '🖤 NUEVOS FICHAJES\n\nFull_boxxing_ (#14) y lTemp30148 (#16) ya son parte del plantel.\n\n¡Bienvenidos! → @fctopsecret\n\n#TopSecretFC #Temporada3 #EAFCClubsPro #Fichajes',
+      x:  '🖤 Top Secret FC suma a Full_boxxing_ (#14, MCD) y lTemp30148 (#16, DC) al plantel.\n\n¡Bienvenidos al club!\n\n#TopSecretFC #Temporada3 #Fichajes',
+      fb: '🖤 NUEVOS FICHAJES · TOP SECRET FC\n\nEl club anuncia la incorporación de Full_boxxing_ (#14, mediocampista central) y lTemp30148 (#16, delantero centro) al plantel.\n\nAmbos ya entrenan con el grupo y quedan a disposición para las próximas convocatorias.\n\n¡Bienvenidos a Top Secret FC! 🖤⭐\n\n#TopSecretFC #Temporada3 #EAFCClubsPro #Fichajes',
+    },
+  },
+  {
     id: 'gracias-yzytx0-mauriii-2026',
     pinned: false,
     category: 'Institución',
