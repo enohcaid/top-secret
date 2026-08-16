@@ -262,12 +262,12 @@ const PLAYER_TRAITS = {
   'kee_viin03':      { dorsal: 21,   desc: 'piel oscura, afro grande y voluminoso teñido de rojo/rosa intenso, sin barba, contextura atlética' },
   'Lautavester7':    { dorsal: 7,    desc: 'piel oscura, pelo muy corto con tinte azul claro, barba negra tupida, visor deportivo verde espejado' },
   'Lil_Dekuroko':    { dorsal: 22,   desc: 'piel morena, pelo corto rizado teñido rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca, tatuaje en el antebrazo derecho' },
-  'Mauriii-_1891':   { dorsal: 30,   desc: 'piel morena, pelo corto rizado teñido rubio platinado, cara descubierta sin anteojos, sin máscara ni barba' },
+  'Full_boxxing_':   { dorsal: 14,   desc: 'piel oscura, pelo corto rizado teñido rubio ceniza, anteojos de sol azules espejados envolventes, barba candado prolija, guantes blancos' },
   'Ramiro4588':      { dorsal: 96,   desc: 'piel morena, pelo negro corto tipo afro bajo, chivita, anteojos deportivos con lente dorada espejada' },
   'Ringhiio':        { dorsal: 70,   desc: 'piel trigueña, melena despeinada VIOLETA, anteojos de sol negros' },
   'rivarola90':      { dorsal: 2,    desc: 'piel oscura, melena gris plateada hasta los hombros con vincha negra, chivita canosa, mangas largas oscuras' },
   'RS32-DaniStone':  { dorsal: 13,   desc: 'piel clara, pelo revuelto turquesa/verde agua, máscara celeste cubriendo nariz y boca, anteojos, una manga azul en el brazo derecho' },
-  'yzytx0':          { dorsal: 99,   desc: 'piel oscura, dreadlocks rubio ceniza/grisáceos con vincha negra, máscara de calavera blanca cubriendo nariz y boca, guantes blancos' },
+  'lTemp30148':      { dorsal: 16,   desc: 'piel oscura, pelo negro afro corto, máscara amarilla tipo antifaz cubriendo los ojos, sin barba visible' },
 };
 
 // Dorsales vigentes desde Firestore (plantel/activo.numeros) — la misma fuente
