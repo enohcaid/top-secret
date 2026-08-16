@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'gracias-yzytx0-mauriii-2026',
+    pinned: false,
+    category: 'Institución',
+    title: 'Gracias, yzytx0 y Mauriii-_1891: el club se despide de dos piezas del plantel',
+    date: '2026-08-16',
+    dateLabel: '16 de agosto de 2026',
+    excerpt: 'Top Secret FC agradece a yzytx0 y Mauriii-_1891, que dejan el plantel tras su paso por el club. Las puertas quedan abiertas para volver a cruzarse en el fútbol virtual.',
+    image: 'logos/GRACIAS!.webp',
+    body: [
+      'Todo ciclo tiene un final, y hoy le toca a dos jugadores que fueron parte del plantel de <strong>Top Secret FC</strong>: <strong>yzytx0</strong> y <strong>Mauriii-_1891</strong> dejan el club.',
+      'Ambos vistieron la camiseta con compromiso en cada convocatoria, sumando minutos y aportando su granito de arena a la historia reciente del equipo. El club les agradece el esfuerzo, la dedicación y el tiempo compartido dentro y fuera de la cancha.',
+      'Como en cada cierre de etapa, la puerta queda abierta: en el fútbol virtual los caminos se vuelven a cruzar, y Top Secret FC les desea lo mejor en lo que viene.',
+      'Gracias, yzytx0. Gracias, Mauriii-_1891. Siempre van a ser parte de esta historia. 🖤⭐',
+    ],
+    shareCaption: '🖤 GRACIAS\n\nTop Secret FC se despide de yzytx0 y Mauriii-_1891, que dejan el plantel tras su paso por el club.\n\nGracias por el compromiso y el tiempo compartido. Las puertas siempre abiertas.\n\n#TopSecretFC #Temporada3',
+    shareCaptions: {
+      ig: '🖤 GRACIAS\n\nyzytx0 y Mauriii-_1891 dejan el plantel. Gracias por el compromiso y el tiempo compartido.\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #Temporada3 #EAFCClubsPro',
+      x:  '🖤 Top Secret FC se despide de yzytx0 y Mauriii-_1891, que dejan el plantel tras su paso por el club. Gracias por el tiempo compartido.\n\n#TopSecretFC #Temporada3',
+      fb: '🖤 GRACIAS\n\nTop Secret FC agradece a yzytx0 y Mauriii-_1891, que dejan el plantel tras su paso por el club.\n\nAmbos vistieron la camiseta con compromiso en cada convocatoria. Les deseamos lo mejor en lo que viene.\n\nSiempre van a ser parte de esta historia.\n\n#TopSecretFC #Temporada3 #EAFCClubsPro',
+    },
+  },
+  {
     id: 'comunicado-colombia-2026',
     pinned: false,
     category: 'Institución',
