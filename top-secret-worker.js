@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'gracias-yzytx0-mauriii-2026': {
+    t: 'Gracias, yzytx0 y Mauriii-_1891: el club se despide de dos piezas del plantel',
+    i: SITE + 'logos/' + encodeURIComponent('GRACIAS!.webp'),
+  },
   'comunicado-colombia-2026': {
     t: 'Comunicado oficial: Top Secret FC junto a Colombia',
     i: SITE + 'logos/' + encodeURIComponent('Comunicado Colombia.png'),
