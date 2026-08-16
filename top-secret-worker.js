@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'fichajes-full-boxxing-ltemp30148-2026': {
+    t: 'Nuevos fichajes: Full_boxxing_ y lTemp30148 se suman al plantel',
+    i: SITE + 'logos/' + encodeURIComponent('NUEVOS FICHAJES.webp'),
+  },
   'gracias-yzytx0-mauriii-2026': {
     t: 'Gracias, yzytx0 y Mauriii-_1891: el club se despide de dos piezas del plantel',
     i: SITE + 'logos/' + encodeURIComponent('GRACIAS!.webp'),
