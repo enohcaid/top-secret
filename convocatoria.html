@@ -854,7 +854,7 @@ function getTodayMatches() {
     .map(m => ({...m, badge: E11_T3_BADGES[m.rival]||null}));
   // Deduplicate VPN: skip if calCustom already has same rival
   const dedupedVpn = fromVpn.filter(v =>
-    !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase() === (v.rival||'').toLowerCase())
+    !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase().trim() === (v.rival||'').toLowerCase().trim())
   );
   // Prefer live dates/rivals from the Worker (single source of truth for reprogramaciones);
   // INVIERNO_SCHEDULE is only a pre-fetch fallback so the panel isn't empty on first paint.
