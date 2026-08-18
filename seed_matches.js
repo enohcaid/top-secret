@@ -2123,23 +2123,6 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.5, goals:0, assists:0, passes:5,   pass_accuracy:80,  distance_km:7.3,  sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 12 VPN T3 - Argentino de Merlo - 17 Ago 2026 (Visita, 0-3, Derrota)
-  {rival:'Argentino de Merlo', league:'VPN', date:'2026-08-17', isHome:false, match_result:'0-3', uploadedAt:'2026-08-18T22:00:00.000Z', notes:'',
-  team_stats:{posesion:62,tiros:4,tiros_arco:null,goles_esperados:1.9,pases:226,precision_pases:85,entradas:17,entradas_exito:4,intercepciones:null,paradas:2,faltas:0,fuera_juego:2,corneres:1,regates_exito:177,precision_tiro:50},
-  players:[
-    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'EI',  rating:6.4, goals:0, assists:0, passes:24,  pass_accuracy:92,  distance_km:16.8, sprints:null, tackles:null, interceptions:null},
-    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'DC',  rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'ED',  rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Guiidow',        matched:'Guiidow',           played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:21,  pass_accuracy:81,  distance_km:17.0, sprints:null, tackles:null, interceptions:null},
-    {name:'Riva',           matched:'rivarola90',        played_pos:'DFI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DCI', rating:8.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFC', rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'Huber236',       matched:'Huber236',          played_pos:'DFD', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.0, goals:0, assists:0, passes:8,   pass_accuracy:100, distance_km:6.5,  sprints:null, tackles:null, interceptions:null},
-  ]},
-
   // Fecha 13 VPN T3 - Temperley Esports - 17 Ago 2026 (Local, 0-5, Derrota)
   {rival:'Temperley Esports', league:'VPN', date:'2026-08-17', isHome:true, match_result:'0-5', uploadedAt:'2026-08-18T16:05:00.000Z', notes:'',
   team_stats:{posesion:50,tiros:1,tiros_arco:null,goles_esperados:0.2,pases:176,precision_pases:85,entradas:24,entradas_exito:10,intercepciones:null,paradas:2,faltas:1,fuera_juego:2,corneres:1,regates_exito:145,precision_tiro:0},
