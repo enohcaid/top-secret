@@ -2137,7 +2137,6 @@ const SEED_MATCHES = [
     {name:'Cabers14',       matched:'Cabers14',          played_pos:'DCI', rating:8.1, goals:0, assists:0, passes:19,  pass_accuracy:84,  distance_km:15.9, sprints:null, tackles:null, interceptions:null},
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'DFC', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
     {name:'Huber236',       matched:'Huber236',          played_pos:'DFD', rating:6.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
-    {name:'X. Huang',       matched:null,                played_pos:'PO',  rating:4.2, goals:0, assists:0, passes:8,   pass_accuracy:100, distance_km:6.0,  sprints:null, tackles:null, interceptions:null},
   ]},
 
   // Fecha 5 VPUG T6 - Germinal eSports - 17 Ago 2026 (Local, 1-5, Derrota)
