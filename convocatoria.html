@@ -772,11 +772,13 @@ const INVIERNO_SCHEDULE = [
 // 13/08 23:59, agregando una 3ra fecha ese dia (ya jugada, cargada en seed_matches.js). MD7-9
 // confirmados contra la fuente en vivo.
 // 2026-08-14: reacomodado varias veces a pedido del usuario, ninguna confirmada por la fuente
-// en vivo (VPG) mas alla de MD7-9 (13/08, ya jugada). Version final: 3 fechas triples en los
-// dias consecutivos que juega la liga (martes y jueves — ver patron [2,4] en calendario.html),
-// arrancando el primer Tue/Thu disponible tras el 13/08 (jueves): 18/08 (mar), 20/08 (jue),
-// 25/08 (mar). Es una proyeccion, no un dato confirmado — si la liga publica fechas oficiales
-// distintas para MD10-18, esas mandan por sobre este reacomodo.
+// en vivo (VPG) mas alla de MD7-9 (13/08, ya jugada).
+// 2026-08-18: el usuario pidio pasar de fechas triples a fechas DOBLES (2 partidos por dia) —
+// el 3er partido del 18/08 (Interzonal A) se corrio al jueves 20/08, y todo lo demas se
+// recorrio en cascada manteniendo el patron martes/jueves (ver [2,4] en calendario.html) a 2
+// partidos por fecha: 18/08, 20/08, 25/08, 27/08, y 01/09 (este ultimo queda con 1 solo partido
+// porque son 9 partidos restantes, numero impar). Es una proyeccion, no un dato confirmado — si
+// la liga publica fechas oficiales distintas para MD10-18, esas mandan por sobre este reacomodo.
 const E11_T3_SCHEDULE = [
   {date:'2026-08-04',time:'23:00',league:'11x11',rival:'IACC Cantera',           isHome:true },
   {date:'2026-08-04',time:'23:30',league:'11x11',rival:'Cambaceres',             isHome:false},
@@ -789,13 +791,13 @@ const E11_T3_SCHEDULE = [
   {date:'2026-08-13',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:true },
   {date:'2026-08-18',time:'23:00',league:'11x11',rival:'IACC Cantera',           isHome:false},
   {date:'2026-08-18',time:'23:30',league:'11x11',rival:'Cambaceres',             isHome:true },
-  {date:'2026-08-18',time:'23:59',league:'11x11',rival:'Interzonal A',           isHome:false},
-  {date:'2026-08-20',time:'23:00',league:'11x11',rival:'Sub 21 CF',              isHome:false},
-  {date:'2026-08-20',time:'23:30',league:'11x11',rival:'Olimpo Esports',         isHome:true },
-  {date:'2026-08-20',time:'23:59',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
-  {date:'2026-08-25',time:'23:00',league:'11x11',rival:'Deportivo Ballester',    isHome:false},
-  {date:'2026-08-25',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
-  {date:'2026-08-25',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:false},
+  {date:'2026-08-20',time:'23:00',league:'11x11',rival:'Interzonal A',           isHome:false},
+  {date:'2026-08-20',time:'23:30',league:'11x11',rival:'Sub 21 CF',              isHome:false},
+  {date:'2026-08-25',time:'23:00',league:'11x11',rival:'Olimpo Esports',         isHome:true },
+  {date:'2026-08-25',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
+  {date:'2026-08-27',time:'23:00',league:'11x11',rival:'Deportivo Ballester',    isHome:false},
+  {date:'2026-08-27',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
+  {date:'2026-09-01',time:'23:00',league:'11x11',rival:'Camioneros eSports',     isHome:false},
 ];
 let _shareLogo = null;
 const _shareLogoReady = new Promise(res => {
