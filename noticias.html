@@ -1305,8 +1305,9 @@ function _renderDraftBanner(draft) {
   document.getElementById('draft-excerpt').textContent = draft.excerpt  || '';
   const imagesEl = document.getElementById('draft-images');
   imagesEl.innerHTML = '';
-  if (draft.imagePost)  imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imagePost}" alt="Post"></div><div class="draft-img-label">Post (1086×1448) · <a href="#" onclick="event.preventDefault(); downloadImage('${draft.imagePost.replace(/'/g, "\\'")}', '${(draft.id || 'draft')}_post')">Descargar</a></div></div>`;
-  if (draft.imageStory) imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imageStory}" alt="Story"></div><div class="draft-img-label">Story (941×1672) · <a href="#" onclick="event.preventDefault(); downloadImage('${draft.imageStory.replace(/'/g, "\\'")}', '${(draft.id || 'draft')}_story')">Descargar</a></div></div>`;
+  const _cacheBust = Date.now();
+  if (draft.imagePost)  imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imagePost}?t=${_cacheBust}" alt="Post"></div><div class="draft-img-label">Post (1086×1448) · <a href="#" onclick="event.preventDefault(); downloadImage('${draft.imagePost.replace(/'/g, "\\'")}', '${(draft.id || 'draft')}_post')">Descargar</a></div></div>`;
+  if (draft.imageStory) imagesEl.innerHTML += `<div><div class="draft-img-wrap"><img src="${draft.imageStory}?t=${_cacheBust}" alt="Story"></div><div class="draft-img-label">Story (941×1672) · <a href="#" onclick="event.preventDefault(); downloadImage('${draft.imageStory.replace(/'/g, "\\'")}', '${(draft.id || 'draft')}_story')">Descargar</a></div></div>`;
 }
 
 function expandDraftBanner() {
@@ -1507,8 +1508,9 @@ function _showRegenConfirm(draft) {
   document.getElementById('regen-confirm-excerpt').textContent = draft.excerpt || '';
   const imgs = document.getElementById('regen-confirm-imgs');
   imgs.innerHTML = '';
-  if (draft.imagePost)  imgs.innerHTML += `<img src="${draft.imagePost}"  alt="Post">`;
-  if (draft.imageStory) imgs.innerHTML += `<img src="${draft.imageStory}" alt="Story">`;
+  const _cacheBust2 = Date.now();
+  if (draft.imagePost)  imgs.innerHTML += `<img src="${draft.imagePost}?t=${_cacheBust2}"  alt="Post">`;
+  if (draft.imageStory) imgs.innerHTML += `<img src="${draft.imageStory}?t=${_cacheBust2}" alt="Story">`;
   _renderDraftBanner(draft);
 }
 
