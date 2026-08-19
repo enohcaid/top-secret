@@ -551,11 +551,17 @@ const SLOT_LABEL_ES = {
     CDM:'Volante central', CM1:'Volante', CM2:'Volante', CAM:'Mediapunta', ST1:'Delantero', ST2:'Delantero' },
 };
 
-/* Orden fijo pedido para "Copiar equipo" — el resto de las formaciones sigue
-   el orden natural de FORMATIONS. */
+/* Orden fijo pedido para "Copiar equipo", igual para TODAS las formaciones:
+   arquero, líbero, centrales (der/izq), laterales, carrileros, medio
+   defensivo, medios (der/izq), enganche, extremos, delanteros. Si una
+   formación no tiene alguna de estas posiciones, esa categoría se omite. */
 const COPY_ORDER_ES = {
-  '4-3-3': ['GK','RB','LB','CB1','CB2','CM','RM','LM','RW','LW','CF'],
-  '3-5-2': ['GK','CB2','CB1','CB3','RM','LM','CM2','CM1','CM3','ST1','ST2'],
+  '4-3-3':      ['GK','CB1','CB2','RB','LB','CM','RM','LM','RW','LW','CF'],
+  '4-4-2':      ['GK','CB1','CB2','RB','LB','CM1','CM2','RM','LM','ST1','ST2'],
+  '4-2-3-1':    ['GK','CB1','CB2','RB','LB','CDM1','CDM2','RAM','LAM','CAM','CF'],
+  '3-5-2':      ['GK','CB2','CB1','CB3','RM','LM','CM2','CM1','CM3','ST1','ST2'],
+  '3-4-3':      ['GK','CB2','CB1','CB3','RM','LM','CM1','CM2','RW','LW','CF'],
+  '4-1-2-1-2':  ['GK','CB1','CB2','RB','LB','CDM','CM1','CM2','CAM','ST1','ST2'],
 };
 
 /* ─── FIREBASE ─── */
