@@ -892,7 +892,7 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-08-13T19:15:00-03:00';
+const BUILD_VERSION = '2026-08-19T15:55:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
@@ -1096,6 +1096,17 @@ function saveState(source) {
     // > y no !==: una pestaña vieja (TODAY desactualizado) nunca debe poder pisar hacia
     // atrás un resetDate que el servidor ya tiene más adelantado (ver checkDailyReset()).
     if (TODAY > _baseline.resetDate) args.push('resetDate', TODAY);
+
+    // alwaysPresent/captain/lineup (incidente 2026-08-19): no son maps, así que no pasan
+    // por _pushMapDiff. Una acción normal saca 1 jugador de alwaysPresent a la vez o
+    // desmarca 1 capitán — perder 2+ jugadores de alwaysPresent de golpe, o vaciar un
+    // lineup con slots cargados, no tiene ningún botón que lo haga así en un solo click.
+    const apLost = (_baseline.alwaysPresent || []).filter(n => !alwaysPresent.includes(n));
+    if (apLost.length >= 2) deletedKeys.push(...apLost.map(n => 'alwaysPresent.' + n));
+    if (_baseline.captain != null && captain == null) deletedKeys.push('captain');
+    const baseSlotCount = Object.keys((_baseline.lineup && _baseline.lineup.slots) || {}).length;
+    const nowSlotCount  = Object.keys(lineup.slots || {}).length;
+    if (baseSlotCount > 0 && nowSlotCount === 0) deletedKeys.push('lineup.slots');
 
     if (deletedKeys.length >= 2 && source !== 'daily-reset' && source !== 'backup-restore') {
       console.warn('[conv] BORRADO MASIVO INESPERADO', { source, deletedKeys, TODAY, savedResetDate: _savedResetDate, buildVersion: BUILD_VERSION, at: new Date().toISOString() });
@@ -2317,10 +2328,23 @@ scheduleMidnightReset();
 // cambió pero esta pestaña sigue con el TODAY viejo, recargar en vez de dejar
 // que checkDailyReset() actúe con una fecha desactualizada. Aprovechamos el
 // mismo momento para chequear si hay un deploy más nuevo (ver checkForNewBuild).
+//
+// STALE_BACKGROUND_MS (incidente 2026-08-19: alwaysPresent/captain/lineup se
+// vaciaron en producción): además de esos dos chequeos puntuales, si la pestaña
+// estuvo oculta más de 2 min se la trata directamente como sesión nueva y se
+// recarga entera al volver — no alcanza con comparar fecha/build, porque una
+// pestaña suspendida un buen rato puede tener alwaysPresent/captain/lineup en
+// memoria desincronizados del servidor de formas que esos dos chequeos no
+// detectan, y un guardado desde ahí pisa el documento completo con datos viejos.
+// Forzar el reload es más simple y confiable que intentar distinguir en el
+// cliente qué datos siguen siendo válidos.
+const STALE_BACKGROUND_MS = 2 * 60 * 1000;
+let _hiddenAt = null;
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible') return;
+  if (document.visibilityState !== 'visible') { _hiddenAt = Date.now(); return; }
   const fresh = new Date().toLocaleDateString('sv', {timeZone:'America/Argentina/Buenos_Aires'});
   if (fresh !== TODAY) { location.reload(); return; }
+  if (_hiddenAt && (Date.now() - _hiddenAt) > STALE_BACKGROUND_MS) { location.reload(); return; }
   checkForNewBuild();
 });
 
