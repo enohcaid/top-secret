@@ -2206,6 +2206,23 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 11 11x11 T3 - Cambaceres - 18 Ago 2026 (Local, 0-0, Empate)
+  {rival:'Cambaceres', league:'11x11', date:'2026-08-18', isHome:true, match_result:'0-0', uploadedAt:'2026-08-19T04:00:00.000Z', notes:'',
+  team_stats:{posesion:35,tiros:3,tiros_arco:null,goles_esperados:0.3,pases:135,precision_pases:77,entradas:15,entradas_exito:6,intercepciones:null,paradas:4,faltas:1,fuera_juego:1,corneres:1,regates_exito:97,precision_tiro:67},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.3, goals:0, assists:0, passes:18,  pass_accuracy:56,  distance_km:18.3, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:5.8, goals:0, assists:0, passes:7,   pass_accuracy:57,  distance_km:19.0, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'MI',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCI', rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniStone',matched:'RS32-DaniStone',   played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DCI', rating:7.7, goals:0, assists:0, passes:15,  pass_accuracy:93,  distance_km:14.8, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:7.5, goals:0, assists:0, passes:4,   pass_accuracy:100, distance_km:6.2,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
