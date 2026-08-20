@@ -788,6 +788,9 @@ const INVIERNO_SCHEDULE = [
 // vez de dejarlo en fecha propia — 27/08 queda como la unica fecha triple del resto del
 // calendario. Es una proyeccion, no un dato confirmado — si la liga publica fechas oficiales
 // distintas para MD10-18, esas mandan por sobre este reacomodo.
+// 2026-08-20: el usuario deshizo el ultimo agrupamiento triple — Camioneros eSports vuelve a
+// tener fecha propia (01/09, martes, siguiente slot del patron [2,4]) en vez de sumarse al
+// 27/08. Con esto el resto del calendario 11x11 queda en fechas dobles.
 const E11_T3_SCHEDULE = [
   {date:'2026-08-04',time:'23:00',league:'11x11',rival:'IACC Cantera',           isHome:true },
   {date:'2026-08-04',time:'23:30',league:'11x11',rival:'Cambaceres',             isHome:false},
@@ -806,7 +809,7 @@ const E11_T3_SCHEDULE = [
   {date:'2026-08-25',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
   {date:'2026-08-27',time:'23:00',league:'11x11',rival:'Deportivo Ballester',    isHome:false},
   {date:'2026-08-27',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
-  {date:'2026-08-27',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:false},
+  {date:'2026-09-01',time:'23:00',league:'11x11',rival:'Camioneros eSports',     isHome:false},
 ];
 let _shareLogo = null;
 const _shareLogoReady = new Promise(res => {
