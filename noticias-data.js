@@ -80,7 +80,7 @@ const NOTICIAS = [
     body: [
       'Ya está oficial. CopáFácil publicó el calendario completo de <strong>#1 Primera División VPUG (Temporada 6)</strong> y Top Secret FC tiene por delante <strong>17 partidos</strong>, todos a ida única.',
       'El debut es hoy mismo, de visitante ante <strong>Nueva Chicago</strong> (22:30hs). Un arranque directo, sin margen para acomodarse.',
-      'El fixture se extiende hasta el <strong>7 de septiembre</strong>, con rivales como Deportivo Moron, Real MarcianoFC, InfinitX, Germinal eSports, Argentino de Merlo, Hacha eSports, Olimpo eSports, Ysh FC, Atlético Moneiro, United Mito, Temperley eSports y Colon SL, entre otros. Diecisiete jornadas, todas a las 22:30hs, de lunes a jueves.',
+      'El fixture se extiende hasta el <strong>7 de septiembre</strong>, con rivales como Deportivo Moron, Real MarcianoFC, InfinitX, Germinal eSports, Argentino de Merlo, Hacha eSports, Suda eSports, Ysh FC, Atlético Moneiro, United Mito, Temperley eSports y Colon SL, entre otros. Diecisiete jornadas, todas a las 22:30hs, de lunes a jueves.',
       'El plantel llega con la base de la Temporada 3 y las ganas intactas de sumar en las tres ligas del club.',
       'El fixture completo está disponible en el calendario del sitio. Seguí cada jornada y no te pierdas ningún resultado. 🖤⭐',
     ],
