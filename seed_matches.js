@@ -2296,6 +2296,40 @@ const SEED_MATCHES = [
   team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
   players:[]},
 
+  // Fecha 12 11x11 T3 - Interzonal A - 20 Ago 2026 (Visita, 0-1, Derrota) - rival reskineado como "All Boys"/New Zealand Football en el reporte
+  {rival:'Interzonal A', league:'11x11', date:'2026-08-20', isHome:false, match_result:'0-1', uploadedAt:'2026-08-21T00:00:00.000Z', notes:'',
+  team_stats:{posesion:59,tiros:2,tiros_arco:null,goles_esperados:0.4,pases:204,precision_pases:85,entradas:10,entradas_exito:4,intercepciones:null,paradas:5,faltas:1,fuera_juego:2,corneres:6,regates_exito:149,precision_tiro:50},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'AnyuTeAmo',      matched:'lTemp30148',        played_pos:'DI',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:5.9, goals:0, assists:0, passes:7,   pass_accuracy:85,  distance_km:20.0, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MI',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniStone',matched:'RS32-DaniStone',   played_pos:'MCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MD',  rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DCI', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.4, goals:0, assists:0, passes:10,  pass_accuracy:100, distance_km:6.7,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 13 11x11 T3 - Sub 21 CF - 20 Ago 2026 (Visita, 2-1, Victoria)
+  {rival:'Sub 21 CF', league:'11x11', date:'2026-08-20', isHome:false, match_result:'2-1', uploadedAt:'2026-08-21T00:05:00.000Z', notes:'',
+  team_stats:{posesion:50,tiros:4,tiros_arco:null,goles_esperados:1.5,pases:171,precision_pases:89,entradas:9,entradas_exito:2,intercepciones:null,paradas:2,faltas:0,fuera_juego:1,corneres:1,regates_exito:134,precision_tiro:75},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.3, goals:0, assists:0, passes:25,  pass_accuracy:80,  distance_km:19.5, sprints:null, tackles:null, interceptions:null},
+    {name:'AnyuTeAmo',      matched:'lTemp30148',        played_pos:'DI',  rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:8.0, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MI',  rating:7.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniStone',matched:'RS32-DaniStone',   played_pos:'MCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MD',  rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.0, goals:0, assists:0, passes:8,   pass_accuracy:100, distance_km:6.6,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
