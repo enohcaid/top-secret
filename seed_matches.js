@@ -2291,6 +2291,11 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:4.9, goals:0, assists:0, passes:4,   pass_accuracy:75,  distance_km:6.5,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 8 VPUG T6 - Suda eSports - 20 Ago 2026 (Visita, W.O., Victoria)
+  {rival:'Suda eSports', league:'VPUG', date:'2026-08-20', isHome:false, match_result:'1-0', uploadedAt:'2026-08-20T00:20:00.000Z', notes:'W.O.',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
+
 ];
 
 
