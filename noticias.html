@@ -965,12 +965,27 @@ function formatDate(iso) {
 
 function videoEmbedFragment(n, cls) {
   if (n.videoProvider === 'tiktok' && n.videoId) {
-    return `<div class="${cls} tiktok"><iframe src="https://www.tiktok.com/embed/v2/${n.videoId}?autoplay=1" title="${n.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+    const base = `https://www.tiktok.com/embed/v2/${n.videoId}?autoplay=1`;
+    return `<div class="${cls} tiktok"><iframe class="tiktok-embed-frame" data-base-src="${base}" src="${base}" title="${n.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
   }
   if (n.videoId) {
     return `<div class="${cls}"><iframe src="https://www.youtube.com/embed/${n.videoId}" title="${n.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
   }
   return null;
+}
+
+// El player embebido de TikTok no repite el video solo al terminar (a diferencia
+// de la app) — lo forzamos reasignando el src cada 41s (duración del video) para
+// que se vea en loop.
+const TIKTOK_LOOP_MS = 41000;
+function bindTiktokLoop(root) {
+  (root || document).querySelectorAll('iframe.tiktok-embed-frame:not([data-loop-bound])').forEach(f => {
+    f.dataset.loopBound = '1';
+    const base = f.dataset.baseSrc || f.src;
+    setInterval(() => {
+      f.src = base + (base.includes('?') ? '&' : '?') + '_r=' + Date.now();
+    }, TIKTOK_LOOP_MS);
+  });
 }
 
 function renderFeatured(n) {
@@ -998,6 +1013,7 @@ function renderFeatured(n) {
       ${media}
     </div>
   `;
+  bindTiktokLoop(slot);
 }
 
 function renderGrid(items) {
@@ -1072,7 +1088,9 @@ function openArticle(id) {
   `;
   document.getElementById('am-title').textContent = n.title;
   document.getElementById('am-date').textContent = n.dateLabel || formatDate(n.date);
-  document.getElementById('am-content').innerHTML = n.body.map(p => `<p>${p}</p>`).join('');
+  const amContent = document.getElementById('am-content');
+  amContent.innerHTML = n.body.map(p => `<p>${p}</p>`).join('');
+  bindTiktokLoop(amContent);
   document.getElementById('am-actions').innerHTML = `
     <button class="btn-primary" onclick="closeArticle(); openShare('${n.id}')">Compartir</button>
     <button class="btn-secondary" onclick="copyLink('${n.id}')">Copiar link</button>
