@@ -6,6 +6,8 @@ const NOTICIAS = [
     id: 'lanzamiento-tiktok-2026',
     pinned: true,
     category: 'Multimedia',
+    videoId: '7677330220185062664',
+    videoProvider: 'tiktok',
     title: '¡Ya estamos en TikTok! Top Secret FC lanza su cuenta oficial',
     date: '2026-08-23',
     dateLabel: '23 de agosto de 2026',

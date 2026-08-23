@@ -197,6 +197,11 @@
       width: 100%;
       aspect-ratio: 16 / 9;
     }
+    .featured-video.tiktok {
+      max-width: 325px;
+      aspect-ratio: 325 / 730;
+      align-self: center;
+    }
     .featured-video iframe {
       position: absolute;
       inset: 0;
@@ -958,18 +963,25 @@ function formatDate(iso) {
   return `${d} de ${months[m - 1]} de ${y}`;
 }
 
+function videoEmbedFragment(n, cls) {
+  if (n.videoProvider === 'tiktok' && n.videoId) {
+    return `<div class="${cls} tiktok"><iframe src="https://www.tiktok.com/embed/v2/${n.videoId}" title="${n.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+  }
+  if (n.videoId) {
+    return `<div class="${cls}"><iframe src="https://www.youtube.com/embed/${n.videoId}" title="${n.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
+  }
+  return null;
+}
+
 function renderFeatured(n) {
   const slot = document.getElementById('featured-slot');
-  const media = n.videoId
-    ? `<div class="featured-video">
-         <iframe src="https://www.youtube.com/embed/${n.videoId}" title="${n.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-       </div>`
-    : `<div class="featured-photo">
+  const videoHtml = videoEmbedFragment(n, 'featured-video');
+  const media = videoHtml || `<div class="featured-photo">
          <img src="${n.image}" alt="${n.title}" onerror="this.parentElement.style.background='#1a1a1a'">
          <div class="featured-photo-gradient"></div>
        </div>`;
   slot.innerHTML = `
-    <div class="featured-card${n.videoId ? ' has-video' : ''}">
+    <div class="featured-card${videoHtml ? ' has-video' : ''}">
       <div class="featured-text">
         <div class="featured-eyebrow">
           <span class="pill-pinned">📌 Fijado</span>

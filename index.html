@@ -195,6 +195,7 @@ body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;f
 .ns-col.ns-landscape{grid-template-columns:1fr;}
 .ns-col.ns-landscape .ns-col-img{aspect-ratio:16/9;}
 .ns-col-video{position:relative;width:100%;aspect-ratio:16/9;background:#000;}
+.ns-col-video.tiktok{aspect-ratio:9/16;}
 .ns-col-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
 .ns-col-body{padding:20px 22px;display:flex;flex-direction:column;justify-content:center;min-height:180px;}
 .ns-col-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
@@ -624,11 +625,20 @@ const stripNews = allNews.filter(n => !n.noStrip);
 const pinnedNews = stripNews.find(n => n.pinned);
 const latestNews = stripNews.find(n => n !== pinnedNews);
 
+function newsVideoFragment(news) {
+  if (news.videoProvider === 'tiktok' && news.videoId) {
+    return `<div class="ns-col-video tiktok"><iframe src="https://www.tiktok.com/embed/v2/${news.videoId}" title="${news.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+  }
+  if (news.videoId) {
+    return `<div class="ns-col-video"><iframe src="https://www.youtube.com/embed/${news.videoId}" title="${news.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
+  }
+  return null;
+}
+
 function renderNewsCol(el, news) {
   if (!el || !news) return;
-  const media = news.videoId
-    ? `<div class="ns-col-video"><iframe src="https://www.youtube.com/embed/${news.videoId}" title="${news.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
-    : (news.image ? `<img class="ns-col-img" src="${news.image}" alt="${news.title}" onload="if(this.naturalWidth>this.naturalHeight)this.closest('.ns-col').classList.add('ns-landscape')" onerror="this.style.display='none';this.parentElement.style.gridTemplateColumns='1fr'">` : '');
+  const videoHtml = newsVideoFragment(news);
+  const media = videoHtml || (news.image ? `<img class="ns-col-img" src="${news.image}" alt="${news.title}" onload="if(this.naturalWidth>this.naturalHeight)this.closest('.ns-col').classList.add('ns-landscape')" onerror="this.style.display='none';this.parentElement.style.gridTemplateColumns='1fr'">` : '');
   el.innerHTML = `
     ${media}
     <div class="ns-col-body">
@@ -640,8 +650,8 @@ function renderNewsCol(el, news) {
       <div class="ns-col-excerpt">${news.excerpt}</div>
       <div class="ns-col-date">${news.dateLabel || news.date}</div>
     </div>`;
-  if (news.videoId) el.classList.add('ns-landscape');
-  else if (!news.image) el.style.gridTemplateColumns = '1fr';
+  if (news.videoId && news.videoProvider !== 'tiktok') el.classList.add('ns-landscape');
+  else if (!news.image && !videoHtml) el.style.gridTemplateColumns = '1fr';
 }
 
 renderNewsCol(document.getElementById('ns-latest'), latestNews);
