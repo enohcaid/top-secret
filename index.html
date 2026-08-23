@@ -637,9 +637,9 @@ function newsVideoFragment(news) {
 }
 
 // El player embebido de TikTok no repite el video solo al terminar (a diferencia
-// de la app) — lo forzamos reasignando el src cada 41s (duración del video) para
-// que se vea en loop.
-const TIKTOK_LOOP_MS = 41000;
+// de la app) — lo forzamos reasignando el src cada 43s (el video dura 41s; el
+// margen extra evita que se corte el final) para que se vea en loop.
+const TIKTOK_LOOP_MS = 43000;
 function bindTiktokLoop(root) {
   (root || document).querySelectorAll('iframe.tiktok-embed-frame:not([data-loop-bound])').forEach(f => {
     f.dataset.loopBound = '1';
