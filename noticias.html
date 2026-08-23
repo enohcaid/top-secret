@@ -199,7 +199,7 @@
     }
     .featured-video.tiktok {
       max-width: 325px;
-      aspect-ratio: 325 / 730;
+      aspect-ratio: 325 / 780;
       align-self: center;
     }
     .featured-video iframe {
@@ -965,7 +965,7 @@ function formatDate(iso) {
 
 function videoEmbedFragment(n, cls) {
   if (n.videoProvider === 'tiktok' && n.videoId) {
-    return `<div class="${cls} tiktok"><iframe src="https://www.tiktok.com/embed/v2/${n.videoId}" title="${n.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+    return `<div class="${cls} tiktok"><iframe src="https://www.tiktok.com/embed/v2/${n.videoId}?autoplay=1" title="${n.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
   }
   if (n.videoId) {
     return `<div class="${cls}"><iframe src="https://www.youtube.com/embed/${n.videoId}" title="${n.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
