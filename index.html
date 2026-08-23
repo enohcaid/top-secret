@@ -627,12 +627,27 @@ const latestNews = stripNews.find(n => n !== pinnedNews);
 
 function newsVideoFragment(news) {
   if (news.videoProvider === 'tiktok' && news.videoId) {
-    return `<div class="ns-col-video tiktok"><iframe src="https://www.tiktok.com/embed/v2/${news.videoId}?autoplay=1" title="${news.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+    const base = `https://www.tiktok.com/embed/v2/${news.videoId}?autoplay=1`;
+    return `<div class="ns-col-video tiktok"><iframe class="tiktok-embed-frame" data-base-src="${base}" src="${base}" title="${news.title}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
   }
   if (news.videoId) {
     return `<div class="ns-col-video"><iframe src="https://www.youtube.com/embed/${news.videoId}" title="${news.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
   }
   return null;
+}
+
+// El player embebido de TikTok no repite el video solo al terminar (a diferencia
+// de la app) — lo forzamos reasignando el src cada 41s (duración del video) para
+// que se vea en loop.
+const TIKTOK_LOOP_MS = 41000;
+function bindTiktokLoop(root) {
+  (root || document).querySelectorAll('iframe.tiktok-embed-frame:not([data-loop-bound])').forEach(f => {
+    f.dataset.loopBound = '1';
+    const base = f.dataset.baseSrc || f.src;
+    setInterval(() => {
+      f.src = base + (base.includes('?') ? '&' : '?') + '_r=' + Date.now();
+    }, TIKTOK_LOOP_MS);
+  });
 }
 
 function renderNewsCol(el, news) {
@@ -652,6 +667,7 @@ function renderNewsCol(el, news) {
     </div>`;
   if (news.videoId && news.videoProvider !== 'tiktok') el.classList.add('ns-landscape');
   else if (!news.image && !videoHtml) el.style.gridTemplateColumns = '1fr';
+  bindTiktokLoop(el);
 }
 
 renderNewsCol(document.getElementById('ns-latest'), latestNews);
