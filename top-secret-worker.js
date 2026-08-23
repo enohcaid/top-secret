@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'lanzamiento-tiktok-2026': {
+    t: '¡Ya estamos en TikTok! Top Secret FC lanza su cuenta oficial',
+    i: SITE + 'logos/' + encodeURIComponent('Lanzamiento TikTok.png'),
+  },
   'fichajes-full-boxxing-ltemp30148-2026': {
     t: 'Nuevos fichajes: Full_boxxing_ y lTemp30148 se suman al plantel',
     i: SITE + 'logos/' + encodeURIComponent('NUEVOS FICHAJES.webp'),

@@ -3,6 +3,29 @@
 
 const NOTICIAS = [
   {
+    id: 'lanzamiento-tiktok-2026',
+    pinned: true,
+    category: 'Multimedia',
+    videoId: 'LD-mdNnvjkY',
+    title: '¡Ya estamos en TikTok! Top Secret FC lanza su cuenta oficial',
+    date: '2026-08-23',
+    dateLabel: '23 de agosto de 2026',
+    excerpt: 'Top Secret FC suma una nueva red a su comunidad: ya está online la cuenta oficial de TikTok del club. Lo festejamos con el primer video de la cuenta.',
+    image: 'logos/Lanzamiento TikTok.png',
+    body: [
+      'El club sigue creciendo puertas afuera de la cancha: <strong>Top Secret FC</strong> ya tiene su cuenta oficial de <strong>TikTok</strong>, un nuevo espacio para que la comunidad viva el día a día del equipo con un formato más ágil y directo.',
+      '<div class="video-embed"><iframe src="https://www.youtube.com/embed/LD-mdNnvjkY" title="Ya estamos en TikTok - Top Secret FC" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>',
+      'De acá en adelante, TikTok va a sumarse a Instagram y YouTube como parte del combo de contenido del club: jugadas, plantel, detrás de escena y todo lo que va pasando en las tres ligas.',
+      'Seguinos para no perderte nada: <a href="https://www.tiktok.com/@topsecretfc" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700;">@topsecretfc</a> en TikTok, o entrá directo al video de lanzamiento: <a href="https://vt.tiktok.com/ZSVHX1SKE/" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700;">vt.tiktok.com/ZSVHX1SKE</a> 🖤⭐',
+    ],
+    shareCaption: '🖤 YA ESTAMOS EN TIKTOK · TOP SECRET FC\n\nSumamos una nueva red a la comunidad del club.\n\n🎵 Seguinos → @topsecretfc\n\n#TopSecretFC #TikTok #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 YA ESTAMOS EN TIKTOK\n\nNueva red, misma comunidad. Seguinos → @topsecretfc en TikTok\n\n#TopSecretFC #TikTok #EAFCClubsPro',
+      x:  '🖤 Top Secret FC ya tiene cuenta oficial de TikTok.\n\nSeguinos → @topsecretfc\n\n#TopSecretFC #TikTok',
+      fb: '🖤 YA ESTAMOS EN TIKTOK · TOP SECRET FC\n\nEl club suma una nueva red a su comunidad. De acá en más, TikTok se suma a Instagram y YouTube con jugadas, plantel y contenido del día a día.\n\n🎵 Seguinos: https://www.tiktok.com/@topsecretfc\n\n#TopSecretFC #TikTok #EAFCClubsPro',
+    },
+  },
+  {
     id: 'fichajes-full-boxxing-ltemp30148-2026',
     pinned: false,
     category: 'Institución',
@@ -93,7 +116,7 @@ const NOTICIAS = [
   },
   {
     id: 'youtube-resumen-semanal-1',
-    pinned: true,
+    pinned: false,
     category: 'Multimedia',
     videoId: 'GGgiX_QBIh4',
     title: '¡Estamos en YouTube! Top Secret FC inaugura su canal oficial con el Resumen Semanal #1',
