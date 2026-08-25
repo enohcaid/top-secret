@@ -7,6 +7,10 @@
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const NOTICIAS_OG = {
+  'lanzamiento-twitch-2026': {
+    t: '¡Ya estamos en Twitch! Top Secret FC transmite todos sus partidos en vivo',
+    i: SITE + 'logos/' + encodeURIComponent('Lanzamiento Twitch.png'),
+  },
   'cierre-vpn-t3-2026': {
     t: 'Cierre VPN: 19 partidos, el cambio a línea de tres y los 9 goles de Lautavester7',
     i: SITE + 'logos/' + encodeURIComponent('Cierre VPN T3.png'),

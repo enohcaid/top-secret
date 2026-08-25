@@ -28,20 +28,24 @@
       .sidebar-right {
         top: auto !important;
         bottom: 72px !important;
+        left: 8px !important;
         right: 8px !important;
         height: auto !important;
         width: auto !important;
         padding: 0 !important;
-        gap: 10px !important;
+        gap: 8px !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: flex-end !important;
         z-index: 490 !important;
       }
       .sidebar-right .sr-icon {
-        width: 36px !important;
-        height: 36px !important;
+        width: 32px !important;
+        height: 32px !important;
       }
       .sidebar-right .sr-icon svg {
-        width: 17px !important;
-        height: 17px !important;
+        width: 15px !important;
+        height: 15px !important;
       }
 
       /* Reset body padding from sidebars; keep topbar; add room for bottom nav */

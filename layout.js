@@ -79,6 +79,8 @@
     .sr-icon:nth-child(3){animation-delay:1s;}
     .sr-icon:nth-child(4){animation-delay:1.5s;}
     .sr-icon:nth-child(5){animation-delay:2s;}
+    .sr-icon:nth-child(6){animation-delay:2.5s;}
+    .sr-icon:nth-child(7){animation-delay:3s;}
     @keyframes sr-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
     .sr-icon.sr-ig{color:#E1306C;background:rgba(225,48,108,.15);border:1px solid rgba(225,48,108,.32);}
     .sr-icon.sr-ig:hover{background:rgba(225,48,108,.28);box-shadow:0 8px 22px rgba(225,48,108,.4);}
@@ -90,6 +92,10 @@
     .sr-icon.sr-wa:hover{background:rgba(37,211,102,.32);box-shadow:0 8px 22px rgba(37,211,102,.45);}
     .sr-icon.sr-yt{color:#FF0000;background:rgba(255,0,0,.15);border:1px solid rgba(255,0,0,.32);}
     .sr-icon.sr-yt:hover{background:rgba(255,0,0,.28);box-shadow:0 8px 22px rgba(255,0,0,.4);}
+    .sr-icon.sr-tk{color:#fff;background:#000;border:1px solid rgba(254,44,85,.4);}
+    .sr-icon.sr-tk:hover{background:#0a0a0a;box-shadow:0 8px 22px rgba(254,44,85,.4);}
+    .sr-icon.sr-tw{color:#9146FF;background:rgba(145,70,255,.15);border:1px solid rgba(145,70,255,.35);}
+    .sr-icon.sr-tw:hover{background:rgba(145,70,255,.28);box-shadow:0 8px 22px rgba(145,70,255,.4);}
 
     @media(max-width:860px){.tb-center{display:none;}}
 
@@ -378,6 +384,8 @@
     <a class="sr-icon sr-fb" href="https://facebook.com/topsecretfc" target="_blank" rel="noopener" title="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg></a>
     <a class="sr-icon sr-wa" href="https://chat.whatsapp.com/G3zmPxrMZsYB1MqWCEhrkU" target="_blank" rel="noopener" title="Unite a nuestro grupo de WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0011.815 0C5.24 0-.13 5.371-.133 11.984c0 2.11.551 4.171 1.598 5.986L0 24l6.185-1.62a11.94 11.94 0 005.628 1.427h.005c6.575 0 11.946-5.372 11.949-11.985a11.94 11.94 0 00-3.5-8.47"/></svg></a>
     <a class="sr-icon sr-yt" href="https://www.youtube.com/@TOPSecretFC" target="_blank" rel="noopener" title="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+    <a class="sr-icon sr-tk" href="https://www.tiktok.com/@topsecretfc" target="_blank" rel="noopener" title="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
+    <a class="sr-icon sr-tw" href="https://www.twitch.tv/topsecretfc" target="_blank" rel="noopener" title="Twitch"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg></a>
   `;
 
   // ── Inject into body ───────────────────────────────────────────────────────
