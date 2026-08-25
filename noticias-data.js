@@ -3,6 +3,28 @@
 
 const NOTICIAS = [
   {
+    id: 'lanzamiento-twitch-2026',
+    pinned: true,
+    category: 'Multimedia',
+    title: '¡Ya estamos en Twitch! Top Secret FC transmite todos sus partidos en vivo',
+    date: '2026-08-25',
+    dateLabel: '25 de agosto de 2026',
+    excerpt: 'Top Secret FC lanza su canal oficial de Twitch. De ahora en más, todos los partidos del club en VPN, VPUG y 11x11 se transmiten en vivo, todas las noches desde las 22:40hs ART.',
+    image: 'logos/Lanzamiento Twitch.png',
+    body: [
+      'El club suma un nuevo frente para estar más cerca de la comunidad: <strong>Top Secret FC</strong> ya tiene su canal oficial de <strong>Twitch</strong>.',
+      'De ahora en más, <strong>todos los partidos del club</strong> — en VPN, VPUG y 11x11 — se transmiten en vivo por el canal, <strong>todas las noches desde las 22:40hs (ART)</strong>. Cada fecha, cada rival, en directo y sin editar.',
+      'Twitch se suma a Instagram, X, Facebook, YouTube y TikTok como parte del combo de contenido del club — pero es el único lugar donde se puede ver el partido completo, en el momento en que se juega.',
+      'Seguinos y activá las notificaciones para no perderte ningún partido: <a href="https://www.twitch.tv/topsecretfc" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700;">twitch.tv/topsecretfc</a> 🖤⭐',
+    ],
+    shareCaption: '🟣 YA ESTAMOS EN TWITCH · TOP SECRET FC\n\nTodos nuestros partidos en vivo, todas las noches desde las 22:40hs (ART).\n\n📺 Seguinos → twitch.tv/topsecretfc\n\n#TopSecretFC #Twitch #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🟣 YA ESTAMOS EN TWITCH\n\nTodos los partidos del club en vivo, todas las noches desde las 22:40hs ART.\n\nSeguinos → twitch.tv/topsecretfc\n\n#TopSecretFC #Twitch #EAFCClubsPro',
+      x:  '🟣 Top Secret FC ya tiene canal oficial de Twitch.\n\nTodos los partidos en vivo, todas las noches desde las 22:40hs ART.\n\n📺 twitch.tv/topsecretfc\n\n#TopSecretFC #Twitch',
+      fb: '🟣 YA ESTAMOS EN TWITCH · TOP SECRET FC\n\nEl club lanza su canal oficial de Twitch. De ahora en más, todos los partidos en VPN, VPUG y 11x11 se transmiten en vivo, todas las noches desde las 22:40hs (ART).\n\n📺 Seguinos: https://www.twitch.tv/topsecretfc\n\n#TopSecretFC #Twitch #EAFCClubsPro',
+    },
+  },
+  {
     id: 'cierre-vpn-t3-2026',
     pinned: true,
     category: 'Análisis',
