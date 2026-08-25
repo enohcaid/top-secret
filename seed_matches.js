@@ -2330,6 +2330,74 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.0, goals:0, assists:0, passes:8,   pass_accuracy:100, distance_km:6.6,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 9 VPUG T6 - Ysh FC - 24 Ago 2026 (Local, 3-1, Victoria)
+  {rival:'Ysh FC', league:'VPUG', date:'2026-08-24', isHome:true, match_result:'3-1', uploadedAt:'2026-08-25T03:00:00.000Z', notes:'',
+  team_stats:{posesion:53,tiros:6,tiros_arco:null,goles_esperados:4.6,pases:175,precision_pases:85,entradas:14,entradas_exito:5,intercepciones:null,paradas:5,faltas:1,fuera_juego:1,corneres:1,regates_exito:131,precision_tiro:83},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.6, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.7, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:7.7, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MCI', rating:7.9, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.7, goals:0, assists:1, passes:13,  pass_accuracy:69,  distance_km:18.7, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFC', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFC', rating:8.2, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:7.0, goals:0, assists:0, passes:13,  pass_accuracy:85,  distance_km:6.5,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 17 VPN T3 - Sub 21 CF - 24 Ago 2026 (Local, 1-2, Derrota)
+  {rival:'Sub 21 CF', league:'VPN', date:'2026-08-24', isHome:true, match_result:'1-2', uploadedAt:'2026-08-25T03:05:00.000Z', notes:'',
+  team_stats:{posesion:null,tiros:3,tiros_arco:null,goles_esperados:null,pases:183,precision_pases:84,entradas:20,entradas_exito:6,intercepciones:null,paradas:null,faltas:1,fuera_juego:1,corneres:null,regates_exito:142,precision_tiro:33},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:29,  pass_accuracy:59,  distance_km:18.6, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:7.3, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MCI', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.5, goals:0, assists:0, passes:14,  pass_accuracy:79,  distance_km:18.6, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DCI', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFC', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:4.9, goals:0, assists:0, passes:3,   pass_accuracy:100, distance_km:5.8,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 18 VPN T3 - IACC Cantera - 24 Ago 2026 (Local, 1-0, Victoria)
+  {rival:'IACC Cantera', league:'VPN', date:'2026-08-24', isHome:true, match_result:'1-0', uploadedAt:'2026-08-25T03:10:00.000Z', notes:'',
+  team_stats:{posesion:55,tiros:4,tiros_arco:null,goles_esperados:0.4,pases:206,precision_pases:86,entradas:12,entradas_exito:6,intercepciones:null,paradas:2,faltas:0,fuera_juego:1,corneres:0,regates_exito:151,precision_tiro:75},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.6, goals:0, assists:1, passes:30,  pass_accuracy:70,  distance_km:19.4, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:7.6, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MCI', rating:8.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MCD', rating:7.5, goals:0, assists:0, passes:18,  pass_accuracy:94,  distance_km:19.0, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFC', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFC', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.9, goals:0, assists:0, passes:7,   pass_accuracy:100, distance_km:6.1,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 19 VPN T3 - 4BDOMIFL4NES - 24 Ago 2026 (Visita, 4-2, Victoria)
+  {rival:'4BDOMIFL4NES', league:'VPN', date:'2026-08-24', isHome:false, match_result:'4-2', uploadedAt:'2026-08-25T03:15:00.000Z', notes:'',
+  team_stats:{posesion:null,tiros:6,tiros_arco:null,goles_esperados:null,pases:157,precision_pases:87,entradas:21,entradas_exito:4,intercepciones:null,paradas:null,faltas:1,fuera_juego:0,corneres:null,regates_exito:128,precision_tiro:83},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:8.3, goals:0, assists:2, passes:26,  pass_accuracy:73,  distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:8.6, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MCI', rating:7.8, goals:1, assists:0, passes:15,  pass_accuracy:60,  distance_km:19.1, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DCI', rating:8.6, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFC', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFC', rating:8.7, goals:0, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.2, goals:0, assists:0, passes:8,   pass_accuracy:100, distance_km:6.1,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
