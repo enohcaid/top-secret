@@ -3,6 +3,33 @@
 
 const NOTICIAS = [
   {
+    id: 'cierre-vpn-t3-2026',
+    pinned: true,
+    category: 'Análisis',
+    title: 'Cierre VPN: 19 partidos, el cambio a línea de tres y los 9 goles de Lautavester7',
+    date: '2026-08-25',
+    dateLabel: '25 de agosto de 2026',
+    excerpt: 'Top Secret FC cerró su participación en VPN con 19 partidos: 7 victorias, 2 empates y 10 derrotas. Un arranque parejo, un bache defensivo que costó caro y un cambio de sistema a línea de tres que le dio vuelta la cara al equipo en el tramo final.',
+    image: 'logos/Cierre VPN T3.png',
+    body: [
+      'Con el triple triunfo del 24 de agosto ante Sub 21 CF, IACC Cantera y 4BDOMIFL4NES, Top Secret FC cerró su participación en <strong>VPN</strong> tras 19 partidos. El balance final: <strong>7 victorias, 2 empates y 10 derrotas</strong>, con 31 goles marcados y 35 recibidos. Un número que a simple vista parece parejo, pero que esconde una temporada de tres etapas bien marcadas — y una decisión táctica que cambió el rumbo del equipo en el cierre.',
+      '<strong>El arranque (03-10 de agosto).</strong> Los primeros siete partidos mostraron a un equipo competitivo pero irregular: victorias ante Ysh Fc y Al-Yateh FC, empates ante Suda Esports y Parke Avellane, y caídas ajustadas ante NUVO FC, División Palermo y Atlético de Rafaela. Dos triunfos, dos empates y tres derrotas — un inicio sin sobresaltos, sosteniendo la pelota (más del 55% de posesión en la mayoría de los encuentros) pero sin resolver todavía con contundencia.',
+      '<strong>El bache (12-17 de agosto).</strong> Fue el tramo más duro de la temporada: apenas una victoria (4-2 ante Real Pilar Esports, con doblete de Lautavester7) en seis partidos, con derrotas duras ante United Mito (0-3), Argentino de Merlo (0-3) y Temperley Esports (0-5). El equipo seguía manejando la posesión —hasta 62% ante Argentino de Merlo— pero generaba cada vez menos: partidos con apenas 1 o 4 tiros al arco rival. En esos seis partidos, el equipo recibió 18 goles.',
+      '<strong>El cambio de sistema (desde el 19 de agosto).</strong> A partir de la fecha ante AlToke Perro, los reportes empezaron a mostrar una línea de <strong>tres defensores centrales</strong> en lugar de la habitual línea de cuatro, con carrileros por los costados — el pase a un 3-5-2. El efecto fue inmediato: menos posesión (46-55%, contra el 51-62% del tramo anterior) pero muchos más disparos y disparos al arco por partido. El equipo cerró con <strong>4 victorias y 2 derrotas</strong> en los últimos seis encuentros —goleadas 4-0 a AlToke Perro y 5-1 a Colón SL, además de los triunfos ante IACC Cantera y 4BDOMIFL4NES— y bajó los goles recibidos de 18 a solo <strong>7</strong> en la misma cantidad de partidos. El mismo equipo, con otra estructura defensiva, jugó otro campeonato.',
+      '<strong>Lautavester7 — 9 goles, el goleador de la temporada.</strong> Presente en los 19 partidos, terminó como máximo artillero con nueve tantos y tres asistencias. Su mejor tramo llegó justo con el cambio de sistema: cinco goles y dos asistencias en los últimos seis partidos, incluyendo el doblete clave ante Real Pilar Esports en pleno bache.',
+      '<strong>Juan_Martinez4 — el arquitecto que también cambió con el sistema.</strong> El mediocampista y director técnico del plantel jugó los 19 partidos con un promedio de 7.49 y cero goles pero <strong>seis asistencias</strong>, cinco de ellas en los últimos seis partidos bajo la nueva línea de tres — el jugador que más se benefició del espacio que le dio el nuevo esquema para asociarse.',
+      '<strong>fedeavv9 — el segundo goleador con menos partidos.</strong> Con solo 13 presencias, convirtió 7 goles: la mejor relación gol-partido del plantel en la temporada.',
+      '<strong>Cabers14 y Alexisraies23 — la base defensiva.</strong> Cabers14 firmó el promedio más alto del equipo (7.80 en 16 partidos), y Alexisraies23 fue el defensor más presente (18 de 19 partidos, 7.67 de promedio) — los dos pilares de una zaga que, tras el cambio de sistema, dejó de ser el problema de la temporada. <strong>Ivan_Cabj_La12</strong> completó los 19 partidos bajo los tres palos, sosteniendo al equipo en el tramo más exigente del bache.',
+      'VPN cierra así con una lectura agridulce pero con una lección clara de cara a lo que viene: cuando el equipo encontró su estructura defensiva, la temporada cambió de cara. El plantel sigue compitiendo en VPUG y 11x11. 🖤⭐',
+    ],
+    shareCaption: '🖤 CIERRE VPN · TOP SECRET FC\n\n19 partidos · 7V · 2E · 10D · 31 goles marcados\n\nEl cambio a línea de tres (desde el 19/08) bajó los goles recibidos de 18 a 7 en 6 partidos y dejó 4 victorias en el cierre.\n\nLautavester7: 9 goles · Juan_Martinez4: 6 asistencias · fedeavv9: 7 goles en 13 partidos\n\n#TopSecretFC #VPN #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 CIERRE VPN · TOP SECRET FC\n\n19 partidos. 7V-2E-10D.\n\nEl cambio a línea de tres le dio vuelta la temporada: de recibir 18 goles en 6 partidos a recibir solo 7.\n\nLautavester7: 9G · Juan_Martinez4: 6A · fedeavv9: 7G en 13 partidos\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPN #EAFCClubsPro',
+      x:  '🖤 Top Secret FC cierra su participación en VPN.\n\n19 partidos · 7V-2E-10D · 31 goles\n\nEl cambio a línea de tres bajó los goles recibidos de 18 a 7 en los últimos 6 partidos.\n\nLautavester7: 9 goles. Juan_Martinez4: 6 asistencias.\n\n#TopSecretFC #VPN',
+      fb: '🖤 CIERRE VPN · TOP SECRET FC\n\nEl club cerró su participación en VPN tras 19 partidos:\n\n📊 7 victorias · 2 empates · 10 derrotas\n📊 31 goles marcados · 35 recibidos\n\nLa temporada tuvo tres etapas: un arranque parejo, un bache duro (1 victoria en 6 partidos, 18 goles recibidos) y un cambio de sistema el 19 de agosto —de línea de cuatro a línea de tres— que le cambió la cara al equipo: 4 victorias en los últimos 6 partidos y apenas 7 goles recibidos en ese tramo.\n\nLautavester7 cerró como goleador con 9 tantos. Juan_Martinez4 (DT y mediocampista) sumó 6 asistencias, la mayoría ya con el nuevo esquema. fedeavv9 anotó 7 goles en solo 13 partidos. Cabers14 (7.80 de promedio) y Alexisraies23 (18 partidos) fueron la base de una defensa que terminó de la mejor manera posible.\n\nEl plantel sigue compitiendo en VPUG y 11x11.\n\n#TopSecretFC #VPN #EAFCClubsPro',
+    },
+  },
+  {
     id: 'lanzamiento-tiktok-2026',
     pinned: true,
     category: 'Multimedia',
