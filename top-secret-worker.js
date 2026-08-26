@@ -722,6 +722,39 @@ export default {
         }
       }
 
+      // ── TWITCH LIVE STATUS (/twitch-live) ────────
+      // Chequea si el canal está en vivo vía el endpoint GQL interno que usa
+      // la propia web de twitch.tv (client-id público, sin cuenta/2FA/app
+      // registrada). No oficial: si Twitch lo rompe, migrar a la API Helix
+      // oficial (requiere TWITCH_CLIENT_ID/TWITCH_CLIENT_SECRET como secrets).
+      if (url.pathname === '/twitch-live' && request.method === 'GET') {
+        const cacheKey = 'twitch_live:topsecretfc';
+        try {
+          const cached = await env.TS_KV.get(cacheKey, 'json');
+          if (cached) return jsonResp(cached);
+        } catch (e) {}
+
+        let result = { live: false };
+        try {
+          const gqlResp = await fetch('https://gql.twitch.tv/gql', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Client-Id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+            },
+            body: JSON.stringify({
+              query: 'query($login:String!){user(login:$login){stream{id}}}',
+              variables: { login: 'topsecretfc' },
+            }),
+          });
+          const gqlData = await gqlResp.json();
+          result = { live: !!gqlData?.data?.user?.stream };
+        } catch (e) { /* deja result = { live:false } */ }
+
+        try { await env.TS_KV.put(cacheKey, JSON.stringify(result), { expirationTtl: 30 }); } catch (e) {}
+        return jsonResp(result);
+      }
+
       // ── OG META REDIRECT (/og/<id>) ──────────────
       // Clean short link for WhatsApp previews. URL: /og/<articleId>
       // Article data comes from the NOTICIAS_OG map above — no KV, no query params.
