@@ -2398,6 +2398,57 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.2, goals:0, assists:0, passes:8,   pass_accuracy:100, distance_km:6.1,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 14 11x11 T3 - Olimpo Esports - 25 Ago 2026 (Local, 3-0, Victoria) - rival reskineado como "Suda eSports" en el reporte
+  {rival:'Olimpo Esports', league:'11x11', date:'2026-08-25', isHome:true, match_result:'3-0', uploadedAt:'2026-08-26T02:25:44.000Z', notes:'',
+  team_stats:{posesion:52,tiros:9,tiros_arco:null,goles_esperados:2.7,pases:165,precision_pases:80,entradas:16,entradas_exito:7,intercepciones:null,paradas:0,faltas:1,fuera_juego:7,corneres:0,regates_exito:117,precision_tiro:56},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:23,  pass_accuracy:74,  distance_km:18.9, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:8.6, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'DD',  rating:8.1, goals:1, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MI',  rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniStone',matched:'RS32-DaniStone',   played_pos:'MCI', rating:7.3, goals:0, assists:0, passes:18,  pass_accuracy:89,  distance_km:18.8, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DCI', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'DFC', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFC', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.2, goals:0, assists:0, passes:2,   pass_accuracy:100, distance_km:5.6,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 15 11x11 T3 - Comunicaciones eSports - 25 Ago 2026 (Local, 0-2, Derrota)
+  {rival:'Comunicaciones eSports', league:'11x11', date:'2026-08-25', isHome:true, match_result:'0-2', uploadedAt:'2026-08-26T02:55:10.000Z', notes:'',
+  team_stats:{posesion:52,tiros:6,tiros_arco:null,goles_esperados:1.5,pases:156,precision_pases:83,entradas:12,entradas_exito:2,intercepciones:null,paradas:3,faltas:2,fuera_juego:0,corneres:0,regates_exito:114,precision_tiro:17},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:5.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'DD',  rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MI',  rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniStone',matched:'RS32-DaniStone',   played_pos:'MCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'DFC', rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFC', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.3, goals:0, assists:0, passes:10,  pass_accuracy:73,  distance_km:6.9,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 10 VPUG T6 - I.A.C.C Cantera - 25 Ago 2026 (Visita, 2-1, Victoria)
+  {rival:'I.A.C.C Cantera', league:'VPUG', date:'2026-08-25', isHome:false, match_result:'2-1', uploadedAt:'2026-08-26T02:02:54.000Z', notes:'',
+  team_stats:{posesion:52,tiros:5,tiros_arco:null,goles_esperados:null,pases:158,precision_pases:81,entradas:16,entradas_exito:4,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:110,precision_tiro:null},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.0, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:7.4, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'DD',  rating:6.4, goals:0, assists:0, passes:17,  pass_accuracy:71,  distance_km:18.2, sprints:null, tackles:null, interceptions:null},
+    {name:'Eli No Skill',   matched:'Eli_No-SKILL',      played_pos:'MI',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. RS32DaniStone',matched:'RS32-DaniStone',   played_pos:'MCI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'FJRS',           matched:'Lil_Dekuroko',      played_pos:'DCI', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:13,  pass_accuracy:100, distance_km:15.4, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DFC', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.7, goals:0, assists:0, passes:9,   pass_accuracy:78,  distance_km:6.9,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
