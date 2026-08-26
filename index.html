@@ -64,6 +64,12 @@ body{background:var(--black);color:var(--text);font-family:'Barlow',sans-serif;f
 .hero-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:width .3s ease, border-radius .3s ease, background-color .3s ease;}
 .hero-dot.active{width:14px;border-radius:3px;background:var(--gold);}
 
+.hero-live-wrap{position:absolute;inset:0;z-index:4;background:#000;display:none;}
+.hero-live-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.hero-live-badge{position:absolute;top:14px;left:calc(var(--sb-left) + 14px);z-index:5;display:inline-flex;align-items:center;gap:7px;background:rgba(20,10,10,.7);border:1px solid rgba(255,60,60,.6);border-radius:2px;padding:5px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.5);}
+.hero-live-dot{width:7px;height:7px;border-radius:50%;background:#ff3b3b;animation:hero-live-pulse 1.4s ease-in-out infinite;}
+@keyframes hero-live-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,59,59,.55);}50%{opacity:.55;box-shadow:0 0 0 5px rgba(255,59,59,0);}}
+
 /* ── SECTION ── */
 .section{padding:40px 40px;}
 .section.alt{background:var(--gray);}
@@ -222,6 +228,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   /* reset hero: body sin padding, margin-left negativo lo sacaría del viewport */
   .hero{width:100vw;margin-left:0;aspect-ratio:2/1;max-height:75vh;padding:0;}
   .hero-content{padding:0 24px 28px;}
+  .hero-live-badge{left:14px;}
   .section{padding:28px 20px;}
 }
 @media(max-width:640px){
@@ -284,10 +291,14 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       <img class="hero-photo" id="hero-img-a" src="logos/Plantel T3 Uniforme.webp" alt="Top Secret FC">
       <img class="hero-photo" id="hero-img-b" alt="Top Secret FC" style="opacity:0">
       <div class="hero-photo-fade"></div>
-      <div class="hero-slider-ui">
+      <div class="hero-slider-ui" id="hero-slider-ui">
         <button class="hero-nav-btn" id="hero-prev">&#8249;</button>
         <div class="hero-dots" id="hero-dots"></div>
         <button class="hero-nav-btn" id="hero-next">&#8250;</button>
+      </div>
+      <div class="hero-live-wrap" id="hero-live-wrap">
+        <div class="hero-live-badge"><span class="hero-live-dot"></span>En vivo en Twitch</div>
+        <iframe id="hero-live-frame" title="Transmisión en vivo Top Secret FC" allowfullscreen scrolling="no"></iframe>
       </div>
     </div>
   </section>
@@ -882,6 +893,43 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   document.getElementById('hero-prev').addEventListener('click', ()=>goTo(current-1));
   document.getElementById('hero-next').addEventListener('click', ()=>goTo(current+1));
   startTimer();
+})();
+
+/* ── TWITCH LIVE CHECK ── */
+(function() {
+  const CHANNEL = 'topsecretfc';
+  const liveWrap  = document.getElementById('hero-live-wrap');
+  const liveFrame = document.getElementById('hero-live-frame');
+  const sliderUi  = document.getElementById('hero-slider-ui');
+  const heroImgs  = [document.getElementById('hero-img-a'), document.getElementById('hero-img-b')];
+  let isLive = false;
+
+  function setLive(live) {
+    if (live === isLive) return;
+    isLive = live;
+    if (live) {
+      liveFrame.src = `https://player.twitch.tv/?channel=${CHANNEL}&parent=${location.hostname || 'localhost'}&muted=true&autoplay=true`;
+      liveWrap.style.display = 'block';
+      sliderUi.style.display = 'none';
+      heroImgs.forEach(el => { if (el) el.style.visibility = 'hidden'; });
+    } else {
+      liveWrap.style.display = 'none';
+      liveFrame.src = '';
+      sliderUi.style.display = '';
+      heroImgs.forEach(el => { if (el) el.style.visibility = ''; });
+    }
+  }
+
+  async function checkLive() {
+    try {
+      const r = await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/twitch-live');
+      const data = await r.json();
+      setLive(!!data.live);
+    } catch (e) { /* ante error de red, deja el estado actual */ }
+  }
+
+  checkLive();
+  setInterval(checkLive, 45000);
 })();
 </script>
 <script src="layout.js?v=10"></script>
