@@ -2449,6 +2449,23 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.7, goals:0, assists:0, passes:9,   pass_accuracy:78,  distance_km:6.9,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 11 VPUG T6 - Atlético Moneiro - 26 Ago 2026 (Local, 4-1, Victoria)
+  {rival:'Atlético Moneiro', league:'VPUG', date:'2026-08-26', isHome:true, match_result:'4-1', uploadedAt:'2026-08-27T00:30:00.000Z', notes:'',
+  team_stats:{posesion:47,tiros:8,tiros_arco:null,goles_esperados:2.7,pases:194,precision_pases:87,entradas:17,entradas_exito:3,intercepciones:null,paradas:1,faltas:0,fuera_juego:0,corneres:3,regates_exito:134,precision_tiro:100},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.9, goals:0, assists:1, passes:33,  pass_accuracy:82,  distance_km:18.9, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DI',  rating:8.3, goals:2, assists:0, passes:19,  pass_accuracy:89,  distance_km:19.1, sprints:null, tackles:null, interceptions:null},
+    {name:'AnyuTeAmo',      matched:'lTemp30148',        played_pos:'DD',  rating:7.7, goals:1, assists:0, passes:15,  pass_accuracy:100, distance_km:19.7, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:7.6, goals:1, assists:0, passes:15,  pass_accuracy:67,  distance_km:19.4, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:7.9, goals:0, assists:1, passes:27,  pass_accuracy:85,  distance_km:18.2, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MD',  rating:7.3, goals:0, assists:1, passes:16,  pass_accuracy:81,  distance_km:18.7, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:6.7, goals:0, assists:0, passes:14,  pass_accuracy:93,  distance_km:17.6, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DCI', rating:7.2, goals:0, assists:0, passes:10,  pass_accuracy:90,  distance_km:15.3, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.5, goals:0, assists:1, passes:17,  pass_accuracy:88,  distance_km:14.9, sprints:null, tackles:null, interceptions:null},
+    {name:'Alexisraies2',   matched:'Alexisraies23',     played_pos:'DFC', rating:8.0, goals:0, assists:0, passes:23,  pass_accuracy:91,  distance_km:18.4, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.6, goals:0, assists:0, passes:5,   pass_accuracy:100, distance_km:5.8,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
