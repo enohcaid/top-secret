@@ -2466,6 +2466,11 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.6, goals:0, assists:0, passes:5,   pass_accuracy:100, distance_km:5.8,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 16 11x11 T3 - Parke Avellane - 27 Ago 2026 (Local, 0-3, Derrota) - sin reporte en video por error del juego
+  {rival:'Parke Avellane', league:'11x11', date:'2026-08-27', isHome:true, match_result:'0-3', uploadedAt:'2026-08-27T00:00:00.000Z', notes:'Sin reporte en video (error del juego)',
+  team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
+  players:[]},
+
 ];
 
 
