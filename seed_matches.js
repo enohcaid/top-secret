@@ -2466,10 +2466,61 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.6, goals:0, assists:0, passes:5,   pass_accuracy:100, distance_km:5.8,  sprints:null, tackles:null, interceptions:null},
   ]},
 
-  // Fecha 16 11x11 T3 - Parke Avellane - 27 Ago 2026 (Local, 0-3, Derrota) - sin reporte en video por error del juego
+  // Fecha 12 VPUG T6 - 4BDOMIFL4NES - 27 Ago 2026 (Visita, 4-1, Victoria)
+  {rival:'4BDOMIFL4NES', league:'VPUG', date:'2026-08-27', isHome:false, match_result:'4-1', uploadedAt:'2026-08-28T03:20:00.000Z', notes:'',
+  team_stats:{posesion:null,tiros:6,tiros_arco:null,goles_esperados:null,pases:223,precision_pases:91,entradas:11,entradas_exito:2,intercepciones:null,paradas:null,faltas:0,fuera_juego:0,corneres:null,regates_exito:147,precision_tiro:100},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.9, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:8.6, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:7.3, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:7.4, goals:1, assists:0, passes:26,  pass_accuracy:81,  distance_km:18.8, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:8.3, goals:0, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MCD', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DCI', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'DFC', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:6.5, goals:0, assists:0, passes:13,  pass_accuracy:100, distance_km:16.0, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.6, goals:0, assists:0, passes:9,   pass_accuracy:100, distance_km:6.5,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 16 11x11 T3 - Deportivo Ballester - 27 Ago 2026 (Visita, 3-0, Victoria)
+  {rival:'Deportivo Ballester', league:'11x11', date:'2026-08-27', isHome:false, match_result:'3-0', uploadedAt:'2026-08-28T03:00:00.000Z', notes:'',
+  team_stats:{posesion:null,tiros:10,tiros_arco:null,goles_esperados:null,pases:211,precision_pases:89,entradas:16,entradas_exito:7,intercepciones:null,paradas:null,faltas:0,fuera_juego:2,corneres:null,regates_exito:152,precision_tiro:60},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:8.1, goals:0, assists:1, passes:27,  pass_accuracy:78,  distance_km:19.1, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:9.7, goals:3, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:6.9, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:8.0, goals:0, assists:0, passes:30,  pass_accuracy:80,  distance_km:19.2, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:7.3, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'R. Ramiro4588',  matched:'Ramiro4588',        played_pos:'MCD', rating:8.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:7.7, goals:0, assists:0, passes:18,  pass_accuracy:100, distance_km:16.0, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:7.2, goals:0, assists:0, passes:5,   pass_accuracy:null, distance_km:6.4,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 17 11x11 T3 - Parke Avellane - 27 Ago 2026 (Local, 0-3, Derrota) - sin reporte en video por error del juego
   {rival:'Parke Avellane', league:'11x11', date:'2026-08-27', isHome:true, match_result:'0-3', uploadedAt:'2026-08-27T00:00:00.000Z', notes:'Sin reporte en video (error del juego)',
   team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:null,precision_pases:null,entradas:null,entradas_exito:null,intercepciones:null,paradas:null,faltas:null,fuera_juego:null,corneres:null,regates_exito:null,precision_tiro:null},
   players:[]},
+
+  // Fecha 18 11x11 T3 - Camioneros eSports - 27 Ago 2026 (Visita, 2-1, Victoria)
+  {rival:'Camioneros eSports', league:'11x11', date:'2026-08-27', isHome:false, match_result:'2-1', uploadedAt:'2026-08-28T03:40:00.000Z', notes:'',
+  team_stats:{posesion:57,tiros:5,tiros_arco:null,goles_esperados:1.8,pases:195,precision_pases:87,entradas:21,entradas_exito:7,intercepciones:null,paradas:4,faltas:0,fuera_juego:0,corneres:2,regates_exito:143,precision_tiro:60},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.6, goals:0, assists:1, passes:22,  pass_accuracy:77,  distance_km:18.5, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:8.0, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MI',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman',   matched:'Juanchyroman08',    played_pos:'MD',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',        matched:'Guiidow',           played_pos:'DCI', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.8, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:8.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:7.1, goals:0, assists:0, passes:11,  pass_accuracy:82,  distance_km:6.4,  sprints:null, tackles:null, interceptions:null},
+  ]},
 
 ];
 
