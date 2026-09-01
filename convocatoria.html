@@ -1105,9 +1105,12 @@ function saveState(source) {
     if (JSON.stringify(alwaysPresent) !== JSON.stringify(_baseline.alwaysPresent)) args.push('alwaysPresent', alwaysPresent);
     if (captain !== _baseline.captain) args.push('captain', captain);
     if (JSON.stringify(lineup) !== JSON.stringify(_baseline.lineup)) args.push('lineup', lineup);
-    // > y no !==: una pestaña vieja (TODAY desactualizado) nunca debe poder pisar hacia
-    // atrás un resetDate que el servidor ya tiene más adelantado (ver checkDailyReset()).
-    if (TODAY > _baseline.resetDate) args.push('resetDate', TODAY);
+    // El cliente NUNCA escribe resetDate (incidente 2026-09-01): desde el 2026-08-12 el
+    // reset diario es 100% server-side (dailyConvocatoriaReset() en el Worker, ver
+    // checkDailyReset() más arriba), pero acá había quedado un resabio que igual escribía
+    // resetDate=TODAY en cualquier guardado normal apenas cambiaba la fecha local. Eso
+    // ganaba la carrera contra el cron: el cron ve resetDate ya al día y no limpia
+    // `availability`, dejando los estados de ayer intactos todo el día siguiente.
 
     // alwaysPresent/captain/lineup (incidente 2026-08-19): no son maps, así que no pasan
     // por _pushMapDiff. Una acción normal saca 1 jugador de alwaysPresent a la vez o
