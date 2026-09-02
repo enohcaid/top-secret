@@ -2551,6 +2551,74 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12',   matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.5, goals:0, assists:0, passes:3,   pass_accuracy:100, distance_km:6.1,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // Fecha 14 VPUG T6 - All Boys eSp - 01 Sep 2026 (Visita, 1-2, Derrota)
+  {rival:'All Boys eSp', league:'VPUG', date:'2026-09-01', isHome:false, match_result:'1-2', uploadedAt:'2026-09-02T02:07:36.000Z', notes:'',
+  team_stats:{posesion:55,tiros:5,tiros_arco:null,goles_esperados:1.8,pases:220,precision_pases:90,entradas:19,entradas_exito:5,intercepciones:null,paradas:2,faltas:0,fuera_juego:1,corneres:1,regates_exito:152,precision_tiro:20},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:7.4, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:5.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman08', matched:'Juanchyroman08',    played_pos:'MI',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MD',  rating:6.7, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Riva',           matched:'rivarola90',        played_pos:'DCI', rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Ivan Lopez',     matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:5.5, goals:0, assists:0, passes:6,   pass_accuracy:100, distance_km:6.0,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 15 VPUG T6 - Temperley eSports - 01 Sep 2026 (Local, 3-5, Derrota)
+  {rival:'Temperley eSports', league:'VPUG', date:'2026-09-01', isHome:true, match_result:'3-5', uploadedAt:'2026-09-02T02:28:00.000Z', notes:'',
+  team_stats:{posesion:57,tiros:9,tiros_arco:null,goles_esperados:3.5,pases:237,precision_pases:87,entradas:14,entradas_exito:8,intercepciones:null,paradas:1,faltas:1,fuera_juego:2,corneres:3,regates_exito:172,precision_tiro:67},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.8, goals:0, assists:1, passes:32,  pass_accuracy:81,  distance_km:19.1, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:8.2, goals:2, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:8.1, goals:1, assists:1, passes:28,  pass_accuracy:93,  distance_km:19.6, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman08', matched:'Juanchyroman08',    played_pos:'MI',  rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MD',  rating:6.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:7.5, goals:0, assists:0, passes:29,  pass_accuracy:93,  distance_km:18.3, sprints:null, tackles:null, interceptions:null},
+    {name:'Riva',           matched:'rivarola90',        played_pos:'DCI', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Ivan Lopez',     matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:4.0, goals:0, assists:0, passes:7,   pass_accuracy:100, distance_km:6.2,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 17 VPUG T6 - Colon SL - 01 Sep 2026 (Local, 4-0, Victoria)
+  {rival:'Colon SL', league:'VPUG', date:'2026-09-01', isHome:true, match_result:'4-0', uploadedAt:'2026-09-02T02:48:42.000Z', notes:'',
+  team_stats:{posesion:60,tiros:15,tiros_arco:null,goles_esperados:4.2,pases:187,precision_pases:82,entradas:26,entradas_exito:5,intercepciones:null,paradas:7,faltas:0,fuera_juego:2,corneres:7,regates_exito:132,precision_tiro:60},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:8.2, goals:0, assists:0, passes:34,  pass_accuracy:71,  distance_km:20.2, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:9.5, goals:3, assists:0, passes:15,  pass_accuracy:87,  distance_km:17.8, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman08', matched:'Juanchyroman08',    played_pos:'MI',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:9.7, goals:0, assists:3, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MD',  rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:7.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Riva',           matched:'rivarola90',        played_pos:'DCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:8.4, goals:1, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Ivan Lopez',     matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:7.7, goals:0, assists:0, passes:5,   pass_accuracy:80,  distance_km:6.9,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
+  // Fecha 16 VPUG T6 - San Miguel eSports - 01 Sep 2026 (Visita, 5-1, Victoria)
+  {rival:'San Miguel eSports', league:'VPUG', date:'2026-09-01', isHome:false, match_result:'5-1', uploadedAt:'2026-09-02T03:29:25.000Z', notes:'',
+  team_stats:{posesion:55,tiros:15,tiros_arco:null,goles_esperados:5.4,pases:187,precision_pases:80,entradas:28,entradas_exito:8,intercepciones:null,paradas:4,faltas:0,fuera_juego:4,corneres:7,regates_exito:142,precision_tiro:53},
+  players:[
+    {name:'J. Martinez',    matched:'Juan_Martinez4',    played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:26,  pass_accuracy:65,  distance_km:19.7, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7',   matched:'Lautavester7',      played_pos:'DI',  rating:9.2, goals:2, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fedeavv9',       matched:'fedeavv9',          played_pos:'DD',  rating:9.2, goals:1, assists:2, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Juanchyroman08', matched:'Juanchyroman08',    played_pos:'MI',  rating:7.5, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'ciprimancini',   matched:'CipriMancini',      played_pos:'MCI', rating:7.4, goals:0, assists:0, passes:28,  pass_accuracy:71,  distance_km:19.5, sprints:null, tackles:null, interceptions:null},
+    {name:'BlackPanther',   matched:'BlackPanther-CG',   played_pos:'MD',  rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'fullboxxing',    matched:'Full_boxxing_',     played_pos:'MCD', rating:8.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Riva',           matched:'rivarola90',        played_pos:'DCI', rating:6.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',       matched:'Cabers14',          played_pos:'DFC', rating:8.2, goals:1, assists:0, passes:22,  pass_accuracy:86,  distance_km:15.0, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber236',       matched:'Huber236',          played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Ivan Lopez',     matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.0, goals:0, assists:0, passes:7,   pass_accuracy:100, distance_km:6.7,  sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
