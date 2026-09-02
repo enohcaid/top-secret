@@ -3,6 +3,32 @@
 
 const NOTICIAS = [
   {
+    id: 'cierre-11x11-t3-2026',
+    pinned: true,
+    category: 'Análisis',
+    title: 'Cierre 11x11: 18 partidos, la remontada en la vuelta y los 8 goles de Lautavester7',
+    date: '2026-09-02',
+    dateLabel: '2 de septiembre de 2026',
+    excerpt: 'Top Secret FC cerró su participación en 11x11 con 18 partidos: 6 victorias, 3 empates y 9 derrotas. Una ida durísima con apenas 1 triunfo en 9 fechas dio paso a una vuelta completamente distinta, con 5 victorias y los goles recibidos bajando de 19 a 8.',
+    image: 'logos/Cierre 11x11 T3.png',
+    body: [
+      'Con la triple jornada del 27 de agosto —victorias ante Deportivo Ballester (3-0) y Camioneros eSports (2-1), derrota ante Parke Avellane (0-3)— Top Secret FC cerró su participación en <strong>11x11</strong> (Challengers Argentina) tras 18 partidos. El balance final: <strong>6 victorias, 3 empates y 9 derrotas</strong>, con 20 goles marcados y 27 recibidos. Un resultado que a simple vista parece flojo, pero que esconde una temporada partida en dos mitades completamente opuestas.',
+      '<strong>La ida (4-13 de agosto): el tramo más duro.</strong> Los primeros nueve partidos, uno contra cada rival, dejaron apenas <strong>1 victoria, 2 empates y 6 derrotas</strong>, con 9 goles a favor y <strong>19 en contra</strong>. Caídas duras ante IACC Cantera (0-3), Parke Avellane (1-4) y Camioneros eSports (0-2) marcaron un arranque para el olvido.',
+      '<strong>La vuelta (18-27 de agosto): otro equipo.</strong> En la segunda rueda, contra los mismos nueve rivales, el equipo dio vuelta la página: <strong>5 victorias, 1 empate y 3 derrotas</strong>, con 11 goles a favor y apenas <strong>8 en contra</strong> — los goles recibidos cayeron de 19 a 8 entre una mitad y la otra. Triunfos como el 3-0 a Deportivo Ballester o el 3-0 a Olimpo Esports mostraron a un equipo mucho más sólido que el de la ida.',
+      '<strong>Lautavester7 — 8 goles, el goleador con menos partidos.</strong> Con solo 10 presencias (de 18), terminó como máximo artillero del torneo con ocho tantos — la mejor relación gol-partido de todo el plantel.',
+      '<strong>Juanchyroman08 — el motor ofensivo desde adentro.</strong> Presente en 16 de los 18 partidos, cerró como máximo asistente con 3 asistencias, además de un gol propio.',
+      '<strong>Juan_Martinez4 — el único que no faltó nunca.</strong> Jugó los 18 partidos sin excepción y cerró con 7.36 de promedio —empatado como el más alto del plantel— además de 3 asistencias, la misma cifra que Juanchyroman08.',
+      '<strong>Cabers14 — la base de una defensa que mejoró con el correr del torneo.</strong> En 13 partidos, firmó el mismo 7.36 de promedio que Juan_Martinez4, la marca más alta del plantel. <strong>fedeavv9</strong> aportó 5 goles en apenas 14 presencias. <strong>Ivan_Cabj_La12</strong> fue el arquero titular en 17 de los 18 partidos, sosteniendo el arco en el tramo más exigente de la ida.',
+      '11x11 cierra así con una lectura clara: el equipo tardó en encontrarse, pero cuando lo hizo, cambió por completo de cara. Con VPN y 11x11 ya cerrados, el plantel sigue compitiendo en VPUG. 🖤⭐',
+    ],
+    shareCaption: '🖤 CIERRE 11x11 · TOP SECRET FC\n\n18 partidos · 6V · 3E · 9D · 20 goles marcados\n\nLa ida fue durísima (1V-2E-6D, 19 goles recibidos), pero en la vuelta el equipo dio vuelta la página: 5V-1E-3D y apenas 8 goles recibidos.\n\nLautavester7: 8 goles en 10 PJ · Juanchyroman08: 3 asistencias · Juan_Martinez4: los 18 partidos sin faltar\n\n#TopSecretFC #11x11 #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 CIERRE 11x11 · TOP SECRET FC\n\n18 partidos. 6V-3E-9D.\n\nDe 1 victoria en la ida (9 fechas) a 5 en la vuelta — los goles recibidos bajaron de 19 a 8.\n\nLautavester7: 8G en 10 PJ · Juanchyroman08: 3A · Juan_Martinez4: presente en los 18\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #11x11 #EAFCClubsPro',
+      x:  '🖤 Top Secret FC cierra el 11x11.\n\n18 partidos · 6V-3E-9D · 20 goles\n\nDe 1V en la ida a 5V en la vuelta: los goles recibidos bajaron de 19 a 8.\n\nLautavester7: 8 goles en solo 10 partidos.\n\n#TopSecretFC #11x11',
+      fb: '🖤 CIERRE 11x11 · TOP SECRET FC\n\nEl club cerró su participación en 11x11 (Challengers Argentina) tras 18 partidos:\n\n📊 6 victorias · 3 empates · 9 derrotas\n📊 20 goles marcados · 27 recibidos\n\nLa temporada tuvo dos mitades opuestas: una ida durísima (1 victoria en 9 fechas, 19 goles recibidos) y una vuelta completamente distinta (5 victorias, apenas 8 goles recibidos) contra los mismos nueve rivales.\n\nLautavester7 cerró como goleador con 8 tantos en solo 10 partidos. Juanchyroman08 sumó 3 asistencias y un gol en 16 presencias. Juan_Martinez4 fue el único que jugó los 18 partidos, con 7.36 de promedio (el más alto del plantel, empatado con Cabers14). Ivan_Cabj_La12 fue el arquero titular en 17 de los 18 encuentros.\n\nCon VPN y 11x11 ya cerrados, el plantel sigue compitiendo en VPUG.\n\n#TopSecretFC #11x11 #EAFCClubsPro',
+    },
+  },
+  {
     id: 'lanzamiento-twitch-2026',
     pinned: true,
     category: 'Multimedia',

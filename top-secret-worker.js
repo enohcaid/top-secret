@@ -15,6 +15,10 @@ const NOTICIAS_OG = {
     t: 'Cierre VPN: 19 partidos, el cambio a línea de tres y los 9 goles de Lautavester7',
     i: SITE + 'logos/' + encodeURIComponent('Cierre VPN T3.png'),
   },
+  'cierre-11x11-t3-2026': {
+    t: 'Cierre 11x11: 18 partidos, la remontada en la vuelta y los 8 goles de Lautavester7',
+    i: SITE + 'logos/' + encodeURIComponent('Cierre 11x11 T3.png'),
+  },
   'lanzamiento-tiktok-2026': {
     t: '¡Ya estamos en TikTok! Top Secret FC lanza su cuenta oficial',
     i: SITE + 'logos/' + encodeURIComponent('Lanzamiento TikTok.png'),
