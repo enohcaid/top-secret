@@ -252,7 +252,6 @@ const PLAYER_TRAITS = {
   'Cabers14':        { dorsal: 5,    desc: 'piel muy oscura, dreadlocks negros largos y sueltos, máscara de calavera blanca cubriendo nariz y boca, mangas largas negras' },
   'CAT_FEL':         { dorsal: 55,   desc: 'piel clara, laterales de la cabeza rapados con mohawk corto rubio arriba, barba teñida de azul, anteojos de sol azules, mangas de compresión a cuadros rojo y blanco en ambos antebrazos, tatuajes en los brazos' },
   'CipriMancini':    { dorsal: 32,   desc: 'piel trigueña, AFRO AZUL gigante y esponjoso, anteojos deportivos oscuros, cuello y brazos tatuados, manga blanca en el brazo derecho' },
-  'Eli_No-SKILL':    { dorsal: 10,   desc: 'piel oscura, pelo corto blanco/plateado, máscara celeste cubriendo nariz y boca, guantes de arquero blancos, mangas largas' },
   'fedeavv9':        { dorsal: 9,    desc: 'piel trigueña, pelo corto rubio platinado, muy tatuado en cuello, brazos y piernas, venda blanca en la muñeca izquierda' },
   'Guiidow':         { dorsal: 20,   desc: 'piel trigueña, pelo oscuro rapado a los costados con cresta corta, chivita fina, cara descubierta sin anteojos ni máscara' },
   'Huber236':        { dorsal: 8,    desc: 'piel clara, pelo negro abundante peinado hacia arriba, barba negra completa y prolija, mangas largas negras' },

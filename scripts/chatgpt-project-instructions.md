@@ -32,7 +32,6 @@ Cada render del proyecto se llama exactamente igual que el gamertag del jugador.
 | 13 | RS32-DaniStone | MCI | RS32-DaniStone.png |
 | 32 | CipriMancini | MVD | CipriMancini.png |
 | 20 | Guiidow | MCI | Guiidow.png |
-| 10 | Eli_No-SKILL | MCI | Eli_No-SKILL.png |
 | 7 | Lautavester7 | EI | Lautavester7.png |
 | 11 | BlackPanther-CG | ED | BlackPanther-CG.png |
 | 9 | fedeavv9 | DC | fedeavv9.png |
