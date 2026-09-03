@@ -19,6 +19,10 @@ const NOTICIAS_OG = {
     t: 'Cierre 11x11: 18 partidos, la remontada en la vuelta y los 8 goles de Lautavester7',
     i: SITE + 'logos/' + encodeURIComponent('Cierre 11x11 T3.png'),
   },
+  'cierre-vpug-t3-2026': {
+    t: 'Cierre VPUG: 17 partidos, la racha de 5 triunfos y los 16 goles de Lautavester7',
+    i: SITE + 'logos/' + encodeURIComponent('Cierre VPUG T3.png'),
+  },
   'lanzamiento-tiktok-2026': {
     t: '¡Ya estamos en TikTok! Top Secret FC lanza su cuenta oficial',
     i: SITE + 'logos/' + encodeURIComponent('Lanzamiento TikTok.png'),

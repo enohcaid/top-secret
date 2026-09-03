@@ -3,6 +3,32 @@
 
 const NOTICIAS = [
   {
+    id: 'cierre-vpug-t3-2026',
+    pinned: true,
+    category: 'Análisis',
+    title: 'Cierre VPUG: 17 partidos, la racha de 5 triunfos y los 16 goles de Lautavester7',
+    date: '2026-09-03',
+    dateLabel: '3 de septiembre de 2026',
+    excerpt: 'Top Secret FC cerró su participación en VPUG con 17 partidos: 10 victorias, 0 empates y 7 derrotas. Un arranque irregular dio paso a una racha de 5 triunfos consecutivos, y Lautavester7 cerró como goleador con 16 tantos — la mejor marca individual de toda la Temporada 3.',
+    image: 'logos/Cierre VPUG T3.png',
+    body: [
+      'Con el cierre cuádruple del 1 de septiembre —derrotas ante All Boys eSp (1-2) y Temperley eSports (3-5), victorias ante Colón SL (4-0) y San Miguel eSports (5-1)— Top Secret FC terminó su participación en <strong>VPUG</strong> tras 17 partidos. El balance final: <strong>10 victorias, 0 empates y 7 derrotas</strong>, con 34 goles marcados y 27 recibidos. Dos de esas victorias llegaron por walkover (ante InfinitX y Suda eSports).',
+      '<strong>El arranque (10-20 de agosto): parejo hasta el milímetro.</strong> Tras dos derrotas para abrir el torneo (1-3 ante Nueva Chicago, 0-2 ante Deportivo Moron), el equipo respondió con dos triunfos (Real Marcianos FC e InfinitX por W.O.), pero volvió a caer tres veces seguidas —5-1 ante Germinal eSports, 2-1 ante Argentino de Merlo, 2-0 ante Hacha eSports— antes de otra victoria por walkover ante Suda eSports. Cuatro victorias y cuatro derrotas en las primeras ocho fechas.',
+      '<strong>La racha (24-31 de agosto): el mejor tramo del torneo.</strong> Cinco triunfos consecutivos —3-1 ante Ysh FC, 2-1 ante IACC Cantera, 4-1 ante Atlético Moneiro, 4-1 ante 4BDOMIFL4NES y 2-1 ante United Mito— la mejor seguidilla de resultados de cualquier liga en toda la Temporada 3.',
+      '<strong>El cierre cuádruple (1 de septiembre).</strong> Los últimos cuatro partidos se reprogramaron para jugarse en una sola noche: dos derrotas (All Boys eSp, Temperley eSports) y dos victorias (Colón SL, San Miguel eSports) cerraron el torneo con saldo parejo en la última fecha.',
+      '<strong>Lautavester7 — 16 goles, la mejor marca individual de la temporada.</strong> En 14 partidos, casi un gol y medio de promedio por encuentro — muy por encima de sus registros en VPN (9 goles) y 11x11 (8 goles).',
+      '<strong>CipriMancini — el motor creativo.</strong> Máximo asistente del torneo con 7 asistencias en 12 partidos, además del mejor promedio de todo el plantel: 7.68.',
+      '<strong>Juan_Martinez4 — presente en 15 de los 17 partidos</strong>, con 7.51 de promedio y 5 asistencias. <strong>Cabers14</strong> completó 11 partidos con 7.55 de promedio, la segunda marca más alta del plantel, sumando además 2 goles y 3 asistencias desde la defensa.',
+      'Con VPN, 11x11 y ahora VPUG cerrados, el plantel completa su participación en las tres ligas de la Temporada 3. 🖤⭐',
+    ],
+    shareCaption: '🖤 CIERRE VPUG · TOP SECRET FC\n\n17 partidos · 10V · 0E · 7D · 34 goles marcados\n\nUn arranque irregular (4V-4D en 8 fechas) dio paso a una racha de 5 triunfos consecutivos, la mejor seguidilla de la temporada.\n\nLautavester7: 16 goles en 14 PJ · CipriMancini: 7 asistencias · Juan_Martinez4: 15 partidos, 7.51 de promedio\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    shareCaptions: {
+      ig: '🖤 CIERRE VPUG · TOP SECRET FC\n\n17 partidos. 10V-0E-7D.\n\nUna racha de 5 triunfos consecutivos fue el mejor tramo de la temporada. Lautavester7 cerró con 16 goles — la mejor marca individual del año.\n\nCipriMancini: 7A · Juan_Martinez4: 15 PJ, 7.51 prom\n\nSeguinos → @fctopsecret\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+      x:  '🖤 Top Secret FC cierra el VPUG.\n\n17 partidos · 10V-0E-7D · 34 goles\n\n5 triunfos consecutivos en el mejor tramo del torneo. Lautavester7: 16 goles, la mejor marca de la temporada.\n\n#TopSecretFC #VPUG',
+      fb: '🖤 CIERRE VPUG · TOP SECRET FC\n\nEl club cerró su participación en VPUG tras 17 partidos:\n\n📊 10 victorias · 0 empates · 7 derrotas\n📊 34 goles marcados · 27 recibidos\n\nUn arranque parejo (4V-4D en las primeras 8 fechas) dio paso a una racha de 5 triunfos consecutivos —el mejor tramo de cualquier liga en toda la Temporada 3— antes de un cierre cuádruple el 1 de septiembre (2V-2D en una sola noche).\n\nLautavester7 cerró como goleador con 16 tantos en 14 partidos, su mejor marca en cualquier liga de la temporada. CipriMancini fue el máximo asistente (7) y también el mejor promedio del plantel (7.68). Juan_Martinez4 jugó 15 de los 17 partidos con 7.51 de promedio y 5 asistencias.\n\nCon VPN, 11x11 y ahora VPUG cerrados, el plantel completa su participación en las tres ligas de la Temporada 3.\n\n#TopSecretFC #VPUG #EAFCClubsPro',
+    },
+  },
+  {
     id: 'cierre-11x11-t3-2026',
     pinned: true,
     category: 'Análisis',
