@@ -906,7 +906,7 @@ export default {
 
         if (request.method === 'DELETE') {
           // Descarte real (no publicación ni regen): capturar las imágenes ya
-          // generadas para que el watcher local las borre del repo y de Daily News.
+          // generadas para que el watcher local las borre de R2 (bucket top-secret-media).
           let cleanup = null;
           try {
             const fsResp = await fetch(FS_DRAFT);
@@ -916,10 +916,13 @@ export default {
               if (draft) {
                 const files = [...new Set(
                   [draft.imagePost, draft.imageStory, draft.image]
-                    .filter(f => typeof f === 'string' && f.startsWith('Renders/Daily News/') && !f.includes('..'))
+                    .filter(f => typeof f === 'string' && f.startsWith(MEDIA))
+                    .map(f => decodeURIComponent(f.slice(MEDIA.length)))
+                    .filter(f => f.startsWith('Renders/Daily News/') && !f.includes('..'))
                 )];
-                if (!files.length && draft.date) {
-                  files.push(`Renders/Daily News/${draft.date}_post.png`, `Renders/Daily News/${draft.date}_story.png`);
+                if (!files.length && (draft.id || draft.date)) {
+                  const slug = draft.id || draft.date;
+                  files.push(`Renders/Daily News/${slug}_post.png`, `Renders/Daily News/${slug}_story.png`);
                 }
                 if (files.length) cleanup = { requested: true, date: draft.date || null, files, at: new Date().toISOString() };
               }

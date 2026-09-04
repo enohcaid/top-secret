@@ -22,6 +22,13 @@ import sharp from 'sharp';
 import { pathToFileURL } from 'url';
 
 const WORKER_BASE             = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+const R2_ACCESS_KEY   = '193343f75da07692afb937f600d53fbb';
+const R2_SECRET_KEY   = 'b3e498f4c5cdb0fac18f3b9dcca4586bae251b33f0a17e6ecf0162f694ed309d';
+const R2_ENDPOINT     = 'https://505a1321519db1680cebe235e4e42808.r2.cloudflarestorage.com';
+const R2_BUCKET       = 'top-secret-media';
+function r2MediaUrl(relPath) {
+  return `${WORKER_BASE}/media/${relPath.split('/').map(encodeURIComponent).join('/')}`;
+}
 const FIRESTORE_DRAFT        = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 const FIRESTORE_STYLE_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/image_style_history';
 const FIRESTORE_KIT_HISTORY  = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/kit_color_history';
@@ -895,28 +902,19 @@ async function generateImage(page, draft, format, prompt, { freshChat, excludeSr
   return { filename, imgUrl };
 }
 
-function gitPushImages(postFile, storyFile) {
-  const repoRoot = path.resolve('.');
-  const run = (cmd) => execSync(cmd, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
-
-  try {
-    // Solo los archivos del día — nunca la carpeta entera, para no arrastrar
-    // otros cambios pendientes del working tree.
-    const files = [postFile, storyFile].filter(Boolean)
-      .map(f => `"Renders/Daily News/${f}"`).join(' ');
-    run(`git add ${files}`);
-    // git status no acepta --cached (fallaba siempre y el push nunca corría)
-    const status = run('git diff --cached --name-only');
-    if (!status) {
-      console.log('  Git: sin cambios para commitear.');
-      return;
+function uploadImagesToR2(postFile, storyFile) {
+  for (const f of [postFile, storyFile].filter(Boolean)) {
+    const localPath = path.join(OUTPUT_DIR, f);
+    const key = `Renders/Daily News/${f}`.split('/').map(encodeURIComponent).join('/');
+    try {
+      execSync(
+        `curl -s -o NUL -w "%{http_code}" -X PUT --aws-sigv4 "aws:amz:auto:s3" --user "${R2_ACCESS_KEY}:${R2_SECRET_KEY}" -H "content-type: image/png" --data-binary @"${localPath}" "${R2_ENDPOINT}/${R2_BUCKET}/${key}"`,
+        { stdio: 'pipe' }
+      );
+      console.log(`  R2: ${f} subida.`);
+    } catch (e) {
+      console.warn(`  R2 upload falló para ${f} (no crítico):`, e.message.split('\n')[0]);
     }
-    const date = postFile.split('_')[0];
-    run(`git commit -m "feat: imagenes diarias ${date}"`);
-    run('git push');
-    console.log('  Git: imagenes pusheadas a GitHub.');
-  } catch (e) {
-    console.warn('  Git push falló (no crítico):', e.message.split('\n')[0]);
   }
 }
 
@@ -932,9 +930,9 @@ async function updateDraft(draft, postFile, storyFile) {
   }
   const updated = {
     ...fresh,
-    imagePost:  `Renders/Daily News/${postFile}`,
-    imageStory: `Renders/Daily News/${storyFile}`,
-    image:      `Renders/Daily News/${postFile}`,
+    imagePost:  r2MediaUrl(`Renders/Daily News/${postFile}`),
+    imageStory: r2MediaUrl(`Renders/Daily News/${storyFile}`),
+    image:      r2MediaUrl(`Renders/Daily News/${postFile}`),
   };
   const payload = { fields: { data: { stringValue: JSON.stringify(updated) } } };
   await fetch(FIRESTORE_DRAFT, {
@@ -1337,7 +1335,7 @@ async function main() {
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
     await saveKitHistory(chosenKit.id, dateStr, kitHistory);
     if (mentioned.length > 0) await saveFeaturedHistory(mentioned, dateStr, featuredHistory);
-    gitPushImages(lastPostFile, storyFile);
+    uploadImagesToR2(lastPostFile, storyFile);
 
     console.log('\n✓ Listo.');
     console.log('  Post: ', lastPostFile);

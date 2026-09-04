@@ -22,7 +22,6 @@ scripts/.last-neterr
 .impeccable/
 
 # Migrado a Cloudflare R2 (bucket top-secret-media, servido via /media en el Worker) — 2026-09-04.
-# Renders/Daily News/ queda afuera a propósito: la pipeline diaria sigue commiteando ahí.
+# Renders/Daily News/ se sumó el mismo día: la pipeline diaria ahora sube ahí mismo, sin commitear a git.
 logos/*
 Renders/*
-!Renders/Daily News/

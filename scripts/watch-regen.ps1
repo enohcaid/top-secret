@@ -16,6 +16,11 @@ function Log($msg) {
 }
 
 # ── PASO 0: Limpieza de imágenes de noticias descartadas ─────────────────────
+$r2AccessKey = '193343f75da07692afb937f600d53fbb'
+$r2SecretKey = 'b3e498f4c5cdb0fac18f3b9dcca4586bae251b33f0a17e6ecf0162f694ed309d'
+$r2Endpoint  = 'https://505a1321519db1680cebe235e4e42808.r2.cloudflarestorage.com'
+$r2Bucket    = 'top-secret-media'
+
 try {
     $discard = Invoke-RestMethod "$worker/discard-flag" -TimeoutSec 10
 } catch {
@@ -23,7 +28,7 @@ try {
 }
 
 if ($discard -and $discard.requested) {
-    Log "Noticia descartada ($($discard.date)) — eliminando imágenes generadas"
+    Log "Noticia descartada ($($discard.date)) — eliminando imagenes de R2"
 
     # Limpiar el flag primero para evitar doble ejecución
     try { Invoke-RestMethod "$worker/discard-flag" -Method DELETE -TimeoutSec 10 | Out-Null }
@@ -31,35 +36,22 @@ if ($discard -and $discard.requested) {
 
     $removed = @()
     foreach ($rel in $discard.files) {
-        # Solo se tocan archivos dentro de Renders/Daily News, sin path traversal
+        # Solo se tocan claves dentro de Renders/Daily News, sin path traversal
         if ($rel -notlike 'Renders/Daily News/*' -or $rel -match '\.\.') {
             Log "Ignorado (fuera de Daily News): $rel"
             continue
         }
+        $key = ($rel -split '/' | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/'
+        $code = & curl.exe -s -o NUL -w "%{http_code}" -X DELETE --aws-sigv4 "aws:amz:auto:s3" --user "${r2AccessKey}:${r2SecretKey}" "$r2Endpoint/$r2Bucket/$key"
+        if ($code -eq '204' -or $code -eq '200') { $removed += $rel; Log "Borrado de R2: $rel" }
+        else { Log "Error borrando de R2 (HTTP $code): $rel" }
+
+        # Tambien borrar el archivo local si quedo (working tree, ya no versionado)
         $abs = Join-Path $repoRoot ($rel -replace '/', '\')
-        if (Test-Path $abs) {
-            try { Remove-Item $abs -Force -Confirm:$false; $removed += $rel; Log "Borrado local: $rel" }
-            catch { Log "Error borrando ${rel}: $_" }
-        } else {
-            Log "No existe localmente: $rel"
-        }
+        if (Test-Path $abs) { try { Remove-Item $abs -Force -Confirm:$false } catch {} }
     }
 
-    if ($removed.Count -gt 0) {
-        # git escribe progreso a stderr; con EAP Stop eso lanza excepción falsa.
-        # Se baja a Continue y se valida con $LASTEXITCODE.
-        $prevEap = $ErrorActionPreference
-        $ErrorActionPreference = 'Continue'
-        git -C $repoRoot add -A -- "Renders/Daily News" *> $null
-        git -C $repoRoot commit -m "chore: elimina imagenes de noticia descartada $($discard.date)" *> $null
-        $commitOk = ($LASTEXITCODE -eq 0)
-        git -C $repoRoot push *> $null
-        $pushOk = ($LASTEXITCODE -eq 0)
-        $ErrorActionPreference = $prevEap
-        if ($commitOk -and $pushOk) { Log "Repo actualizado: $($removed.Count) imagen(es) eliminadas de GitHub" }
-        elseif ($commitOk)          { Log "Commit hecho pero push falló (exit $LASTEXITCODE) — reintentará en el próximo push" }
-        else                        { Log "git commit falló — imágenes borradas solo localmente" }
-    }
+    if ($removed.Count -gt 0) { Log "R2 actualizado: $($removed.Count) imagen(es) eliminadas" }
 }
 
 # Verificar si hay pedido de regeneración pendiente
