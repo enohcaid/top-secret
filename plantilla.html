@@ -707,15 +707,17 @@ function plataformaBadge(p) {
 /* ─── ROSTER T3 ─── (fuente única en roster.js, importado arriba) */
 
 /* ─── PATHS ─── */
+const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
+function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/'); }
 function renderFolder(p) { return p.folderOverride || p.key; }
-function brazosPath(p)   { return `Renders/${renderFolder(p)}/Brazos.png`; }
-function frontePath(p)   { return `Renders/${renderFolder(p)}/Frente.png`; }
-function brazos2Path(p)  { return `Renders/${renderFolder(p)}/Brazos2.png`; }
-function frente2Path(p)  { return `Renders/${renderFolder(p)}/Frente2.png`; }
-function brazos3Path(p)  { return `Renders/${renderFolder(p)}/Brazos3.png`; }
-function frente3Path(p)  { return `Renders/${renderFolder(p)}/Frente3.png`; }
-function pose3Path(p)    { return `Renders/${renderFolder(p)}/Pose3.png`; }
-function svgPath(p)      { return `Renders/${p.key}.svg`; }
+function brazosPath(p)   { return mediaUrl(`Renders/${renderFolder(p)}/Brazos.png`); }
+function frontePath(p)   { return mediaUrl(`Renders/${renderFolder(p)}/Frente.png`); }
+function brazos2Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Brazos2.png`); }
+function frente2Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Frente2.png`); }
+function brazos3Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Brazos3.png`); }
+function frente3Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Frente3.png`); }
+function pose3Path(p)    { return mediaUrl(`Renders/${renderFolder(p)}/Pose3.png`); }
+function svgPath(p)      { return mediaUrl(`Renders/${p.key}.svg`); }
 
 /* ─── COMPUTE STATS ─── */
 function computePlayerStats(matches) {
@@ -1085,7 +1087,7 @@ function downloadGraphics() {
   }
   files.forEach(f => {
     const a = document.createElement('a');
-    a.href = f.path;
+    a.href = mediaUrl(f.path) + '?dl=' + encodeURIComponent(f.name);
     a.download = f.name;
     document.body.appendChild(a);
     a.click();

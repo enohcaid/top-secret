@@ -10,7 +10,7 @@ const NOTICIAS = [
     date: '2026-09-03',
     dateLabel: '3 de septiembre de 2026',
     excerpt: 'Top Secret FC cerró su participación en VPUG con 17 partidos: 10 victorias, 0 empates y 7 derrotas. Un arranque irregular dio paso a una racha de 5 triunfos consecutivos, y Lautavester7 cerró como goleador con 16 tantos — la mejor marca individual de toda la Temporada 3.',
-    image: 'logos/Cierre VPUG T3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Cierre%20VPUG%20T3.png',
     body: [
       'Con el cierre cuádruple del 1 de septiembre —derrotas ante All Boys eSp (1-2) y Temperley eSports (3-5), victorias ante Colón SL (4-0) y San Miguel eSports (5-1)— Top Secret FC terminó su participación en <strong>VPUG</strong> tras 17 partidos. El balance final: <strong>10 victorias, 0 empates y 7 derrotas</strong>, con 34 goles marcados y 27 recibidos. Dos de esas victorias llegaron por walkover (ante InfinitX y Suda eSports).',
       '<strong>El arranque (10-20 de agosto): parejo hasta el milímetro.</strong> Tras dos derrotas para abrir el torneo (1-3 ante Nueva Chicago, 0-2 ante Deportivo Moron), el equipo respondió con dos triunfos (Real Marcianos FC e InfinitX por W.O.), pero volvió a caer tres veces seguidas —5-1 ante Germinal eSports, 2-1 ante Argentino de Merlo, 2-0 ante Hacha eSports— antes de otra victoria por walkover ante Suda eSports. Cuatro victorias y cuatro derrotas en las primeras ocho fechas.',
@@ -36,7 +36,7 @@ const NOTICIAS = [
     date: '2026-09-02',
     dateLabel: '2 de septiembre de 2026',
     excerpt: 'Top Secret FC cerró su participación en 11x11 con 18 partidos: 6 victorias, 3 empates y 9 derrotas. Una ida durísima con apenas 1 triunfo en 9 fechas dio paso a una vuelta completamente distinta, con 5 victorias y los goles recibidos bajando de 19 a 8.',
-    image: 'logos/Cierre 11x11 T3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Cierre%2011x11%20T3.png',
     body: [
       'Con la triple jornada del 27 de agosto —victorias ante Deportivo Ballester (3-0) y Camioneros eSports (2-1), derrota ante Parke Avellane (0-3)— Top Secret FC cerró su participación en <strong>11x11</strong> (Challengers Argentina) tras 18 partidos. El balance final: <strong>6 victorias, 3 empates y 9 derrotas</strong>, con 20 goles marcados y 27 recibidos. Un resultado que a simple vista parece flojo, pero que esconde una temporada partida en dos mitades completamente opuestas.',
       '<strong>La ida (4-13 de agosto): el tramo más duro.</strong> Los primeros nueve partidos, uno contra cada rival, dejaron apenas <strong>1 victoria, 2 empates y 6 derrotas</strong>, con 9 goles a favor y <strong>19 en contra</strong>. Caídas duras ante IACC Cantera (0-3), Parke Avellane (1-4) y Camioneros eSports (0-2) marcaron un arranque para el olvido.',
@@ -62,7 +62,7 @@ const NOTICIAS = [
     date: '2026-08-25',
     dateLabel: '25 de agosto de 2026',
     excerpt: 'Top Secret FC lanza su canal oficial de Twitch. De ahora en más, todos los partidos del club en VPN, VPUG y 11x11 se transmiten en vivo, de lunes a jueves desde las 22:40hs ART.',
-    image: 'logos/Lanzamiento Twitch.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Lanzamiento%20Twitch.png',
     body: [
       'El club suma un nuevo frente para estar más cerca de la comunidad: <strong>Top Secret FC</strong> ya tiene su canal oficial de <strong>Twitch</strong>.',
       'De ahora en más, <strong>todos los partidos del club</strong> — en VPN, VPUG y 11x11 — se transmiten en vivo por el canal, <strong>de lunes a jueves desde las 22:40hs (ART)</strong>. Cada fecha, cada rival, en directo y sin editar.',
@@ -84,7 +84,7 @@ const NOTICIAS = [
     date: '2026-08-25',
     dateLabel: '25 de agosto de 2026',
     excerpt: 'Top Secret FC cerró su participación en VPN con 19 partidos: 7 victorias, 2 empates y 10 derrotas. Un arranque parejo, un bache defensivo que costó caro y un cambio de sistema a línea de tres que le dio vuelta la cara al equipo en el tramo final.',
-    image: 'logos/Cierre VPN T3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Cierre%20VPN%20T3.png',
     body: [
       'Con el triple triunfo del 24 de agosto ante Sub 21 CF, IACC Cantera y 4BDOMIFL4NES, Top Secret FC cerró su participación en <strong>VPN</strong> tras 19 partidos. El balance final: <strong>7 victorias, 2 empates y 10 derrotas</strong>, con 31 goles marcados y 35 recibidos. Un número que a simple vista parece parejo, pero que esconde una temporada de tres etapas bien marcadas — y una decisión táctica que cambió el rumbo del equipo en el cierre.',
       '<strong>El arranque (03-10 de agosto).</strong> Los primeros siete partidos mostraron a un equipo competitivo pero irregular: victorias ante Ysh Fc y Al-Yateh FC, empates ante Suda Esports y Parke Avellane, y caídas ajustadas ante NUVO FC, División Palermo y Atlético de Rafaela. Dos triunfos, dos empates y tres derrotas — un inicio sin sobresaltos, sosteniendo la pelota (más del 55% de posesión en la mayoría de los encuentros) pero sin resolver todavía con contundencia.',
@@ -114,7 +114,7 @@ const NOTICIAS = [
     date: '2026-08-23',
     dateLabel: '23 de agosto de 2026',
     excerpt: 'Top Secret FC suma una nueva red a su comunidad: ya está online la cuenta oficial de TikTok del club. Lo festejamos con el primer video de la cuenta.',
-    image: 'logos/Lanzamiento TikTok.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Lanzamiento%20TikTok.png',
     body: [
       'El club sigue creciendo puertas afuera de la cancha: <strong>Top Secret FC</strong> ya tiene su cuenta oficial de <strong>TikTok</strong>, un nuevo espacio para que la comunidad viva el día a día del equipo con un formato más ágil y directo.',
       '<div style="position:relative;width:100%;max-width:325px;margin:4px auto 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#000;"><iframe class="tiktok-embed-frame" data-base-src="https://www.tiktok.com/embed/v2/7677330220185062664?autoplay=1" src="https://www.tiktok.com/embed/v2/7677330220185062664?autoplay=1" title="Ya estamos en TikTok - Top Secret FC" style="width:100%;height:780px;border:0;display:block;" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>',
@@ -136,7 +136,7 @@ const NOTICIAS = [
     date: '2026-08-16',
     dateLabel: '16 de agosto de 2026',
     excerpt: 'Top Secret FC anuncia la incorporación de Full_boxxing_ (#14, MCD) y lTemp30148 (#16, DC), que se suman al plantel para reforzar mediocampo y ataque.',
-    image: 'logos/NUEVOS FICHAJES.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/NUEVOS%20FICHAJES.webp',
     body: [
       '<strong>Top Secret FC</strong> anuncia dos nuevas incorporaciones al plantel: <strong>Full_boxxing_</strong> y <strong>lTemp30148</strong> ya son parte del club.',
       '<strong>Full_boxxing_</strong> vestirá la camiseta <strong>#14</strong> y se suma como mediocampista central, aportando recorrido y presencia en la mitad de la cancha.',
@@ -158,7 +158,7 @@ const NOTICIAS = [
     date: '2026-08-16',
     dateLabel: '16 de agosto de 2026',
     excerpt: 'Top Secret FC agradece a yzytx0 y Mauriii-_1891, que dejan el plantel tras su paso por el club. Las puertas quedan abiertas para volver a cruzarse en el fútbol virtual.',
-    image: 'logos/GRACIAS!.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/GRACIAS!.webp',
     body: [
       'Todo ciclo tiene un final, y hoy le toca a dos jugadores que fueron parte del plantel de <strong>Top Secret FC</strong>: <strong>yzytx0</strong> y <strong>Mauriii-_1891</strong> dejan el club.',
       'Ambos vistieron la camiseta con compromiso en cada convocatoria, sumando minutos y aportando su granito de arena a la historia reciente del equipo. El club les agradece el esfuerzo, la dedicación y el tiempo compartido dentro y fuera de la cancha.',
@@ -180,7 +180,7 @@ const NOTICIAS = [
     date: '2026-08-10',
     dateLabel: '10 de agosto de 2026',
     excerpt: 'Ante el terremoto que golpeó a Colombia este 10 de agosto, el club expresa sus condolencias y su apoyo al pueblo colombiano, con una mención especial a Lil_Dekuroko, nuestro compañero colombiano en el plantel.',
-    image: 'logos/Comunicado Colombia.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Comunicado%20Colombia.png',
     body: [
       'Ante el terremoto de magnitud 7,4 que golpeó a Colombia este 10 de agosto, dejando numerosas víctimas fatales y heridos en Cali, Pereira, Manizales, Quibdó y otras regiones del país, desde <strong>Top Secret FC</strong> queremos expresar nuestras condolencias a las familias de las víctimas y todo nuestro apoyo al pueblo colombiano en este momento tan doloroso.',
       'Como parte de la comunidad del fútbol virtual, nos sentimos cerca de cada jugador, club y aficionado colombiano. Un abrazo especial para <strong>Lil_Dekuroko</strong>, nuestro compañero colombiano en el plantel, y para su familia y sus seres queridos en este momento tan difícil.',
@@ -202,7 +202,7 @@ const NOTICIAS = [
     date: '2026-08-10',
     dateLabel: '10 de agosto de 2026',
     excerpt: 'CopáFácil publicó el calendario completo de la Primera División VPUG. Top Secret FC jugará 17 partidos a lo largo de la Temporada 6, con debut hoy mismo de visitante ante Nueva Chicago.',
-    image: 'logos/Fixture VPUG T3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Fixture%20VPUG%20T3.png',
     body: [
       'Ya está oficial. CopáFácil publicó el calendario completo de <strong>#1 Primera División VPUG (Temporada 6)</strong> y Top Secret FC tiene por delante <strong>17 partidos</strong>, todos a ida única.',
       'El debut es hoy mismo, de visitante ante <strong>Nueva Chicago</strong> (22:30hs). Un arranque directo, sin margen para acomodarse.',
@@ -226,7 +226,7 @@ const NOTICIAS = [
     date: '2026-08-09',
     dateLabel: '9 de agosto de 2026',
     excerpt: 'Un paso más en el crecimiento del club: nace el canal oficial de YouTube de Top Secret FC. Lo celebramos con el Resumen Semanal #1, todos los goles de la primera semana de la Temporada 3.',
-    image: 'logos/Resumen Semanal 1.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Resumen%20Semanal%201.png',
     body: [
       'Hoy es un día para celebrar. Top Secret FC inaugura oficialmente su <strong>canal de YouTube</strong> — un nuevo espacio para que los hinchas del club vivan cada gol, cada jugada y cada momento del equipo en video.',
       '<div class="video-embed"><iframe src="https://www.youtube.com/embed/GGgiX_QBIh4" title="Resumen Semanal #1 - Top Secret FC" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>',
@@ -248,7 +248,7 @@ const NOTICIAS = [
     date: '2026-08-02',
     dateLabel: '2 de agosto de 2026',
     excerpt: 'Con el mercado de pases cerrado, el club presenta el plantel completo que peleará la Temporada 3: veinte jugadores entre la base que viene de la T2 y las once caras nuevas incorporadas para esta campaña.',
-    image: 'logos/Presentación Plantel T3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Presentaci%C3%B3n%20Plantel%20T3.png',
     body: [
       'Cerrado el libro de pases, Top Secret FC presenta el <strong>plantel completo para la Temporada 3</strong>: veinte jugadores, cuatro líneas cubiertas y un mismo objetivo de cara al arranque de la nueva campaña.',
       'La base es la que viene respondiendo desde la T2: <strong>Alexisraies23, Cabers14, Huber236, Juan_Martinez4, RS32-DaniStone, CipriMancini, Guiidow, BlackPanther-CG y Lautavester7</strong> repiten camiseta y le dan continuidad e identidad al equipo. A ese núcleo se suman las <strong>once incorporaciones</strong> confirmadas para esta temporada — arco, defensa, mediocampo y ataque reforzados de punta a punta.',
@@ -269,7 +269,7 @@ const NOTICIAS = [
     date: '2026-08-03',
     dateLabel: '3 de agosto de 2026',
     excerpt: 'La VPN Argentina publicó el calendario oficial de la Temporada 3. Top Secret FC jugará 19 partidos en la Liga Argentina 2da División, con doble jornada hoy mismo.',
-    image: 'logos/Fixture VPN T3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Fixture%20VPN%20T3.png',
     body: [
       'Ya está oficial. La VPN Argentina publicó el calendario completo de la Temporada 3 y Top Secret FC tiene por delante <strong>19 partidos</strong> en la Liga Argentina 2da División.',
       'El debut es hoy mismo, con doble jornada: <strong>Ysh Fc</strong> (Local · 23:00) y <strong>Al-Yateh FC</strong> (Visita · 23:30). Un arranque a pura acción para abrir la temporada.',
@@ -292,7 +292,7 @@ const NOTICIAS = [
     date: '2026-08-03',
     dateLabel: '3 de agosto de 2026',
     excerpt: 'Virtual Pro Gaming publicó el fixture de la Zona 1 del Challengers #4. Top Secret FC jugará 18 partidos, ida y vuelta contra los 9 rivales de su zona, arrancando el martes.',
-    image: 'logos/Fixture 11x11 T3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Fixture%2011x11%20T3.png',
     body: [
       'Ya está confirmado el calendario del <strong>Challengers #4</strong>, el torneo de 11x11 de Virtual Pro Gaming Argentina. Top Secret FC quedó en la <strong>Zona 1</strong> junto a IACC Cantera, Cambaceres, Interzonal A, Sub 21 CF, Olimpo Esports, Comunicaciones eSports, Deportivo Ballester, Parke Avellane y Camioneros eSports.',
       'El formato es ida y vuelta contra cada rival de la zona: <strong>18 partidos</strong> en total. El debut es el martes 4 de agosto, con doble fecha: IACC Cantera (Local · 23:00) y Cambaceres (Visita · 23:30).',
@@ -314,18 +314,18 @@ const NOTICIAS = [
     date: '2026-08-02',
     dateLabel: '2 de agosto de 2026',
     excerpt: 'El club cierra el libro de pases de la T3 con once incorporaciones: un arquero, dos defensores, tres mediocampistas y cinco delanteros. Repasamos a cada uno de los nuevos fichajes.',
-    image: 'logos/10.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/10.png',
     body: [
       'La <strong>Temporada 3</strong> arranca con el plantel más renovado de la historia del club. Top Secret FC confirmó <strong>once nuevos fichajes</strong> que se suman a la base que viene de la T2, cubriendo las cuatro líneas del equipo. Once nombres, once historias, un mismo objetivo: pelear arriba en las tres ligas.',
       '<strong>El arco.</strong> <strong>IVAN_CABJ_LA12</strong> llega para hacerse cargo del puesto 12 bajo los tres palos. Reflejos, salidas seguras y la personalidad para ser la última palabra en el fondo — el primer nombre confirmado de esta tanda de refuerzos.',
-      '<img src="logos/2.png" alt="IVAN_CABJ_LA12 - Nuevo fichaje - Portero #12">',
+      '<img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/2.png" alt="IVAN_CABJ_LA12 - Nuevo fichaje - Portero #12">',
       '<strong>La defensa se blinda.</strong> <strong>RIVAROLA90</strong> se suma al fondo con la dorsal 2: experiencia y presencia en el área propia, el tipo de central que impone respeto antes de que arranque la jugada. Lo acompaña <strong>CAT_FEL</strong>, que llega desde Chile 🇨🇱 con el 55 a la espalda para sumar solidez y jerarquía en la línea defensiva.',
-      '<img src="logos/4.png" alt="RIVAROLA90 - Nuevo fichaje - Defensor #2"><img src="logos/1.png" alt="CAT_FEL - Nuevo fichaje - Defensor #55">',
+      '<img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/4.png" alt="RIVAROLA90 - Nuevo fichaje - Defensor #2"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/1.png" alt="CAT_FEL - Nuevo fichaje - Defensor #55">',
       '<strong>Motor de mediocampo.</strong> <strong>ELI_NO-SKILL</strong> (10) llega para ordenar el medio y hacer que la pelota circule con más criterio. <strong>LIL_DEKUROKO</strong> (22) se suma desde Colombia 🇨🇴 aportando manejo y templanza, mientras que <strong>MAURIII-_1891</strong> (30) llega desde Uruguay 🇺🇾 para dar equilibrio y recorrido en la mitad de cancha. Tres estilos distintos, un mismo objetivo: sostener el medio.',
-      '<img src="logos/3.png" alt="ELI_NO-SKILL - Nuevo fichaje - Mediocampista #10"><img src="logos/7.png" alt="LIL_DEKUROKO - Nuevo fichaje - Mediocampista #22"><img src="logos/9.png" alt="MAURIII-_1891 - Nuevo fichaje - Mediocampista #30">',
+      '<img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/3.png" alt="ELI_NO-SKILL - Nuevo fichaje - Mediocampista #10"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/7.png" alt="LIL_DEKUROKO - Nuevo fichaje - Mediocampista #22"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/9.png" alt="MAURIII-_1891 - Nuevo fichaje - Mediocampista #30">',
       '<strong>El ataque se renueva por completo.</strong> Cinco nombres nuevos arriba. <strong>JUANCHYROMAN08</strong> (18) llega para jugar por afuera, con velocidad y desequilibrio de extremo. <strong>RAMIRO4588</strong> (96) y <strong>FEDEAVV9</strong> (9) suman referencia y peso ofensivo en el área. <strong>YZYTX0</strong> (99) y <strong>KEE_VIIN03</strong> (21) cierran la lista con la misma consigna: definir. Cinco delanteros distintos para darle variantes al equipo según lo que pida cada partido.',
-      '<img src="logos/8.png" alt="JUANCHYROMAN08 - Nuevo fichaje - Extremo #18"><img src="logos/11.png" alt="RAMIRO4588 - Nuevo fichaje - Delantero #96"><img src="logos/6.png" alt="FEDEAVV9 - Nuevo fichaje - Delantero #9">',
-      '<img src="logos/5.png" alt="YZYTX0 - Nuevo fichaje - Delantero #99"><img src="logos/10.png" alt="KEE_VIIN03 - Nuevo fichaje - Delantero #21">',
+      '<img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/8.png" alt="JUANCHYROMAN08 - Nuevo fichaje - Extremo #18"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/11.png" alt="RAMIRO4588 - Nuevo fichaje - Delantero #96"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/6.png" alt="FEDEAVV9 - Nuevo fichaje - Delantero #9">',
+      '<img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/5.png" alt="YZYTX0 - Nuevo fichaje - Delantero #99"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/10.png" alt="KEE_VIIN03 - Nuevo fichaje - Delantero #21">',
       'Con estas once incorporaciones, Top Secret FC cierra el mercado de pases de la Temporada 3. Un arquero, dos defensores, tres mediocampistas y cinco delanteros — el plantel queda armado para competir en las tres ligas. Bienvenidos, refuerzos. 🖤⭐',
     ],
     shareCaption: '🔒 ONCE CARAS NUEVAS · TOP SECRET FC · TEMPORADA 3\n\nEl club confirma 11 nuevos fichajes: IVAN_CABJ_LA12, RIVAROLA90, CAT_FEL, ELI_NO-SKILL, LIL_DEKUROKO, MAURIII-_1891, JUANCHYROMAN08, RAMIRO4588, FEDEAVV9, YZYTX0 y KEE_VIIN03.\n\n#TopSecretFC #NuevoFichaje #Temporada3 #EAFCClubsPro',
@@ -343,7 +343,7 @@ const NOTICIAS = [
     date: '2026-07-17',
     dateLabel: '17 de julio de 2026',
     excerpt: 'Remontada épica en Atlanta: Argentina le dio vuelta el partido a Inglaterra con goles de Enzo Fernández y Lautaro Martínez sobre el final y jugará su segunda final de Mundial consecutiva. El domingo, España en el MetLife.',
-    image: 'logos/Noticia WC2026 17-7.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Noticia%20WC2026%2017-7.webp',
     body: [
       'Había partidos que valían una final, y el del miércoles en Atlanta era uno de ellos. <strong>Argentina 2, Inglaterra 1</strong> — pero el resultado no cuenta la película. La Selección estuvo abajo en el marcador durante casi todo el partido, contra un rival que manejó los tiempos y pareció tener la clasificación controlada. Hasta que llegaron los minutos donde los equipos grandes se hacen grandes.',
       '<strong>Enzo Fernández a los 85 y Lautaro Martínez en el 90+2.</strong> Dos golpes en siete minutos para dar vuelta una semifinal de Mundial contra Inglaterra. La remontada no tiene precedentes en la historia reciente de la Selección: nunca había revertido un resultado adverso en una instancia de este calibre. Y el premio es enorme — <strong>segunda final de Mundial consecutiva</strong>, algo que ninguna generación argentina había logrado.',
@@ -365,7 +365,7 @@ const NOTICIAS = [
     date: '2026-06-22',
     dateLabel: '22 de junio de 2026',
     excerpt: 'Top Secret FC presenta su indumentaria para la Temporada 3. Por primera vez con Nike como marca y con AIA como sponsor, el club llega con tres kits: el negro de siempre, el blanco alternativo y un tercero en amarillo.',
-    image: 'logos/T3 Kits.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/T3%20Kits.png',
     body: [
       'Top Secret FC presenta su indumentaria para la <strong>Temporada 3</strong>. La novedad principal no es solo estética: por primera vez en la historia del club, los kits están <strong>crafted by Nike</strong>. El cambio de marca es una declaración — el club llega a la T3 con estructura, con identidad y con la asociación deportiva más reconocida del mundo respaldando su imagen.',
       '<strong>El kit local — el negro que no se negocia.</strong> La camiseta titular mantiene el negro como color dominante, fiel a la identidad que el club construyó desde su primer partido. Cuello blanco, escudo en el pecho y el sponsoreo de <strong>AIA</strong> como único texto visible sobre la tela. Minimal, directo, Top Secret. El negro siempre fue la base y la T3 no cambia eso.',
@@ -388,7 +388,7 @@ const NOTICIAS = [
     date: '2026-06-26',
     dateLabel: '26 de junio de 2026',
     excerpt: 'Fechas 3 a 6 del Campeonato de Invierno. Tras un martes para olvidar (1-4 y 0-1), Top Secret respondió el jueves con dos victorias al hilo: 1-0 a HF Giles y 3-0 a Team Valhalla. Lautavester7 emerge como máximo artillero del torneo con 4 goles.',
-    image: 'logos/Resumen sem1 invierno.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Resumen%20sem1%20invierno.png',
     body: [
       'Si la semana inaugural del <strong>Campeonato de Invierno VPUG</strong> había dejado una imagen impecable — seis puntos, cinco goleadores distintos, cero dudas —, el martes 23 de junio llegó para complicar el panorama. Dos partidos, dos derrotas: <strong>1-4 de visitante ante Comunicaciones</strong> y <strong>0-1 en casa contra InfinitX</strong>. La primera caída del torneo llegó doble y en la misma noche.',
       'El jueves 25 no admitió más margen de error. Top Secret salió a resolver y lo hizo con claridad: <strong>1-0 de visitante ante HF Giles</strong> y <strong>3-0 en casa ante Team Valhalla</strong>. Cuatro goles en dos partidos, cero en contra, y la respuesta que el torneo exigía. El equipo no dejó que las dos derrotas del martes definieran la semana.',
@@ -410,7 +410,7 @@ const NOTICIAS = [
     date: '2026-06-18',
     dateLabel: '18 de junio de 2026',
     excerpt: 'Primera jornada del Campeonato de Invierno VPUG. Dos partidos, dos victorias: 2-1 ante Black Mamba AC y 3-2 ante Vikings Team. Cabers14 y Huber236 lideran con gol y asistencia cada uno. Cinco goleadores distintos en el estreno.',
-    image: 'logos/Campeonato Invierno.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Campeonato%20Invierno.png',
     body: [
       'Top Secret FC abrió su participación en el <strong>Campeonato de Invierno VPUG</strong> con un debut impecable. La jornada del 18 de junio dejó dos victorias: <strong>2-1 ante Black Mamba AC</strong> en el primer turno y <strong>3-2 ante Vikings Team</strong> en el cierre de la noche. Seis puntos de seis posibles y cinco goleadores distintos en dos partidos.',
       'La distribución del gol es la lectura más importante de esta apertura. No hubo un referente individual que cargara el peso ofensivo: <strong>Agubostero7, Cabers14, Lautavester7, pibu y Huber236</strong> anotaron un gol cada uno. Ciprimancini y BlackPanther sumaron una asistencia cada uno. Un equipo con producción distribuida a lo largo del plantel es más difícil de neutralizar, y estas dos fechas lo confirman desde el primer partido.',
@@ -432,7 +432,7 @@ const NOTICIAS = [
     date: '2026-06-12',
     dateLabel: '12 de junio de 2026',
     excerpt: '17 partidos, 8 victorias, 4 empates y 5 derrotas. 30 goles marcados y 19 recibidos. BlackPanther terminó como goleador de la temporada con 10 tantos. El balance completo de la VPUG T2.',
-    image: 'logos/Cierre VPUG T2.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Cierre%20VPUG%20T2.png',
     body: [
       'Con los cuatro partidos del 11 de junio, Top Secret FC cerró su participación en la <strong>VPUG Temporada 2</strong>. Diecisiete fechas, 30 goles marcados y un balance de <strong>8 victorias, 4 empates y 5 derrotas</strong>. Una diferencia de goles de +11 que refleja una temporada sólida del primer al último partido.',
       '<strong>BlackPanther — 10 goles, el goleador de la temporada.</strong> El resultado es incontestable: BlackPanther terminó como el máximo artillero de la VPUG T2 con diez tantos. Doblete en el arranque ante United Mito (9.0 de rating), goles ante InfinitX (8.0), dupla goleadora ante Evermeet FC (9.0, 2G+1A), doblete ante Real Marcianos (8.2) y goles ante Germinal, Suda eSports y Nueva Chicago. Una temporada que lo consolida como el delantero más letal del plantel cuando ocupa ese rol.',
@@ -456,7 +456,7 @@ const NOTICIAS = [
     date: '2026-06-09',
     dateLabel: '9 de junio de 2026',
     excerpt: '9 partidos, 4 victorias, 14 goles. La liga más equilibrada de la temporada cerró con balance positivo. Lautavester7 y lucasmatiakd terminaron como cogoleadores con 5 tantos cada uno. ciprimancini fue el jugador más consistente del torneo.',
-    image: 'logos/Cierre 11x11 T2.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Cierre%2011x11%20T2.png',
     body: [
       'Con nueve partidos disputados entre el 19 de mayo y el 28 de mayo de 2026, Top Secret FC cerró su participación en el <strong>11x11 Temporada 2</strong>. El balance final fue de <strong>4 victorias, 1 empate y 4 derrotas</strong>, con 14 goles marcados y 12 recibidos. Una campaña pareja, con picos ofensivos notables y un colectivo que encontró su mejor versión en los partidos más importantes.',
       'El equipo arrancó con dos derrotas en la primera jornada —1-2 ante Los Waxiturros y 1-2 de visita ante Argentino de Merlo— pero se recompuso de inmediato con victorias consecutivas por 1-0 ante Ferro eSp y Dep Ballester. Luego llegó el empate ante All Boys, la caída ante Comunicaciones, otra derrota ante IACC Reserva, y el cierre más explosivo de la temporada: <strong>victoria 4-2 ante 4BDOMIFL4NES y 2-0 ante Los Picantes eSports</strong> en los dos últimos partidos. El equipo terminó ganando cuando más importaba.',
@@ -480,7 +480,7 @@ const NOTICIAS = [
     date: '2026-06-09',
     dateLabel: '9 de junio de 2026',
     excerpt: '19 partidos en la Primera División de la VPN. El salto de categoría fue exigente: 1 victoria, 2 empates y 16 derrotas. Pero Lautavester7 convirtió 13 goles para liderar la tabla de artilleros. Un cierre agridulce con lecciones para la próxima temporada.',
-    image: 'logos/Cierre VPN T2.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Cierre%20VPN%20T2.png',
     body: [
       'Con el partido ante Belgrano Esports del 8 de junio, Top Secret FC cerró su primera temporada completa en la <strong>Primera División de la VPN</strong>. Diecinueve partidos, 23 goles marcados y un registro de <strong>1 victoria, 2 empates y 16 derrotas</strong>. El salto desde la categoría anterior a la élite fue directo y el nivel del torneo lo hizo notar partido a partido. Sin embargo, en ese contexto, los números individuales de algunos jugadores tienen aún más valor.',
       '<strong>El escenario.</strong> La VPN de Primera División es el torneo más competitivo de los tres en que participa el club. En casi todos los encuentros el equipo mantuvo la posesión —57% de promedio a lo largo de la temporada— y generó situaciones, pero la efectividad ofensiva y la solidez defensiva no estuvieron siempre alineadas. Los dos empates (ante Riestra eSports y Monoidales) y la única victoria (3-1 ante Belgrano Esports en el cierre) muestran que cuando el equipo funcionó en bloque, el resultado llegó.',
@@ -504,7 +504,7 @@ const NOTICIAS = [
     date: '2026-06-05',
     dateLabel: '5 de junio de 2026',
     excerpt: '9 partidos en 4 noches. La VPN rescató un empate ante Monoidales tras cuatro derrotas. La VPUG brilló con un 4-0 a Real Marcianos. Sin actividad en el 11x11. Lautavester7 convirtió 5 goles en la semana.',
-    image: 'logos/Destacados Sem3.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Destacados%20Sem3.png',
     body: [
       'Entre el 1 y el 4 de junio, Top Secret FC afrontó nueve partidos repartidos en la VPN y la VPUG. <strong>Sin actividad en el 11x11</strong>, la semana se concentró en los dos frentes más exigentes de la temporada y dejó una lectura clara: una victoria dominante, tres empates peleados y cinco derrotas que no desdibujan lo que el equipo viene construyendo.',
       '<strong>VPN — Cinco partidos, un punto vital.</strong> El lunes fue la jornada más dura: tres partidos en una sola noche y tres derrotas. Ante Instituto Esports (1-3 de visita) Agubostero7 descontó y fue figura con 8.4 de rating; Alexisraies2 (8.9) fue el más sólido de la zaga y el número individual más alto de toda la semana. En el segundo partido, la caída 1-2 ante Estudiantes LP de local fue un duelo de dominio sin recompensa —58% de posesión, 3 tiros— con Lautavester7 marcando el descuento y Alexisraies2 (8.3) y J. Martinez (7.9) como los mejores. La noche cerró con la derrota más abultada: 1-5 de visita ante Talleres eSports, aunque el equipo generó —7 tiros, 1.8 xG— y Guiidow (7.9) y Agubostero7 (7.8) se mantuvieron al nivel. El miércoles trajo dos partidos de signo distinto: primero la frustración de caer 0-1 ante FCO Cannabiense con 61% de posesión y 4 tiros sin convertir, y después la mejor noticia de la VPN en la semana: empate 1-1 de visita ante Monoidales con J. Martinez en modo excepcional (8.2, 41 pases, 88% de precisión), ciprimancini dominando el mediocampo (8.0) y lucasmatiakd anotando el gol. Pibu sumó asistencia. El equipo manejó el 62% de la posesión y generó 9 tiros. Un punto rescatado que sabe bien.',
@@ -527,7 +527,7 @@ const NOTICIAS = [
     date: '2026-05-29',
     dateLabel: '29 de mayo de 2026',
     excerpt: '11 partidos en 3 noches. La VPN sigue sin ceder puntos. El VPUG cerró con una goleada. El 11x11 respondió con dos victorias seguidas. lucasmatiakd convirtió 8 goles en la semana.',
-    image: 'logos/Destacados Sem2.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Destacados%20Sem2.png',
     body: [
       'Entre el 26 y el 28 de mayo, Top Secret FC completó su segunda semana de competencia en la Temporada 2. <strong>11 partidos en tres noches</strong>, distribuidos en las tres ligas. La semana fue de contrastes: un miércoles para olvidar en los tres frentes, y un jueves de respuesta colectiva donde el equipo convirtió 10 goles en tres partidos.',
       '<strong>VPN — El nudo que no afloja.</strong> Tres partidos, tres derrotas, tres goles marcados y siete recibidos. El miércoles fue el día más exigente en la Primera División: ante Aesma Gaming (0-1 de visita) el equipo propuso, tuvo el 54% de posesión y generó por los costados, pero con apenas 2 tiros y 0.4 de xG el gol propio nunca llegó. Guiidow fue la figura con 8.3. Ante CAI Esports (2-3 de local) el nivel ofensivo apareció — Lautavester7 y lucasmatiakd anotaron, Buraa 07 (7.6) distribuyó desde el mediocampo — pero la solidez defensiva siguió siendo el problema. San Lorenzo Esports cerró la noche con un 3-1 donde Lautavester7 anotó el descuento y J. Martinez (7.7) fue el mejor del plantel. La VPN no perdona errores defensivos y el equipo todavía no encontró el equilibrio entre ataque y retaguardia.',
@@ -551,7 +551,7 @@ const NOTICIAS = [
     date: '2026-05-22',
     dateLabel: '22 de mayo de 2026',
     excerpt: '17 partidos en 9 días. Arranque duro en la VPN, sólido en VPUG, y en 11x11 dos caídas seguidas antes de cerrar el miércoles con dos victorias en fila. Un repaso por el rendimiento colectivo de la primera semana de la nueva era.',
-    image: 'logos/Destacados Sem1.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Destacados%20Sem1.png',
     body: [
       'Entre el 13 y el 21 de mayo, Top Secret FC completó su primera semana de competencia en la Temporada 2. <strong>17 partidos en 9 días</strong>, repartidos en tres ligas con exigencias distintas y resultados muy diferentes entre sí.',
       '<strong>VPN — El golpe de realidad.</strong> Nueve partidos, cero victorias, un empate y ocho derrotas. El salto a Primera División es exigente y los números lo confirman: en la mayoría de los encuentros el equipo mantuvo la pelota (entre el 53% y el 70% de posesión) y llegó con volumen al área, pero la efectividad no acompañó y la solidez defensiva fue irregular. El único punto llegó en el cierre de la tercera jornada, un empate 1-1 ante Riestra eSports con gol de BlackPanther. La VPN es el desafío pendiente de la temporada.',
@@ -575,7 +575,7 @@ const NOTICIAS = [
     date: '2026-05-15',
     dateLabel: '15 de mayo de 2026',
     excerpt: 'Top Secret FC anuncia la conformación oficial de su nuevo Cuerpo Técnico. Cinco nombres, cinco roles, una sola dirección: llevar al club a lo más alto de la Primera División.',
-    image: 'logos/Nuevo CT.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Nuevo%20CT.png',
     body: [
       'Top Secret FC hace oficial la conformación de su nuevo Cuerpo Técnico de cara a la Temporada 2. Cinco integrantes, roles bien definidos y una convicción compartida: este club tiene todo para competirle a cualquiera en la élite del fútbol virtual argentino.',
       '<strong>#6 · Juan_Martinez4 — Director Técnico.</strong> El cerebro del equipo asume la conducción táctica. Define sistemas, gestiona el plantel y toma las decisiones que marcan el rumbo de cada partido. La pelota en el centro de la mesa no es casual.',
@@ -600,7 +600,7 @@ const NOTICIAS = [
     date: '2026-05-13',
     dateLabel: '13 de mayo de 2026',
     excerpt: 'La Liga VPN publicó el calendario oficial de la Temporada 2. Top Secret FC jugará 19 partidos en su debut en Primera División, con el primer partido hoy mismo.',
-    image: 'logos/Fixture VPN.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Fixture%20VPN.webp',
     body: [
       'Ya está oficial. La Liga VPN publicó el calendario completo de la Temporada 2 y Top Secret FC tiene por delante 19 partidos en su primera experiencia en la élite del fútbol virtual argentino.',
       'El debut es hoy: tres encuentros en una misma jornada frente a <strong>Escuela Vieja</strong> (Local · 23:00), <strong>Nueva Chicago eSports</strong> (Visita · 23:30) y <strong>Real Black</strong> (Local · 23:59). Un arranque exigente que marcará el tono de lo que viene.',
@@ -623,7 +623,7 @@ const NOTICIAS = [
     date: '2026-05-11',
     dateLabel: '11 de mayo de 2026',
     excerpt: 'Top Secret FC presenta oficialmente el plantel para la temporada 2026. Dieciséis jugadores, una misma misión: competir en la élite del fútbol virtual argentino.',
-    image: 'logos/Plantel T2 2026.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Plantel%20T2%202026.webp',
     body: [
       'Top Secret FC presenta el plantel que defenderá los colores del club en la temporada 2026. Dieciséis jugadores comprometidos con el proyecto, con historia dentro de la institución y con hambre de seguir creciendo.',
       'El bloque viene reforzado. A la base que logró el ascenso se suman tres incorporaciones que elevan la competencia interna y dan mayor profundidad en todas las líneas. El desafío es enorme — Primera División de la VPN — y el plantel está a la altura.',
@@ -647,7 +647,7 @@ const NOTICIAS = [
     date: '2026-05-10',
     dateLabel: '10 de mayo de 2026',
     excerpt: 'Top Secret FC anuncia las altas para la nueva temporada: Cabers14, pauloco10 y AR-ELTIO se suman al plantel. Nuevo Secreto. Misma Misión.',
-    image: 'logos/Fichajes.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Fichajes.webp',
     body: [
       'Top Secret FC cierra su ventana de mercado para la Temporada 2 con tres incorporaciones que refuerzan el plantel de cara al debut en la Primera División de la VPN.',
       '<strong>#4 · Cabers14</strong> llega para puntalar la línea defensiva. Defensa central con presencia y capacidad para liderar la última línea en una categoría más exigente.',
@@ -670,7 +670,7 @@ const NOTICIAS = [
     date: '2026-05-06',
     dateLabel: '6 de mayo de 2026',
     excerpt: 'Top Secret FC presenta el nuevo kit oficial para la temporada 2026. Las camisetas que nos acompañarán en la VPN, la VPUG y el 11x11.',
-    image: 'logos/2026 Kit Drop.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/2026%20Kit%20Drop.png',
     body: [
       'Top Secret FC presenta oficialmente el nuevo kit para la temporada 2026. Un diseño que llega con fuerza en un momento especial: el debut del club en la Primera División de la VPN.',
       'Las nuevas camisetas nos acompañarán en todas las competencias del ciclo: la Liga VPN, la VPUG y el 11x11. Tres frentes, una sola identidad.',
@@ -692,7 +692,7 @@ const NOTICIAS = [
     date: '2026-05-06',
     dateLabel: '6 de mayo de 2026',
     excerpt: 'El club anuncia una renovación de su identidad visual. Una nueva era para Top Secret FC.',
-    image: 'logos/Anuncio Rebrand.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Anuncio%20Rebrand.webp',
     body: [
       'Top Secret FC da un paso adelante y presenta oficialmente su nueva identidad visual. Un rediseño que refleja la evolución del club y su crecimiento dentro del fútbol virtual argentino.',
       'La nueva imagen llega en un momento bisagra: el club acaba de lograr el ascenso a la Primera División de la VPN y se prepara para debutar en la élite del fútbol virtual argentino.',
@@ -715,7 +715,7 @@ const NOTICIAS = [
     date: '2026-05-04',
     dateLabel: '4 de mayo de 2026',
     excerpt: 'La Liga VPN seleccionó a Lautavester7, cansitrGd22_ y BlackPanther-CG en su equipo ideal de la Temporada 1. Los tres delanteros del club firmaron números históricos.',
-    image: 'logos/equipo-temporada-vpn.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/equipo-temporada-vpn.webp',
     body: [
       'La Liga VPN hizo oficial su Equipo de la Temporada 1 y Top Secret FC tuvo una participación histórica: tres jugadores seleccionados en el once ideal, todos delanteros.',
       'cansitrGd22_ fue el gran protagonista de la temporada con 64 goles y 22 asistencias en 49 partidos, cerrando con un rating promedio de 7.69 — el más alto del club. Sus números lo ubican como uno de los goleadores más letales de toda la liga.',
@@ -738,7 +738,7 @@ const NOTICIAS = [
     date: '2025-05-03',
     dateLabel: '3 de mayo de 2025',
     excerpt: 'Top Secret FC logró el ascenso a la Primera División de la VPN tras una campaña histórica. Un hito que marca el inicio de una nueva era para el club.',
-    image: 'logos/Festejo Ascenso.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Festejo%20Ascenso.webp',
     body: [
       'Top Secret FC escribió una de las páginas más importantes de su historia al coronarse campeón y obtener el ascenso a la Primera División de la VPN.',
       'Fue una temporada de entrega, trabajo y colectivo. El equipo demostró carácter en los momentos clave y supo imponerse ante rivales de mucho nivel para hacerse merecedor de este logro.',

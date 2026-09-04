@@ -296,10 +296,11 @@
   const T3_SVG   = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
   const CLS_SVG  = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'; // escudo — Clasificado
 
-  const LOGO_DARK  = 'logos/Top Secret white.png';
+  const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
+  const LOGO_DARK  = MEDIA_BASE + '/logos/Top%20Secret%20white.png';
   const LOGO_LIGHT = 'Top-Secret.png';
-  const LOGO_T3    = 'logos/TOP Secret Blue.png';
-  const LOGO_CLS   = 'logos/Top Secret white.png';
+  const LOGO_T3    = MEDIA_BASE + '/logos/TOP%20Secret%20Blue.png';
+  const LOGO_CLS   = MEDIA_BASE + '/logos/Top%20Secret%20white.png';
 
   // ── Theme helpers ──────────────────────────────────────────────────────────
   function getTheme() {
@@ -350,8 +351,8 @@
     </a>
     <div class="tb-logos">
       <div class="tb-sep"></div>
-      <img src="logos/Logo EA FC26.png" alt="EA FC 26">
-      <img src="logos/Clubs Pro Badge.png" alt="Clubs Pro">
+      <img src="${MEDIA_BASE}/logos/Logo%20EA%20FC26.png" alt="EA FC 26">
+      <img src="${MEDIA_BASE}/logos/Clubs%20Pro%20Badge.png" alt="Clubs Pro">
     </div>
     <button class="tb-theme-btn" id="tb-theme-btn" title="Cambiar tema">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="tb-theme-icon">

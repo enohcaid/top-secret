@@ -6,134 +6,135 @@
 // ── NOTICIAS — OG meta map ───────────────────────────────────────
 // Add an entry here whenever a new article is added to noticias-data.js
 const SITE = 'https://enohcaid.github.io/top-secret/';
+const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
   'lanzamiento-twitch-2026': {
     t: '¡Ya estamos en Twitch! Top Secret FC transmite todos sus partidos en vivo',
-    i: SITE + 'logos/' + encodeURIComponent('Lanzamiento Twitch.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Lanzamiento Twitch.png'),
   },
   'cierre-vpn-t3-2026': {
     t: 'Cierre VPN: 19 partidos, el cambio a línea de tres y los 9 goles de Lautavester7',
-    i: SITE + 'logos/' + encodeURIComponent('Cierre VPN T3.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Cierre VPN T3.png'),
   },
   'cierre-11x11-t3-2026': {
     t: 'Cierre 11x11: 18 partidos, la remontada en la vuelta y los 8 goles de Lautavester7',
-    i: SITE + 'logos/' + encodeURIComponent('Cierre 11x11 T3.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Cierre 11x11 T3.png'),
   },
   'cierre-vpug-t3-2026': {
     t: 'Cierre VPUG: 17 partidos, la racha de 5 triunfos y los 16 goles de Lautavester7',
-    i: SITE + 'logos/' + encodeURIComponent('Cierre VPUG T3.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Cierre VPUG T3.png'),
   },
   'lanzamiento-tiktok-2026': {
     t: '¡Ya estamos en TikTok! Top Secret FC lanza su cuenta oficial',
-    i: SITE + 'logos/' + encodeURIComponent('Lanzamiento TikTok.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Lanzamiento TikTok.png'),
   },
   'fichajes-full-boxxing-ltemp30148-2026': {
     t: 'Nuevos fichajes: Full_boxxing_ y lTemp30148 se suman al plantel',
-    i: SITE + 'logos/' + encodeURIComponent('NUEVOS FICHAJES.webp'),
+    i: MEDIA + 'logos/' + encodeURIComponent('NUEVOS FICHAJES.webp'),
   },
   'gracias-yzytx0-mauriii-2026': {
     t: 'Gracias, yzytx0 y Mauriii-_1891: el club se despide de dos piezas del plantel',
-    i: SITE + 'logos/' + encodeURIComponent('GRACIAS!.webp'),
+    i: MEDIA + 'logos/' + encodeURIComponent('GRACIAS!.webp'),
   },
   'comunicado-colombia-2026': {
     t: 'Comunicado oficial: Top Secret FC junto a Colombia',
-    i: SITE + 'logos/' + encodeURIComponent('Comunicado Colombia.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Comunicado Colombia.png'),
   },
   'fixture-vpug-t6-2026': {
     t: 'Fixture confirmado: 17 partidos en la Primera División VPUG, Temporada 6',
-    i: SITE + 'logos/' + encodeURIComponent('Fixture VPUG T3.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Fixture VPUG T3.png'),
   },
   'youtube-resumen-semanal-1': {
     t: '¡Estamos en YouTube! Top Secret FC inaugura su canal oficial con el Resumen Semanal #1',
-    i: SITE + 'logos/' + encodeURIComponent('Resumen Semanal 1.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Resumen Semanal 1.png'),
   },
   'plantel-t3-2026': {
     t: 'Presentamos el plantel completo de Top Secret FC para la Temporada 3',
-    i: SITE + 'logos/' + encodeURIComponent('Presentación Plantel T3.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Presentación Plantel T3.png'),
   },
   'fichajes-t3-2026': {
     t: 'Once caras nuevas: Top Secret FC confirma sus refuerzos para la Temporada 3',
-    i: SITE + 'logos/10.png',
+    i: MEDIA + 'logos/10.png',
   },
   'fixture-vpn-t3-2026': {
     t: 'Ya tenemos fixture: 19 partidos en la Liga Argentina 2da División VPN',
-    i: SITE + 'logos/' + encodeURIComponent('Fixture VPN T3.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Fixture VPN T3.png'),
   },
   'fixture-11x11-t3-2026': {
     t: 'Fixture confirmado: 18 partidos en el Challengers #4 de 11x11',
-    i: SITE + 'logos/' + encodeURIComponent('Fixture 11x11 T3.png'),
+    i: MEDIA + 'logos/' + encodeURIComponent('Fixture 11x11 T3.png'),
   },
   'mundial-2026-finalissima': {
     t: '"Ganamos la final": Argentina tumbó a Inglaterra y el domingo va por la Finalíssima ante España',
-    i: SITE + 'logos/Noticia%20WC2026%2017-7.png',
+    i: MEDIA + 'logos/Noticia%20WC2026%2017-7.png',
   },
   'kits-t3-2026': {
     t: 'Top Secret FC presenta sus kits T3 con Nike — negro, blanco y amarillo',
-    i: SITE + 'logos/T3%20Kits.png',
+    i: MEDIA + 'logos/T3%20Kits.png',
   },
   'invierno-2026-j3j6': {
     t: 'Invierno VPUG: caída el martes, doble victoria el jueves — el equipo se recompone',
-    i: SITE + 'logos/Resumen%20sem1%20invierno.png',
+    i: MEDIA + 'logos/Resumen%20sem1%20invierno.png',
   },
   'invierno-2026-j1j2': {
     t: 'Campeonato de Invierno: Top Secret arranca con dos victorias — 2-1 y 3-2',
-    i: SITE + 'logos/Campeonato%20Invierno.png',
+    i: MEDIA + 'logos/Campeonato%20Invierno.png',
   },
   'cierre-vpug-t2': {
     t: 'Cierre VPUG T2: 17 partidos, 30 goles y BlackPanther como máximo artillero con 10',
-    i: SITE + 'logos/Cierre%20VPUG%20T2.png',
+    i: MEDIA + 'logos/Cierre%20VPUG%20T2.png',
   },
   'cierre-11x11-t2': {
     t: 'Cierre 11x11 T2: Lautavester7 y lucasmatiakd, 5 goles cada uno',
-    i: SITE + 'logos/Cierre%2011x11%20T2.png',
+    i: MEDIA + 'logos/Cierre%2011x11%20T2.png',
   },
   'cierre-vpn-t2': {
     t: 'Cierre VPN T2: 19 partidos en Primera División, Lautavester7 termina con 13 goles',
-    i: SITE + 'logos/Cierre%20VPN%20T2.png',
+    i: MEDIA + 'logos/Cierre%20VPN%20T2.png',
   },
   'destacados-semana3-t2': {
     t: 'Semana 3: la goleada en VPUG y el punto arrancado en VPN',
-    i: SITE + 'logos/Destacados%20Sem3.png',
+    i: MEDIA + 'logos/Destacados%20Sem3.png',
   },
   'destacados-semana2-t2': {
     t: 'Semana 2: el jueves salva la semana',
-    i: SITE + 'logos/Destacados%20Sem2.png',
+    i: MEDIA + 'logos/Destacados%20Sem2.png',
   },
   'destacados-semana1-t2': {
     t: 'Semana 1 de Temporada 2: análisis de los tres frentes',
-    i: SITE + 'logos/Destacados%20Sem1.png',
+    i: MEDIA + 'logos/Destacados%20Sem1.png',
   },
   'nuevo-ct-2026': {
     t: 'Top Secret FC presenta su nuevo Cuerpo Técnico',
-    i: SITE + 'logos/Nuevo%20CT.png',
+    i: MEDIA + 'logos/Nuevo%20CT.png',
   },
   'fixture-vpn-t2-2026': {
     t: 'Ya tenemos fixture: 19 partidos en la Primera División VPN',
-    i: SITE + 'logos/Fixture%20VPN.webp',
+    i: MEDIA + 'logos/Fixture%20VPN.webp',
   },
   'plantel-2026': {
     t: 'Este es el plantel que jugará la nueva temporada',
-    i: SITE + 'logos/Plantel%20T2%202026.webp',
+    i: MEDIA + 'logos/Plantel%20T2%202026.webp',
   },
   'fichajes-t2-2026': {
     t: 'Tres incorporaciones para la Temporada 2',
-    i: SITE + 'logos/Fichajes.webp',
+    i: MEDIA + 'logos/Fichajes.webp',
   },
   'kit-drop-2026': {
     t: 'Nuevas camisetas para la temporada 2026',
-    i: SITE + 'logos/2026%20Kit%20Drop.png',
+    i: MEDIA + 'logos/2026%20Kit%20Drop.png',
   },
   'rebrand-2026': {
     t: 'Top Secret FC presenta su nueva identidad',
-    i: SITE + 'logos/Anuncio%20Rebrand.webp',
+    i: MEDIA + 'logos/Anuncio%20Rebrand.webp',
   },
   'equipo-temporada-vpn-2026': {
     t: 'Tres jugadores en el Equipo de la Temporada VPN',
-    i: SITE + 'logos/equipo-temporada-vpn.webp',
+    i: MEDIA + 'logos/equipo-temporada-vpn.webp',
   },
   'ascenso-primera-2025': {
     t: 'Ascendimos a Primera División',
-    i: SITE + 'logos/Festejo%20Ascenso.webp',
+    i: MEDIA + 'logos/Festejo%20Ascenso.webp',
   },
 };
 
@@ -203,6 +204,20 @@ export default {
     const url = new URL(request.url);
 
     try {
+      // ── R2 MEDIA (/media/<key>) — serves Renders/ and logos/ from the R2 bucket ──
+      if (url.pathname.startsWith('/media/') && request.method === 'GET') {
+        const key = decodeURIComponent(url.pathname.slice('/media/'.length));
+        const obj = await env.MEDIA_BUCKET.get(key);
+        if (!obj) return new Response('Not found', { status: 404, headers: CORS_HEADERS });
+        const headers = new Headers(CORS_HEADERS);
+        obj.writeHttpMetadata(headers);
+        headers.set('etag', obj.httpEtag);
+        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        const dl = url.searchParams.get('dl');
+        if (dl) headers.set('Content-Disposition', `attachment; filename="${dl.replace(/"/g, '')}"`);
+        return new Response(obj.body, { headers });
+      }
+
       // ── KV STORAGE (/kv) ──────────────────────────
       if (url.pathname === '/kv') {
         if (request.method === 'GET') {
