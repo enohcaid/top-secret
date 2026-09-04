@@ -166,7 +166,7 @@ html,body{width:100%;height:100%;background:#000;font-family:'Barlow',sans-serif
 <!-- ── LOCK SCREEN ── -->
 <div id="lockScreen">
   <div id="lockContent">
-    <img class="secret-logo" src="logos/Secreto.webp" alt="Top Secret FC">
+    <img class="secret-logo" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Secreto.webp" alt="Top Secret FC">
     <div class="lock-title">Acceso Restringido</div>
     <div class="lock-subtitle">Ingrese el código</div>
 
@@ -200,7 +200,7 @@ html,body{width:100%;height:100%;background:#000;font-family:'Barlow',sans-serif
   <div class="pdf-bar">
     <span class="pdf-bar-title">★ Plan de Juego · Top Secret FC ★</span>
     <div class="pdf-bar-actions">
-      <a class="pdf-btn pdf-btn-dl" href="logos/TopSecret_FC_Plan_de_Juego.pdf" download>⬇ Descargar</a>
+      <a class="pdf-btn pdf-btn-dl" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/TopSecret_FC_Plan_de_Juego.pdf?dl=TopSecret_FC_Plan_de_Juego.pdf" download>⬇ Descargar</a>
       <button class="pdf-btn pdf-btn-lock" onclick="lockAgain()">🔒 Cerrar</button>
     </div>
   </div>
@@ -253,7 +253,7 @@ function checkCode() {
 }
 
 function unlock() {
-  document.getElementById('pdfFrame').src = 'logos/TopSecret_FC_Plan_de_Juego.pdf';
+  document.getElementById('pdfFrame').src = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/TopSecret_FC_Plan_de_Juego.pdf';
   const viewer = document.getElementById('pdfViewer');
   viewer.style.display = 'flex';
   requestAnimationFrame(() => requestAnimationFrame(() => viewer.classList.add('visible')));

@@ -2,9 +2,9 @@
 
 // Imágenes por defecto — aplican a todas las fechas anteriores al primer período.
 export const RESULT_IMAGES = {
-  win:  ['logos/victoria/festejo.png', 'logos/victoria/festejo 2.png', 'logos/victoria/festejo 4.png', 'logos/victoria/festejo 5.png'],
-  draw: ['logos/empate/Empate 0.png', 'logos/empate/Empate 1.png'],
-  loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png', 'logos/derrota/Derrota 2.png'],
+  win:  ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/victoria/festejo.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/victoria/festejo%202.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/victoria/festejo%204.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/victoria/festejo%205.png'],
+  draw: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/empate/Empate%200.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/empate/Empate%201.png'],
+  loss: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%200.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%201.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%202.png'],
 };
 
 // Períodos con imágenes propias.
@@ -12,15 +12,15 @@ export const RESULT_IMAGES = {
 export const RESULT_IMAGES_PERIODS = [
   {
     from: '2026-05-13',
-    win:  ['logos/victoria/Victoria 0.png', 'logos/victoria/Victoria 1.png'],
-    draw: ['logos/empate/Empate 0.png', 'logos/empate/Empate 1.png'],
-    loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png', 'logos/derrota/Derrota 2.png'],
+    win:  ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/victoria/Victoria%200.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/victoria/Victoria%201.png'],
+    draw: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/empate/Empate%200.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/empate/Empate%201.png'],
+    loss: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%200.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%201.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%202.png'],
   },
   {
     from: '2026-05-10',
     win:  [],
-    draw: ['logos/empate/Empate 0.png', 'logos/empate/Empate 1.png'],
-    loss: ['logos/derrota/Derrota 0.png', 'logos/derrota/Derrota 1.png', 'logos/derrota/Derrota 2.png'],
+    draw: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/empate/Empate%200.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/empate/Empate%201.png'],
+    loss: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%200.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%201.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/derrota/Derrota%202.png'],
   },
 ];
 

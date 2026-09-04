@@ -20,3 +20,9 @@ Clips/
 scripts/debug-*.png
 scripts/.last-neterr
 .impeccable/
+
+# Migrado a Cloudflare R2 (bucket top-secret-media, servido via /media en el Worker) — 2026-09-04.
+# Renders/Daily News/ queda afuera a propósito: la pipeline diaria sigue commiteando ahí.
+logos/*
+Renders/*
+!Renders/Daily News/

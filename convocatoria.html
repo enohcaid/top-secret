@@ -817,7 +817,7 @@ const _shareLogoReady = new Promise(res => {
   const img = new Image();
   img.onload = () => { _shareLogo = img; res(); };
   img.onerror = () => res();
-  img.src = 'logos/Top Secret white.png';
+  img.src = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Top%20Secret%20white.png';
 });
 if (CAL_DOC_CONV) {
   CAL_DOC_CONV.onSnapshot(snap => {
@@ -1172,13 +1172,15 @@ function getNote(name) {
 }
 
 /* ─── PHOTO HELPERS ─── */
-function brazosPath(p)  { return `Renders/${p.folder || p.name}/Brazos.png`; }
-function frontePath(p)  { return `Renders/${p.folder || p.name}/Frente.png`; }
-function brazos2Path(p) { return `Renders/${p.folder || p.name}/Brazos2.png`; }
-function frente2Path(p) { return `Renders/${p.folder || p.name}/Frente2.png`; }
-function brazos3Path(p) { return `Renders/${p.folder || p.name}/Brazos3.png`; }
-function frente3Path(p) { return `Renders/${p.folder || p.name}/Frente3.png`; }
-function svgPath(p)     { return `Renders/${p.name}.svg`; }
+const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
+function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/'); }
+function brazosPath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Brazos.png`); }
+function frontePath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Frente.png`); }
+function brazos2Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos2.png`); }
+function frente2Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente2.png`); }
+function brazos3Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos3.png`); }
+function frente3Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente3.png`); }
+function svgPath(p)     { return mediaUrl(`Renders/${p.name}.svg`); }
 
 function tryImages(paths, idx, onSuccess, onFail) {
   if (idx >= paths.length) { onFail(); return; }
@@ -1399,7 +1401,7 @@ function renderPitch() {
       if (player.isGuest) {
         tok.innerHTML = '';
         const _sil = document.createElement('img');
-        _sil.src = 'Renders/silueta-prueba.png';
+        _sil.src = mediaUrl('Renders/silueta-prueba.png');
         _sil.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(2.7) translateY(0%);transform-origin:top center;opacity:.55;';
         tok.appendChild(_sil);
         const _bar = document.createElement('div'); _bar.className = 'stoken-bar';
@@ -1439,7 +1441,7 @@ function renderPitch() {
         () => {
           tok.innerHTML = '';
           const _sil = document.createElement('img');
-          _sil.src = 'Renders/silueta-prueba.png';
+          _sil.src = mediaUrl('Renders/silueta-prueba.png');
           _sil.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(2.7) translateY(0%);transform-origin:top center;opacity:.55;';
           tok.appendChild(_sil);
           const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
@@ -2142,7 +2144,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
   const _silImg = await new Promise(res => {
     const i = new Image(); i.crossOrigin = 'anonymous';
     i.onload = () => res(i); i.onerror = () => res(null);
-    i.src = 'Renders/silueta-prueba.png';
+    i.src = mediaUrl('Renders/silueta-prueba.png');
   });
 
   function drawSilhouette(tx, ty) {

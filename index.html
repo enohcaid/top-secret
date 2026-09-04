@@ -10,11 +10,11 @@
 <meta property="og:title" content="Top Secret FC · Club Oficial">
 <meta property="og:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 3 en curso.">
 <meta property="og:url" content="https://enohcaid.github.io/top-secret/">
-<meta property="og:image" content="https://enohcaid.github.io/top-secret/logos/og-home.jpg">
+<meta property="og:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og-home.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Top Secret FC · Club Oficial">
 <meta name="twitter:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 3 en curso.">
-<meta name="twitter:image" content="https://enohcaid.github.io/top-secret/logos/og-home.jpg">
+<meta name="twitter:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og-home.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -278,7 +278,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     <div class="hero-content">
       <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">Expediente T3 · 2026 — EA FC Clubs Pro · Buenos Aires</span></div>
       <div class="hero-identity">
-        <img class="hero-logo" src="logos/Top Secret Logo.png" alt="Top Secret FC">
+        <img class="hero-logo" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Top%20Secret%20Logo.png" alt="Top Secret FC">
         <h1 class="hero-title">TOP <span class="hero-title-accent">SECRET</span> FC</h1>
       </div>
       <p class="hero-sub">Tres ligas · un plantel · nada que declarar</p>
@@ -288,7 +288,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
       </div>
     </div>
     <div class="hero-visual">
-      <img class="hero-photo" id="hero-img-a" src="logos/Plantel T3 Uniforme.webp" alt="Top Secret FC">
+      <img class="hero-photo" id="hero-img-a" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Plantel%20T3%20Uniforme.webp" alt="Top Secret FC">
       <img class="hero-photo" id="hero-img-b" alt="Top Secret FC" style="opacity:0">
       <div class="hero-photo-fade"></div>
       <div class="hero-slider-ui" id="hero-slider-ui">
@@ -462,17 +462,20 @@ const ROSTER_NUM = {
   'cansitrGd22_':'22','Lautavester7':'7','Lucasmati_akd':'9',
 };
 
+const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
+function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/'); }
+
 function brazosPath(key) {
   const folder = FOLDER_OVERRIDE[key] || key;
-  return `Renders/${folder}/Brazos.png`;
+  return mediaUrl(`Renders/${folder}/Brazos.png`);
 }
 
 const T2_CUTOFF = '2026-04-30';
 const T3_CUTOFF = '2026-08-02'; // arranque real de la T3 (VPN/11x11) — la pretemporada VPUG queda afuera
 
-function frente3Path(key) { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente3.png`; }
-function frente2Path(key) { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente2.png`; }
-function frontePath(key)  { const f=FOLDER_OVERRIDE[key]||key; return `Renders/${f}/Frente.png`; }
+function frente3Path(key) { const f=FOLDER_OVERRIDE[key]||key; return mediaUrl(`Renders/${f}/Frente3.png`); }
+function frente2Path(key) { const f=FOLDER_OVERRIDE[key]||key; return mediaUrl(`Renders/${f}/Frente2.png`); }
+function frontePath(key)  { const f=FOLDER_OVERRIDE[key]||key; return mediaUrl(`Renders/${f}/Frente.png`); }
 
 function tryImages(paths, idx, onSuccess, onFail) {
   if (idx >= paths.length) { onFail(); return; }
@@ -495,7 +498,7 @@ function loadTopAvatars() {
       },
       () => {
         const sil = document.createElement('img');
-        sil.src = 'Renders/silueta-prueba.png';
+        sil.src = mediaUrl('Renders/silueta-prueba.png');
         sil.style.opacity = '.45';
         av.insertBefore(sil, initEl);
         initEl.style.display = 'none';
@@ -810,7 +813,7 @@ function showPlayerModal(key) {
   const modalImg = document.getElementById('pmob-photo-img');
   tryImages([frente3Path(key), frente2Path(key), frontePath(key)], 0,
     src => { modalImg.src = src; },
-    () => { modalImg.src = 'Renders/silueta-prueba.png'; modalImg.style.opacity = '.55'; }
+    () => { modalImg.src = mediaUrl('Renders/silueta-prueba.png'); modalImg.style.opacity = '.55'; }
   );
 }
 function closePlayerModal() {
@@ -854,7 +857,7 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
   const imgB   = document.getElementById('hero-img-b');
   const dotsEl = document.getElementById('hero-dots');
 
-  const images = ['logos/Plantel T3 Uniforme.webp','logos/Plantel T3 Formal.webp'];
+  const images = [mediaUrl('logos/Plantel T3 Uniforme.webp'), mediaUrl('logos/Plantel T3 Formal.webp')];
 
   if (images.length <= 1) return;
 
