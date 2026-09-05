@@ -1385,6 +1385,6 @@ export {
   evaluateImage,
   deleteChatById,
   currentChatId,
-  gitPushImages,
+  uploadImagesToR2,
   fetchJerseyOverrides,
 };
