@@ -813,6 +813,7 @@ const E11_T3_SCHEDULE = [
 let _shareLogo = null;
 const _shareLogoReady = new Promise(res => {
   const img = new Image();
+  img.crossOrigin = 'anonymous';
   img.onload = () => { _shareLogo = img; res(); };
   img.onerror = () => res();
   img.src = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Top%20Secret%20white.png';
@@ -2220,9 +2221,8 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
         drawBar(tx, ty, player);
         resolve();
       }
-      const i1 = new Image();
       tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
-        (src) => { const im = new Image(); im.onload = () => drawPhoto(im, src); im.src = src; },
+        (src) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => drawPhoto(im, src); im.src = src; },
         () => { drawSilhouette(tx, ty); drawBar(tx, ty, player); resolve(); }
       );
     })));
