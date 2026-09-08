@@ -257,7 +257,6 @@ const PLAYER_TRAITS = {
   'Alexisraies23':   { dorsal: 3,    desc: 'piel morena, dreadlocks negros hasta los hombros, barba negra, anteojos deportivos celestes, venda blanca en la mano izquierda' },
   'BlackPanther-CG': { dorsal: 11,   desc: 'piel morena, pelo muy corto rosa/magenta, máscara de calavera blanca cubriendo nariz y boca, brazos completamente tatuados' },
   'Cabers14':        { dorsal: 5,    desc: 'piel muy oscura, dreadlocks negros largos y sueltos, máscara de calavera blanca cubriendo nariz y boca, mangas largas negras' },
-  'CAT_FEL':         { dorsal: 55,   desc: 'piel clara, laterales de la cabeza rapados con mohawk corto rubio arriba, barba teñida de azul, anteojos de sol azules, mangas de compresión a cuadros rojo y blanco en ambos antebrazos, tatuajes en los brazos' },
   'CipriMancini':    { dorsal: 32,   desc: 'piel trigueña, AFRO AZUL gigante y esponjoso, anteojos deportivos oscuros, cuello y brazos tatuados, manga blanca en el brazo derecho' },
   'fedeavv9':        { dorsal: 9,    desc: 'piel trigueña, pelo corto rubio platinado, muy tatuado en cuello, brazos y piernas, venda blanca en la muñeca izquierda' },
   'Guiidow':         { dorsal: 20,   desc: 'piel trigueña, pelo oscuro rapado a los costados con cresta corta, chivita fina, cara descubierta sin anteojos ni máscara' },
@@ -273,7 +272,6 @@ const PLAYER_TRAITS = {
   'Ringhiio':        { dorsal: 70,   desc: 'piel trigueña, melena despeinada VIOLETA, anteojos de sol negros' },
   'rivarola90':      { dorsal: 2,    desc: 'piel oscura, melena gris plateada hasta los hombros con vincha negra, chivita canosa, mangas largas oscuras' },
   'RS32-DaniStone':  { dorsal: 13,   desc: 'piel clara, pelo revuelto turquesa/verde agua, máscara celeste cubriendo nariz y boca, anteojos, una manga azul en el brazo derecho' },
-  'lTemp30148':      { dorsal: 16,   desc: 'piel oscura, pelo negro afro corto, máscara amarilla tipo antifaz cubriendo los ojos, sin barba visible' },
 };
 
 // Dorsales vigentes desde Firestore (plantel/activo.numeros) — la misma fuente
