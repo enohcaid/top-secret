@@ -814,10 +814,31 @@ async function ensureNormalQuality(page) {
   }
 }
 
+// La página del proyecto a veces cae en un error boundary genérico de
+// ChatGPT ("Volver a intentar", sin composer) al navegar en frío — visto
+// 2026-09-09, reproducible en pestaña nueva y con caché/service worker
+// limpios, con el gizmo intacto vía /backend-api/gizmos (falla del lado de
+// ChatGPT, no de la sesión ni del proyecto). Reintenta con backoff antes de
+// rendirse — más barato que quemar los 3 intentos externos del script en
+// segundos y dejar el día sin imágenes.
+async function gotoProjectComposer(page, maxTries = 5) {
+  for (let i = 1; i <= maxTries; i++) {
+    await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+    const ok = await page.evaluate(() => !!document.querySelector('div[contenteditable="true"], p[data-placeholder]'));
+    if (ok) return;
+    if (i < maxTries) {
+      console.log(`  Página del proyecto no cargó el composer (intento ${i}/${maxTries}) — reintentando...`);
+      await page.waitForTimeout(5000 * i);
+    }
+  }
+  await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-project-load.png'), fullPage: true }).catch(() => {});
+  throw new Error('La página del proyecto de ChatGPT no cargó el composer tras varios intentos (posible falla del lado de ChatGPT). Screenshot en scripts/debug-project-load.png');
+}
+
 async function sendPromptInProject(page, prompt, { freshChat = true, attachments = [] } = {}) {
   if (freshChat) {
-    await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(3000);
+    await gotoProjectComposer(page);
   } else {
     // Si quedó una generación colgada del intento anterior, frenarla antes
     // de reenviar — el composer no acepta mensajes mientras hay streaming.
@@ -863,18 +884,43 @@ async function sendPromptInProject(page, prompt, { freshChat = true, attachments
   await page.waitForTimeout(1000);
 
   // Send with the button (never press Enter directly — it submits)
-  const sendBtn = page.locator('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]').first();
-  if (await sendBtn.count() > 0) {
-    if (attachments.length > 0) {
-      // El botón queda deshabilitado hasta que terminan de subir los adjuntos
-      await page.waitForFunction(() => {
-        const b = document.querySelector('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]');
-        return b && !b.disabled;
-      }, { timeout: 90000 }).catch(() => {});
+  const clickSend = async () => {
+    const sendBtn = page.locator('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]').first();
+    if (await sendBtn.count() > 0) {
+      if (attachments.length > 0) {
+        // El botón queda deshabilitado hasta que terminan de subir los adjuntos
+        await page.waitForFunction(() => {
+          const b = document.querySelector('button[data-testid="send-button"], button[aria-label*="Send"], button[aria-label*="Enviar"]');
+          return b && !b.disabled;
+        }, { timeout: 90000 }).catch(() => {});
+      }
+      await sendBtn.click({ timeout: 30000 });
+    } else {
+      await page.keyboard.press('Enter');
     }
-    await sendBtn.click({ timeout: 30000 });
-  } else {
-    await page.keyboard.press('Enter');
+  };
+
+  await clickSend();
+
+  // El click a veces no registra en la UI de ChatGPT: el texto y los adjuntos
+  // quedan visibles en el composer sin enviarse, y el script espera igual los
+  // 25 min completos sin que nada pase (ver memoria
+  // feedback_chatgpt_stuck_send_button). Confirmar que el envío arrancó
+  // (aparece el botón "stop" de streaming) o que el composer quedó vacío, y
+  // reintentar el click si no.
+  for (let i = 0; i < 3; i++) {
+    await page.waitForTimeout(2000);
+    const sent = await page.evaluate(() => {
+      const streaming = !!document.querySelector('button[data-testid="stop-button"], button[aria-label*="Stop"], button[aria-label*="Detener"]');
+      const composer = document.querySelector('div[contenteditable="true"], p[data-placeholder]');
+      const empty = composer ? (composer.textContent || '').trim().length === 0 : true;
+      return streaming || empty;
+    });
+    if (sent) break;
+    if (i < 2) {
+      console.log('  Envío no confirmado — reintentando click de enviar...');
+      await clickSend().catch(() => {});
+    }
   }
 }
 
