@@ -64,4 +64,29 @@ if (-not (Test-CDP)) {
 Set-Location $repoRoot
 # cmd /c en vez de *>> : PowerShell 5.1 redirige a UTF-16 y mezclaba encodings
 # en el log; cmd escribe los bytes UTF-8 de node tal cual.
-cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
+# Reintento externo: si el script falla del todo (ej. la pagina del proyecto
+# de ChatGPT cae en error por un rato largo, mas de lo que cubren los
+# reintentos internos), no dejar el dia entero sin imagenes - reintentar mas
+# tarde en la misma manana en vez de requerir que alguien note el fallo y
+# corra regen-once.ps1 a mano.
+$maxAttempts = 3
+$attempt = 1
+$success = $false
+while ($attempt -le $maxAttempts -and -not $success) {
+    if ($attempt -gt 1) {
+        Log "Reintento externo $attempt de $maxAttempts tras fallo del intento anterior."
+    }
+    cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
+    if ($LASTEXITCODE -eq 0) {
+        $success = $true
+    } else {
+        Log "Intento $attempt fallo (exit code $LASTEXITCODE)."
+        if ($attempt -lt $maxAttempts) {
+            Start-Sleep -Seconds 600
+        }
+    }
+    $attempt++
+}
+if (-not $success) {
+    Log "Generacion de imagenes fallo tras $maxAttempts intentos - requiere revision manual."
+}
