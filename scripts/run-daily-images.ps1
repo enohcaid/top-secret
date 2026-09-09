@@ -89,4 +89,5 @@ while ($attempt -le $maxAttempts -and -not $success) {
 }
 if (-not $success) {
     Log "Generacion de imagenes fallo tras $maxAttempts intentos - requiere revision manual."
+    exit 1
 }
