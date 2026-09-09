@@ -1185,7 +1185,6 @@ async function main() {
   const kitHistory   = await fetchKitHistory();
   const chosenKit    = pickKitColor(kitHistory);
   const kitCropPath  = await cropKitImage(chosenKit.id);
-  const evalPrompt   = buildEvalPrompt(chosenStyle, draft, mentioned, chosenKit);
   console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
   console.log(`Kit del día: ${chosenKit.label}`);
   if (draft.imageBrief) console.log(`Brief visual del artículo: ${draft.imageBrief.slice(0, 100)}...`);
@@ -1203,16 +1202,17 @@ async function main() {
       console.log(`\nUsando post existente: ${lastPostFile}`);
     }
 
-    // Loop solo sobre el post hasta aprobarlo.
-    // IMPORTANTE: las correcciones (kit mal, proporción mal, etc.) se mandan
-    // COMO SEGUIMIENTO DEL MISMO CHAT (freshChat:false), nunca en un chat
-    // nuevo. Empíricamente el chat nuevo con el prompt completo repetido
-    // vuelve a caer en el mismo error (ej. kit negro por defecto pese al
-    // texto pidiendo blanco/amarillo) — visto 2 veces seguidas (2026-08-13).
-    // La story, que SÍ continúa el chat para su corrección, corrige bien en
-    // 1-2 intentos. Un pedido corto de "arreglá esto puntual" sobre la imagen
-    // ya generada es mucho más confiable que repetir el prompt gigante desde
-    // cero cada vez.
+    // Un solo intento de contenido por imagen — sin verificación de calidad
+    // por ChatGPT Vision ni reintento automático por formato (decisión del
+    // usuario, 2026-09-09): buildPrompt() ya especifica todo lo necesario
+    // (identidad, kit, proporción, título) en un único prompt, y la revisión
+    // final la hace un humano en el preview de publicación, no ChatGPT. Los
+    // reintentos que quedan en este loop son solo por fallas TÉCNICAS (red,
+    // composer que no cargó), nunca por calidad del contenido. En modo
+    // --review el humano sigue pudiendo pedir correcciones interactivas
+    // como seguimiento del mismo chat (freshChat:false) — ese flujo no
+    // cambió, porque ahí el que decide es la persona, no una evaluación
+    // automática.
     let postChatOpen = false;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !FLAG_STORY; attempt++) {
       if (attempt > 1) console.log(`\nIntento ${attempt}/${MAX_ATTEMPTS}...`);
@@ -1261,15 +1261,12 @@ async function main() {
       lastPostFile   = postFile;
       lastPostImgUrl = postImgUrl;
 
-      // Chequeo mecánico de proporción — sobre los píxeles reales, no sobre lo
-      // que dice el prompt (ChatGPT lo ignora seguido y devuelve el post con
-      // la misma proporción angosta que la story; ver POST_MIN_RATIO arriba).
+      // Chequeo mecánico de proporción — queda como diagnóstico en el log;
+      // ya no dispara un reintento automático (ver nota arriba). Si sale
+      // mal, se ve en el preview de publicación.
       const postDims = await imageRatio(path.join(OUTPUT_DIR, postFile));
-      const postTooNarrow = postDims.ratio < POST_MIN_RATIO;
-      const postTooWide   = postDims.ratio > POST_MAX_RATIO;
-      const wrongPostFormat = postTooNarrow || postTooWide;
-      if (wrongPostFormat) {
-        console.log(`  ⚠ Formato incorrecto: post salió ${postDims.width}x${postDims.height} (proporción ${postDims.ratio.toFixed(2)}) — ${postTooNarrow ? 'parece story, no post' : 'apaisado/horizontal, no post'}.`);
+      if (postDims.ratio < POST_MIN_RATIO || postDims.ratio > POST_MAX_RATIO) {
+        console.log(`  ⚠ Formato del post ${postDims.width}x${postDims.height} (proporción ${postDims.ratio.toFixed(2)}) fuera del rango esperado — revisar en el preview de publicación.`);
       }
 
       if (FLAG_REVIEW) {
@@ -1281,47 +1278,21 @@ async function main() {
         correction = await askInput('¿Qué corregir para la próxima versión?: ');
         if (!correction) console.log('Sin feedback — pidiendo una nueva versión en el mismo chat.');
         if (attempt === MAX_ATTEMPTS) console.log('Máximo de intentos alcanzado — usando esta versión.');
-      } else if (wrongPostFormat && attempt < MAX_ATTEMPTS) {
-        // Rechazo técnico por proporción — ni vale la pena gastar una llamada
-        // de evaluación visual, el problema es medible en los píxeles.
-        correction = postTooNarrow
-          ? `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — MUY angosta y alta, formato Story. Necesito el formato POST: notoriamente MÁS ANCHO Y MÁS CUADRADO, proporción 4:5, nunca el encuadre extra alto de una Story.`
-          : `La imagen anterior salió en proporción ${postDims.ratio.toFixed(2)} (${postDims.width}x${postDims.height}) — APAISADA/HORIZONTAL, el ancho es mayor que el alto. Eso está mal: el post SIGUE SIENDO VERTICAL, más alto que ancho, proporción 4:5 (ej. 1086x1448), nunca panorámico.`;
-        console.log(`  Corrección: "${correction}"`);
       } else {
-        if (wrongPostFormat) console.log('  Máximo de intentos alcanzado — usando última versión igual (formato incorrecto).');
-        // Evaluación automática con ChatGPT Vision
-        let evalResponse = null;
-        try {
-          evalResponse = await evaluateImage(context, path.join(OUTPUT_DIR, postFile), evalPrompt);
-        } catch (evalErr) {
-          console.log(`  Evaluación falló (${evalErr.message.split('\n')[0]}) — aceptando imagen.`);
-        }
-
-        const approved = !evalResponse || /^aprobada/i.test(evalResponse.trim());
-
-        if (approved || attempt === MAX_ATTEMPTS) {
-          if (evalResponse && !approved) console.log('  Máximo de intentos alcanzado — usando última versión.');
-          break;
-        }
-
-        correction = evalResponse.replace(/^rechazada\s*[-–]\s*/i, '').trim();
-        console.log(`  Corrección: "${correction}"`);
+        break;
       }
     }
 
-    // Story se genera a partir del post aprobado. También pasa por el evaluador
-    // (una corrección como máximo — el post ya fijó escena y estilo).
-    let storyFile;
-    const storyExclude    = [lastPostImgUrl];
-    let storyCorrection = null;
+    // Story se genera a partir del post — un solo intento de contenido,
+    // mismo criterio que el post: sin verificación de calidad ni reintento
+    // por formato. Los reintentos que quedan son solo por fallas técnicas.
+    let storyFile = null;
     for (let attempt = 1; attempt <= 3; attempt++) {
-      let storyImgUrl;
       try {
-        const storyPrompt = buildResizePrompt() +
-          (storyCorrection ? `\n\nCORRECCIÓN sobre la versión anterior: ${storyCorrection}` : '');
+        const storyPrompt = buildResizePrompt();
+        let storyImgUrl;
         ({ filename: storyFile, imgUrl: storyImgUrl } = await generateImage(
-          page, draft, 'story', storyPrompt, { freshChat: false, excludeSrcs: storyExclude }
+          page, draft, 'story', storyPrompt, { freshChat: false, excludeSrcs: [lastPostImgUrl] }
         ));
       } catch (genErr) {
         console.log(`  Error generando story (intento ${attempt}/3): ${genErr.message.split('\n')[0]}`);
@@ -1329,38 +1300,12 @@ async function main() {
         await page.waitForTimeout(5000);
         continue;
       }
-      storyExclude.push(storyImgUrl);
 
-      // Mismo chequeo mecánico que el post, en espejo: la story tiene que ser
-      // notoriamente más angosta, no una repetición del post en otra pestaña.
       const storyDims = await imageRatio(path.join(OUTPUT_DIR, storyFile));
-      const wrongStoryFormat = storyDims.ratio > STORY_MAX_RATIO;
-      if (wrongStoryFormat) {
-        console.log(`  ⚠ Formato incorrecto: story salió ${storyDims.width}x${storyDims.height} (proporción ${storyDims.ratio.toFixed(2)}) — parece post, no story.`);
+      if (storyDims.ratio > STORY_MAX_RATIO) {
+        console.log(`  ⚠ Formato de la story ${storyDims.width}x${storyDims.height} (proporción ${storyDims.ratio.toFixed(2)}) fuera del rango esperado — revisar en el preview de publicación.`);
       }
-
-      // En modo review el humano ya dirige; y una sola corrección automática alcanza
-      if (FLAG_REVIEW || storyCorrection !== null || attempt === 3) {
-        if (wrongStoryFormat && attempt === 3) console.log('  Máximo de intentos alcanzado — usando última versión igual (formato incorrecto).');
-        break;
-      }
-
-      if (wrongStoryFormat) {
-        storyCorrection = `La imagen anterior salió en proporción ${storyDims.ratio.toFixed(2)} (${storyDims.width}x${storyDims.height}) — parece un post, no una story. Necesito el formato STORY: mucho MÁS ALTO Y ANGOSTO, proporción 9:16, pantalla completa de celular.`;
-        console.log(`  Corrección: "${storyCorrection}"`);
-        continue;
-      }
-
-      let storyEval = null;
-      try {
-        storyEval = await evaluateImage(context, path.join(OUTPUT_DIR, storyFile), evalPrompt);
-      } catch (evalErr) {
-        console.log(`  Evaluación de story falló (${evalErr.message.split('\n')[0]}) — aceptando.`);
-      }
-      if (!storyEval || /^aprobada/i.test(storyEval.trim())) break;
-
-      storyCorrection = storyEval.replace(/^rechazada\s*[-–]\s*/i, '').trim();
-      console.log(`  Story rechazada: "${storyCorrection}" — regenerando.`);
+      break;
     }
 
     // Si la story no salió, usar el post como story: perder el formato vertical
