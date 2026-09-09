@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -595,12 +596,18 @@ const FB_CONFIG = {
   messagingSenderId: "303110190986",
   appId: "1:303110190986:web:6a5987dfff32af49a4fa73"
 };
-let _db = null, RECLU_COL = null, PLANTEL_DOC = null;
+let _db = null, RECLU_COL = null, PLANTEL_DOC = null, CONV_DOC = null;
 try {
   if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
   _db = firebase.firestore();
   RECLU_COL   = _db.collection('reclutamiento');
   PLANTEL_DOC = _db.collection('plantel').doc('activo');
+  CONV_DOC    = _db.collection('convocatoria').doc('state');
+  // Las reglas de Firestore exigen auth para escribir en convocatoria/* (a
+  // diferencia de reclutamiento/plantel, que son de escritura abierta) —
+  // sign-in anónimo y silencioso, igual que convocatoria.html, necesario
+  // para marcar "fijo" a un jugador recién promovido (ver _confirmarPromover).
+  firebase.auth().signInAnonymously().catch(e => console.warn('[reclu] anonymous sign-in error:', e));
 } catch(e) { console.warn('Firestore init error:', e); }
 
 const ADMIN_PW = '8189';
@@ -908,6 +915,19 @@ async function _confirmarPromover(plantelActual, nuevos) {
     await PLANTEL_DOC.set({ jugadores: [...plantelActual, ...agregados] }, { merge: false });
     // Marcar como en_plantel para que no vuelvan a aparecer como promovibles
     await Promise.all(nuevos.map(d => RECLU_COL.doc(d._id).update({ estado: 'en_plantel' })));
+    // Marcar "fijo" (siempre presente) en convocatoria automáticamente al
+    // promover — antes había que hacerlo a mano por cada jugador nuevo
+    // (pedido del usuario, 2026-09-09, caso Elianja20). arrayUnion en vez de
+    // leer+reescribir todo el array: evita pisar cambios concurrentes de
+    // alguien con convocatoria.html abierto en otra pestaña en simultáneo.
+    if (CONV_DOC) {
+      try {
+        await CONV_DOC.set(
+          { alwaysPresent: firebase.firestore.FieldValue.arrayUnion(...agregados.map(a => a.name)) },
+          { merge: true }
+        );
+      } catch (e) { console.warn('[reclu] no se pudo marcar fijo en convocatoria:', e); }
+    }
     document.getElementById('promoteModal').classList.remove('open');
     showShareToast(`✓ ${nuevos.length} jugador${nuevos.length > 1 ? 'es' : ''} agregado${nuevos.length > 1 ? 's' : ''} al plantel`);
     loadSubmissions();
