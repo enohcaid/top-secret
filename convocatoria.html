@@ -456,7 +456,6 @@ const PLAYERS = [
   { name:'Juanchyroman08',  pos:'ED',  num:18, folder:'Juanchyroman08' },
   { name:'fedeavv9',        pos:'DC',  num:9,  folder:'fedeavv9'       },
   { name:'kee_viin03',      pos:'DC',  num:21, folder:'kee_viin03'     },
-  { name:'Elianja20',       pos:'DFC', num:'', folder:null, isRecluta:true, nombre:'Elian jacobsen' },
   { name:'Prueba',          pos:'MCD', num:'', folder:null, isGuest:true },
 ];
 
@@ -592,27 +591,35 @@ try {
     .catch(e => { console.warn('[conv] anonymous sign-in error:', e); });
 } catch(e) { console.warn('Firebase init error:', e); }
 
-// Load dynamically promoted players from Firestore and merge into PLAYERS
-function _loadPlantel() {
-  if (!PLANTEL_DOC) return;
-  PLANTEL_DOC.onSnapshot(snap => {
-    const base = PLAYERS.filter(p => !p.isRecluta);
-    PLAYERS.length = 0; base.forEach(p => PLAYERS.push(p));
-    if (snap.exists) {
-      const data = snap.data();
-      const numOverrides = data.numeros || {};
-      PLAYERS.forEach(p => { if (numOverrides[p.name] != null) p.num = numOverrides[p.name]; });
-      const existingNames = new Set(PLAYERS.map(p => p.name));
-      (data.jugadores || []).forEach(j => {
-        if (j.name && !existingNames.has(j.name)) {
-          PLAYERS.push({ name: j.name, pos: j.pos || 'DC', num: j.num || '', folder: null, isRecluta: true, nombre: j.nombre || '' });
-        }
-      });
-    }
-    render();
-  }, () => {});
+// Load dynamically promoted players from Firestore and merge into PLAYERS.
+// _loadPlantel() espera el primer .get() ANTES del render() inicial (ver bloque
+// INIT más abajo) para que un jugador recién promovido no aparezca con delay en
+// la lista (reportado 2026-09-09, caso Elianja20) — antes esto solo usaba
+// onSnapshot, que resuelve async y siempre corría después del primer render().
+function _applyPlantelSnapshot(snap) {
+  const base = PLAYERS.filter(p => !p.isRecluta);
+  PLAYERS.length = 0; base.forEach(p => PLAYERS.push(p));
+  if (snap.exists) {
+    const data = snap.data();
+    const numOverrides = data.numeros || {};
+    PLAYERS.forEach(p => { if (numOverrides[p.name] != null) p.num = numOverrides[p.name]; });
+    const existingNames = new Set(PLAYERS.map(p => p.name));
+    (data.jugadores || []).forEach(j => {
+      if (j.name && !existingNames.has(j.name)) {
+        PLAYERS.push({ name: j.name, pos: j.pos || 'DC', num: j.num || '', folder: null, isRecluta: true, nombre: j.nombre || '' });
+      }
+    });
+  }
 }
-_loadPlantel();
+
+async function _loadPlantel() {
+  if (!PLANTEL_DOC) return;
+  try {
+    _applyPlantelSnapshot(await PLANTEL_DOC.get());
+  } catch (e) { console.warn('[conv] plantel get error:', e); }
+  PLANTEL_DOC.onSnapshot(snap => { _applyPlantelSnapshot(snap); render(); }, () => {});
+}
+const _plantelReady = _loadPlantel();
 
 // Map slot position labels → reclutamiento position codes
 const SLOT_TO_RECLU_POS = {
@@ -2332,10 +2339,18 @@ if (window.visualViewport) {
    que el snapshot llegaba. Como el navegador descarta pestañas en segundo plano en el
    celular, esto se repetía "sin patrón" cada vez que se reabría la pestaña (reporte
    2026-08-12: "se resetean los estados todo el tiempo"). Ahora esa ventana se ve como
-   un estado de carga (dot pulsante, opacidad reducida) en vez de estados reales. */
+   un estado de carga (dot pulsante, opacidad reducida) en vez de estados reales.
+
+   _plantelReady sí se espera acá (con un tope de 2s por si Firestore no
+   responde) porque un jugador recién promovido desde reclutamiento no tiene
+   ningún guard de "cargando" — si no está en PLAYERS todavía, no aparece en
+   la lista, y aparecer de golpe unos segundos después se ve como un bug
+   (reporte 2026-09-09, caso Elianja20). El .get() inicial de _loadPlantel()
+   es una sola lectura de documento — normalmente resuelve en pocos cientos
+   de ms, así que esta espera es imperceptible en el caso común. */
 _loadBackup().then(() => loadState());
 renderDateTag();
-render();
+Promise.race([_plantelReady, new Promise(r => setTimeout(r, 2000))]).then(render);
 scheduleMidnightReset();
 
 // Pestaña que quedó en segundo plano (el navegador congela los timers ahí,
