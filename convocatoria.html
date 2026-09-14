@@ -451,7 +451,6 @@ const PLAYERS = [
   { name:'CipriMancini',    pos:'MVD', num:32, folder:'CipriMancini'   },
   { name:'Lil_Dekuroko',    pos:'LI',  num:22, folder:'Lil_Dekuroko'   },
   { name:'Full_boxxing_',   pos:'MCD', num:14, folder:'Full_boxxing_'  },
-  { name:'BlackPanther-CG', pos:'ED',  num:11, folder:'BlackPanther-CG'},
   { name:'Lautavester7',    pos:'EI',  num:7,  folder:'Lautavester7'   },
   { name:'Juanchyroman08',  pos:'ED',  num:18, folder:'Juanchyroman08' },
   { name:'fedeavv9',        pos:'DC',  num:9,  folder:'fedeavv9'       },
@@ -462,7 +461,6 @@ const PLAYERS = [
 /* ─── SVG CROP DATA (fallback cuando no hay PNG) ─── */
 const CROP_DATA = {
   'Alexisraies23':{iW:121.2,iH:68.1,oX:58.1,oY:13.0},
-  'BlackPanther-CG':{iW:121.2,iH:68.1,oX:58.9,oY:13.0},
   'CipriMancini':   {iW:121.2,iH:68.1,oX:65.8,oY:13.0},
   'Guiidow':        {iW:121.2,iH:68.1,oX:65.1,oY:13.0},
   'Juan_Martinez4': {iW:100.2,iH:56.4,oX:43.7,oY:7.2 },
@@ -1559,7 +1557,7 @@ function autoLineup() {
   lineup.slots = {
     'GK':'Ivan_Cabj_La12','RB':'Huber236','CB1':'Alexisraies23',
     'CB2':'Cabers14','LB':'Guiidow','RM':'Juan_Martinez4','CM':null,
-    'LM':'CipriMancini','RW':'BlackPanther-CG','CF':null,'LW':'Lautavester7',
+    'LM':'CipriMancini','RW':null,'CF':null,'LW':'Lautavester7',
   };
   saveState(); render();
   showToast('Alineación cargada ⚡');
