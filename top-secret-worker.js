@@ -774,7 +774,7 @@ export default {
           result = { live: !!gqlData?.data?.user?.stream };
         } catch (e) { /* deja result = { live:false } */ }
 
-        try { await env.TS_KV.put(cacheKey, JSON.stringify(result), { expirationTtl: 30 }); } catch (e) {}
+        try { await env.TS_KV.put(cacheKey, JSON.stringify(result), { expirationTtl: 300 }); } catch (e) {}
         return jsonResp(result);
       }
 
