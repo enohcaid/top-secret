@@ -923,7 +923,21 @@ document.querySelectorAll('.section-title').forEach(el=>io2.observe(el));
     }
   }
 
+  // Los vivos solo pasan entre 22:30 y 00:30 ART — fuera de esa franja (con
+  // margen) ni siquiera se pregunta al Worker, para no gastar cuota de KV
+  // pollendo 24hs algo que nunca puede estar en vivo.
+  function isLiveWindow() {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(new Date());
+    const h = parseInt(parts.find(p => p.type === 'hour').value, 10);
+    const m = parseInt(parts.find(p => p.type === 'minute').value, 10);
+    const mins = h * 60 + m;
+    return mins >= 21 * 60 + 45 || mins <= 45; // 21:45 → 00:45 ART
+  }
+
   async function checkLive() {
+    if (!isLiveWindow()) { setLive(false); return; }
     try {
       const r = await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/twitch-live');
       const data = await r.json();
