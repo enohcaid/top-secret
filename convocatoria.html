@@ -1188,7 +1188,9 @@ function brazos2Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos2
 function frente2Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente2.png`); }
 function brazos3Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos3.png`); }
 function frente3Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente3.png`); }
-function svgPath(p)     { return mediaUrl(`Renders/${p.name}.svg`); }
+function brazos4Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos4.png`); }
+function frente4Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente4.png`); }
+function svgPath(p)    { return mediaUrl(`Renders/${p.name}.svg`); }
 
 function tryImages(paths, idx, onSuccess, onFail) {
   if (idx >= paths.length) { onFail(); return; }
@@ -1204,7 +1206,7 @@ function buildAvatar(p, container) {
     container.innerHTML = `<div class="guest-sil"><svg viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg" style="width:68%;height:68%;"><ellipse cx="20" cy="14" rx="9" ry="10" fill="#2a2a2a"/><path d="M4 56C4 38 36 38 36 56Z" fill="#2a2a2a"/></svg></div>`;
     return;
   }
-  tryImages([brazos3Path(p), brazos2Path(p), brazosPath(p)], 0,
+  tryImages([brazos4Path(p), brazos3Path(p), brazos2Path(p), brazosPath(p)], 0,
     (src) => {
       container.innerHTML = '';
       const el = document.createElement('img');
@@ -1444,7 +1446,7 @@ function renderPitch() {
       }
 
       // Try T3 → T2 → T1 → silueta
-      if (!player.isGuest) tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
+      if (!player.isGuest) tryImages([frente4Path(player), frente3Path(player), frente2Path(player), frontePath(player), brazos4Path(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => setPhoto(src),
         () => {
           tok.innerHTML = '';
@@ -2230,7 +2232,7 @@ async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
         drawBar(tx, ty, player);
         resolve();
       }
-      tryImages([frente3Path(player), frente2Path(player), frontePath(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
+      tryImages([frente4Path(player), frente3Path(player), frente2Path(player), frontePath(player), brazos4Path(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => drawPhoto(im, src); im.src = src; },
         () => { drawSilhouette(tx, ty); drawBar(tx, ty, player); resolve(); }
       );
