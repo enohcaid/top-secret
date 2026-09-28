@@ -38,7 +38,7 @@ body {
 body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 
 /* ── PAGE HEADER ── */
-.page-header { max-width: 1100px; margin: 0 auto; padding: 48px 32px 20px; }
+.page-header { max-width: 1440px; margin: 0 auto; padding: 48px var(--ts-g) 20px; }
 .ph-eyebrow {
   font-size: .7rem; font-weight: 700; letter-spacing: .2em;
   text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
@@ -54,8 +54,8 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 
 /* ── SEASON BAR ── */
 .season-bar {
-  max-width: 1100px; margin: 0 auto 20px;
-  padding: 0 32px; display: flex; gap: 8px;
+  max-width: 1440px; margin: 0 auto 20px;
+  padding: 0 var(--ts-g); display: flex; gap: 8px;
 }
 .season-pill {
   padding: 7px 22px; border-radius: 20px;
@@ -70,8 +70,8 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 
 /* ── POSITION FILTER ── */
 .pos-filter {
-  max-width: 1100px; margin: 0 auto 32px;
-  padding: 0 32px; display: flex; gap: 8px; flex-wrap: wrap;
+  max-width: 1440px; margin: 0 auto 32px;
+  padding: 0 var(--ts-g); display: flex; gap: 8px; flex-wrap: wrap;
 }
 .pfbtn {
   padding: 7px 18px; border-radius: 8px;
@@ -86,33 +86,34 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 
 /* ── SQUAD GRID ── */
 .squad-grid {
-  max-width: 1100px; margin: 0 auto; padding: 0 32px 80px;
+  max-width: 1440px; margin: 0 auto; padding: 0 var(--ts-g) 80px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
 }
 
 /* ── PLAYER CARD ── */
 .player-card {
-  background: var(--gray);
+  background: linear-gradient(180deg, var(--card2, #1D1910), var(--card, #16130B));
   border: 1px solid var(--border);
-  border-top: 3px solid var(--gold);
-  border-radius: 0 0 8px 8px;
+  border-radius: 22px;
+  transition: border-color .2s ease;
   overflow: hidden;
   cursor: pointer;
   position: relative;
   will-change: transform;
 }
 .player-card.hidden { display: none; }
-.player-card.selected { border-top-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.player-card:hover { border-color: color-mix(in srgb, var(--gold) 55%, transparent); }
+.player-card.selected { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
 
 /* ── CARD IMAGE WRAP ── */
 .card-img-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 4/5;
+  aspect-ratio: 3/4;
   overflow: hidden;
-  background: var(--black);
+  background: transparent;
 }
 .player-card.v2 .card-img-wrap { background: var(--gray); }
 .card-img-wrap::after {
@@ -142,7 +143,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 
 /* ── CARD FOOTER ── */
 .card-footer {
-  padding: 11px 14px;
+  padding: 14px 18px 18px;
   display: flex; align-items: flex-start; justify-content: space-between;
 }
 .cf-num {
@@ -152,11 +153,11 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
   margin-bottom: 1px;
 }
 .cf-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: .9rem; font-weight: 800;
-  color: var(--text); letter-spacing: .02em;
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.05rem; font-weight: 800;
+  color: var(--text); letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  line-height: 1.2; max-width: 130px;
+  line-height: 1.2; max-width: 160px;
 }
 .cf-posn { font-size: .66rem; color: var(--mid); letter-spacing: .04em; margin-top: 2px; }
 .cf-right { flex-shrink: 0; margin-left: 6px; padding-top: 3px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
@@ -175,7 +176,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 }
 .plataforma-badge svg { width: 14px; height: 14px; }
 .pos-badge {
-  display: inline-block; padding: 3px 8px; border-radius: 4px;
+  display: inline-block; padding: 4px 10px; border-radius: 999px;
   font-size: .6rem; font-weight: 700; letter-spacing: .1em;
   border: 1px solid var(--border); color: var(--mid); background: var(--gray);
 }
@@ -407,7 +408,7 @@ body.panel-open { margin-right: calc(48px + var(--panel-w)); }
 .pp-dl-btn:active { opacity: .7; }
 
 /* ── T2 PLACEHOLDER ── */
-.t2-soon { max-width: 1100px; margin: 0 auto; padding: 0 32px 80px; display: none; }
+.t2-soon { max-width: 1440px; margin: 0 auto; padding: 0 var(--ts-g) 80px; display: none; }
 .t2-card {
   background: var(--gray); border: 1px solid var(--border);
   border-top: 3px solid var(--gold); border-radius: 0 0 8px 8px;
@@ -1197,6 +1198,6 @@ renderGrid4('all');
   }, 400);
 })();
 </script>
-<script src="layout.js?v=11"></script>
+<script src="layout.js?v=12"></script>
 </body>
 </html>

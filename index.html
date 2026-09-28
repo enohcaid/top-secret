@@ -63,7 +63,12 @@ img{display:block;}
 .hero-visual{position:relative;min-height:420px;background:#050403;}
 .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 12%;}
 .hero-visual::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 0%,transparent 22%);pointer-events:none;opacity:.85;}
-.hero-tag{position:absolute;right:22px;bottom:22px;z-index:3;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:rgba(11,10,7,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(242,238,224,.12);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#F2EEE0;}
+.hero-photo{transition:opacity .9s ease;}
+.hero-nav{position:absolute;right:22px;bottom:22px;z-index:3;display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(11,10,7,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(242,238,224,.12);}
+.hero-nav button{width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:#F2EEE0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background-color .2s ease,color .2s ease;}
+.hero-nav button:hover{background:var(--gold);color:#0B0A07;}
+.hero-nav svg{width:17px;height:17px;}
+.hero-tag{position:absolute;left:calc(22% + 10px);bottom:22px;z-index:3;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:rgba(11,10,7,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(242,238,224,.12);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#F2EEE0;}
 .hero-tag i{width:7px;height:7px;border-radius:50%;background:var(--gold);}
 .hero-scroll{position:absolute;left:50%;bottom:0;transform:translateX(-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 16px 10px;border-radius:40px 40px 0 0;background:var(--bg);text-decoration:none;font-size:.62rem;font-weight:600;letter-spacing:.08em;color:var(--mid);}
 .hero-scroll span{width:36px;height:36px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;}
@@ -265,14 +270,19 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
             </a>
             <div class="hero-feature">
               <h3>Nuevo kit · Temporada 4</h3>
-              <p>Negro y dorado para el campo, naranja para los arqueros. Conocé al plantel que sale a la cancha.</p>
+              <p>Negro y dorado de titular, azul de alternativa y naranja para los arqueros. Conocé al plantel que sale a la cancha.</p>
               <a class="pill-btn" href="plantilla.html">Ver plantel<span class="pill-btn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></a>
             </div>
           </div>
         </div>
         <div class="hero-visual">
-          <img class="hero-photo" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/hero-t4.webp" alt="Juan_Martinez4 y Lautavester7 con el kit de la Temporada 4">
-          <div class="hero-tag"><i></i>Kit T4 · EA FC Clubs Pro</div>
+          <img class="hero-photo" id="hero-a" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/hero-t4.webp" alt="Juan_Martinez4 y Lautavester7 con el kit de la Temporada 4">
+          <img class="hero-photo" id="hero-b" alt="" style="opacity:0">
+          <div class="hero-tag"><i></i><span id="hero-cap">Juan_Martinez4 · Lautavester7</span></div>
+          <div class="hero-nav" id="hero-nav">
+            <button type="button" id="hero-prev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <button type="button" id="hero-next" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
           <div class="hero-live-wrap" id="hero-live-wrap">
             <div class="hero-live-badge"><span class="hero-live-dot"></span>En vivo en Twitch</div>
             <iframe id="hero-live-frame" title="Transmisión en vivo Top Secret FC" allowfullscreen scrolling="no"></iframe>
@@ -386,7 +396,7 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
 </div>
 
 <script src="noticias-data.js"></script>
-<script type="module" src="index-home.js?v=1"></script>
-<script src="layout.js?v=11"></script>
+<script type="module" src="index-home.js?v=2"></script>
+<script src="layout.js?v=12"></script>
 </body>
 </html>

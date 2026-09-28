@@ -54,7 +54,7 @@
   // ── CSS ────────────────────────────────────────────────────────────────────
   const style = document.createElement('style');
   style.textContent = `
-    :root{--gold:#B0B8C4;--gold2:#D4DAE4;--sb-left:0px !important;--sb-right:0px !important;}
+    :root{--gold:#B0B8C4;--gold2:#D4DAE4;--sb-left:0px !important;--sb-right:0px !important;--ts-g:clamp(16px,3vw,40px);}
 
     /* Sin barras laterales: cada página reservaba 64px/48px a los costados. */
     body{margin-left:0 !important;margin-right:0 !important;padding-left:0 !important;padding-right:0 !important;}
@@ -114,6 +114,26 @@
     .tb-sheet-social a span{color:color-mix(in srgb, var(--text, #F2EEE0) 70%, transparent);}
     .tb-sheet-social svg{width:20px;height:20px;}
     .tb-sheet .tb-cta{align-self:flex-start;margin-top:18px;}
+
+    /* ── Encabezado de páginas interiores: tarjeta con título grande + dupla ── */
+    .ts-hero{position:relative;left:50%;transform:translateX(-50%);display:grid !important;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);width:min(1360px,calc(100vw - 2*clamp(16px,3vw,40px)));max-width:none !important;min-height:clamp(260px,30vw,420px);margin:12px 0 clamp(24px,3vw,40px) !important;padding:0 !important;border-radius:28px;background:linear-gradient(160deg,var(--card,#16130B),var(--bg,#0B0A07) 85%);border:1px solid color-mix(in srgb, var(--text, #F2EEE0) 8%, transparent);overflow:hidden;text-align:left;}
+    .ts-hero.ts-hero--compact{min-height:clamp(180px,18vw,240px);}
+    .ts-hero-copy{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px;padding:clamp(26px,4vw,56px);min-width:0;}
+    .ts-hero-copy > *{margin-left:0 !important;margin-right:0 !important;}
+    .ts-hero h1,.ts-hero .ph-title,.ts-hero .page-title{font-family:'Barlow',sans-serif !important;font-weight:900 !important;font-size:clamp(2.6rem,6vw,5.4rem) !important;line-height:.92 !important;letter-spacing:-.045em !important;text-transform:none !important;color:var(--text, #F2EEE0) !important;margin:0 !important;}
+    .ts-hero.ts-hero--compact h1,.ts-hero.ts-hero--compact .page-title{font-size:clamp(2.2rem,4.4vw,3.8rem) !important;}
+    .ts-hero h1 span,.ts-hero .ph-title span,.ts-hero .page-title span{color:inherit !important;}
+    .ts-hero .ph-eyebrow,.ts-hero .page-eyebrow{border:0 !important;box-shadow:none !important;background:none !important;padding:0 !important;font-family:'Barlow',sans-serif !important;font-size:.74rem !important;font-weight:600 !important;letter-spacing:.3em !important;text-transform:uppercase;color:var(--gold) !important;}
+    .ts-hero .ph-sub,.ts-hero .page-sub,.ts-hero p{font-size:.92rem !important;color:color-mix(in srgb, var(--text, #F2EEE0) 55%, transparent) !important;letter-spacing:.02em !important;text-transform:none !important;max-width:460px;}
+    .ts-hero-visual{position:relative;min-height:100%;background:#050403;}
+    .ts-hero-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .ts-hero-visual::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--card,#16130B) 0%,transparent 30%);pointer-events:none;}
+    @media(max-width:760px){
+      .ts-hero{grid-template-columns:1fr;min-height:0;}
+      .ts-hero-visual{order:-1;aspect-ratio:16/10;min-height:0;}
+      .ts-hero-visual::after{background:linear-gradient(0deg,var(--card,#16130B) 0%,transparent 40%);}
+      .ts-hero.ts-hero--compact .ts-hero-visual{aspect-ratio:16/7;}
+    }
 
     @media(max-width:980px){
       .tb-nav,.tb-counter,.tb-right .tb-cta{display:none;}
@@ -416,9 +436,38 @@
     document.getElementById('tb-theme-btn').addEventListener('click', cycleTheme);
   }
 
+  // Dupla que ilustra cada página interior (logos/duos/*.webp en R2).
+  const PAGE_ART = {
+    'plantilla.html':     { img: 'duo-capitanes-k2',  pos: '50% 18%' },
+    'estadisticas.html':  { img: 'duo-mediocampo-k1', pos: '50% 18%' },
+    'posiciones.html':    { img: 'duo-ataque-k1',     pos: '50% 18%' },
+    'calendario.html':    { img: 'duo-laterales-k2',  pos: '50% 22%' },
+    'noticias.html':      { img: 'duo-defensa-k1',    pos: '50% 18%' },
+    'reclutamiento.html': { img: 'duo-defensa-k2',    pos: '50% 18%' },
+    'convocatoria.html':  { img: 'duo-arqueros',      pos: '50% 22%', compact: true },
+  };
+
+  function decorateHeader() {
+    const art = PAGE_ART[currentFile];
+    const h = art && document.querySelector('.page-header, .page-header-row');
+    if (!h || h.classList.contains('ts-hero')) return;
+    h.classList.add('ts-hero');
+    if (art.compact) h.classList.add('ts-hero--compact');
+    const copy = document.createElement('div');
+    copy.className = 'ts-hero-copy';
+    while (h.firstChild) copy.appendChild(h.firstChild);
+    const visual = document.createElement('div');
+    visual.className = 'ts-hero-visual';
+    visual.innerHTML = `<img src="${MEDIA_BASE}/logos/duos/${art.img}.webp" alt="" style="object-position:${art.pos}" onerror="this.onerror=null;this.src='${MEDIA_BASE}/logos/hero-t4.webp'">`;
+    h.append(copy, visual);
+  }
+
   function inject() {
     document.body.insertBefore(sheet, document.body.firstChild);
     document.body.insertBefore(topbar, document.body.firstChild);
+    // noticias.html carga layout.js antes de su contenido: esperar al DOM completo.
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decorateHeader);
+    else decorateHeader();
     bind();
   }
 

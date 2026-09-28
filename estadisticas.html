@@ -22,12 +22,12 @@
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;margin-left:64px;margin-right:48px;padding-top:64px;}
 /* PAGE */
-.page-header{padding:56px 32px 24px;max-width:1100px;margin:0 auto;}
+.page-header{padding: 56px var(--ts-g) 24px;max-width:1440px;margin:0 auto;}
 .page-eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:900;line-height:.9;letter-spacing:-.01em;text-transform:uppercase;}
 .page-title span{color:var(--gold);}
 .page-sub{font-size:.85rem;color:var(--muted);margin-top:10px;}
-.wrap{max-width:1100px;margin:0 auto;padding:0 32px 80px;}
+.wrap{max-width:1440px;margin:0 auto;padding: 0 var(--ts-g) 80px;}
 
 /* TABS */
 .tabs{display:flex;gap:4px;margin-bottom:32px;border-bottom:1px solid var(--border);}
@@ -2974,6 +2974,6 @@ window.ceaSortBy        = ceaSortBy;
 })(); // end IIFE
 
 </script>
-<script src="layout.js?v=11"></script>
+<script src="layout.js?v=12"></script>
 </body>
 </html>

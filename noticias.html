@@ -33,9 +33,9 @@
 
     /* ── Page wrapper ── */
     .page-wrap {
-      max-width: 1100px;
+      max-width: 1440px;
       margin: 0 auto;
-      padding: 48px 24px 80px;
+      padding: 48px var(--ts-g) 80px;
     }
 
     /* ── Page header ── */
@@ -61,11 +61,12 @@
     .featured-card {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      background: var(--black);
-      border-radius: 4px;
+      background: linear-gradient(160deg, var(--card, #16130B), var(--bg, #0B0A07) 85%);
+      border: 1px solid var(--border);
+      border-radius: 28px;
       overflow: hidden;
-      min-height: 420px;
-      margin-bottom: 56px;
+      min-height: 480px;
+      margin-bottom: 64px;
       position: relative;
     }
     @media (max-width: 760px) {
@@ -104,8 +105,8 @@
       font-weight: 800;
       letter-spacing: .12em;
       text-transform: uppercase;
-      padding: 3px 9px;
-      border-radius: 2px;
+      padding: 4px 11px;
+      border-radius: 999px;
     }
     .pill-cat {
       font-family: 'Barlow Condensed', sans-serif;
@@ -116,13 +117,12 @@
       color: rgba(255,255,255,.4);
     }
     .featured-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 2.5rem;
+      font-family: 'Barlow', sans-serif;
+      font-size: clamp(2rem, 3.6vw, 3.3rem);
       font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      color: #FFFFFF;
-      line-height: 1.05;
+      letter-spacing: -.035em;
+      color: var(--text, #F2EEE0);
+      line-height: 1;
       margin-bottom: 16px;
     }
     .featured-date {
@@ -151,8 +151,8 @@
       font-weight: 800;
       letter-spacing: .1em;
       text-transform: uppercase;
-      padding: 10px 22px;
-      border-radius: 3px;
+      padding: 12px 24px;
+      border-radius: 999px;
       transition: background .15s;
     }
     .btn-primary:hover { background: var(--gold2); }
@@ -166,8 +166,8 @@
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
-      padding: 10px 22px;
-      border-radius: 3px;
+      padding: 12px 24px;
+      border-radius: 999px;
       transition: border-color .15s, color .15s;
     }
     .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
@@ -177,6 +177,8 @@
       overflow: hidden;
     }
     .featured-photo img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -186,7 +188,7 @@
     .featured-photo-gradient {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to right, #111111 0%, transparent 40%);
+      background: linear-gradient(to right, var(--card, #16130B) 0%, transparent 35%);
       pointer-events: none;
     }
     .featured-video {
@@ -212,50 +214,50 @@
 
     /* ── Section heading ── */
     .section-heading {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .1em;
+      font-family: 'Barlow', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1;
       color: var(--text, #F0F2F8);
-      padding-bottom: 12px;
-      border-bottom: 2px solid var(--border);
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
-    .section-heading span { color: var(--gold); }
+    .section-heading span { color: inherit; }
 
     /* ── News grid ── */
+    /* Tarjetas con la imagen a sangre (4:5, formato del post diario) y el texto encima */
     .news-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
     }
 
     .news-card {
-      background: var(--gray);
+      position: relative;
+      aspect-ratio: 4/5;
+      background: var(--card, #16130B);
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 22px;
       overflow: hidden;
       cursor: pointer;
-      transition: transform .15s, box-shadow .15s;
+      isolation: isolate;
+      transition: border-color .2s ease;
     }
-    .news-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+    .news-card:hover { border-color: color-mix(in srgb, var(--gold) 55%, transparent); }
+    .news-card::after {
+      content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(to top, rgba(5,4,3,.94) 0%, rgba(5,4,3,.4) 42%, transparent 68%);
+    }
     .news-card-img {
-      width: 100%;
-      height: 180px;
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
       object-fit: cover;
       display: block;
-      background: var(--gray);
+      background: var(--card, #16130B);
+      transition: transform .6s cubic-bezier(.22,1,.36,1);
     }
-    .news-card.portrait {
-      display: grid;
-      grid-template-columns: 42% 1fr;
-    }
-    .news-card.portrait .news-card-img {
-      height: 100%;
-      min-height: 200px;
-    }
-    .news-card-body { padding: 18px 20px; }
+    .news-card:hover .news-card-img { transform: scale(1.05); }
+    .news-card-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 20px 22px; color: #fff; }
     .news-card-cat {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: .68rem;
@@ -266,11 +268,12 @@
       margin-bottom: 6px;
     }
     .news-card-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.15rem;
+      font-family: 'Barlow', sans-serif;
+      font-size: 1.2rem;
       font-weight: 800;
-      text-transform: uppercase;
+      letter-spacing: -.015em;
       line-height: 1.15;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
       margin-bottom: 8px;
     }
     .news-card-date {
@@ -769,7 +772,7 @@
 <body>
 
 <script src="noticias-data.js"></script>
-<script src="layout.js?v=11"></script>
+<script src="layout.js?v=12"></script>
 
 <div class="page-wrap">
 
@@ -954,6 +957,15 @@ function findNews(id) {
   return allNews().find(x => x.id === id);
 }
 
+// Las imágenes de R2 tienen una versión .webp liviana al lado del PNG original
+// (~150 KB vs ~2.5 MB). Se pide primero el webp; si no existe, cae al original.
+function webp(url) {
+  return /\/media\/.+\.(png|jpe?g)$/i.test(url || '') ? url.replace(/\.(png|jpe?g)$/i, '.webp') : url;
+}
+function webpFallback(url) {
+  return `if(!this.dataset.f&&this.src!=='${url}'){this.dataset.f=1;this.src='${url}';return;}`;
+}
+
 function formatDate(iso) {
   const n = allNews().find(x => x.date === iso);
   if (n && n.dateLabel) return n.dateLabel;
@@ -991,7 +1003,7 @@ function renderFeatured(n) {
   const slot = document.getElementById('featured-slot');
   const videoHtml = videoEmbedFragment(n, 'featured-video');
   const media = videoHtml || `<div class="featured-photo">
-         <img src="${n.image}" alt="${n.title}" onerror="this.parentElement.style.background='#1a1a1a'">
+         <img src="${webp(n.image)}" alt="${n.title}" onerror="${webpFallback(n.image)}this.parentElement.style.background='#1a1a1a'">
          <div class="featured-photo-gradient"></div>
        </div>`;
   slot.innerHTML = `
@@ -1022,7 +1034,7 @@ function renderGrid(items) {
   wrap.style.display = 'block';
   grid.innerHTML = items.map(n => `
     <div class="news-card" onclick="openArticle('${n.id}')">
-      <img class="news-card-img" src="${n.image}" alt="${n.title}" onload="if(this.naturalHeight>this.naturalWidth)this.closest('.news-card').classList.add('portrait')" onerror="this.style.background='var(--gray)'">
+      <img class="news-card-img" src="${webp(n.image)}" alt="${n.title}" loading="lazy" onerror="${webpFallback(n.image)}this.style.background='var(--gray)'">
       <div class="news-card-body">
         <div class="news-card-cat">${n.category}</div>
         <div class="news-card-title">${n.title}</div>
@@ -1058,7 +1070,7 @@ function renderAutoSection() {
   wrap.style.display = 'block';
   grid.innerHTML = merged.map(n => `
     <div class="news-card" onclick="openArticle('${n.id}')">
-      ${n.image ? `<img class="news-card-img" src="${n.image}" alt="${n.title}" onload="if(this.naturalHeight>this.naturalWidth)this.closest('.news-card').classList.add('portrait')" onerror="this.style.background='var(--gray)';this.style.display='none'">` : '<div class="news-card-img" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.1em;">Resultados</div>'}
+      ${n.image ? `<img class="news-card-img" src="${webp(n.image)}" alt="${n.title}" loading="lazy" onerror="${webpFallback(n.image)}this.style.background='var(--gray)';this.style.display='none'">` : '<div class="news-card-img" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.1em;">Resultados</div>'}
       <div class="news-card-body">
         <div class="news-card-cat">${n.category}</div>
         <div class="news-card-title">${n.title}</div>

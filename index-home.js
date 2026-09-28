@@ -138,8 +138,11 @@ const autoNews   = generateMatchNews(SEED_MATCHES);
 const manualNews = typeof NOTICIAS !== 'undefined' ? NOTICIAS : [];
 const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
 
+// Las imágenes de R2 tienen un .webp liviano al lado del PNG; si falta, cae al original.
+const webp = url => /\/media\/.+\.(png|jpe?g)$/i.test(url || '') ? url.replace(/\.(png|jpe?g)$/i, '.webp') : url;
+
 function newsMedia(n) {
-  if (n.image) return `<img src="${n.image}" alt="" loading="lazy">`;
+  if (n.image) return `<img src="${webp(n.image)}" alt="" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${n.image}'}">`;
   if (n.videoId && n.videoProvider !== 'tiktok') return `<img src="https://i.ytimg.com/vi/${n.videoId}/hqdefault.jpg" alt="" loading="lazy">`;
   return `<div class="news-fallback"><img src="${mediaUrl('logos/rebrand/clean-white.webp')}" alt=""></div>`;
 }
@@ -255,6 +258,46 @@ if (!reduced && typeof gsap !== 'undefined') {
   gsap.from('.hero-photo', { opacity: 0, scale: 1.04, duration: 1.1, ease: 'power3.out' });
   revealIn(document.querySelectorAll('.block-head, .stat-card, .league-card, .top-card, .result-row, .tile, .social-tile'));
 }
+
+/* ── HERO ROTATIVO (duplas del plantel, kit principal y secundario) ── */
+(function () {
+  const SLIDES = [
+    ['logos/hero-t4.webp',              'Juan_Martinez4 · Lautavester7'],
+    ['logos/duos/duo-mediocampo-k1.webp','CipriMancini · RS32-DaniStone'],
+    ['logos/duos/duo-defensa-k2.webp',  'Elianja20 · endiabladorojo66 · Kit 2'],
+    ['logos/duos/duo-defensa-k1.webp',  'Alexisraies23 · Cabers14'],
+    ['logos/duos/duo-laterales-k2.webp','nikileo527 · pepolemmo2710 · Kit 2'],
+    ['logos/duos/duo-arqueros.webp',    'Ivan_Cabj_La12 · adri_cai · Arqueros'],
+    ['logos/duos/duo-ataque-k1.webp',   'NicoBJ_96 · kee_viin03'],
+    ['logos/duos/duo-capitanes-k2.webp','Juan_Martinez4 · Lautavester7 · Kit 2'],
+  ].map(([p, cap]) => ({ src: mediaUrl(p), cap }));
+  const imgs = [$('hero-a'), $('hero-b')], cap = $('hero-cap');
+  let cur = 0, front = 0, timer = null, busy = false;
+  const slides = SLIDES.slice();
+
+  function show(idx) {
+    if (busy || !slides.length) return;
+    idx = (idx + slides.length) % slides.length;
+    if (idx === cur) return;
+    busy = true;
+    const next = imgs[1 - front], s = slides[idx];
+    next.onload = () => {
+      next.style.opacity = '1'; imgs[front].style.opacity = '0';
+      front = 1 - front; cur = idx; cap.textContent = s.cap; busy = false;
+    };
+    // Si una dupla todavía no está subida, se saltea sin cortar la rotación.
+    next.onerror = () => { slides.splice(idx, 1); if (idx < cur) cur--; busy = false; show(idx); };
+    next.alt = s.cap;
+    next.src = s.src;
+  }
+  const start = () => { clearInterval(timer); if (!reduced) timer = setInterval(() => show(cur + 1), 6000); };
+  $('hero-prev').addEventListener('click', () => { show(cur - 1); start(); });
+  $('hero-next').addEventListener('click', () => { show(cur + 1); start(); });
+  const visual = document.querySelector('.hero-visual');
+  visual.addEventListener('mouseenter', () => clearInterval(timer));
+  visual.addEventListener('mouseleave', start);
+  start();
+})();
 
 /* ── TWITCH EN VIVO (sobre la imagen del hero) ── */
 (function () {

@@ -47,7 +47,7 @@ body{
 }
 
 /* ─── PAGE HEADER ─── */
-.page-header{max-width:1100px;margin:0 auto;padding:56px 32px 24px;}
+.page-header{max-width:1440px;margin:0 auto;padding: 56px var(--ts-g) 24px;}
 .ph-eyebrow{
   font-size:.7rem;font-weight:700;letter-spacing:.2em;
   text-transform:uppercase;color:var(--gold);margin-bottom:8px;
@@ -62,7 +62,7 @@ body{
 .ph-sub{font-size:.85rem;color:var(--mid);margin-top:10px;}
 
 /* ─── WRAP ─── */
-.wrap{max-width:1100px;margin:0 auto;padding:0 32px 80px;}
+.wrap{max-width:1440px;margin:0 auto;padding: 0 var(--ts-g) 80px;}
 
 /* ─── FOOTER ─── */
 footer{
@@ -75,9 +75,9 @@ footer span{color:var(--gold);}
 
 /* ─── FILTERS / LEGEND ─── */
 .controls{
-  max-width:1100px;
+  max-width:1440px;
   margin:0 auto 32px;
-  padding:0 32px;
+  padding: 0 var(--ts-g);
   display:flex;
   flex-wrap:wrap;
   gap:10px;
@@ -125,7 +125,7 @@ footer span{color:var(--gold);}
 .fbtn.active.e11{background:var(--e11);border-color:var(--e11);color:#fff;}
 
 /* ─── WEEK BLOCKS ─── */
-.calendar{max-width:1100px;margin:0 auto;padding:0 32px;}
+.calendar{max-width:1440px;margin:0 auto;padding: 0 var(--ts-g);}
 
 .week{margin-bottom:40px;}
 .week-title{
@@ -371,7 +371,7 @@ footer span{color:var(--gold);}
 
 /* ─── SEASON SECTIONS ─── */
 .season-section{margin-bottom:4px;}
-.season-section-header{display:flex;align-items:center;gap:14px;padding:24px 32px 10px;max-width:1100px;margin:0 auto;}
+.season-section-header{display:flex;align-items:center;gap:14px;padding: 24px var(--ts-g) 10px;max-width:1440px;margin:0 auto;}
 .season-section-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;}
 .season-section-sub{font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;opacity:.7;}
 .season-section-line{flex:1;height:1px;background:var(--border);}
@@ -391,7 +391,7 @@ body.locked .admin-el{display:none !important;}
 body.locked .result-box.pending{cursor:default;}
 
 /* ─── NEW CAL CONTROLS ─── */
-.cal-header-row{max-width:1100px;margin:16px auto 0;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.cal-header-row{max-width:1440px;margin:16px auto 0;padding: 0 var(--ts-g);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .cal-legend-new{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
 .cln-item{display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);}
 .cln-dot{width:8px;height:8px;border-radius:50%;}
@@ -401,7 +401,7 @@ body.locked .result-box.pending{cursor:default;}
 .cal-admin-btns{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 
 /* ─── NEXT HERO ─── */
-.next-hero-wrap{max-width:1100px;margin:20px auto 0;padding:0 32px;}
+.next-hero-wrap{max-width:1440px;margin:20px auto 0;padding: 0 var(--ts-g);}
 .nh-card{background:var(--black);border-radius:16px;padding:28px 36px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:28px;position:relative;overflow:hidden;}
 .nh-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:var(--gold);}
 .nh-waiting{background:var(--gray);border:1px solid var(--border);border-radius:16px;padding:28px 36px;display:flex;align-items:center;gap:20px;}
@@ -429,7 +429,7 @@ body.locked .result-box.pending{cursor:default;}
 .nh-w-sub{font-size:.8rem;color:var(--mid);}
 
 /* ─── YEAR GRID ─── */
-.year-grid{max-width:1100px;margin:20px auto 0;padding:0 32px 80px;display:flex;flex-direction:column;gap:5px;}
+.year-grid{max-width:1440px;margin:20px auto 0;padding: 0 var(--ts-g) 80px;display:flex;flex-direction:column;gap:5px;}
 
 /* ─── MONTH CARD ─── */
 .month-card{background:var(--gray);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:opacity .15s;}
@@ -475,14 +475,14 @@ body.locked .result-box.pending{cursor:default;}
 }
 
 /* ─── NEXT MATCH CARD ─── */
-.next-match-outer{max-width:1100px;margin:8px auto 0;padding:0 32px;}
+.next-match-outer{max-width:1440px;margin:8px auto 0;padding: 0 var(--ts-g);}
 .next-match-card{display:flex;align-items:center;gap:14px;padding:11px 16px;border-radius:10px;border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.04);}
 .nm-countdown{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;color:var(--gold);min-width:72px;letter-spacing:.04em;white-space:nowrap;}
 .nm-rival{font-size:.92rem;font-weight:700;color:var(--text);}
 .nm-meta{font-size:.7rem;color:var(--mid);margin-top:2px;}
 
 /* ─── PER-LEAGUE STATS ─── */
-.stats-perleague{max-width:1100px;margin:0 auto 20px;padding:0 32px;display:flex;gap:10px;flex-wrap:wrap;}
+.stats-perleague{max-width:1440px;margin:0 auto 20px;padding: 0 var(--ts-g);display:flex;gap:10px;flex-wrap:wrap;}
 .lsc{flex:1;min-width:140px;background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
 .lsc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
 .lsc-badge{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.1em;padding:2px 8px;border-radius:4px;}
@@ -663,9 +663,9 @@ body.locked .result-box.pending{cursor:default;}
 
 /* ─── STATS BAR ─── */
 .stats{
-  max-width:1100px;
+  max-width:1440px;
   margin:0 auto 28px;
-  padding:0 32px;
+  padding: 0 var(--ts-g);
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:10px;
@@ -726,7 +726,7 @@ body{padding-top:64px;}
 @media(max-width:600px){}
 
 .week-strip-wrap{position:sticky;top:64px;z-index:50;background:rgba(17,17,17,.97);border-bottom:1px solid var(--border);padding:10px 32px 8px;max-width:calc(100% - 0px);}
-.week-strip{display:flex;flex-direction:row;gap:5px;overflow-x:auto;scrollbar-width:none;max-width:1100px;margin:0 auto;}
+.week-strip{display:flex;flex-direction:row;gap:5px;overflow-x:auto;scrollbar-width:none;max-width:1440px;margin:0 auto;}
 .week-strip::-webkit-scrollbar{display:none;}
 .day-pill{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 9px;border-radius:8px;cursor:pointer;border:1px solid transparent;min-width:42px;transition:border-color .15s, background-color .15s, opacity .15s;user-select:none;}
 .day-pill:hover{border-color:var(--border);}
@@ -738,7 +738,7 @@ body{padding-top:64px;}
 .dp-dots{display:flex;gap:2px;justify-content:center;margin-top:1px;}
 .dp-dot{width:4px;height:4px;border-radius:50%;}
 .day-pill.today .dp-dow,.day-pill.today .dp-num{color:#fff;}
-.today-card-outer{max-width:1100px;margin:12px auto 0;padding:0 32px;}
+.today-card-outer{max-width:1440px;margin:12px auto 0;padding: 0 var(--ts-g);}
 .today-card{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:12px 16px;}
 .today-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .today-card-title{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
@@ -3039,6 +3039,6 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
-<script src="layout.js?v=11"></script>
+<script src="layout.js?v=12"></script>
 </body>
 </html>
