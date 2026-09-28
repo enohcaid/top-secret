@@ -249,6 +249,37 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
   .result-date{display:none;}
   .foot{justify-content:center;text-align:center;}
 }
+
+/* ── LIBRE: fuera del hero nada va en recuadros (como el modelo) ── */
+.hero-card{border:0;}
+.stat-card,.league-card,.top-card,.tile,.social-tile{background:none !important;border:0 !important;border-radius:0 !important;}
+.stats-grid,.leagues-grid,.tops-grid{gap:clamp(20px,3vw,48px);}
+.stat-card{padding:18px 0 0;border-top:1px solid var(--border) !important;}
+.league-card{padding:18px 0 0;border-top:2px solid var(--border) !important;}
+.league-card:nth-child(1){border-top-color:var(--vpn) !important;}
+.league-card:nth-child(2){border-top-color:var(--vpug) !important;}
+.league-card:nth-child(3){border-top-color:var(--e11) !important;}
+.lc-dot{display:none;}
+.top-card-head{padding:0 0 10px;}
+.top-entry{padding:12px 0;}
+.results-list{gap:0;}
+.result-row{background:none;border:0;border-radius:0;border-bottom:1px solid var(--border);padding:16px 0;}
+.result-row:first-child{border-top:1px solid var(--border);}
+.tiles{gap:clamp(20px,3vw,48px);}
+.tile{min-height:0;padding:22px 0 0;border-top:1px solid var(--border) !important;}
+.tile:hover .tile-title{color:var(--gold);}
+.sq-card{background:none;border:0;border-radius:0;}
+.sq-card:hover{transform:none;}
+.sq-img{border-radius:18px;background:linear-gradient(180deg,var(--card2),var(--card));transition:transform .25s ease;}
+.sq-card:hover .sq-img{transform:translateY(-4px);}
+.sq-info{padding:12px 2px 0;}
+.social-grid{gap:clamp(16px,2vw,28px);}
+.social-tile{flex-direction:row;align-items:center;gap:14px;padding:0;}
+.social-tile svg{width:22px;height:22px;flex-shrink:0;}
+.social-tile:hover{background:none !important;}
+.social-tile:hover .social-name{color:var(--brand);}
+footer{border-top:0;}
+/* ── FIN LIBRE ── */
 </style>
 </head>
 <body>
@@ -419,6 +450,6 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
 
 <script src="noticias-data.js"></script>
 <script type="module" src="index-home.js?v=2"></script>
-<script src="layout.js?v=14"></script>
+<script src="layout.js?v=15"></script>
 </body>
 </html>

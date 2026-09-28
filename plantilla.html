@@ -455,6 +455,15 @@ footer span { color: var(--gold); }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
 }
+
+/* ── LIBRE: la ficha es la foto + texto suelto, sin caja ── */
+.player-card{background:none !important;border:0 !important;border-radius:0 !important;overflow:visible;}
+.player-card.selected{box-shadow:none;}
+.player-card.selected .card-img-wrap{box-shadow:0 0 0 2px var(--gold);}
+.card-img-wrap{border-radius:20px;background:linear-gradient(180deg,var(--card2,#1D1910),var(--card,#16130B)) !important;}
+.card-img-wrap::after{display:none;}
+.card-footer{padding:12px 2px 0;}
+/* ── FIN LIBRE ── */
 </style>
 </head>
 <body>
@@ -1198,6 +1207,6 @@ renderGrid4('all');
   }, 400);
 })();
 </script>
-<script src="layout.js?v=14"></script>
+<script src="layout.js?v=15"></script>
 </body>
 </html>

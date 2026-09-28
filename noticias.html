@@ -768,12 +768,19 @@
     .regen-confirm-actions .btn-primary  { width: 100%; }
     .regen-confirm-actions .btn-secondary { width: 100%; }
     .regen-confirm-actions .btn-danger    { width: 100%; }
-  </style>
+  
+/* ── LIBRE: el destacado sin caja; la imagen se redondea sola ── */
+.featured-card{background:none;border:0;border-radius:0;overflow:visible;gap:clamp(20px,3vw,48px);}
+.featured-text{padding:0;}
+.featured-photo{border-radius:26px;overflow:hidden;}
+.featured-photo-gradient{display:none;}
+/* ── FIN LIBRE ── */
+</style>
 </head>
 <body>
 
 <script src="noticias-data.js"></script>
-<script src="layout.js?v=14"></script>
+<script src="layout.js?v=15"></script>
 
 <div class="page-wrap">
 

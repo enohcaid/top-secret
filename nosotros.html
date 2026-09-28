@@ -136,6 +136,24 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;font-size:.78rem;c
   .palette,.anatomy,.specs{grid-template-columns:1fr;}
   .social-grid{grid-template-columns:repeat(2,1fr);}
 }
+
+/* ── LIBRE: sin recuadros, contenido suelto como el modelo ── */
+.fact,.anat,.spec,.tl,.social-tile,.crest-stage{background:none !important;border:0 !important;border-radius:0 !important;}
+.facts,.anatomy,.specs{gap:clamp(20px,3vw,48px);}
+.fact,.anat,.spec{padding:18px 0 0;border-top:1px solid var(--border) !important;}
+.timeline{gap:0;}
+.tl{padding:24px 0;border-bottom:1px solid var(--border) !important;}
+.tl:first-child{border-top:1px solid var(--border) !important;}
+.tl.now .tl-when,.tl.now h3{color:var(--gold);}
+.crest-stage{padding:0;}
+.variants{gap:clamp(12px,2vw,24px);}
+.variant{border:0;}
+.social-tile{flex-direction:row;align-items:center;gap:14px;padding:0;}
+.social-tile:hover{background:none !important;}
+.social-tile:hover .social-name{color:var(--brand);}
+.cta{background:none;border:0;border-radius:0;padding:clamp(28px,4vw,48px) 0 0;border-top:1px solid var(--border);}
+footer{border-top:0;}
+/* ── FIN LIBRE ── */
 </style>
 </head>
 <body>
@@ -203,7 +221,7 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;font-size:.78rem;c
     <div class="narrow">
       <div class="kicker">Historia</div>
       <h2>Temporada a temporada.</h2>
-      <p class="lead">Un recorrido corto pero intenso, hasta un plantel de veinte jugadores con camisetas propias.</p>
+      <p class="lead">Un recorrido corto pero intenso, hasta un plantel estable con camisetas propias.</p>
     </div>
     <div class="timeline" id="timeline"></div>
   </section>
@@ -320,7 +338,7 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;font-size:.78rem;c
 
 <footer><div class="wrap">Top Secret FC · EA FC Clubs Pro · Buenos Aires · Argentina</div></footer>
 
-<script src="layout.js?v=14"></script>
+<script src="layout.js?v=15"></script>
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
 import { ROSTER_T4 } from './roster.js';
@@ -345,7 +363,7 @@ const STEPS = [
   { when: 'Junio – Julio 2026', title: 'Campeonato de Invierno', text: 'Pretemporada en VPUG para llegar rodados a la temporada siguiente.' },
   { when: 'Agosto – Septiembre 2026', title: 'Temporada 3', text: 'VPN en 2da División, VPUG y 11x11 en simultáneo. Nace el canal oficial de YouTube y llegan las noticias diarias.', m: inRange('2026-08-02', '2026-09-28') },
   { when: 'Septiembre 2026', title: 'Nuevo escudo', text: 'Rebrand completo: el espía pasa al centro de la identidad y del sitio.' },
-  { when: 'Próximamente', title: 'Temporada 4', text: 'Veinte jugadores, tres camisetas nuevas y el mismo objetivo: competir en las tres ligas.', now: true },
+  { when: 'Próximamente', title: 'Temporada 4', text: 'Plantel renovado, tres camisetas nuevas y el mismo objetivo: competir en las tres ligas.', now: true },
 ];
 $('timeline').innerHTML = STEPS.map(s => {
   const st = s.m && s.m.length ? summary(s.m) : null;
