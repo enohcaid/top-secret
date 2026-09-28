@@ -179,6 +179,14 @@ img{display:block;}
 .result-score{font-size:1.05rem;font-weight:900;font-variant-numeric:tabular-nums;}
 .result-date{font-size:.72rem;color:var(--mid2);width:48px;text-align:right;}
 
+/* ── NOSOTROS ── */
+.about-card{position:relative;display:flex;align-items:flex-end;min-height:clamp(320px,38vw,520px);border-radius:28px;overflow:hidden;text-decoration:none;background:#050403;isolation:isolate;}
+.about-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;transition:transform .8s cubic-bezier(.22,1,.36,1);}
+.about-card:hover img{transform:scale(1.03);}
+.about-card::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,10,7,.92) 0%,rgba(11,10,7,.5) 45%,transparent 75%);z-index:1;}
+.about-copy{position:relative;z-index:2;padding:clamp(26px,4vw,56px);max-width:560px;}
+.about-title{font-size:clamp(1.8rem,3.4vw,3rem);font-weight:900;letter-spacing:-.035em;line-height:1.02;margin:10px 0 22px;color:#F2EEE0;}
+
 /* ── REDES ── */
 .social-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;}
 .social-tile{display:flex;flex-direction:column;align-items:flex-start;gap:26px;padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--border);text-decoration:none;transition:border-color .2s ease,background-color .2s ease;}
@@ -369,12 +377,26 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
     </div>
   </section>
 
-  <!-- REDES -->
-  <section class="block" id="redes">
+  <!-- NOSOTROS -->
+  <section class="block" id="nosotros">
     <div class="wrap">
       <div class="block-head">
-        <div><div class="block-kicker">Seguinos</div><h2 class="block-title">Redes</h2></div>
+        <div><div class="block-kicker">El club</div><h2 class="block-title"><a href="nosotros.html">Nosotros</a></h2></div>
+        <div class="chips">
+          <a class="chip" href="nosotros.html#historia">Historia</a>
+          <a class="chip" href="nosotros.html#escudo">El escudo</a>
+          <a class="chip" href="nosotros.html#equipaciones">Equipaciones</a>
+        </div>
       </div>
+      <a class="about-card" href="nosotros.html">
+        <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/manada-k1.webp" alt="El plantel saliendo del túnel" loading="lazy" onerror="this.onerror=null;this.src='https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-defensa-k1.webp'">
+        <div class="about-copy">
+          <div class="block-kicker">Nada que declarar</div>
+          <div class="about-title">El proyecto, la identidad y las camisetas de Top Secret FC.</div>
+          <span class="pill-btn">Conocé el club<span class="pill-btn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        </div>
+      </a>
+      <div class="sub-title">Redes</div>
       <div class="social-grid" id="social-grid"></div>
     </div>
   </section>
@@ -397,6 +419,6 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
 
 <script src="noticias-data.js"></script>
 <script type="module" src="index-home.js?v=2"></script>
-<script src="layout.js?v=12"></script>
+<script src="layout.js?v=13"></script>
 </body>
 </html>

@@ -27,7 +27,12 @@
       { label: 'Calendario',    desc: 'Fixture y resultados',           url: 'calendario.html' },
       { label: 'Estadísticas',  desc: 'Goles, asistencias, ratings',    url: 'estadisticas.html' },
     ]},
-    { id: 'redes', label: 'Redes', social: true },
+    { id: 'nosotros', label: 'Nosotros', url: 'nosotros.html', match: ['nosotros.html'], social: true, items: [
+      { label: 'El proyecto',   desc: 'Tres ligas, un plantel',          url: 'nosotros.html#proyecto' },
+      { label: 'Historia',      desc: 'Temporada a temporada',           url: 'nosotros.html#historia' },
+      { label: 'El escudo',     desc: 'El espía y sus variantes',        url: 'nosotros.html#escudo' },
+      { label: 'Equipaciones',  desc: 'Titular, alternativa y arquero',  url: 'nosotros.html#equipaciones' },
+    ]},
   ];
 
   const SOCIAL = [
@@ -44,12 +49,14 @@
 
   const currentFile = location.pathname.split('/').pop() || 'index.html';
 
-  if (!document.querySelector('link[href*="Bebas+Neue"]')) {
+  // Fuentes que usa la barra/menú, por si la página no las carga.
+  [['Bebas+Neue', 'Bebas+Neue'], ['Barlow+Condensed', 'Barlow+Condensed:wght@700'], ['family=Barlow:', 'Barlow:wght@400;600;700;900']].forEach(([probe, fam]) => {
+    if (document.querySelector(`link[href*="${probe}"]`)) return;
     const font = document.createElement('link');
     font.rel = 'stylesheet';
-    font.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
+    font.href = `https://fonts.googleapis.com/css2?family=${fam}&display=swap`;
     document.head.appendChild(font);
-  }
+  });
 
   // ── CSS ────────────────────────────────────────────────────────────────────
   const style = document.createElement('style');
@@ -84,7 +91,9 @@
     .tb-drop a.current .tb-d-label{color:var(--gold);}
     .tb-d-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.04em;}
     .tb-d-desc{display:block;font-size:.72rem;color:color-mix(in srgb, var(--text, #F2EEE0) 50%, transparent);margin-top:1px;}
-    .tb-drop.social{min-width:290px;display:grid;grid-template-columns:1fr;}
+    .tb-d-sep{font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:color-mix(in srgb, var(--text, #F2EEE0) 40%, transparent);padding:12px 12px 6px;margin-top:4px;border-top:1px solid color-mix(in srgb, var(--text, #F2EEE0) 8%, transparent);}
+    .tb-d-social{display:flex;flex-wrap:wrap;gap:4px;padding:4px 8px 6px;}
+    .tb-d-social a{padding:4px !important;border-radius:10px;}
     .tb-s-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:color-mix(in srgb, var(--text, #F2EEE0) 7%, transparent);color:var(--text, #F2EEE0);transition:color .15s ease,background-color .15s ease;}
     .tb-s-icon svg{width:16px;height:16px;}
     .tb-drop a:hover .tb-s-icon{color:var(--brand);background:color-mix(in srgb, var(--brand) 16%, transparent);}
@@ -346,15 +355,16 @@
   // ── Markup ────────────────────────────────────────────────────────────────
   const isCurrent = url => url.split('?')[0] === currentFile;
   const isActive  = g => (g.match || []).includes(currentFile);
-  const socialLink = s => `<a href="${s.url}" target="_blank" rel="noopener" style="--brand:${s.color}"><span class="tb-s-icon"><svg viewBox="0 0 24 24" fill="currentColor">${s.svg}</svg></span><span><span class="tb-d-label">${s.label}</span><span class="tb-d-desc">${s.handle}</span></span></a>`;
 
   function navItem(g) {
     if (!g.items && !g.social) {
       return `<div class="tb-item${isActive(g) ? ' active' : ''}"><a class="tb-link" href="${g.url}">${g.label}</a></div>`;
     }
-    const drop = g.social
-      ? `<div class="tb-drop social">${SOCIAL.map(socialLink).join('')}</div>`
-      : `<div class="tb-drop">${g.items.map(i => `<a href="${i.url}"${isCurrent(i.url) ? ' class="current"' : ''}><span><span class="tb-d-label">${i.label}</span><span class="tb-d-desc">${i.desc}</span></span></a>`).join('')}</div>`;
+    const links = (g.items || []).map(i => `<a href="${i.url}"${isCurrent(i.url) ? ' class="current"' : ''}><span><span class="tb-d-label">${i.label}</span><span class="tb-d-desc">${i.desc}</span></span></a>`).join('');
+    const socialRow = g.social
+      ? `<div class="tb-d-sep">Redes</div><div class="tb-d-social">${SOCIAL.map(s => `<a href="${s.url}" target="_blank" rel="noopener" title="${s.label}" style="--brand:${s.color}"><span class="tb-s-icon"><svg viewBox="0 0 24 24" fill="currentColor">${s.svg}</svg></span></a>`).join('')}</div>`
+      : '';
+    const drop = `<div class="tb-drop">${links}${socialRow}</div>`;
     const trigger = g.url
       ? `<a class="tb-link" href="${g.url}" data-drop>${g.label}${CARET_SVG}</a>`
       : `<button class="tb-link" type="button" data-drop aria-haspopup="true">${g.label}${CARET_SVG}</button>`;
@@ -385,14 +395,11 @@
   sheet.innerHTML = `
     <div class="tb-sheet-head">${brandHtml}<button class="tb-burger" type="button" aria-label="Cerrar menú" style="display:flex">${CLOSE_SVG}</button></div>
     <div class="tb-sheet-group"><a class="tb-sheet-title${currentFile === 'index.html' ? ' active' : ''}" href="index.html">Inicio</a></div>
-    ${NAV.filter(g => !g.social).map(g => `<div class="tb-sheet-group">
+    ${NAV.map(g => `<div class="tb-sheet-group">
       <a class="tb-sheet-title${isActive(g) ? ' active' : ''}" href="${g.url}">${g.label}</a>
       ${g.items ? `<div class="tb-sheet-sub">${g.items.map(i => `<a href="${i.url}">${i.label}</a>`).join('')}</div>` : ''}
+      ${g.social ? `<div class="tb-sheet-social">${SOCIAL.map(s => `<a href="${s.url}" target="_blank" rel="noopener" style="--brand:${s.color}"><svg viewBox="0 0 24 24" fill="currentColor">${s.svg}</svg><span>${s.label}</span></a>`).join('')}</div>` : ''}
     </div>`).join('')}
-    <div class="tb-sheet-group">
-      <span class="tb-sheet-title">Redes</span>
-      <div class="tb-sheet-social">${SOCIAL.map(s => `<a href="${s.url}" target="_blank" rel="noopener" style="--brand:${s.color}"><svg viewBox="0 0 24 24" fill="currentColor">${s.svg}</svg><span>${s.label}</span></a>`).join('')}</div>
-    </div>
     <a class="tb-cta" href="reclutamiento.html">Sumate al club</a>
   `;
 

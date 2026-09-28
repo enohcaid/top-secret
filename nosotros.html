@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Secret FC · Nosotros</title>
+<link rel="icon" href="Top-Secret.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Top Secret FC">
+<meta property="og:title" content="Nosotros · Top Secret FC">
+<meta property="og:description" content="El proyecto, la identidad, la historia, el escudo y las equipaciones de Top Secret FC.">
+<meta property="og:url" content="https://enohcaid.github.io/top-secret/nosotros.html">
+<meta property="og:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og-home.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0A07; --card:#16130B; --card2:#1D1910;
+  --gold:#C9A84C; --gold2:#E8C97A;
+  --text:#F2EEE0; --text2:rgba(242,238,224,.66); --mid:rgba(242,238,224,.44); --border:rgba(242,238,224,.08);
+  --topbar:64px; --gutter:clamp(16px,3vw,40px);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:16px;line-height:1.6;padding-top:var(--topbar);-webkit-font-smoothing:antialiased;}
+img{display:block;max-width:100%;}
+a{color:inherit;}
+.wrap{max-width:1440px;margin:0 auto;padding:0 var(--gutter);}
+.narrow{max-width:760px;}
+
+/* ── HERO a pantalla completa ── */
+.nos-hero{position:relative;margin:12px var(--gutter) 0;border-radius:32px;overflow:hidden;min-height:min(78vh,760px);display:flex;align-items:flex-end;background:#050403;}
+.nos-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;}
+.nos-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,7,.95) 0%,rgba(11,10,7,.35) 45%,transparent 70%);}
+.nos-hero-copy{position:relative;z-index:2;padding:clamp(28px,5vw,72px);max-width:900px;}
+.kicker{font-size:.76rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);}
+.nos-hero h1{font-size:clamp(3.4rem,10vw,9rem);font-weight:900;letter-spacing:-.05em;line-height:.88;margin-top:12px;}
+.nos-hero p{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--text2);margin-top:18px;max-width:560px;}
+
+/* ── Índice ── */
+.toc{display:flex;gap:8px;flex-wrap:wrap;margin:28px 0 0;}
+.toc a{padding:10px 18px;border-radius:999px;border:1px solid var(--border);text-decoration:none;font-size:.84rem;font-weight:600;color:var(--text2);transition:border-color .2s ease,color .2s ease;}
+.toc a:hover{border-color:var(--gold);color:var(--text);}
+
+/* ── Secciones editoriales ── */
+.chapter{padding:clamp(56px,8vw,120px) 0 0;scroll-margin-top:var(--topbar);}
+.chapter h2{font-size:clamp(2.4rem,5.4vw,4.8rem);font-weight:900;letter-spacing:-.045em;line-height:.95;margin-top:10px;}
+.lead{font-size:clamp(1.15rem,1.8vw,1.45rem);font-weight:300;line-height:1.5;color:var(--text);margin-top:22px;}
+.body p{color:var(--text2);margin-top:16px;}
+.body p strong{color:var(--text);font-weight:700;}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:center;}
+.split.rev > :first-child{order:2;}
+.figure{border-radius:26px;overflow:hidden;background:var(--card);position:relative;}
+.figure img{width:100%;height:100%;object-fit:cover;}
+.figure.tall{aspect-ratio:4/5;}
+.figure.wide{aspect-ratio:3/2;}
+.caption{font-size:.78rem;color:var(--mid);margin-top:10px;}
+.quote{margin-top:28px;padding-left:22px;border-left:2px solid var(--gold);font-size:clamp(1.2rem,2vw,1.6rem);font-weight:300;font-style:italic;color:var(--text);}
+
+/* ── Números ── */
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px;}
+.fact{border-radius:22px;background:var(--card);border:1px solid var(--border);padding:24px;}
+.fact b{display:block;font-size:clamp(2.2rem,3.6vw,3.2rem);font-weight:900;letter-spacing:-.04em;line-height:1;}
+.fact span{display:block;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);margin-top:10px;}
+
+/* ── Línea de tiempo ── */
+.timeline{margin-top:40px;display:grid;gap:14px;}
+.tl{display:grid;grid-template-columns:180px minmax(0,1fr) auto;gap:24px;align-items:center;padding:24px 28px;border-radius:22px;background:var(--card);border:1px solid var(--border);}
+.tl-when{font-size:.74rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+.tl h3{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;}
+.tl p{font-size:.92rem;color:var(--text2);margin-top:4px;}
+.tl-stats{display:flex;gap:22px;text-align:right;}
+.tl-stats b{display:block;font-size:1.5rem;font-weight:900;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;}
+.tl-stats span{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);}
+.tl.now{border-color:color-mix(in srgb,var(--gold) 55%,transparent);background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 10%,var(--card)),var(--card) 60%);}
+
+/* ── Escudo ── */
+.crest-stage{border-radius:32px;background:radial-gradient(circle at 50% 40%,#1D1910,#050403 70%);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:clamp(32px,6vw,80px);}
+.crest-stage img{width:min(420px,80%);filter:drop-shadow(0 30px 60px rgba(0,0,0,.6));}
+.anatomy{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
+.anat{border-radius:20px;background:var(--card);border:1px solid var(--border);padding:22px;}
+.anat b{display:block;font-size:1.05rem;font-weight:800;}
+.anat span{display:block;font-size:.86rem;color:var(--text2);margin-top:6px;}
+.variants{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:40px;}
+.variant{border-radius:22px;border:1px solid var(--border);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;}
+.variant img{width:62%;height:auto;}
+.variant span{font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);}
+.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px;}
+.swatch{border-radius:22px;padding:22px;min-height:140px;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid var(--border);}
+.swatch b{font-size:1.05rem;font-weight:800;}
+.swatch span{font-size:.8rem;font-family:ui-monospace,monospace;opacity:.75;}
+
+/* ── Equipaciones ── */
+.kit{padding-top:clamp(48px,6vw,88px);}
+.kit-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;}
+.kit-num{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;color:var(--gold);}
+.kit h3{font-size:clamp(2rem,4.2vw,3.6rem);font-weight:900;letter-spacing:-.04em;line-height:.98;margin-top:8px;}
+.kit-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:14px;margin-top:28px;}
+.kit-grid .figure:first-child{grid-row:span 2;}
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px;}
+.spec{border-radius:18px;background:var(--card);border:1px solid var(--border);padding:18px 20px;}
+.spec b{display:block;font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);}
+.spec span{display:block;font-size:.92rem;color:var(--text2);margin-top:6px;}
+
+/* ── Redes ── */
+.social-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-top:32px;}
+.social-tile{display:flex;flex-direction:column;align-items:flex-start;gap:26px;padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--border);text-decoration:none;transition:border-color .2s ease,background-color .2s ease;}
+.social-tile svg{width:24px;height:24px;transition:color .2s ease;}
+.social-tile:hover{border-color:color-mix(in srgb,var(--brand) 60%,transparent);background:color-mix(in srgb,var(--brand) 8%,var(--card));}
+.social-tile:hover svg{color:var(--brand);}
+.social-name{font-size:.92rem;font-weight:800;}
+.social-handle{font-size:.72rem;color:var(--mid);}
+.cta{margin:clamp(56px,8vw,110px) 0 clamp(40px,6vw,80px);border-radius:32px;background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 16%,var(--card)),var(--card) 55%);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);padding:clamp(32px,5vw,64px);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.cta h2{font-size:clamp(2rem,4vw,3.4rem);font-weight:900;letter-spacing:-.04em;line-height:1;}
+.pill-btn{display:inline-flex;align-items:center;gap:14px;padding:6px 6px 6px 22px;border-radius:999px;background:var(--gold);color:var(--bg);text-decoration:none;font-weight:800;}
+.pill-btn i{width:40px;height:40px;border-radius:50%;background:var(--bg);color:var(--gold);display:flex;align-items:center;justify-content:center;font-style:normal;}
+
+footer{border-top:1px solid var(--border);padding:28px 0 36px;font-size:.78rem;color:var(--mid);}
+
+@media(max-width:1000px){
+  .split,.kit-grid{grid-template-columns:1fr;}
+  .split.rev > :first-child{order:0;}
+  .kit-grid .figure:first-child{grid-row:auto;}
+  .facts{grid-template-columns:repeat(2,1fr);}
+  .variants{grid-template-columns:repeat(3,1fr);}
+  .palette,.anatomy,.specs{grid-template-columns:repeat(2,1fr);}
+  .social-grid{grid-template-columns:repeat(4,1fr);}
+  .tl{grid-template-columns:1fr;gap:10px;}
+  .tl-stats{text-align:left;}
+}
+@media(max-width:560px){
+  .nos-hero{border-radius:24px;min-height:70vh;}
+  .variants{grid-template-columns:repeat(2,1fr);}
+  .palette,.anatomy,.specs{grid-template-columns:1fr;}
+  .social-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<section class="nos-hero">
+  <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/manada-k1.webp" alt="El plantel de Top Secret FC saliendo del túnel con el kit titular de la Temporada 4" onerror="this.onerror=null;this.src='https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/hero-t4.webp'">
+  <div class="nos-hero-copy">
+    <div class="kicker">Top Secret FC · EA FC Clubs Pro</div>
+    <h1>Nosotros</h1>
+    <p>Un club argentino de fútbol virtual que compite en tres ligas con un solo plantel. Esta es su historia, su identidad y la ropa con la que sale a la cancha.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Secciones">
+    <a href="#proyecto">El proyecto</a>
+    <a href="#identidad">Identidad</a>
+    <a href="#historia">Historia</a>
+    <a href="#escudo">El escudo</a>
+    <a href="#equipaciones">Equipaciones</a>
+    <a href="#redes">Redes</a>
+  </nav>
+
+  <!-- EL PROYECTO -->
+  <section class="chapter" id="proyecto">
+    <div class="split">
+      <div>
+        <div class="kicker">El proyecto</div>
+        <h2>Tres ligas.<br>Un plantel.</h2>
+        <p class="lead">Top Secret FC compite en serio en EA Sports FC Clubs Pro, con un plantel estable que juega tres torneos de la escena argentina a la vez.</p>
+        <div class="body">
+          <p>Cada semana el equipo reparte sus noches entre <strong>VPN</strong>, <strong>VPUG</strong> y <strong>11x11</strong>. La convocatoria se arma día a día con la disponibilidad de cada jugador, los partidos se analizan después con sus números y todo queda registrado en esta web: resultados, estadísticas, noticias y el plantel completo.</p>
+          <p>La idea es simple: jugar ordenados, sostener un grupo que se conoce y crecer temporada a temporada sin perder lo que nos hace distintos.</p>
+        </div>
+      </div>
+      <div class="figure tall"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-capitanes-k2.webp" alt="Juan_Martinez4 y Lautavester7 con el kit alternativo" loading="lazy"></div>
+    </div>
+    <div class="facts">
+      <div class="fact"><b id="f-matches">—</b><span>Partidos jugados</span></div>
+      <div class="fact"><b id="f-wins">—</b><span>Victorias</span></div>
+      <div class="fact"><b id="f-goals">—</b><span>Goles a favor</span></div>
+      <div class="fact"><b id="f-squad">—</b><span>Jugadores en T4</span></div>
+    </div>
+  </section>
+
+  <!-- IDENTIDAD -->
+  <section class="chapter" id="identidad">
+    <div class="split rev">
+      <div>
+        <div class="kicker">Identidad</div>
+        <h2>Nada que declarar.</h2>
+        <p class="lead">Top Secret es un expediente clasificado: lo que se prepara, se guarda; lo que se muestra, se juega.</p>
+        <div class="body">
+          <p>La identidad del club se apoya en esa idea. El espía del escudo, los sellos de "confidencial" en nuestras piezas y el lenguaje de expediente en cada comunicación no son decoración: cuentan cómo queremos jugar, con planes que no se anuncian y un grupo que habla en la cancha.</p>
+          <p>El <strong>negro</strong> es el fondo del expediente y el <strong>dorado</strong>, lo que se gana. Son los colores del escudo, de la web y de la camiseta titular.</p>
+        </div>
+        <p class="quote">Lo que no se dice, se juega.</p>
+      </div>
+      <div class="figure tall"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-defensa-k1.webp" alt="Alexisraies23 y Cabers14 espalda con espalda con el kit titular" loading="lazy"></div>
+    </div>
+  </section>
+
+  <!-- HISTORIA -->
+  <section class="chapter" id="historia">
+    <div class="narrow">
+      <div class="kicker">Historia</div>
+      <h2>Temporada a temporada.</h2>
+      <p class="lead">Un recorrido corto pero intenso, hasta un plantel de veinte jugadores con camisetas propias.</p>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- ESCUDO -->
+  <section class="chapter" id="escudo">
+    <div class="split">
+      <div>
+        <div class="kicker">El escudo</div>
+        <h2>Un espía en el pecho.</h2>
+        <p class="lead">En septiembre de 2026 el club renovó su escudo: un sello circular con el nombre completo y, en el centro, el espía que resume la identidad.</p>
+        <div class="body">
+          <p>La marca se puede usar completa, dentro del sello, o sola, en su versión "clean". Esa versión limpia es la que va bordada en las camisetas de la Temporada 4: dorada en el kit titular y en el alternativo, blanca en el de arquero.</p>
+        </div>
+      </div>
+      <div class="crest-stage"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/badge-metal.webp" alt="Escudo de Top Secret FC"></div>
+    </div>
+    <div class="anatomy">
+      <div class="anat"><b>El sombrero</b><span>Ala ancha, bajado sobre los ojos. El que observa sin ser visto.</span></div>
+      <div class="anat"><b>Los anteojos</b><span>Oscuros, rectos. La mirada que no se deja leer.</span></div>
+      <div class="anat"><b>La gabardina</b><span>Cuello levantado. Lo que se prepara, queda guardado.</span></div>
+    </div>
+    <div class="variants">
+      <div class="variant" style="background:#0B0A07"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/badge-dorado.webp" alt="" loading="lazy"><span>Sello dorado</span></div>
+      <div class="variant" style="background:#0B0A07"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/badge-white.webp" alt="" loading="lazy"><span>Sello blanco</span></div>
+      <div class="variant" style="background:#1E69BC"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-white.webp" alt="" loading="lazy"><span style="color:rgba(255,255,255,.75)">Clean sobre azul</span></div>
+      <div class="variant" style="background:#16130B"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp" alt="" loading="lazy"><span>Clean dorado</span></div>
+      <div class="variant" style="background:#F2EEE0"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-negro.webp" alt="" loading="lazy"><span style="color:rgba(11,10,7,.6)">Clean negro</span></div>
+    </div>
+    <div class="palette">
+      <div class="swatch" style="background:#0B0A07"><b>Negro expediente</b><span>#0B0A07</span></div>
+      <div class="swatch" style="background:#C8A84B;color:#0B0A07"><b>Dorado</b><span>#C8A84B</span></div>
+      <div class="swatch" style="background:#1E69BC"><b>Azul</b><span>#1E69BC</span></div>
+      <div class="swatch" style="background:#F2EEE0;color:#0B0A07"><b>Marfil</b><span>#F2EEE0</span></div>
+    </div>
+  </section>
+
+  <!-- EQUIPACIONES -->
+  <section class="chapter" id="equipaciones">
+    <div class="narrow">
+      <div class="kicker">Equipaciones · Temporada 4</div>
+      <h2>Tres camisetas, un mismo secreto.</h2>
+      <p class="lead">Para la Temporada 4 el club presenta su primer juego completo de camisetas: titular, alternativa y arquero, con el escudo nuevo en el pecho.</p>
+    </div>
+    <div class="figure wide" style="margin-top:32px"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/vestuario-kits.webp" alt="Las tres camisetas de la Temporada 4 colgadas en el vestuario" loading="lazy" onerror="this.closest('.figure').remove()"></div>
+
+    <article class="kit">
+      <div class="kit-head"><span class="kit-num">01 · Titular</span></div>
+      <h3>Negro y oro.<br>El secreto en cada detalle.</h3>
+      <div class="kit-grid">
+        <div class="figure tall"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-mediocampo-k1.webp" alt="CipriMancini y RS32-DaniStone con el kit titular" loading="lazy"></div>
+        <div class="figure wide"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/detalle-k1.webp" alt="Detalle del cuello y el escudo del kit titular" loading="lazy" onerror="this.src='https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-ataque-k1.webp'"></div>
+        <div class="body" style="align-self:end">
+          <p>La camiseta titular es <strong>negra</strong>, con un ribete <strong>dorado de laureles</strong> que recorre el cuello en V y se repite en los puños y en la banda de las medias. Vivos dorados a los costados, el swoosh en oro y el escudo del espía, también dorado, en el pecho y en el short.</p>
+          <p>Es el negro del expediente y el oro de lo que se gana: la versión más directa de la identidad del club.</p>
+        </div>
+      </div>
+      <div class="specs">
+        <div class="spec"><b>Base</b><span>Negro, con vivos dorados laterales</span></div>
+        <div class="spec"><b>Detalle</b><span>Laureles dorados en cuello, puños y medias</span></div>
+        <div class="spec"><b>Escudo</b><span>Espía "clean" dorado, pecho y short</span></div>
+      </div>
+    </article>
+
+    <article class="kit">
+      <div class="kit-head"><span class="kit-num">02 · Alternativa</span></div>
+      <h3>Azul francia.<br>La otra cara del expediente.</h3>
+      <div class="kit-grid">
+        <div class="figure tall"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-defensa-k2.webp" alt="Elianja20 y endiabladorojo66 con el kit alternativo" loading="lazy"></div>
+        <div class="figure wide"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/detalle-k2.webp" alt="Detalle del cuello polo y el escudo del kit alternativo" loading="lazy" onerror="this.src='https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-laterales-k2.webp'"></div>
+        <div class="body" style="align-self:end">
+          <p>La alternativa cambia el negro por un <strong>azul francia</strong> con cuello polo y una textura tono sobre tono que aparece con la luz. Los vivos y el swoosh son amarillos, y el escudo sigue siendo el espía dorado.</p>
+          <p>Las <strong>medias blancas</strong> con banda azul cierran un conjunto pensado para los partidos en que el negro se cruza con el rival.</p>
+        </div>
+      </div>
+      <div class="specs">
+        <div class="spec"><b>Base</b><span>Azul francia, cuello polo</span></div>
+        <div class="spec"><b>Detalle</b><span>Vivos amarillos y textura tono sobre tono</span></div>
+        <div class="spec"><b>Medias</b><span>Blancas con banda azul ornamental</span></div>
+      </div>
+    </article>
+
+    <article class="kit">
+      <div class="kit-head"><span class="kit-num">03 · Arquero</span></div>
+      <h3>Naranja.<br>Imposible de no ver.</h3>
+      <div class="kit-grid">
+        <div class="figure tall"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-arqueros.webp" alt="Ivan_Cabj_La12 y adri_cai con el kit de arquero" loading="lazy"></div>
+        <div class="figure wide"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/detalle-gk.webp" alt="Detalle de los guantes y la camiseta de arquero" loading="lazy" onerror="this.closest('.figure').remove()"></div>
+        <div class="body" style="align-self:end">
+          <p>Los arqueros visten <strong>naranja con ondas amarillas</strong> en todo el cuerpo, con short y medias <strong>rojas</strong>. Es la única camiseta con el escudo en <strong>blanco</strong>, para que el espía resalte sobre el estampado.</p>
+        </div>
+      </div>
+      <div class="specs">
+        <div class="spec"><b>Base</b><span>Naranja con ondas amarillas</span></div>
+        <div class="spec"><b>Short y medias</b><span>Rojos</span></div>
+        <div class="spec"><b>Escudo</b><span>Espía "clean" blanco</span></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- REDES -->
+  <section class="chapter" id="redes">
+    <div class="kicker">Redes</div>
+    <h2>Seguí el expediente.</h2>
+    <p class="lead" style="max-width:640px">Resultados, noticias diarias, videos de los partidos y los vivos del club.</p>
+    <div class="social-grid" id="social-grid"></div>
+  </section>
+
+  <div class="cta">
+    <div><div class="kicker">Reclutamiento</div><h2>¿Querés sumarte al plantel?</h2></div>
+    <a class="pill-btn" href="reclutamiento.html">Postulate<i>→</i></a>
+  </div>
+</div>
+
+<footer><div class="wrap">Top Secret FC · EA FC Clubs Pro · Buenos Aires · Argentina</div></footer>
+
+<script src="layout.js?v=13"></script>
+<script type="module">
+import { SEED_MATCHES } from './seed_matches.js';
+import { ROSTER_T4 } from './roster.js';
+
+const score = s => String(s || '').split('-').map(Number);
+function summary(matches) {
+  let w = 0, g = 0, n = 0;
+  matches.forEach(m => { if (!m.match_result) return; n++; const [gf, gc] = score(m.match_result); g += gf || 0; if (gf > gc) w++; });
+  return { n, w, g };
+}
+const $ = id => document.getElementById(id);
+const all = summary(SEED_MATCHES);
+$('f-matches').textContent = all.n;
+$('f-wins').textContent = all.w;
+$('f-goals').textContent = all.g;
+$('f-squad').textContent = ROSTER_T4.length;
+
+const inRange = (a, b) => SEED_MATCHES.filter(m => m.date && m.date > a && m.date <= b);
+const STEPS = [
+  { when: 'Marzo – Abril 2026', title: 'Temporada 1', text: 'La primera temporada registrada en esta web: VPN, VPUG y 11x11 con un plantel que se armaba sobre la marcha.', m: inRange('0000', '2026-04-30') },
+  { when: 'Mayo – Junio 2026', title: 'Temporada 2', text: 'La base se consolida y el club empieza a registrar cada partido: estadísticas, reportes y ranking de jugadores.', m: inRange('2026-04-30', '2026-06-17') },
+  { when: 'Junio – Julio 2026', title: 'Campeonato de Invierno', text: 'Pretemporada en VPUG para llegar rodados a la temporada siguiente.' },
+  { when: 'Agosto – Septiembre 2026', title: 'Temporada 3', text: 'VPN en 2da División, VPUG y 11x11 en simultáneo. Nace el canal oficial de YouTube y llegan las noticias diarias.', m: inRange('2026-08-02', '2026-09-28') },
+  { when: 'Septiembre 2026', title: 'Nuevo escudo', text: 'Rebrand completo: el espía pasa al centro de la identidad y del sitio.' },
+  { when: 'Próximamente', title: 'Temporada 4', text: 'Veinte jugadores, tres camisetas nuevas y el mismo objetivo: competir en las tres ligas.', now: true },
+];
+$('timeline').innerHTML = STEPS.map(s => {
+  const st = s.m && s.m.length ? summary(s.m) : null;
+  return `<div class="tl${s.now ? ' now' : ''}">
+    <div class="tl-when">${s.when}</div>
+    <div><h3>${s.title}</h3><p>${s.text}</p></div>
+    ${st ? `<div class="tl-stats"><div><b>${st.n}</b><span>PJ</span></div><div><b>${st.w}</b><span>Victorias</span></div><div><b>${st.g}</b><span>Goles</span></div></div>` : '<div></div>'}
+  </div>`;
+}).join('');
+
+$('social-grid').innerHTML = (window.TS_SOCIAL || []).map(s => `
+  <a class="social-tile" href="${s.url}" target="_blank" rel="noopener" style="--brand:${s.color}">
+    <svg viewBox="0 0 24 24" fill="currentColor">${s.svg}</svg>
+    <div><div class="social-name">${s.label}</div><div class="social-handle">${s.handle}</div></div>
+  </a>`).join('');
+</script>
+</body>
+</html>
