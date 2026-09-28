@@ -463,7 +463,7 @@ footer span { color: var(--gold); }
 <!-- TOPBAR -->
 <!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="ph-eyebrow" id="ph-eyebrow">Temporada 3 · 2026</div>
+  <div class="ph-eyebrow" id="ph-eyebrow">Temporada 4 · 2026</div>
   <h1 class="ph-title">El <span>Plantel</span></h1>
   <p class="ph-sub">Top Secret Football Club</p>
 </div>
@@ -472,7 +472,8 @@ footer span { color: var(--gold); }
 <div class="season-bar">
   <button class="season-pill" onclick="switchSeason(1, this)">T1 · 2026</button>
   <button class="season-pill" onclick="switchSeason(2, this)">T2 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:800;background:rgba(255,255,255,.1);color:var(--muted);">FINALIZADA</span></button>
-  <button class="season-pill active" onclick="switchSeason(3, this)">T3 · 2026</button>
+  <button class="season-pill" onclick="switchSeason(3, this)">T3 · 2026 <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:800;background:rgba(255,255,255,.1);color:var(--muted);">FINALIZADA</span></button>
+  <button class="season-pill active" onclick="switchSeason(4, this)">T4 · 2026</button>
 </div>
 
 <!-- T1 CONTENT -->
@@ -502,7 +503,7 @@ footer span { color: var(--gold); }
 </div>
 
 <!-- T3 CONTENT -->
-<div id="t3-content">
+<div id="t3-content" style="display:none">
   <div class="pos-filter" id="pos-filter-t3">
     <button class="pfbtn active" onclick="filterPos3('all', this)">Todos</button>
     <button class="pfbtn" onclick="filterPos3('POR', this)">POR</button>
@@ -512,6 +513,19 @@ footer span { color: var(--gold); }
     <button class="pfbtn" onclick="filterPos3('DEL', this)">DEL</button>
   </div>
   <div class="squad-grid" id="squadGrid3"></div>
+</div>
+
+<!-- T4 CONTENT -->
+<div id="t4-content">
+  <div class="pos-filter" id="pos-filter-t4">
+    <button class="pfbtn active" onclick="filterPos4('all', this)">Todos</button>
+    <button class="pfbtn" onclick="filterPos4('POR', this)">POR</button>
+    <button class="pfbtn" onclick="filterPos4('DEF', this)">DEF</button>
+    <button class="pfbtn" onclick="filterPos4('LAT', this)">LAT</button>
+    <button class="pfbtn" onclick="filterPos4('MED', this)">MED</button>
+    <button class="pfbtn" onclick="filterPos4('DEL', this)">DEL</button>
+  </div>
+  <div class="squad-grid" id="squadGrid4"></div>
 </div>
 
 <!-- BACKDROP -->
@@ -609,12 +623,12 @@ footer span { color: var(--gold); }
 
 <!-- FOOTER -->
 <footer>
-  <span>Top Secret FC</span> · Temporada 1 · 2026
+  <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
 
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
-import { ROSTER_T3 } from './roster.js';
+import { ROSTER_T3, ROSTER_T4 } from './roster.js';
 
 /* ─── ROSTER ─── */
 const ROSTER = [
@@ -711,12 +725,15 @@ const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/'); }
 function renderFolder(p) { return p.folderOverride || p.key; }
 function brazosPath(p)   { return mediaUrl(`Renders/${renderFolder(p)}/Brazos.png`); }
-function frontePath(p)   { return mediaUrl(`Renders/${renderFolder(p)}/Frente.png`); }
 function brazos2Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Brazos2.png`); }
-function frente2Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Frente2.png`); }
 function brazos3Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Brazos3.png`); }
-function frente3Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Frente3.png`); }
 function pose3Path(p)    { return mediaUrl(`Renders/${renderFolder(p)}/Pose3.png`); }
+// Render de la temporada `season` y, si falta, los de temporadas anteriores.
+function renderChain(p, kind, season) {
+  const out = [];
+  for (let s = season; s >= 1; s--) out.push(mediaUrl(`Renders/${renderFolder(p)}/${kind}${s === 1 ? '' : s}.png`));
+  return out;
+}
 function svgPath(p)      { return mediaUrl(`Renders/${p.key}.svg`); }
 
 /* ─── COMPUTE STATS ─── */
@@ -772,9 +789,12 @@ const T2_CUTOFF    = '2026-04-30';
 const T2_END       = '2026-06-17'; // fin de T2 (no confundir con el arranque de T3 — entre medio quedo la pretemporada VPUG, no cuenta para ninguna)
 const T3_CUTOFF    = '2026-08-02'; // arranque real de la T3 (VPN/11x11)
 const T2_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T2_CUTOFF && m.date <= T2_END);
-const T3_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T3_CUTOFF);
+const T4_CUTOFF    = '2026-09-28'; // T4 aún sin fecha de arranque: todo partido posterior cuenta como T4
+const T3_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T3_CUTOFF && m.date <= T4_CUTOFF);
+const T4_MATCHES   = SEED_MATCHES.filter(m => m.date && m.date > T4_CUTOFF);
 const ROSTER_T2_KEYS = ROSTER_T2.map(r => r.key);
 const ROSTER_T3_KEYS = ROSTER_T3.map(r => r.key);
+const ROSTER_T4_KEYS = ROSTER_T4.map(r => r.key);
 
 const allStats     = computePlayerStats(SEED_MATCHES);
 const allRankings  = computeRankings(allStats, ROSTER_KEYS);
@@ -782,18 +802,29 @@ const t2Stats      = computePlayerStats(T2_MATCHES);
 const t2Rankings   = computeRankings(t2Stats, ROSTER_T2_KEYS);
 const t3Stats      = computePlayerStats(T3_MATCHES);
 const t3Rankings   = computeRankings(t3Stats, ROSTER_T3_KEYS);
+const t4Stats      = computePlayerStats(T4_MATCHES);
+const t4Rankings   = computeRankings(t4Stats, ROSTER_T4_KEYS);
+const STATS_BY_SEASON    = {1: allStats, 2: t2Stats, 3: t3Stats, 4: t4Stats};
+const RANKINGS_BY_SEASON = {1: allRankings, 2: t2Rankings, 3: t3Rankings, 4: t4Rankings};
 
 /* ─── STATE ─── */
 let currentFilter = 'all';
 let selectedCard  = null;
 let _currentPlayer = null;
 
+function loadChain(img, srcs, onFail) {
+  let i = 0;
+  img.onerror = () => { i++; if (i < srcs.length) img.src = srcs[i]; else onFail(); };
+  img.src = srcs[0];
+}
+
 /* ─── BUILD CARD ─── */
-function buildCard(p, useV2 = false, useV3 = false) {
+function buildCard(p, season) {
   const card = document.createElement('div');
-  card.className = useV3 ? 'player-card v3' : (useV2 ? 'player-card v2' : 'player-card');
+  card.className = season === 2 ? 'player-card v2' : 'player-card';
   card.dataset.pos = p.pos;
   card.dataset.key = p.key;
+  card.dataset.season = season;
 
   const ph = `<div class="card-placeholder" style="display:none">
     <img class="ph-svg-bg" src="${svgPath(p)}" alt="" onerror="this.style.display='none'">
@@ -801,23 +832,9 @@ function buildCard(p, useV2 = false, useV3 = false) {
     <div class="ph-name">${p.key}</div>
   </div>`;
 
-  const bSrc  = useV3 ? brazos3Path(p) : (useV2 ? brazos2Path(p) : brazosPath(p));
-  const bFall = useV3 ? brazos2Path(p) : brazosPath(p);
-  const bFall2 = useV3 ? brazosPath(p) : null;
-  const fSrc  = useV3 ? frente3Path(p) : (useV2 ? frente2Path(p) : frontePath(p));
-  const fFall = useV3 ? frente2Path(p) : frontePath(p);
-  const fFall2 = useV3 ? frontePath(p) : null;
-
-  const bErr = bFall2
-    ? `if(!this._f){this._f=1;this.src='${bFall}';}else if(!this._f2){this._f2=1;this.src='${bFall2}';}else{this.style.display='none';this.parentElement.querySelector('.card-placeholder').style.display='flex';}`
-    : `if(!this._f){this._f=1;this.src='${bFall}';}else{this.style.display='none';this.parentElement.querySelector('.card-placeholder').style.display='flex';}`;
-  const fErr = fFall2
-    ? `if(!this._f){this._f=1;this.src='${fFall}';}else if(!this._f2){this._f2=1;this.src='${fFall2}';}else{this.dataset.missing='1';this.style.display='none';}`
-    : `if(!this._f){this._f=1;this.src='${fFall}';}else{this.dataset.missing='1';this.style.display='none';}`;
-
   const imgHtml = `<div class="card-img-wrap">
-    <img class="img-brazos" src="${bSrc}" alt="${p.key}" onerror="${bErr}">
-    <img class="img-frente" src="${fSrc}" alt="${p.key} frente" onerror="${fErr}">
+    <img class="img-brazos" alt="${p.key}">
+    <img class="img-frente" alt="${p.key} frente">
     ${ph}
   </div>`;
 
@@ -839,6 +856,14 @@ function buildCard(p, useV2 = false, useV3 = false) {
 
   const brazos = card.querySelector('.img-brazos');
   const frente = card.querySelector('.img-frente');
+  loadChain(brazos, renderChain(p, 'Brazos', season), () => {
+    brazos.style.display = 'none';
+    card.querySelector('.card-placeholder').style.display = 'flex';
+  });
+  loadChain(frente, renderChain(p, 'Frente', season), () => {
+    frente.dataset.missing = '1';
+    frente.style.display = 'none';
+  });
 
   card.addEventListener('mouseenter', () => {
     gsap.to(card, {y: -6, duration: 0.25, ease: 'power2.out'});
@@ -869,7 +894,7 @@ function renderGrid(filter) {
   const grid = document.getElementById('squadGrid');
   grid.innerHTML = '';
   const visible = ROSTER.filter(p => filter === 'all' || p.pos === filter);
-  visible.forEach(p => grid.appendChild(buildCard(p)));
+  visible.forEach(p => grid.appendChild(buildCard(p, 1)));
   gsap.from(grid.querySelectorAll('.player-card'), {
     opacity: 0, y: 28, duration: 0.45, stagger: 0.045, ease: 'power2.out'
   });
@@ -892,14 +917,21 @@ function switchSeason(n, btn) {
   const t1 = document.getElementById('t1-content');
   const t2 = document.getElementById('t2-content');
   const t3 = document.getElementById('t3-content');
-  t1.style.display = 'none'; t2.style.display = 'none'; t3.style.display = 'none';
+  const t4 = document.getElementById('t4-content');
+  t1.style.display = 'none'; t2.style.display = 'none'; t3.style.display = 'none'; t4.style.display = 'none';
   closePanel(false);
   _currentSeason = n;
   const eyebrow = document.getElementById('ph-eyebrow');
   if (eyebrow) eyebrow.textContent = 'Temporada ' + n + ' · 2026';
-  if (n === 1) { t1.style.display = ''; renderGrid(currentFilter); }
-  else if (n === 2) { t2.style.display = 'block'; renderGrid2(currentFilter2); }
-  else { t3.style.display = 'block'; renderGrid3(currentFilter3); }
+  rerenderSeason();
+}
+
+function rerenderSeason() {
+  const n = _currentSeason;
+  if (n === 1) { document.getElementById('t1-content').style.display = ''; renderGrid(currentFilter); }
+  else if (n === 2) { document.getElementById('t2-content').style.display = 'block'; renderGrid2(currentFilter2); }
+  else if (n === 3) { document.getElementById('t3-content').style.display = 'block'; renderGrid3(currentFilter3); }
+  else { document.getElementById('t4-content').style.display = 'block'; renderGrid4(currentFilter4); }
 }
 window.switchSeason = switchSeason;
 
@@ -911,7 +943,7 @@ function renderGrid2(filter) {
   const grid = document.getElementById('squadGrid2');
   grid.innerHTML = '';
   const visible = ROSTER_T2.filter(p => filter === 'all' || p.pos === filter);
-  visible.forEach(p => grid.appendChild(buildCard(p, true)));
+  visible.forEach(p => grid.appendChild(buildCard(p, 2)));
   gsap.from(grid.querySelectorAll('.player-card'), {
     opacity: 0, y: 28, duration: 0.45, stagger: 0.045, ease: 'power2.out'
   });
@@ -934,7 +966,7 @@ function renderGrid3(filter) {
   const grid = document.getElementById('squadGrid3');
   grid.innerHTML = '';
   const visible = ROSTER_T3.filter(p => filter === 'all' || p.pos === filter);
-  visible.forEach(p => grid.appendChild(buildCard(p, false, true)));
+  visible.forEach(p => grid.appendChild(buildCard(p, 3)));
   gsap.from(grid.querySelectorAll('.player-card'), {
     opacity: 0, y: 28, duration: 0.45, stagger: 0.045, ease: 'power2.out'
   });
@@ -949,6 +981,29 @@ function filterPos3(pos, btn) {
 }
 window.filterPos3 = filterPos3;
 
+/* ─── T4 GRID ─── */
+let currentFilter4 = 'all';
+
+function renderGrid4(filter) {
+  currentFilter4 = filter;
+  const grid = document.getElementById('squadGrid4');
+  grid.innerHTML = '';
+  const visible = ROSTER_T4.filter(p => filter === 'all' || p.pos === filter);
+  visible.forEach(p => grid.appendChild(buildCard(p, 4)));
+  gsap.from(grid.querySelectorAll('.player-card'), {
+    opacity: 0, y: 28, duration: 0.45, stagger: 0.045, ease: 'power2.out'
+  });
+}
+
+function filterPos4(pos, btn) {
+  document.querySelectorAll('#pos-filter-t4 .pfbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const wasOpen = document.getElementById('player-panel').style.display === 'flex';
+  if (wasOpen) closePanel(false);
+  renderGrid4(pos);
+}
+window.filterPos4 = filterPos4;
+
 /* ─── OPEN PANEL ─── */
 function openPanel(p, card) {
   _currentPlayer = p;
@@ -961,13 +1016,14 @@ function openPanel(p, card) {
   const photoWrap = document.getElementById('pp-photo-wrap');
   photoWrap.querySelectorAll('.pp-photo,.pp-photo-placeholder').forEach(el => el.remove());
 
-  const isT2 = card.classList.contains('v2');
-  const isT3 = card.classList.contains('v3');
+  const season = +card.dataset.season;
 
   const img = document.createElement('img');
   img.className = 'pp-photo';
   img.alt = p.key;
-  const ppFallbacks = isT3
+  const ppFallbacks = season === 4
+    ? [mediaUrl(`Renders/${renderFolder(p)}/Pose4.png`), ...renderChain(p, 'Brazos', 4)]
+    : season === 3
     ? [pose3Path(p), brazos3Path(p), brazos2Path(p), brazosPath(p)]
     : [brazos2Path(p), brazosPath(p)];
   let ppFi = 0;
@@ -992,7 +1048,7 @@ function openPanel(p, card) {
   document.getElementById('pp-posn').textContent  = p.posn;
 
   /* KPIs */
-  const statMap = isT3 ? t3Stats : (isT2 ? t2Stats : allStats);
+  const statMap = STATS_BY_SEASON[season];
   const st = statMap[p.key] || {pj:0, g:0, a:0, avgRating:0, maxRating:0};
   document.getElementById('pk-nvl').textContent   = p.nvl;
   document.getElementById('pk-pj').textContent    = st.pj || '—';
@@ -1023,7 +1079,7 @@ function openPanel(p, card) {
   document.getElementById('pk-arq').textContent   = p.arq;
 
   /* medals */
-  const rankMap = isT3 ? t3Rankings : (isT2 ? t2Rankings : allRankings);
+  const rankMap = RANKINGS_BY_SEASON[season];
   const medals = rankMap[p.key] || [];
   const mc = ['m1','m2','m3'];
   const medalsEl = document.getElementById('pp-medals');
@@ -1107,8 +1163,8 @@ gsap.to('.season-bar', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0
 gsap.to('.pos-filter', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0.34});
 
 /* ─── INIT ─── */
-let _currentSeason = 3;
-renderGrid3('all');
+let _currentSeason = 4;
+renderGrid4('all');
 
 /* ─── NUMBER OVERRIDES FROM FIRESTORE ─── */
 (function() {
@@ -1125,12 +1181,10 @@ renderGrid3('all');
       if (!snap.exists) return;
       const numeros = snap.data().numeros || {};
       if (!Object.keys(numeros).length) return;
-      [ROSTER, ROSTER_T2, ROSTER_T3].forEach(roster =>
+      [ROSTER, ROSTER_T2, ROSTER_T3, ROSTER_T4].forEach(roster =>
         roster.forEach(p => { if (numeros[p.key] != null) p.num = String(numeros[p.key]); })
       );
-      if (_currentSeason === 1)      renderGrid(currentFilter);
-      else if (_currentSeason === 2) renderGrid2(currentFilter2);
-      else                           renderGrid3(currentFilter3);
+      rerenderSeason();
     });
   } catch(e) { console.warn('Firestore num overrides:', e); }
 })();
