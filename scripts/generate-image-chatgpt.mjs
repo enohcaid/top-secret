@@ -668,6 +668,11 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
         const src = img.src || '';
         if (excludeSrcs.includes(src)) continue;
         if (img.closest('[data-message-author-role="user"]')) continue;
+        // DOM 2026-09: el adjunto ya no vive bajo author-role="user" — es un
+        // blob: con alt "Archivo adjunto del usuario" que se monta después
+        // del snapshot preExisting y se detectaba como imagen generada.
+        if (/adjunto|attachment|uploaded/i.test(img.alt || '')) continue;
+        if (img.closest('form')) continue;
         if (
           img.complete &&
           img.naturalWidth  > 300 &&
