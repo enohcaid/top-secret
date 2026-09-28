@@ -457,9 +457,9 @@ body.season-4 .stage{display:block;}
 body.season-4 .page-header{display:none;}
 .stage-img{display:block;width:100%;height:auto;min-height:520px;object-fit:cover;object-position:50% 20%;transition:filter .3s ease;}
 .stage::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(180deg,color-mix(in srgb,var(--bg,#0B0A07) 65%,transparent) 0%,transparent 16%),linear-gradient(0deg,var(--bg,#0B0A07) 0%,transparent 18%);}
-.stage-copy{position:absolute;z-index:3;left:max(var(--ts-g), calc((100vw - 1440px) / 2 + var(--ts-g)));top:calc(64px + clamp(24px,5vw,72px));max-width:460px;pointer-events:none;}
+.stage-copy{position:absolute;z-index:3;left:max(var(--ts-g), calc((100vw - 1440px) / 2 + var(--ts-g)));bottom:clamp(20px,3.5vw,56px);max-width:460px;pointer-events:none;}
 .stage-title{white-space:nowrap;}
-.stage::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 42% 55% at 0% 0%,color-mix(in srgb,var(--bg,#0B0A07) 88%,transparent) 0%,color-mix(in srgb,var(--bg,#0B0A07) 55%,transparent) 45%,transparent 100%);}
+.stage::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 40% 45% at 0% 100%,color-mix(in srgb,var(--bg,#0B0A07) 88%,transparent) 0%,color-mix(in srgb,var(--bg,#0B0A07) 55%,transparent) 45%,transparent 100%);}
 .stage-kicker{font-size:.74rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);}
 .stage-title{font-family:'Barlow',sans-serif;font-size:clamp(2.8rem,6vw,5.6rem);font-weight:900;letter-spacing:-.045em;line-height:.9;color:var(--text,#F2EEE0);margin:10px 0 14px;}
 .stage-sub{font-size:.9rem;color:color-mix(in srgb,var(--text,#F2EEE0) 55%,transparent);}
@@ -489,7 +489,7 @@ body.season-4 .page-header{display:none;}
 }
 @media (max-width:760px){
   .stage-copy{max-width:none;right:var(--ts-g);}
-  .stage::before{background:linear-gradient(180deg,color-mix(in srgb,var(--bg,#0B0A07) 80%,transparent) 0%,transparent 28%);}
+  .stage::before{background:linear-gradient(0deg,color-mix(in srgb,var(--bg,#0B0A07) 85%,transparent) 0%,transparent 32%);}
   .stage-sub{display:none;}
   .stage-spots,.dossier{display:none;}
 }
