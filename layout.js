@@ -445,11 +445,11 @@
   // Dupla que ilustra cada página interior (logos/duos/*.webp en R2).
   const PAGE_ART = {
     'plantilla.html':     { img: 'duo-capitanes-k2',  pos: '50% 0%' },
-    'estadisticas.html':  { img: 'duo-mediocampo-k1', pos: '50% 0%' },
+    'estadisticas.html':  { img: 'duo-guiidow-lil-k1', pos: '50% 0%' },
     'posiciones.html':    { img: 'duo-ataque-k1',     pos: '50% 0%' },
-    'calendario.html':    { img: 'duo-laterales-k2',  pos: '50% 0%' },
+    'calendario.html':    { img: 'duo-rivarola-huber-k2',  pos: '50% 0%' },
     'noticias.html':      { img: 'duo-defensa-k1',    pos: '50% 0%' },
-    'reclutamiento.html': { img: 'duo-defensa-k2',    pos: '50% 0%' },
+    'reclutamiento.html': { img: 'solo-juanchyroman-k2',    pos: '50% 0%' },
     'convocatoria.html':  { img: 'duo-arqueros',      pos: '50% 0%', compact: true },
   };
 

@@ -270,6 +270,9 @@ if (!reduced && typeof gsap !== 'undefined') {
     ['logos/duos/duo-arqueros.webp',    'Ivan_Cabj_La12 · adri_cai · Arqueros'],
     ['logos/duos/duo-ataque-k1.webp',   'NicoBJ_96 · kee_viin03'],
     ['logos/duos/duo-capitanes-k2.webp','Juan_Martinez4 · Lautavester7 · Kit 2'],
+    ['logos/duos/duo-guiidow-lil-k1.webp','Guiidow · Lil_Dekuroko'],
+    ['logos/duos/duo-rivarola-huber-k2.webp','rivarola90 · Huber236 · Kit 2'],
+    ['logos/duos/solo-juanchyroman-k2.webp','Juanchyroman08 · Kit 2'],
   ].map(([p, cap]) => ({ src: mediaUrl(p), cap }));
   const imgs = [$('hero-a'), $('hero-b')], cap = $('hero-cap');
   let cur = 0, front = 0, timer = null, busy = false;
