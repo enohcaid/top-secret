@@ -266,7 +266,6 @@ const PLAYER_TRAITS = {
   'kee_viin03':      { dorsal: 21,   desc: 'piel oscura, afro grande y voluminoso teñido de rojo/rosa intenso, sin barba, contextura atlética' },
   'Lautavester7':    { dorsal: 7,    desc: 'piel oscura, pelo muy corto con tinte azul claro, barba negra tupida, visor deportivo verde espejado' },
   'Lil_Dekuroko':    { dorsal: 22,   desc: 'piel morena, pelo corto rizado teñido rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca, tatuaje en el antebrazo derecho' },
-  'Full_boxxing_':   { dorsal: 14,   desc: 'piel oscura, pelo corto rizado teñido rubio ceniza, anteojos de sol azules espejados envolventes, barba candado prolija, guantes blancos' },
   'Ringhiio':        { dorsal: 70,   desc: 'piel trigueña, melena despeinada VIOLETA, anteojos de sol negros' },
   'rivarola90':      { dorsal: 2,    desc: 'piel oscura, melena gris plateada hasta los hombros con vincha negra, chivita canosa, mangas largas oscuras' },
   'RS32-DaniStone':  { dorsal: 13,   desc: 'piel clara, pelo revuelto turquesa/verde agua, máscara celeste cubriendo nariz y boca, anteojos, una manga azul en el brazo derecho' },

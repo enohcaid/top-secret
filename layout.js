@@ -126,7 +126,7 @@
 
     /* ── Encabezado de páginas interiores: tarjeta con título grande + dupla ── */
     .ts-hero{position:relative;left:50%;transform:translateX(-50%);display:grid !important;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);width:min(1360px,calc(100vw - 2*clamp(16px,3vw,40px)));max-width:none !important;min-height:clamp(260px,30vw,420px);margin:12px 0 clamp(24px,3vw,40px) !important;padding:0 !important;border-radius:28px;background:linear-gradient(160deg,var(--card,#16130B),var(--bg,#0B0A07) 85%);border:1px solid color-mix(in srgb, var(--text, #F2EEE0) 8%, transparent);overflow:hidden;text-align:left;}
-    .ts-hero.ts-hero--compact{min-height:clamp(180px,18vw,240px);}
+    .ts-hero.ts-hero--compact{min-height:clamp(230px,22vw,300px);}
     .ts-hero-copy{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px;padding:clamp(26px,4vw,56px);min-width:0;}
     .ts-hero-copy > *{margin-left:0 !important;margin-right:0 !important;}
     .ts-hero h1,.ts-hero .ph-title,.ts-hero .page-title{font-family:'Barlow',sans-serif !important;font-weight:900 !important;font-size:clamp(2.6rem,6vw,5.4rem) !important;line-height:.92 !important;letter-spacing:-.045em !important;text-transform:none !important;color:var(--text, #F2EEE0) !important;margin:0 !important;}
@@ -445,13 +445,13 @@
 
   // Dupla que ilustra cada página interior (logos/duos/*.webp en R2).
   const PAGE_ART = {
-    'plantilla.html':     { img: 'duo-capitanes-k2',  pos: '50% 18%' },
-    'estadisticas.html':  { img: 'duo-mediocampo-k1', pos: '50% 18%' },
-    'posiciones.html':    { img: 'duo-ataque-k1',     pos: '50% 18%' },
-    'calendario.html':    { img: 'duo-laterales-k2',  pos: '50% 22%' },
-    'noticias.html':      { img: 'duo-defensa-k1',    pos: '50% 18%' },
-    'reclutamiento.html': { img: 'duo-defensa-k2',    pos: '50% 18%' },
-    'convocatoria.html':  { img: 'duo-arqueros',      pos: '50% 22%', compact: true },
+    'plantilla.html':     { img: 'duo-capitanes-k2',  pos: '50% 0%' },
+    'estadisticas.html':  { img: 'duo-mediocampo-k1', pos: '50% 0%' },
+    'posiciones.html':    { img: 'duo-ataque-k1',     pos: '50% 0%' },
+    'calendario.html':    { img: 'duo-laterales-k2',  pos: '50% 0%' },
+    'noticias.html':      { img: 'duo-defensa-k1',    pos: '50% 0%' },
+    'reclutamiento.html': { img: 'duo-defensa-k2',    pos: '50% 0%' },
+    'convocatoria.html':  { img: 'duo-arqueros',      pos: '50% 0%', compact: true },
   };
 
   function decorateHeader() {

@@ -97,7 +97,7 @@ img{display:block;}
 .news-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:clamp(220px,20vw,300px);gap:14px;}
 .news-card{position:relative;border-radius:20px;overflow:hidden;background:var(--card);text-decoration:none;color:#fff;isolation:isolate;}
 .news-card.big{grid-column:span 2;grid-row:span 2;}
-.news-card > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.22,1,.36,1);}
+.news-card > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;transition:transform .6s cubic-bezier(.22,1,.36,1);}
 .news-card:hover > img{transform:scale(1.05);}
 .news-card::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(5,4,3,.92) 0%,rgba(5,4,3,.35) 45%,transparent 70%);z-index:1;}
 .news-body{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 20px;}
@@ -419,6 +419,6 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
 
 <script src="noticias-data.js"></script>
 <script type="module" src="index-home.js?v=2"></script>
-<script src="layout.js?v=13"></script>
+<script src="layout.js?v=14"></script>
 </body>
 </html>

@@ -44,7 +44,6 @@ const ROSTER_T4 = [
   {key:'RS32-DaniStone',   pos:'MED', posn:'Mediocampista',   num:'13', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
   {key:'CipriMancini',     pos:'MED', posn:'Mediocampista',   num:'32', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
   {key:'Lil_Dekuroko',     pos:'MED', posn:'Mediocampista',   num:'22', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'co', plataforma:'ps'},
-  {key:'Full_boxxing_',    pos:'MED', posn:'Mediocampista',   num:'14', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
   {key:'Lautavester7',     pos:'DEL', posn:'Extremo',         num:'7',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
   {key:'Juanchyroman08',   pos:'DEL', posn:'Extremo',         num:'18', nvl:'—', arq:'—', build:'—', stats:[], total:0},
   {key:'kee_viin03',       pos:'DEL', posn:'Delantero',       num:'21', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'ps'},

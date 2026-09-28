@@ -37,7 +37,6 @@ Cada render del proyecto se llama exactamente igual que el gamertag del jugador.
 | 18 | Juanchyroman08 | ED | Juanchyroman08.png |
 | 22 | Lil_Dekuroko | MCI | Lil_Dekuroko.png |
 | 21 | kee_viin03 | DC | kee_viin03.png |
-| 14 | Full_boxxing_ | MCD | Full_boxxing_.png |
 
 Si el dorsal es visible en la imagen, tiene que ser el número de esta tabla.
 Si la noticia no menciona jugadores → composición institucional: el escudo como elemento héroe con gráfica deportiva abstracta.
