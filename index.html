@@ -8,12 +8,12 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Top Secret FC">
 <meta property="og:title" content="Top Secret FC · Club Oficial">
-<meta property="og:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 3 en curso.">
+<meta property="og:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 4.">
 <meta property="og:url" content="https://enohcaid.github.io/top-secret/">
 <meta property="og:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og-home.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Top Secret FC · Club Oficial">
-<meta name="twitter:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 3 en curso.">
+<meta name="twitter:description" content="Resultados, estadísticas, noticias y plantel del equipo. VPN · VPUG · 11x11 · Temporada 4.">
 <meta name="twitter:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og-home.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -276,7 +276,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   <section class="hero">
     <div class="hero-lines"></div>
     <div class="hero-content">
-      <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">Expediente T3 · 2026 — EA FC Clubs Pro · Buenos Aires</span></div>
+      <div class="hero-badge"><span class="hero-badge-dot"></span><span class="hero-badge-text">Expediente T4 · 2026 — EA FC Clubs Pro · Buenos Aires</span></div>
       <div class="hero-identity">
         <img class="hero-logo" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Top%20Secret%20Logo.png" alt="Top Secret FC">
         <h1 class="hero-title">TOP <span class="hero-title-accent">SECRET</span> FC</h1>
@@ -318,9 +318,9 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
   <!-- QUICK STATS — filled by JS -->
   <section class="section alt">
     <div class="section-header">
-      <h2 class="section-title">Temporada 3 · 2026</h2>
+      <h2 class="section-title" id="season-title">Temporada 3 · 2026</h2>
       <div class="section-line"></div>
-      <span class="section-badge" id="t3-badge" style="color:var(--gold);border-color:rgba(201,168,76,.35);">EN CURSO</span>
+      <span class="section-badge" id="t3-badge" style="color:var(--gold);border-color:rgba(201,168,76,.35);">FINALIZADA</span>
     </div>
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card"><div class="stat-num" id="sq-pj">—</div><div class="stat-label">Partidos jugados</div><div class="stat-sub" id="sq-pj-sub">T3</div></div>
@@ -379,7 +379,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
     <div class="section-header">
       <h2 class="section-title">Top Jugadores</h2>
       <div class="section-line"></div>
-      <span class="section-badge">T3 2026</span>
+      <span class="section-badge" id="tops-badge">T3 2026</span>
     </div>
     <div class="tops-grid" id="tops-grid"></div>
   </section>
@@ -432,7 +432,7 @@ footer{background:var(--black);border-top:3px solid var(--gold);padding:28px 40p
 
 <!-- FOOTER -->
 <footer>
-  <span class="footer-brand"><strong>Top Secret FC</strong> · VPN 2da División · T3 2026</span>
+  <span class="footer-brand"><strong>Top Secret FC</strong> · VPN 2da División · T4 2026</span>
   <span class="footer-copy">EA FC Clubs Pro · Buenos Aires · Argentina</span>
 </footer>
 
@@ -472,7 +472,9 @@ function brazosPath(key) {
 
 const T2_CUTOFF = '2026-04-30';
 const T3_CUTOFF = '2026-08-02'; // arranque real de la T3 (VPN/11x11) — la pretemporada VPUG queda afuera
+const T4_CUTOFF = '2026-09-28'; // T4 aún sin fecha de arranque: todo partido posterior cuenta como T4
 
+function frente4Path(key) { const f=FOLDER_OVERRIDE[key]||key; return mediaUrl(`Renders/${f}/Frente4.png`); }
 function frente3Path(key) { const f=FOLDER_OVERRIDE[key]||key; return mediaUrl(`Renders/${f}/Frente3.png`); }
 function frente2Path(key) { const f=FOLDER_OVERRIDE[key]||key; return mediaUrl(`Renders/${f}/Frente2.png`); }
 function frontePath(key)  { const f=FOLDER_OVERRIDE[key]||key; return mediaUrl(`Renders/${f}/Frente.png`); }
@@ -489,7 +491,7 @@ function loadTopAvatars() {
   document.querySelectorAll('.top-av[data-key]').forEach(av => {
     const key = av.dataset.key;
     const initEl = av.querySelector('.top-av-init');
-    tryImages([frente3Path(key), frente2Path(key), frontePath(key)], 0,
+    tryImages([frente4Path(key), frente3Path(key), frente2Path(key), frontePath(key)], 0,
       src => {
         const el = document.createElement('img');
         el.src = src; el.alt = key;
@@ -507,8 +509,16 @@ function loadTopAvatars() {
   });
 }
 
-/* ── COMPUTE AGGREGATE STATS (T3 — SEED matches + pretemporada via Worker) ── */
-const T3_MATCHES = SEED_MATCHES.filter(m => m.date > T3_CUTOFF);
+/* ── COMPUTE AGGREGATE STATS ── */
+// Hasta el primer partido de T4 el dashboard sigue mostrando T3 (última temporada con datos).
+const T4_MATCHES = SEED_MATCHES.filter(m => m.date > T4_CUTOFF);
+const SHOW_T4    = T4_MATCHES.length > 0;
+const SEASON_LBL = SHOW_T4 ? 'T4 2026' : 'T3 2026';
+const SEASON_MATCHES = SHOW_T4 ? T4_MATCHES : SEED_MATCHES.filter(m => m.date > T3_CUTOFF && m.date <= T4_CUTOFF);
+document.getElementById('season-title').textContent = SHOW_T4 ? 'Temporada 4 · 2026' : 'Temporada 3 · 2026';
+document.getElementById('t3-badge').textContent     = SHOW_T4 ? 'EN CURSO' : 'FINALIZADA';
+document.getElementById('sq-pj-sub').textContent    = SHOW_T4 ? 'T4' : 'T3';
+document.getElementById('tops-badge').textContent   = SEASON_LBL;
 
 let totalGoals = 0, totalWins = 0, totalDraws = 0;
 const allRatings = [];
@@ -524,7 +534,7 @@ function matchOutcome(s) {
   return gf > gc ? 'win' : (gf === gc ? 'draw' : 'loss');
 }
 
-T3_MATCHES.forEach(m => {
+SEASON_MATCHES.forEach(m => {
   if (!m.match_result) return;
   const outcome = matchOutcome(m.match_result);
   if (outcome === 'win') totalWins++;
@@ -544,7 +554,7 @@ Object.keys(playerStats).forEach(k => {
   p.avgRating = p.ratings.length ? +(p.ratings.reduce((a,b)=>a+b,0)/p.ratings.length).toFixed(2) : 0;
 });
 
-const totalGames = T3_MATCHES.length;
+const totalGames = SEASON_MATCHES.length;
 const avgRating  = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(2) : '—';
 const eff        = totalGames ? Math.round(totalWins/totalGames*100) : 0;
 const gpg        = totalGames ? (totalGoals/totalGames).toFixed(1) : '—';
@@ -609,7 +619,7 @@ const pillClass = {win:'pill-w', draw:'pill-d', loss:'pill-l'};
 const pillLabel = {win:'V', draw:'E', loss:'D'};
 const M_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-const last5 = [...T3_MATCHES].filter(m => m.match_result).sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
+const last5 = [...SEASON_MATCHES].filter(m => m.match_result).sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
 const resList = document.getElementById('results-list');
 resList.innerHTML = '';
 last5.forEach(m => {
@@ -798,7 +808,7 @@ function showPlayerModal(key) {
      </div>
      <div class="pmob-body">
        <div class="pmob-name">${key}</div>
-       <div class="pmob-pos">${pos} · T3 2026</div>
+       <div class="pmob-pos">${pos} · ${SEASON_LBL}</div>
        <div class="pmob-stats">
          <div class="pmob-stat"><div class="pmob-stat-val" style="color:var(--gold)">${st.pj}</div><div class="pmob-stat-lbl">PJ</div></div>
          <div class="pmob-stat"><div class="pmob-stat-val" style="color:#2a9d5c">${st.g}</div><div class="pmob-stat-lbl">Goles</div></div>
@@ -811,7 +821,7 @@ function showPlayerModal(key) {
      </div>`;
   document.getElementById('playerModalOverlay').classList.add('open');
   const modalImg = document.getElementById('pmob-photo-img');
-  tryImages([frente3Path(key), frente2Path(key), frontePath(key)], 0,
+  tryImages([frente4Path(key), frente3Path(key), frente2Path(key), frontePath(key)], 0,
     src => { modalImg.src = src; },
     () => { modalImg.src = mediaUrl('Renders/silueta-prueba.png'); modalImg.style.opacity = '.55'; }
   );
