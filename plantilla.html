@@ -451,6 +451,69 @@ footer span { color: var(--gold); }
 /* ── ACTIVE PRESS STATES ── */
 .season-pill:active, .pfbtn:active, .pp-dl-btn:active { transform: scale(0.97); }
 
+/* ── ESCENARIO T4 ── */
+.stage{display:none;position:relative;margin-top:-64px;width:100%;overflow:hidden;background:#0B0A07;}
+body.season-4 .stage{display:block;}
+body.season-4 .page-header{display:none;}
+.stage-img{display:block;width:100%;height:auto;min-height:520px;object-fit:cover;object-position:50% 20%;transition:filter .3s ease;}
+.stage::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(180deg,color-mix(in srgb,var(--bg,#0B0A07) 65%,transparent) 0%,transparent 16%),linear-gradient(0deg,var(--bg,#0B0A07) 0%,transparent 18%);}
+.stage-copy{position:absolute;z-index:3;left:max(var(--ts-g), calc((100vw - 1440px) / 2 + var(--ts-g)));top:calc(64px + clamp(24px,5vw,72px));max-width:460px;pointer-events:none;}
+.stage-title{white-space:nowrap;}
+.stage::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 42% 55% at 0% 0%,color-mix(in srgb,var(--bg,#0B0A07) 88%,transparent) 0%,color-mix(in srgb,var(--bg,#0B0A07) 55%,transparent) 45%,transparent 100%);}
+.stage-kicker{font-size:.74rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);}
+.stage-title{font-family:'Barlow',sans-serif;font-size:clamp(2.8rem,6vw,5.6rem);font-weight:900;letter-spacing:-.045em;line-height:.9;color:var(--text,#F2EEE0);margin:10px 0 14px;}
+.stage-sub{font-size:.9rem;color:color-mix(in srgb,var(--text,#F2EEE0) 55%,transparent);}
+.stage-spots{position:absolute;inset:0;z-index:2;}
+.spot{position:absolute;border:0;padding:0;background:transparent;cursor:pointer;border-radius:40% 40% 18% 18%;}
+.spot:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.stage-dim{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(ellipse var(--rx,9%) var(--ry,30%) at var(--sx,50%) var(--sy,40%),transparent 0,transparent 55%,rgba(5,4,3,.72) 100%);}
+.stage.hovering .stage-dim{opacity:1;}
+
+/* Expediente flotante */
+.dossier{position:absolute;z-index:4;width:250px;pointer-events:none;opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;}
+.dossier.show{opacity:1;transform:none;}
+.dos-inner{background:color-mix(in srgb,var(--bg,#0B0A07) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.6);}
+.dos-stamp{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 0;font-size:.6rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);}
+.dos-stamp b{border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);border-radius:4px;padding:2px 6px;transform:rotate(-4deg);}
+.dos-photo{position:relative;height:210px;overflow:hidden;margin-top:8px;background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--gold) 16%,transparent),transparent 65%);}
+.dos-photo img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 0;transform:scale(2.1);transform-origin:50% 6%;}
+.dos-body{padding:12px 16px 16px;}
+.dos-num{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;line-height:.9;color:var(--gold);}
+.dos-name{font-family:'Barlow',sans-serif;font-size:1.3rem;font-weight:900;letter-spacing:-.02em;color:var(--text,#F2EEE0);margin-top:2px;}
+.dos-pos{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--text,#F2EEE0) 50%,transparent);margin-top:4px;}
+.dos-hint{font-size:.66rem;color:color-mix(in srgb,var(--text,#F2EEE0) 40%,transparent);margin-top:10px;}
+
+/* En escritorio la T4 es solo el escenario; en pantallas táctiles queda la grilla debajo */
+@media (hover:hover) and (min-width:761px){
+  body.season-4 #pos-filter-t4, body.season-4 #squadGrid4{display:none;}
+}
+@media (max-width:760px){
+  .stage-copy{max-width:none;right:var(--ts-g);}
+  .stage::before{background:linear-gradient(180deg,color-mix(in srgb,var(--bg,#0B0A07) 80%,transparent) 0%,transparent 28%);}
+  .stage-sub{display:none;}
+  .stage-spots,.dossier{display:none;}
+}
+
+/* ── PERFIL: sin bordes ni divisiones, foto grande con los datos encima ── */
+#player-panel{top:0;right:0;height:100vh;border-left:0;background:linear-gradient(180deg,var(--card2,#1D1910) 0%,var(--bg,#0B0A07) 55%);box-shadow:-40px 0 90px rgba(0,0,0,.55);}
+#player-panel .pp-photo-wrap{height:min(76vh,740px);background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--gold) 18%,transparent),transparent 62%);}
+#player-panel.s4 .pp-photo{object-fit:contain;object-position:50% 100%;transform:none;padding-top:40px;}
+#player-panel .pp-photo-grad{height:45%;background:linear-gradient(to top,var(--bg,#0B0A07) 8%,transparent 100%);}
+#player-panel .pp-identity{left:28px;right:28px;bottom:22px;}
+#player-panel .pp-badge{border:0;background:none;padding:0;letter-spacing:.3em;}
+#player-panel .pp-num{font-family:'Bebas Neue',sans-serif;font-size:4.2rem;line-height:.85;}
+#player-panel .pp-name{font-family:'Barlow',sans-serif;font-size:clamp(2rem,3vw,2.8rem);font-weight:900;letter-spacing:-.04em;line-height:.95;margin-top:4px;}
+#player-panel .pp-posn{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;margin-top:8px;}
+#player-panel .pp-close{border:0;background:rgba(0,0,0,.45);}
+#player-panel .pp-body{padding:8px 28px 40px;gap:28px;}
+#player-panel .pp-kpi{background:none;border:0;padding:0;text-align:left;}
+#player-panel .pp-kpi-val{font-size:2rem;}
+#player-panel .pp-rend-item{text-align:left;}
+#player-panel .pp-total{border-top:0;padding-top:4px;}
+#player-panel [style*="border-top:1px solid"]{border-top:0 !important;}
+#player-panel .pp-dl-btn{border:0;background:color-mix(in srgb,var(--gold) 14%,transparent);border-radius:999px;color:var(--gold);}
+#player-panel [style*="background:rgba(201,168,76,.08)"],#player-panel [style*="background:rgba(255,255,255,.04)"]{border:0 !important;background:none !important;padding:0 18px 0 0 !important;}
+
 /* ── REDUCED MOTION ── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
@@ -475,6 +538,19 @@ footer span { color: var(--gold); }
   <h1 class="ph-title">El <span>Plantel</span></h1>
   <p class="ph-sub">Top Secret Football Club</p>
 </div>
+
+<!-- ESCENARIO T4: foto grupal con expediente al pasar el mouse -->
+<section class="stage" id="stage4" aria-label="Plantel de la Temporada 4">
+  <img class="stage-img" id="stage-img" alt="Plantel de Top Secret FC, Temporada 4">
+  <div class="stage-copy">
+    <div class="stage-kicker">Temporada 4 · 2026</div>
+    <h1 class="stage-title">El Plantel</h1>
+    <p class="stage-sub">Pasá el mouse sobre cada jugador para abrir su expediente.</p>
+  </div>
+  <div class="stage-dim" id="stage-dim"></div>
+  <div class="stage-spots" id="stage-spots"></div>
+  <div class="dossier" id="dossier" aria-hidden="true"></div>
+</section>
 
 <!-- SEASON BAR -->
 <div class="season-bar">
@@ -637,6 +713,7 @@ footer span { color: var(--gold); }
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
 import { ROSTER_T3, ROSTER_T4 } from './roster.js';
+import { STAGE_T4, STAGE_IMG } from './plantel-t4-stage.js';
 
 /* ─── ROSTER ─── */
 const ROSTER = [
@@ -936,6 +1013,7 @@ function switchSeason(n, btn) {
 
 function rerenderSeason() {
   const n = _currentSeason;
+  document.body.classList.toggle('season-4', n === 4);
   if (n === 1) { document.getElementById('t1-content').style.display = ''; renderGrid(currentFilter); }
   else if (n === 2) { document.getElementById('t2-content').style.display = 'block'; renderGrid2(currentFilter2); }
   else if (n === 3) { document.getElementById('t3-content').style.display = 'block'; renderGrid3(currentFilter3); }
@@ -1012,6 +1090,53 @@ function filterPos4(pos, btn) {
 }
 window.filterPos4 = filterPos4;
 
+/* ─── ESCENARIO T4 ─── */
+function buildStage() {
+  const stage = document.getElementById('stage4');
+  const img = document.getElementById('stage-img');
+  const spots = document.getElementById('stage-spots');
+  const dossier = document.getElementById('dossier');
+  img.src = mediaUrl(STAGE_IMG);
+  const byKey = Object.fromEntries(ROSTER_T4.map(p => [p.key, p]));
+  spots.innerHTML = '';
+  STAGE_T4.forEach(s => {
+    const p = byKey[s.key];
+    if (!p) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'spot';
+    b.dataset.key = p.key;
+    b.dataset.season = '4';
+    b.setAttribute('aria-label', `${p.key}, #${p.num}, ${p.posn}`);
+    Object.assign(b.style, { left: s.x + '%', top: s.y + '%', width: s.w + '%', height: s.h + '%', zIndex: 10 + s.row });
+    const show = () => {
+      dossier.innerHTML = `<div class="dos-inner">
+        <div class="dos-stamp"><span>Expediente</span><b>Clasificado</b></div>
+        <div class="dos-photo"><img src="${mediaUrl(`Renders/${renderFolder(p)}/Frente4.png`)}" alt=""></div>
+        <div class="dos-body"><div class="dos-num">#${p.num}</div><div class="dos-name">${p.key}</div><div class="dos-pos">${p.posn}</div><div class="dos-hint">Click para ver el perfil completo</div></div>
+      </div>`;
+      const right = s.x + s.w / 2 < 58;
+      dossier.style.left = right ? `calc(${s.x + s.w}% + 12px)` : '';
+      dossier.style.right = right ? '' : `calc(${100 - s.x}% + 12px)`;
+      dossier.style.top = `clamp(80px, ${s.y}%, calc(100% - 420px))`;
+      const dim = document.getElementById('stage-dim');
+      dim.style.setProperty('--sx', (s.x + s.w / 2) + '%');
+      dim.style.setProperty('--sy', (s.y + s.h * 0.55) + '%');
+      dim.style.setProperty('--rx', (s.w * 1.1) + '%');
+      dim.style.setProperty('--ry', (s.h * 1.5) + '%');
+      dossier.classList.add('show');
+      stage.classList.add('hovering');
+    };
+    const hide = () => { dossier.classList.remove('show'); stage.classList.remove('hovering'); };
+    b.addEventListener('mouseenter', show);
+    b.addEventListener('focus', show);
+    b.addEventListener('mouseleave', hide);
+    b.addEventListener('blur', hide);
+    b.addEventListener('click', () => { hide(); openPanel(p, b); });
+    spots.appendChild(b);
+  });
+}
+
 /* ─── OPEN PANEL ─── */
 function openPanel(p, card) {
   _currentPlayer = p;
@@ -1025,12 +1150,13 @@ function openPanel(p, card) {
   photoWrap.querySelectorAll('.pp-photo,.pp-photo-placeholder').forEach(el => el.remove());
 
   const season = +card.dataset.season;
+  document.getElementById('player-panel').classList.toggle('s4', season === 4);
 
   const img = document.createElement('img');
   img.className = 'pp-photo';
   img.alt = p.key;
   const ppFallbacks = season === 4
-    ? [mediaUrl(`Renders/${renderFolder(p)}/Pose4.png`), ...renderChain(p, 'Brazos', 4)]
+    ? [mediaUrl(`Renders/${renderFolder(p)}/Unica4.png`), mediaUrl(`Renders/${renderFolder(p)}/Pose4.png`), ...renderChain(p, 'Brazos', 4)]
     : season === 3
     ? [pose3Path(p), brazos3Path(p), brazos2Path(p), brazosPath(p)]
     : [brazos2Path(p), brazosPath(p)];
@@ -1172,6 +1298,8 @@ gsap.to('.pos-filter', {opacity:1, y:0, duration:0.4, ease:'power2.out', delay:0
 
 /* ─── INIT ─── */
 let _currentSeason = 4;
+buildStage();
+document.body.classList.add('season-4');
 renderGrid4('all');
 
 /* ─── NUMBER OVERRIDES FROM FIRESTORE ─── */
@@ -1207,6 +1335,6 @@ renderGrid4('all');
   }, 400);
 })();
 </script>
-<script src="layout.js?v=16"></script>
+<script src="layout.js?v=17"></script>
 </body>
 </html>

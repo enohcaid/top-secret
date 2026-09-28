@@ -444,7 +444,6 @@
 
   // Dupla que ilustra cada página interior (logos/duos/*.webp en R2).
   const PAGE_ART = {
-    'plantilla.html':     { img: 'duo-capitanes-k2',  pos: '50% 0%' },
     'estadisticas.html':  { img: 'duo-guiidow-lil-k1', pos: '50% 0%' },
     'posiciones.html':    { img: 'duo-ataque-k1',     pos: '50% 0%' },
     'calendario.html':    { img: 'duo-rivarola-huber-k2',  pos: '50% 0%' },
