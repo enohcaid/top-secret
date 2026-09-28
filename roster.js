@@ -27,7 +27,7 @@ const ROSTER_T3 = [
 ];
 
 // Plantel T4 (temporada actual) — el mismo de convocatoria.html. Renders
-// Brazos4/Frente4/Pose4 con el Kit 1 de T4 (adri_cai todavía sin render).
+// Brazos4/Frente4/Pose4 con el Kit 1 de T4; los arqueros con el kit de arquero.
 const ROSTER_T4 = [
   {key:'Ivan_Cabj_La12',   pos:'POR', posn:'Portero',         num:'12', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
   {key:'adri_cai',         pos:'POR', posn:'Portero',         num:'99', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
