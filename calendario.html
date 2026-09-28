@@ -787,7 +787,8 @@ body{padding-top:64px;}
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <div class="season-btns">
       <button class="sbtn" id="sbtn-pre" onclick="setGridSeason('pre',this)" style="border-color:rgba(62,207,142,.35);color:var(--vpug);">PRE</button>
-      <button class="sbtn active" id="sbtn-t3" onclick="setGridSeason('t3',this)">T3</button>
+      <button class="sbtn active" id="sbtn-t4" onclick="setGridSeason('t4',this)">T4</button>
+      <button class="sbtn" id="sbtn-t3" onclick="setGridSeason('t3',this)">T3</button>
       <button class="sbtn" id="sbtn-t2" onclick="setGridSeason('t2',this)">T2</button>
       <button class="sbtn" id="sbtn-t1" onclick="setGridSeason('t1',this)">T1</button>
       <button class="sbtn" id="sbtn-all" onclick="setGridSeason('all',this)">Todo</button>
@@ -1198,7 +1199,7 @@ let suspended  = JSON.parse(localStorage.getItem('ts_suspended') ||'{}'); // id 
 let custom     = JSON.parse(localStorage.getItem('ts_custom')    ||'[]'); // custom matches added via UI
 let currentFilter = 'all';
 let currentSeason = 'all';    // 'all' | 't1' | 't2'
-let currentGridSeason = 't3'; // section filter for the year grid
+let currentGridSeason = 't4'; // section filter for the year grid
 let _preData = null;           // cached pretemporada data from Worker
 let isAdminMode   = false;
 let editingId = null;
@@ -1207,9 +1208,10 @@ let editHomeVal = true;
 let addType = 'partido';
 let addHomeVal = true;
 
-// T1/T2/T3 season boundaries
+// T1/T2/T3/T4 season boundaries
 const T1_CUTOFF  = '2026-04-30';
 const T3_CUTOFF  = '2026-06-30';
+const T4_CUTOFF  = '2026-09-28'; // T4 aún sin fecha de arranque; en la grilla, T4 = de octubre en adelante
 // Admin PIN (change here to customize)
 const ADMIN_PIN  = '8189';
 
@@ -1507,7 +1509,8 @@ function scoreDisplay(id){
 function matchSeason(dateStr){
   if (dateStr <= T1_CUTOFF) return 't1';
   if (dateStr <= T3_CUTOFF) return 't2';
-  return 't3';
+  if (dateStr <= T4_CUTOFF) return 't3';
+  return 't4';
 }
 function shouldHide(dateStr, league){
   const seasonHide = currentSeason !== 'all' && matchSeason(dateStr) !== currentSeason;
@@ -1941,7 +1944,8 @@ function renderTodayCard() {
 
 /* ── SEASON DEFINITIONS ──────────────────────────────────────────────────── */
 const SEASON_RANGES = [
-  { id:'t3', label:'T3 · Temporada 3', color:'#4a9eff', bg:'rgba(74,158,255,.09)', months:['2026-07','2026-08'] },
+  { id:'t4', label:'T4 · Temporada 4', color:'#e8c35a', bg:'rgba(232,195,90,.09)', months:['2026-10','2026-11','2026-12'] },
+  { id:'t3', label:'T3 · Temporada 3', color:'#4a9eff', bg:'rgba(74,158,255,.09)', months:['2026-07','2026-08','2026-09'] },
   { id:'t2', label:'T2 · Temporada 2', color:'#C9A84C', bg:'rgba(201,168,76,.09)', months:['2026-05','2026-06'] },
   { id:'t1', label:'T1 · Temporada 1', color:'#888888', bg:'rgba(136,136,136,.06)', months:['2026-03','2026-04'] },
 ];
@@ -2016,9 +2020,9 @@ function renderNextHero() {
     hero.innerHTML = `<div class="nh-waiting">
       <span class="nh-w-icon">⏳</span>
       <div>
-        <div class="nh-eyebrow" style="color:var(--gold)">Temporada 3 · 2026</div>
+        <div class="nh-eyebrow" style="color:var(--gold)">Temporada 4 · 2026</div>
         <div class="nh-w-title">Sin partidos próximos</div>
-        <div class="nh-w-sub">El fixture de T3 estará disponible cuando se publique el calendario</div>
+        <div class="nh-w-sub">El fixture de T4 estará disponible cuando se publique el calendario</div>
       </div>
     </div>`;
     return;
@@ -2105,19 +2109,22 @@ function renderYearGrid() {
   }
 
   // Dynamically extend sections to include any month present in mbd but not hardcoded.
-  const t3Base = new Set(['2026-07','2026-08']);
+  const t4Base = new Set(['2026-10']);
+  const t3Base = new Set(['2026-07','2026-08','2026-09']);
   const t2Base = new Set(['2026-05','2026-06']);
   const t1Base = new Set(['2026-03','2026-04']);
   Object.keys(mbd).forEach(d => {
     const mk = d.slice(0,7);
-    if (!t3Base.has(mk) && !t2Base.has(mk) && !t1Base.has(mk)) {
-      if (mk > T3_CUTOFF.slice(0,7)) t3Base.add(mk);
+    if (!t4Base.has(mk) && !t3Base.has(mk) && !t2Base.has(mk) && !t1Base.has(mk)) {
+      if (mk > T4_CUTOFF.slice(0,7)) t4Base.add(mk);
+      else if (mk > T3_CUTOFF.slice(0,7)) t3Base.add(mk);
       else if (mk >= '2026-05') t2Base.add(mk);
       else t1Base.add(mk);
     }
   });
   const sections = [
-    { id:'t3', label:'Temporada 3', sub:'Próximamente', months:[...t3Base].sort(), forceShow:true },
+    { id:'t4', label:'Temporada 4', sub:'Próximamente', months:[...t4Base].sort(), forceShow:true },
+    { id:'t3', label:'Temporada 3', sub:'Finalizada',   months:[...t3Base].sort(), forceShow:false },
     { id:'t2', label:'Temporada 2', sub:'Finalizada',   months:[...t2Base].sort(), forceShow:false },
     { id:'t1', label:'Temporada 1', sub:'Finalizada',   months:[...t1Base].sort(), forceShow:false },
   ];
@@ -3030,7 +3037,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 </script>
 
 <footer>
-  <span>Top Secret FC</span> · Temporada 2 · 2026
+  <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
 <script src="layout.js?v=10"></script>
 <script src="mobile-nav.js?v=10"></script>
