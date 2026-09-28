@@ -188,7 +188,7 @@ td.left { text-align: left; }
 }
 .prox-title {
   font-family:'Barlow Condensed',sans-serif; font-size:3rem; font-weight:900;
-  letter-spacing:-.01em; color:var(--black); text-transform:uppercase; line-height:1;
+  letter-spacing:-.01em; color:var(--text); text-transform:uppercase; line-height:1;
   margin-bottom:10px;
 }
 .prox-sub { font-size:.88rem; color:var(--mid); max-width:420px; margin:0 auto; }
@@ -270,9 +270,13 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <span class="sb-label">T2 2026</span>
       <span class="sb-sub">Finalizada</span>
     </button>
-    <button class="season-btn active" id="sbtn-t3" onclick="switchSeason('t3',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
+    <button class="season-btn" id="sbtn-t3" onclick="switchSeason('t3',this)">
       <span class="sb-label">T3 2026</span>
-      <span class="sb-sub">En curso</span>
+      <span class="sb-sub">Finalizada</span>
+    </button>
+    <button class="season-btn active" id="sbtn-t4" onclick="switchSeason('t4',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
+      <span class="sb-label">T4 2026</span>
+      <span class="sb-sub">Próximamente</span>
     </button>
   </div>
 
@@ -343,8 +347,17 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
     </div>
   </div>
 
+  <!-- ════════════ TEMPORADA 4 ════════════ -->
+  <div id="s-t4">
+    <div class="prox-wrap">
+      <div class="prox-badge">Temporada 4 · 2026</div>
+      <div class="prox-title">Próximamente</div>
+      <p class="prox-sub">Las tablas de VPN, VPUG y 11x11 aparecen cuando arranquen los torneos de la Temporada 4.</p>
+    </div>
+  </div>
+
   <!-- ════════════ TEMPORADA 3 ════════════ -->
-  <div id="s-t3">
+  <div id="s-t3" style="display:none">
     <div class="tabs">
       <button class="tab active" data-league="vpn"  onclick="switchTab('vpn','t3',this)">VPN</button>
       <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t3',this)">VPUG</button>
@@ -639,6 +652,7 @@ function switchSeason(season, btn) {
   document.getElementById('s-t1').style.display  = season === 't1'  ? '' : 'none';
   document.getElementById('s-t2').style.display  = season === 't2'  ? '' : 'none';
   document.getElementById('s-t3').style.display  = season === 't3'  ? '' : 'none';
+  document.getElementById('s-t4').style.display  = season === 't4'  ? '' : 'none';
 }
 
 /* ── TAB SWITCH (per season) ── */
