@@ -26,7 +26,7 @@ Three layers:
 
 | File | Purpose |
 |---|---|
-| `index.html` | Dashboard: hero slider, quick stats, latest news, top performers, fixtures |
+| `index.html` | Home (logic in `index-home.js`): hero card (text + `logos/hero-t4.webp`, Twitch live overlays it), big-image news grid, Miembros (T4 squad rail + Convocatoria/Plan tiles), Competencias (season stats, leagues, tops, results), Redes |
 | `plantilla.html` | Squad roster (position filters, player cards from `Renders/`) |
 | `estadisticas.html` | Per-match and per-player stats |
 | `calendario.html` | Match calendar; admin editing writes to Firestore `calendario/estado` |
@@ -37,9 +37,8 @@ Three layers:
 | `reclutamiento.html` | Recruitment form (posts to Worker `/notify-reclu`) |
 | `plan-de-juego.html` | Game plan (password-gated, PDF) |
 
-Every page loads `layout.js?v=5` and `mobile-nav.js?v=5` at the end of `<body>`:
-- **`layout.js`** injects topbar, left nav sidebar, right social sidebar, the 3-theme system (`t3` default = dark gray/blue, `dark` = black/silver, `light`), and the visit counter (Worker `/counter`). New pages must be added to `PAGES` here.
-- **`mobile-nav.js`** injects the bottom tab bar and mobile overrides for screens ≤ 640px. Has its own `PAGES` list — keep both in sync.
+Every page loads `layout.js?v=N` at the end of `<body>` (redesign 2026-09-28, v=11):
+- **`layout.js`** injects the only navigation: a transparent top nav (gains blur/background on scroll) with the `Clean logo` (→ index), grouped menus in `NAV` — Noticias · **Miembros** (→ plantilla; dropdown Convocatoria, Plan de juego) · **Competencias** (→ posiciones; dropdown Calendario, Estadísticas) · **Redes** (dropdown with every social network, list in `SOCIAL`, also exposed as `window.TS_SOCIAL`) — plus "Sumate" (reclutamiento), visit counter and theme toggle. On ≤980px it becomes a full-screen menu. **No sidebars, no social bubbles, no bottom tab bar** (the user asked to remove them; `mobile-nav.js` was deleted). It also resets the old per-page sidebar offsets (`--sb-left/--sb-right`, body margins). New pages go into `NAV` (and its `match` list so the group highlights). Themes: `cls` default (black/gold), `t3`, `dark`, `light`.
 - **Cache busting is manual**: bump the `?v=N` query across all pages when editing these files, or GitHub Pages visitors get stale JS. `seed_matches.js` imports are sometimes versioned too (`?v=20260612` in calendario.html).
 
 ### Data Layer — `seed_matches.js`
@@ -138,7 +137,7 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 - ART timezone (`America/Argentina/Buenos_Aires`) for all date/time logic.
 - CSS: use the design tokens, never hard-code colors; no `transition: all`; no emojis in UI text unless requested.
 - Keep inline `<script>` blocks under ~500 lines in new code; extract to `.js` files. (Legacy pages exceed this — don't grow them further.)
-- Each page is self-contained — no cross-page dependencies beyond `layout.js`, `mobile-nav.js`, `seed_matches.js`, `noticias-data.js`, `auto-noticias.js`.
+- Each page is self-contained — no cross-page dependencies beyond `layout.js`, `roster.js`, `seed_matches.js`, `noticias-data.js`, `auto-noticias.js`.
 - Never delete or overwrite code unless explicitly instructed; ask when context is missing.
 - Commit when a change is done (user preference: don't wait to be asked). Commit messages in the existing style: `feat:`/`fix:` + short Spanish description.
 
@@ -163,8 +162,8 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 3. Remove their row from the table in `scripts/chatgpt-project-instructions.md` and update the same instructions in the live ChatGPT project (this file is only a mirror).
 4. The article-writing routine (the scheduled cloud agent that drafts `news/draft`) is external to this repo and can still write an ex-player's name into an article's text from stale knowledge — steps 1-3 only stop them from appearing as an image protagonist, not from being mentioned in prose. If that happens, discard/regenerate the draft.
 
-**Edit shared UI (`layout.js` / `mobile-nav.js`)**
-1. Make the change (both `PAGES` lists if nav changed).
+**Edit shared UI (`layout.js`)**
+1. Make the change (`NAV` if navigation changed).
 2. Bump `?v=N` on every page's script tags. Commit.
 
 **Reprogramar una fecha del Campeonato de Invierno VPUG (pretemporada)**

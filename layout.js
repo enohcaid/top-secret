@@ -1,5 +1,5 @@
 // ─── TOP SECRET FC · Shared Layout ────────────────────────────────────────────
-// Injects topbar, left sidebar, and right sidebar into every page.
+// Injects the top navigation (menús agrupados + redes) into every page.
 // Edit this file once → changes replicate everywhere.
 
 (function () {
@@ -14,17 +14,33 @@
   else if (stored === 't3') htmlEl.classList.add('t3-mode');
   else htmlEl.classList.add('cls-mode'); // null o 'cls' → Clasificado (negro+dorado) es el default
 
-  const PAGES = [
-    { url: 'index.html',        label: 'Inicio', svg: '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>' },
-    { url: 'plantilla.html',    label: 'Equipo', svg: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' },
-    { url: 'estadisticas.html', label: 'Stats',  svg: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>' },
-    { url: 'posiciones.html',   label: 'Liga',   svg: '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' },
-    { url: 'calendario.html',   label: 'Cal.',   svg: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
-    { url: 'convocatoria.html?vista', label: 'Conv.',  svg: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 12l3 3 5-5"/>' },
-    { url: 'noticias.html',     label: 'News',  svg: '<path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>' },
-    { url: 'plan-de-juego.html',   label: 'Plan',   svg: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>' },
-    { url: 'reclutamiento.html',   label: 'Reclu.', svg: '<path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>' },
+  // Menú agrupado. `url` del grupo = a dónde lleva el click; `items` = desplegable.
+  const NAV = [
+    { id: 'noticias', label: 'Noticias', url: 'noticias.html', match: ['noticias.html'] },
+    { id: 'miembros', label: 'Miembros', url: 'plantilla.html', match: ['plantilla.html', 'convocatoria.html', 'convo.html', 'plan-de-juego.html'], items: [
+      { label: 'Plantel',       desc: 'Fichas del plantel T4',          url: 'plantilla.html' },
+      { label: 'Convocatoria',  desc: 'Disponibilidad y armado',        url: 'convocatoria.html?vista' },
+      { label: 'Plan de juego', desc: 'Táctica del equipo',             url: 'plan-de-juego.html' },
+    ]},
+    { id: 'competencias', label: 'Competencias', url: 'posiciones.html', match: ['posiciones.html', 'calendario.html', 'estadisticas.html'], items: [
+      { label: 'Posiciones',    desc: 'VPN · VPUG · 11x11',             url: 'posiciones.html' },
+      { label: 'Calendario',    desc: 'Fixture y resultados',           url: 'calendario.html' },
+      { label: 'Estadísticas',  desc: 'Goles, asistencias, ratings',    url: 'estadisticas.html' },
+    ]},
+    { id: 'redes', label: 'Redes', social: true },
   ];
+
+  const SOCIAL = [
+    { key: 'ig', label: 'Instagram', handle: '@fctopsecret', url: 'https://instagram.com/fctopsecret', color: '#E1306C', svg: '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>' },
+    { key: 'x', label: 'X', handle: '@fctopsecret', url: 'https://x.com/fctopsecret', color: '#FFFFFF', svg: '<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>' },
+    { key: 'fb', label: 'Facebook', handle: 'topsecretfc', url: 'https://facebook.com/topsecretfc', color: '#1877F2', svg: '<path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/>' },
+    { key: 'wa', label: 'WhatsApp', handle: 'Grupo de la comunidad', url: 'https://chat.whatsapp.com/G3zmPxrMZsYB1MqWCEhrkU', color: '#25D366', svg: '<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0011.815 0C5.24 0-.13 5.371-.133 11.984c0 2.11.551 4.171 1.598 5.986L0 24l6.185-1.62a11.94 11.94 0 005.628 1.427h.005c6.575 0 11.946-5.372 11.949-11.985a11.94 11.94 0 00-3.5-8.47"/>' },
+    { key: 'yt', label: 'YouTube', handle: '@TOPSecretFC', url: 'https://www.youtube.com/@TOPSecretFC', color: '#FF0000', svg: '<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>' },
+    { key: 'tk', label: 'TikTok', handle: '@topsecretfc', url: 'https://www.tiktok.com/@topsecretfc', color: '#FE2C55', svg: '<path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>' },
+    { key: 'tw', label: 'Twitch', handle: 'topsecretfc', url: 'https://www.twitch.tv/topsecretfc', color: '#9146FF', svg: '<path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>' },
+  ];
+
+  window.TS_SOCIAL = SOCIAL; // la portada arma su sección "Redes" con esta misma lista
 
   const currentFile = location.pathname.split('/').pop() || 'index.html';
 
@@ -38,69 +54,76 @@
   // ── CSS ────────────────────────────────────────────────────────────────────
   const style = document.createElement('style');
   style.textContent = `
-    :root{--gold:#B0B8C4;--gold2:#D4DAE4;}
+    :root{--gold:#B0B8C4;--gold2:#D4DAE4;--sb-left:0px !important;--sb-right:0px !important;}
 
-    /* ── Topbar ── */
-    .topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#111111;border-bottom:3px solid var(--gold);display:flex;align-items:center;padding:0 16px 0 16px;gap:8px;}
-    .tb-brand{display:flex;align-items:center;gap:22px;text-decoration:none;margin-right:auto;}
-    .tb-brand img{height:44px;width:auto;object-fit:contain;}
-    .tb-brand-name{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;font-weight:400;letter-spacing:.1em;color:#FFFFFF;line-height:1;}
-    .tb-brand-name span{color:var(--gold);}
-    .tb-center{display:none;}
-    .tb-logos{display:flex;align-items:center;gap:40px;margin-right:4px;}
-    .tb-counter{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:var(--gold);white-space:nowrap;flex-shrink:0;cursor:default;user-select:none;}
-    .tb-counter svg{width:13px;height:13px;flex-shrink:0;opacity:.85;}
-    @media(max-width:640px){.tb-counter{padding:4px 9px;font-size:.68rem;}}
-    .tb-logos img{width:auto;object-fit:contain;opacity:.95;}
-    .tb-logos img[alt="EA FC 26"]{height:100px;}
-    .tb-logos img[alt="Clubs Pro"]{height:90px;}
-    .tb-sep{width:1px;height:22px;background:rgba(255,255,255,.12);flex-shrink:0;}
+    /* Sin barras laterales: cada página reservaba 64px/48px a los costados. */
+    body{margin-left:0 !important;margin-right:0 !important;padding-left:0 !important;padding-right:0 !important;}
+    #lockScreen,#pdfViewer{left:0 !important;right:0 !important;}
 
-    /* ── Theme toggle button ── */
-    .tb-theme-btn{width:32px;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s,background-color .15s;flex-shrink:0;padding:0;}
-    .tb-theme-btn:hover{color:var(--gold);border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.06);}
-    .tb-theme-btn svg{width:15px;height:15px;pointer-events:none;}
+    /* ── Top nav: transparente, se "nota" recién al scrollear ── */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;display:flex;align-items:center;gap:18px;padding:0 clamp(16px,3vw,40px);background:transparent;border-bottom:1px solid transparent;transition:background-color .3s ease,border-color .3s ease,backdrop-filter .3s ease;}
+    .topbar.tb-scrolled{background:color-mix(in srgb, var(--bg, #0B0A07) 78%, transparent);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);border-bottom-color:color-mix(in srgb, var(--text, #F2EEE0) 8%, transparent);}
+    .tb-brand{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0;}
+    .tb-brand img{height:34px;width:auto;object-fit:contain;transition:transform .25s ease;}
+    .tb-brand:hover img{transform:rotate(-6deg) scale(1.05);}
+    .tb-brand-name{font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--text, #F2EEE0);white-space:nowrap;}
 
-    /* ── Left sidebar ── */
-    .sidebar-left{position:fixed;top:64px;left:0;z-index:100;width:64px;height:calc(100vh - 64px);background:#111111;border-right:1px solid rgba(176,184,196,.15);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:4px;}
-    .sl-link{width:44px;height:44px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:rgba(255,255,255,.35);transition:background-color .15s,color .15s;}
-    .sl-link svg{width:18px;height:18px;}
-    .sl-link span{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
-    .sl-link:hover{background:rgba(176,184,196,.1);color:rgba(255,255,255,.75);}
-    .sl-link.active{background:rgba(176,184,196,.12);color:var(--gold);}
+    .tb-nav{display:flex;align-items:center;gap:4px;margin:0 auto;}
+    .tb-item{position:relative;}
+    .tb-link{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:999px;font-family:'Barlow',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:color-mix(in srgb, var(--text, #F2EEE0) 72%, transparent);text-decoration:none;background:none;border:0;cursor:pointer;transition:color .15s ease,background-color .15s ease;}
+    .tb-link:hover,.tb-item.open>.tb-link{color:var(--text, #F2EEE0);background:color-mix(in srgb, var(--text, #F2EEE0) 6%, transparent);}
+    .tb-item.active>.tb-link{color:var(--gold);}
+    .tb-caret{width:10px;height:10px;transition:transform .2s ease;}
+    .tb-item.open .tb-caret{transform:rotate(180deg);}
 
-    /* ── Right sidebar — floating social bubbles ── */
-    .sidebar-right{position:fixed;top:64px;right:0;z-index:100;width:56px;height:calc(100vh - 64px);display:flex;flex-direction:column;align-items:center;padding:24px 0;gap:14px;pointer-events:none;}
-    .sr-icon{pointer-events:auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:transform .2s ease, box-shadow .2s ease, background .2s ease;animation:sr-float 3.6s ease-in-out infinite;}
-    .sr-icon svg{width:19px;height:19px;}
-    .sr-icon:hover{transform:translateY(-4px) scale(1.08);}
-    .sr-icon:nth-child(1){animation-delay:0s;}
-    .sr-icon:nth-child(2){animation-delay:.5s;}
-    .sr-icon:nth-child(3){animation-delay:1s;}
-    .sr-icon:nth-child(4){animation-delay:1.5s;}
-    .sr-icon:nth-child(5){animation-delay:2s;}
-    .sr-icon:nth-child(6){animation-delay:2.5s;}
-    .sr-icon:nth-child(7){animation-delay:3s;}
-    @keyframes sr-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-    .sr-icon.sr-ig{color:#E1306C;background:rgba(225,48,108,.15);border:1px solid rgba(225,48,108,.32);}
-    .sr-icon.sr-ig:hover{background:rgba(225,48,108,.28);box-shadow:0 8px 22px rgba(225,48,108,.4);}
-    .sr-icon.sr-x{color:#fff;background:#0a0a0a;border:1px solid rgba(255,255,255,.24);}
-    .sr-icon.sr-x:hover{background:#000;box-shadow:0 8px 22px rgba(0,0,0,.45);}
-    .sr-icon.sr-fb{color:#1877F2;background:rgba(24,119,242,.15);border:1px solid rgba(24,119,242,.32);}
-    .sr-icon.sr-fb:hover{background:rgba(24,119,242,.28);box-shadow:0 8px 22px rgba(24,119,242,.4);}
-    .sr-icon.sr-wa{color:#25D366;background:rgba(37,211,102,.18);border:1px solid rgba(37,211,102,.4);}
-    .sr-icon.sr-wa:hover{background:rgba(37,211,102,.32);box-shadow:0 8px 22px rgba(37,211,102,.45);}
-    .sr-icon.sr-yt{color:#FF0000;background:rgba(255,0,0,.15);border:1px solid rgba(255,0,0,.32);}
-    .sr-icon.sr-yt:hover{background:rgba(255,0,0,.28);box-shadow:0 8px 22px rgba(255,0,0,.4);}
-    .sr-icon.sr-tk{color:#fff;background:#000;border:1px solid rgba(254,44,85,.4);}
-    .sr-icon.sr-tk:hover{background:#0a0a0a;box-shadow:0 8px 22px rgba(254,44,85,.4);}
-    .sr-icon.sr-tw{color:#9146FF;background:rgba(145,70,255,.15);border:1px solid rgba(145,70,255,.35);}
-    .sr-icon.sr-tw:hover{background:rgba(145,70,255,.28);box-shadow:0 8px 22px rgba(145,70,255,.4);}
+    .tb-drop{position:absolute;top:calc(100% + 10px);left:50%;min-width:250px;padding:8px;border-radius:16px;background:color-mix(in srgb, var(--card, #16130B) 94%, transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid color-mix(in srgb, var(--text, #F2EEE0) 10%, transparent);box-shadow:0 18px 50px rgba(0,0,0,.45);opacity:0;visibility:hidden;transform:translate(-50%,-6px);transition:opacity .18s ease,transform .18s ease,visibility .18s;}
+    .tb-item.open .tb-drop{opacity:1;visibility:visible;transform:translate(-50%,0);}
+    .tb-drop::before{content:'';position:absolute;left:0;right:0;top:-12px;height:12px;}
+    .tb-drop a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--text, #F2EEE0);transition:background-color .15s ease;}
+    .tb-drop a:hover{background:color-mix(in srgb, var(--gold) 12%, transparent);}
+    .tb-drop a.current .tb-d-label{color:var(--gold);}
+    .tb-d-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.04em;}
+    .tb-d-desc{display:block;font-size:.72rem;color:color-mix(in srgb, var(--text, #F2EEE0) 50%, transparent);margin-top:1px;}
+    .tb-drop.social{min-width:290px;display:grid;grid-template-columns:1fr;}
+    .tb-s-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:color-mix(in srgb, var(--text, #F2EEE0) 7%, transparent);color:var(--text, #F2EEE0);transition:color .15s ease,background-color .15s ease;}
+    .tb-s-icon svg{width:16px;height:16px;}
+    .tb-drop a:hover .tb-s-icon{color:var(--brand);background:color-mix(in srgb, var(--brand) 16%, transparent);}
 
-    @media(max-width:860px){.tb-center{display:none;}}
+    .tb-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .tb-cta{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid color-mix(in srgb, var(--gold) 55%, transparent);color:var(--gold);font-family:'Barlow',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;transition:background-color .2s ease,color .2s ease;}
+    .tb-cta:hover{background:var(--gold);color:var(--bg, #0B0A07);}
+    .tb-counter{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;letter-spacing:.04em;color:color-mix(in srgb, var(--text, #F2EEE0) 45%, transparent);white-space:nowrap;cursor:default;user-select:none;}
+    .tb-counter svg{width:13px;height:13px;}
+    .tb-theme-btn{width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:color-mix(in srgb, var(--text, #F2EEE0) 55%, transparent);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s ease,background-color .15s ease;padding:0;}
+    .tb-theme-btn:hover{color:var(--gold);background:color-mix(in srgb, var(--text, #F2EEE0) 6%, transparent);}
+    .tb-theme-btn svg{width:16px;height:16px;pointer-events:none;}
+
+    /* ── Menú mobile (pantalla completa) ── */
+    .tb-burger{display:none;width:40px;height:40px;border-radius:50%;border:0;background:color-mix(in srgb, var(--text, #F2EEE0) 7%, transparent);color:var(--text, #F2EEE0);cursor:pointer;align-items:center;justify-content:center;padding:0;}
+    .tb-burger svg{width:18px;height:18px;}
+    .tb-sheet{position:fixed;inset:0;z-index:300;background:var(--bg, #0B0A07);display:flex;flex-direction:column;padding:18px 20px 28px;overflow-y:auto;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .22s ease,transform .22s ease,visibility .22s;}
+    .tb-sheet.open{opacity:1;visibility:visible;transform:none;}
+    .tb-sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+    .tb-sheet-group{padding:14px 0;border-top:1px solid color-mix(in srgb, var(--text, #F2EEE0) 8%, transparent);}
+    .tb-sheet-title{display:block;font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.04em;line-height:1;color:var(--text, #F2EEE0);text-decoration:none;}
+    .tb-sheet-title.active{color:var(--gold);}
+    .tb-sheet-sub{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+    .tb-sheet-sub a{padding:8px 14px;border-radius:999px;background:color-mix(in srgb, var(--text, #F2EEE0) 6%, transparent);color:color-mix(in srgb, var(--text, #F2EEE0) 80%, transparent);font-size:.8rem;font-weight:600;text-decoration:none;}
+    .tb-sheet-social{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;}
+    .tb-sheet-social a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:14px;background:color-mix(in srgb, var(--text, #F2EEE0) 5%, transparent);color:var(--brand);text-decoration:none;font-size:.66rem;font-weight:600;}
+    .tb-sheet-social a span{color:color-mix(in srgb, var(--text, #F2EEE0) 70%, transparent);}
+    .tb-sheet-social svg{width:20px;height:20px;}
+    .tb-sheet .tb-cta{align-self:flex-start;margin-top:18px;}
+
+    @media(max-width:980px){
+      .tb-nav,.tb-counter,.tb-right .tb-cta{display:none;}
+      .tb-burger{display:flex;}
+      .tb-right{margin-left:auto;}
+    }
+    @media(max-width:420px){ .tb-brand-name{display:none;} }
 
     /* ────────────────────────────────────────────────────────────────────────
-       T3 MODE — nuevo default: gris oscuro + azul
+       T3 MODE — gris oscuro + azul
     ──────────────────────────────────────────────────────────────────────── */
     html.t3-mode {
       --gold:     #4a9eff;
@@ -117,16 +140,6 @@
       --mid2:     rgba(224,232,244,.28);
     }
     html.t3-mode body { background: #0d1117; color: #e0e8f4; }
-    html.t3-mode .topbar { background: #0d1117; border-bottom-color: #4a9eff; }
-    html.t3-mode .tb-brand-name { color: #e0e8f4; }
-    html.t3-mode .tb-sep { background: rgba(74,158,255,.2); }
-    html.t3-mode .tb-counter { background: rgba(74,158,255,.08); border-color: rgba(74,158,255,.22); color: #4a9eff; }
-    html.t3-mode .tb-theme-btn { border-color: rgba(74,158,255,.25); color: rgba(224,232,244,.5); }
-    html.t3-mode .tb-theme-btn:hover { color: #4a9eff; border-color: rgba(74,158,255,.5); background: rgba(74,158,255,.08); }
-    html.t3-mode .sidebar-left { background: #0d1117; border-right-color: rgba(74,158,255,.12); }
-    html.t3-mode .sl-link { color: rgba(224,232,244,.3); }
-    html.t3-mode .sl-link:hover { background: rgba(74,158,255,.08); color: rgba(224,232,244,.8); }
-    html.t3-mode .sl-link.active { background: rgba(74,158,255,.12); color: #4a9eff; }
 
     /* Calendario */
     html.t3-mode .week-strip-wrap { background: rgba(13,17,23,.97) !important; }
@@ -148,10 +161,6 @@
     html.t3-mode .sdot.sy { background: #f5c518 !important; }
     html.t3-mode .sdot.sr { background: #ef4444 !important; }
     html.t3-mode .sdot.sa { background: #4a9eff !important; }
-
-    /* Mobile nav */
-    html.t3-mode #ts-mobile-nav { background: #0d1117 !important; border-top-color: rgba(74,158,255,.25) !important; }
-    html.t3-mode #ts-mobile-nav a.ts-mbn-active { color: #4a9eff !important; }
 
     /* ────────────────────────────────────────────────────────────────────────
        CLASIFICADO — default: negro cálido + dorado comprometido.
@@ -177,17 +186,6 @@
       --white:    #F7F4EA;
     }
     html.cls-mode body { background: #0B0A07; color: #F2EEE0; }
-    html.cls-mode .topbar { background: #0B0A07; border-bottom: 3px solid #C8A84B; }
-    html.cls-mode .tb-brand-name { color: #F2EEE0; }
-    html.cls-mode .tb-brand-name span { color: #C8A84B; }
-    html.cls-mode .tb-sep { background: rgba(200,168,75,.25); }
-    html.cls-mode .tb-counter { background: rgba(200,168,75,.08); border-color: rgba(200,168,75,.3); color: #C8A84B; }
-    html.cls-mode .tb-theme-btn { border-color: rgba(200,168,75,.3); color: rgba(242,238,224,.55); }
-    html.cls-mode .tb-theme-btn:hover { color: #C8A84B; border-color: rgba(200,168,75,.6); background: rgba(200,168,75,.08); }
-    html.cls-mode .sidebar-left { background: #0B0A07; border-right-color: rgba(200,168,75,.14); }
-    html.cls-mode .sl-link { color: rgba(242,238,224,.34); }
-    html.cls-mode .sl-link:hover { background: rgba(200,168,75,.08); color: rgba(242,238,224,.85); }
-    html.cls-mode .sl-link.active { background: rgba(200,168,75,.14); color: #C8A84B; }
 
     /* Sello de expediente: los badges de sección hablan el idioma "clasificado" */
     html.cls-mode .section-badge,
@@ -217,10 +215,6 @@
     html.cls-mode .pitch-hint { color: rgba(242,238,224,.35) !important; }
     html.cls-mode .stoken.empty { background: rgba(200,168,75,.05) !important; border-color: rgba(200,168,75,.25) !important; color: rgba(242,238,224,.3) !important; }
     html.cls-mode .always-badge { color: #C8A84B !important; }
-
-    /* Mobile nav */
-    html.cls-mode #ts-mobile-nav { background: #0B0A07 !important; border-top-color: rgba(200,168,75,.35) !important; }
-    html.cls-mode #ts-mobile-nav a.ts-mbn-active { color: #C8A84B !important; }
 
     /* Accesibilidad de movimiento — global, todos los temas */
     @media (prefers-reduced-motion: reduce) {
@@ -263,15 +257,6 @@
       --red:    #c0392b;
     }
     html.light-mode body { background: #FFFFFF; color: #111111; }
-    html.light-mode .topbar { background: #FFFFFF; border-bottom-color: #C9A84C; }
-    html.light-mode .tb-brand-name { color: #111111; }
-    html.light-mode .tb-sep { background: rgba(0,0,0,.12); }
-    html.light-mode .tb-theme-btn { border-color: rgba(0,0,0,.15); color: rgba(0,0,0,.45); }
-    html.light-mode .tb-theme-btn:hover { color: #C9A84C; border-color: rgba(201,168,76,.5); background: rgba(201,168,76,.06); }
-    html.light-mode .sidebar-left { background: #FFFFFF; border-right-color: #E5E5E0; }
-    html.light-mode .sl-link { color: rgba(0,0,0,.4); }
-    html.light-mode .sl-link:hover { background: rgba(0,0,0,.05); color: rgba(0,0,0,.7); }
-    html.light-mode .sl-link.active { background: rgba(201,168,76,.08); color: #C9A84C; }
     html.light-mode .week-strip-wrap { background: rgba(255,255,255,.97) !important; }
     html.light-mode .month-title-row:hover { background: rgba(0,0,0,.03) !important; }
     html.light-mode .result-box.win  { border-color: rgba(42,157,92,.4)  !important; background: rgba(42,157,92,.04)  !important; }
@@ -295,12 +280,14 @@
   const SUN_SVG  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
   const T3_SVG   = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
   const CLS_SVG  = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'; // escudo — Clasificado
+  const CARET_SVG = '<svg class="tb-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  const BURGER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
+  const CLOSE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+  const EYE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 
   const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
-  const LOGO_DARK  = MEDIA_BASE + '/logos/Top%20Secret%20white.png';
-  const LOGO_LIGHT = 'Top-Secret.png';
-  const LOGO_T3    = MEDIA_BASE + '/logos/TOP%20Secret%20Blue.png';
-  const LOGO_CLS   = MEDIA_BASE + '/logos/Top%20Secret%20white.png';
+  const LOGO_ON_DARK  = MEDIA_BASE + '/logos/rebrand/clean-white.webp';
+  const LOGO_ON_LIGHT = MEDIA_BASE + '/logos/rebrand/clean-negro.webp';
 
   // ── Theme helpers ──────────────────────────────────────────────────────────
   function getTheme() {
@@ -317,10 +304,7 @@
   }
 
   function themeLogo(theme) {
-    if (theme === 'light') return LOGO_LIGHT;
-    if (theme === 't3')    return LOGO_T3;
-    if (theme === 'dark')  return LOGO_DARK;
-    return LOGO_CLS;
+    return theme === 'light' ? LOGO_ON_LIGHT : LOGO_ON_DARK;
   }
 
   function applyTheme(theme) {
@@ -330,9 +314,8 @@
     if (theme === 'cls')   htmlEl.classList.add('cls-mode');
     localStorage.setItem(THEME_KEY, theme);
     const icon = document.getElementById('tb-theme-icon');
-    const logo = document.getElementById('tb-logo');
     if (icon) icon.innerHTML = themeIcon(theme);
-    if (logo) logo.src = themeLogo(theme);
+    document.querySelectorAll('.tb-logo').forEach(l => { l.src = themeLogo(theme); });
   }
 
   function cycleTheme() {
@@ -340,63 +323,103 @@
     applyTheme(next);
   }
 
-  // ── Topbar HTML ────────────────────────────────────────────────────────────
+  // ── Markup ────────────────────────────────────────────────────────────────
+  const isCurrent = url => url.split('?')[0] === currentFile;
+  const isActive  = g => (g.match || []).includes(currentFile);
+  const socialLink = s => `<a href="${s.url}" target="_blank" rel="noopener" style="--brand:${s.color}"><span class="tb-s-icon"><svg viewBox="0 0 24 24" fill="currentColor">${s.svg}</svg></span><span><span class="tb-d-label">${s.label}</span><span class="tb-d-desc">${s.handle}</span></span></a>`;
+
+  function navItem(g) {
+    if (!g.items && !g.social) {
+      return `<div class="tb-item${isActive(g) ? ' active' : ''}"><a class="tb-link" href="${g.url}">${g.label}</a></div>`;
+    }
+    const drop = g.social
+      ? `<div class="tb-drop social">${SOCIAL.map(socialLink).join('')}</div>`
+      : `<div class="tb-drop">${g.items.map(i => `<a href="${i.url}"${isCurrent(i.url) ? ' class="current"' : ''}><span><span class="tb-d-label">${i.label}</span><span class="tb-d-desc">${i.desc}</span></span></a>`).join('')}</div>`;
+    const trigger = g.url
+      ? `<a class="tb-link" href="${g.url}" data-drop>${g.label}${CARET_SVG}</a>`
+      : `<button class="tb-link" type="button" data-drop aria-haspopup="true">${g.label}${CARET_SVG}</button>`;
+    return `<div class="tb-item${isActive(g) ? ' active' : ''}">${trigger}${drop}</div>`;
+  }
+
   const currentTheme = getTheme();
+  const brandHtml = `<a class="tb-brand" href="index.html" title="Inicio"><img class="tb-logo" src="${themeLogo(currentTheme)}" alt="Top Secret FC"><span class="tb-brand-name">Top Secret FC</span></a>`;
+
   const topbar = document.createElement('header');
   topbar.className = 'topbar';
   topbar.innerHTML = `
-    <a class="tb-brand" href="index.html">
-      <img id="tb-logo" src="${themeLogo(currentTheme)}" alt="TSFC">
-      <span class="tb-brand-name">TOP <span>SECRET</span> FC</span>
-    </a>
-    <div class="tb-logos">
-      <div class="tb-sep"></div>
-      <img src="${MEDIA_BASE}/logos/Logo%20EA%20FC26.png" alt="EA FC 26">
-      <img src="${MEDIA_BASE}/logos/Clubs%20Pro%20Badge.png" alt="Clubs Pro">
-    </div>
-    <button class="tb-theme-btn" id="tb-theme-btn" title="Cambiar tema">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="tb-theme-icon">
-        ${themeIcon(currentTheme)}
-      </svg>
-    </button>
-    <div class="tb-counter" id="tb-counter" title="Visitas al sitio">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      <span id="tb-count">—</span>
+    ${brandHtml}
+    <nav class="tb-nav" aria-label="Principal">${NAV.map(navItem).join('')}</nav>
+    <div class="tb-right">
+      <a class="tb-cta" href="reclutamiento.html">Sumate</a>
+      <div class="tb-counter" title="Visitas al sitio">${EYE_SVG}<span class="tb-count">—</span></div>
+      <button class="tb-theme-btn" id="tb-theme-btn" title="Cambiar tema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="tb-theme-icon">${themeIcon(currentTheme)}</svg>
+      </button>
+      <button class="tb-burger" type="button" aria-label="Abrir menú">${BURGER_SVG}</button>
     </div>
   `;
 
-  // ── Left sidebar HTML ──────────────────────────────────────────────────────
-  const sbLeft = document.createElement('nav');
-  sbLeft.className = 'sidebar-left';
-  PAGES.forEach(p => {
-    const a = document.createElement('a');
-    a.className = 'sl-link' + (p.url.split('?')[0] === currentFile ? ' active' : '');
-    a.href = p.url;
-    a.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p.svg}</svg><span>${p.label}</span>`;
-    sbLeft.appendChild(a);
-  });
-
-  // ── Right sidebar HTML ─────────────────────────────────────────────────────
-  const sbRight = document.createElement('aside');
-  sbRight.className = 'sidebar-right';
-  sbRight.innerHTML = `
-    <a class="sr-icon sr-ig" href="https://instagram.com/fctopsecret" target="_blank" rel="noopener" title="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-    <a class="sr-icon sr-x" href="https://x.com/fctopsecret" target="_blank" rel="noopener" title="X (Twitter)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-    <a class="sr-icon sr-fb" href="https://facebook.com/topsecretfc" target="_blank" rel="noopener" title="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg></a>
-    <a class="sr-icon sr-wa" href="https://chat.whatsapp.com/G3zmPxrMZsYB1MqWCEhrkU" target="_blank" rel="noopener" title="Unite a nuestro grupo de WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0011.815 0C5.24 0-.13 5.371-.133 11.984c0 2.11.551 4.171 1.598 5.986L0 24l6.185-1.62a11.94 11.94 0 005.628 1.427h.005c6.575 0 11.946-5.372 11.949-11.985a11.94 11.94 0 00-3.5-8.47"/></svg></a>
-    <a class="sr-icon sr-yt" href="https://www.youtube.com/@TOPSecretFC" target="_blank" rel="noopener" title="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-    <a class="sr-icon sr-tk" href="https://www.tiktok.com/@topsecretfc" target="_blank" rel="noopener" title="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
-    <a class="sr-icon sr-tw" href="https://www.twitch.tv/topsecretfc" target="_blank" rel="noopener" title="Twitch"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg></a>
+  const sheet = document.createElement('div');
+  sheet.className = 'tb-sheet';
+  sheet.setAttribute('aria-hidden', 'true');
+  sheet.innerHTML = `
+    <div class="tb-sheet-head">${brandHtml}<button class="tb-burger" type="button" aria-label="Cerrar menú" style="display:flex">${CLOSE_SVG}</button></div>
+    <div class="tb-sheet-group"><a class="tb-sheet-title${currentFile === 'index.html' ? ' active' : ''}" href="index.html">Inicio</a></div>
+    ${NAV.filter(g => !g.social).map(g => `<div class="tb-sheet-group">
+      <a class="tb-sheet-title${isActive(g) ? ' active' : ''}" href="${g.url}">${g.label}</a>
+      ${g.items ? `<div class="tb-sheet-sub">${g.items.map(i => `<a href="${i.url}">${i.label}</a>`).join('')}</div>` : ''}
+    </div>`).join('')}
+    <div class="tb-sheet-group">
+      <span class="tb-sheet-title">Redes</span>
+      <div class="tb-sheet-social">${SOCIAL.map(s => `<a href="${s.url}" target="_blank" rel="noopener" style="--brand:${s.color}"><svg viewBox="0 0 24 24" fill="currentColor">${s.svg}</svg><span>${s.label}</span></a>`).join('')}</div>
+    </div>
+    <a class="tb-cta" href="reclutamiento.html">Sumate al club</a>
   `;
 
-  // ── Inject into body ───────────────────────────────────────────────────────
+  // ── Behaviour ─────────────────────────────────────────────────────────────
+  function closeDrops(except) {
+    topbar.querySelectorAll('.tb-item.open').forEach(i => { if (i !== except) i.classList.remove('open'); });
+  }
+
+  function bind() {
+    // Hover abre en desktop; click en el disparador sin URL (Redes) o toque en pantallas táctiles.
+    topbar.querySelectorAll('.tb-item').forEach(item => {
+      if (!item.querySelector('.tb-drop')) return;
+      let t;
+      item.addEventListener('mouseenter', () => { clearTimeout(t); closeDrops(item); item.classList.add('open'); });
+      item.addEventListener('mouseleave', () => { t = setTimeout(() => item.classList.remove('open'), 140); });
+      const trigger = item.querySelector('[data-drop]');
+      trigger.addEventListener('click', e => {
+        const touch = matchMedia('(hover: none)').matches;
+        if (trigger.tagName === 'BUTTON' || (touch && !item.classList.contains('open'))) {
+          e.preventDefault();
+          closeDrops(item);
+          item.classList.toggle('open');
+        }
+      });
+    });
+    document.addEventListener('click', e => { if (!topbar.contains(e.target)) closeDrops(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrops(); setSheet(false); } });
+
+    const onScroll = () => topbar.classList.toggle('tb-scrolled', window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    function setSheet(open) {
+      sheet.classList.toggle('open', open);
+      sheet.setAttribute('aria-hidden', open ? 'false' : 'true');
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+    }
+    topbar.querySelector('.tb-burger').addEventListener('click', () => setSheet(true));
+    sheet.querySelector('.tb-burger').addEventListener('click', () => setSheet(false));
+
+    document.getElementById('tb-theme-btn').addEventListener('click', cycleTheme);
+  }
+
   function inject() {
-    document.body.insertBefore(sbRight, document.body.firstChild);
-    document.body.insertBefore(sbLeft,  document.body.firstChild);
-    document.body.insertBefore(topbar,  document.body.firstChild);
-
-    const btn = document.getElementById('tb-theme-btn');
-    if (btn) btn.addEventListener('click', cycleTheme);
+    document.body.insertBefore(sheet, document.body.firstChild);
+    document.body.insertBefore(topbar, document.body.firstChild);
+    bind();
   }
 
   if (document.body) inject();
@@ -409,13 +432,14 @@
 
   var COUNTER_URL = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/counter';
 
+  function showCount(txt) {
+    document.querySelectorAll('.tb-count').forEach(function (el) { el.textContent = txt; });
+  }
+
   function updateCounterDisplay() {
     fetch(COUNTER_URL)
       .then(function(r) { return r.json(); })
-      .then(function(d) {
-        var el = document.getElementById('tb-count');
-        if (el) el.textContent = fmtCount(d.count);
-      })
+      .then(function(d) { showCount(fmtCount(d.count)); })
       .catch(function() {});
   }
 
@@ -424,14 +448,10 @@
     fetch(COUNTER_URL, { method: alreadyCounted ? 'GET' : 'POST' })
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        var el = document.getElementById('tb-count');
-        if (el) el.textContent = fmtCount(d.count);
+        showCount(fmtCount(d.count));
         if (!alreadyCounted) sessionStorage.setItem('ts_v', '1');
       })
-      .catch(function() {
-        var el = document.getElementById('tb-count');
-        if (el) el.textContent = '';
-      });
+      .catch(function() { showCount(''); });
     setInterval(updateCounterDisplay, 30000);
   })();
 
