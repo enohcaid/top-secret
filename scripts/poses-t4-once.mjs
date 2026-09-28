@@ -22,7 +22,7 @@ const POSES = {
   'pepolemmo2710':    'saltando en el aire con un puño en alto, festejo explosivo',
   'Juan_Martinez4':   'con brazalete de capitán en el brazo, aplaudiendo con fuerza mientras arenga al equipo, boca abierta',
   'RS32-DaniStone':   'señalándose los ojos con dos dedos y luego a cámara, gesto de "te estoy mirando"',
-  'CipriMancini':     'pisando la pelota con la suela, cuerpo girado, mirando por encima del hombro',
+  'CipriMancini':     'de frente, conduciendo la pelota con el pie derecho apenas adelantado sobre el balón, torso levemente inclinado, mirada al frente; ambas piernas anatómicamente correctas y rectas',
   'Lil_Dekuroko':     'con el dedo índice sobre la máscara a la altura de la boca, gesto de silencio "shh"',
   'Lautavester7':     'festejo de goleador: deslizándose de rodillas con los brazos abiertos y el pecho inflado',
   'Juanchyroman08':   'ajustándose el pañuelo de la cabeza con las dos manos, mirando hacia arriba',

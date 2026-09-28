@@ -1,5 +1,5 @@
 // Generado por scripts/plantel-foto-t4.mjs — imagen del escenario de plantilla.html y posición de cada jugador (% del ancho/alto).
-export const STAGE_IMG = 'logos/plantel-t4-mulvzalb.webp';
+export const STAGE_IMG = 'logos/plantel-t4-mulwea19.webp';
 export const STAGE_T4 = [{"key":"Huber236","row":0,"x":8.9,"y":14.76,"w":10.2,"h":15.86},
   {"key":"rivarola90","row":0,"x":21.63,"y":13.29,"w":8.74,"h":16.24},
   {"key":"Elianja20","row":0,"x":32.9,"y":8.65,"w":10.2,"h":16.98},
@@ -17,5 +17,5 @@ export const STAGE_T4 = [{"key":"Huber236","row":0,"x":8.9,"y":14.76,"w":10.2,"h
   {"key":"Ivan_Cabj_La12","row":2,"x":15.08,"y":34.29,"w":12.24,"h":37.66},
   {"key":"nikileo527","row":2,"x":29.48,"y":29.59,"w":12.24,"h":39.92},
   {"key":"Lautavester7","row":2,"x":43.88,"y":41.53,"w":12.24,"h":30.6},
-  {"key":"CipriMancini","row":2,"x":58.28,"y":29.24,"w":12.24,"h":40.8},
+  {"key":"CipriMancini","row":2,"x":58.28,"y":29.24,"w":12.24,"h":40.48},
   {"key":"endiabladorojo66","row":2,"x":72.68,"y":35.24,"w":12.24,"h":37.38}];

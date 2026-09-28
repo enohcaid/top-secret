@@ -514,6 +514,12 @@ body.season-4 .page-header{display:none;}
 #player-panel .pp-dl-btn{border:0;background:color-mix(in srgb,var(--gold) 14%,transparent);border-radius:999px;color:var(--gold);}
 #player-panel [style*="background:rgba(201,168,76,.08)"],#player-panel [style*="background:rgba(255,255,255,.04)"]{border:0 !important;background:none !important;padding:0 18px 0 0 !important;}
 
+.pp-picker{position:absolute;top:18px;left:22px;right:64px;z-index:6;display:flex;gap:6px;flex-wrap:wrap;}
+.pp-pick{display:flex;flex-direction:column;align-items:center;gap:3px;width:52px;padding:4px 0 5px;border:0;border-radius:12px;background:rgba(0,0,0,.35);cursor:pointer;color:color-mix(in srgb,var(--text,#F2EEE0) 60%,transparent);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:background-color .15s ease,color .15s ease;}
+.pp-pick img{width:34px;height:40px;object-fit:cover;object-position:50% 0;}
+.pp-pick:hover{color:var(--text,#F2EEE0);background:rgba(0,0,0,.55);}
+.pp-pick.on{color:var(--bg,#0B0A07);background:var(--gold);}
+
 /* ── REDUCED MOTION ── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
@@ -1137,6 +1143,42 @@ function buildStage() {
   });
 }
 
+/* ─── SELECTOR DE FOTOS DEL PERFIL ─── */
+// Arranca en "Brazos" y deja elegir cualquier otra foto del jugador; las que no existan se ocultan solas.
+// ?v= fuerza a re-descargar poses regeneradas (R2 cachea un año).
+const UNICA_V = 2;
+function buildPhotoPicker(p, season, img) {
+  const old = document.getElementById('pp-picker');
+  if (old) old.remove();
+  if (season !== 4) return;
+  const f = renderFolder(p);
+  const opts = [
+    ['Brazos', `Renders/${f}/Brazos4.png`],
+    ['Frente', `Renders/${f}/Frente4.png`],
+    ['Pose', `Renders/${f}/Pose4.png`],
+    ['Única', `Renders/${f}/Unica4.png`, UNICA_V],
+    ['T3', `Renders/${f}/Brazos3.png`],
+  ];
+  const bar = document.createElement('div');
+  bar.id = 'pp-picker';
+  bar.className = 'pp-picker';
+  opts.forEach(([label, path, v], i) => {
+    const url = mediaUrl(path) + (v ? '?v=' + v : '');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pp-pick' + (i === 0 ? ' on' : '');
+    b.innerHTML = `<img src="${url}" alt=""><span>${label}</span>`;
+    b.querySelector('img').onerror = () => b.remove();
+    b.addEventListener('click', () => {
+      bar.querySelectorAll('.pp-pick').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      img.src = url;
+    });
+    bar.appendChild(b);
+  });
+  document.getElementById('pp-photo-wrap').appendChild(bar);
+}
+
 /* ─── OPEN PANEL ─── */
 function openPanel(p, card) {
   _currentPlayer = p;
@@ -1155,8 +1197,9 @@ function openPanel(p, card) {
   const img = document.createElement('img');
   img.className = 'pp-photo';
   img.alt = p.key;
+  buildPhotoPicker(p, season, img);
   const ppFallbacks = season === 4
-    ? [mediaUrl(`Renders/${renderFolder(p)}/Unica4.png`), mediaUrl(`Renders/${renderFolder(p)}/Pose4.png`), ...renderChain(p, 'Brazos', 4)]
+    ? renderChain(p, 'Brazos', 4)
     : season === 3
     ? [pose3Path(p), brazos3Path(p), brazos2Path(p), brazosPath(p)]
     : [brazos2Path(p), brazosPath(p)];
