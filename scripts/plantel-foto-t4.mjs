@@ -64,4 +64,8 @@ fs.writeFileSync('plantel-t4-stage.js', `// Generado por scripts/plantel-foto-t4
 export const STAGE_IMG = '${IMG}';
 export const STAGE_T4 = ${JSON.stringify(stage).replace(/\},\{/g, '},\n  {')};
 `);
+// Actualiza el import de plantilla.html para que el navegador no use una versión cacheada.
+const ver = IMG.match(/plantel-t4-([a-z0-9]+).webp/)[1];
+const page = fs.readFileSync('plantilla.html', 'utf8').replace(/plantel-t4-stage.js(?v=[a-z0-9]+)?'/, );
+fs.writeFileSync('plantilla.html', page);
 console.log('ok', stage.length, 'jugadores', IMG, missing.length ? 'SIN pose única: ' + missing.join(', ') : '');
