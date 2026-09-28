@@ -115,7 +115,7 @@ Source lives in this repo; **edits require redeploying** (credentials/commands i
 - **Season boundaries (T4)**: plantel T4 lives in `roster.js` (`ROSTER_T4`; `ROSTER_T3` kept as history). T4 has no start date yet, so `T4_CUTOFF = '2026-09-28'` in plantilla/estadisticas/calendario/index — any match after that counts as T4. Replace it with the real kickoff date once known.
 - `logos/` — club logos, league logos, news images. Convention: heavy PNGs get a `.webp` sibling for web use.
 - `logos/rebrand/` — high-res crest set from the 2026-09 rebrand (4x upscale, transparent PNG): `Top Secret Logo New.png` (metallic badge, 5016px), `Top Secret Logo New White/Azul/Dorado/Negro.png` (flat badge, 5016px) and `Clean logo` (spy mark alone) in white/Metal/Azul/Dorado/Negro (1740×1932). Azul = `#1E69BC` (from `logos/TOP Secret Blue.png`). Source masters stay in `logos/` (`Top Secret Logo New*.png`, `Clean logo.png`) — never overwrite them. These are source assets: derive a small `.webp` before using one in a page.
-- `Top-Secret.png` — club crest (favicon on all pages). Theme logos: `logos/TOP Secret Blue.png` (t3), `logos/Top Secret white.png` (dark), `Top-Secret.png` (light).
+- Favicon (all pages): `Clean logo Metal` → R2 `logos/rebrand/favicon-64.png` + `favicon-180.png` (apple-touch). `Top-Secret.png` — old crest. Theme logos: `logos/TOP Secret Blue.png` (t3), `logos/Top Secret white.png` (dark), `Top-Secret.png` (light).
 - **Commit images to git together with the code that references them** — GitHub Pages serves only what's committed.
 - Optimize before committing: images displayed small must not be multi-MB. `sharp` is available in `node_modules` (devDependency, scripts only — never in page code).
 
