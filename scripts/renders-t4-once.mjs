@@ -31,10 +31,12 @@ const t4 = (k, withBody) => [`${k} - carta.png`, ...(withBody ? [`${k} - cuerpo.
 const PLAYERS = [
   { key: 'adri_cai',         num: 99, gk: true, idRefs: t4('adri_cai', true) },
   { key: 'Juan_Martinez4',   num: 6  },
-  { key: 'Ivan_Cabj_La12',   num: 12, gk: true },
+  { key: 'Ivan_Cabj_La12',   num: 12, gk: true, idRefs: [path.join(SRC_DIR, 'Ivan_Cabj_La12-v2 - carta.png')],
+    lookNote: 'Look NUEVO (reemplaza por completo al anterior): piel oscura, trenzas/rastas largas AZUL oscuro recogidas hacia atrás, barba corta canosa (blanca/gris), SIN anteojos, SIN tatuajes visibles en los brazos.' },
   { key: 'rivarola90',       num: 2  },
   { key: 'Alexisraies23',    num: 3  },
-  { key: 'Cabers14',         num: 5  },
+  { key: 'Cabers14',         num: 5, idRefs: [path.join(SRC_DIR, 'Cabers14-v2 - carta.png')],
+    lookNote: 'Look NUEVO (reemplaza por completo al anterior): rasgos del este asiático, piel clara, pelo negro corto y lacio, SIN barba, SIN máscara de calavera, SIN rastas, rostro sereno.' },
   { key: 'Huber236',         num: 8  },
   { key: 'Guiidow',          num: 20 },
   { key: 'Lil_Dekuroko',     num: 22 },
@@ -93,7 +95,7 @@ function buildFrentePrompt(player) {
   const idSource = player.renewed
     ? `Te adjunto su render de la temporada pasada ("Frente3.png", ignorá ese uniforme viejo con "AIA") y la carta in-game NUEVA con su look actual. ${player.lookNote} Copiá exactamente esa cara, tono de piel y contextura.`
     : player.idRefs
-    ? 'Te adjunto capturas in-game del jugador (carta del club y, si está, su avatar de cuerpo entero con ropa casual). Son la fuente de verdad de su apariencia: copiá exactamente cara, peinado/tocado, vello facial, tatuajes, accesorios (anteojos, máscaras, bandanas, mangas, guantes), tono de piel y contextura. La ropa casual NO va: solo la usás para ver el cuerpo.'
+    ? 'Te adjunto capturas in-game del jugador (carta del club y, si está, su avatar de cuerpo entero con ropa casual). Son la fuente de verdad de su apariencia: copiá exactamente cara, peinado/tocado, vello facial, tatuajes, accesorios (anteojos, máscaras, bandanas, mangas, guantes), tono de piel y contextura. La ropa casual NO va: solo la usás para ver el cuerpo.' + (player.lookNote ? ' ' + player.lookNote : '')
     : `Te adjunto el render oficial de la temporada pasada de este jugador ("Frente3.png"). Es la fuente de verdad de su apariencia: copiá exactamente cara, peinado, vello facial, tatuajes, accesorios, tono de piel y contextura. IGNORÁ su uniforme (el negro con "AIA" blanco): ese kit ya no se usa.`;
   return `Sos el diseñador de renders oficiales de Top Secret FC, club argentino de fútbol virtual (EA Sports FC Clubs Pro). Necesito el render de plantel de la Temporada 4 del jugador ${player.key}: un cutout de cuerpo entero para su ficha.
 
