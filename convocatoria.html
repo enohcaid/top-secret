@@ -55,7 +55,7 @@ html body .conv-top .page-eyebrow{border:0;box-shadow:none;background:none;paddi
 /* Cancha: entra entera en la pantalla y queda fija mientras se recorre la lista */
 @media(min-width:901px){
   .col-pitch{top:76px;}
-  .col-pitch .pitch{width:min(100%,calc((100vh - 170px) * .75));margin:0 auto;}
+  .col-pitch .pitch,.col-pitch .pitch-bar{width:min(100%,calc((100vh - 170px) * .75));margin-left:auto;margin-right:auto;}
 }
 
 /* Pestañas solo en celular */
@@ -64,10 +64,27 @@ html body .conv-top .page-eyebrow{border:0;box-shadow:none;background:none;paddi
   .conv-tabs{display:flex;gap:6px;margin:0 0 16px;position:sticky;top:64px;z-index:20;padding:8px 0;background:var(--bg,#0B0A07);}
   .conv-tab{flex:1;padding:11px 0;border:0;border-radius:999px;background:rgba(242,238,224,.06);color:var(--mid);font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;}
   .conv-tab.on{background:var(--gold);color:#0B0A07;}
-  body:not(.tab-armado) .col-pitch, body:not(.tab-armado) .section-head-right{display:none !important;}
-  body.tab-armado .col-players, body.tab-armado .section-head{display:none !important;}
-  .section-head-right{flex-wrap:wrap;gap:6px;}
+  body:not(.tab-armado) .col-pitch{display:none !important;}
+  body.tab-armado .col-players{display:none !important;}
 }
+
+/* ── BARRA SOBRE LA CANCHA ── */
+.pitch-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.pb-form{display:flex;align-items:center;gap:10px;font-size:.72rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--mid);}
+.pb-form select{appearance:none;-webkit-appearance:none;font-family:'Barlow',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.02em;color:var(--text);background:rgba(242,238,224,.06) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='3' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center/12px;border:0;border-radius:999px;padding:9px 34px 9px 16px;cursor:pointer;}
+.pb-form select:disabled{cursor:default;background-image:none;padding-right:16px;opacity:1;}
+.pb-form select option{background:#16130B;color:#F2EEE0;}
+.pb-menu{position:relative;}
+.pb-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:0;border-radius:999px;background:var(--gold);color:#0B0A07;font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:800;cursor:pointer;}
+.pb-btn svg{width:13px;height:13px;transition:transform .2s ease;}
+.pb-menu.open .pb-btn svg{transform:rotate(180deg);}
+.pb-drop{position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:250px;padding:8px;border-radius:16px;background:#16130B;box-shadow:0 18px 50px rgba(0,0,0,.55);display:none;flex-direction:column;}
+.pb-menu.open .pb-drop{display:flex;}
+.pb-drop button{text-align:left;padding:11px 14px;border:0;border-radius:10px;background:none;color:#F2EEE0;font-family:'Barlow',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;}
+.pb-drop button:hover{background:rgba(201,168,76,.14);}
+.pb-drop button:disabled{opacity:.6;cursor:wait;}
+.pb-edit:not(:empty){border-top:1px solid var(--border);margin-top:6px;padding-top:6px;display:flex;flex-direction:column;}
+.pb-drop button.danger{color:#f87171;}
 
 /* ── RESUMEN SUELTO BAJO EL TÍTULO ── */
 .conv-stats{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:4px;}
@@ -384,20 +401,6 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
     <button type="button" class="conv-tab" data-tab="armado" onclick="setConvTab('armado')">Armado</button>
   </div>
 
-  <!-- SECTION HEADERS -->
-  <div class="section-row">
-    <div class="section-head">
-      <span>Disponibilidad</span>
-      <span id="sectionDate" style="font-size:.62rem;letter-spacing:.08em;"></span>
-    </div>
-    <div class="section-head-right">
-      <span>Armado</span>
-      <button class="share-btn" id="copyListBtn" onclick="copyPlayerList()" style="margin-right:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar lista</button>
-      <button class="share-btn" id="copyLineupBtn" onclick="copyLineup()" style="margin-right:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar equipo</button>
-      <button class="share-btn" id="shareBtn" onclick="doShare()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
-    </div>
-  </div>
-
   <!-- TWO-COL LAYOUT -->
   <div class="conv-layout">
 
@@ -410,7 +413,18 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
         <span id="assignBannerText">Seleccioná un jugador</span>
         <span class="assign-cancel" onclick="cancelSlotSelect()">✕</span>
       </div>
-      <div class="fbar" id="fbar"></div>
+      <div class="pitch-bar">
+        <label class="pb-form"><span>Formación</span><select id="formSel" onchange="selectFormation(this.value)"></select></label>
+        <div class="pb-menu" id="pbMenu">
+          <button type="button" class="pb-btn" onclick="togglePbMenu(event)" aria-haspopup="true">Opciones<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div class="pb-drop" id="pbDrop">
+            <button type="button" id="shareBtn" onclick="closePbMenu();doShare()">Compartir imagen</button>
+            <button type="button" id="copyLineupBtn" onclick="closePbMenu();copyLineup()">Copiar equipo</button>
+            <button type="button" id="copyListBtn" onclick="closePbMenu();copyPlayerList()">Copiar lista de disponibilidad</button>
+            <div class="pb-edit" id="pbEdit"></div>
+          </div>
+        </div>
+      </div>
       <div class="pitch" id="pitch">
         <img class="pitch-logo" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-negro.webp" alt="" aria-hidden="true">
         <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" class="pitch-svg">
@@ -430,7 +444,7 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
           <path d="M110,334 A34,34 0 0,1 190,334" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
         </svg>
       </div>
-      <div class="pitch-hint" id="pitchHint">Arrastrá un jugador al puesto · o tocá un slot</div>
+      <div class="pitch-hint" id="pitchHint">Arrastrá un jugador a un puesto, o tocá un puesto y después al jugador</div>
     </div>
 
   </div>
@@ -984,7 +998,7 @@ function renderTodayMatchesPanel() {
   const matches = getTodayMatches();
   document.getElementById('tmpTitle').textContent = matches.length > 1 ? 'Partidos de hoy' : matches.length ? 'Partido de hoy' : 'Hoy';
   if (!matches.length) {
-    wrap.querySelector('.tmp-list').innerHTML = '<div class="tmp-row"><span class="tmp-time">22:30</span><span class="tmp-rival">Entrenamiento</span><span class="tmp-loc">Adentro</span></div>';
+    wrap.querySelector('.tmp-list').innerHTML = '<div class="tmp-row"><span class="tmp-time">22:30</span><span class="tmp-rival">Entrenamiento</span><span class="tmp-loc">Todos conectados</span></div>';
     return;
   }
   const lc = {VPN:'#f5c518',VPUG:'#3ecf8e','11x11':'#4a9eff'};
@@ -994,7 +1008,7 @@ function renderTodayMatchesPanel() {
       ${m.badge?`<img class="tmp-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">`:''}
       <span class="tmp-rival">${m.rival||'—'}</span>
       ${m.league ? `<span class="tmp-badge" style="background:${lc[m.league]||'#888'}22;color:${lc[m.league]||'#888'};border:1px solid ${lc[m.league]||'#888'}55">${m.league}</span>` : ''}
-      <span class="tmp-loc">${m.isHome?'🏠':'✈️'}</span>
+      <span class="tmp-loc">${m.isHome?'Local':'Visitante'}</span>
     </div>`).join('');
 }
 
@@ -1326,7 +1340,6 @@ function renderDateTag() {
   const MONTHS= ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const d = new Date();
   document.getElementById('dateTag').textContent = DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + MONTHS[d.getMonth()] + ' · ' + d.getFullYear();
-  document.getElementById('sectionDate').textContent = TODAY;
 }
 
 /* ─── TARJETA GRANDE DE JUGADOR ─── */
@@ -1454,26 +1467,17 @@ function renderStats() {
 
 /* ─── RENDER FORMATION BAR ─── */
 function renderFbar() {
-  const bar = document.getElementById('fbar');
-  bar.innerHTML = '';
-  Object.keys(FORMATIONS).forEach(f => {
-    const btn = document.createElement('button');
-    btn.className = 'fbtn' + (f === lineup.formation ? ' active' : '');
-    btn.textContent = f;
-    btn.onclick = () => selectFormation(f);
-    bar.appendChild(btn);
-  });
-  const autoBtn = document.createElement('button');
-  autoBtn.className = 'auto-btn';
-  autoBtn.innerHTML = '⚡ Auto';
-  autoBtn.onclick = autoLineup;
-  bar.appendChild(autoBtn);
-  const clearBtn = document.createElement('button');
-  clearBtn.className = 'clear-btn';
-  clearBtn.innerHTML = '✕ Limpiar';
-  clearBtn.onclick = clearLineup;
-  bar.appendChild(clearBtn);
+  const sel = document.getElementById('formSel');
+  sel.innerHTML = Object.keys(FORMATIONS).map(f => `<option value="${f}"${f === lineup.formation ? ' selected' : ''}>${f}</option>`).join('');
+  sel.disabled = !EDIT_MODE; // en modo vista solo muestra la formación
+  document.getElementById('pbEdit').innerHTML = EDIT_MODE
+    ? '<button type="button" onclick="closePbMenu();autoLineup()">Armado automático</button><button type="button" class="danger" onclick="closePbMenu();clearLineup()">Vaciar la cancha</button>'
+    : '';
 }
+function togglePbMenu(e) { e.stopPropagation(); document.getElementById('pbMenu').classList.toggle('open'); }
+function closePbMenu() { document.getElementById('pbMenu').classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('#pbMenu')) closePbMenu(); });
+window.togglePbMenu = togglePbMenu; window.closePbMenu = closePbMenu;
 
 /* ─── TAMAÑO DE FICHA ───
    Todas las fichas miden lo mismo: la mayor posible para que, con esta formación,
@@ -2048,10 +2052,7 @@ function copyPlayerList() {
     });
   });
   navigator.clipboard.writeText(lines.join('\n')).then(() => {
-    const btn = document.getElementById('copyListBtn');
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copiado';
-    setTimeout(() => btn.textContent = orig, 1800);
+    showToast('Lista de disponibilidad copiada');
   });
 }
 
@@ -2070,10 +2071,7 @@ function copyLineup() {
   });
   if (!lines.length) { showToast('No hay equipo armado para copiar'); return; }
   navigator.clipboard.writeText(lines.join('\n')).then(() => {
-    const btn = document.getElementById('copyLineupBtn');
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copiado';
-    setTimeout(() => btn.textContent = orig, 1800);
+    showToast('Equipo copiado');
   });
 }
 
@@ -2298,7 +2296,7 @@ async function canvasToBlob(cvs) {
 async function doShare() {
   const btn = document.getElementById('shareBtn');
   const orig = btn.textContent;
-  btn.textContent = '⏳...'; btn.disabled = true;
+  btn.textContent = 'Generando imagen…'; btn.disabled = true;
 
   /* ── Copy WhatsApp message to clipboard ── */
   try { await navigator.clipboard.writeText(buildWhatsAppMessage()); } catch(e) {}
