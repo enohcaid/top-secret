@@ -1,280 +1,390 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plan de Juego · Top Secret FC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Secret FC · Plan de Juego</title>
 <link rel="icon" type="image/png" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png">
 <link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#0B0A07; --card:#16130B; --card2:#1D1910;
+  --gold:#C8A84B; --gold2:#E0C979;
+  --text:#F2EEE0; --text2:rgba(242,238,224,.66); --mid:rgba(242,238,224,.44); --border:rgba(242,238,224,.08);
+  --rival:#E0645A; --ok:#3ECF8E;
+  --topbar:64px; --gutter:clamp(16px,3vw,40px);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;height:100%;background:#000;font-family:'Barlow',sans-serif;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:16px;line-height:1.6;padding-top:var(--topbar);-webkit-font-smoothing:antialiased;}
+body.locked{overflow:hidden;}
+img{display:block;max-width:100%;}
+.wrap{max-width:1280px;margin:0 auto;padding:0 var(--gutter);}
 
-/* Content area sits inside topbar + sidebars */
-#lockScreen,#pdfViewer{
-  position:fixed;
-  top:64px;left:64px;right:48px;bottom:0;
+/* ══════════ CAJA FUERTE ══════════ */
+#vault{position:fixed;inset:var(--topbar) 0 0 0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vh,30px);padding:20px;
+  background:radial-gradient(ellipse at 50% 42%,#1d1810 0%,#0B0A07 62%);transition:opacity .6s ease .9s,visibility 0s linear 1.5s;}
+#vault.open{opacity:0;visibility:hidden;pointer-events:none;}
+.v-side{display:flex;flex-direction:column;align-items:center;gap:14px;}
+@media(min-width:900px){
+  #vault{flex-direction:row;gap:clamp(40px,7vw,110px);}
+  .v-stage{width:min(72vh,500px);}
+  .v-side{align-items:flex-start;}
+  .v-side .v-kicker,.v-side .v-title,.v-side .v-msg{text-align:left;}
+  .v-title{font-size:clamp(2.2rem,3.6vw,3.2rem);}
 }
+@media(max-width:899px){ .v-stage{width:min(38vh,82vw);} .v-title br{display:none;} }
+.v-kicker{font-size:.72rem;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);text-align:center;}
+.v-title{font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:900;letter-spacing:-.03em;text-align:center;line-height:1;margin-top:6px;}
 
-/* ── LOCK SCREEN ── */
-#lockScreen{
-  background:#000;
-  display:flex;align-items:center;justify-content:center;
-  z-index:10;
-}
-#lockContent{
-  display:flex;flex-direction:column;align-items:center;gap:20px;
-  opacity:0;
-  animation:revealIn 2.4s ease-out 0.6s forwards;
-}
-@keyframes revealIn{
-  0%  {opacity:0;filter:brightness(.1);}
-  40% {opacity:.5;filter:brightness(.5);}
-  100%{opacity:1;filter:brightness(1);}
-}
+.v-stage{position:relative;width:min(62vh,440px,86vw);aspect-ratio:1;perspective:1600px;flex-shrink:0;}
+.v-glow{position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle,rgba(224,201,121,.95) 0%,rgba(200,168,75,.45) 35%,transparent 70%);opacity:0;transition:opacity .5s ease .55s;}
+#vault.open .v-glow{opacity:1;}
+.v-door{position:absolute;inset:0;border-radius:50%;transform-origin:4% 50%;transform-style:preserve-3d;transition:transform 1.1s cubic-bezier(.6,.05,.3,1) .5s;
+  background:radial-gradient(circle at 50% 38%,#3a3528 0%,#1f1c15 55%,#0e0c08 100%);box-shadow:0 30px 80px rgba(0,0,0,.7),inset 0 0 0 10px #8a7434,inset 0 0 0 14px #2a2418;}
+#vault.open .v-door{transform:rotateY(-108deg);}
+.v-door img{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.v-bolt{position:absolute;width:9%;height:3.4%;left:50%;top:50%;border-radius:4px;background:linear-gradient(180deg,#f0d98a,#8a7434);box-shadow:0 2px 6px rgba(0,0,0,.6);transform-origin:0 50%;transition:transform .45s cubic-bezier(.5,0,.3,1);}
+#vault.unbolt .v-bolt{transform:var(--rot) translateX(40%) !important;}
 
-.secret-logo{
-  width:clamp(90px,14vw,150px);
-  height:clamp(90px,14vw,150px);
-  object-fit:contain;
-  filter:drop-shadow(0 0 28px rgba(201,168,76,.55));
-  margin-bottom:4px;
-}
+.v-dial{position:absolute;left:29%;top:28%;width:42%;height:42%;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,#4a4232,#1b1810 70%);box-shadow:0 10px 30px rgba(0,0,0,.7),inset 0 0 0 3px #c8a84b,inset 0 0 0 7px #2a2418,inset 0 -8px 18px rgba(0,0,0,.6);
+  transition:transform .55s cubic-bezier(.3,1.4,.5,1);}
+.v-dial svg{position:absolute;inset:0;width:100%;height:100%;}
+.v-dial svg text{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7px;fill:#E0C979;text-anchor:middle;dominant-baseline:middle;}
+.v-dial img{position:absolute;left:30%;top:30%;width:40%;height:40%;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));}
+.v-mark{position:absolute;left:50%;top:calc(28% - 15px);width:0;height:0;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:13px solid var(--gold);filter:drop-shadow(0 2px 3px rgba(0,0,0,.7));z-index:3;}
 
-.lock-title{
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:900;
-  font-size:clamp(1.3rem,3.5vw,2rem);
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:#C9A84C;
-  text-shadow:0 0 30px rgba(201,168,76,.4);
-}
-.lock-subtitle{
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:600;
-  font-size:clamp(.75rem,1.8vw,.95rem);
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  color:rgba(255,255,255,.4);
-  margin-top:-8px;
-}
+.v-lights{display:flex;gap:14px;}
+.v-light{width:14px;height:14px;border-radius:50%;background:#2a2418;box-shadow:inset 0 1px 3px rgba(0,0,0,.8);transition:background-color .2s ease,box-shadow .2s ease;}
+.v-light.on{background:var(--gold);box-shadow:0 0 12px var(--gold);}
+.v-light.bad{background:var(--rival);box-shadow:0 0 14px var(--rival);}
+.v-light.good{background:var(--ok);box-shadow:0 0 14px var(--ok);}
+.v-msg{min-height:20px;font-size:.84rem;font-weight:600;color:var(--mid);letter-spacing:.04em;text-align:center;}
+.v-msg.bad{color:var(--rival);}
+.v-pad{display:grid;grid-template-columns:repeat(3,64px);gap:10px;}
+.v-key{height:52px;border:0;border-radius:14px;background:linear-gradient(180deg,#2c271c,#17140e);box-shadow:0 3px 0 #0a0906,inset 0 1px 0 rgba(255,255,255,.08);color:var(--text);font-family:'Bebas Neue',sans-serif;font-size:1.6rem;cursor:pointer;transition:transform .08s ease,box-shadow .08s ease;}
+.v-key:active{transform:translateY(2px);box-shadow:0 1px 0 #0a0906;}
+.v-key.fn{font-family:'Barlow',sans-serif;font-size:1rem;color:var(--mid);}
+.v-shake{animation:vshake .5s ease;}
+@keyframes vshake{0%,100%{transform:translateX(0);}20%{transform:translateX(-12px);}40%{transform:translateX(10px);}60%{transform:translateX(-7px);}80%{transform:translateX(4px);}}
+@media(max-height:760px){.v-pad{grid-template-columns:repeat(3,56px);gap:8px;}.v-key{height:44px;}}
+@media(max-width:899px) and (max-height:760px){.v-side{gap:8px;}.v-key{height:40px;}}
 
-/* ── PIN DOTS ── */
-.pin-dots{
-  display:flex;gap:18px;margin:8px 0 4px;
-}
-.pin-dot{
-  width:18px;height:18px;border-radius:50%;
-  border:2px solid rgba(201,168,76,.4);
-  background:transparent;
-  transition:background .15s,border-color .15s,box-shadow .15s;
-}
-.pin-dot.filled{
-  background:#C9A84C;
-  border-color:#C9A84C;
-  box-shadow:0 0 10px rgba(201,168,76,.5);
-}
-.pin-dot.error{
-  background:#e8502e;
-  border-color:#e8502e;
-  box-shadow:0 0 10px rgba(232,80,46,.5);
-}
+/* ══════════ CONTENIDO ══════════ */
+#plan{opacity:0;transform:scale(.97);transition:opacity .8s ease 1s,transform .9s cubic-bezier(.2,.8,.2,1) 1s;}
+#plan.show{opacity:1;transform:none;}
 
-.lock-error{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;
-  color:#e8502e;height:20px;text-align:center;
-}
+.p-hero{position:relative;min-height:calc(100vh - var(--topbar));display:flex;align-items:flex-end;overflow:hidden;background:#050403;}
+.p-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 20%;opacity:.55;}
+.p-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,var(--bg) 0%,rgba(11,10,7,.5) 45%,rgba(11,10,7,.25) 100%);}
+.p-hero .wrap{position:relative;z-index:2;padding-bottom:clamp(40px,8vh,90px);width:100%;}
+.stamp{display:inline-block;padding:6px 14px;border:2px solid var(--rival);color:var(--rival);font-weight:800;letter-spacing:.3em;font-size:.72rem;transform:rotate(-4deg);border-radius:4px;}
+.p-hero h1{font-size:clamp(3.4rem,11vw,9.5rem);font-weight:900;letter-spacing:-.055em;line-height:.85;margin:18px 0 14px;}
+.p-hero h1 span{color:var(--gold);}
+.p-hero p{font-size:clamp(1rem,1.6vw,1.25rem);color:var(--text2);max-width:620px;}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+.tag{padding:8px 16px;border-radius:999px;background:rgba(242,238,224,.08);font-size:.82rem;font-weight:700;letter-spacing:.04em;}
+.p-scroll{position:absolute;right:var(--gutter);bottom:30px;z-index:3;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mid);writing-mode:vertical-rl;}
 
-/* ── NUMPAD ── */
-.numpad{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
-  margin-top:8px;
-}
-.nk{
-  width:68px;height:68px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.1);
-  background:rgba(255,255,255,.05);
-  color:#fff;
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:700;font-size:1.45rem;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .12s,transform .08s,border-color .12s;
-  user-select:none;-webkit-tap-highlight-color:transparent;
-}
-.nk:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);}
-.nk:active{transform:scale(.93);background:rgba(201,168,76,.18);border-color:rgba(201,168,76,.4);}
-.nk.del{font-size:1.2rem;color:rgba(255,255,255,.5);}
-.nk.empty{background:transparent;border:none;cursor:default;pointer-events:none;}
+.chapter{padding:clamp(70px,11vh,130px) 0 0;}
+.ch-num{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.2em;color:var(--gold);}
+.chapter h2{font-size:clamp(2.4rem,5.6vw,5rem);font-weight:900;letter-spacing:-.045em;line-height:.93;margin-top:8px;}
+.lead{font-size:clamp(1.1rem,1.7vw,1.4rem);font-weight:300;line-height:1.5;color:var(--text);max-width:760px;margin-top:20px;}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(28px,5vw,80px);align-items:center;margin-top:44px;}
+.split.rev > :first-child{order:2;}
+.points{display:grid;gap:0;}
+.point{padding:20px 0;border-top:1px solid var(--border);}
+.point:last-child{border-bottom:1px solid var(--border);}
+.point b{display:flex;align-items:baseline;gap:12px;font-size:1.12rem;font-weight:800;letter-spacing:-.01em;}
+.point b i{font-style:normal;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);min-width:26px;}
+.point p{color:var(--text2);margin-top:6px;font-size:.96rem;}
+.who{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.86rem;letter-spacing:.06em;padding:1px 7px;border-radius:5px;background:rgba(200,168,75,.16);color:var(--gold2);margin-right:2px;}
+.who.r{background:rgba(224,100,90,.16);color:#f0918a;}
 
-@keyframes shake{
-  0%,100%{transform:translateX(0);}
-  20%{transform:translateX(-10px);}
-  40%{transform:translateX(10px);}
-  60%{transform:translateX(-7px);}
-  80%{transform:translateX(7px);}
-}
-.shake{animation:shake .35s ease;}
+/* Principios en grande */
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(20px,3vw,48px);margin-top:48px;}
+.pillar{padding-top:18px;border-top:2px solid var(--gold);}
+.pillar .big{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,5vw,4.6rem);line-height:.9;color:var(--gold);}
+.pillar h3{font-size:1.15rem;font-weight:800;margin:8px 0 6px;}
+.pillar p{font-size:.93rem;color:var(--text2);}
 
-/* ── PDF VIEWER ── */
-#pdfViewer{
-  display:none;flex-direction:column;
-  background:#111;
-  opacity:0;transition:opacity .5s ease;
-  z-index:10;
-}
-#pdfViewer.visible{display:flex;opacity:1;}
+/* Cancha SVG */
+.pitch{position:relative;width:100%;max-width:520px;margin:0 auto;aspect-ratio:100/140;}
+.pitch.half{aspect-ratio:100/70;max-width:620px;}
+.pitch.half svg{overflow:hidden;border-radius:6px;}
+.pitch svg{width:100%;height:100%;display:block;overflow:visible;}
+.pitch .grass{fill:#1c3a1e;}
+.pitch .stripe{fill:#21441f;}
+.pitch .line{fill:none;stroke:rgba(255,255,255,.55);stroke-width:.35;}
+.pitch .tok circle{stroke-width:.5;}
+.pitch .tok.us circle{fill:#C8A84B;stroke:#fff5d1;}
+.pitch .tok.us text{fill:#0B0A07;}
+.pitch .tok.them circle{fill:#0B0A07;stroke:#E0645A;stroke-width:.7;}
+.pitch .tok.them text{fill:#f0918a;}
+.pitch .tok.hi circle{fill:#fff;stroke:#C8A84B;stroke-width:1.2;}
+.pitch .tok text{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:3px;text-anchor:middle;dominant-baseline:central;}
+.pitch .arrow{fill:none;stroke:#E0C979;stroke-width:.7;stroke-linecap:round;}
+.pitch .arrow.run{stroke-dasharray:1.6 1.2;}
+.pitch .arrow.mark{stroke:#f0918a;stroke-width:.55;stroke-dasharray:.8 .9;}
+.pitch .zone{fill:rgba(200,168,75,.13);stroke:rgba(200,168,75,.5);stroke-width:.3;stroke-dasharray:1 1;}
+.pitch .zone.red{fill:rgba(224,100,90,.12);stroke:rgba(224,100,90,.5);}
+.pitch .zlabel{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.4px;letter-spacing:.3px;fill:rgba(242,238,224,.75);text-anchor:start;}
+.pitch .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:stroke-dashoffset 1.2s ease;}
+.reveal.in .pitch .draw{stroke-dashoffset:0;}
+.reveal.in .pitch .draw.run{stroke-dasharray:1.6 1.2;stroke-dashoffset:0;}
+.legend{display:flex;gap:18px;justify-content:center;margin-top:14px;font-size:.78rem;color:var(--mid);flex-wrap:wrap;}
+.legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;}
+.legend .l-us::before{background:#C8A84B;}
+.legend .l-them::before{background:#0B0A07;border:2px solid #E0645A;}
+.legend .l-arrow::before{width:18px;height:2px;border-radius:0;background:#E0C979;vertical-align:3px;}
 
-.pdf-bar{
-  flex-shrink:0;height:50px;
-  background:#111;border-bottom:2px solid #C9A84C;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;gap:16px;
-}
-.pdf-bar-title{
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:800;font-size:1rem;letter-spacing:.14em;
-  text-transform:uppercase;color:#C9A84C;
-}
-.pdf-bar-actions{display:flex;gap:10px;}
-.pdf-btn{
-  padding:7px 16px;border-radius:6px;border:none;cursor:pointer;
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;
-  transition:background .12s;text-decoration:none;
-  display:inline-flex;align-items:center;
-}
-.pdf-btn-lock{background:rgba(255,255,255,.08);color:#aaa;}
-.pdf-btn-lock:hover{background:rgba(255,255,255,.15);color:#fff;}
-.pdf-btn-dl{background:#C9A84C;color:#111;}
-.pdf-btn-dl:hover{background:#e8c97a;}
+/* Roles */
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:0 clamp(24px,4vw,56px);margin-top:44px;}
+.role{padding:22px 0;border-top:1px solid var(--border);}
+.role .tagpos{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;line-height:.9;color:var(--gold);}
+.role h3{font-size:1.1rem;font-weight:800;margin:6px 0 4px;}
+.role p{font-size:.93rem;color:var(--text2);}
 
-#pdfFrame{flex:1;border:none;width:100%;background:#222;}
+/* Selector de rivales */
+.rivals{display:flex;gap:8px;flex-wrap:wrap;margin-top:34px;}
+.rv{padding:10px 18px;border:0;border-radius:999px;background:rgba(242,238,224,.07);color:var(--text2);font-family:'Barlow',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background-color .2s ease,color .2s ease;}
+.rv:hover{color:var(--text);}
+.rv.on{background:var(--gold);color:#0B0A07;}
+.rv-panel{display:none;}
+.rv-panel.on{display:grid;animation:fadeUp .45s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 
-/* Mobile: full width under topbar only */
-@media(max-width:640px){
-  #lockScreen,#pdfViewer{left:0;right:0;top:64px;}
+/* Cierre */
+.outro{padding:clamp(90px,16vh,180px) 0 clamp(60px,10vh,110px);text-align:center;}
+.outro h2{font-size:clamp(2.6rem,7vw,6.4rem);font-weight:900;letter-spacing:-.05em;line-height:.92;}
+.outro h2 span{color:var(--gold);}
+.outro img{width:90px;margin:0 auto 26px;opacity:.9;}
+.close-btn{display:inline-flex;align-items:center;gap:10px;margin-top:34px;padding:12px 24px;border:0;border-radius:999px;background:rgba(242,238,224,.08);color:var(--text);font-family:'Barlow',sans-serif;font-weight:700;cursor:pointer;}
+.close-btn:hover{background:var(--gold);color:#0B0A07;}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1;transform:none;}
+
+@media(max-width:900px){
+  .split{grid-template-columns:1fr;}
+  .split.rev > :first-child{order:0;}
+  .pillars{grid-template-columns:repeat(2,1fr);}
+  .roles{grid-template-columns:1fr 1fr;}
 }
+@media(max-width:560px){
+  .pillars,.roles{grid-template-columns:1fr;}
+  .p-scroll{display:none;}
+}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms !important;animation-duration:.01ms !important;}}
 </style>
 </head>
-<body>
+<body class="locked">
 
-<!-- ── LOCK SCREEN ── -->
-<div id="lockScreen">
-  <div id="lockContent">
-    <img class="secret-logo" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Secreto.webp" alt="Top Secret FC">
-    <div class="lock-title">Acceso Restringido</div>
-    <div class="lock-subtitle">Ingrese el código</div>
-
-    <div class="pin-dots">
-      <div class="pin-dot" id="pd0"></div>
-      <div class="pin-dot" id="pd1"></div>
-      <div class="pin-dot" id="pd2"></div>
-      <div class="pin-dot" id="pd3"></div>
+<!-- ══════════ CAJA FUERTE ══════════ -->
+<div id="vault" aria-label="Acceso al plan de juego">
+  <div class="v-stage" id="vStage">
+    <div class="v-glow"></div>
+    <div class="v-door" id="vDoor">
+      <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/plan/boveda.webp" alt="" onerror="this.remove()">
+      <div class="v-dial" id="vDial">
+        <svg viewBox="0 0 100 100" id="vTicks" aria-hidden="true"></svg>
+        <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp" alt="">
+      </div>
     </div>
-    <div class="lock-error" id="lockErr"></div>
-
-    <div class="numpad">
-      <button class="nk" onclick="pressKey('1')">1</button>
-      <button class="nk" onclick="pressKey('2')">2</button>
-      <button class="nk" onclick="pressKey('3')">3</button>
-      <button class="nk" onclick="pressKey('4')">4</button>
-      <button class="nk" onclick="pressKey('5')">5</button>
-      <button class="nk" onclick="pressKey('6')">6</button>
-      <button class="nk" onclick="pressKey('7')">7</button>
-      <button class="nk" onclick="pressKey('8')">8</button>
-      <button class="nk" onclick="pressKey('9')">9</button>
-      <button class="nk empty"></button>
-      <button class="nk" onclick="pressKey('0')">0</button>
-      <button class="nk del" onclick="pressDelete()">⌫</button>
-    </div>
+    <div class="v-mark"></div>
+  </div>
+  <div class="v-side">
+    <div class="v-kicker">Información clasificada</div>
+    <div class="v-title">Ingresá la <br>combinación</div>
+    <div class="v-lights" id="vLights"><i class="v-light"></i><i class="v-light"></i><i class="v-light"></i><i class="v-light"></i></div>
+    <div class="v-msg" id="vMsg">Cuatro dígitos</div>
+    <div class="v-pad" id="vPad"></div>
   </div>
 </div>
 
-<!-- ── PDF VIEWER ── -->
-<div id="pdfViewer">
-  <div class="pdf-bar">
-    <span class="pdf-bar-title">★ Plan de Juego · Top Secret FC ★</span>
-    <div class="pdf-bar-actions">
-      <a class="pdf-btn pdf-btn-dl" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/TopSecret_FC_Plan_de_Juego.pdf?dl=TopSecret_FC_Plan_de_Juego.pdf" download>⬇ Descargar</a>
-      <button class="pdf-btn pdf-btn-lock" onclick="lockAgain()">🔒 Cerrar</button>
-    </div>
-  </div>
-  <iframe id="pdfFrame" src="" title="Plan de Juego"></iframe>
-</div>
+<!-- ══════════ PLAN ══════════ -->
+<main id="plan" aria-hidden="true">
 
+  <section class="p-hero">
+    <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/manada-k1.webp" alt="">
+    <div class="wrap">
+      <span class="stamp">Confidencial</span>
+      <h1>Plan de<br><span>juego</span></h1>
+      <p>El manual táctico de Top Secret FC para la Temporada 4: la 3-5-2 con un medio centro ofensivo libre entre líneas.</p>
+      <div class="tags"><span class="tag">3-5-2 · MCO</span><span class="tag">Superioridad en el medio</span><span class="tag">Presión tras pérdida</span><span class="tag">Carrileros profundos</span></div>
+    </div>
+    <div class="p-scroll">Bajá ↓</div>
+  </section>
+
+  <div class="wrap">
+
+    <!-- PRINCIPIOS -->
+    <section class="chapter reveal">
+      <div class="ch-num">00 · La idea</div>
+      <h2>Cuatro principios.<br>Ninguna excepción.</h2>
+      <div class="pillars">
+        <div class="pillar"><div class="big">5v3</div><h3>Dueños del medio</h3><p>Dos medios, el MCO y los dos carrileros cerrando por dentro: siempre tenemos un hombre más en el centro de la cancha.</p></div>
+        <div class="pillar"><div class="big">3+2</div><h3>Base sólida</h3><p>Tres centrales y dos medios que no suben juntos. Con la pelota o sin ella, cinco jugadores protegen el arco.</p></div>
+        <div class="pillar"><div class="big">10</div><h3>El MCO libre</h3><p>El medio centro ofensivo no tiene marca fija: vive entre líneas y todo el ataque pasa por sus pies.</p></div>
+        <div class="pillar"><div class="big">5″</div><h3>Presión tras pérdida</h3><p>Cinco segundos para recuperar donde la perdimos. Si no se puede, bloque 5-3-2 y a esperar.</p></div>
+      </div>
+    </section>
+
+    <!-- EL DIBUJO -->
+    <section class="chapter">
+      <div class="ch-num">01 · El dibujo</div>
+      <h2>3-5-2 con MCO.</h2>
+      <p class="lead">Tres centrales, dos carrileros que hacen toda la banda, un doble pivote, un enganche y dos delanteros. Corto por dentro, ancho por fuera.</p>
+      <div class="split reveal">
+        <div><div class="pitch" data-diagram="base"></div>
+          <div class="legend"><span class="l-us">Top Secret</span></div></div>
+        <div class="points">
+          <div class="point"><b><i>POR</i>Arquero</b><p>Primer pase de la salida. Juega corto con los centrales y ordena la línea de tres.</p></div>
+          <div class="point"><b><i>DFC</i>Tres centrales</b><p>El del medio es el líbero: manda, corrige y cubre. Los de los costados salen a la banda cuando el carrilero sube.</p></div>
+          <div class="point"><b><i>CAR</i>Dos carrileros</b><p>Dan todo el ancho. Atacan como extremos y defienden como laterales: son los que más corren.</p></div>
+          <div class="point"><b><i>MC</i>Doble pivote</b><p>Los dos medios de contención. Nunca suben los dos a la vez: uno sale, el otro cuida.</p></div>
+          <div class="point"><b><i>MCO</i>Medio centro ofensivo</b><p>El creador. Recibe entre líneas, gira y habilita a los delanteros o cambia de frente.</p></div>
+          <div class="point"><b><i>DC</i>Dos delanteros</b><p>Uno fija a los centrales, el otro cae a recibir y se asocia con el MCO.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROLES -->
+    <section class="chapter reveal">
+      <div class="ch-num">02 · Roles</div>
+      <h2>Qué hace cada uno.</h2>
+      <div class="roles">
+        <div class="role"><div class="tagpos">POR</div><h3>Arquero</h3><p>Sale a cortar centros y habla todo el partido. En salida se ofrece como un central más para el pase de seguridad.</p></div>
+        <div class="role"><div class="tagpos">DFC</div><h3>Central abierto</h3><p>En salida se abre casi a la banda. Sin pelota marca al delantero de su lado y cubre la espalda del carrilero.</p></div>
+        <div class="role"><div class="tagpos">LÍB</div><h3>Central del medio</h3><p>El último hombre. No sale a presionar lejos: cubre, anticipa y corrige a los otros dos.</p></div>
+        <div class="role"><div class="tagpos">CAR</div><h3>Carrilero</h3><p>Da el ancho arriba y cierra atrás. Si el del otro lado ataca, él se queda: nunca suben los dos juntos al mismo tiempo sin que baje un medio.</p></div>
+        <div class="role"><div class="tagpos">MC</div><h3>Medio de contención</h3><p>Recibe de los centrales y juega de cara. Primer filtro defensivo: cierra pases interiores y roba.</p></div>
+        <div class="role"><div class="tagpos">MCO</div><h3>Medio centro ofensivo</h3><p>Se mueve entre la defensa y el medio rival. Pisa el área en llegada. Sin pelota presiona al pivote rival.</p></div>
+        <div class="role"><div class="tagpos">DC</div><h3>Delantero de área</h3><p>Fija a los centrales y ataca la espalda. Es el primero en presionar al central rival que recibe.</p></div>
+        <div class="role"><div class="tagpos">DC</div><h3>Delantero móvil</h3><p>Baja a recibir, gira o descarga con el MCO. Tira diagonales hacia la banda para arrastrar marcas.</p></div>
+        <div class="role"><div class="tagpos">C</div><h3>Capitán</h3><p>Ordena la presión y la línea. Si él grita "salimos", sale todo el equipo.</p></div>
+      </div>
+    </section>
+
+    <!-- SALIDA -->
+    <section class="chapter">
+      <div class="ch-num">03 · Salida desde atrás</div>
+      <h2>Salimos con tres.<br>Nunca la tiramos.</h2>
+      <div class="split rev reveal">
+        <div><div class="pitch" data-diagram="salida"></div>
+          <div class="legend"><span class="l-us">Top Secret</span><span class="l-them">Rival</span><span class="l-arrow">Pase / movimiento</span></div></div>
+        <div class="points">
+          <div class="point"><b><i>01</i>3 contra 2</b><p>Los tres centrales se abren contra los dos delanteros rivales: siempre hay uno libre para conducir.</p></div>
+          <div class="point"><b><i>02</i>Un medio baja, el otro sostiene</b><p>Si presionan con tres, el MC más cercano baja entre centrales y armamos una línea de cuatro.</p></div>
+          <div class="point"><b><i>03</i>Carrileros altos</b><p>Bien abiertos y adelantados: estiran al rival y dejan pasillos por dentro para el MCO.</p></div>
+          <div class="point"><b><i>04</i>Salida por el MCO</b><p>Cuando el MCO se perfila entre líneas, el pase va directo a él. Si está tapado, cambio de frente al carrilero libre.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRESIÓN -->
+    <section class="chapter">
+      <div class="ch-num">04 · Presión alta</div>
+      <h2>Presión con dos,<br>cierre con cinco.</h2>
+      <div class="split reveal">
+        <div><div class="pitch" data-diagram="presion"></div>
+          <div class="legend"><span class="l-us">Top Secret</span><span class="l-them">Rival 4-3-3</span><span class="l-arrow">Salida a presionar</span></div></div>
+        <div class="points">
+          <div class="point"><b><i>01</i>El disparador</b><p>Pase del arquero al central rival. Los dos DC salen a los centrales tapando el pase interior.</p></div>
+          <div class="point"><b><i>02</i>El MCO se come al pivote</b><p>Mientras los DC presionan, el MCO se pega al 5 rival: sin pase por el centro, el rival tiene que ir a la banda.</p></div>
+          <div class="point"><b><i>03</i>La banda es la trampa</b><p>Cuando el lateral rival recibe, salta nuestro carrilero y el MC de ese lado cierra el pase interior. Robo en banda.</p></div>
+          <div class="point"><b><i>04</i>Si la presión se rompe</b><p>Los carrileros bajan a la línea de centrales y armamos el bloque 5-3-2. Nadie persigue: se cierra el centro.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ATAQUE -->
+    <section class="chapter">
+      <div class="ch-num">05 · Ataque</div>
+      <h2>Por dentro se crea,<br>por fuera se termina.</h2>
+      <div class="split rev reveal">
+        <div><div class="pitch" data-diagram="ataque"></div>
+          <div class="legend"><span class="l-us">Top Secret</span><span class="l-arrow">Pase</span><span class="l-arrow">Desmarque (punteado)</span></div></div>
+        <div class="points">
+          <div class="point"><b><i>01</i>Triángulo MCO + DC + DC</b><p>El delantero móvil baja, el MCO recibe de cara y el otro DC ataca la espalda. Pared y a definir.</p></div>
+          <div class="point"><b><i>02</i>Carrilero al área</b><p>Cuando el centro va desde una banda, el carrilero del lado opuesto entra al segundo palo. Es el gol que nadie marca.</p></div>
+          <div class="point"><b><i>03</i>Llegada de segunda línea</b><p>Uno de los MC pisa el borde del área para el rebote y el remate de afuera. El otro se queda.</p></div>
+          <div class="point"><b><i>04</i>Pases de un toque</b><p>Entre líneas, un toque. Si hay que pensar, se piensa de cara al arco, no de espaldas.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSICIÓN DEFENSIVA -->
+    <section class="chapter">
+      <div class="ch-num">06 · Sin la pelota</div>
+      <h2>Perdemos. Cinco atrás.</h2>
+      <div class="split reveal">
+        <div><div class="pitch" data-diagram="bloque"></div>
+          <div class="legend"><span class="l-us">Top Secret</span><span class="l-arrow">Repliegue</span></div></div>
+        <div class="points">
+          <div class="point"><b><i>01</i>Cinco segundos</b><p>Los tres más cercanos a la pelota van a recuperar. El resto cierra líneas de pase.</p></div>
+          <div class="point"><b><i>02</i>Los carrileros bajan</b><p>Si no la recuperamos, los dos carrileros se meten a la línea de centrales: defensa de cinco.</p></div>
+          <div class="point"><b><i>03</i>Tres en el medio</b><p>Doble pivote más el MCO forman una línea de tres detrás de los delanteros. Juntos, sin espacios entre ellos.</p></div>
+          <div class="point"><b><i>04</i>Los DC no bajan</b><p>Se quedan arriba tapando la salida del central rival y listos para la contra.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MARCAS VS RIVALES -->
+    <section class="chapter reveal">
+      <div class="ch-num">07 · Marcas por rival</div>
+      <h2>Contra quién jugamos.</h2>
+      <p class="lead">Cada dibujo rival tiene su plan de marcas. Elegí el sistema del rival para ver quién toma a quién.</p>
+      <div class="rivals" id="rivals"></div>
+      <div id="rivalPanels"></div>
+    </section>
+
+    <!-- CÓRNERS -->
+    <section class="chapter">
+      <div class="ch-num">08 · Pelota parada</div>
+      <h2>Córner en contra.</h2>
+      <div class="split reveal">
+        <div><div class="pitch half" data-diagram="cornerDef" data-view="0 70 100 70"></div>
+          <div class="legend"><span class="l-us">Top Secret</span><span class="l-them">Rival</span></div></div>
+        <div class="points">
+          <div class="point"><b><i>Z1</i>Área chica: los tres centrales</b><p>Los tres DFC en la línea del área chica, uno por palo y el líbero en el centro. Nadie cabecea libre ahí.</p></div>
+          <div class="point"><b><i>Z2</i>Punto penal: MC, MC y carrilero</b><p>Los dos medios y el carrilero del lado opuesto forman la segunda línea. Toman el segundo palo y el rebote.</p></div>
+          <div class="point"><b><i>Z3</i>Borde del área: MCO y carrilero</b><p>El MCO y el carrilero del lado del córner cuidan el borde para el remate de afuera y el córner corto.</p></div>
+          <div class="point"><b><i>Z4</i>Arriba: los dos DC</b><p>Quedan en mitad de cancha. Obligan al rival a dejar defensores atrás y son la salida de la contra.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter">
+      <h2>Córner a favor.</h2>
+      <div class="split rev reveal">
+        <div><div class="pitch half" data-diagram="cornerOf" data-view="0 0 100 70"></div>
+          <div class="legend"><span class="l-us">Top Secret</span><span class="l-arrow">Carrera</span></div></div>
+        <div class="points">
+          <div class="point"><b><i>01</i>Centrales a los palos</b><p>Un DFC ataca el primer palo para peinar; el otro va al segundo palo a cabecear al arco.</p></div>
+          <div class="point"><b><i>02</i>DC y carrilero en carrera</b><p>Los dos delanteros y el carrilero del lado opuesto arrancan desde el punto penal hacia el área chica.</p></div>
+          <div class="point"><b><i>03</i>MCO al borde</b><p>Para la segunda jugada: remate de volea o pelota de nuevo al área.</p></div>
+          <div class="point"><b><i>04</i>Cuatro que no suben</b><p>El líbero, los dos MC y el otro carrilero quedan atrás. Una contra rival no nos puede encontrar mal parados.</p></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <section class="outro reveal">
+    <div class="wrap">
+      <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp" alt="">
+      <h2>El plan es claro.<br><span>La ejecución, secreta.</span></h2>
+      <button class="close-btn" type="button" onclick="lockVault()">Cerrar la caja fuerte</button>
+    </div>
+  </section>
+</main>
+
+<script src="plan-de-juego.js?v=1"></script>
 <script src="layout.js?v=18"></script>
-<script>
-const CODE = '9075';
-let entered = '';
-
-function pressKey(k) {
-  if (entered.length >= 4) return;
-  entered += k;
-  updateDots();
-  if (entered.length === 4) setTimeout(checkCode, 120);
-}
-
-function pressDelete() {
-  if (!entered.length) return;
-  entered = entered.slice(0, -1);
-  updateDots();
-  document.getElementById('lockErr').textContent = '';
-}
-
-function updateDots(state) {
-  for (let i = 0; i < 4; i++) {
-    const d = document.getElementById('pd' + i);
-    d.classList.remove('filled', 'error');
-    if (state === 'error') d.classList.add('error');
-    else if (i < entered.length) d.classList.add('filled');
-  }
-}
-
-function checkCode() {
-  if (entered === CODE) {
-    unlock();
-  } else {
-    updateDots('error');
-    document.getElementById('lockErr').textContent = 'Código incorrecto';
-    document.getElementById('lockContent').classList.add('shake');
-    setTimeout(() => {
-      entered = '';
-      updateDots();
-      document.getElementById('lockErr').textContent = '';
-      document.getElementById('lockContent').classList.remove('shake');
-    }, 700);
-  }
-}
-
-function unlock() {
-  document.getElementById('pdfFrame').src = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/TopSecret_FC_Plan_de_Juego.pdf';
-  const viewer = document.getElementById('pdfViewer');
-  viewer.style.display = 'flex';
-  requestAnimationFrame(() => requestAnimationFrame(() => viewer.classList.add('visible')));
-  document.getElementById('lockScreen').style.display = 'none';
-}
-
-function lockAgain() {
-  entered = '';
-  updateDots();
-  document.getElementById('lockErr').textContent = '';
-  document.getElementById('pdfFrame').src = '';
-  const viewer = document.getElementById('pdfViewer');
-  viewer.classList.remove('visible');
-  setTimeout(() => { viewer.style.display = 'none'; }, 500);
-  document.getElementById('lockScreen').style.display = 'flex';
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key >= '0' && e.key <= '9') pressKey(e.key);
-  else if (e.key === 'Backspace') pressDelete();
-});
-</script>
 </body>
 </html>
