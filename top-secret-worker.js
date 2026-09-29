@@ -9,7 +9,7 @@ const SITE = 'https://enohcaid.github.io/top-secret/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
   'renovacion-web-identidad-2026': {
-    t: 'Nuevo escudo, nuevo sitio: Top Secret renueva su identidad',
+    t: 'Misma esencia, otra presencia: Top Secret renueva su imagen',
     i: MEDIA + 'logos/noticias/web-identidad-portada.png',
   },
   'presentacion-kits-t4': {
