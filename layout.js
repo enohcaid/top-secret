@@ -449,7 +449,6 @@
     'calendario.html':    { img: 'duo-rivarola-huber-k2',  pos: '50% 0%' },
     'noticias.html':      { img: 'duo-defensa-k1',    pos: '50% 0%' },
     'reclutamiento.html': { img: 'solo-juanchyroman-k2',    pos: '50% 0%' },
-    'convocatoria.html':  { img: 'duo-arqueros',      pos: '50% 0%', compact: true },
   };
 
   function decorateHeader() {

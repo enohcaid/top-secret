@@ -38,6 +38,37 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:2.6rem;font-weight:900;letter-spacing:-.01em;line-height:1;color:var(--text);text-transform:uppercase;}
 .page-sub{font-size:13px;color:var(--mid);margin-top:6px;}
 
+/* ── ENCABEZADO EN UNA FILA ── */
+.conv-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px 40px;flex-wrap:wrap;margin:8px 0 30px;}
+.conv-top .page-header{margin:0;}
+html body .conv-top .page-eyebrow{border:0;box-shadow:none;background:none;padding:0;font-family:'Barlow',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.3em;color:var(--gold);margin-bottom:10px;}
+.conv-top .page-title{font-family:'Barlow',sans-serif;font-size:clamp(2.6rem,5.2vw,4.6rem);font-weight:900;letter-spacing:-.045em;line-height:.92;text-transform:none;margin-bottom:12px;}
+.conv-top .today-matches-panel{background:none;border:0;border-radius:0;padding:0;margin:0;min-width:min(100%,360px);}
+.conv-top .tmp-head{border:0;padding:0;margin:0 0 6px;}
+.conv-top .tmp-title{font-family:'Barlow',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.3em;color:var(--gold);}
+.conv-top .tmp-row{border-bottom:1px solid var(--border);padding:8px 0;}
+.conv-top .tmp-row:last-child{border-bottom:0;}
+.conv-top .tmp-time{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;font-weight:400;line-height:1;min-width:64px;}
+.conv-top .tmp-rival{font-size:1.05rem;font-weight:800;}
+.conv-top .tmp-loc{font-size:.8rem;color:var(--mid);}
+
+/* Cancha: entra entera en la pantalla y queda fija mientras se recorre la lista */
+@media(min-width:901px){
+  .col-pitch{top:76px;}
+  .col-pitch .pitch{width:min(100%,calc((100vh - 170px) * .75));margin:0 auto;}
+}
+
+/* Pestañas solo en celular */
+.conv-tabs{display:none;}
+@media(max-width:900px){
+  .conv-tabs{display:flex;gap:6px;margin:0 0 16px;position:sticky;top:64px;z-index:20;padding:8px 0;background:var(--bg,#0B0A07);}
+  .conv-tab{flex:1;padding:11px 0;border:0;border-radius:999px;background:rgba(242,238,224,.06);color:var(--mid);font-family:'Barlow',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;}
+  .conv-tab.on{background:var(--gold);color:#0B0A07;}
+  body:not(.tab-armado) .col-pitch, body:not(.tab-armado) .section-head-right{display:none !important;}
+  body.tab-armado .col-players, body.tab-armado .section-head{display:none !important;}
+  .section-head-right{flex-wrap:wrap;gap:6px;}
+}
+
 /* ── RESUMEN SUELTO BAJO EL TÍTULO ── */
 .conv-stats{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:4px;}
 .conv-stats .cs{font-size:.95rem;font-weight:600;color:rgba(242,238,224,.6);white-space:nowrap;}
@@ -327,6 +358,7 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
 <!-- MAIN CONTENT -->
 <main class="main">
 
+  <div class="conv-top">
   <div class="page-header">
     <div class="page-eyebrow">Top Secret FC · 2026</div>
     <h1 class="page-title">Convocatoria</h1>
@@ -339,13 +371,17 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
     <p class="page-sub" id="dateTag">Cargando...</p>
   </div>
 
-  <!-- TODAY MATCHES PANEL -->
-  <div id="todayMatchesPanel" class="today-matches-panel" style="display:none;">
-    <div class="tmp-head">
-      <span>⚽</span>
-      <span class="tmp-title">Partidos hoy</span>
-    </div>
+  <!-- HOY: partidos o entrenamiento -->
+  <div id="todayMatchesPanel" class="today-matches-panel">
+    <div class="tmp-head"><span class="tmp-title" id="tmpTitle">Hoy</span></div>
     <div class="tmp-list"></div>
+  </div>
+  </div>
+
+  <!-- PESTAÑAS (solo celular) -->
+  <div class="conv-tabs" role="tablist">
+    <button type="button" class="conv-tab on" data-tab="lista" onclick="setConvTab('lista')">Disponibilidad</button>
+    <button type="button" class="conv-tab" data-tab="armado" onclick="setConvTab('armado')">Armado</button>
   </div>
 
   <!-- SECTION HEADERS -->
@@ -946,8 +982,11 @@ function renderTodayMatchesPanel() {
   const wrap = document.getElementById('todayMatchesPanel');
   if (!wrap) return;
   const matches = getTodayMatches();
-  if (!matches.length) { wrap.style.display='none'; return; }
-  wrap.style.display='block';
+  document.getElementById('tmpTitle').textContent = matches.length > 1 ? 'Partidos de hoy' : matches.length ? 'Partido de hoy' : 'Hoy';
+  if (!matches.length) {
+    wrap.querySelector('.tmp-list').innerHTML = '<div class="tmp-row"><span class="tmp-time">22:30</span><span class="tmp-rival">Entrenamiento</span><span class="tmp-loc">Adentro</span></div>';
+    return;
+  }
   const lc = {VPN:'#f5c518',VPUG:'#3ecf8e','11x11':'#4a9eff'};
   wrap.querySelector('.tmp-list').innerHTML = matches.map(m => `
     <div class="tmp-row">
@@ -2317,6 +2356,15 @@ function _download(blob, name) {
 /* ─── PAGE LOAD ANIMATION ─── */
 gsap.set('.page-header > *', { opacity:0, y:18 });
 
+/* ─── Pestañas Disponibilidad / Armado (celular) ─── */
+function setConvTab(t) {
+  document.body.classList.toggle('tab-armado', t === 'armado');
+  document.querySelectorAll('.conv-tab').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  if (t === 'armado') renderPitch(); // la cancha estaba oculta: recalcula el tamaño de las fichas
+  window.scrollTo({ top: 0 });
+}
+window.setConvTab = setConvTab;
+
 /* ─── Fichas de la cancha proporcionales al ancho ─── */
 let _pitchW = 0, _pitchT;
 window.addEventListener('resize', () => {
@@ -2422,6 +2470,6 @@ if (!EDIT_MODE) {
   document.head.appendChild(styleRO);
 }
 </script>
-<script src="layout.js?v=17"></script>
+<script src="layout.js?v=18"></script>
 </body>
 </html>
