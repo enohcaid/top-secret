@@ -4,13 +4,13 @@ const { chromium } = require('playwright');
 const M='https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const CARDS=[
  ['home','Inicio','TOP SECRET','Football Club','VPN · VPUG · 11x11 — Temporada 4','logos/plantel-t4-mum79hui.webp','50% 30%',1],
- ['noticias','Noticias','Noticias','Archivo del club','Expedientes desclasificados','logos/noticias/kits-t4-portada-v2.webp','50% 25%'],
+ ['noticias','Noticias','Noticias','Archivo del club','Expedientes desclasificados','logos/noticias/kits-t4-portada-v3.webp','50% 25%'],
  ['plantel','Miembros','El Plantel','Temporada 4','Los agentes de Top Secret FC','logos/plantel-t4-mum79hui.webp','50% 30%'],
  ['convocatoria','Miembros','Convocatoria','Quién juega hoy','Formación y presentes del día','logos/duos/duo-mediocampo-k1.webp','50% 12%'],
  ['plan','Miembros','Plan de juego','Información clasificada','Solo para el plantel','logos/plan/boveda.webp','50% 50%'],
  ['competencias','Competencias','Competencias','VPN · VPUG · 11x11','Posiciones, calendario y estadísticas','logos/duos/duo-ataque-k1.webp','50% 12%'],
  ['nosotros','Nosotros','Nosotros','El club por dentro','Proyecto, identidad y equipaciones','logos/nosotros/manada-k1.webp','50% 35%'],
- ['reclutamiento','Sumate','Sumate','Buscamos agentes','Postulate para Top Secret FC','logos/duos/solo-juanchyroman-k2-v2.webp','50% 10%'],
+ ['reclutamiento','Sumate','Sumate','Buscamos agentes','Postulate para Top Secret FC','logos/duos/solo-juanchyroman-k2-v3.webp','50% 10%'],
 ];
 // Composición centrada: WhatsApp de escritorio recorta la placa a un CUADRADO del centro
 // (x 285-915), así que escudo + título tienen que entrar ahí; la foto va de fondo.
