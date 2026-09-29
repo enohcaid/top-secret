@@ -569,7 +569,7 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
    de convocatoria.html (DCD, DFC, LD, MCI…)
 ───────────────────────────────────────────── */
 const PLAYERS = [
-  { name:'Ivan_Cabj_La12',  pos:'POR', num:12, folder:'Ivan_Cabj_La12' },
+  { name:'Ivan_Cabj_La12',  pos:'POR', num:12, folder:'Ivan_Cabj_La12', campo:true },  // campo: tiene render con kit de jugador para usar fuera del arco
   { name:'rivarola90',      pos:'DFC', num:2,  folder:'rivarola90'     },
   { name:'Alexisraies23',   pos:'DFC', num:3,  folder:'Alexisraies23'  },
   { name:'Cabers14',        pos:'DFC', num:5,  folder:'Cabers14'       },
@@ -1330,6 +1330,8 @@ function brazos4Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos4
 function brazos4Web(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos4.webp`); }
 function frente4Web(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente4.webp`); }
 function frente4Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente4.png`); }
+// Arqueros con render de kit de jugador (p.campo): se usa cuando están en un puesto que no es GK.
+function frente4Campo(p) { return [mediaUrl(`Renders/${p.folder || p.name}/Frente4-campo.webp`), mediaUrl(`Renders/${p.folder || p.name}/Frente4-campo.png`)]; }
 function svgPath(p)    { return mediaUrl(`Renders/${p.name}.svg`); }
 
 function tryImages(paths, idx, onSuccess, onFail) {
@@ -1586,7 +1588,7 @@ function renderPitch() {
       }
 
       // Try T3 → T2 → T1 → silueta
-      if (!player.isGuest) tryImages([frente4Web(player), frente4Path(player), frente3Path(player), frente2Path(player), frontePath(player), brazos4Path(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
+      if (!player.isGuest) tryImages([...(player.campo && s.key !== 'GK' ? frente4Campo(player) : []), frente4Web(player), frente4Path(player), frente3Path(player), frente2Path(player), frontePath(player), brazos4Path(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => setPhoto(src),
         () => { setPhoto(mediaUrl('Renders/silueta-prueba.png')); tok.querySelector('.tok-photo').style.opacity = '.55'; }
       );
@@ -2297,7 +2299,7 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
     };
     let img = null;
     if (withPhotos) {
-      for (const src of [frente4Web(player), frente4Path(player), frente3Path(player), brazos4Path(player)]) { img = await loadImg(src); if (img) break; }
+      for (const src of [...(player.campo && s.key !== 'GK' ? frente4Campo(player) : []), frente4Web(player), frente4Path(player), frente3Path(player), brazos4Path(player)]) { img = await loadImg(src); if (img) break; }
     }
     return () => {
       tokenBase(tx, ty);
