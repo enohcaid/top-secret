@@ -58,11 +58,40 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 
 /* ── MAIN 2-COL LAYOUT ── */
 .conv-layout{display:flex;gap:20px;align-items:flex-start;}
-@media(max-width:900px){.conv-layout{flex-direction:column;}}
+@media(max-width:900px){.conv-layout{flex-direction:column;align-items:stretch;}.col-players,.col-pitch{width:100%;position:static;}}
 .col-players{flex:1 1 0;min-width:0;}
 .col-pitch{flex:1 1 0;min-width:0;position:sticky;top:80px;}
 
-/* ── PLAYER CARDS ── */
+/* ── PLAYER CARDS (grandes, con brillo por estado) ── */
+#playersList{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+#playersList .pos-label{grid-column:1/-1;padding:14px 2px 0;}
+.pcard.tile{position:relative;display:block;aspect-ratio:3/4;padding:0;margin:0;border:0;border-radius:18px;overflow:hidden;cursor:grab;user-select:none;-webkit-tap-highlight-color:transparent;
+  --glow:transparent;background:radial-gradient(ellipse 70% 60% at 50% 38%,color-mix(in srgb,var(--glow) 22%,transparent),transparent 70%),linear-gradient(180deg,#1d1910,#0d0b08);transition:transform .2s ease;}
+.pcard.tile:hover{transform:translateY(-3px);}
+.pcard.tile .tile-img{position:absolute;left:50%;top:4%;height:172%;width:auto;max-width:none;transform:translateX(-50%);pointer-events:none;transition:filter .3s ease;}
+.pcard.tile.green{--glow:#22C55E;}
+.pcard.tile.always{--glow:#4a9eff;}
+.pcard.tile.yellow{--glow:#F5C518;}
+.pcard.tile.red{--glow:#EF4444;}
+.pcard.tile.black{--glow:#f97316;}
+/* Silueta brillante: el render tiene fondo transparente, drop-shadow sigue el contorno del jugador */
+.pcard.tile.green .tile-img,.pcard.tile.always .tile-img,.pcard.tile.yellow .tile-img{filter:drop-shadow(0 0 3px var(--glow)) drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 22px var(--glow)) drop-shadow(0 0 40px color-mix(in srgb,var(--glow) 70%,transparent));animation:tileGlow 2.4s ease-in-out infinite;}
+.pcard.tile.red .tile-img,.pcard.tile.black .tile-img{filter:grayscale(.7) brightness(.7) drop-shadow(0 0 3px var(--glow)) drop-shadow(0 0 12px var(--glow));}
+.pcard.tile.pending .tile-img,.pcard.tile.loading .tile-img{filter:grayscale(.55) brightness(.8);}
+@keyframes tileGlow{0%,100%{opacity:1;}50%{opacity:.86;}}
+.pcard.tile .tile-num{position:absolute;top:10px;left:12px;z-index:2;font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:.9;color:var(--gold);text-shadow:0 2px 8px rgba(0,0,0,.8);}
+.pcard.tile.green .tile-num,.pcard.tile.always .tile-num,.pcard.tile.yellow .tile-num,.pcard.tile.red .tile-num,.pcard.tile.black .tile-num{color:var(--glow);}
+.pcard.tile .tile-badges{position:absolute;top:10px;right:10px;z-index:2;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.pcard.tile .sdot{margin:0;width:12px;height:12px;}
+.pcard.tile .tile-info{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:34px 12px 11px;background:linear-gradient(0deg,rgba(5,4,3,.95) 0%,rgba(5,4,3,.7) 55%,transparent 100%);}
+.pcard.tile .pc-name{font-family:'Barlow',sans-serif;font-size:.95rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em;}
+.pcard.tile .pc-pos{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px;}
+.pcard.tile .pnote{font-size:.66rem;margin-top:3px;}
+.pcard.tile .on-pitch{display:inline-block;margin-top:4px;font-size:.56rem;padding:2px 6px;border-radius:999px;background:rgba(34,197,94,.18);}
+.pcard.tile.assignable{outline:2px solid var(--gold);outline-offset:2px;cursor:pointer;}
+@media(max-width:640px){#playersList{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;}.pcard.tile .tile-num{font-size:1.7rem;}.pcard.tile .pc-name{font-size:.8rem;}}
+
+/* ── PLAYER CARDS (legacy) ── */
 .pos-label{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);padding:10px 2px 4px;}
 .pcard{
   display:flex;align-items:center;gap:10px;
@@ -127,7 +156,21 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
   --bar-pad: 2px 5px 2px 4px;
 }
 
-/* ── PITCH ── */
+/* ── PITCH (verde claro) ── */
+.pitch{background:repeating-linear-gradient(180deg,#9fd49a 0,#9fd49a 9%,#aedcaa 9%,#aedcaa 18%) !important;border:0 !important;border-radius:16px !important;}
+.pitch-svg line,.pitch-svg rect,.pitch-svg circle,.pitch-svg path{stroke:rgba(255,255,255,.85) !important;}
+.pitch-svg circle:not([fill="none"]){fill:rgba(255,255,255,.9) !important;}
+.pitch .stoken-bar{background:rgba(11,10,7,.82);}
+.pitch .stoken.filled{border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#1d1910,#0b0a07);box-shadow:0 6px 16px rgba(0,40,0,.35);}
+.pitch .stoken.empty{background:rgba(255,255,255,.35) !important;border:2px dashed rgba(255,255,255,.9) !important;color:#2f6b2b !important;border-radius:12px;font-weight:800;}
+/* Nombre vertical descendente a la izquierda, número centrado a la derecha */
+.tok-name{position:absolute;left:0;top:0;bottom:0;width:var(--tok-name-w);z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(11,10,7,.82);}
+.tok-name span{writing-mode:vertical-rl;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:var(--name-size);letter-spacing:.04em;text-transform:uppercase;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:94%;line-height:1;}
+.tok-num{position:absolute;right:5px;top:50%;transform:translateY(-50%);z-index:3;font-family:'Bebas Neue',sans-serif;font-size:var(--num-size);line-height:1;color:var(--gold);text-shadow:0 2px 6px rgba(0,0,0,.85);}
+.tok-cap{position:absolute;top:4px;right:4px;z-index:4;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.78rem;box-shadow:0 0 8px rgba(201,168,76,.7);}
+.tok-photo{position:absolute;top:0;bottom:0;left:var(--tok-name-w);right:0;width:auto !important;height:100% !important;object-fit:cover;object-position:50% 0;transform:scale(var(--chest-scale)) !important;transform-origin:50% 4% !important;}
+
+/* ── PITCH (base) ── */
 .pitch{position:relative;width:100%;aspect-ratio:3/4;background:repeating-linear-gradient(180deg,#eef1ee 0,#eef1ee 28px,#f5f7f5 28px,#f5f7f5 56px);border-radius:10px;border:1px solid #d0d8d0;overflow:hidden;}
 .pitch-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
 .pitch-svg line,.pitch-svg rect,.pitch-svg circle,.pitch-svg path{stroke:rgba(60,90,60,.25)!important;}
@@ -505,6 +548,13 @@ const FORMATIONS = {
   '3-5-2':[
     {key:'GK', l:'POR',x:50,y:84},
     {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:70},{key:'CB3',l:'DFC',x:28,y:68},
+    {key:'RM', l:'LD', x:86,y:40},{key:'CM1',l:'MCD',x:64,y:48},{key:'CM2',l:'MCD',x:36,y:48},{key:'LM',l:'LI',x:14,y:40},
+    {key:'CAM',l:'MCO',x:50,y:31},
+    {key:'ST1',l:'DC', x:64,y:14},{key:'ST2',l:'DC', x:36,y:14},
+  ],
+  '3-1-4-2':[
+    {key:'GK', l:'POR',x:50,y:84},
+    {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:70},{key:'CB3',l:'DFC',x:28,y:68},
     {key:'RM', l:'LD', x:85,y:37},{key:'CM1',l:'MCD',x:67,y:35},{key:'CM2',l:'MCD',x:50,y:44},{key:'CM3',l:'MCI',x:33,y:35},{key:'LM',l:'LI',x:15,y:37},
     {key:'ST1',l:'DC', x:64,y:14},{key:'ST2',l:'DC', x:36,y:14},
   ],
@@ -529,7 +579,7 @@ const POS_LABEL = {
   POR:'Portero',DCD:'Def. Derecho',DFD:'Def. Derecho',DFC:'Defensa Central',
   DCI:'Def. Izquierdo',DFI:'Def. Izquierdo',LD:'Lateral Derecho',LI:'Lateral Izquierdo',
   MCD:'Mediocampista',MCI:'Mediocampista',MVD:'Mediocampista',MVI:'Mediocampista',
-  DC:'Delantero Centro',ED:'Extremo Derecho',EI:'Extremo Izquierdo',
+  DC:'Delantero Centro',ED:'Extremo Derecho',EI:'Extremo Izquierdo',MCO:'Medio Centro Ofensivo',
 };
 function getPosLabel(pos){ return POS_LABEL[pos] || pos; }
 
@@ -542,6 +592,8 @@ const SLOT_LABEL_ES = {
   '4-2-3-1': { GK:'Arquero', RB:'Defensor derecho', CB1:'Defensor central', CB2:'Defensor central', LB:'Defensor izquierdo',
     CDM1:'Volante central', CDM2:'Volante central', RAM:'Mediapunta derecho', CAM:'Mediapunta central', LAM:'Mediapunta izquierdo', CF:'Delantero centro' },
   '3-5-2': { GK:'Arquero', CB1:'Defensor derecho', CB2:'Líbero', CB3:'Defensor izquierdo',
+    RM:'Carrilero derecho', CM1:'Medio derecho', CM2:'Medio izquierdo', CAM:'Medio centro ofensivo', LM:'Carrilero izquierdo', ST1:'Delantero derecho', ST2:'Delantero izquierdo' },
+  '3-1-4-2': { GK:'Arquero', CB1:'Defensor derecho', CB2:'Líbero', CB3:'Defensor izquierdo',
     RM:'Carrilero derecho', CM1:'Medio derecho', CM2:'Medio defensivo', CM3:'Medio izquierdo', LM:'Carrilero izquierdo', ST1:'Delantero derecho', ST2:'Delantero izquierdo' },
   '3-4-3': { GK:'Arquero', CB1:'Defensor central', CB2:'Defensor central', CB3:'Defensor central',
     RM:'Carrilero derecho', CM1:'Volante', CM2:'Volante', LM:'Carrilero izquierdo', RW:'Extremo derecho', CF:'Delantero centro', LW:'Extremo izquierdo' },
@@ -557,7 +609,8 @@ const COPY_ORDER_ES = {
   '4-3-3':      ['GK','CB1','CB2','RB','LB','CM','RM','LM','RW','LW','CF'],
   '4-4-2':      ['GK','CB1','CB2','RB','LB','CM1','CM2','RM','LM','ST1','ST2'],
   '4-2-3-1':    ['GK','CB1','CB2','RB','LB','CDM1','CDM2','RAM','LAM','CAM','CF'],
-  '3-5-2':      ['GK','CB2','CB1','CB3','RM','LM','CM2','CM1','CM3','ST1','ST2'],
+  '3-5-2':      ['GK','CB2','CB1','CB3','RM','LM','CM1','CM2','CAM','ST1','ST2'],
+  '3-1-4-2':    ['GK','CB2','CB1','CB3','RM','LM','CM2','CM1','CM3','ST1','ST2'],
   '3-4-3':      ['GK','CB2','CB1','CB3','RM','LM','CM1','CM2','RW','LW','CF'],
   '4-1-2-1-2':  ['GK','CB1','CB2','RB','LB','CDM','CM1','CM2','CAM','ST1','ST2'],
 };
@@ -992,6 +1045,7 @@ function applyData(rawData) {
   alwaysPresent   = data.alwaysPresent  || [];
   captain         = data.captain        || null;
   lineup          = data.lineup         || { formation:'4-3-3', slots:{} };
+  if (lineup.formation === '3-5-2' && lineup.slots && 'CM3' in lineup.slots) lineup.formation = '3-1-4-2';
   // Baseline = lo que el servidor realmente tiene persistido ahora mismo.
   // Si hubo corrección por backup, la baseline sigue siendo el doc corrupto (rawData),
   // así el próximo saveState() detecta la diferencia completa y la restaura de verdad.
@@ -1189,6 +1243,9 @@ function frente2Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente2
 function brazos3Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos3.png`); }
 function frente3Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente3.png`); }
 function brazos4Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos4.png`); }
+// Versiones livianas (~40 KB vs ~1 MB) para la lista y la cancha
+function brazos4Web(p) { return mediaUrl(`Renders/${p.folder || p.name}/Brazos4.webp`); }
+function frente4Web(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente4.webp`); }
 function frente4Path(p) { return mediaUrl(`Renders/${p.folder || p.name}/Frente4.png`); }
 function svgPath(p)    { return mediaUrl(`Renders/${p.name}.svg`); }
 
@@ -1232,6 +1289,31 @@ function renderDateTag() {
   document.getElementById('sectionDate').textContent = TODAY;
 }
 
+/* ─── TARJETA GRANDE DE JUGADOR ─── */
+function buildTile(card, p, d) {
+  const img = document.createElement('img');
+  img.className = 'tile-img'; img.alt = ''; img.draggable = false;
+  if (p.isGuest) img.src = mediaUrl('Renders/silueta-prueba.png');
+  else tryImages([brazos4Web(p), brazos4Path(p), brazos3Path(p), brazos2Path(p), brazosPath(p)], 0,
+    src => { img.src = src; },
+    () => { img.src = mediaUrl('Renders/silueta-prueba.png'); img.style.opacity = '.5'; });
+  card.appendChild(img);
+  if (p.num !== '' && p.num != null) {
+    const n = document.createElement('div'); n.className = 'tile-num'; n.textContent = p.num; card.appendChild(n);
+  }
+  const badges = document.createElement('div'); badges.className = 'tile-badges';
+  const dot = document.createElement('span'); dot.className = 'sdot ' + d.dot; badges.appendChild(dot);
+  if (d.captain) { const cb = document.createElement('span'); cb.className = 'cap-badge'; cb.textContent = 'C'; badges.appendChild(cb); }
+  if (d.always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; badges.appendChild(b); }
+  card.appendChild(badges);
+  const info = document.createElement('div'); info.className = 'tile-info';
+  const nm = document.createElement('div'); nm.className = 'pc-name'; nm.textContent = d.name; info.appendChild(nm);
+  const pos = document.createElement('div'); pos.className = 'pc-pos'; pos.textContent = d.pos; info.appendChild(pos);
+  if (d.note) { const nt = document.createElement('div'); nt.className = 'pnote'; nt.textContent = d.note; info.appendChild(nt); }
+  if (d.pitched) { const sp = document.createElement('span'); sp.className = 'on-pitch'; sp.textContent = '✓ EN CANCHA'; info.appendChild(sp); }
+  card.appendChild(info);
+}
+
 /* ─── RENDER PLAYERS LIST ─── */
 function renderPlayers() {
   const el = document.getElementById('playersList');
@@ -1263,7 +1345,7 @@ function renderPlayers() {
       const pitched = onPitch.has(p.name);
 
       const card = document.createElement('div');
-      card.className = 'pcard ' + (always && st === 'green' ? 'always' : st);
+      card.className = 'pcard tile ' + (always && st === 'green' ? 'always' : st);
       card.draggable = true;
       card.addEventListener('dragstart', e => {
         e.dataTransfer.setData('playerName', p.name);
@@ -1277,34 +1359,11 @@ function renderPlayers() {
       });
       if (selectedSlotKey) card.classList.add('assignable');
 
-      // Num
-      const pnum = document.createElement('div');
-      pnum.className = 'pnum';
-      pnum.textContent = p.num;
-
-      // Avatar
-      const av = document.createElement('div');
-      av.className = 'pavatar';
-      buildAvatar(p, av);
-
-      // Info
-      const info = document.createElement('div'); info.className = 'pinfo';
-      const nm = document.createElement('div'); nm.className = 'pname';
-      nm.textContent = p.name;
-      if (always) { const b = document.createElement('span'); b.className = 'always-badge'; b.textContent = '∞'; nm.appendChild(b); }
-      if (captain === p.name) { const cb = document.createElement('span'); cb.className = 'cap-badge'; cb.textContent = 'C'; nm.appendChild(cb); }
-      const sub = document.createElement('div'); sub.className = 'psub';
-      const pos = document.createElement('span'); pos.className = 'ppos'; pos.textContent = getPosLabel(p.pos);
-      sub.appendChild(pos);
-      if (pitched) { const sp = document.createElement('span'); sp.className = 'on-pitch'; sp.textContent = '✓ EN CANCHA'; sub.appendChild(sp); }
-      info.appendChild(nm); info.appendChild(sub);
-      if (note) { const nt = document.createElement('div'); nt.className = 'pnote'; nt.style.marginTop = '2px'; nt.textContent = note; info.appendChild(nt); }
-
-      // Dot
-      const dot = document.createElement('span');
-      dot.className = 'sdot ' + (always && st === 'green' ? 'sa' : (dotCls[st] || 'sp'));
-
-      card.appendChild(pnum); card.appendChild(av); card.appendChild(info); card.appendChild(dot);
+      buildTile(card, p, {
+        name: p.name, pos: getPosLabel(p.pos), note, pitched, always,
+        captain: captain === p.name,
+        dot: always && st === 'green' ? 'sa' : (dotCls[st] || 'sp'),
+      });
       el.appendChild(card);
       newCards.push(card);
     });
@@ -1314,28 +1373,19 @@ function renderPlayers() {
   const guestPlayers = PLAYERS.filter(p => p.isGuest);
   if (guestPlayers.length) {
     const gsep = document.createElement('div');
-    gsep.style.cssText = 'height:1px;background:var(--border);margin:6px 0 4px;';
+    gsep.style.cssText = 'grid-column:1/-1;height:1px;background:var(--border);margin:6px 0 4px;';
     el.appendChild(gsep);
     guestPlayers.forEach(p => {
       const st = _firestoreLoaded ? getStatus(p.name) : 'loading';
       const pitched = onPitch.has(p.name);
       const card = document.createElement('div');
-      card.className = 'pcard ' + st;
+      card.className = 'pcard tile ' + st;
       card.draggable = true;
       card.addEventListener('dragstart', e => { e.dataTransfer.setData('playerName', p.name); e.dataTransfer.effectAllowed = 'move'; setTimeout(() => card.style.opacity = '.4', 0); });
       card.addEventListener('dragend', () => card.style.opacity = '');
       card.addEventListener('click', () => { if (selectedSlotKey) assignPlayerToSelectedSlot(p.name); else openStatusModal(p.name); });
       if (selectedSlotKey) card.classList.add('assignable');
-      const av = document.createElement('div'); av.className = 'pavatar'; buildAvatar(p, av);
-      const info = document.createElement('div'); info.className = 'pinfo';
-      const nm = document.createElement('div'); nm.className = 'pname'; nm.textContent = 'Prueba';
-      const sub = document.createElement('div'); sub.className = 'psub';
-      const posEl = document.createElement('span'); posEl.className = 'ppos'; posEl.textContent = 'Jugador prueba';
-      sub.appendChild(posEl);
-      if (pitched) { const sp = document.createElement('span'); sp.className = 'on-pitch'; sp.textContent = '✓ EN CANCHA'; sub.appendChild(sp); }
-      info.appendChild(nm); info.appendChild(sub);
-      const dot = document.createElement('span'); dot.className = 'sdot ' + (dotCls[st] || 'sp');
-      card.appendChild(av); card.appendChild(info); card.appendChild(dot);
+      buildTile(card, p, { name: 'Prueba', pos: 'Jugador prueba', note: '', pitched, dot: dotCls[st] || 'sp' });
       el.appendChild(card);
       newCards.push(card);
     });
@@ -1389,8 +1439,13 @@ function renderFbar() {
 function renderPitch() {
   const pitch = document.getElementById('pitch');
   pitch.querySelectorAll('.slot').forEach(el => el.remove());
-  const stW = Math.min(76, Math.max(50, window.innerWidth * 0.05));
-  const stScale = stW / 42;
+  const tokW = Math.round(Math.min(132, Math.max(64, pitch.clientWidth * 0.155)));
+  pitch.style.setProperty('--tok-w', tokW + 'px');
+  pitch.style.setProperty('--tok-h', Math.round(tokW * 1.12) + 'px');
+  pitch.style.setProperty('--tok-name-w', Math.round(tokW * 0.2) + 'px');
+  pitch.style.setProperty('--name-size', Math.max(9, Math.round(tokW * 0.12)) + 'px');
+  pitch.style.setProperty('--num-size', Math.max(18, Math.round(tokW * 0.34)) + 'px');
+  pitch.style.setProperty('--chest-scale', '2.9');
   const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
 
   slots.forEach(s => {
@@ -1423,45 +1478,23 @@ function renderPitch() {
         _bar.appendChild(_ginp); tok.appendChild(_bar);
       }
 
-      // Helper: set photo inside token (portrait, chest-up crop) + name bar
+      // Foto de pecho hacia arriba, nombre vertical a la izquierda, número a la derecha
       function setPhoto(src) {
         tok.innerHTML = '';
         const img = document.createElement('img');
-        img.src = src;
-        img.className = 'tok-photo';
-        const isV3 = /Frente3|Brazos3/.test(src);
-        const scale = isV3 ? '2.7' : 'var(--photo-scale)';
-        img.style.cssText = `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(${scale}) translateY(var(--photo-y));transform-origin:top center;`;
+        img.src = src; img.className = 'tok-photo'; img.draggable = false;
         tok.appendChild(img);
-        // Número sobre la foto (izquierda)
-        const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
-        tok.appendChild(numEl);
-        // Badge capitán
-        if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
-        // Barra inferior solo con nombre
-        const bar = document.createElement('div'); bar.className = 'stoken-bar';
-        const nameEl = document.createElement('span'); nameEl.className = 'stoken-name'; nameEl.textContent = player.name;
-        bar.appendChild(nameEl);
-        tok.appendChild(bar);
+        const nm = document.createElement('div'); nm.className = 'tok-name';
+        const ns = document.createElement('span'); ns.textContent = player.name; nm.appendChild(ns);
+        tok.appendChild(nm);
+        if (player.num !== '' && player.num != null) { const numEl = document.createElement('span'); numEl.className = 'tok-num'; numEl.textContent = player.num; tok.appendChild(numEl); }
+        if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'tok-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
       }
 
       // Try T3 → T2 → T1 → silueta
-      if (!player.isGuest) tryImages([frente4Path(player), frente3Path(player), frente2Path(player), frontePath(player), brazos4Path(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
+      if (!player.isGuest) tryImages([frente4Web(player), frente4Path(player), frente3Path(player), frente2Path(player), frontePath(player), brazos4Path(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
         (src) => setPhoto(src),
-        () => {
-          tok.innerHTML = '';
-          const _sil = document.createElement('img');
-          _sil.src = mediaUrl('Renders/silueta-prueba.png');
-          _sil.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(2.7) translateY(0%);transform-origin:top center;opacity:.55;';
-          tok.appendChild(_sil);
-          const numEl = document.createElement('span'); numEl.className = 'stoken-num'; numEl.textContent = player.num;
-          tok.appendChild(numEl);
-          if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'stoken-cap'; cap.textContent = 'C'; tok.appendChild(cap); }
-          const bar = document.createElement('div'); bar.className = 'stoken-bar';
-          const nameEl2 = document.createElement('span'); nameEl2.className = 'stoken-name'; nameEl2.textContent = player.name;
-          bar.appendChild(nameEl2);
-          tok.appendChild(bar);
-        }
+        () => { setPhoto(mediaUrl('Renders/silueta-prueba.png')); tok.querySelector('.tok-photo').style.opacity = '.55'; }
       );
     } else {
       tok.className = 'stoken empty';
@@ -2323,6 +2356,16 @@ function _download(blob, name) {
 /* ─── PAGE LOAD ANIMATION ─── */
 gsap.set('.page-header > *', { opacity:0, y:18 });
 gsap.set('.kpi-card', { opacity:0, y:14 });
+
+/* ─── Fichas de la cancha proporcionales al ancho ─── */
+let _pitchW = 0, _pitchT;
+window.addEventListener('resize', () => {
+  clearTimeout(_pitchT);
+  _pitchT = setTimeout(() => {
+    const w = document.getElementById('pitch').clientWidth;
+    if (Math.abs(w - _pitchW) > 20) { _pitchW = w; renderPitch(); }
+  }, 150);
+});
 
 /* ─── MOBILE: empujar overlay cuando aparece el teclado virtual ─── */
 if (window.visualViewport) {
