@@ -68,7 +68,7 @@ html body .conv-top .page-eyebrow{border:0;box-shadow:none;background:none;paddi
 
 /* Cancha: entra entera en la pantalla y queda fija mientras se recorre la lista */
 @media(min-width:901px){
-  .col-pitch .pitch,.col-pitch .pitch-bar{width:min(100%,calc((100vh - 170px) * .75));margin-left:auto;margin-right:auto;}
+  .col-pitch .pitch,.col-pitch .pitch-bar{width:min(100%,calc((100vh - 170px) * .75));margin-left:0;margin-right:auto;}
 }
 
 /* Pestañas solo en celular */
@@ -1013,7 +1013,7 @@ function renderTodayMatchesPanel() {
   const matches = getTodayMatches();
   document.getElementById('tmpTitle').textContent = matches.length > 1 ? 'Partidos de hoy' : matches.length ? 'Partido de hoy' : 'Hoy';
   if (!matches.length) {
-    wrap.querySelector('.tmp-list').innerHTML = '<div class="tmp-row"><span class="tmp-time">22:30</span><span class="tmp-rival">Entrenamiento</span><span class="tmp-loc">Todos conectados</span></div>';
+    wrap.querySelector('.tmp-list').innerHTML = '<div class="tmp-row"><span class="tmp-time">22:30</span><span class="tmp-rival">Entrenamiento</span></div>';
     return;
   }
   const lc = {VPN:'#f5c518',VPUG:'#3ecf8e','11x11':'#4a9eff'};
@@ -1387,11 +1387,9 @@ function renderPlayers() {
   const el = document.getElementById('playersList');
   const onPitch = new Set(Object.values(lineup.slots));
   const groups = [
-    {label:'Arquero',       f:p=>p.pos==='POR'},
-    {label:'Defensores',    f:p=>['DCD','DFC','DFD','DCI'].includes(p.pos)},
-    {label:'Laterales',     f:p=>['LD','LI','DFI'].includes(p.pos)},
-    {label:'Mediocampistas',f:p=>['MCD','MCI','MVD','MVI'].includes(p.pos)},
-    {label:'Delanteros',    f:p=>['DC','EI','ED'].includes(p.pos)},
+    {label:'Arqueros y defensores', f:p=>['POR','DCD','DFC','DFD','DCI'].includes(p.pos), order:['POR']},
+    {label:'Mediocampistas',        f:p=>['LD','LI','DFI','MCD','MCI','MVD','MVI','MCO'].includes(p.pos), order:['LD','LI','DFI']},
+    {label:'Delanteros',            f:p=>['DC','EI','ED'].includes(p.pos)},
   ];
 
   // Collect cards to animate later
@@ -1400,6 +1398,7 @@ function renderPlayers() {
 
   groups.forEach(g => {
     const gp = PLAYERS.filter(p => !p.isGuest && g.f(p));
+    if (g.order) gp.sort((a, b) => (g.order.includes(b.pos) ? 1 : 0) - (g.order.includes(a.pos) ? 1 : 0));
     if (!gp.length) return;
     const lbl = document.createElement('div');
     lbl.className = 'pos-label';
