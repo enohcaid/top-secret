@@ -168,7 +168,7 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .pitch .pitch-svg circle:not([fill="none"]){fill:rgba(255,255,255,.9) !important;}
 .pitch .stoken-bar{background:rgba(11,10,7,.82);}
 .pitch .stoken.filled{border-radius:12px;overflow:hidden;background:radial-gradient(ellipse 85% 75% at 58% 30%,#b89a5c 0%,#7a6438 45%,#3a2f1a 100%);box-shadow:0 6px 16px rgba(0,40,0,.35);}
-.pitch .stoken.empty{background:rgba(255,255,255,.35) !important;border:2px dashed rgba(255,255,255,.9) !important;color:#2f6b2b !important;border-radius:12px;font-weight:800;}
+html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h) !important;background:rgba(255,255,255,.35) !important;border:2px dashed rgba(255,255,255,.9) !important;color:#2f6b2b !important;border-radius:12px;font-weight:800;}
 /* Nombre vertical descendente a la izquierda, número centrado a la derecha */
 .tok-name{position:absolute;left:0;top:0;bottom:0;width:var(--tok-name-w);z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(11,10,7,.82);}
 .tok-name span{writing-mode:vertical-rl;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:var(--name-size);letter-spacing:.04em;text-transform:uppercase;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:94%;line-height:1;}
@@ -176,6 +176,7 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .tok-cap{position:absolute;top:4px;right:4px;z-index:4;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.78rem;box-shadow:0 0 8px rgba(201,168,76,.7);}
 .tok-name span[contenteditable]{outline:none;cursor:text;}
 .tok-name span[contenteditable]:focus{color:var(--gold);}
+.pitch .slot:hover .stoken{transform:none;}
 .tok-photo{position:absolute;top:0;bottom:0;left:var(--tok-name-w);right:0;width:auto !important;height:100% !important;object-fit:cover;object-position:50% 0;transform:scale(var(--chest-scale)) !important;transform-origin:50% 4% !important;}
 
 .pitch-logo{position:absolute;top:3.5%;right:3.5%;width:8.5%;height:auto;opacity:.72;z-index:1;pointer-events:none;}
@@ -535,45 +536,45 @@ function getGuestSlotName(slotKey) {
 /* ─── FORMATIONS ─── */
 const FORMATIONS = {
   '4-3-3':[
-    {key:'GK', l:'POR',x:50,y:84},
+    {key:'GK', l:'POR',x:50,y:87},
     {key:'RB', l:'DFD',x:85,y:63},{key:'CB1',l:'DFC',x:64,y:66},{key:'CB2',l:'DFC',x:36,y:66},{key:'LB',l:'DFI',x:15,y:63},
     {key:'RM', l:'MCI',x:75,y:37},{key:'CM', l:'MCD',x:50,y:44},{key:'LM', l:'MCI',x:25,y:37},
     {key:'RW', l:'ED', x:80,y:14},{key:'CF', l:'DC', x:50,y:14},{key:'LW', l:'EI', x:20,y:14},
   ],
   '4-4-2':[
-    {key:'GK', l:'POR',x:50,y:84},
+    {key:'GK', l:'POR',x:50,y:87},
     {key:'RB', l:'DFD',x:85,y:63},{key:'CB1',l:'DFC',x:64,y:66},{key:'CB2',l:'DFC',x:36,y:66},{key:'LB',l:'DFI',x:15,y:63},
     {key:'RM', l:'MVI',x:80,y:37},{key:'CM1',l:'MCD',x:60,y:44},{key:'CM2',l:'MCI',x:40,y:37},{key:'LM',l:'MVD',x:20,y:37},
     {key:'ST1',l:'DC', x:64,y:14},{key:'ST2',l:'DC', x:36,y:14},
   ],
   '4-2-3-1':[
-    {key:'GK',  l:'POR',x:50,y:84},
+    {key:'GK',  l:'POR',x:50,y:87},
     {key:'RB',  l:'DFD',x:85,y:63},{key:'CB1',l:'DFC',x:64,y:66},{key:'CB2',l:'DFC',x:36,y:66},{key:'LB',l:'DFI',x:15,y:63},
     {key:'CDM1',l:'MCD',x:62,y:49},{key:'CDM2',l:'MCD',x:38,y:49},
     {key:'RAM', l:'MCI',x:78,y:34},{key:'CAM', l:'MCI',x:50,y:31},{key:'LAM',l:'MCI',x:22,y:34},
     {key:'CF',  l:'DC', x:50,y:14},
   ],
   '3-5-2':[
-    {key:'GK', l:'POR',x:50,y:84},
-    {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:70},{key:'CB3',l:'DFC',x:28,y:68},
+    {key:'GK', l:'POR',x:50,y:87},
+    {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:67},{key:'CB3',l:'DFC',x:28,y:68},
     {key:'RM', l:'LD', x:86,y:40},{key:'CM1',l:'MCD',x:64,y:48},{key:'CM2',l:'MCD',x:36,y:48},{key:'LM',l:'LI',x:14,y:40},
     {key:'CAM',l:'MCO',x:50,y:31},
     {key:'ST1',l:'DC', x:64,y:14},{key:'ST2',l:'DC', x:36,y:14},
   ],
   '3-1-4-2':[
-    {key:'GK', l:'POR',x:50,y:84},
-    {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:70},{key:'CB3',l:'DFC',x:28,y:68},
+    {key:'GK', l:'POR',x:50,y:87},
+    {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:67},{key:'CB3',l:'DFC',x:28,y:68},
     {key:'RM', l:'LD', x:85,y:37},{key:'CM1',l:'MCD',x:67,y:35},{key:'CM2',l:'MCD',x:50,y:44},{key:'CM3',l:'MCI',x:33,y:35},{key:'LM',l:'LI',x:15,y:37},
     {key:'ST1',l:'DC', x:64,y:14},{key:'ST2',l:'DC', x:36,y:14},
   ],
   '3-4-3':[
-    {key:'GK', l:'POR',x:50,y:84},
-    {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:70},{key:'CB3',l:'DFC',x:28,y:68},
-    {key:'RM', l:'LD', x:85,y:37},{key:'CM1',l:'MCD',x:57,y:44},{key:'CM2',l:'MCI',x:43,y:34},{key:'LM',l:'LI', x:15,y:37},
+    {key:'GK', l:'POR',x:50,y:87},
+    {key:'CB1',l:'DFC',x:72,y:68},{key:'CB2',l:'DFC',x:50,y:67},{key:'CB3',l:'DFC',x:28,y:68},
+    {key:'RM', l:'LD', x:85,y:37},{key:'CM1',l:'MCD',x:62,y:44},{key:'CM2',l:'MCI',x:38,y:44},{key:'LM',l:'LI', x:15,y:37},
     {key:'RW', l:'ED', x:80,y:14},{key:'CF', l:'DC', x:50,y:14},{key:'LW',l:'EI', x:20,y:14},
   ],
   '4-1-2-1-2':[
-    {key:'GK',  l:'POR',x:50,y:84},
+    {key:'GK',  l:'POR',x:50,y:87},
     {key:'RB',  l:'DFD',x:85,y:63},{key:'CB1',l:'DFC',x:64,y:66},{key:'CB2',l:'DFC',x:36,y:66},{key:'LB',l:'DFI',x:15,y:63},
     {key:'CDM', l:'MCD',x:50,y:53},
     {key:'CM1', l:'MCI',x:72,y:43},{key:'CM2',l:'MCI',x:28,y:43},
@@ -1435,18 +1436,38 @@ function renderFbar() {
   bar.appendChild(clearBtn);
 }
 
+/* ─── TAMAÑO DE FICHA ───
+   Todas las fichas miden lo mismo: la mayor posible para que, con esta formación,
+   ninguna se superponga (dejando GAP entre cada par) ni se salga de la cancha. */
+const TOK_RATIO = 1.12;
+function fitTokenWidth(slots, W, H) {
+  const gap = Math.max(8, Math.round(W * 0.018));
+  let w = W * 0.24;
+  const pts = slots.map(s => [s.x / 100 * W, s.y / 100 * H]);
+  for (let i = 0; i < pts.length; i++) {
+    const [x, y] = pts[i];
+    w = Math.min(w, 2 * Math.min(x, W - x) - 4, 2 * Math.min(y, H - y) / TOK_RATIO - 4);
+    for (let j = i + 1; j < pts.length; j++) {
+      const dx = Math.abs(x - pts[j][0]), dy = Math.abs(y - pts[j][1]);
+      // Alcanza con separarse en horizontal O en vertical
+      w = Math.min(w, Math.max(dx - gap, (dy - gap) / TOK_RATIO));
+    }
+  }
+  return Math.max(40, Math.floor(w));
+}
+
 /* ─── RENDER PITCH ─── */
 function renderPitch() {
   const pitch = document.getElementById('pitch');
   pitch.querySelectorAll('.slot').forEach(el => el.remove());
-  const tokW = Math.round(Math.min(132, Math.max(64, pitch.clientWidth * 0.155)));
-  pitch.style.setProperty('--tok-w', tokW + 'px');
-  pitch.style.setProperty('--tok-h', Math.round(tokW * 1.12) + 'px');
-  pitch.style.setProperty('--tok-name-w', Math.round(tokW * 0.2) + 'px');
-  pitch.style.setProperty('--name-size', Math.max(9, Math.round(tokW * 0.12)) + 'px');
-  pitch.style.setProperty('--num-size', Math.max(18, Math.round(tokW * 0.34)) + 'px');
-  pitch.style.setProperty('--chest-scale', '2.9');
   const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
+  const tokW = fitTokenWidth(slots, pitch.clientWidth, pitch.clientHeight);
+  pitch.style.setProperty('--tok-w', tokW + 'px');
+  pitch.style.setProperty('--tok-h', Math.round(tokW * TOK_RATIO) + 'px');
+  pitch.style.setProperty('--tok-name-w', Math.round(tokW * 0.2) + 'px');
+  pitch.style.setProperty('--name-size', Math.max(8, Math.round(tokW * 0.12)) + 'px');
+  pitch.style.setProperty('--num-size', Math.max(14, Math.round(tokW * 0.34)) + 'px');
+  pitch.style.setProperty('--chest-scale', '2.9');
 
   slots.forEach(s => {
     const assigned = lineup.slots[s.key];
@@ -2186,7 +2207,7 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
     ctx.restore();
   }
   function drawEmpty(cx, cy, label) {
-    const w = tokW * 0.5, h = tokH * 0.5, x = cx - w / 2, y = cy - h / 2;
+    const w = tokW, h = tokH, x = cx - w / 2, y = cy - h / 2;
     roundRect(ctx, x, y, w, h, 12 * S);
     ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
     ctx.setLineDash([5 * S, 4 * S]); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2 * S; ctx.stroke(); ctx.setLineDash([]);
