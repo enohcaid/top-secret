@@ -425,6 +425,17 @@
       .article-modal-img { object-fit: cover; }
     }
 
+    /* ── Share modal: placas generadas (share-cards.js) ── */
+    .share-modal { max-width: 720px !important; }
+    .sc-previews { display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; align-items: end; margin-bottom: 20px; }
+    .sc-prev { margin: 0; }
+    .sc-prev .canvas-wrap { margin: 0; border-radius: 12px; }
+    .sc-post .canvas-wrap { aspect-ratio: 4 / 5; }
+    .sc-story .canvas-wrap { aspect-ratio: 9 / 16; }
+    .sc-prev figcaption { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: rgba(242,238,224,.45); margin-top: 8px; }
+    .share-footer-row { flex-wrap: wrap; }
+    @media (max-width: 560px) { .sc-previews { grid-template-columns: 1fr 1fr; gap: 10px; } }
+
     /* ── Share modal ── */
     .share-modal {
       background: var(--gray);
@@ -500,6 +511,7 @@
       font-size: .88rem;
       line-height: 1.5;
       color: var(--text, #F0F2F8);
+      background: rgba(242,238,224,.05);
       resize: vertical;
       margin-bottom: 16px;
     }
@@ -867,6 +879,7 @@ body{padding-left:0;padding-right:0;}
 <body>
 
 <script src="noticias-data.js"></script>
+<script src="share-cards.js?v=1"></script>
 <script src="layout.js?v=19"></script>
 
 <div class="page-wrap">
@@ -1002,9 +1015,9 @@ body{padding-left:0;padding-right:0;}
       <button class="modal-close" style="position:static;background:rgba(255,255,255,.1);" onclick="closeShare()">✕</button>
     </div>
     <div class="share-modal-body">
-      <div class="canvas-wrap">
-        <img id="share-preview" src="" alt="">
-        <div class="canvas-loading" id="canvas-loading">Cargando…</div>
+      <div class="sc-previews">
+        <figure class="sc-prev sc-post"><div class="canvas-wrap"><img id="share-preview" src="" alt="Post para Instagram"><div class="canvas-loading" id="canvas-loading">Armando placa…</div></div><figcaption>Post · 4:5</figcaption></figure>
+        <figure class="sc-prev sc-story"><div class="canvas-wrap"><img id="share-preview-story" src="" alt="Historia"></div><figcaption>Historia · 9:16</figcaption></figure>
       </div>
       <div class="share-caption-label">Texto para la publicación</div>
       <textarea class="share-caption" id="share-caption"></textarea>
@@ -1029,7 +1042,11 @@ body{padding-left:0;padding-right:0;}
       <div class="share-footer-row">
         <button class="share-btn share-btn-download" onclick="downloadImg()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Descargar imagen
+          Descargar post
+        </button>
+        <button class="share-btn share-btn-download" onclick="downloadStoryCard()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="14" x2="12" y2="6"/></svg>
+          Descargar historia
         </button>
         <button class="share-btn share-btn-copy" onclick="copyOgLink()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
@@ -1265,7 +1282,7 @@ function openArticle(id) {
   document.getElementById('am-actions').innerHTML = `
     <button class="btn-primary" onclick="closeArticle(); openShare('${n.id}')">Compartir</button>
     <button class="btn-secondary" onclick="copyLink('${n.id}')">Copiar link</button>
-    ${n.imageStory ? `<button class="btn-secondary" onclick="downloadImage('${n.imageStory.replace(/'/g, "\\'")}', '${n.id}_story')">Descargar historia</button>` : ''}
+    <button class="btn-secondary" onclick="downloadStoryCard(findNews('${n.id}'))">Descargar historia</button>
   `;
   document.getElementById('article-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1337,27 +1354,56 @@ function closeShare() {
 }
 
 // ── IMAGE PREVIEW + DESCARGA DIRECTA ─────────────────────────────────────────
+// Placas con estética de expediente (share-cards.js): post 4:5 para compartir
+// e historia 9:16 para descargar. Se arman una vez por noticia y se cachean.
+const _cards = {};
+function cardMeta(n) { return { id: expId(n), file: fileName(n) }; }
+function getCard(n, kind) {
+  const key = n.id + ':' + kind;
+  if (!_cards[key]) _cards[key] = TSCards[kind](n, cardMeta(n))
+    .then(cv => TSCards.toBlob(cv))
+    .catch(() => null);
+  return _cards[key];
+}
 async function buildShareCanvas(n) {
   const preview = document.getElementById('share-preview');
+  const previewStory = document.getElementById('share-preview-story');
   const loading = document.getElementById('canvas-loading');
   loading.style.display = 'flex';
-  preview.src = n.image || '';
-  preview.onload  = () => { loading.style.display = 'none'; };
-  preview.onerror = () => { loading.style.display = 'none'; };
-  if (!n.image) loading.style.display = 'none';
+  preview.removeAttribute('src'); previewStory.removeAttribute('src');
+  const [post, story] = await Promise.all([getCard(n, 'post'), getCard(n, 'story')]);
+  if (_shareNews !== n) return;
+  preview.src = post ? URL.createObjectURL(post) : (n.image || '');
+  if (story) previewStory.src = URL.createObjectURL(story);
+  loading.style.display = 'none';
 }
 
+function saveBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+// "Original" = la placa de post; si el canvas falla, la imagen tal cual.
 async function downloadOriginalImage(n) {
-  if (!n || !n.image) return;
+  if (!n) return;
+  const post = await getCard(n, 'post');
+  if (post) return saveBlob(post, `top-secret-fc-${n.id}-post.jpg`);
+  if (!n.image) return;
   const resp = await fetch(n.image);
   const blob = await resp.blob();
   const ext  = (n.image.split('.').pop() || 'png').toLowerCase();
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = `top-secret-fc-${n.id}.${ext}`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  saveBlob(blob, `top-secret-fc-${n.id}.${ext}`);
+}
+
+async function downloadStoryCard(n) {
+  n = n || _shareNews;
+  if (!n) return;
+  const story = await getCard(n, 'story');
+  if (story) return saveBlob(story, `top-secret-fc-${n.id}-historia.jpg`);
+  if (n.imageStory) downloadImage(n.imageStory, n.id + '_story');
 }
 
 // ── SHARE ACTIONS ────────────────────────────────────────────────────────────
@@ -1426,11 +1472,14 @@ function downloadImg() {
 }
 
 async function webShareAction() {
-  if (!_shareNews || !_shareNews.image) return;
+  if (!_shareNews) return;
   try {
-    const resp = await fetch(_shareNews.image);
-    const blob = await resp.blob();
-    const ext  = (_shareNews.image.split('.').pop() || 'png').toLowerCase();
+    let blob = await getCard(_shareNews, 'post'), ext = 'jpg';
+    if (!blob) {
+      const resp = await fetch(_shareNews.image);
+      blob = await resp.blob();
+      ext  = (_shareNews.image.split('.').pop() || 'png').toLowerCase();
+    }
     const file = new File([blob], `top-secret-fc.${ext}`, { type: blob.type });
     await navigator.share({ title: _shareNews.title, text: getCaption(), files: [file] });
   } catch(e) {
