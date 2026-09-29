@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -770,6 +770,92 @@
     .regen-confirm-actions .btn-secondary { width: 100%; }
     .regen-confirm-actions .btn-danger    { width: 100%; }
   
+/* ══════════ EXPEDIENTE DIGITAL ══════════ */
+:root{--mono:'JetBrains Mono',ui-monospace,monospace;--xg:#C8A84B;--xok:#3ECF8E;}
+body{padding-left:0;padding-right:0;}
+.page-wrap{padding-top:28px;}
+.xp-head{margin:0 0 clamp(28px,4vw,48px);}
+.xp-path{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.78rem;color:rgba(242,238,224,.55);letter-spacing:.02em;}
+.xp-dot{width:8px;height:8px;border-radius:50%;background:var(--xok);box-shadow:0 0 10px var(--xok);}
+.xp-caret{color:var(--xg);animation:xpBlink 1s steps(1) infinite;}
+@keyframes xpBlink{50%{opacity:0;}}
+.xp-title{font-family:'Barlow',sans-serif;font-size:clamp(3rem,8vw,6.4rem);font-weight:900;letter-spacing:-.05em;line-height:.9;margin:14px 0 10px;text-transform:none;}
+.xp-sub{font-family:var(--mono);font-size:.82rem;color:rgba(242,238,224,.5);}
+.xp-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin-top:22px;}
+.xp-search{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;background:rgba(242,238,224,.05);font-family:var(--mono);font-size:.85rem;color:var(--xg);min-width:min(100%,300px);}
+.xp-search input{flex:1;background:none;border:0;outline:none;color:#F2EEE0;font-family:var(--mono);font-size:.85rem;}
+.xp-search input::placeholder{color:rgba(242,238,224,.35);}
+.xp-cats{display:flex;flex-wrap:wrap;gap:6px;}
+.xp-cat{padding:8px 14px;border:0;border-radius:999px;background:rgba(242,238,224,.05);color:rgba(242,238,224,.6);font-family:var(--mono);font-size:.74rem;cursor:pointer;}
+.xp-cat:hover{color:#F2EEE0;}
+.xp-cat.on{background:var(--xg);color:#0B0A07;}
+.xp-mono{font-family:var(--mono);font-size:.8em;color:var(--xg);font-weight:500;letter-spacing:0;}
+
+/* Ventana del destacado */
+.xp-win{margin-bottom:clamp(48px,7vw,80px);}
+.xp-bar{display:flex;align-items:center;gap:8px;padding:0 4px 14px;font-family:var(--mono);font-size:.76rem;color:rgba(242,238,224,.5);}
+.xp-bar i{width:10px;height:10px;border-radius:50%;background:rgba(242,238,224,.14);}
+.xp-bar i:first-child{background:#e0645a;}.xp-bar i:nth-child(2){background:#e0c979;}.xp-bar i:nth-child(3){background:#3ecf8e;}
+.xp-bar span{margin-left:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.xp-bar b{margin-left:auto;font-weight:700;color:var(--xg);letter-spacing:.14em;}
+.featured-card{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) !important;min-height:0 !important;margin:0 !important;align-items:center;}
+.featured-card .featured-photo{order:0;aspect-ratio:4/3;min-height:0;}
+.featured-card.has-video{display:grid !important;}
+.featured-title{font-family:'Barlow',sans-serif !important;font-size:clamp(1.8rem,3.4vw,3rem) !important;font-weight:900 !important;letter-spacing:-.035em !important;text-transform:none !important;line-height:1 !important;margin:18px 0 14px !important;}
+.featured-excerpt{color:rgba(242,238,224,.7) !important;}
+.xp-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px;font-family:var(--mono);font-size:.74rem;}
+.xp-meta div{border-top:1px solid rgba(242,238,224,.1);padding-top:8px;}
+.xp-meta dt{color:rgba(242,238,224,.4);text-transform:uppercase;letter-spacing:.12em;font-size:.66rem;}
+.xp-meta dd{color:#F2EEE0;margin-top:2px;}
+.xp-meta dd.ok{color:var(--xok);}
+.btn-primary{background:var(--xg) !important;color:#0B0A07 !important;font-family:'Barlow',sans-serif !important;text-transform:none !important;letter-spacing:0 !important;font-size:.92rem !important;font-weight:800 !important;border-radius:999px !important;}
+.btn-secondary{font-family:'Barlow',sans-serif !important;text-transform:none !important;letter-spacing:0 !important;font-size:.92rem !important;font-weight:700 !important;border:0 !important;background:rgba(242,238,224,.08) !important;color:#F2EEE0 !important;border-radius:999px !important;}
+@media(max-width:760px){.featured-card{grid-template-columns:1fr !important;}}
+
+/* Grilla de expedientes */
+.section-heading{font-family:'Barlow',sans-serif !important;font-size:clamp(1.8rem,3.6vw,2.8rem) !important;}
+.news-card .xp-tag{position:absolute;top:12px;left:12px;z-index:3;padding:4px 9px;border-radius:6px;background:rgba(11,10,7,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:var(--mono);font-size:.66rem;color:var(--xg);letter-spacing:.04em;}
+.news-card-cat{font-family:var(--mono) !important;font-size:.66rem !important;font-weight:500 !important;letter-spacing:.08em !important;}
+.news-card-date{font-family:var(--mono);font-size:.7rem !important;}
+
+/* Visor de documento */
+.xv.modal-overlay{padding:0 !important;background:#0B0A07 !important;-webkit-backdrop-filter:none;backdrop-filter:none;display:none;}
+.xv.modal-overlay.open{display:block !important;}
+.xv-bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;height:52px;padding:0 clamp(16px,3vw,40px);background:rgba(11,10,7,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-family:var(--mono);font-size:.76rem;color:rgba(242,238,224,.55);}
+.xv-bar i{width:10px;height:10px;border-radius:50%;}
+.xv-bar i:first-child{background:#e0645a;}.xv-bar i:nth-child(2){background:#e0c979;}.xv-bar i:nth-child(3){background:#3ecf8e;}
+.xv-bar span{margin-left:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.xv-close{margin-left:auto;border:0;background:rgba(242,238,224,.08);color:#F2EEE0;font-family:var(--mono);font-size:.74rem;padding:8px 14px;border-radius:999px;cursor:pointer;}
+.xv-close:hover{background:var(--xg);color:#0B0A07;}
+.xv .article-modal,.xv .article-modal.landscape{display:block !important;max-width:1040px !important;max-height:none !important;margin:0 auto;padding:clamp(28px,5vw,64px) clamp(16px,3vw,40px) 90px;background:none !important;border-radius:0 !important;overflow:visible !important;}
+.xv-top{max-width:820px;}
+.xv .article-modal-title{font-family:'Barlow',sans-serif !important;font-size:clamp(2.2rem,5.4vw,4.4rem) !important;font-weight:900 !important;letter-spacing:-.045em !important;text-transform:none !important;line-height:.95 !important;margin:22px 0 12px !important;}
+.xv .article-modal-date{font-family:var(--mono);font-size:.78rem !important;}
+.xv .article-modal-eyebrow{display:block !important;}
+.xv .xp-meta{grid-template-columns:repeat(4,minmax(0,1fr));}
+.xv .article-modal-img-col{width:100% !important;height:auto !important;margin:clamp(24px,4vw,44px) 0;border-radius:22px;overflow:hidden;background:#111;display:block !important;}
+.xv .article-modal-img{width:100%;height:auto !important;max-height:78vh;object-fit:cover;}
+.xv .article-modal-body{max-width:760px;margin:0 auto;padding:0 !important;overflow:visible !important;}
+.xv .article-modal-content p{font-size:1.1rem !important;line-height:1.75 !important;color:rgba(242,238,224,.82) !important;margin-bottom:20px !important;}
+.xv .article-modal-content p strong{color:#F2EEE0;}
+.xv .article-modal-content a{color:var(--xg);text-decoration:underline;text-underline-offset:3px;}
+.xb-h{font-family:'Barlow',sans-serif;font-size:clamp(1.7rem,3.4vw,2.6rem);font-weight:900;letter-spacing:-.035em;line-height:1;margin:56px 0 18px;color:#F2EEE0;}
+.xb-fig{margin:34px 0;}
+.xb-fig img,.xb-pair img{display:block;width:100% !important;max-width:none !important;margin:0 !important;border:0 !important;border-radius:18px !important;}
+.xb-fig.wide{width:min(1040px,calc(100vw - 32px));margin-left:50%;transform:translateX(-50%);}
+.xb-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:34px 0;}
+.xb-pair img{aspect-ratio:4/5;object-fit:cover;}
+.xb-pair figcaption,.xb-fig figcaption{grid-column:1/-1;font-family:var(--mono);font-size:.74rem;color:rgba(242,238,224,.45);margin-top:10px;}
+.xb-quote{margin:40px 0;padding-left:24px;border-left:2px solid var(--xg);font-size:clamp(1.3rem,2.4vw,1.8rem);font-weight:300;line-height:1.35;color:#F2EEE0;}
+.xb-quote cite{display:block;margin-top:12px;font-family:var(--mono);font-style:normal;font-size:.74rem;color:var(--xg);}
+.xb-specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 24px;margin:26px 0 34px;font-family:var(--mono);font-size:.8rem;}
+.xb-specs div{border-top:1px solid rgba(242,238,224,.12);padding-top:10px;}
+.xb-specs dt{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--xg);}
+.xb-specs dd{color:#F2EEE0;margin-top:4px;font-family:'Barlow',sans-serif;font-size:.95rem;}
+.xv-close{white-space:nowrap;flex-shrink:0;}
+@media(max-width:700px){.xp-cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;width:100%;}.xp-cats::-webkit-scrollbar{display:none;}.xp-cat{flex-shrink:0;}}
+@media(max-width:700px){.xv .xp-meta{grid-template-columns:1fr 1fr;}.xb-specs{grid-template-columns:1fr;}.xb-pair{grid-template-columns:1fr;}}
+
 /* ── LIBRE: el destacado sin caja; la imagen se redondea sola ── */
 .featured-card{background:none;border:0;border-radius:0;overflow:visible;gap:clamp(20px,3vw,48px);}
 .featured-text{padding:0;}
@@ -785,10 +871,15 @@
 
 <div class="page-wrap">
 
-  <!-- Page header -->
-  <div class="page-header">
-    <h1>Noti<span>cias</span></h1>
-    <p>Novedades y comunicados del club</p>
+  <!-- Consola del archivo -->
+  <div class="xp-head">
+    <div class="xp-path"><span class="xp-dot"></span>TSFC://archivo/noticias<span class="xp-caret">_</span></div>
+    <h1 class="xp-title">Noticias</h1>
+    <div class="xp-sub" id="xp-sub">&gt; cargando expedientes…</div>
+    <div class="xp-tools">
+      <label class="xp-search"><span>&gt;</span><input id="xp-q" type="search" placeholder="buscar expediente" autocomplete="off" oninput="applyFilters()"></label>
+      <div class="xp-cats" id="xp-cats"></div>
+    </div>
   </div>
 
   <!-- Trigger admin: siempre visible pero discreto -->
@@ -843,7 +934,7 @@
 
   <!-- Regular news -->
   <div id="other-news-wrap" style="display:none">
-    <div class="section-heading">Más <span>Noticias</span></div>
+    <div class="section-heading"><span class="xp-mono">&gt; ls</span> Expedientes</div>
     <div class="news-grid" id="news-grid"></div>
   </div>
 
@@ -884,17 +975,19 @@
   </div>
 </div>
 
-<!-- Article modal -->
-<div class="modal-overlay" id="article-overlay">
+<!-- Visor de expediente -->
+<div class="modal-overlay xv" id="article-overlay">
+  <div class="xv-bar"><i></i><i></i><i></i><span id="am-file"></span><button class="xv-close" onclick="closeArticle()" aria-label="Cerrar">✕ cerrar</button></div>
   <div class="article-modal" id="article-modal">
-    <button class="modal-close" onclick="closeArticle()">✕</button>
+    <div class="xv-top">
+      <div class="article-modal-eyebrow" id="am-eyebrow"></div>
+      <h2 class="article-modal-title" id="am-title"></h2>
+      <div class="article-modal-date" id="am-date"></div>
+    </div>
     <div class="article-modal-img-col">
       <img class="article-modal-img" id="am-img" src="" alt="">
     </div>
     <div class="article-modal-body">
-      <div class="article-modal-eyebrow" id="am-eyebrow"></div>
-      <h2 class="article-modal-title" id="am-title"></h2>
-      <div class="article-modal-date" id="am-date"></div>
       <div class="article-modal-content" id="am-content"></div>
       <div class="article-modal-actions" id="am-actions"></div>
     </div>
@@ -975,6 +1068,55 @@ function webpFallback(url) {
   return `if(!this.dataset.f&&this.src!=='${url}'){this.dataset.f=1;this.src='${url}';return;}`;
 }
 
+function expId(n) {
+  let h = 0; for (const c of n.id || '') h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return 'EXP-' + (n.date || '').replace(/-/g, '').slice(2) + '-' + (h % 1296).toString(36).toUpperCase().padStart(2, '0');
+}
+function fileName(n) { return (n.id || 'expediente').slice(0, 40) + '.dossier'; }
+
+function applyFilters() {
+  const q = (document.getElementById('xp-q').value || '').trim().toLowerCase();
+  const cat = window._xpCat || '';
+  const norm = x => catKey(x);
+  let shown = 0;
+  document.querySelectorAll('#news-grid .news-card').forEach(c => {
+    const ok = (!cat || norm(c.dataset.cat) === cat) && (!q || c.dataset.q.includes(q));
+    c.style.display = ok ? '' : 'none'; if (ok) shown++;
+  });
+  const sub = document.getElementById('xp-sub');
+  if (sub) sub.textContent = `> ${shown} expediente${shown === 1 ? '' : 's'}${cat ? ' · ' + cat : ''}${q ? ' · "' + q + '"' : ''} · acceso público`;
+}
+function catKey(c) {
+  const k = String(c || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  return ({ institucional: 'institucion', resultados: 'resultado', destacados: 'destacado' })[k] || k;
+}
+function buildCats() {
+  const count = {}, label = { Todos: 'Todos' };
+  allNews().forEach(n => {
+    const k = catKey(n.category); if (!k) return;
+    count[k] = (count[k] || 0) + 1;
+    if (!label[k] || /[^\x00-\x7f]/.test(n.category)) label[k] = n.category;
+  });
+  const cats = Object.keys(count).sort((a, b) => count[b] - count[a]).slice(0, 7);
+  const el = document.getElementById('xp-cats'); if (!el) return;
+  el.innerHTML = ['Todos', ...cats].map(c => `<button type="button" class="xp-cat${(window._xpCat || '') === (c === 'Todos' ? '' : c) ? ' on' : ''}" onclick="window._xpCat='${c === 'Todos' ? '' : c}';buildCats();applyFilters()">${label[c]}</button>`).join('');
+}
+function refreshTools() { buildCats(); applyFilters(); }
+
+/* Cuerpo enriquecido: además de párrafos (string) acepta bloques
+   {h}, {img, caption, wide}, {pair:[img, img], caption}, {quote, by}, {specs:[[clave, valor]]}. */
+function bodyHtml(body) {
+  return (body || []).map(b => {
+    if (typeof b === 'string') return `<p>${b}</p>`;
+    if (b.h) return `<h3 class="xb-h">${b.h}</h3>`;
+    if (b.img) return `<figure class="xb-fig${b.wide ? ' wide' : ''}"><img src="${webp(b.img)}" alt="" loading="lazy" onerror="${webpFallback(b.img)}"><figcaption>${b.caption || ''}</figcaption></figure>`;
+    if (b.pair) return `<figure class="xb-pair">${b.pair.map(u => `<img src="${webp(u)}" alt="" loading="lazy" onerror="${webpFallback(u)}">`).join('')}<figcaption>${b.caption || ''}</figcaption></figure>`;
+    if (b.quote) return `<blockquote class="xb-quote">${b.quote}${b.by ? `<cite>${b.by}</cite>` : ''}</blockquote>`;
+    if (b.specs) return `<dl class="xb-specs">${b.specs.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+    return '';
+  }).join('');
+}
+
 function formatDate(iso) {
   const n = allNews().find(x => x.date === iso);
   if (n && n.dateLabel) return n.dateLabel;
@@ -1016,21 +1158,25 @@ function renderFeatured(n) {
          <div class="featured-photo-gradient"></div>
        </div>`;
   slot.innerHTML = `
-    <div class="featured-card${videoHtml ? ' has-video' : ''}">
-      <div class="featured-text">
-        <div class="featured-eyebrow">
-          <span class="pill-pinned">📌 Fijado</span>
-          <span class="pill-cat">${n.category}</span>
-        </div>
-        <h2 class="featured-title">${n.title}</h2>
-        <div class="featured-date">${n.dateLabel || formatDate(n.date)}</div>
-        <p class="featured-excerpt">${n.excerpt}</p>
-        <div class="featured-actions">
-          <button class="btn-primary" onclick="openArticle('${n.id}')">Leer noticia</button>
-          <button class="btn-secondary" onclick="openShare('${n.id}')">Compartir</button>
+    <div class="xp-win">
+      <div class="xp-bar"><i></i><i></i><i></i><span>${expId(n)} · ${fileName(n)}</span><b>FIJADO</b></div>
+      <div class="featured-card${videoHtml ? ' has-video' : ''}">
+        ${media}
+        <div class="featured-text">
+          <dl class="xp-meta">
+            <div><dt>ID</dt><dd>${expId(n)}</dd></div>
+            <div><dt>Fecha</dt><dd>${n.dateLabel || formatDate(n.date)}</dd></div>
+            <div><dt>Tipo</dt><dd>${n.category}</dd></div>
+            <div><dt>Estado</dt><dd class="ok">Desclasificado</dd></div>
+          </dl>
+          <h2 class="featured-title">${n.title}</h2>
+          <p class="featured-excerpt">${n.excerpt}</p>
+          <div class="featured-actions">
+            <button class="btn-primary" onclick="openArticle('${n.id}')">Abrir expediente →</button>
+            <button class="btn-secondary" onclick="openShare('${n.id}')">Compartir</button>
+          </div>
         </div>
       </div>
-      ${media}
     </div>
   `;
   bindTiktokLoop(slot);
@@ -1042,7 +1188,8 @@ function renderGrid(items) {
   const grid = document.getElementById('news-grid');
   wrap.style.display = 'block';
   grid.innerHTML = items.map(n => `
-    <div class="news-card" onclick="openArticle('${n.id}')">
+    <div class="news-card" data-cat="${n.category}" data-q="${(n.title + ' ' + (n.excerpt || '')).toLowerCase().replace(/"/g, '')}" onclick="openArticle('${n.id}')">
+      <span class="xp-tag">${expId(n)}</span>
       <img class="news-card-img" src="${webp(n.image)}" alt="${n.title}" loading="lazy" onerror="${webpFallback(n.image)}this.style.background='var(--gray)'">
       <div class="news-card-body">
         <div class="news-card-cat">${n.category}</div>
@@ -1058,6 +1205,7 @@ function init() {
   if (pinned) renderFeatured(pinned);
   const rest = NOTICIAS.filter(n => n !== pinned);
   renderGrid(rest);
+  refreshTools();
 }
 
 function renderAutoSection() {
@@ -1078,7 +1226,8 @@ function renderAutoSection() {
   const grid = document.getElementById('news-grid');
   wrap.style.display = 'block';
   grid.innerHTML = merged.map(n => `
-    <div class="news-card" onclick="openArticle('${n.id}')">
+    <div class="news-card" data-cat="${n.category}" data-q="${(n.title + ' ' + (n.excerpt || '')).toLowerCase().replace(/"/g, '')}" onclick="openArticle('${n.id}')">
+      <span class="xp-tag">${expId(n)}</span>
       ${n.image ? `<img class="news-card-img" src="${webp(n.image)}" alt="${n.title}" loading="lazy" onerror="${webpFallback(n.image)}this.style.background='var(--gray)';this.style.display='none'">` : '<div class="news-card-img" style="background:var(--black);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);text-transform:uppercase;letter-spacing:.1em;">Resultados</div>'}
       <div class="news-card-body">
         <div class="news-card-cat">${n.category}</div>
@@ -1087,6 +1236,7 @@ function renderAutoSection() {
       </div>
     </div>
   `).join('');
+  refreshTools();
 }
 
 // ── ARTICLE MODAL ─────────────────────────────────────────────────────────────
@@ -1100,16 +1250,17 @@ function openArticle(id) {
   amImg.onload = function() {
     if (this.naturalWidth > this.naturalHeight) amModal.classList.add('landscape');
   };
-  amImg.src = n.image;
+  amImg.src = webp(n.image); amImg.onerror = function () { if (!this.dataset.f) { this.dataset.f = 1; this.src = n.image; } };
   amImg.alt = n.title;
-  document.getElementById('am-eyebrow').innerHTML = `
-    <span class="pill-pinned" style="${n.pinned ? '' : 'display:none'}">${n.pinned ? '📌 Fijado' : ''}</span>
-    <span class="pill-cat">${n.category}</span>
-  `;
+  document.getElementById('am-file').textContent = expId(n) + ' · ' + fileName(n);
+  document.getElementById('am-eyebrow').innerHTML = `<dl class="xp-meta">
+      <div><dt>ID</dt><dd>${expId(n)}</dd></div><div><dt>Tipo</dt><dd>${n.category}</dd></div>
+      <div><dt>Estado</dt><dd class="ok">Desclasificado</dd></div>${n.pinned ? '<div><dt>Prioridad</dt><dd>Fijado</dd></div>' : ''}</dl>`;
   document.getElementById('am-title').textContent = n.title;
   document.getElementById('am-date').textContent = n.dateLabel || formatDate(n.date);
   const amContent = document.getElementById('am-content');
-  amContent.innerHTML = n.body.map(p => `<p>${p}</p>`).join('');
+  amContent.innerHTML = bodyHtml(n.body);
+  document.getElementById('article-overlay').scrollTop = 0;
   bindTiktokLoop(amContent);
   document.getElementById('am-actions').innerHTML = `
     <button class="btn-primary" onclick="closeArticle(); openShare('${n.id}')">Compartir</button>
@@ -1219,7 +1370,7 @@ const IG_CAPTION_LIMIT = 2200;
 
 function fullArticleText(n) {
   if (!n.body || !n.body.length) return '';
-  const bodyText = n.body.map(p => String(p).replace(/<[^>]+>/g, '').trim()).join('\n\n');
+  const bodyText = n.body.map(p => typeof p === 'string' ? p : (p.h || p.quote || '')).filter(Boolean).map(p => String(p).replace(/<[^>]+>/g, '').trim()).join('\n\n');
   return `${n.title}\n\n${bodyText}`;
 }
 

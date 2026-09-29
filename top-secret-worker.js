@@ -8,6 +8,10 @@
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
+  'presentacion-kits-t4': {
+    t: 'Negro, azul y fuego: así son las camisetas de la Temporada 4',
+    i: MEDIA + 'logos/noticias/kits-t4-portada.png',
+  },
   'lanzamiento-twitch-2026': {
     t: '¡Ya estamos en Twitch! Top Secret FC transmite todos sus partidos en vivo',
     i: MEDIA + 'logos/' + encodeURIComponent('Lanzamiento Twitch.png'),
