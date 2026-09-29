@@ -25,3 +25,4 @@ scripts/.last-neterr
 # Renders/Daily News/ se sumó el mismo día: la pipeline diaria ahora sube ahí mismo, sin commitear a git.
 logos/*
 Renders/*
+scripts/.og-out/
