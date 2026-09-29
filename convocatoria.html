@@ -158,18 +158,19 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 
 /* ── PITCH (verde claro) ── */
 .pitch{background:repeating-linear-gradient(180deg,#9fd49a 0,#9fd49a 9%,#aedcaa 9%,#aedcaa 18%) !important;border:0 !important;border-radius:16px !important;}
-.pitch-svg line,.pitch-svg rect,.pitch-svg circle,.pitch-svg path{stroke:rgba(255,255,255,.85) !important;}
-.pitch-svg circle:not([fill="none"]){fill:rgba(255,255,255,.9) !important;}
+.pitch .pitch-svg line,.pitch .pitch-svg rect,.pitch .pitch-svg circle,.pitch .pitch-svg path{stroke:rgba(255,255,255,.85) !important;}
+.pitch .pitch-svg circle:not([fill="none"]){fill:rgba(255,255,255,.9) !important;}
 .pitch .stoken-bar{background:rgba(11,10,7,.82);}
-.pitch .stoken.filled{border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#1d1910,#0b0a07);box-shadow:0 6px 16px rgba(0,40,0,.35);}
+.pitch .stoken.filled{border-radius:12px;overflow:hidden;background:radial-gradient(ellipse 85% 75% at 58% 30%,#b89a5c 0%,#7a6438 45%,#3a2f1a 100%);box-shadow:0 6px 16px rgba(0,40,0,.35);}
 .pitch .stoken.empty{background:rgba(255,255,255,.35) !important;border:2px dashed rgba(255,255,255,.9) !important;color:#2f6b2b !important;border-radius:12px;font-weight:800;}
 /* Nombre vertical descendente a la izquierda, número centrado a la derecha */
 .tok-name{position:absolute;left:0;top:0;bottom:0;width:var(--tok-name-w);z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(11,10,7,.82);}
 .tok-name span{writing-mode:vertical-rl;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:var(--name-size);letter-spacing:.04em;text-transform:uppercase;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:94%;line-height:1;}
-.tok-num{position:absolute;right:5px;top:50%;transform:translateY(-50%);z-index:3;font-family:'Bebas Neue',sans-serif;font-size:var(--num-size);line-height:1;color:var(--gold);text-shadow:0 2px 6px rgba(0,0,0,.85);}
+.tok-num{position:absolute;left:var(--tok-name-w);right:0;bottom:3px;text-align:center;z-index:3;font-family:'Bebas Neue',sans-serif;font-size:var(--num-size);line-height:1;color:var(--gold);text-shadow:0 2px 6px rgba(0,0,0,.85);}
 .tok-cap{position:absolute;top:4px;right:4px;z-index:4;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.78rem;box-shadow:0 0 8px rgba(201,168,76,.7);}
 .tok-photo{position:absolute;top:0;bottom:0;left:var(--tok-name-w);right:0;width:auto !important;height:100% !important;object-fit:cover;object-position:50% 0;transform:scale(var(--chest-scale)) !important;transform-origin:50% 4% !important;}
 
+.pitch-logo{position:absolute;top:3.5%;right:3.5%;width:8.5%;height:auto;opacity:.72;z-index:1;pointer-events:none;}
 /* ── PITCH (base) ── */
 .pitch{position:relative;width:100%;aspect-ratio:3/4;background:repeating-linear-gradient(180deg,#eef1ee 0,#eef1ee 28px,#f5f7f5 28px,#f5f7f5 56px);border-radius:10px;border:1px solid #d0d8d0;overflow:hidden;}
 .pitch-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
@@ -368,6 +369,7 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
       </div>
       <div class="fbar" id="fbar"></div>
       <div class="pitch" id="pitch">
+        <img class="pitch-logo" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-negro.webp" alt="" aria-hidden="true">
         <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" class="pitch-svg">
           <rect x="10" y="10" width="280" height="380" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
           <line x1="10" y1="200" x2="290" y2="200" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
@@ -872,14 +874,6 @@ const E11_T3_SCHEDULE = [
   {date:'2026-08-27',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
   {date:'2026-08-27',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:false},
 ];
-let _shareLogo = null;
-const _shareLogoReady = new Promise(res => {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => { _shareLogo = img; res(); };
-  img.onerror = () => res();
-  img.src = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/Top%20Secret%20white.png';
-});
 if (CAL_DOC_CONV) {
   CAL_DOC_CONV.onSnapshot(snap => {
     if (snap.exists) calCustom = snap.data().custom || [];
@@ -2067,224 +2061,165 @@ function buildWhatsAppMessage() {
   return msg;
 }
 
-async function drawShareFooter(c2d, FW, FH, FOOTER, S) {
-  c2d.fillStyle = '#111111'; c2d.fillRect(0, FH, FW, FOOTER);
-  c2d.fillStyle = '#B0B8C4'; c2d.fillRect(0, FH, FW, 3*S);
-  const badgeR = FOOTER * 0.34, badgeCX = FW*0.065, badgeCY = FH + FOOTER*0.5;
-  await _shareLogoReady;
-  if (_shareLogo) {
-    const logoSize = badgeR * 2;
-    c2d.drawImage(_shareLogo, badgeCX - badgeR, badgeCY - badgeR, logoSize, logoSize);
-  } else {
-    c2d.fillStyle = '#B0B8C4';
-    c2d.beginPath(); c2d.arc(badgeCX, badgeCY, badgeR, 0, Math.PI*2); c2d.fill();
-    c2d.fillStyle = '#111';
-    c2d.font = `900 ${Math.round(badgeR*1.1)}px "Barlow Condensed",sans-serif`;
-    c2d.textAlign = 'center'; c2d.textBaseline = 'middle';
-    c2d.fillText('TS', badgeCX, badgeCY);
-  }
-  /* Club name */
-  const nX = badgeCX + badgeR + 8*S, nMid = FH + FOOTER*0.45;
-  c2d.textBaseline = 'middle'; c2d.textAlign = 'left';
-  c2d.font = `bold ${Math.round(FOOTER*0.3)}px "Barlow Condensed",sans-serif`;
-  c2d.fillStyle = '#fff'; c2d.fillText('TOP ', nX, nMid);
-  const w1 = c2d.measureText('TOP ').width;
-  c2d.fillStyle = '#B0B8C4'; c2d.fillText('SECRET', nX+w1, nMid);
-  const w2 = c2d.measureText('SECRET').width;
-  c2d.fillStyle = '#fff'; c2d.fillText(' FC', nX+w1+w2, nMid);
-  /* Date + session + formation */
-  const DAYS2   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const MONTHS2 = ['Enero','Feb','Marzo','Abril','Mayo','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const nd = new Date();
-  const todayMs = getTodayMatches();
-  let session;
-  if (todayMs.length === 1) {
-    const m = todayMs[0];
-    session = `${m.league ? m.league + ' · ' : ''}vs ${m.rival}${m.time ? ' ' + m.time : ''}`;
-  } else if (todayMs.length > 1) {
-    session = todayMs.map(m => `${m.league||''} vs ${m.rival}`).join(' · ');
-  } else {
-    session = 'Entrenamiento';
-  }
-  c2d.font = `${Math.round(FOOTER*0.2)}px "Barlow Condensed",sans-serif`;
-  c2d.fillStyle = 'rgba(255,255,255,.45)';
-  c2d.fillText(`${DAYS2[nd.getDay()]} ${nd.getDate()} de ${MONTHS2[nd.getMonth()]} · ${session} · ${lineup.formation}`, nX, FH+FOOTER*0.75);
-  c2d.textBaseline = 'alphabetic';
+/* ─── Build share canvas ───
+   Réplica exacta de la cancha en pantalla: mismos colores, líneas, tamaños de
+   ficha (leídos del DOM), foto de pecho, nombre vertical, número a la derecha
+   y logo arriba a la derecha. Sin pie. */
+const PITCH_LOGO = mediaUrl('logos/rebrand/clean-negro.webp');
+function loadImg(src) {
+  return new Promise(res => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
 
-/* ─── Build share canvas ─── */
-async function buildShareCanvas(FW, FH, FOOTER, S, withPhotos) {
-  const slots  = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
-  const tokW   = Math.round(FW * 0.252);
-  const tokH   = Math.round(tokW * (108/102));
-  const barH   = Math.round(tokH * (17/108));
-  const photoH = tokH - barH;
-  const numSz  = Math.round(tokH * 0.22);
-  const nameSz = Math.round(barH * 0.72);
-  const vsx    = FW/300, vsy = FH/400;
+async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
+  const pitchEl = document.getElementById('pitch');
+  const css = getComputedStyle(pitchEl);
+  const px = v => parseFloat(css.getPropertyValue(v)) || 0;
+  const tokW = Math.round(px('--tok-w') * S), tokH = Math.round(px('--tok-h') * S);
+  const nameW = Math.round(px('--tok-name-w') * S);
+  const nameSz = Math.round(px('--name-size') * S), numSz = Math.round(px('--num-size') * S);
+  const chest = parseFloat(css.getPropertyValue('--chest-scale')) || 2.9;
+  const gold = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#C9A84C';
+  const slots = FORMATIONS[lineup.formation] || FORMATIONS['4-3-3'];
+  const vsx = FW / 300, vsy = FH / 400;
+
+  try { await Promise.all([document.fonts.load(`${numSz}px "Bebas Neue"`), document.fonts.load(`800 ${nameSz}px "Barlow Condensed"`)]); } catch (e) {}
 
   const cvs = document.createElement('canvas');
-  cvs.width = FW; cvs.height = FH + FOOTER;
+  cvs.width = FW; cvs.height = FH;
   const ctx = cvs.getContext('2d');
 
-  /* pitch stripes */
-  const stripeH = 28 * S;
-  for (let y = 0; y < FH; y += stripeH * 2) {
-    ctx.fillStyle = '#eef1ee'; ctx.fillRect(0, y, FW, stripeH);
-    ctx.fillStyle = '#f5f7f5'; ctx.fillRect(0, y + stripeH, FW, stripeH);
+  /* césped: franjas de 9% del alto, igual que el CSS */
+  const band = FH * 0.09;
+  for (let i = 0, y = 0; y < FH; i++, y += band) {
+    ctx.fillStyle = i % 2 ? '#aedcaa' : '#9fd49a';
+    ctx.fillRect(0, y, FW, Math.ceil(band) + 1);
   }
-  /* pitch lines */
-  ctx.strokeStyle = 'rgba(60,90,60,.3)'; ctx.lineWidth = 1.5*S;
-  ctx.strokeRect(10*vsx,10*vsy,280*vsx,380*vsy);
-  ctx.beginPath(); ctx.moveTo(10*vsx,200*vsy); ctx.lineTo(290*vsx,200*vsy); ctx.stroke();
-  ctx.beginPath(); ctx.arc(150*vsx,200*vsy,34*vsx,0,Math.PI*2); ctx.stroke();
-  ctx.strokeRect(72*vsx,10*vsy,156*vsx,56*vsy);
-  ctx.strokeRect(72*vsx,334*vsy,156*vsx,56*vsy);
+  /* líneas (mismo SVG de la cancha, viewBox 300×400) */
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.5 * vsx;
+  const R = (x, y, w, h) => ctx.strokeRect(x * vsx, y * vsy, w * vsx, h * vsy);
+  R(10, 10, 280, 380);
+  ctx.beginPath(); ctx.moveTo(10 * vsx, 200 * vsy); ctx.lineTo(290 * vsx, 200 * vsy); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(150 * vsx, 200 * vsy, 34 * vsx, 34 * vsy, 0, 0, Math.PI * 2); ctx.stroke();
+  R(72, 10, 156, 56); R(112, 10, 76, 22); R(72, 334, 156, 56); R(112, 368, 76, 22); R(127, 3, 46, 9); R(127, 388, 46, 9);
+  ctx.beginPath(); ctx.ellipse(150 * vsx, 66 * vsy, 40 * vsx, 40 * vsy, 0, 0, Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(150 * vsx, 334 * vsy, 40 * vsx, 40 * vsy, 0, Math.PI, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.9)';
+  [[150, 200], [150, 47], [150, 353]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x * vsx, y * vsy, 2.5 * vsx, 0, Math.PI * 2); ctx.fill(); });
 
-  /* helper: draw name bar + number overlay + captain badge */
-  function drawBar(tx, ty, player) {
-    /* barra: solo nombre */
-    ctx.fillStyle = '#111111';
-    ctx.fillRect(tx, ty + photoH, tokW, barH);
-    ctx.font = `700 ${nameSz}px "Barlow Condensed",sans-serif`;
+  /* logo del club arriba a la derecha */
+  const logo = await loadImg(PITCH_LOGO);
+  if (logo) {
+    const lw = Math.round(FW * 0.085), lh = lw * logo.naturalHeight / logo.naturalWidth;
+    ctx.globalAlpha = 0.72;
+    ctx.drawImage(logo, FW - lw - FW * 0.035, FW * 0.035, lw, lh);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawVerticalName(tx, ty, name) {
+    ctx.fillStyle = 'rgba(11,10,7,.82)';
+    ctx.fillRect(tx, ty, nameW, tokH);
+    ctx.save();
+    ctx.translate(tx + nameW / 2, ty + tokH / 2);
+    ctx.rotate(Math.PI / 2);
+    ctx.font = `800 ${nameSz}px "Barlow Condensed",sans-serif`;
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.save();
-    ctx.beginPath(); ctx.rect(tx, ty + photoH, tokW, barH); ctx.clip();
-    ctx.fillText(player.name.toUpperCase(), tx + tokW/2, ty + photoH + barH * 0.5);
+    let t = String(name).toUpperCase();
+    const max = tokH * 0.94;
+    if (ctx.measureText(t).width > max) { while (t.length > 1 && ctx.measureText(t + '…').width > max) t = t.slice(0, -1); t += '…'; }
+    ctx.fillText(t, 0, 0);
     ctx.restore();
-    /* número: overlay bottom-left sobre la foto */
-    ctx.font = `900 ${numSz}px "Barlow Condensed",sans-serif`;
-    ctx.fillStyle = '#B0B8C4'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 3*S;
-    ctx.fillText(String(player.num), tx + 3*S, ty + photoH - 3*S);
-    ctx.shadowBlur = 0;
-    /* badge C: bottom-right sobre la foto */
+  }
+  function drawNumAndCap(tx, ty, player) {
+    if (player.num !== '' && player.num != null) {
+      ctx.font = `${numSz}px "Bebas Neue",sans-serif`;
+      ctx.fillStyle = gold; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 6 * S; ctx.shadowOffsetY = 2 * S;
+      ctx.fillText(String(player.num), tx + nameW + (tokW - nameW) / 2, ty + tokH - 3 * S);
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    }
     if (captain === player.name) {
-      const capR = Math.round(tokH * 0.11);
-      const capX = tx + tokW - capR - 3*S;
-      const capY = ty + photoH - capR - 3*S;
-      ctx.fillStyle = '#B0B8C4';
-      ctx.beginPath(); ctx.arc(capX, capY, capR, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.5*S; ctx.stroke();
-      ctx.font = `900 ${Math.round(capR*1.1)}px "Barlow Condensed",sans-serif`;
+      const r = 10 * S, cx = tx + tokW - 4 * S - r, cy = ty + 4 * S + r;
+      ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.font = `900 ${Math.round(r * 1.2)}px "Barlow Condensed",sans-serif`;
       ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('C', capX, capY);
+      ctx.fillText('C', cx, cy);
     }
     ctx.textBaseline = 'alphabetic';
   }
-
-  /* helper: draw placeholder photo area (dark + big number) */
-  function drawPlaceholder(tx, ty, player) {
-    ctx.fillStyle = '#1a1d26'; ctx.fillRect(tx, ty, tokW, photoH);
-    ctx.font = `900 ${Math.round(photoH * 0.6)}px "Barlow Condensed",sans-serif`;
-    ctx.fillStyle = 'rgba(201,168,76,.5)';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(String(player.num), tx + tokW/2, ty + photoH/2);
-    ctx.textBaseline = 'alphabetic';
-  }
-
-  /* helper: silueta para slots vacíos — cargada una sola vez */
-  const _silImg = await new Promise(res => {
-    const i = new Image(); i.crossOrigin = 'anonymous';
-    i.onload = () => res(i); i.onerror = () => res(null);
-    i.src = mediaUrl('Renders/silueta-prueba.png');
-  });
-
-  function drawSilhouette(tx, ty) {
+  /* foto: object-fit:cover + object-position 50% 0 + scale(chest) desde 50% 4%, como el CSS */
+  function drawPhoto(img, tx, ty, alpha) {
+    const bx = tx + nameW, bw = tokW - nameW, bh = tokH;
+    const cs = Math.max(bw / img.naturalWidth, bh / img.naturalHeight);
+    const dw = img.naturalWidth * cs, dh = img.naturalHeight * cs;
+    const offX = (bw - dw) / 2, ox = bw * 0.5, oy = bh * 0.04;
     ctx.save();
-    ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
-    if (_silImg) {
-      ctx.globalAlpha = 0.55;
-      const PHOTO_SCALE = 2.0;
-      const imgW = _silImg.naturalWidth, imgH = _silImg.naturalHeight;
-      const coverScale = Math.max(tokW / imgW, photoH / imgH);
-      let srcW = tokW / coverScale, srcH = photoH / coverScale;
-      let srcX = (imgW - srcW) / 2;
-      srcW = srcW / PHOTO_SCALE; srcH = srcH / PHOTO_SCALE;
-      srcX += (tokW / coverScale - srcW) / 2;
-      ctx.drawImage(_silImg, srcX, 0, srcW, srcH, tx, ty, tokW, photoH);
-      ctx.globalAlpha = 1;
-    } else {
-      ctx.fillStyle = 'rgba(0,0,0,0.42)';
-      const cx = tx + tokW / 2, headR = tokW * 0.152, headCY = ty + photoH * 0.21;
-      ctx.beginPath(); ctx.arc(cx, headCY, headR, 0, Math.PI * 2); ctx.fill();
-      const neckHW = headR * 0.38, neckBotY = headCY + headR * 0.78;
-      const shoulderHW = tokW * 0.38, shoulderY = neckBotY + headR * 0.52;
-      const waistY = ty + photoH * 0.7, hipHW = tokW * 0.33, botY = ty + photoH + 2;
-      ctx.beginPath(); ctx.moveTo(cx - neckHW, neckBotY);
-      ctx.bezierCurveTo(cx - neckHW, shoulderY - headR * 0.35, cx - shoulderHW, shoulderY, cx - shoulderHW, shoulderY + headR * 0.45);
-      ctx.bezierCurveTo(cx - shoulderHW, waistY - headR * 0.3, cx - hipHW * 0.82, waistY, cx - hipHW, botY);
-      ctx.lineTo(cx + hipHW, botY);
-      ctx.bezierCurveTo(cx + hipHW * 0.82, waistY, cx + shoulderHW, waistY - headR * 0.3, cx + shoulderHW, shoulderY + headR * 0.45);
-      ctx.bezierCurveTo(cx + shoulderHW, shoulderY, cx + neckHW, shoulderY - headR * 0.35, cx + neckHW, neckBotY);
-      ctx.closePath(); ctx.fill();
-    }
+    ctx.beginPath(); ctx.rect(bx, ty, bw, bh); ctx.clip();
+    ctx.globalAlpha = alpha || 1;
+    ctx.drawImage(img, bx + ox + (offX - ox) * chest, ty + oy + (0 - oy) * chest, dw * chest, dh * chest);
     ctx.restore();
   }
-
-  /* tokens */
-  if (withPhotos) {
-    await Promise.all(slots.map(s => new Promise(resolve => {
-      const cx = s.x/100*FW, cy = s.y/100*FH;
-      const tx = Math.round(cx - tokW/2), ty = Math.round(cy - tokH/2);
-      const assigned = lineup.slots[s.key];
-      const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
-      if (!player) {
-        drawSilhouette(tx, ty);
-        drawBar(tx, ty, { name: 'PRUEBA', num: '' });
-        return resolve();
-      }
-      if (player.isGuest) {
-        drawSilhouette(tx, ty);
-        drawBar(tx, ty, { name: getGuestSlotName(s.key), num: '' });
-        return resolve();
-      }
-      function drawPhoto(img, src) {
-        ctx.save();
-        ctx.beginPath(); ctx.rect(tx, ty, tokW, photoH); ctx.clip();
-        if (img) {
-          const isV3 = src && /Frente3|Brazos3/.test(src);
-          const PHOTO_SCALE = isV3 ? 2.0 : 3.6;
-          const imgW = img.naturalWidth, imgH = img.naturalHeight;
-          // 1. cover scale: escalar para cubrir tokW × photoH
-          const coverScale = Math.max(tokW / imgW, photoH / imgH);
-          // 2. crop cover en coordenadas fuente
-          let srcW = tokW / coverScale, srcH = photoH / coverScale;
-          let srcX = (imgW - srcW) / 2; // centrado horizontal
-          let srcY = 0;                 // alineado arriba
-          // 3. aplicar zoom photo-scale: tomar el centro superior 1/PHOTO_SCALE
-          srcW = srcW / PHOTO_SCALE;
-          srcH = srcH / PHOTO_SCALE;
-          srcX += (tokW / coverScale - srcW) / 2; // re-centrar x tras zoom
-          // srcY queda en 0 (top)
-          ctx.drawImage(img, srcX, srcY, srcW, srcH, tx, ty, tokW, photoH);
-        } else {
-          drawPlaceholder(tx, ty, player);
-        }
-        ctx.restore();
-        drawBar(tx, ty, player);
-        resolve();
-      }
-      tryImages([frente4Path(player), frente3Path(player), frente2Path(player), frontePath(player), brazos4Path(player), brazos3Path(player), brazos2Path(player), brazosPath(player)], 0,
-        (src) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => drawPhoto(im, src); im.src = src; },
-        () => { drawSilhouette(tx, ty); drawBar(tx, ty, player); resolve(); }
-      );
-    })));
-  } else {
-    slots.forEach(s => {
-      const cx = s.x/100*FW, cy = s.y/100*FH;
-      const tx = Math.round(cx - tokW/2), ty = Math.round(cy - tokH/2);
-      const assigned = lineup.slots[s.key];
-      const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
-      if (player) {
-        if (player.isGuest)    { drawSilhouette(tx, ty); drawBar(tx, ty, { name: getGuestSlotName(s.key), num: '' }); }
-        else if (player.isRecluta) { drawSilhouette(tx, ty); drawBar(tx, ty, { name: player.name, num: '' }); }
-        else { drawPlaceholder(tx, ty, player); drawBar(tx, ty, player); }
-      } else { drawSilhouette(tx, ty); drawBar(tx, ty, { name: 'PRUEBA', num: '' }); }
-    });
+  function tokenBase(tx, ty) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,40,0,.35)'; ctx.shadowBlur = 16 * S; ctx.shadowOffsetY = 6 * S;
+    roundRect(ctx, tx, ty, tokW, tokH, 12 * S);
+    ctx.fillStyle = '#3a2f1a'; ctx.fill();
+    ctx.restore();
+    ctx.save();
+    roundRect(ctx, tx, ty, tokW, tokH, 12 * S); ctx.clip();
+    const gx = tx + tokW * 0.58, gy = ty + tokH * 0.3;
+    ctx.translate(gx, gy); ctx.scale(tokW * 0.85, tokH * 0.75);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, '#b89a5c'); g.addColorStop(0.45, '#7a6438'); g.addColorStop(1, '#3a2f1a');
+    ctx.fillStyle = g; ctx.fillRect(-2, -2, 4, 4);
+    ctx.restore();
+  }
+  function drawEmpty(cx, cy, label) {
+    const w = tokW * 0.5, h = tokH * 0.5, x = cx - w / 2, y = cy - h / 2;
+    roundRect(ctx, x, y, w, h, 12 * S);
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fill();
+    ctx.setLineDash([5 * S, 4 * S]); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2 * S; ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = `800 ${Math.round(nameSz * 0.95)}px "Barlow Condensed",sans-serif`;
+    ctx.fillStyle = '#2f6b2b'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, cx, cy); ctx.textBaseline = 'alphabetic';
   }
 
-  await drawShareFooter(ctx, FW, FH, FOOTER, S);
+  const sil = await loadImg(mediaUrl('Renders/silueta-prueba.png'));
+  const jobs = slots.map(async s => {
+    const cx = s.x / 100 * FW, cy = s.y / 100 * FH;
+    const tx = Math.round(cx - tokW / 2), ty = Math.round(cy - tokH / 2);
+    const assigned = lineup.slots[s.key];
+    const player = assigned ? PLAYERS.find(p => p.name === assigned) : null;
+    if (!player) return () => drawEmpty(cx, cy, s.l);
+    if (player.isGuest) return () => {
+      tokenBase(tx, ty);
+      ctx.save(); roundRect(ctx, tx, ty, tokW, tokH, 12 * S); ctx.clip();
+      if (sil) drawPhoto(sil, tx - nameW / 2, ty, 0.55);
+      const barH = Math.round(tokH * 0.16);
+      ctx.fillStyle = 'rgba(11,10,7,.82)'; ctx.fillRect(tx, ty + tokH - barH, tokW, barH);
+      ctx.font = `800 ${nameSz}px "Barlow Condensed",sans-serif`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(getGuestSlotName(s.key).toUpperCase(), tx + tokW / 2, ty + tokH - barH / 2);
+      ctx.restore();
+    };
+    let img = null;
+    if (withPhotos) {
+      for (const src of [frente4Web(player), frente4Path(player), frente3Path(player), brazos4Path(player)]) { img = await loadImg(src); if (img) break; }
+    }
+    return () => {
+      tokenBase(tx, ty);
+      ctx.save(); roundRect(ctx, tx, ty, tokW, tokH, 12 * S); ctx.clip();
+      if (img) drawPhoto(img, tx, ty);
+      else if (sil) drawPhoto(sil, tx, ty, 0.55);
+      drawVerticalName(tx, ty, player.name);
+      drawNumAndCap(tx, ty, player);
+      ctx.restore();
+    };
+  });
+  // Se dibujan en el orden del DOM (así las fichas que se superponen quedan igual que en pantalla)
+  (await Promise.all(jobs)).forEach(draw => draw());
   return cvs;
 }
 
@@ -2308,7 +2243,7 @@ async function doShare() {
     const S = 2;
     const FW = pitchEl.offsetWidth * S, FH = pitchEl.offsetHeight * S;
     if (!FW || !FH) { showToast('Error: cancha no visible', 'info'); btn.textContent=orig; btn.disabled=false; return; }
-    const FOOTER = Math.round(FH * 0.13);
+    const FOOTER = 0;
 
     /* ── Try with photos first ── */
     let blob = null;
