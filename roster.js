@@ -42,7 +42,7 @@ const ROSTER_T4 = [
   {key:'pepolemmo2710',    pos:'LAT', posn:'Lateral',         num:'15', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
   {key:'Juan_Martinez4',   pos:'MED', posn:'Mediocampista',   num:'6',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'ps'},
   {key:'RS32-DaniStone',   pos:'MED', posn:'Mediocampista',   num:'13', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
-  {key:'CipriMancini',     pos:'MED', posn:'Mediocampista',   num:'32', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
+  {key:'CipriMancini',     pos:'MED', posn:'Mediocampista',   num:'14', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
   {key:'Lil_Dekuroko',     pos:'MED', posn:'Mediocampista',   num:'22', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'co', plataforma:'ps'},
   {key:'Lautavester7',     pos:'DEL', posn:'Extremo',         num:'7',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
   {key:'Juanchyroman08',   pos:'DEL', posn:'Extremo',         num:'18', nvl:'—', arq:'—', build:'—', stats:[], total:0},

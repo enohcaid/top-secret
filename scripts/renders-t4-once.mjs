@@ -43,7 +43,7 @@ const PLAYERS = [
   { key: 'RS32-DaniStone',   num: 13, idRefs: t4('RS32-DaniStone') },
   { key: 'Lautavester7',     num: 7,  idRefs: t4('Lautavester7'), renewed: true,
     lookNote: 'Misma persona que en su Frente3 (piel oscura, barba tupida, pelo corto oscuro). Lo nuevo según la carta: anteojos deportivos envolventes ROJOS (ya no verdes).' },
-  { key: 'CipriMancini',     num: 32, idRefs: t4('CipriMancini'), renewed: true,
+  { key: 'CipriMancini',     num: 14, idRefs: t4('CipriMancini'), renewed: true,
     lookNote: 'Misma cara que en su Frente3, pero con el look nuevo de la carta: pelo castaño con rulos por encima de los hombros (ya NO el afro azul), anteojos deportivos ROJOS, manga térmica azul con estampado rojo en el brazo derecho y manga/guante azul en el izquierdo.' },
   { key: 'Elianja20',        num: 24, idRefs: t4('Elianja20', true) },
   { key: 'endiabladorojo66', num: 66, idRefs: t4('endiabladorojo66', true) },
