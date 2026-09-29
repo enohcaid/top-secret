@@ -174,6 +174,8 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .tok-name span{writing-mode:vertical-rl;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:var(--name-size);letter-spacing:.04em;text-transform:uppercase;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:94%;line-height:1;}
 .tok-num{position:absolute;left:var(--tok-name-w);right:0;bottom:3px;text-align:center;z-index:3;font-family:'Bebas Neue',sans-serif;font-size:var(--num-size);line-height:1;color:var(--gold);text-shadow:0 2px 6px rgba(0,0,0,.85);}
 .tok-cap{position:absolute;top:4px;right:4px;z-index:4;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.78rem;box-shadow:0 0 8px rgba(201,168,76,.7);}
+.tok-name span[contenteditable]{outline:none;cursor:text;}
+.tok-name span[contenteditable]:focus{color:var(--gold);}
 .tok-photo{position:absolute;top:0;bottom:0;left:var(--tok-name-w);right:0;width:auto !important;height:100% !important;object-fit:cover;object-position:50% 0;transform:scale(var(--chest-scale)) !important;transform-origin:50% 4% !important;}
 
 .pitch-logo{position:absolute;top:3.5%;right:3.5%;width:8.5%;height:auto;opacity:.72;z-index:1;pointer-events:none;}
@@ -1462,18 +1464,20 @@ function renderPitch() {
       lbl.textContent = player.isGuest ? getGuestSlotName(s.key) : player.name;
 
       if (player.isGuest) {
+        // Igual que las demás fichas: silueta de pecho, nombre vertical (editable en modo editor)
         tok.innerHTML = '';
         const _sil = document.createElement('img');
-        _sil.src = mediaUrl('Renders/silueta-prueba.png');
-        _sil.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transform:scale(2.7) translateY(0%);transform-origin:top center;opacity:.55;';
+        _sil.src = mediaUrl('Renders/silueta-prueba.png'); _sil.className = 'tok-photo'; _sil.draggable = false;
         tok.appendChild(_sil);
-        const _bar = document.createElement('div'); _bar.className = 'stoken-bar';
-        const _ginp = document.createElement('input');
-        _ginp.type = 'text'; _ginp.className = 'stoken-name-input';
-        _ginp.value = getGuestSlotName(s.key); _ginp.placeholder = 'Prueba';
-        _ginp.addEventListener('click', e => e.stopPropagation());
-        _ginp.addEventListener('input', () => { setGuestSlotName(s.key, _ginp.value); lbl.textContent = _ginp.value || 'Prueba'; });
-        _bar.appendChild(_ginp); tok.appendChild(_bar);
+        const _nm = document.createElement('div'); _nm.className = 'tok-name';
+        const _ns = document.createElement('span'); _ns.textContent = getGuestSlotName(s.key);
+        if (EDIT_MODE) {
+          _ns.contentEditable = 'true'; _ns.spellcheck = false; _ns.title = 'Tocá para cambiar el nombre';
+          _ns.addEventListener('click', e => e.stopPropagation());
+          _ns.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); _ns.blur(); } });
+          _ns.addEventListener('input', () => { setGuestSlotName(s.key, _ns.textContent); lbl.textContent = _ns.textContent || 'Prueba'; });
+        }
+        _nm.appendChild(_ns); tok.appendChild(_nm);
       }
 
       // Foto de pecho hacia arriba, nombre vertical a la izquierda, número a la derecha
@@ -2201,11 +2205,8 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
     if (player.isGuest) return () => {
       tokenBase(tx, ty);
       ctx.save(); roundRect(ctx, tx, ty, tokW, tokH, 12 * S); ctx.clip();
-      if (sil) drawPhoto(sil, tx - nameW / 2, ty, 0.55);
-      const barH = Math.round(tokH * 0.16);
-      ctx.fillStyle = 'rgba(11,10,7,.82)'; ctx.fillRect(tx, ty + tokH - barH, tokW, barH);
-      ctx.font = `800 ${nameSz}px "Barlow Condensed",sans-serif`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(getGuestSlotName(s.key).toUpperCase(), tx + tokW / 2, ty + tokH - barH / 2);
+      if (sil) drawPhoto(sil, tx, ty);
+      drawVerticalName(tx, ty, getGuestSlotName(s.key));
       ctx.restore();
     };
     let img = null;
