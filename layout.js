@@ -462,7 +462,7 @@
     while (h.firstChild) copy.appendChild(h.firstChild);
     const visual = document.createElement('div');
     visual.className = 'ts-hero-visual';
-    visual.innerHTML = `<img src="${MEDIA_BASE}/logos/duos/${art.img}.webp" alt="" style="object-position:${art.pos}" onerror="this.onerror=null;this.src='${MEDIA_BASE}/logos/hero-t4.webp'">`;
+    visual.innerHTML = `<img src="${MEDIA_BASE}/logos/duos/${art.img}.webp?v=2026-09-29b" alt="" style="object-position:${art.pos}" onerror="this.onerror=null;this.src='${MEDIA_BASE}/logos/hero-t4.webp'">`;
     h.append(copy, visual);
   }
 
