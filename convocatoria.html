@@ -38,6 +38,20 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:2.6rem;font-weight:900;letter-spacing:-.01em;line-height:1;color:var(--text);text-transform:uppercase;}
 .page-sub{font-size:13px;color:var(--mid);margin-top:6px;}
 
+/* ── DISTRIBUCIÓN: cancha a la izquierda, jugadores a la derecha ── */
+.conv-layout{display:grid !important;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);grid-template-rows:auto 1fr;grid-template-areas:"top players" "pitch players";gap:0 clamp(24px,3vw,48px);align-items:start;}
+.conv-layout > .col-players{grid-row:1 / span 2;}
+.conv-layout > .conv-top{grid-area:top;align-self:start;margin:0 0 22px;}
+.conv-layout > .conv-tabs{grid-area:tabs;}
+.conv-layout > .col-pitch{grid-area:pitch;align-self:stretch;position:static;}
+.conv-layout > .col-pitch > .pitch-wrap-sticky{position:sticky;top:76px;}
+.conv-layout > .col-players{grid-area:players;}
+.conv-layout .conv-top .today-matches-panel{min-width:0;flex:1 1 100%;}
+@media(max-width:900px){
+  .conv-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "tabs" "pitch" "players";}
+  .conv-layout > .col-pitch > .pitch-wrap-sticky{position:static;}
+}
+
 /* ── ENCABEZADO EN UNA FILA ── */
 .conv-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px 40px;flex-wrap:wrap;margin:8px 0 30px;}
 .conv-top .page-header{margin:0;}
@@ -54,7 +68,6 @@ html body .conv-top .page-eyebrow{border:0;box-shadow:none;background:none;paddi
 
 /* Cancha: entra entera en la pantalla y queda fija mientras se recorre la lista */
 @media(min-width:901px){
-  .col-pitch{top:76px;}
   .col-pitch .pitch,.col-pitch .pitch-bar{width:min(100%,calc((100vh - 170px) * .75));margin-left:auto;margin-right:auto;}
 }
 
@@ -375,40 +388,41 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
 <!-- MAIN CONTENT -->
 <main class="main">
 
-  <div class="conv-top">
-  <div class="page-header">
-    <div class="page-eyebrow">Top Secret FC · 2026</div>
-    <h1 class="page-title">Convocatoria</h1>
-    <div class="conv-stats">
-      <span class="cs g"><b id="sG">0</b> presentes</span>
-      <span class="cs y"><b id="sY">0</b> tarde</span>
-      <span class="cs r"><b id="sR">0</b> ausentes</span>
-      <span class="cs p"><b id="sP">0</b> sin confirmar</span>
-    </div>
-    <p class="page-sub" id="dateTag">Cargando...</p>
-  </div>
-
-  <!-- HOY: partidos o entrenamiento -->
-  <div id="todayMatchesPanel" class="today-matches-panel">
-    <div class="tmp-head"><span class="tmp-title" id="tmpTitle">Hoy</span></div>
-    <div class="tmp-list"></div>
-  </div>
-  </div>
-
-  <!-- PESTAÑAS (solo celular) -->
-  <div class="conv-tabs" role="tablist">
-    <button type="button" class="conv-tab on" data-tab="lista" onclick="setConvTab('lista')">Disponibilidad</button>
-    <button type="button" class="conv-tab" data-tab="armado" onclick="setConvTab('armado')">Armado</button>
-  </div>
-
   <!-- TWO-COL LAYOUT -->
   <div class="conv-layout">
+    <div class="conv-top">
+    <div class="page-header">
+      <div class="page-eyebrow">Top Secret FC · 2026</div>
+      <h1 class="page-title">Convocatoria</h1>
+      <div class="conv-stats">
+        <span class="cs g"><b id="sG">0</b> presentes</span>
+        <span class="cs y"><b id="sY">0</b> tarde</span>
+        <span class="cs r"><b id="sR">0</b> ausentes</span>
+        <span class="cs p"><b id="sP">0</b> sin confirmar</span>
+      </div>
+      <p class="page-sub" id="dateTag">Cargando...</p>
+    </div>
+
+    <!-- HOY: partidos o entrenamiento -->
+    <div id="todayMatchesPanel" class="today-matches-panel">
+      <div class="tmp-head"><span class="tmp-title" id="tmpTitle">Hoy</span></div>
+      <div class="tmp-list"></div>
+    </div>
+    </div>
+
+    <!-- PESTAÑAS (solo celular) -->
+    <div class="conv-tabs" role="tablist">
+      <button type="button" class="conv-tab on" data-tab="lista" onclick="setConvTab('lista')">Disponibilidad</button>
+      <button type="button" class="conv-tab" data-tab="armado" onclick="setConvTab('armado')">Armado</button>
+    </div>
+
 
     <!-- PLAYERS -->
     <div class="col-players" id="playersList"></div>
 
     <!-- PITCH -->
     <div class="col-pitch">
+      <div class="pitch-wrap-sticky">
       <div id="assignBanner" class="assign-banner">
         <span id="assignBannerText">Seleccioná un jugador</span>
         <span class="assign-cancel" onclick="cancelSlotSelect()">✕</span>
@@ -445,6 +459,7 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
         </svg>
       </div>
       <div class="pitch-hint" id="pitchHint">Arrastrá un jugador a un puesto, o tocá un puesto y después al jugador</div>
+      </div>
     </div>
 
   </div>
