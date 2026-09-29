@@ -856,7 +856,7 @@ body{padding-left:0;padding-right:0;}
 .xb-fig img,.xb-pair img{display:block;width:100% !important;max-width:none !important;margin:0 !important;border:0 !important;border-radius:18px !important;}
 .xb-fig.wide{width:min(1040px,calc(100vw - 32px));margin-left:50%;transform:translateX(-50%);}
 .xb-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:34px 0;}
-.xb-pair img{aspect-ratio:4/5;object-fit:cover;}
+.xb-pair img{aspect-ratio:var(--r,4/5);object-fit:cover;object-position:50% 0;}
 .xb-pair figcaption,.xb-fig figcaption{grid-column:1/-1;font-family:var(--mono);font-size:.74rem;color:rgba(242,238,224,.45);margin-top:10px;}
 .xb-quote{margin:40px 0;padding-left:24px;border-left:2px solid var(--xg);font-size:clamp(1.3rem,2.4vw,1.8rem);font-weight:300;line-height:1.35;color:#F2EEE0;}
 .xb-quote cite{display:block;margin-top:12px;font-family:var(--mono);font-style:normal;font-size:.74rem;color:var(--xg);}
@@ -1127,7 +1127,7 @@ function bodyHtml(body) {
     if (typeof b === 'string') return `<p>${b}</p>`;
     if (b.h) return `<h3 class="xb-h">${b.h}</h3>`;
     if (b.img) return `<figure class="xb-fig${b.wide ? ' wide' : ''}"><img src="${webp(b.img)}" alt="" loading="lazy" onerror="${webpFallback(b.img)}"><figcaption>${b.caption || ''}</figcaption></figure>`;
-    if (b.pair) return `<figure class="xb-pair">${b.pair.map(u => `<img src="${webp(u)}" alt="" loading="lazy" onerror="${webpFallback(u)}">`).join('')}<figcaption>${b.caption || ''}</figcaption></figure>`;
+    if (b.pair) return `<figure class="xb-pair"${b.ratio ? ` style="--r:${b.ratio}"` : ""}>${b.pair.map(u => `<img src="${webp(u)}" alt="" loading="lazy" onerror="${webpFallback(u)}">`).join('')}<figcaption>${b.caption || ''}</figcaption></figure>`;
     if (b.quote) return `<blockquote class="xb-quote">${b.quote}${b.by ? `<cite>${b.by}</cite>` : ''}</blockquote>`;
     if (b.specs) return `<dl class="xb-specs">${b.specs.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
     return '';

@@ -72,7 +72,9 @@ Single source of truth for historical match data. ES module exporting `SEED_MATC
 
 ### News — `noticias-data.js` + `auto-noticias.js`
 
-- `noticias-data.js`: plain script defining `NOTICIAS` (manual articles, newest first, `pinned` supported). Each entry: `id`, `category`, `title`, `date`, `dateLabel`, `excerpt`, `image`, `body` (HTML paragraph array), `shareCaption(s)`.
+- `noticias-data.js`: plain script defining `NOTICIAS` (manual articles, newest first, `pinned` supported). Each entry: `id`, `category`, `title`, `date`, `dateLabel`, `excerpt`, `image`, `body`, `shareCaption(s)`. `body` mixes HTML paragraph strings with blocks rendered by `bodyHtml()` in noticias.html: `{h}`, `{img, caption, wide}`, `{pair:[a,b], caption, ratio}` (ratio default `4/5`; `16/10` for desktop screenshots), `{quote, by}`, `{specs:[[k,v]]}`.
+- **Editorial standard (user rule, 2026-09-29): every new article follows the style of `presentacion-kits-t4`** — Chelsea kit-launch style: short lead, a `specs` strip, sections with `{h}`, big images/pairs with captions, one quote, closing line with a link. Clean and graphic; the old paper-file ("fichero") look is retired. Images: reuse site imagery (R2 `logos/duos`, `logos/nosotros`, screenshots) composed with sharp + the right crest before generating new ones; new covers go to R2 `logos/noticias/`.
+- `share-cards.js`: builds, in the browser (canvas), the Instagram post (1080×1350) and story (1080×1920) for any article with the digital-dossier look (Clean dorado crest, `EXP-…` id, file window). Used by the share modal and "Descargar historia" — no per-article share images needed.
 - `auto-noticias.js`: ES module that auto-generates result news from `SEED_MATCHES`; exports result-image pools (`RESULT_IMAGES`, per-period overrides).
 - **Publishing a manual article requires 3 steps or the WhatsApp share preview breaks**: (1) add to `NOTICIAS`, (2) add the id to `NOTICIAS_OG` in `top-secret-worker.js`, (3) redeploy the Worker.
 
