@@ -10,7 +10,7 @@ const NOTICIAS = [
     date: '2026-09-29',
     dateLabel: '29 de septiembre de 2026',
     excerpt: 'Top Secret FC presenta sus tres equipaciones nuevas: el titular negro con laureles dorados, la alternativa azul francia y el conjunto de arquero naranja. En las tres, el espía vuelve al centro del pecho.',
-    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/kits-t4-portada.png',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/kits-t4-portada-v2.png',
     body: [
       'Hay camisetas que se estrenan y camisetas que se heredan. Las de la Temporada 4 quieren ser de las segundas. Top Secret FC presenta hoy sus <strong>tres equipaciones nuevas</strong> —titular, alternativa y arquero— con una idea que las atraviesa a todas: menos ruido, más carácter, y el escudo del espía en el lugar que le corresponde.',
       { specs: [['Titular', 'Negro · oro'], ['Alternativa', 'Azul francia · amarillo'], ['Arquero', 'Naranja · rojo']] },
@@ -23,7 +23,7 @@ const NOTICIAS = [
       'La segunda piel es la más audaz de la colección. Un <strong>azul francia</strong> intenso con una textura geométrica tono sobre tono que solo aparece de cerca, cuello polo, vivos amarillos que bajan por los costados y medias blancas. El escudo, otra vez dorado, cierra el contraste.',
       { img: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/detalle-k2.png', caption: 'Cuello polo, textura geométrica y vivos amarillos.' },
       { quote: 'Cuando salimos de azul, que se note que llegó Top Secret.', by: 'Vestuario · Temporada 4' },
-      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-capitanes-k2.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-laterales-k2.png'], caption: 'Juan_Martinez4 y Lautavester7 · nikileo527 y pepolemmo2710.' },
+      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-capitanes-k2-v2.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-laterales-k2-v2.png'], caption: 'Juan_Martinez4 y Lautavester7 · nikileo527 y pepolemmo2710.' },
       { h: 'Arquero: fuego bajo los tres palos' },
       'Para el arco, un conjunto que no pasa desapercibido: camiseta <strong>naranja con ondas amarillas</strong>, short y medias rojas. Es el único de los tres que lleva el escudo en <strong>blanco</strong>, para que el espía resalte sobre el estampado. Lo estrenan Ivan_Cabj_La12 y adri_cai.',
       { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-arqueros.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/detalle-gk.png'], caption: 'Ivan_Cabj_La12 y adri_cai con el conjunto de arquero.' },
