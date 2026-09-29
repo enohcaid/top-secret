@@ -814,7 +814,9 @@ function plataformaBadge(p) {
 
 /* ─── PATHS ─── */
 const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
-function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/'); }
+// RENDER_V: subir cuando se regeneren renders de jugadores (R2 los cachea un año en el navegador).
+const RENDER_V = '2026-09-29';
+function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (p.startsWith('Renders/') ? '?v=' + RENDER_V : ''); }
 function renderFolder(p) { return p.folderOverride || p.key; }
 function brazosPath(p)   { return mediaUrl(`Renders/${renderFolder(p)}/Brazos.png`); }
 function brazos2Path(p)  { return mediaUrl(`Renders/${renderFolder(p)}/Brazos2.png`); }
@@ -1146,8 +1148,6 @@ function buildStage() {
 
 /* ─── SELECTOR DE FOTOS DEL PERFIL ─── */
 // Arranca en "Brazos" y deja elegir cualquier otra foto del jugador; las que no existan se ocultan solas.
-// ?v= fuerza a re-descargar poses regeneradas (R2 cachea un año).
-const UNICA_V = 2;
 function buildPhotoPicker(p, season, img) {
   const old = document.getElementById('pp-picker');
   if (old) old.remove();
@@ -1157,13 +1157,13 @@ function buildPhotoPicker(p, season, img) {
     ['Brazos', `Renders/${f}/Brazos4.png`],
     ['Frente', `Renders/${f}/Frente4.png`],
     ['Pose', `Renders/${f}/Pose4.png`],
-    ['Única', `Renders/${f}/Unica4.png`, UNICA_V],
+    ['Única', `Renders/${f}/Unica4.png`],
   ];
   const bar = document.createElement('div');
   bar.id = 'pp-picker';
   bar.className = 'pp-picker';
-  opts.forEach(([label, path, v], i) => {
-    const url = mediaUrl(path) + (v ? '?v=' + v : '');
+  opts.forEach(([label, path], i) => {
+    const url = mediaUrl(path);
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'pp-pick' + (i === 0 ? ' on' : '');

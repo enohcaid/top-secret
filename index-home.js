@@ -5,7 +5,9 @@ import { ROSTER_T4 } from './roster.js';
 
 const WORKER     = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const MEDIA_BASE = WORKER + '/media';
-const mediaUrl = p => MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/');
+// RENDER_V: subir cuando se regeneren renders de jugadores (R2 los cachea un año en el navegador).
+const RENDER_V = '2026-09-29';
+const mediaUrl = p => MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (p.startsWith('Renders/') ? '?v=' + RENDER_V : '');
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const io = new IntersectionObserver(entries => entries.forEach(e => {
