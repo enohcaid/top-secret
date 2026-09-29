@@ -38,6 +38,12 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:2.6rem;font-weight:900;letter-spacing:-.01em;line-height:1;color:var(--text);text-transform:uppercase;}
 .page-sub{font-size:13px;color:var(--mid);margin-top:6px;}
 
+/* ── RESUMEN SUELTO BAJO EL TÍTULO ── */
+.conv-stats{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:4px;}
+.conv-stats .cs{font-size:.95rem;font-weight:600;color:rgba(242,238,224,.6);white-space:nowrap;}
+.conv-stats .cs b{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.9rem;line-height:1;margin-right:5px;vertical-align:-3px;}
+.conv-stats .g b{color:var(--green);} .conv-stats .y b{color:var(--yellow);} .conv-stats .r b{color:var(--red);} .conv-stats .p b{color:rgba(242,238,224,.55);}
+
 /* ── KPI BAR ── */
 .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
 .kpi-card{background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:14px 16px;position:relative;}
@@ -321,15 +327,13 @@ html,body{height:100%;} body{background:var(--black);color:var(--text);font-fami
   <div class="page-header">
     <div class="page-eyebrow">Top Secret FC · 2026</div>
     <h1 class="page-title">Convocatoria</h1>
+    <div class="conv-stats">
+      <span class="cs g"><b id="sG">0</b> presentes</span>
+      <span class="cs y"><b id="sY">0</b> tarde</span>
+      <span class="cs r"><b id="sR">0</b> ausentes</span>
+      <span class="cs p"><b id="sP">0</b> sin confirmar</span>
+    </div>
     <p class="page-sub" id="dateTag">Cargando...</p>
-  </div>
-
-  <!-- KPI BAR -->
-  <div class="kpi-bar">
-    <div class="kpi-card k-green"><div class="kpi-val" id="sG">0</div><div class="kpi-lbl">Presentes</div></div>
-    <div class="kpi-card k-yellow"><div class="kpi-val" id="sY">0</div><div class="kpi-lbl">Tarde</div></div>
-    <div class="kpi-card k-red"><div class="kpi-val" id="sR">0</div><div class="kpi-lbl">Ausentes</div></div>
-    <div class="kpi-card k-mid"><div class="kpi-val" id="sP">0</div><div class="kpi-lbl">Sin confirmar</div></div>
   </div>
 
   <!-- TODAY MATCHES PANEL -->
@@ -2290,7 +2294,6 @@ function _download(blob, name) {
 
 /* ─── PAGE LOAD ANIMATION ─── */
 gsap.set('.page-header > *', { opacity:0, y:18 });
-gsap.set('.kpi-card', { opacity:0, y:14 });
 
 /* ─── Fichas de la cancha proporcionales al ancho ─── */
 let _pitchW = 0, _pitchT;
@@ -2382,7 +2385,6 @@ setInterval(checkForNewBuild, 3 * 60 * 1000); // cada 3 min
 
 /* ─── Animate after render ─── */
 gsap.to('.page-header > *', { opacity:1, y:0, duration:0.55, stagger:0.1, ease:'power3.out', delay:0.05 });
-gsap.to('.kpi-card', { opacity:1, y:0, duration:0.45, stagger:0.07, ease:'power2.out', delay:0.3 });
 
 /* ─── MODO VISTA (?vista) — bloquear controles de edición ───
    El backstop real es el guard de EDIT_MODE en saveState()/_saveBackup():
