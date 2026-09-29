@@ -1,6 +1,6 @@
 // Plan de juego: caja fuerte con combinación + diagramas tácticos dibujados en SVG.
 (function () {
-  const CODE = '9075';
+  const CODE = '3557';
   const KEY = 'ts_plan_open';
   const $ = id => document.getElementById(id);
 
