@@ -246,9 +246,8 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
 .tok-name{position:absolute;left:0;top:0;bottom:0;width:var(--tok-name-w);z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(11,10,7,.82);}
 .tok-name span{writing-mode:vertical-rl;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:var(--name-size);letter-spacing:.04em;text-transform:uppercase;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:94%;line-height:1;}
 .tok-num{position:absolute;left:var(--tok-name-w);right:0;bottom:3px;text-align:center;z-index:3;font-family:'Bebas Neue',sans-serif;font-size:var(--num-size);line-height:1;color:var(--gold);text-shadow:0 2px 6px rgba(0,0,0,.85);}
-/* Capitán: cuadrado dorado arriba de la franja del nombre (fuera de la foto, nunca tapa la cara) */
-.tok-cap{position:absolute;top:0;left:0;z-index:4;width:var(--tok-name-w);height:var(--tok-name-w);background:var(--gold);color:#111;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:calc(var(--tok-name-w) * .72);line-height:1;}
-.stoken.is-cap .tok-name{padding-top:var(--tok-name-w);}
+/* Capitán: brazalete dorado que sobresale del borde derecho de la tarjeta, a la altura del brazo (no tapa la cara) */
+.cap-band{position:absolute;z-index:5;top:calc(var(--tok-h) * .66);left:calc(var(--tok-w) * .84);width:calc(var(--tok-w) * .24);height:calc(var(--tok-h) * .15);border-radius:3px;background:linear-gradient(180deg,#e8c97a,var(--gold) 55%,#9c7f35);color:#111;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:calc(var(--tok-h) * .12);line-height:1;box-shadow:0 3px 8px rgba(0,0,0,.45);pointer-events:none;}
 .tok-name span[contenteditable]{outline:none;cursor:text;}
 .tok-name span[contenteditable]:focus{color:var(--gold);}
 .pitch .slot:hover .stoken{transform:none;}
@@ -1586,7 +1585,8 @@ function renderPitch() {
         const ns = document.createElement('span'); ns.textContent = player.name; nm.appendChild(ns);
         tok.appendChild(nm);
         if (player.num !== '' && player.num != null) { const numEl = document.createElement('span'); numEl.className = 'tok-num'; numEl.textContent = player.num; tok.appendChild(numEl); }
-        if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'tok-cap'; cap.textContent = 'C'; tok.appendChild(cap); tok.classList.add('is-cap'); }
+        el.querySelectorAll('.cap-band').forEach(b => b.remove());
+        if (captain === player.name) { const cap = document.createElement('span'); cap.className = 'cap-band'; cap.textContent = 'C'; el.appendChild(cap); }
       }
 
       // Try T3 → T2 → T1 → silueta
@@ -2218,17 +2218,16 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
     ctx.globalAlpha = 1;
   }
 
-  function drawVerticalName(tx, ty, name, isCap) {
+  function drawVerticalName(tx, ty, name) {
     ctx.fillStyle = 'rgba(11,10,7,.82)';
     ctx.fillRect(tx, ty, nameW, tokH);
-    const top = isCap ? nameW : 0;   // el capitán lleva la C arriba de la franja
     ctx.save();
-    ctx.translate(tx + nameW / 2, ty + top + (tokH - top) / 2);
+    ctx.translate(tx + nameW / 2, ty + tokH / 2);
     ctx.rotate(Math.PI / 2);
     ctx.font = `800 ${nameSz}px "Barlow Condensed",sans-serif`;
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     let t = String(name).toUpperCase();
-    const max = (tokH - top) * 0.94;
+    const max = tokH * 0.94;
     if (ctx.measureText(t).width > max) { while (t.length > 1 && ctx.measureText(t + '…').width > max) t = t.slice(0, -1); t += '…'; }
     ctx.fillText(t, 0, 0);
     ctx.restore();
@@ -2241,12 +2240,20 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
       ctx.fillText(String(player.num), tx + nameW + (tokW - nameW) / 2, ty + tokH - 3 * S);
       ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
     }
-    if (captain === player.name) {
-      ctx.fillStyle = gold; ctx.fillRect(tx, ty, nameW, nameW);
-      ctx.font = `900 ${Math.round(nameW * 0.72)}px "Barlow Condensed",sans-serif`;
-      ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('C', tx + nameW / 2, ty + nameW / 2 + nameW * 0.04);
-    }
+    ctx.textBaseline = 'alphabetic';
+  }
+  /* brazalete de capitán: mismo diseño que .cap-band */
+  function drawCapBand(tx, ty) {
+    const bx = tx + tokW * 0.84, by = ty + tokH * 0.66, bw = tokW * 0.24, bh = tokH * 0.15;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 8 * S; ctx.shadowOffsetY = 3 * S;
+    const g = ctx.createLinearGradient(0, by, 0, by + bh);
+    g.addColorStop(0, '#e8c97a'); g.addColorStop(0.55, gold); g.addColorStop(1, '#9c7f35');
+    roundRect(ctx, bx, by, bw, bh, 3 * S); ctx.fillStyle = g; ctx.fill();
+    ctx.restore();
+    ctx.font = `900 ${Math.round(tokH * 0.12)}px "Barlow Condensed",sans-serif`;
+    ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('C', bx + bw / 2, by + bh / 2 + bh * 0.04);
     ctx.textBaseline = 'alphabetic';
   }
   /* foto: object-fit:cover + object-position 50% 0 + scale(chest) desde 50% 4%, como el CSS */
@@ -2308,9 +2315,10 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
       ctx.save(); roundRect(ctx, tx, ty, tokW, tokH, 12 * S); ctx.clip();
       if (img) drawPhoto(img, tx, ty);
       else if (sil) drawPhoto(sil, tx, ty, 0.55);
-      drawVerticalName(tx, ty, player.name, captain === player.name);
+      drawVerticalName(tx, ty, player.name);
       drawNumAndCap(tx, ty, player);
       ctx.restore();
+      if (captain === player.name) drawCapBand(tx, ty);   // fuera del recorte: sobresale de la tarjeta
     };
   });
   // Se dibujan en el orden del DOM (así las fichas que se superponen quedan igual que en pantalla)
