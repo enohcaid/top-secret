@@ -2209,14 +2209,7 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
   ctx.fillStyle = 'rgba(255,255,255,.9)';
   [[150, 200], [150, 47], [150, 353]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x * vsx, y * vsy, 2.5 * vsx, 0, Math.PI * 2); ctx.fill(); });
 
-  /* logo del club arriba a la derecha */
-  const logo = await loadImg(PITCH_LOGO);
-  if (logo) {
-    const lw = Math.round(FW * 0.085), lh = lw * logo.naturalHeight / logo.naturalWidth;
-    ctx.globalAlpha = 0.72;
-    ctx.drawImage(logo, FW - lw - FW * 0.035, FW * 0.035, lw, lh);
-    ctx.globalAlpha = 1;
-  }
+  /* (el escudo del club va en la barra lateral de la imagen exportada, no en la cancha) */
 
   function drawVerticalName(tx, ty, name) {
     ctx.fillStyle = 'rgba(11,10,7,.82)';
@@ -2326,6 +2319,133 @@ async function buildShareCanvas(FW, FH, _FOOTER, S, withPhotos) {
   return cvs;
 }
 
+/* ─── Barra lateral de la imagen exportada ───
+   Escudo, fecha, horario de entrada y los partidos del día (hora, escudo, rival, liga, local/visita).
+   Reemplaza al texto que antes se copiaba al portapapeles: toda la info queda en la imagen. */
+const LEAGUE_COLORS = { VPN: '#f5c518', VPUG: '#3ecf8e', '11x11': '#4a9eff', Amistoso: '#b8bec6' };
+const ENTRADA = '22:30';
+function badgeSrc(url) {
+  if (!url) return null;
+  if (url.startsWith(MEDIA_BASE)) return url;
+  return MEDIA_BASE.replace(/\/media$/, '') + '/img-proxy?url=' + encodeURIComponent(url);   // CORS para el canvas
+}
+async function buildMatchPanel(H) {
+  const PW = Math.round(H * 0.46), u = H / 1000;          // u = unidad relativa al alto
+  const cvs = document.createElement('canvas'); cvs.width = PW; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  const g = ctx.createRadialGradient(PW / 2, 0, 10, PW / 2, 0, H * 0.75);
+  g.addColorStop(0, '#231c0f'); g.addColorStop(1, '#0B0A07');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, PW, H);
+  try { await Promise.all([document.fonts.load(`${Math.round(80 * u)}px "Bebas Neue"`), document.fonts.load(`900 ${Math.round(28 * u)}px Barlow`), document.fonts.load(`800 ${Math.round(22 * u)}px Barlow`), document.fonts.load(`500 ${Math.round(17 * u)}px Barlow`)]); } catch (e) {}
+
+  const matches = getTodayMatches().slice().sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+  const [logo, ...badges] = await Promise.all([loadImg(mediaUrl('logos/rebrand/clean-white.webp')), ...matches.map(m => m.badge ? loadImg(badgeSrc(m.badge)) : null)]);
+
+  const D = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const M = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const dt = new Date(TODAY + 'T12:00:00');
+  const fecha = `${D[dt.getDay()]} ${dt.getDate()} de ${M[dt.getMonth()]}`.toUpperCase();
+
+  const padX = PW * 0.09, innerW = PW - padX * 2;
+  const n = matches.length;
+  // Con muchos partidos el encabezado se compacta para que entren todas las filas y la línea final.
+  const hs = n >= 4 ? 0.68 : n === 3 ? 0.82 : 1;
+  const logoH = 150 * u * hs;
+  const headH = logoH + 30 * u + (50 + 40 + 38 + 80 + 32 + 40) * u * hs;
+  const footH = 64 * u, margin = 40 * u;
+  const gap = 14 * u;
+  const rowH = n ? Math.min(135 * u, (H - headH - footH - margin * 2 - gap * (n - 1)) / n) : 0;
+  const listH = n ? n * rowH + (n - 1) * gap : 120 * u;
+  let y = Math.max(margin, (H - (headH + listH + footH)) / 2);
+  const center = PW / 2;
+  const text = (t, font, color, x, yy, align = 'center', spacing = 0) => {
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'alphabetic';
+    try { ctx.letterSpacing = spacing + 'px'; } catch (e) {}
+    ctx.fillText(t, x, yy);
+    try { ctx.letterSpacing = '0px'; } catch (e) {}
+  };
+  const line = yy => { ctx.fillStyle = 'rgba(242,238,224,.12)'; ctx.fillRect(padX, yy, innerW, Math.max(2, 2 * u)); };
+  // Parte un nombre en hasta 2 renglones que entren en maxW (corta con … solo si ni así entra).
+  const renglones = (t, font, maxW) => {
+    ctx.font = font;
+    if (ctx.measureText(t).width <= maxW) return [t];
+    const w = t.split(/\s+/); let a = '';
+    for (let i = 0; i < w.length; i++) {
+      const prueba = a ? a + ' ' + w[i] : w[i];
+      if (ctx.measureText(prueba).width > maxW && a) {
+        let resto = w.slice(i).join(' ');
+        while (ctx.measureText(resto).width > maxW && resto.length > 3) resto = resto.slice(0, -2) + '…';
+        return [a, resto];
+      }
+      a = prueba;
+    }
+    while (ctx.measureText(a).width > maxW && a.length > 3) a = a.slice(0, -2) + '…';
+    return [a];
+  };
+
+  if (logo) { const lw = logoH * logo.naturalWidth / logo.naturalHeight; ctx.drawImage(logo, center - lw / 2, y, lw, logoH); }
+  y += logoH + 50 * u * hs;
+  text('TOP SECRET FC', `900 ${Math.round(30 * u)}px Barlow`, '#F2EEE0', center, y, 'center', 5 * u);
+  y += 30 * u;
+  text(fecha, `500 ${Math.round(17 * u)}px Barlow`, 'rgba(242,238,224,.6)', center, y, 'center', 3 * u);
+  y += 40 * u * hs; line(y);
+  y += 38 * u * hs;
+  text('ADENTRO', `800 ${Math.round(17 * u)}px Barlow`, '#C9A84C', center, y, 'center', 6 * u);
+  y += 80 * u * hs;
+  text(ENTRADA, `${Math.round(88 * u * Math.max(hs, 0.8))}px "Bebas Neue"`, '#F2EEE0', center, y);
+  y += 32 * u * hs; line(y);
+  y += 40 * u * hs;
+
+  if (!n) {
+    text('ENTRENAMIENTO', `900 ${Math.round(40 * u)}px Barlow`, '#F2EEE0', center, y + 70 * u, 'center', 3 * u);
+    y += 120 * u;
+  }
+  matches.forEach((m, i) => {
+    const c = LEAGUE_COLORS[m.league] || '#9aa3ad';
+    ctx.save();
+    roundRect(ctx, padX, y, innerW, rowH, 16 * u); ctx.clip();
+    ctx.fillStyle = '#15130e'; ctx.fillRect(padX, y, innerW, rowH);
+    ctx.globalAlpha = 0.16; ctx.fillStyle = c; ctx.fillRect(padX, y, innerW, rowH); ctx.globalAlpha = 1;
+    ctx.fillStyle = c; ctx.fillRect(padX, y, 7 * u, rowH);
+    ctx.restore();
+    const mid = y + rowH / 2, fs = Math.max(0.75, Math.min(1, rowH / (120 * u)));
+    const fTime = `${Math.round(42 * u * fs)}px "Bebas Neue"`;
+    ctx.font = fTime; const timeW = ctx.measureText('00:00').width;
+    const x0 = padX + 24 * u;
+    text(m.time || '', fTime, '#F2EEE0', x0, mid + 14 * u * fs, 'left');
+    const bs = Math.min(rowH * 0.66, 70 * u), bx = x0 + timeW + 18 * u;
+    const b = badges[i];
+    if (b) { const r = Math.min(bs / b.naturalWidth, bs / b.naturalHeight); ctx.drawImage(b, bx + (bs - b.naturalWidth * r) / 2, mid - b.naturalHeight * r / 2, b.naturalWidth * r, b.naturalHeight * r); }
+    const tx = bx + bs + 16 * u, maxW = padX + innerW - tx - 14 * u;
+    const nSize = Math.round(23 * u * fs), fName = `800 ${nSize}px Barlow`;
+    const lines = renglones(String(m.rival || '—'), fName, maxW);
+    const ph = 21 * u * fs, blockH = lines.length * nSize * 1.02 + 8 * u + ph;
+    let ty = mid - blockH / 2 + nSize * 0.86;
+    lines.forEach(l => { text(l, fName, '#F2EEE0', tx, ty, 'left'); ty += nSize * 1.02; });
+    const liga = String(m.league || 'Partido').toUpperCase();
+    const fLiga = `800 ${Math.round(13 * u * fs)}px Barlow`;
+    ctx.font = fLiga;
+    const lw = ctx.measureText(liga).width + 16 * u, py = ty - nSize * 0.86 + 8 * u;
+    roundRect(ctx, tx, py, lw, ph, ph / 2); ctx.fillStyle = c; ctx.fill();
+    text(liga, fLiga, '#0B0A07', tx + lw / 2, py + ph * 0.72);
+    text(m.isHome === false ? 'Visita' : 'Local', `500 ${Math.round(16 * u * fs)}px Barlow`, 'rgba(242,238,224,.65)', tx + lw + 10 * u, py + ph * 0.76, 'left');
+    y += rowH + gap;
+  });
+
+  y = Math.max(y - gap + 44 * u, y);
+  const cap = captain ? ` · C: ${captain}` : '';
+  text(`${lineup.formation || ''}${cap}`, `500 ${Math.round(17 * u)}px Barlow`, 'rgba(242,238,224,.55)', center, y, 'center', 1 * u);
+  return cvs;
+}
+async function buildExportCanvas(FW, FH, S, withPhotos) {
+  const [pitch, panel] = await Promise.all([buildShareCanvas(FW, FH, 0, S, withPhotos), buildMatchPanel(FH)]);
+  const out = document.createElement('canvas');
+  out.width = pitch.width + panel.width; out.height = FH;
+  const ctx = out.getContext('2d');
+  ctx.drawImage(pitch, 0, 0); ctx.drawImage(panel, pitch.width, 0);
+  return out;
+}
+
 async function canvasToBlob(cvs) {
   return new Promise((res, rej) => {
     try { cvs.toBlob(b => b ? res(b) : rej(new Error('null blob')), 'image/png'); }
@@ -2338,8 +2458,6 @@ async function doShare() {
   const orig = btn.textContent;
   btn.textContent = 'Generando imagen…'; btn.disabled = true;
 
-  /* ── Copy WhatsApp message to clipboard ── */
-  try { await navigator.clipboard.writeText(buildWhatsAppMessage()); } catch(e) {}
 
   try {
     const pitchEl = document.getElementById('pitch');
@@ -2351,12 +2469,12 @@ async function doShare() {
     /* ── Try with photos first ── */
     let blob = null;
     try {
-      const cvs = await buildShareCanvas(FW, FH, FOOTER, S, true);
+      const cvs = await buildExportCanvas(FW, FH, S, true);
       blob = await canvasToBlob(cvs);
     } catch(e) {
       if (e.name === 'SecurityError') {
         /* Canvas tainted — file:// cross-origin. Rebuild without photos. */
-        const cvs2 = await buildShareCanvas(FW, FH, FOOTER, S, false);
+        const cvs2 = await buildExportCanvas(FW, FH, S, false);
         blob = await canvasToBlob(cvs2);
         showToast('Sin fotos · para verlas usá: npx serve .', 'info');
       } else throw e;
@@ -2370,12 +2488,12 @@ async function doShare() {
     if (canWebShare) {
       try {
         await navigator.share({ files:[file], title:'Top Secret FC · Convocatoria' });
-        showToast('📤 Compartido · texto copiado');
+        showToast('📤 Compartido');
       } catch(e) {
-        if (e.name !== 'AbortError') { _download(blob, fname); showToast('📸 Descargada · texto copiado'); }
+        if (e.name !== 'AbortError') { _download(blob, fname); showToast('📸 Imagen descargada'); }
       }
     } else {
-      _download(blob, fname); showToast('📸 Imagen descargada · texto copiado');
+      _download(blob, fname); showToast('📸 Imagen descargada');
     }
 
   } catch(e) { console.error(e); showToast('Error: ' + e.message, 'info'); }
