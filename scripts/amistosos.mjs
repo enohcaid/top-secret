@@ -135,11 +135,8 @@ async function avisar(texto) { await client.sendMessage(yo, texto); }
 client.on('ready', async () => {
   yo = client.info.wid._serialized;
   log('conectado como', client.info.pushname, yo, PRUEBA ? '(MODO PRUEBA)' : '');
-  const chats = await client.getChats();
-  const g = chats.find(c => c.isGroup && GRUPO.test(c.name));
-  if (!g) { log('No encontré el grupo de amistosos. Grupos:', chats.filter(c => c.isGroup).map(c => c.name).join(' | ')); process.exit(1); }
-  grupoId = g.id._serialized;
-  log('grupo:', g.name);
+  // No se usa getChats(): con muchos chats falla en whatsapp-web.js. El grupo se reconoce por el
+  // nombre cuando llega su primer mensaje (ver esGrupoAmistosos).
   await cargarEquipos();
   await avisar(`🕵️ *Bot de amistosos activo*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*.`);
 });
@@ -152,11 +149,22 @@ client.on('message_create', async msg => {
     if (msg.fromMe && msg.to === yo && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) return comando(msg.body.trim());
     if (msg.fromMe) return;
     // 2) Pedidos en el grupo.
-    if (msg.from === grupoId) return pedidoGrupo(msg);
+    if (msg.from.endsWith('@g.us') && await esGrupoAmistosos(msg)) return pedidoGrupo(msg);
     // 3) Respuestas por privado de equipos a los que les ofrecimos.
     if (!msg.from.endsWith('@g.us')) return respuestaPrivada(msg);
   } catch (e) { log('error:', e.message); }
 });
+
+const gruposVistos = {};
+async function esGrupoAmistosos(msg) {
+  if (grupoId) return msg.from === grupoId;
+  if (msg.from in gruposVistos) return gruposVistos[msg.from];
+  let nombre = '';
+  try { nombre = (await msg.getChat()).name || ''; } catch (e) {}
+  gruposVistos[msg.from] = GRUPO.test(nombre);
+  if (gruposVistos[msg.from]) { grupoId = msg.from; log('grupo encontrado:', nombre); }
+  return gruposVistos[msg.from];
+}
 
 async function pedidoGrupo(msg) {
   if (!PIDE.test(msg.body)) return;
@@ -168,7 +176,7 @@ async function pedidoGrupo(msg) {
   const eq = buscarEquipo(msg.body + ' ' + nombreContacto, autor);
   const id = letra(st.siguiente++);
   st.pedidos[id] = { autor, contacto: nombreContacto, texto: msg.body.slice(0, 300), equipo: eq && !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : null, estado: 'nuevo', ts: Date.now() };
-  const hp = (msg.body.match(/(2[23])[:.]([0-5]d)/) || [])[0];
+  const hp = (msg.body.match(/\b(2[23])[:.]([0-5]\d)\b/) || [])[0];
   if (hp && SLOTS.includes(hp.replace('.', ':')) && !ocupados().has(hp.replace('.', ':'))) st.pedidos[id].horaPedida = hp.replace('.', ':');
   save();
   log(`pedido ${id}:`, nombreContacto, '→', eq ? `${eq.nombre} (${eq.div})` : 'equipo sin identificar');
