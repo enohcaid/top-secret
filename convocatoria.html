@@ -2137,33 +2137,11 @@ function showToast(msg, type = '', ms = 2800) {
 }
 
 /* ─── SHARE ─── */
-function buildWhatsAppMessage() {
-  const D = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const M = ['Enero','Feb','Marzo','Abril','Mayo','Junio','Julio','Agosto','Sep','Oct','Nov','Dic'];
-  const dt = new Date(TODAY + 'T12:00:00');
-  const dayStr = D[dt.getDay()] + ' ' + dt.getDate() + ' de ' + M[dt.getMonth()];
-  let msg = '⚽ *TOP SECRET FC*\n';
-  msg += '📅 ' + dayStr + '\n';
-  msg += '─────────────────\n';
-  const matches = getTodayMatches();
-  if (matches.length) {
-    msg += '*PARTIDOS HOY - 22:30h ADENTRO* 🔥\n';
-    matches.forEach(m => {
-      msg += `🆚 *${m.rival||'—'}* · ${m.time||''}hs`;
-      if (m.league) msg += ` · ${m.league}`;
-      msg += m.isHome ? ' · 🏠 Local\n' : ' · ✈️ Visita\n';
-    });
-  } else {
-    msg += '_Entrenamiento *22:30hs Adentro*_\n';
-  }
-  return msg;
-}
 
 /* ─── Build share canvas ───
    Réplica exacta de la cancha en pantalla: mismos colores, líneas, tamaños de
    ficha (leídos del DOM), foto de pecho, nombre vertical, número a la derecha
    y logo arriba a la derecha. Sin pie. */
-const PITCH_LOGO = mediaUrl('logos/rebrand/clean-negro.webp');
 function loadImg(src) {
   return new Promise(res => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
 }
