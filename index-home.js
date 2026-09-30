@@ -281,15 +281,44 @@ if (!reduced && typeof gsap !== 'undefined') {
   let cur = 0, front = 0, timer = null, busy = false;
   const slides = SLIDES.slice();
 
-  function show(idx) {
+  // Transición: la foto nueva entra con una cortina lateral (hacia el lado de la flecha) y un
+  // zoom leve; mientras se muestra hace un acercamiento lento (Ken Burns); la anterior se oscurece
+  // y se aleja. Con "reducir movimiento" queda el fundido simple del CSS.
+  const EASE = 'cubic-bezier(.77,0,.18,1)';
+  function kenBurns(img) {
+    if (reduced || !img.animate) return;
+    img.getAnimations().forEach(a => a.cancel());
+    img.animate([{ transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 7000, easing: 'linear', fill: 'forwards' });
+  }
+  function show(idx, dir = 1) {
     if (busy || !slides.length) return;
     idx = (idx + slides.length) % slides.length;
     if (idx === cur) return;
     busy = true;
-    const next = imgs[1 - front], s = slides[idx];
+    const next = imgs[1 - front], prev = imgs[front], s = slides[idx];
     next.onload = () => {
-      next.style.opacity = '1'; imgs[front].style.opacity = '0';
-      front = 1 - front; cur = idx; cap.textContent = s.cap; busy = false;
+      front = 1 - front; cur = idx; cap.textContent = s.cap;
+      if (reduced || !next.animate) {
+        next.style.opacity = '1'; prev.style.opacity = '0'; busy = false; return;
+      }
+      next.getAnimations().forEach(a => a.cancel());
+      next.style.transition = 'none'; next.style.opacity = '1'; next.style.zIndex = '1'; prev.style.zIndex = '0';
+      const from = dir > 0 ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)';
+      const wipe = next.animate([
+        { clipPath: from, transform: 'scale(1.14)' },
+        { clipPath: 'inset(0 0 0 0)', transform: 'scale(1.06)' },
+      ], { duration: 1300, easing: EASE });
+      prev.animate([
+        { transform: getComputedStyle(prev).transform === 'none' ? 'scale(1)' : getComputedStyle(prev).transform, filter: 'brightness(1)' },
+        { transform: 'scale(.96)', filter: 'brightness(.35)' },
+      ], { duration: 1300, easing: EASE, fill: 'forwards' });
+      cap.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: 500, easing: 'ease-out', fill: 'backwards' });
+      wipe.onfinish = () => {
+        prev.getAnimations().forEach(a => a.cancel());
+        prev.style.transition = 'none'; prev.style.opacity = '0';
+        kenBurns(next);
+        busy = false;
+      };
     };
     // Si una dupla todavía no está subida, se saltea sin cortar la rotación.
     next.onerror = () => { slides.splice(idx, 1); if (idx < cur) cur--; busy = false; show(idx); };
@@ -297,11 +326,13 @@ if (!reduced && typeof gsap !== 'undefined') {
     next.src = s.src;
   }
   const start = () => { clearInterval(timer); if (!reduced) timer = setInterval(() => show(cur + 1), 6000); };
-  $('hero-prev').addEventListener('click', () => { show(cur - 1); start(); });
+  $('hero-prev').addEventListener('click', () => { show(cur - 1, -1); start(); });
   $('hero-next').addEventListener('click', () => { show(cur + 1); start(); });
   const visual = document.querySelector('.hero-visual');
   visual.addEventListener('mouseenter', () => clearInterval(timer));
   visual.addEventListener('mouseleave', start);
+  const first = imgs[0];
+  if (first.complete) kenBurns(first); else first.addEventListener('load', () => kenBurns(first), { once: true });
   start();
 })();
 
