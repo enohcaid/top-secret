@@ -203,7 +203,7 @@ const FETCH_ALLOWED_DOMAINS = [
 ];
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     // Preflight CORS
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: CORS_HEADERS });
@@ -217,6 +217,17 @@ export default {
         const key = decodeURIComponent(url.pathname.slice('/media/'.length));
         // `_fuentes/` guarda originales de trabajo (capturas, láminas de kits): no se publican.
         if (key.startsWith('_fuentes/')) return new Response('Not found', { status: 404, headers: CORS_HEADERS });
+        // Copia en la caché del borde de Cloudflare: la primera visita lee R2 (~250 ms), las
+        // siguientes (de cualquier visitante en esa región) salen de la caché. La clave incluye
+        // el ?v=, así que versionar una URL sigue sirviendo la imagen nueva al instante.
+        const cache = caches.default;
+        const cacheKey = new Request(url.toString(), { method: 'GET' });
+        const hit = await cache.match(cacheKey);
+        if (hit) {
+          const h = new Response(hit.body, hit);
+          h.headers.set('X-Media-Cache', 'HIT');
+          return h;
+        }
         const obj = await env.MEDIA_BUCKET.get(key);
         if (!obj) return new Response('Not found', { status: 404, headers: CORS_HEADERS });
         const headers = new Headers(CORS_HEADERS);
@@ -225,7 +236,10 @@ export default {
         headers.set('Cache-Control', 'public, max-age=31536000, immutable');
         const dl = url.searchParams.get('dl');
         if (dl) headers.set('Content-Disposition', `attachment; filename="${dl.replace(/"/g, '')}"`);
-        return new Response(obj.body, { headers });
+        const res = new Response(obj.body, { headers });
+        if (ctx) ctx.waitUntil(cache.put(cacheKey, res.clone()));
+        res.headers.set('X-Media-Cache', 'MISS');
+        return res;
       }
 
       // ── KV STORAGE (/kv) ──────────────────────────
