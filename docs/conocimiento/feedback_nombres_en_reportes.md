@@ -17,3 +17,5 @@ Ejemplo: `{name:'Abuela', matched:'nikileo527', rating:…}`.
 
 **Why:** el usuario lo pidió para que los reportes futuros se carguen al jugador correcto; un nombre sin mapear deja las estadísticas fuera del ranking sin avisar (ver [[feedback_rosters_hardcodeados_desactualizados]]).
 **How to apply:** si aparece en un reporte un nombre que no es un gamertag del plantel y no está en esta tabla, preguntar antes de asignarlo. Sumar acá cada alias nuevo que confirme el usuario.
+
+**Contexto (2026-09-30):** el club pasó a jugar **EA FC 27**. Con el juego nuevo los nombres que muestran los reportes pueden cambiar y todavía no se probó todo: "Crespo" queda sin asignar (no se sabe a quién corresponde en FC27). Ante cualquier nombre raro en un reporte de FC27, preguntar antes de cargarlo.
