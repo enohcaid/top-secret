@@ -7,7 +7,7 @@ const WORKER     = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const MEDIA_BASE = WORKER + '/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores o fotos editoriales
 // (duplas, nosotros, hero) — R2 las cachea un año en el navegador.
-const RENDER_V = '2026-09-29b';
+const RENDER_V = '2026-09-30';
 const mediaUrl = p => MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (/^(Renders\/|logos\/duos\/|logos\/nosotros\/|logos\/hero-)/.test(p) ? '?v=' + RENDER_V : '');
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -270,7 +270,7 @@ if (!reduced && typeof gsap !== 'undefined') {
     ['logos/duos/duo-defensa-k2-v3.webp',  'Elianja20 · endiabladorojo66 · Kit 2'],
     ['logos/duos/duo-defensa-k1.webp',  'Alexisraies23 · Cabers14'],
     ['logos/duos/duo-laterales-k2-v3.webp','nikileo527 · pepolemmo2710 · Kit 2'],
-    ['logos/duos/duo-arqueros.webp',    'Ivan_Cabj_La12 · adri_cai · Arqueros'],
+    ['logos/duos/duo-arqueros-v2.webp',    'Ivan_Cabj_La12 · adri_cai · Arqueros'],
     ['logos/duos/duo-ataque-k1.webp',   'NicoBJ_96 · kee_viin03'],
     ['logos/duos/duo-capitanes-k2-v3.webp','Juan_Martinez4 · Lautavester7 · Kit 2'],
     ['logos/duos/duo-guiidow-lil-k1.webp','Guiidow · Lil_Dekuroko'],

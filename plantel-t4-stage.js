@@ -1,12 +1,12 @@
 // Generado por scripts/plantel-foto-t4.mjs — imagen del escenario de plantilla.html y posición de cada jugador (% del ancho/alto).
-export const STAGE_IMG = 'logos/plantel-t4-mum79hui.webp';
+export const STAGE_IMG = 'logos/plantel-t4-munfhq5w.webp';
 export const STAGE_T4 = [{"key":"Huber236","row":0,"x":8.9,"y":14.76,"w":10.2,"h":15.86},
   {"key":"rivarola90","row":0,"x":21.63,"y":13.29,"w":8.74,"h":16.24},
   {"key":"Elianja20","row":0,"x":32.9,"y":8.65,"w":10.2,"h":16.98},
   {"key":"pepolemmo2710","row":0,"x":44.9,"y":5.59,"w":10.2,"h":16.1},
   {"key":"kee_viin03","row":0,"x":56.9,"y":12.82,"w":10.2,"h":13.2},
   {"key":"Juanchyroman08","row":0,"x":69.02,"y":13.24,"w":9.96,"h":16.56},
-  {"key":"adri_cai","row":0,"x":80.9,"y":13.82,"w":10.2,"h":16.46},
+  {"key":"adri_cai","row":0,"x":80.9,"y":13.76,"w":10.2,"h":16.46},
   {"key":"Guiidow","row":1,"x":10.86,"y":20.88,"w":9.71,"h":19.58},
   {"key":"Alexisraies23","row":1,"x":22.29,"y":19.88,"w":9.71,"h":19.44},
   {"key":"Cabers14","row":1,"x":33.71,"y":18.24,"w":9.71,"h":19.56},

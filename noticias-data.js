@@ -65,7 +65,7 @@ const NOTICIAS = [
       { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-capitanes-k2-v3.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-laterales-k2-v3.png'], caption: 'Juan_Martinez4 y Lautavester7 · nikileo527 y pepolemmo2710.' },
       { h: 'Arquero: fuego bajo los tres palos' },
       'Para el arco, un conjunto que no pasa desapercibido: camiseta <strong>naranja con ondas amarillas</strong>, short y medias rojas. Es el único de los tres que lleva el escudo en <strong>blanco</strong>, para que el espía resalte sobre el estampado. Lo estrenan Ivan_Cabj_La12 y adri_cai.',
-      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-arqueros.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/detalle-gk.png'], caption: 'Ivan_Cabj_La12 y adri_cai con el conjunto de arquero.' },
+      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/duos/duo-arqueros-v2.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/detalle-gk.png'], caption: 'Ivan_Cabj_La12 y adri_cai con el conjunto de arquero.' },
       { h: 'El espía, en el centro' },
       'El hilo conductor de la colección es el escudo nuevo del club: <strong>el espía de sombrero, anteojos y gabardina</strong>, en su versión limpia, sin marco. Dorado en el titular y en la alternativa, blanco en el arquero. Es la primera vez que las tres camisetas comparten la misma marca, y la idea es que se quede.',
       { img: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/nosotros/vestuario-kits.png', caption: 'Las tres equipaciones de la Temporada 4, listas en el vestuario.', wide: true },

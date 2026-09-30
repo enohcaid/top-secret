@@ -1318,7 +1318,7 @@ function getNote(name) {
 /* ─── PHOTO HELPERS ─── */
 const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores (R2 los cachea un año en el navegador).
-const RENDER_V = '2026-09-29c';
+const RENDER_V = '2026-09-30';
 function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (p.startsWith('Renders/') ? '?v=' + RENDER_V : ''); }
 function brazosPath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Brazos.png`); }
 function frontePath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Frente.png`); }
@@ -2508,6 +2508,6 @@ if (!EDIT_MODE) {
   document.head.appendChild(styleRO);
 }
 </script>
-<script src="layout.js?v=21"></script>
+<script src="layout.js?v=22"></script>
 </body>
 </html>

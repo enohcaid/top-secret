@@ -3,9 +3,9 @@
 const { chromium } = require('playwright');
 const M='https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const CARDS=[
- ['home','Inicio','TOP SECRET','Football Club','VPN · VPUG · 11x11 — Temporada 4','logos/plantel-t4-mum79hui.webp','50% 30%',1],
+ ['home','Inicio','TOP SECRET','Football Club','VPN · VPUG · 11x11 — Temporada 4','logos/plantel-t4-munfhq5w.webp','50% 30%',1],
  ['noticias','Noticias','Noticias','Archivo del club','Expedientes desclasificados','logos/noticias/kits-t4-portada-v3.webp','50% 25%'],
- ['plantel','Miembros','El Plantel','Temporada 4','Los agentes de Top Secret FC','logos/plantel-t4-mum79hui.webp','50% 30%'],
+ ['plantel','Miembros','El Plantel','Temporada 4','Los agentes de Top Secret FC','logos/plantel-t4-munfhq5w.webp','50% 30%'],
  ['convocatoria','Miembros','Convocatoria','Quién juega hoy','Formación y presentes del día','logos/duos/duo-mediocampo-k1.webp','50% 12%'],
  ['plan','Miembros','Plan de juego','Información clasificada','Solo para el plantel','logos/plan/boveda.webp','50% 50%'],
  ['competencias','Competencias','Competencias','VPN · VPUG · 11x11','Posiciones, calendario y estadísticas','logos/duos/duo-ataque-k1.webp','50% 12%'],

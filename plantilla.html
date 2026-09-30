@@ -9,13 +9,13 @@
 <meta property="og:title" content="El Plantel · Top Secret FC">
 <meta property="og:description" content="Los jugadores de Top Secret FC en la Temporada 4.">
 <meta property="og:url" content="https://enohcaid.github.io/top-secret/plantilla.html">
-<meta property="og:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og/og-plantel-v2.jpg">
+<meta property="og:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og/og-plantel-v3.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="El Plantel · Top Secret FC">
 <meta name="twitter:description" content="Los jugadores de Top Secret FC en la Temporada 4.">
-<meta name="twitter:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og/og-plantel-v2.jpg">
+<meta name="twitter:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og/og-plantel-v3.jpg">
 <link rel="icon" type="image/png" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png">
 <link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -732,7 +732,7 @@ body.season-4 .page-header{display:none;}
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
 import { ROSTER_T3, ROSTER_T4 } from './roster.js';
-import { STAGE_T4, STAGE_IMG } from './plantel-t4-stage.js?v=mum79hui';
+import { STAGE_T4, STAGE_IMG } from './plantel-t4-stage.js?v=munfhq5w';
 
 /* ─── ROSTER ─── */
 const ROSTER = [
@@ -827,7 +827,7 @@ function plataformaBadge(p) {
 /* ─── PATHS ─── */
 const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores (R2 los cachea un año en el navegador).
-const RENDER_V = '2026-09-29';
+const RENDER_V = '2026-09-30';
 function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (p.startsWith('Renders/') ? '?v=' + RENDER_V : ''); }
 function renderFolder(p) { return p.folderOverride || p.key; }
 function brazosPath(p)   { return mediaUrl(`Renders/${renderFolder(p)}/Brazos.png`); }
@@ -1390,6 +1390,6 @@ renderGrid4('all');
   }, 400);
 })();
 </script>
-<script src="layout.js?v=21"></script>
+<script src="layout.js?v=22"></script>
 </body>
 </html>

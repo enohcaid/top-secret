@@ -30,7 +30,7 @@ const ROSTER_T3 = [
 // Brazos4/Frente4/Pose4 con el Kit 1 de T4; los arqueros con el kit de arquero.
 const ROSTER_T4 = [
   {key:'Ivan_Cabj_La12',   pos:'POR', posn:'Portero',         num:'12', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
-  {key:'adri_cai',         pos:'POR', posn:'Portero',         num:'99', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
+  {key:'adri_cai',         pos:'POR', posn:'Portero',         num:'32', nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
   {key:'rivarola90',       pos:'DEF', posn:'Defensa central', num:'2',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'ps'},
   {key:'Alexisraies23',    pos:'DEF', posn:'Defensa central', num:'3',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
   {key:'Cabers14',         pos:'DEF', posn:'Defensa central', num:'5',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'xbox'},
