@@ -28,7 +28,10 @@ export function r2() {
 export const bucket = () => { loadEnv(); return process.env.R2_BUCKET || 'top-secret-media'; };
 
 export async function putFile(localPath, key, type) {
-  await r2().send(new PutObjectCommand({ Bucket: bucket(), Key: key, Body: fs.readFileSync(localPath), ContentType: type || contentType(localPath) }));
+  const size = fs.statSync(localPath).size;
+  // Archivos grandes (backups, videos) en stream para no cargarlos enteros en memoria; límite de R2 por PUT: 5 GB.
+  const Body = size > 64 * 1048576 ? fs.createReadStream(localPath) : fs.readFileSync(localPath);
+  await r2().send(new PutObjectCommand({ Bucket: bucket(), Key: key, Body, ContentLength: size, ContentType: type || contentType(localPath) }));
 }
 export async function putBuffer(buf, key, type) {
   await r2().send(new PutObjectCommand({ Bucket: bucket(), Key: key, Body: buf, ContentType: type || contentType(key) }));
