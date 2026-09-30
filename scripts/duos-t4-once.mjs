@@ -8,8 +8,9 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import { generateImage, deleteChatById, currentChatId } from './generate-image-chatgpt.mjs';
+import { FOTOS_DIR } from './lib/env.mjs';
 
-const SRC = 'C:/Users/User/Documents/TOP SECRET/Fotos/T4';
+const SRC = path.join(FOTOS_DIR, 'T4');
 const OUT = path.resolve('logos/duos');
 const R = k => path.resolve(`Renders/${k}/Frente4.png`);
 

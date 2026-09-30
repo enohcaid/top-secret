@@ -14,8 +14,9 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import { generateImage, deleteChatById, currentChatId } from './generate-image-chatgpt.mjs';
+import { FOTOS_DIR } from './lib/env.mjs';
 
-const SRC_DIR = 'C:/Users/User/Documents/TOP SECRET/Fotos/T4';
+const SRC_DIR = path.join(FOTOS_DIR, 'T4');
 // Caras tapadas: con la lámina original ChatGPT copiaba la cara del modelo del
 // video en vez la del jugador (pasó con Lautavester7).
 const KIT_SHEET = path.join(SRC_DIR, 'KIT1-T4-referencia-sin-cara.png');

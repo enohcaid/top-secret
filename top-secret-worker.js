@@ -215,6 +215,8 @@ export default {
       // ── R2 MEDIA (/media/<key>) — serves Renders/ and logos/ from the R2 bucket ──
       if (url.pathname.startsWith('/media/') && request.method === 'GET') {
         const key = decodeURIComponent(url.pathname.slice('/media/'.length));
+        // `_fuentes/` guarda originales de trabajo (capturas, láminas de kits): no se publican.
+        if (key.startsWith('_fuentes/')) return new Response('Not found', { status: 404, headers: CORS_HEADERS });
         const obj = await env.MEDIA_BUCKET.get(key);
         if (!obj) return new Response('Not found', { status: 404, headers: CORS_HEADERS });
         const headers = new Headers(CORS_HEADERS);

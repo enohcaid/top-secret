@@ -20,12 +20,15 @@ import path from 'path';
 import { createInterface } from 'readline';
 import sharp from 'sharp';
 import { pathToFileURL } from 'url';
+import { loadEnv } from './lib/env.mjs';
 
 const WORKER_BASE             = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
-const R2_ACCESS_KEY   = '193343f75da07692afb937f600d53fbb';
-const R2_SECRET_KEY   = 'b3e498f4c5cdb0fac18f3b9dcca4586bae251b33f0a17e6ecf0162f694ed309d';
-const R2_ENDPOINT     = 'https://505a1321519db1680cebe235e4e42808.r2.cloudflarestorage.com';
-const R2_BUCKET       = 'top-secret-media';
+// Credenciales R2 desde .env / entorno (ver .env.example) — nunca escribirlas acá: el repo es público.
+loadEnv();
+const R2_ACCESS_KEY   = process.env.R2_ACCESS_KEY_ID || '';
+const R2_SECRET_KEY   = process.env.R2_SECRET_ACCESS_KEY || '';
+const R2_ENDPOINT     = `https://${process.env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com`;
+const R2_BUCKET       = process.env.R2_BUCKET || 'top-secret-media';
 function r2MediaUrl(relPath) {
   return `${WORKER_BASE}/media/${relPath.split('/').map(encodeURIComponent).join('/')}`;
 }
@@ -1361,10 +1364,14 @@ export {
   saveKitHistory,
   T3_FRENTES_DIR,
   PLAYERS_WITH_RENDERS,
+  PLAYER_TRAITS,
   imageRatio,
   buildEvalPrompt,
   buildResizePrompt,
   buildPrompt,
+  buildScene,
+  brandFormatBlock,
+  playerIdentityLine,
   pickStyle,
   fetchStyleHistory,
   saveStyleHistory,

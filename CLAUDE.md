@@ -14,6 +14,13 @@ There is no dev server, bundler, or build step. Pages use ES module imports (`im
 python -m http.server 8000
 ```
 
+## Credentials, knowledge and working from any PC
+
+- **The repo is public: never write credentials in code.** They live in `.env` (gitignored; template `.env.example`), loaded by `scripts/lib/env.mjs` (Node) or parsed directly in `.ps1` scripts. Variables: `CF_EMAIL`, `CF_API_KEY`, `CF_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `KV_NAMESPACE_ID`.
+- **R2** (all site images + working originals): `node scripts/r2.mjs ls|put|get|sync-up|sync-down` (lib: `scripts/lib/r2.mjs`). Keys mirror repo paths (`logos/…`, `Renders/…`); reference photos (game captures, player cards, kit sheets) are in `_fuentes/fotos/` — scripts find them through `FOTOS_DIR` (drygan's `Documents/TOP SECRET/Fotos` if present, else `fuentes/fotos/` pulled from R2).
+- **Project knowledge**: `docs/conocimiento/README.md` indexes the accumulated notes (workflows, user rules, gotchas). Read it before non-trivial work; when you learn something durable about the project, add a note there too (not only to local memory), so other PCs get it.
+- **Working from another PC / claude.ai/code**: see `docs/trabajar-desde-otra-pc.md`. ChatGPT image generation needs a local Chrome with CDP: `scripts/abrir-chrome-chatgpt.ps1`.
+
 ## Architecture
 
 Three layers:
@@ -93,7 +100,7 @@ Pages use the Firebase compat SDK 10.12.0 (`convo`, `convocatoria`, `estadistica
 
 ### Cloudflare Worker — `top-secret-worker.js`
 
-Source lives in this repo; **edits require redeploying** (credentials/commands in memory: "Cloudflare Worker deploy config"). Key routes:
+Source lives in this repo; **edits require redeploying**: `node scripts/deploy-worker.mjs` (reads credentials from `.env`; keeps the KV + R2 bindings and verifies `/media`). A GitHub Action (`.github/workflows/deploy-worker.yml`) also deploys on push when its repo secrets are set. `/media/_fuentes/*` is deliberately 404 (private working originals). Key routes:
 
 - `/vpn-table`, `/vpn-results`, `/vpn-fixtures`, `/vpug-table` (hardcoded fallback), `/copafacil-pretemporada` — standings/results proxies used by `posiciones.html`. 11x11 is fetched directly: `https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2`
 - `/counter` — visit counter (GET reads, POST increments)
@@ -184,7 +191,7 @@ A new VPUG competition (regular season, pretemporada, playoffs, whatever CopáF�
    - **CopáFácil does not store calendar dates or kickoff times per match** — only the pairing and round order. Firebase has nothing to scrape here; the real cadence (which weekday(s), what time) has to come from the user/organizer. Ask before inventing a schedule. Once you have the cadence, project it forward Mon–Thu (or whatever the pattern is) starting from `d_i` — see the 2026-08 VPUG T6 season for a worked example.
 3. **Get team names/logos.** `GET https://copafacil-web.firebaseio.com/events/{eventId}@{code}/teams.json` → `{name, url (logo)}` per team key. Standings (`w/d/l/gf/gc/pts`) live in each team's `dt` snapshot object, keyed by timestamp — **absent until at least one match in that tournament has been scored**, so a brand-new season legitimately returns teams with no `dt` at all (not a bug).
 4. **Wire it into the site** (all of these, or the fetch will silently show stale/wrong data on one page while looking fine on another):
-   - `top-secret-worker.js`: if the tournament will run for a while (not a one-off playoff leg), add a dedicated proxy endpoint like `/vpug-table-t3` mirroring `/vpug-table`'s stats-parsing (`dt` string format `"0=pts#1=gp#2=w#..."`) — don't reuse an existing endpoint hardcoded to a different event key. Redeploy (see [[reference_cloudflare_deploy.md]]).
+   - `top-secret-worker.js`: if the tournament will run for a while (not a one-off playoff leg), add a dedicated proxy endpoint like `/vpug-table-t3` mirroring `/vpug-table`'s stats-parsing (`dt` string format `"0=pts#1=gp#2=w#..."`) — don't reuse an existing endpoint hardcoded to a different event key. Redeploy (`node scripts/deploy-worker.mjs`, see `docs/conocimiento/reference_cloudflare_y_r2.md`).
    - `posiciones.html`: check for a `PRÓXIMAMENTE` placeholder pane already reserved for this — the site pre-builds "Temporada 1/2/3" tab slots ahead of time (`t1-pane-vpug`, `t2-pane-vpug`, `t3-pane-vpug`, etc.) precisely so the next VPUG season has a home. Replace the placeholder `<div>` with a `<table id="tN-vpug-table">`, add a `fetchTNVPUG()` following the `fetchT2VPUG()` pattern (live fetch with a hardcoded all-zero fallback array for when the Worker is down), reuse `normVPUG()` (it already flags the `TOP Secret` row via regex).
    - `calendario.html`: add TOP Secret's fixture rows to the `RAW` array (only TS's own matches, not the whole round-robin) under a new `// ══ VPUG T? — <name> ══` comment block, plus rival logos to a new `VPUG_T?_BADGES` map wired into `vpugBadge()`. Months auto-bucket into the Temporada 1/2/3 UI sections by date against `T3_CUTOFF` — no manual section wiring needed unless the cutoff itself needs to move.
    - `convocatoria.html`: mirror the exact same fixture rows into a `VPUG_T?_SCHEDULE` array and the badges into a matching `VPUG_T?_BADGES` map (comment reminding future edits to keep both files in sync), then wire both into `getTodayMatches()` — filter today's entries, dedupe against `calCustom`, and fold into the final merged array — following the existing `VPUG_T2_SCHEDULE`/`fromVpugT2` block as the template.

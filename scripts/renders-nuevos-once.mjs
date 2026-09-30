@@ -17,8 +17,9 @@ import {
   MAX_ATTEMPTS, CREST_WHITE_PATH,
   generateImage, evaluateImage, deleteChatById, currentChatId,
 } from './generate-image-chatgpt.mjs';
+import { FOTOS_DIR } from './lib/env.mjs';
 
-const SRC_DIR = 'C:/Users/User/Documents/TOP SECRET/Fotos/T3';
+const SRC_DIR = path.join(FOTOS_DIR, 'T3');
 const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');
 
 // Renders YA APROBADOS de otros jugadores, usados como referencia visual

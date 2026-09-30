@@ -16,10 +16,14 @@ function Log($msg) {
 }
 
 # ── PASO 0: Limpieza de imágenes de noticias descartadas ─────────────────────
-$r2AccessKey = '193343f75da07692afb937f600d53fbb'
-$r2SecretKey = 'b3e498f4c5cdb0fac18f3b9dcca4586bae251b33f0a17e6ecf0162f694ed309d'
-$r2Endpoint  = 'https://505a1321519db1680cebe235e4e42808.r2.cloudflarestorage.com'
-$r2Bucket    = 'top-secret-media'
+# Credenciales R2 desde .env en la raíz del repo (ver .env.example) — nunca escribirlas acá: el repo es público.
+$envVars = @{}
+$envFile = Join-Path (Split-Path $PSScriptRoot -Parent) ".env"
+if (Test-Path $envFile) { Get-Content $envFile -Encoding UTF8 | ForEach-Object { if ($_ -match "^\s*([A-Z0-9_]+)\s*=\s*(.*)$") { $envVars[$matches[1]] = $matches[2].Trim() } } }
+$r2AccessKey = $envVars["R2_ACCESS_KEY_ID"]
+$r2SecretKey = $envVars["R2_SECRET_ACCESS_KEY"]
+$r2Endpoint  = "https://$($envVars["CF_ACCOUNT_ID"]).r2.cloudflarestorage.com"
+$r2Bucket    = "top-secret-media"
 
 try {
     $discard = Invoke-RestMethod "$worker/discard-flag" -TimeoutSec 10

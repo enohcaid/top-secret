@@ -1,0 +1,29 @@
+# Despliega el Worker de Cloudflare (top-secret-proxy) cuando cambia top-secret-worker.js en main.
+# Requiere estos secretos en GitHub (Settings → Secrets and variables → Actions):
+#   CF_EMAIL, CF_API_KEY, CF_ACCOUNT_ID, KV_NAMESPACE_ID
+# Sin secretos cargados, el job termina sin hacer nada (el deploy local sigue funcionando igual).
+name: Deploy Worker
+
+on:
+  push:
+    branches: [main]
+    paths: [top-secret-worker.js]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy
+        env:
+          CF_EMAIL: ${{ secrets.CF_EMAIL }}
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          KV_NAMESPACE_ID: ${{ secrets.KV_NAMESPACE_ID }}
+        run: |
+          if [ -z "$CF_API_KEY" ]; then echo "Secretos no configurados: se omite el deploy."; exit 0; fi
+          node scripts/deploy-worker.mjs

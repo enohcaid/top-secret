@@ -26,3 +26,13 @@ scripts/.last-neterr
 logos/*
 Renders/*
 scripts/.og-out/
+
+# Credenciales locales (ver .env.example)
+.env
+
+# Originales de trabajo bajados de R2 (_fuentes/)
+fuentes/
+
+# Cookies exportadas de YouTube (sensibles) y logs sueltos
+scripts/.yt-cookies.txt
+*.log

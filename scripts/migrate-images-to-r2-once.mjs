@@ -2,11 +2,14 @@
 // Non-destructive: does not touch git or existing site references.
 import { readFileSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { loadEnv } from './lib/env.mjs';
 
-const ACCESS_KEY = '193343f75da07692afb937f600d53fbb';
-const SECRET_KEY = 'b3e498f4c5cdb0fac18f3b9dcca4586bae251b33f0a17e6ecf0162f694ed309d';
-const ENDPOINT = 'https://505a1321519db1680cebe235e4e42808.r2.cloudflarestorage.com';
-const BUCKET = 'top-secret-media';
+// Credenciales desde .env / entorno (ver .env.example).
+loadEnv();
+const ACCESS_KEY = process.env.R2_ACCESS_KEY_ID;
+const SECRET_KEY = process.env.R2_SECRET_ACCESS_KEY;
+const ENDPOINT = `https://${process.env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com`;
+const BUCKET = process.env.R2_BUCKET || 'top-secret-media';
 
 const MIME = {
   png: 'image/png',
