@@ -15,7 +15,9 @@
  * - El video sale con la proporción de la imagen (p. ej. 1536x1024 → 1152x768), 30 fps.
  * - Reusa siempre el mismo diseño de Canva (guardado en scripts/.canva-design.json) para no
  *   crear uno nuevo por video. Cada imagen queda además en "Subidos" de Canva.
- * - Cada generación consume créditos de IA de Canva.
+ * - Cada generación consume créditos de IA de Canva. Con la asignación agotada Canva sigue
+ *   generando pero con ~5 min de pausa entre videos: el script espera y reintenta solo
+ *   (CANVA_ESPERA_MIN, CANVA_REINTENTOS). --uso muestra el % usado y lo que queda.
  */
 import { chromium } from 'playwright';
 import fs from 'fs';
@@ -41,6 +43,7 @@ if (argv.includes('--uso')) {
   const costo = pr ? pr.media : null;
   console.log(`Uso de IA de Canva: ${u.usado}% usado, se restablece el ${u.reset}.`);
   console.log(costo ? `Cada video consume en promedio ${costo.toFixed(2)}% (medido en ${pr.n}). Quedan ~${Math.floor((100 - u.usado) / costo)} videos.` : 'Todavía no hay consumo medido por video.');
+  if (u.usado >= 99) console.log('Asignación agotada: se puede seguir generando, pero Canva pone ~5 min de espera entre videos (el script espera solo).');
   process.exit(0);
 }
 if (!IMG || !fs.existsSync(IMG)) { console.error('Uso: node scripts/canva-imagen-a-video.mjs <imagen> [--prompt "..."] [--out x.mp4] [--r2 clave.mp4]'); process.exit(1); }
@@ -55,7 +58,8 @@ page.setDefaultTimeout(60000);
 
 const usoAntes = await leerUso(ctx).catch(() => null);
 if (usoAntes) log('uso de IA de Canva antes:', usoAntes.usado + '%');
-if (usoAntes && usoAntes.usado >= 99) { console.error('La asignación de IA de Canva está agotada (se restablece el ' + usoAntes.reset + ').'); process.exit(2); }
+// Con la asignación agotada Canva no corta: pone una pausa (~5 min) entre generaciones. El paso 5 reintenta solo.
+if (usoAntes && usoAntes.usado >= 99) log('asignación de IA agotada: Canva va a pedir ~5 min de espera entre videos (se restablece el ' + usoAntes.reset + ').');
 
 try {
   // 1. Diseño de trabajo (se crea una sola vez).
@@ -113,15 +117,25 @@ try {
     await page.getByPlaceholder('Describí el efecto de movimiento ideal').fill(PROMPT);
     await page.waitForTimeout(800);
   }
-  await page.locator('button:visible', { hasText: 'Generar video de 5 segundos' }).first().click();
-  log('generando', PROMPT ? '(personalizado)' : '(inteligente)');
+  // Si Canva está en pausa por límite, no aparece el video: esperar 5 min y volver a tocar "Generar".
+  const ESPERA_MIN = +(process.env.CANVA_ESPERA_MIN || 5), REINTENTOS = +(process.env.CANVA_REINTENTOS || 6);
   let src = null;
-  for (let i = 0; i < 60 && !src; i++) {
-    await page.waitForTimeout(5000);
-    src = await page.evaluate(prev => [...document.querySelectorAll('video')].map(v => v.currentSrc || v.src)
-      .find(s => s && s.includes('ingredient-generation') && !prev.includes(s)), prevVideos);
+  for (let intento = 1; intento <= REINTENTOS && !src; intento++) {
+    const btn = page.locator('button:visible', { hasText: 'Generar video de 5 segundos' }).first();
+    if (await btn.isEnabled().catch(() => false)) await btn.click();
+    log('generando', PROMPT ? '(personalizado)' : '(inteligente)', intento > 1 ? `— intento ${intento}` : '');
+    for (let i = 0; i < 30 && !src; i++) {        // hasta 2,5 min por intento
+      await page.waitForTimeout(5000);
+      src = await page.evaluate(prev => [...document.querySelectorAll('video')].map(v => v.currentSrc || v.src)
+        .find(s => s && s.includes('ingredient-generation') && !prev.includes(s)), prevVideos);
+    }
+    if (!src && intento < REINTENTOS) {
+      const aviso = await page.evaluate(() => (document.body.innerText.match(/[^\n]*(límite|espera|esperá|más tarde|minuto|asignación)[^\n]*/i) || [''])[0].slice(0, 140));
+      log(`sin video (${aviso || 'sin aviso'}) — espero ${ESPERA_MIN} min y reintento`);
+      await page.waitForTimeout(ESPERA_MIN * 60000);
+    }
   }
-  if (!src) throw new Error('Canva no devolvió el video (¿sin créditos o error de generación?).');
+  if (!src) throw new Error('Canva no devolvió el video después de ' + REINTENTOS + ' intentos.');
 
   // 6. Descargar (y subir a R2 si se pidió).
   const res = await fetch(src);
