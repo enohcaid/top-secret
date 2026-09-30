@@ -308,6 +308,28 @@ footer{border-top:0;}
 .hero-crest-txt{font-size:clamp(3rem,7vw,6.6rem);white-space:nowrap;font-weight:900;letter-spacing:-.045em;line-height:.92;color:var(--text);}
 .hero-crest{display:block;width:clamp(110px,11vw,170px);height:auto;filter:drop-shadow(0 18px 40px rgba(0,0,0,.55));}
 @media(max-width:900px){.hero-crest{width:96px;}}
+/* ── EN VIVO: ventana 16:9 flotante sobre la foto (no cubre el menú ni el texto) ── */
+.hero-live-wrap{inset:auto;display:none;position:absolute;z-index:6;top:50%;left:clamp(16px,2.4vw,40px);right:max(var(--gutter), calc((100vw - 1360px) / 2 + var(--gutter)));transform:translateY(-44%);flex-direction:column;border-radius:20px;overflow:hidden;background:#0B0A07;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(242,238,224,.08);}
+.hero-live-wrap.on{display:flex;}
+.live-bar{display:flex;align-items:center;gap:12px;height:44px;padding:0 16px;background:#15130e;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:rgba(242,238,224,.6);flex-shrink:0;}
+.live-dots{display:flex;gap:7px;}
+.live-dots i{width:9px;height:9px;border-radius:50%;background:#e0645a;}
+.live-dots i:nth-child(2){background:#e0c979;}.live-dots i:nth-child(3){background:#3ecf8e;}
+.live-path{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.live-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(255,59,59,.14);color:#ff6b6b;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:11px;}
+.live-screen{position:relative;aspect-ratio:16/9;background:#000;}
+.live-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.hero-card.is-live .hero-photo{filter:blur(8px) brightness(.32) saturate(.7);transform:scale(1.06);}
+.hero-card.is-live .hero-tag,.hero-card.is-live .hero-nav{display:none;}
+/* el "Football Club" enorme se metería debajo del video: mientras hay vivo entra en su columna */
+.hero-card.is-live .hero-crest-txt{font-size:clamp(2.4rem,4.1vw,4.4rem);}
+@media(max-width:900px){
+  .hero-card.is-live .hero-visual{aspect-ratio:auto;max-height:none;padding:calc(var(--topbar) + 10px) var(--gutter) 6px;}
+  .hero-card.is-live .hero-photo,.hero-card.is-live .hero-visual::after{display:none;}
+  .hero-live-wrap{position:relative;top:auto;left:auto;right:auto;transform:none;border-radius:16px;}
+  .live-bar{height:38px;font-size:11px;padding:0 12px;}
+  .hero-card.is-live .hero-crest-txt{font-size:clamp(2.2rem,11vw,3.4rem);}
+}
 /* ── FIN LIBRE ── */
 </style>
 </head>
@@ -353,8 +375,8 @@ footer{border-top:0;}
             <button type="button" id="hero-next" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
           </div>
           <div class="hero-live-wrap" id="hero-live-wrap">
-            <div class="hero-live-badge"><span class="hero-live-dot"></span>En vivo en Twitch</div>
-            <iframe id="hero-live-frame" title="Transmisión en vivo Top Secret FC" allowfullscreen scrolling="no"></iframe>
+            <div class="live-bar"><span class="live-dots"><i></i><i></i><i></i></span><span class="live-path">twitch.tv/topsecretfc</span><span class="live-pill"><span class="hero-live-dot"></span>En vivo</span></div>
+            <div class="live-screen"><iframe id="hero-live-frame" title="Transmisión en vivo Top Secret FC" allowfullscreen scrolling="no"></iframe></div>
           </div>
         </div>
         <a class="hero-scroll" href="#noticias"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></span>Bajá</a>
@@ -479,7 +501,7 @@ footer{border-top:0;}
 </div>
 
 <script src="noticias-data.js"></script>
-<script type="module" src="index-home.js?v=8"></script>
+<script type="module" src="index-home.js?v=9"></script>
 <script src="layout.js?v=22"></script>
 </body>
 </html>

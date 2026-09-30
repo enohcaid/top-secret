@@ -314,7 +314,8 @@ if (!reduced && typeof gsap !== 'undefined') {
     if (live === isLive) return;
     isLive = live;
     liveFrame.src = live ? `https://player.twitch.tv/?channel=${CHANNEL}&parent=${location.hostname || 'localhost'}&muted=true&autoplay=true` : '';
-    liveWrap.style.display = live ? 'block' : 'none';
+    liveWrap.classList.toggle('on', live);
+    liveWrap.closest('.hero-card').classList.toggle('is-live', live);
   }
   // Los vivos solo pasan entre 22:30 y 00:30 ART — fuera de esa franja (con
   // margen) ni siquiera se pregunta al Worker, para no gastar cuota de KV.
