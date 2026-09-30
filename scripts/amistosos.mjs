@@ -40,7 +40,7 @@ const AUTO = process.argv.includes('--auto');
 const TODOS = ['22:40', '23:00', '23:20', '23:40'];
 const hArg = process.argv.indexOf('--horarios');
 const SLOTS = hArg > 0 ? process.argv[hArg + 1].split(',').map(h => h.trim().replace('.', ':').padStart(5, '0')) : TODOS;
-if (SLOTS.some(h => !/^d{2}:d{2}$/.test(h))) { console.error('Horarios inválidos:', SLOTS.join(', ')); process.exit(1); }
+if (SLOTS.some(h => !/^\d{2}:\d{2}$/.test(h))) { console.error('Horarios inválidos:', SLOTS.join(', ')); process.exit(1); }
 const GRUPO = /amistosos.*vpn/i;
 const PIDE = /(amistos|busc|disponib|libre|rival|jugar|partido|\bhoy\b|\bx\s*1\b|\b\d{1,2}[:.]\d{2}\b|\b2[23]\s*(hs|h)\b)/i;
 const SI = /\b(dale+|s[ií]+|ok+|oka|okey|de una|va|vamos|listo|joya|perfecto|confirm\w*|hecho|obvio|genial|bueno|buen[ií]simo|claro|seguro)\b|👍|🤝|✅|💪|👌|🔥/i;
