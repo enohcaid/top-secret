@@ -32,6 +32,7 @@ import path from 'path';
 import { execFile } from 'child_process';
 import { ROOT } from './lib/env.mjs';
 import { buscarEquipo as matchEquipo } from './lib/equipos-match.mjs';
+import { buscarEscudo } from './lib/escudos.mjs';
 
 const { Client, LocalAuth } = wweb;
 const PRUEBA = process.argv.includes('--prueba');
@@ -98,6 +99,8 @@ function entradaAmistoso(p) {
   return { mapValue: { fields: Object.fromEntries(Object.entries(f).map(([k, v]) => [k, typeof v === 'boolean' ? { booleanValue: v } : { stringValue: v }])) } };
 }
 async function cargarEnSitio(p) {
+  // Sin escudo en VPN (equipo de otra liga o corregido a mano): buscarlo en VPUG y 11x11.
+  if (!p.equipo.logo) { const e = await buscarEscudo(p.equipo.nombre).catch(() => null); if (e) { p.equipo.logo = e.logo; log(`escudo de ${p.equipo.nombre} tomado de ${e.fuente}`); } }
   if (PRUEBA) { log('[prueba] no se carga en el sitio:', p.equipo.nombre, p.slot); return true; }
   const r = await fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents:commit', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },

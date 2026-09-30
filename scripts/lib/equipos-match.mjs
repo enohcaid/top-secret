@@ -63,6 +63,7 @@ export function buscarEquipo(texto, equipos, alias = {}) {
   }
   // Empate entre equipos distintos (ej. "san jorge": 4BDO San Jorge / San Jorge de Tucuman): no adivinar.
   const empatados = todos.filter(x => mejor && x.score >= mejor.score - 0.2);
-  if (mejor && empatados.length > 1) return { ...mejor, dudoso: empatados.map(x => x.nombre) };
+  const distintos = [...new Set(empatados.map(x => compacto(x.nombre)))];   // el mismo club en varias ligas no es duda
+  if (mejor && distintos.length > 1) return { ...mejor, dudoso: [...new Set(empatados.map(x => x.nombre))] };
   return mejor;
 }
