@@ -36,3 +36,4 @@ fuentes/
 # Cookies exportadas de YouTube (sensibles) y logs sueltos
 scripts/.yt-cookies.txt
 *.log
+scripts/.canva-design.json

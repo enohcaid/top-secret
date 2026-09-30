@@ -57,6 +57,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 ## Referencias técnicas
 
 - [reference_calendario_dead_code](reference_calendario_dead_code.md) — calendario.html tiene funciones de renderizado muertas (nunca invocadas) que pueden confundir — dónde está el widget "HOY" real
+- [reference_canva_imagen_a_video](reference_canva_imagen_a_video.md) — Automatización de "Imagen a video" de Canva (videos de 5 s desde una imagen) con scripts/canva-imagen-a-video.mjs vía el Chrome CDP
 - [reference_canva_resumen_semanal](reference_canva_resumen_semanal.md) — Proceso completo y limitaciones reales para armar el video 'Resumen Semanal' (goles de la semana) en Canva, distinto del proceso de 'Formación Titular'
 - [reference_canva_video_formacion_titular](reference_canva_video_formacion_titular.md) — Proceso y limitaciones reales para editar los videos 'Formación Titular' VPN y 11x11 (Canva) con partidos del día y cambios de jugador, incluye checklist end-to-end y export correcto
 - [reference_cloudflare_y_r2](reference_cloudflare_y_r2.md) — Cómo desplegar el Worker y manejar el bucket R2 sin wrangler — credenciales en .env, scripts deploy-worker.mjs y r2.mjs
