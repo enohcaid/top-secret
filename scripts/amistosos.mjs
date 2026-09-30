@@ -98,6 +98,20 @@ function entradaAmistoso(p) {
   if (p.equipo.logo) f.badge = p.equipo.logo;
   return { mapValue: { fields: Object.fromEntries(Object.entries(f).map(([k, v]) => [k, typeof v === 'boolean' ? { booleanValue: v } : { stringValue: v }])) } };
 }
+// Horarios ya ocupados hoy en el calendario (amistosos cargados a mano o por otra corrida del bot).
+async function leerOcupadosDelSitio() {
+  try {
+    const d = await (await fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado')).json();
+    const hoyStr = st.fecha;
+    for (const v of d.fields?.custom?.arrayValue?.values || []) {
+      const x = v.mapValue.fields;
+      const date = x.date?.stringValue, time = x.time?.stringValue, rival = x.rival?.stringValue;
+      if (date === hoyStr && SLOTS.includes(time) && !st.confirmados[time]) st.confirmados[time] = rival || 'ocupado';
+    }
+    save();
+  } catch (e) { log('no pude leer el calendario:', e.message); }
+}
+
 async function cargarEnSitio(p) {
   // Sin escudo en VPN (equipo de otra liga o corregido a mano): buscarlo en VPUG y 11x11.
   if (!p.equipo.logo) { const e = await buscarEscudo(p.equipo.nombre).catch(() => null); if (e) { p.equipo.logo = e.logo; log(`escudo de ${p.equipo.nombre} tomado de ${e.fuente}`); } }
@@ -138,6 +152,8 @@ client.on('ready', async () => {
   // No se usa getChats(): con muchos chats falla en whatsapp-web.js. El grupo se reconoce por el
   // nombre cuando llega su primer mensaje (ver esGrupoAmistosos).
   await cargarEquipos();
+  await leerOcupadosDelSitio();
+  if (!libre()) log('todos los horarios de hoy ya están ocupados' + (PRUEBA ? ' — en prueba igual aviso los pedidos para ver la detección' : ''));
   await avisar(`🕵️ *Bot de amistosos activo*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*.`);
 });
 
@@ -168,7 +184,7 @@ async function esGrupoAmistosos(msg) {
 
 async function pedidoGrupo(msg) {
   if (!PIDE.test(msg.body)) return;
-  if (!libre()) return;
+  if (!libre() && !PRUEBA) return;
   const contacto = await msg.getContact();
   const autor = msg.author || msg.from;
   if (Object.values(st.pedidos).some(p => p.autor === autor && p.estado !== 'descartado')) return;   // ya lo tenemos
@@ -180,7 +196,7 @@ async function pedidoGrupo(msg) {
   if (hp && SLOTS.includes(hp.replace('.', ':')) && !ocupados().has(hp.replace('.', ':'))) st.pedidos[id].horaPedida = hp.replace('.', ':');
   save();
   log(`pedido ${id}:`, nombreContacto, '→', eq ? `${eq.nombre} (${eq.div})` : 'equipo sin identificar');
-  await avisar(`📣 *Pedido ${id}* — ${eq?.dudoso ? `¿${eq.dudoso.join(' o ')}?` : eq ? `*${eq.nombre}* (${eq.div})` : '_equipo sin identificar_'}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\nLe ofrezco *${st.pedidos[id].horaPedida || libre()}*${st.pedidos[id].horaPedida ? ' (la que pidió)' : ''}. Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq && !eq.dudoso ? '' : `, *${id} <equipo>* para definir el equipo`}, o *${id} no*.`);
+  await avisar(`📣 *Pedido ${id}* — ${eq?.dudoso ? `¿${eq.dudoso.join(' o ')}?` : eq ? `*${eq.nombre}* (${eq.div})` : '_equipo sin identificar_'}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${libre() ? `Le ofrezco *${st.pedidos[id].horaPedida || libre()}*${st.pedidos[id].horaPedida ? ' (la que pidió)' : ''}.` : '_Sin horarios libres hoy: solo para ver la detección._'} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq && !eq.dudoso ? '' : `, *${id} <equipo>* para definir el equipo`}, o *${id} no*.`);
   if (AUTO && eq && !eq.dudoso && eq.div !== '?') await ofrecer(id, null, null);
 }
 
@@ -254,5 +270,18 @@ async function comando(body) {
 setInterval(() => { if (horaArt() >= '23:45') { log('23:45: fin del día, apago.'); process.exit(0); } }, 60000);
 process.on('SIGINT', async () => { try { await client.destroy(); } catch {} process.exit(0); });
 
-log('iniciando WhatsApp personal', PRUEBA ? '(MODO PRUEBA)' : '');
-client.initialize();
+// Al recuperar la sesión, WhatsApp Web a veces recarga la página mientras se inyecta el bot
+// ("Execution context was destroyed"): reintentar el arranque.
+async function iniciar(intento = 1) {
+  log('iniciando WhatsApp personal', PRUEBA ? '(MODO PRUEBA)' : '', intento > 1 ? '— intento ' + intento : '');
+  try { await client.initialize(); }
+  catch (e) {
+    if (intento >= 4) { log('no pude iniciar WhatsApp:', e.message.split('\n')[0]); process.exit(1); }
+    log('falló el arranque (' + e.message.split('\n')[0].slice(0, 80) + '), reintento en 5 s');
+    try { await client.destroy(); } catch {}
+    await new Promise(r => setTimeout(r, 5000));
+    return iniciar(intento + 1);
+  }
+}
+process.on('unhandledRejection', e => log('error no manejado:', String(e && e.message || e).split('\n')[0]));
+iniciar();
