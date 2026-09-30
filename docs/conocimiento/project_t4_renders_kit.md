@@ -31,3 +31,4 @@ metadata:
 - Gotcha: con la lámina del kit con caras visibles, ChatGPT copió la cara del modelo del video (Lautavester7) → usar `KIT1-T4-referencia-sin-cara.png`. Looks renovados: adjuntar Frente3 + carta nueva y describir en texto qué cambió.
 
 **How to apply:** si se retoma T4 (sitio, presentación, Kit 2), partir de estas decisiones sin volver a preguntarlas. Ver [[reference_cloudflare_y_r2]] para subir Renders/ a R2 (no van a git).
+- 2026-09-30: **adri_cai pasó al #32** (antes 99). Renders (Frente4/Brazos4/Pose4/Unica4), dupla `duo-arqueros-v2` y foto grupal regenerados. Para cualquier cambio de dorsal futuro: `node scripts/fix-dorsal.mjs --quien "<descripción (gamertag)>" --de <n> --a <n> <archivos...>` (genera `.nuevo.png` para revisar), luego webp + `scripts/r2.mjs put`, subir `RENDER_V` (plantilla, convocatoria, index-home), `node scripts/plantel-foto-t4.mjs` si cambió Unica4, y actualizar `num` en roster.js.
