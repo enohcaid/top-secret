@@ -98,18 +98,37 @@ function entradaAmistoso(p) {
   if (p.equipo.logo) f.badge = p.equipo.logo;
   return { mapValue: { fields: Object.fromEntries(Object.entries(f).map(([k, v]) => [k, typeof v === 'boolean' ? { booleanValue: v } : { stringValue: v }])) } };
 }
-// Horarios ya ocupados hoy en el calendario (amistosos cargados a mano o por otra corrida del bot).
+// Horarios ya ocupados hoy: se leen TODOS los partidos del día con la misma lógica que la
+// convocatoria (getTodayMatches: oficiales VPN/VPUG/11x11 + amistosos cargados), abriendo la
+// página publicada. Un horario está ocupado si hay un partido que empieza a menos de 20 min.
 async function leerOcupadosDelSitio() {
+  let partidos = null;
   try {
-    const d = await (await fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado')).json();
-    const hoyStr = st.fecha;
-    for (const v of d.fields?.custom?.arrayValue?.values || []) {
-      const x = v.mapValue.fields;
-      const date = x.date?.stringValue, time = x.time?.stringValue, rival = x.rival?.stringValue;
-      if (date === hoyStr && SLOTS.includes(time) && !st.confirmados[time]) st.confirmados[time] = rival || 'ocupado';
-    }
-    save();
-  } catch (e) { log('no pude leer el calendario:', e.message); }
+    const { chromium } = await import('playwright');
+    const b = await chromium.launch({ executablePath: CHROME });
+    const pg = await b.newPage();
+    await pg.goto('https://enohcaid.github.io/top-secret/convocatoria.html?vista&t=' + Date.now(), { waitUntil: 'load', timeout: 60000 });
+    await pg.waitForTimeout(8000);
+    partidos = await pg.evaluate(() => typeof getTodayMatches === 'function' ? getTodayMatches().map(m => ({ rival: m.rival, time: m.time, league: m.league })) : null);
+    await b.close();
+  } catch (e) { log('no pude leer los partidos del día desde la convocatoria:', e.message.split('\n')[0]); }
+  if (!partidos) {
+    // Respaldo: solo los partidos cargados a mano en Firestore.
+    try {
+      const d = await (await fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado')).json();
+      partidos = (d.fields?.custom?.arrayValue?.values || []).map(v => v.mapValue.fields)
+        .filter(x => x.date?.stringValue === st.fecha && (!x.tipo || x.tipo.stringValue === 'partido'))
+        .map(x => ({ rival: x.rival?.stringValue, time: x.time?.stringValue, league: x.league?.stringValue }));
+    } catch (e) { log('tampoco pude leer Firestore:', e.message); partidos = []; }
+  }
+  const min = t => { const [h, m] = String(t || '').split(':').map(Number); return h * 60 + m; };
+  for (const slot of SLOTS) {
+    if (st.confirmados[slot]) continue;
+    const choca = partidos.find(p => p.time && Math.abs(min(p.time) - min(slot)) < 20);
+    if (choca) st.confirmados[slot] = choca.rival + (choca.league && choca.league !== 'Amistoso' ? ' (' + choca.league + ')' : '');
+  }
+  save();
+  log('partidos del día:', partidos.map(p => p.time + ' ' + p.rival + ' ' + (p.league || '')).join(' | ') || 'ninguno');
 }
 
 async function cargarEnSitio(p) {
@@ -153,7 +172,13 @@ client.on('ready', async () => {
   // nombre cuando llega su primer mensaje (ver esGrupoAmistosos).
   await cargarEquipos();
   await leerOcupadosDelSitio();
-  if (!libre()) log('todos los horarios de hoy ya están ocupados' + (PRUEBA ? ' — en prueba igual aviso los pedidos para ver la detección' : ''));
+  if (!libre()) {
+    log('todos los horarios de hoy ya están ocupados' + (PRUEBA ? ' — en prueba igual aviso los pedidos para ver la detección' : ''));
+    if (!PRUEBA) {
+      await avisar(`🕵️ Hoy no hace falta buscar amistosos: los horarios ya están cubiertos.\n${SLOTS.map(s => `${s} ${st.confirmados[s]}`).join('\n')}`);
+      setTimeout(() => process.exit(0), 3000); return;
+    }
+  }
   await avisar(`🕵️ *Bot de amistosos activo*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*.`);
 });
 
