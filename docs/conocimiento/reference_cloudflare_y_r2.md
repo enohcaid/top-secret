@@ -15,7 +15,7 @@ metadata:
 | `R2_BUCKET` | `top-secret-media` |
 | `KV_NAMESPACE_ID` | Namespace KV `top-secret-data`, bindeado como `TS_KV` |
 
-Historia: hasta 2026-09-29 las claves R2 estaban escritas en `generate-image-chatgpt.mjs`, `watch-regen.ps1` y `migrate-images-to-r2-once.mjs` (públicas en GitHub). Se reemplazaron por un token nuevo limitado al bucket y todo lee de `.env`.
+Historia: hasta 2026-09-29 las claves R2 estaban escritas en `generate-image-chatgpt.mjs`, `watch-regen.ps1` y `migrate-images-to-r2-once.mjs` (públicas en GitHub). Se reemplazaron por un token nuevo limitado al bucket, todo lee de `.env` y el token viejo quedó revocado (era un token de cuenta: `DELETE /accounts/<acct>/tokens/<id>`).
 
 **Deploy del Worker** (`top-secret-proxy`): `node scripts/deploy-worker.mjs`. También lo corre la GitHub Action `.github/workflows/deploy-worker.yml` al pushear cambios de `top-secret-worker.js` (si están cargados los secretos del repo).
 - El deploy DEBE declarar los bindings KV `TS_KV` y R2 `MEDIA_BUCKET`, y `keep_bindings: ["secret_text"]` para conservar los secretos del Worker (`ADMIN_PIN`, etc.). Incidente 2026-09-28: un deploy sin el binding R2 dejó `/media/*` en 500 y todas las imágenes del sitio rotas. El script ya lo hace bien y verifica `/media` al final.
