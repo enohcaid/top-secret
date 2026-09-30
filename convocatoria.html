@@ -2330,7 +2330,7 @@ async function buildMatchPanel(H) {
   const hs = n >= 4 ? 0.68 : n === 3 ? 0.82 : 1;
   const logoH = 150 * u * hs;
   const headH = logoH + 30 * u + (50 + 40 + 38 + 80 + 32 + 40) * u * hs;
-  const footH = 64 * u, margin = 40 * u;
+  const footH = 0, margin = 40 * u;
   const gap = 14 * u;
   const rowH = n ? Math.min(135 * u, (H - headH - footH - margin * 2 - gap * (n - 1)) / n) : 0;
   const listH = n ? n * rowH + (n - 1) * gap : 120 * u;
@@ -2410,9 +2410,6 @@ async function buildMatchPanel(H) {
     y += rowH + gap;
   });
 
-  y = Math.max(y - gap + 44 * u, y);
-  const cap = captain ? ` · C: ${captain}` : '';
-  text(`${lineup.formation || ''}${cap}`, `500 ${Math.round(17 * u)}px Barlow`, 'rgba(242,238,224,.55)', center, y, 'center', 1 * u);
   return cvs;
 }
 async function buildExportCanvas(FW, FH, S, withPhotos) {
