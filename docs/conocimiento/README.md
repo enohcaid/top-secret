@@ -44,6 +44,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 ## Estado y decisiones del proyecto
 
 - [project_baja_cat_fel_ltemp_prep_t4](project_baja_cat_fel_ltemp_prep_t4.md) — CAT_FEL y lTemp30148 dejaron el club (2026-09-08); prep de Temporada 4 en plantilla.html/roster.js queda pendiente, el usuario pidió posponerla
+- [project_bot_amistosos](project_bot_amistosos.md) — Bot de amistosos sobre el WhatsApp personal de Juan (grupo Amistosos VPN), semi-automático, carga los confirmados en el calendario
 - [project_chequeo_nocturno_reportes](project_chequeo_nocturno_reportes.md) — Runbook manual para cargar reportes de partido (YouTube) en seed_matches.js — la rutina cloud automática quedó DESHABILITADA, hacerlo a mano cuando el usuario lo pida
 - [project_convocatoria_resets_2026_08_12](project_convocatoria_resets_2026_08_12.md) — convocatoria.html — incidente "se resetean los estados todo el tiempo" (2026-08-12), causas encontradas y fixeadas, qué revisar si vuelve a pasar. Incluye recurrencia 2026-08-19: alwaysPresent/captain/lineup vaciados en producción
 - [project_t4_renders_kit](project_t4_renders_kit.md) — Renders de plantel Temporada 4 (Frente4/Brazos4/Pose4) con Kit 1 negro/dorado y escudo Clean logo Dorado — decisiones del usuario y pendientes

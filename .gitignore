@@ -37,3 +37,7 @@ fuentes/
 scripts/.yt-cookies.txt
 *.log
 scripts/.canva-design.json
+
+# Sesión de WhatsApp personal del bot de amistosos (NUNCA subir)
+scripts/.wa-personal/
+.wwebjs_cache/

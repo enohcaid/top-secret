@@ -1,0 +1,21 @@
+{
+  "_comentario": "alias: como escriben al equipo → nombre oficial de VPN. nombre_sitio: nombre con el que se carga en el calendario (el que ya usa el sitio). extras: equipos que no están en 1ra/2da VPN pero juegan amistosos.",
+  "alias": {
+    "iacc": "Instituto Cantera",
+    "i.a.c.c": "Instituto Cantera",
+    "cantera iacc": "Instituto Cantera",
+    "iacc reserva": "Instituto Reserva",
+    "sub21": "SUB 21CF",
+    "sub 21": "SUB 21CF",
+    "infinix": "InfinitX",
+    "chaca": "Chacarita Esports",
+    "cuervo": "San Lorenzo Esports",
+    "olimpo": "Olimpo Esports"
+  },
+  "nombre_sitio": {
+    "Instituto Cantera": "IACC Cantera"
+  },
+  "extras": [
+    { "nombre": "Olimpo Esports", "div": "otra", "logo": null }
+  ]
+}
