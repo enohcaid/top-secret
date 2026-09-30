@@ -21,6 +21,7 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import { putFile } from './lib/r2.mjs';
+import { leerUso, registrar, promedio } from './lib/canva-uso.mjs';
 
 export const PROMPT_SEGURO = 'Travelling de cámara muy lento hacia adelante, estilo publicidad deportiva de alta gama. La iluminación se mantiene estable. Las personas posan inmóviles como estatuas, con la boca cerrada.';
 
@@ -31,6 +32,17 @@ if (argv.includes('--inteligente')) argv.splice(argv.indexOf('--inteligente'), 1
 const R2KEY = opt('--r2');
 const IMG = argv[0];
 const OUT = opt('--out') || (IMG && IMG.replace(/\.[a-z]+$/i, '') + '.mp4');
+// --uso: solo muestra el uso de IA de Canva y la estimación de videos restantes.
+if (argv.includes('--uso')) {
+  const b = await chromium.connectOverCDP('http://localhost:9222', { timeout: 30000 });
+  const u = await leerUso(b.contexts()[0]);
+  const pr = await promedio('imagen-a-video');
+  if (!u) { console.log('No pude leer el indicador de uso de Canva.'); process.exit(1); }
+  const costo = pr ? pr.media : null;
+  console.log(`Uso de IA de Canva: ${u.usado}% usado, se restablece el ${u.reset}.`);
+  console.log(costo ? `Cada video consume en promedio ${costo.toFixed(2)}% (medido en ${pr.n}). Quedan ~${Math.floor((100 - u.usado) / costo)} videos.` : 'Todavía no hay consumo medido por video.');
+  process.exit(0);
+}
 if (!IMG || !fs.existsSync(IMG)) { console.error('Uso: node scripts/canva-imagen-a-video.mjs <imagen> [--prompt "..."] [--out x.mp4] [--r2 clave.mp4]'); process.exit(1); }
 
 const DESIGN_FILE = path.resolve('scripts/.canva-design.json');
@@ -40,6 +52,10 @@ const browser = await chromium.connectOverCDP('http://localhost:9222', { timeout
 const ctx = browser.contexts()[0];
 const page = await ctx.newPage();
 page.setDefaultTimeout(60000);
+
+const usoAntes = await leerUso(ctx).catch(() => null);
+if (usoAntes) log('uso de IA de Canva antes:', usoAntes.usado + '%');
+if (usoAntes && usoAntes.usado >= 99) { console.error('La asignación de IA de Canva está agotada (se restablece el ' + usoAntes.reset + ').'); process.exit(2); }
 
 try {
   // 1. Diseño de trabajo (se crea una sola vez).
@@ -114,6 +130,10 @@ try {
   fs.writeFileSync(OUT, Buffer.from(await res.arrayBuffer()));
   log('video guardado', OUT, (fs.statSync(OUT).size / 1048576).toFixed(1) + ' MB');
   if (R2KEY) { await putFile(OUT, R2KEY, 'video/mp4'); log('subido a R2', R2KEY); }
+  await page.waitForTimeout(4000);   // el indicador de Canva tarda unos segundos en actualizarse
+  const usoDespues = await leerUso(ctx).catch(() => null);
+  const c = await registrar('imagen-a-video', OUT, usoAntes?.usado, usoDespues?.usado);
+  if (usoDespues) log(`uso de IA: ${usoDespues.usado}% (este video: ${c === '' ? '?' : c + '%'})`);
 } finally {
   await page.close().catch(() => {});
 }
