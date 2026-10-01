@@ -1,0 +1,14 @@
+{
+  "_ayuda": "Datos de una noche para el compilado de goles. Ver scripts/goles/README.md. inicio/fin = segundos del VOD (fin justo antes del corte de cámara o festejo).",
+  "vod": "2888589352",
+  "fecha": "2026-09-30",
+  "etiqueta": "AMISTOSO · 30/09",
+  "titulo": "AMISTOSOS · 30 DE SEPTIEMBRE",
+  "hudTopRightHasta": 210,
+  "goles": [
+    { "inicio": 2753, "fin": 2767.9, "marcador": "1-1", "rival": "Olimpo Esports", "escudoRival": "https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMunLybVb4pwFbqCue.png?alt=media&token=1&m=1778519167987", "minuto": "20'", "goleador": "Juan_Martinez4", "numero": "6" },
+    { "inicio": 2885, "fin": 2895.4, "marcador": "2-1", "rival": "Olimpo Esports", "escudoRival": "https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMunLybVb4pwFbqCue.png?alt=media&token=1&m=1778519167987", "minuto": "33' · penal", "goleador": "NicoBJ_96", "numero": "9" },
+    { "inicio": 3214, "fin": 3228.5, "marcador": "3-1", "rival": "Olimpo Esports", "escudoRival": "https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMunLybVb4pwFbqCue.png?alt=media&token=1&m=1778519167987", "minuto": "64'", "goleador": "Huber236", "numero": "8" },
+    { "inicio": 4535, "fin": 4549.95, "marcador": "1-1", "rival": "IACC Cantera", "escudoRival": "https://www.virtualpronetwork.com/api/media/images/teamlogos/67004976dd4706b30d022daedba9e066.png", "minuto": "42'", "goleador": "nikileo527", "numero": "10" }
+  ]
+}
