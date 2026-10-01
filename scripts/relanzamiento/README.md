@@ -2,7 +2,7 @@
 
 Concepto aprobado por Juan: el club como organización secreta que abre su archivo. El **fichero de papel** (estética vieja del sitio y de las noticias) es el pasado; el **expediente digital** es el presente: "se informatizó todo". Hilo cinematográfico: el espía del escudo (sombrero, anteojos, gabardina, siempre de espaldas) camina del archivo de papel a la sala digital y termina en el estadio. **Sin fichajes no anunciados** (ni nombres ni primeros planos).
 
-Reel vertical 1080×1920, ~42 s, sin audio → R2 `videos/relanzamiento-t4.mp4`.
+Reel vertical 1080×1920, ~42 s, sin audio → R2 `videos/relanzamiento-t4-v2.mp4`.
 
 | # | Escena | Fuente |
 |---|---|---|
@@ -14,9 +14,9 @@ Reel vertical 1080×1920, ~42 s, sin audio → R2 `videos/relanzamiento-t4.mp4`.
 | 6 | 160 partidos · 75 victorias · 303 goles · 3 ligas | `escenas.cjs` (numeros), datos de `seed_matches.js` al 1/10 |
 | 7 | Lautavester7, 100 goles | `escenas.cjs` (leyenda) |
 | 8 | Sello metálico "Misma esencia. Otra presencia." | placa |
-| 9 | Travelling de las camisetas T4 | `fuentes/nueva-era/kits.mp4` |
+| 9 | Paneo izquierda→derecha por las 3 camisetas T4 (alternativa, titular, arquero) | `fuentes/nueva-era/kits.mp4` |
 | 10 | Vestuario — "Listos para salir." | `logos/nosotros/vestuario-kits.png` |
-| 11 | "Ahora en EA FC 27": gol de Juan_Martinez4 | compilado de goles del 30/9 |
+| 11 | "Ahora en EA FC 27": goles de Juan_Martinez4 y Huber236 apilados, recortados hacia la jugada (la cámara de FC27 es muy abierta: a pantalla completa en vertical no se ven) | compilado de goles del 30/9 |
 | 12 | Espía en el estadio — "La nueva era empieza ahora." + redes | ChatGPT `estadio-final` → Canva (cámara casi fija: con travelling Canva convirtió al espía en un sombrero gigante) |
 | 13 | Escudo Clean dorado "TOP SECRET" | placa |
 

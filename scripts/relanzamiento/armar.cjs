@@ -25,6 +25,9 @@ const OV = {
     <div class="c h" style="top:1250px;font-size:100px">Misma esencia.</div><div class="c h" style="top:1360px;font-size:100px;color:#C8A84B">Otra presencia.</div>`, BG),
   o_kits: pg(`<div class="sb"></div><div class="c mono" style="bottom:420px;font-size:28px">TEMPORADA 4</div><div class="c h" style="bottom:200px;font-size:120px">Tres camisetas.<br>Un espía.</div>`),
   o_vestuario: pg(`<div class="st"></div><div class="c mono" style="top:150px;font-size:28px">EXPEDIENTE ABIERTO</div><div class="c h" style="top:220px;font-size:110px">Listos para salir.</div>`),
+  t_goles: pg(`<div class="c mono" style="top:170px;font-size:30px">AHORA EN</div><div class="c h" style="top:230px;font-size:140px">EA FC 27</div>
+    <div style="position:absolute;left:60px;top:470px;font-weight:800;font-size:40px"><span style="font-family:'Bebas Neue';color:#C8A84B;font-size:56px">6</span> Juan_Martinez4 <span style="font-weight:500;color:rgba(242,238,224,.6)">· vs Olimpo</span></div>
+    <div style="position:absolute;left:60px;top:1160px;font-weight:800;font-size:40px"><span style="font-family:'Bebas Neue';color:#C8A84B;font-size:56px">8</span> Huber236 <span style="font-weight:500;color:rgba(242,238,224,.6)">· vs Olimpo</span></div>`, BG),
   o_goles: pg(`<div class="st"></div><div class="c mono" style="top:150px;font-size:28px">AHORA EN</div><div class="c h" style="top:220px;font-size:130px">EA FC 27</div>`),
   o_estadio: pg(`<div class="sb" style="height:900px"></div><div class="c mono" style="bottom:640px;font-size:30px">EXPEDIENTE DESCLASIFICADO</div>
     <div class="c h" style="bottom:400px;font-size:132px">La nueva era<br>empieza ahora.</div>
@@ -60,9 +63,16 @@ const OV = {
   push(4.6, vid(path.join(R, 'esc-numeros.mp4'), 0.1, 4.6));                          // 6 160 / 75 / 303 / 3
   push(3.0, vid(path.join(R, 'esc-leyenda.mp4'), 0.1, 3.0));                          // 7 Lautavester7, 100 goles
   push(3.0, still(path.join(T, 't_esencia.png'), 3.0, 0.0008));                        // 8 identidad
-  push(3.6, vid(path.join(NE, 'kits.mp4'), 0.3, 3.6, 'o_kits'));                       // 9 camisetas T4
+  { // 9 camisetas T4: paneo de izquierda a derecha para que se vean las tres
+    const d = 4.2, v = add(['-ss', '0.2', '-t', String(d + X), '-i', path.join(NE, 'kits.mp4')]); const o = add(['-loop', '1', '-t', String(d + X), '-i', path.join(T, 'o_kits.png')]);
+    push(d, `[${v}:v]scale=-2:1920,crop=1080:1920:x='(iw-1080)*min(1,t/${d})':y=0[kp];[kp][${o}:v]overlay=0:0`);
+  }
   push(3.2, still(path.join(ROOT, 'logos', 'nosotros', 'vestuario-kits.png'), 3.2, 0.0009, 'o_vestuario')); // 10 vestuario
-  push(4.2, vid(path.join(NE, 'goles.mp4'), 4.2, 4.2, 'o_goles', false));              // 11 gol Juan_Martinez4 (FC27)
+  { // 11 dos goles reales (FC27), recortados hacia la jugada y apilados
+    const d = 4.2, bg = add(['-loop', '1', '-t', String(d + X), '-i', path.join(T, 't_goles.png')]);
+    const g1 = add(['-ss', '13.0', '-t', String(d + X), '-i', path.join(NE, 'goles.mp4')]); const g2 = add(['-ss', '37.6', '-t', String(d + X), '-i', path.join(NE, 'goles.mp4')]);
+    push(d, `[${g1}:v]crop=729:410:x='400+70*min(1,t/${d})':y=190,scale=1080:608[ga];[${g2}:v]crop=729:410:x='350-290*min(1,t/${d})':y=190,scale=1080:608[gb];[${bg}:v]scale=1080:1920,setsar=1[gbg];[gbg][ga]overlay=0:540[g1o];[g1o][gb]overlay=0:1230`);
+  }
   push(5.0, vid(path.join(R, 'clip-estadio.mp4'), 0.0, 5.0, 'o_estadio'));            // 12 estadio: la nueva era
   push(2.6, still(path.join(T, 't_fin.png'), 2.6, 0.0006));                            // 13 cierre
 
