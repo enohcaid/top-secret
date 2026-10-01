@@ -8,6 +8,10 @@
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
+  'expediente-desclasificado-2026': {
+    t: 'Expediente Top Secret: desclasificado',
+    i: MEDIA + 'logos/noticias/relanz-estadio-final.png',
+  },
   'renovacion-web-identidad-2026': {
     t: 'Misma esencia, otra presencia: Top Secret renueva su imagen',
     i: MEDIA + 'logos/noticias/web-identidad-portada.png',

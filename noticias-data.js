@@ -3,6 +3,38 @@
 
 const NOTICIAS = [
   {
+    id: 'expediente-desclasificado-2026',
+    pinned: true,
+    category: 'Club',
+    title: 'Expediente Top Secret: desclasificado',
+    date: '2026-10-01',
+    dateLabel: '1 de octubre de 2026',
+    excerpt: 'Todo empezó en un archivo de papel. Hoy el archivo se informatizó. Top Secret FC abre su expediente y presenta la nueva era: misma esencia, otra presencia, y ahora en EA FC 27.',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/relanz-estadio-final.png',
+    body: [
+      'Hay clubes que se cuentan con trofeos. Este se cuenta con un archivo. Desde marzo, cada partido, cada gol y cada noche de Top Secret FC quedó registrado en una carpeta. Hoy esa carpeta se abre: <strong>el expediente queda desclasificado</strong> y empieza una nueva era.',
+      { youtube: '7ykfCkHJuD8', vertical: true, caption: 'Expediente Top Secret: desclasificado.' },
+      { specs: [['Partidos', '160'], ['Victorias', '75'], ['Goles', '303']] },
+      { h: 'Todo empezó en un archivo' },
+      'Al principio, todo era papel. Las noticias se armaban como fichas de un expediente viejo: carpetas gastadas, sellos de "confidencial", clips y fotos pegadas. Así se fue escribiendo la historia: la Temporada 1 en VPN, VPUG y 11x11, el ascenso a Primera, la goleada 11-1 a Lírico FC, el Campeonato de Invierno y una Temporada 3 jugada en tres frentes a la vez.',
+      { img: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/relanz-archivo-papel.png', caption: 'El archivo de papel: donde quedó registrada la primera etapa del club.', wide: true },
+      'En ese archivo hay un nombre que se repite más que ningún otro: <strong>Lautavester7</strong>, máximo goleador de la historia del club con <strong>100 goles</strong>.',
+      { h: 'El archivo se informatizó' },
+      'Con la Temporada 4 el expediente pasó a ser digital. El sitio se rediseñó de punta a punta, las noticias se convirtieron en un archivo de computadora y la identidad del club dio un paso al frente: el espía de siempre, con un trazo más limpio y una versión clean para cada soporte.',
+      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/relanz-sala-digital.png', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/relanz-estadio-final.png'], caption: 'La sala digital del expediente · El estadio de la nueva era.' },
+      { quote: 'Misma esencia. Otra presencia.', by: 'Top Secret FC · Temporada 4' },
+      { h: 'Ahora en EA FC 27' },
+      'La nueva era también cambia de juego. Top Secret FC ya compite en <strong>EA FC 27</strong>, con tres camisetas nuevas —titular negra y oro, alternativa azul francia y arquero naranja— y las transmisiones en vivo de cada noche en Twitch.',
+      'El expediente sigue abierto. Seguí al club en <a href="https://www.youtube.com/@TOPSecretFC" target="_blank" rel="noopener">YouTube</a>, <a href="https://www.twitch.tv/topsecretfc" target="_blank" rel="noopener">Twitch</a> y en todas sus redes, y recorré la historia completa en <a href="nosotros.html">Nosotros</a>.',
+    ],
+    shareCaption: 'Expediente Top Secret: desclasificado. Todo empezó en un archivo; hoy el archivo se informatizó. 160 partidos, 75 victorias, 303 goles. La nueva era empieza ahora.',
+    shareCaptions: {
+      ig: 'Expediente Top Secret: desclasificado 🕵️\n\nTodo empezó en un archivo. Hoy el archivo se informatizó.\n\n▪️ 160 partidos\n▪️ 75 victorias\n▪️ 303 goles\n\nMisma esencia. Otra presencia. Ahora en EA FC 27.\nLa nueva era empieza ahora.\n\n#TopSecretFC #ClubsPro #EAFC27',
+      x: 'Expediente Top Secret: desclasificado 🕵️ Todo empezó en un archivo. Hoy el archivo se informatizó. 160 partidos · 75 victorias · 303 goles. La nueva era empieza ahora. #TopSecretFC',
+      fb: 'Top Secret FC abre su expediente. Todo empezó en un archivo de papel; hoy el archivo se informatizó. 160 partidos, 75 victorias y 303 goles después, el club presenta su nueva era: misma esencia, otra presencia, y ahora en EA FC 27. Mirá el video en la nota.',
+    },
+  },
+  {
     id: 'renovacion-web-identidad-2026',
     category: 'Club',
     title: 'Misma esencia, otra presencia: Top Secret renueva su imagen',
