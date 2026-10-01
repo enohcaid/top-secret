@@ -34,8 +34,8 @@ const OV = {
     <div class="c h" style="top:1100px;font-size:120px">Bienvenidos<br>a la nueva era</div>
     <div class="c" style="top:1430px;font-family:'JetBrains Mono';font-size:30px;line-height:1.7;color:rgba(242,238,224,.8)">@fctopsecret<br>twitch.tv/topsecretfc<br>youtube.com/@TOPSecretFC</div>`, BG),
   // Textos sobre video (transparentes)
-  kits: page(`<div class="shade-b"></div><div class="c mono" style="bottom:330px;font-size:28px">TEMPORADA 4</div><div class="c h" style="bottom:170px;font-size:120px">Camisetas<br>nuevas</div>`),
-  plantel: page(`<div class="shade-b"></div><div class="c mono" style="bottom:330px;font-size:28px">MIEMBROS</div><div class="c h" style="bottom:170px;font-size:120px">El plantel<br>de la T4</div>`),
+  kits: page(`<div class="shade-b"></div><div class="c mono" style="bottom:430px;font-size:28px">TEMPORADA 4</div><div class="c h" style="bottom:170px;font-size:120px">Camisetas<br>nuevas</div>`),
+  plantel: page(`<div class="shade-b"></div><div class="c mono" style="bottom:430px;font-size:28px">MIEMBROS</div><div class="c h" style="bottom:170px;font-size:120px">El plantel<br>de la T4</div>`),
   goles: page(`<div class="shade-t"></div><div class="c mono" style="top:150px;font-size:28px">AHORA EN</div><div class="c h" style="top:210px;font-size:130px">EA FC 27</div>`),
   web: page(`<div class="shade-t" style="height:560px;background:linear-gradient(180deg,rgba(7,6,5,.97) 55%,rgba(7,6,5,0))"></div><div class="c h" style="top:150px;font-size:120px">Sitio renovado</div><div class="c mono" style="top:300px;font-size:26px">ENOHCAID.GITHUB.IO/TOP-SECRET</div>`),
 };
@@ -80,7 +80,7 @@ FICHAJES.forEach(([gt, num, pos], i) => {
     const d = 0.95, v = add(['-ss', '1.2', '-t', String(d + X), '-i', path.join(ROOT, 'fuentes', 'video-fichajes', gt + '.mp4')]); const o = add(['-loop', '1', '-t', String(d + X), '-i', path.join(T, 'f' + i + '.png')]);
     push(d, `[${v}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[fv${i}];[fv${i}][${o}:v]overlay=0:0`);
   });
-  push(4.4, padV(path.join(D, 'goles.mp4'), 22.9, 4.4 + X, 'goles.png'));
+  push(4.4, padV(path.join(D, 'goles.mp4'), 51.9, 4.4 + X, 'goles.png'));   // gol de nikileo527 vs IACC Cantera
   { // sitio: captura del celular que se desplaza hacia abajo
     const i = add(['-loop', '1', '-t', String(3.0 + X), '-i', path.join(ROOT, 'logos', 'noticias', 'web-movil-portada.png')]); const o = add(['-loop', '1', '-t', String(3.0 + X), '-i', path.join(T, 'web.png')]);
     push(3.0, `[${i}:v]scale=1080:-2,crop=1080:1920:x=0:y='min(ih-1920,(ih-1920)*t/${3.0 + X})'[wb];[wb][${o}:v]overlay=0:0`);
