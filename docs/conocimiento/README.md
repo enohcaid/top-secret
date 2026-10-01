@@ -35,6 +35,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [feedback_push_images](feedback_push_images.md) — Siempre pushear imágenes al repo cuando el usuario las sube o cuando el JS las referencia
 - [feedback_render_review](feedback_render_review.md) — Antes de commitear renders nuevos, revisar cada imagen visualmente y convertir JPEG a PNG
 - [feedback_report_workflow](feedback_report_workflow.md) — How the user delivers new match reports and how to process them (images historically, video from T3 onward)
+- [feedback_publicaciones_con_musica](feedback_publicaciones_con_musica.md) — Regla: toda publicación en redes va con música; IG/FB con música solo manual desde la app
 - [feedback_reskin_equipos_11x11](feedback_reskin_equipos_11x11.md) — Equipos de 11x11/VPUG a veces cambian de nombre/escudo (reskin) a mitad de temporada sin que el codigo del sitio se entere; el usuario es la fuente de verdad final sobre el nombre actual del rival, no calendario.html/convocatoria.html
 - [feedback_rosters_hardcodeados_desactualizados](feedback_rosters_hardcodeados_desactualizados.md) — El sitio tiene varias listas de gamertags hardcodeadas e independientes que se desactualizan cuando cambia el plantel — revisar todas al arrancar temporada o agregar/dar de baja jugadores
 - [feedback_sin_verificacion_calidad_imagenes](feedback_sin_verificacion_calidad_imagenes.md) — generate-image-chatgpt.mjs ya no evalúa con ChatGPT Vision ni reintenta por formato en el flujo default — un solo intento por imagen, revisión humana en el preview de publicación
