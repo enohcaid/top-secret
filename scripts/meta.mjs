@@ -9,6 +9,7 @@
  *   node scripts/meta.mjs ig-carrusel "<texto>" <url1> <url2> …   carrusel (2-10 imágenes)
  *   node scripts/meta.mjs ig-reel   <url-publica.mp4> "<texto>"   reel (SIN música de la biblioteca: la API no la permite)
  *   node scripts/meta.mjs fb-foto   <url-publica> "<texto>"
+ *   node scripts/meta.mjs fb-album  "<texto>" <url1> <url2> …    post de Facebook con varias fotos
  *   node scripts/meta.mjs fb-video  <url-publica.mp4> "<texto>"
  *   Agregar --prueba para crear el contenedor/validar sin publicar.
  *
@@ -73,6 +74,16 @@ if (cmd === 'estado') {
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
   const r = await api(`/${E.META_PAGE_ID}/photos`, { url: args[0], caption: args[1] || '', ...igTok() });
   console.log('publicado en Facebook:', `https://www.facebook.com/${r.post_id || r.id}`);
+} else if (cmd === 'fb-album') {
+  // Post con varias fotos: se suben sin publicar y se adjuntan a un solo post del feed.
+  const [caption, ...urls] = args;
+  if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
+  const ids = [];
+  for (const u of urls) ids.push((await api(`/${E.META_PAGE_ID}/photos`, { url: u, published: 'false', ...igTok() })).id);
+  const params = { message: caption, ...igTok() };
+  ids.forEach((id, i) => { params[`attached_media[${i}]`] = JSON.stringify({ media_fbid: id }); });
+  const r = await api(`/${E.META_PAGE_ID}/feed`, params);
+  console.log('publicado en Facebook:', `https://www.facebook.com/${r.id}`);
 } else if (cmd === 'fb-video') {
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
   const r = await api(`/${E.META_PAGE_ID}/videos`, { file_url: args[0], description: args[1] || '', ...igTok() });
