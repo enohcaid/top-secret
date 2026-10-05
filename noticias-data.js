@@ -14,7 +14,7 @@ const NOTICIAS = [
     body: [
       'Llegan de brazos cruzados y se presentan a su manera. Top Secret FC suma <strong>seis jugadores</strong> para la Temporada 4, repartidos entre el arco, la defensa y el ataque, y les da la bienvenida con un video en el que cada uno tiene su momento.',
       { specs: [['Fichajes', '6'], ['Arquero', '1'], ['Defensores', '4'], ['Delantero', '1']] },
-      { youtube: 'nsSKVD5q3WU', vertical: true, caption: 'Nuevos fichajes: de brazos cruzados a su pose, uno por uno.' },
+      { instagram: 'DeIVJH_DFlB', caption: 'Nuevos fichajes: de brazos cruzados a su pose, uno por uno.' },
       { h: 'Arco y zaga central' },
       'adri_cai llega para pelear el arco con el <strong>32</strong> y el conjunto naranja; se presenta golpeándose el escudo. En el centro de la defensa se suman Elianja20 (<strong>24</strong>), que avisa con dos dedos que está mirando, y endiabladorojo66 (<strong>66</strong>), que pide que lo escuchen.',
       { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/adri_cai.webp', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/Elianja20.webp'], caption: 'adri_cai · Elianja20.' },
