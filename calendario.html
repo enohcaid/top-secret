@@ -1992,6 +1992,8 @@ function abbrevRival(rival) {
   return (words[0]+(words[1]?words[1].slice(0,3):'')).slice(0,6).toUpperCase();
 }
 
+// Lo que muestra el hero (hoy o la próxima fecha), para la placa de Compartir (calendario-share.js)
+let _shareData = null;
 function renderNextHero() {
   const today = getToday();
   const hero = document.getElementById('nextHero');
@@ -2068,7 +2070,8 @@ function renderNextHero() {
     const todayDt   = new Date(today+'T12:00:00');
     const dateLabel = `${DIAS[todayDt.getDay()]} ${todayDt.getDate()} ${MESES_C[todayDt.getMonth()]}`;
     const countLbl  = todayMatches.length > 1 ? `${todayMatches.length} partidos` : '1 partido';
-    hero.innerHTML  = `<div class="nh-card">${cdown}<div>
+    _shareData = { today: true, eyebrow: todayMatches.length > 1 ? 'Partidos de hoy' : 'Partido de hoy', title: dateLabel, matches: todayMatches.map(x => x.m) };
+    hero.innerHTML  =`<div class="nh-card">${cdown}<div>
       <div class="nh-eyebrow">HOY · ${countLbl} · ${dateLabel}</div>
       ${buildMatchRows(todayMatches)}
     </div>${shareBtn}</div>`;
@@ -2085,6 +2088,7 @@ function renderNextHero() {
   const nextMatches = upcoming.filter(x => x.m.date === nextDate);
   const countLbl  = nextMatches.length > 1 ? `${nextMatches.length} partidos` : 'Próximo partido';
 
+  _shareData = { today: false, eyebrow: diff === 1 ? 'Mañana' : 'Próxima fecha', title: dateLabel, matches: nextMatches.map(x => x.m) };
   const todayDt2   = new Date(today+'T12:00:00');
   const todayLabel = `${DIAS[todayDt2.getDay()]} ${todayDt2.getDate()} ${MESES_C[todayDt2.getMonth()]}`;
 
@@ -2939,49 +2943,24 @@ const _LOAD_ICON  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"
 
 async function shareMatchday() {
   const btn = document.querySelector('.nh-share-btn');
-  const card = document.querySelector('#nextHero .nh-card');
-  if (!card || (btn && btn.disabled)) return;
+  if (!_shareData || !_shareData.matches.length || (btn && btn.disabled)) return;
 
   if (btn) { btn.innerHTML = _LOAD_ICON; btn.disabled = true; }
 
   // Copy text to clipboard once
-  navigator.clipboard.writeText(_SHARE_MSG).catch(() => {});
+  const shareMsg = _shareData.today ? _SHARE_MSG
+    : `Estos son los próximos partidos (${_shareData.title}), ya pueden confirmar asistencia: https://enohcaid.github.io/top-secret/convocatoria.html`;
+  navigator.clipboard.writeText(shareMsg).catch(() => {});
 
   const restore = () => { if (btn) { btn.innerHTML = _SHARE_ICON; btn.disabled = false; btn.style.visibility = ''; } };
 
   try {
-    // Load html2canvas lazily
-    if (!window.html2canvas) {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
-      });
-    }
-
-    // Swap rival badge src to CORS proxy so html2canvas can capture them
-    const IMG_PROXY = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/img-proxy?url=';
-    const badgeImgs = [...card.querySelectorAll('img.nh-rival-badge')];
-    const origSrcs = badgeImgs.map(img => img.src);
-    badgeImgs.forEach(img => { img.src = IMG_PROXY + encodeURIComponent(img.src); });
-    if (badgeImgs.length) {
-      await Promise.all(badgeImgs.map(img => new Promise(r => { img.onload = img.onerror = r; })));
-    }
-
-    // Hide button before capture so it doesn't appear in the image
-    if (btn) btn.style.visibility = 'hidden';
-    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: '#111111' });
-    if (btn) btn.style.visibility = '';
-
-    // Restore original badge srcs
-    badgeImgs.forEach((img, i) => { img.src = origSrcs[i]; });
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    // Placa 4:5 dibujada en canvas (calendario-share.js)
+    const blob = await TSMatchdayCard.build(_shareData);
     const file = new File([blob], 'partidos-top-secret.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], text: _SHARE_MSG });
+      await navigator.share({ files: [file], text: shareMsg });
     } else {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -3073,6 +3052,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
+<script src="calendario-share.js?v=1"></script>
 <script src="layout.js?v=22"></script>
 </body>
 </html>
