@@ -3,6 +3,38 @@
 
 const NOTICIAS = [
   {
+    id: 'nuevos-fichajes-t4',
+    pinned: true,
+    category: 'Club',
+    title: 'Seis caras nuevas: los fichajes de la Temporada 4',
+    date: '2026-10-05',
+    dateLabel: '5 de octubre de 2026',
+    excerpt: 'adri_cai, Elianja20, endiabladorojo66, nikileo527, pepolemmo2710 y NicoBJ_96 se suman a Top Secret FC. Un arquero, dos centrales, dos laterales y un delantero para la Temporada 4.',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/fichajes-t4-portada.jpg',
+    body: [
+      'Llegan de brazos cruzados y se presentan a su manera. Top Secret FC suma <strong>seis jugadores</strong> para la Temporada 4, repartidos entre el arco, la defensa y el ataque, y les da la bienvenida con un video en el que cada uno tiene su momento.',
+      { specs: [['Fichajes', '6'], ['Arquero', '1'], ['Defensores', '4'], ['Delantero', '1']] },
+      { youtube: 'nsSKVD5q3WU', vertical: true, caption: 'Nuevos fichajes: de brazos cruzados a su pose, uno por uno.' },
+      { h: 'Arco y zaga central' },
+      'adri_cai llega para pelear el arco con el <strong>32</strong> y el conjunto naranja; se presenta golpeándose el escudo. En el centro de la defensa se suman Elianja20 (<strong>24</strong>), que avisa con dos dedos que está mirando, y endiabladorojo66 (<strong>66</strong>), que pide que lo escuchen.',
+      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/adri_cai.webp', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/Elianja20.webp'], caption: 'adri_cai · Elianja20.' },
+      { h: 'Por las bandas' },
+      'Dos laterales para darle ida y vuelta al equipo: nikileo527 (<strong>10</strong>), que se señala el escudo apenas aparece, y pepolemmo2710 (<strong>15</strong>), que se acomoda los anteojos antes de arrancar.',
+      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/nikileo527.webp', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/pepolemmo2710.webp'], caption: 'nikileo527 · pepolemmo2710.' },
+      { quote: 'Se llega de brazos cruzados. Se queda el que se pone la camiseta.', by: 'Vestuario · Temporada 4' },
+      { h: 'Arriba' },
+      'El último en entrar es NicoBJ_96, con el <strong>9</strong> en la espalda: señala directo a cámara, como quien ya sabe dónde está el arco.',
+      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/NicoBJ_96.webp', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/endiabladorojo66.webp'], caption: 'NicoBJ_96 · endiabladorojo66.' },
+      'Los seis ya forman parte del <a href="noticias.html#presentacion-plantel-t4">plantel de la Temporada 4</a>. Sus fichas están en la sección <a href="plantilla.html">Miembros</a>. Bienvenidos.',
+    ],
+    shareCaption: 'Seis caras nuevas. adri_cai, Elianja20, endiabladorojo66, nikileo527, pepolemmo2710 y NicoBJ_96 se suman a Top Secret FC para la Temporada 4.',
+    shareCaptions: {
+      ig: 'Nuevos fichajes.\n\nadri_cai, Elianja20, endiabladorojo66, nikileo527, pepolemmo2710 y NicoBJ_96 se suman a Top Secret FC para la Temporada 4.\n\nBienvenidos.\n\n#TopSecretFC #ProClubs #EAFC',
+      x: 'Seis caras nuevas para la Temporada 4 de Top Secret FC. Bienvenidos. #TopSecretFC',
+      fb: 'Top Secret FC suma seis jugadores para la Temporada 4: adri_cai (arquero), Elianja20 y endiabladorojo66 (centrales), nikileo527 y pepolemmo2710 (laterales) y NicoBJ_96 (delantero). Nota completa y video en el sitio.',
+    },
+  },
+  {
     id: 'presentacion-plantel-t4',
     pinned: true,
     category: 'Club',

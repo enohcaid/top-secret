@@ -8,6 +8,10 @@
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
+  'nuevos-fichajes-t4': {
+    t: 'Seis caras nuevas: los fichajes de la Temporada 4',
+    i: MEDIA + 'logos/noticias/fichajes-t4-portada.jpg',
+  },
   'presentacion-plantel-t4': {
     t: 'Diecinueve: así se presenta el plantel de la Temporada 4',
     i: MEDIA + 'logos/noticias/plantel-t4-portada-v2.jpg',

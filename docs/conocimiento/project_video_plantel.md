@@ -17,3 +17,4 @@ Herramienta en `scripts/video-plantel/` (ver su README). Primera versión 2026-1
 - **Arquero de campo** (2026-10-05): Ivan_Cabj_La12 tiene variante `Ivan_Cabj_La12-campo` (camiseta negra, mismo gesto sin guantes); el video la usa cuando no está en el arco (pedido de Juan).
 - **Limpieza** (pedido de Juan, "importante"): el video del botón vive solo en memoria y se libera al compartir/cerrar/salir; en la PC, `render.mjs --modo equipo` borra los de días anteriores (local + R2 `videos/equipo-*`).
 - Cupo de IA de Canva: 100% usado el 2026-10-05 (se renueva el 2/11). Pasado el 100% Canva sigue, con ~5 min de espera por clip.
+- **Video Nuevos fichajes** (2026-10-05, pedido de Juan): estética libre y minimalista, sin recuadros, cada jugador con su momento; arranca de brazos cruzados y se pone en pose (transición con destello); portada "NUEVOS FICHAJES". `scripts/video-plantel/fichajes.mjs`. Publicado en las 5 redes y como noticia `nuevos-fichajes-t4`.
