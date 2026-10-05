@@ -55,6 +55,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [project_topsecret_tareas_imagenes](project_topsecret_tareas_imagenes.md) — Las tareas diarias de imágenes (09:30/09:35) solo corren con sesión iniciada; regen-once.ps1 es la recuperación manual; ChatGPT muy lento de noche
 - [project_twitch_clips_extraccion](project_twitch_clips_extraccion.md) — Pipeline de extraccion de clips destacados desde VODs de Twitch (cabers1414/cacc_esport/topsecretfc) y tarea programada asociada
 - [project_ideas_transiciones_dynexo](project_ideas_transiciones_dynexo.md) — Ideas de transiciones con scroll (estilo dynexo.io) guardadas para la próxima temporada, sin implementar
+- [project_video_plantel](project_video_plantel.md) — Videos de plantel y equipo de hoy: poses Gesto4 distintas, grilla de brazos cruzados con transición, clips de Canva
 - [project_vpug_t4_pretemporada](project_vpug_t4_pretemporada.md) — Liga Pretemporada VPUG (FC-27), Grupo D, arrancó 2026-10-05 — lunes y miércoles 23:00 y 23:30
 - [project_vpug_t6_temporada_regular](project_vpug_t6_temporada_regular.md) — Estado del fixture de la temporada regular VPUG T6 (Primera División) cargado en el sitio — fechas proyectadas, no confirmadas partido a partido
 - [project_youtube_canal_oficial_tsfc](project_youtube_canal_oficial_tsfc.md) — Top Secret FC lanzó su canal oficial de YouTube (@TOPSecretFC) el 2026-08-09 — contenido de video del club, reportes de partido incluidos
