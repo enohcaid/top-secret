@@ -217,7 +217,7 @@ $('social-grid').innerHTML = (window.TS_SOCIAL || []).map(s => `
   load('vpn', WORKER + '/vpn-table', raw => (Array.isArray(raw) ? raw : []).map(e => ({
     name: e.team?.name || '', gp: e.gp || 0, w: e.gw || 0, d: e.gt || 0, l: e.gl || 0,
     gf: e.gf ?? null, gc: e.gc ?? null, gd: e.gd ?? null, pts: e.pts || 0 })));
-  load('vpug', WORKER + '/vpug-table', raw => (Array.isArray(raw) ? raw : []).map(e => ({
+  load('vpug', WORKER + '/vpug-table-t4?group=D', raw => (Array.isArray(raw) ? raw : []).map(e => ({
     name: e.name || '', gp: e.gp || 0, w: e.w || 0, d: e.d || 0, l: e.l || 0,
     gf: e.gf ?? null, gc: e.gc ?? null, gd: e.gd ?? null, pts: e.pts || 0 })));
   load('e11', 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/', raw => {

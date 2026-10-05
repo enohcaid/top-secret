@@ -575,6 +575,38 @@ export default {
         return jsonResp(teams);
       }
 
+      // ── VPUG API PROXY T4 (/vpug-table-t4) ────
+      // Liga Pretemporada VPUG (FC-27) (T7 CopáFácil) — arrancó 2026-10-05, 8 grupos A-H
+      // (TOP Secret en el D). ?group=D devuelve solo ese grupo; sin parámetro, todos con `group`.
+      if (url.pathname === '/vpug-table-t4' && request.method === 'GET') {
+        const fbResp = await fetch('https://copafacil-web.firebaseio.com/events/-fthh5@b7we/teams.json');
+        const raw = await fbResp.json();
+        if (!raw) return jsonResp({ error: 'Firebase returned null', fallback: true }, 200);
+        const groupFilter = (url.searchParams.get('group') || '').toUpperCase();
+        const teams = Object.values(raw)
+          .filter(t => !groupFilter || (t.g || '').toUpperCase() === groupFilter)
+          .map(t => {
+            const stats = {};
+            const dtKeys = Object.keys(t.dt || {}).sort();
+            const latest = dtKeys.length ? t.dt[dtKeys[dtKeys.length - 1]] : null;
+            if (latest && latest.dt) {
+              latest.dt.split('#').forEach(pair => {
+                const [k, v] = pair.split('=');
+                stats[k] = parseFloat(v);
+              });
+            }
+            return {
+              name: (t.name || '').replace(/\s*\p{RI}\p{RI}\s*$/u, '').trim(),
+              logo: t.url || null,
+              group: t.g || null,
+              gp: stats['1'] || 0, w: stats['2'] || 0, d: stats['3'] || 0, l: stats['4'] || 0,
+              gf: stats['5'] || 0, gc: stats['6'] || 0, gd: stats['7'] || 0, pts: stats['0'] || 0
+            };
+          });
+        teams.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name));
+        return jsonResp(teams);
+      }
+
       // ── COPAFACIL PRETEMPORADA (/copafacil-pretemporada) ──────────────
       if (url.pathname === '/copafacil-pretemporada' && request.method === 'GET') {
         const BASE   = 'https://copafacil-web.firebaseio.com';

@@ -54,6 +54,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [project_topsecret_tarea_duplicada_09_30](project_topsecret_tarea_duplicada_09_30.md) — Tarea de Task Scheduler duplicada (09:30) causaba fallas silenciosas del pipeline de imágenes diarias; deshabilitada el 2026-08-10
 - [project_topsecret_tareas_imagenes](project_topsecret_tareas_imagenes.md) — Las tareas diarias de imágenes (09:30/09:35) solo corren con sesión iniciada; regen-once.ps1 es la recuperación manual; ChatGPT muy lento de noche
 - [project_twitch_clips_extraccion](project_twitch_clips_extraccion.md) — Pipeline de extraccion de clips destacados desde VODs de Twitch (cabers1414/cacc_esport/topsecretfc) y tarea programada asociada
+- [project_vpug_t4_pretemporada](project_vpug_t4_pretemporada.md) — Liga Pretemporada VPUG (FC-27), Grupo D, arrancó 2026-10-05 — fechas proyectadas L-J 22:30
 - [project_vpug_t6_temporada_regular](project_vpug_t6_temporada_regular.md) — Estado del fixture de la temporada regular VPUG T6 (Primera División) cargado en el sitio — fechas proyectadas, no confirmadas partido a partido
 - [project_youtube_canal_oficial_tsfc](project_youtube_canal_oficial_tsfc.md) — Top Secret FC lanzó su canal oficial de YouTube (@TOPSecretFC) el 2026-08-09 — contenido de video del club, reportes de partido incluidos
 

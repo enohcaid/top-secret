@@ -887,6 +887,29 @@ const VPUG_T3_SCHEDULE = [
   {date:'2026-09-01',time:'23:30',league:'VPUG',rival:'Colon SL',           isHome:true },
 ];
 
+// VPUG T4 badges — Liga Pretemporada VPUG (FC-27) (T7 CopáFácil), Grupo D, desde 2026-10-05
+const VPUG_T4_BADGES = {
+  'Villa Dalmine eSports':   'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2JRiVP2pCqmqxrPfis.png?alt=media&token=1&m=1790270899743',
+  'Norpatagonicos eSports':  'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P31SBjRST6W8mTvYHP0.png?alt=media&token=1&m=1791042652994',
+  'Cambaceres':              'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2sJ7lR0q6j546X1yLj.png?alt=media&token=1&m=1790872517335',
+  'Real Envido':             'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2dRpWyb-B6cLLfTYAj.png?alt=media&token=1&m=1790623057205',
+  'Inter Regional':          'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2OXy0twcTpDlidx8p-.png?alt=media&token=1&m=1790356227056',
+  'Temperley eSports':       'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2xb8ufrcFsK91qcsrN.png?alt=media&token=1&m=1791045825948',
+  'Peñarol Creadores':       'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2nt3cP2umFGxBQ5FKa.png?alt=media&token=1&m=1790798403308',
+};
+
+// VPUG T4 schedule (mirrors RAW in calendario.html — update both if dates change).
+// Fechas proyectadas L-J 22:30 desde el arranque del torneo; CopáFácil no guarda fechas.
+const VPUG_T4_SCHEDULE = [
+  {date:'2026-10-05',time:'22:30',league:'VPUG',rival:'Villa Dalmine eSports',  isHome:true },
+  {date:'2026-10-06',time:'22:30',league:'VPUG',rival:'Norpatagonicos eSports', isHome:false},
+  {date:'2026-10-07',time:'22:30',league:'VPUG',rival:'Cambaceres',             isHome:true },
+  {date:'2026-10-08',time:'22:30',league:'VPUG',rival:'Real Envido',            isHome:false},
+  {date:'2026-10-12',time:'22:30',league:'VPUG',rival:'Inter Regional',         isHome:true },
+  {date:'2026-10-13',time:'22:30',league:'VPUG',rival:'Temperley eSports',      isHome:false},
+  {date:'2026-10-14',time:'22:30',league:'VPUG',rival:'Peñarol Creadores',      isHome:true },
+];
+
 // Campeonato de Invierno VPUG (hardcoded fallback; fetch enriquece con badges)
 const INVIERNO_SCHEDULE = [
   {date:'2026-06-18',time:'22:30',league:'VPUG',rival:'Black Mamba AC',            isHome:false},
@@ -981,7 +1004,7 @@ function getTodayMatches() {
     .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'))
     .map(m => {
       if (m.badge) return m;
-      if (m.league === 'VPUG')  return {...m, badge: VPUG_T2_BADGES[m.rival]||VPUG_T3_BADGES[m.rival]||null};
+      if (m.league === 'VPUG')  return {...m, badge: VPUG_T4_BADGES[m.rival]||VPUG_T2_BADGES[m.rival]||VPUG_T3_BADGES[m.rival]||null};
       if (m.league === '11x11') return {...m, badge: E11_T3_BADGES[m.rival]||null};
       if (m.league === 'VPN') {
         const live = vpnFixtures.find(v => (v.rival||'').toLowerCase().trim() === (m.rival||'').toLowerCase().trim());
@@ -1002,6 +1025,11 @@ function getTodayMatches() {
     .filter(m => m.date === TODAY)
     .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
     .map(m => ({...m, badge: VPUG_T3_BADGES[m.rival]||null}));
+  // VPUG T4 schedule — Liga Pretemporada VPUG (FC-27), include today's entry if not already in calCustom
+  const fromVpugT4 = VPUG_T4_SCHEDULE
+    .filter(m => m.date === TODAY)
+    .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
+    .map(m => ({...m, badge: VPUG_T4_BADGES[m.rival]||null}));
   // 11x11 T2 schedule — include today's entries if not already in calCustom
   const from11x11 = E11_T3_SCHEDULE
     .filter(m => m.date === TODAY)
@@ -1018,7 +1046,7 @@ function getTodayMatches() {
     .filter(m => m.date === TODAY)
     .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
     .map(m => ({ ...m, league: 'VPUG', badge: m.rivalLogo || VPUG_T2_BADGES[m.rival] || null }));
-  return [...fromCustom, ...fromVpugT2, ...fromVpugT3, ...from11x11, ...fromInvierno, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+  return [...fromCustom, ...fromVpugT2, ...fromVpugT3, ...fromVpugT4, ...from11x11, ...fromInvierno, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
   const wrap = document.getElementById('todayMatchesPanel');

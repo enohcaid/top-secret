@@ -289,7 +289,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
     </button>
     <button class="season-btn active" id="sbtn-t4" onclick="switchSeason('t4',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
       <span class="sb-label">T4 2026</span>
-      <span class="sb-sub">Próximamente</span>
+      <span class="sb-sub">En curso</span>
     </button>
   </div>
 
@@ -362,10 +362,34 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
 
   <!-- ════════════ TEMPORADA 4 ════════════ -->
   <div id="s-t4">
-    <div class="prox-wrap">
-      <div class="prox-badge">Temporada 4 · 2026</div>
-      <div class="prox-title">Próximamente</div>
-      <p class="prox-sub">Las tablas de VPN, VPUG y 11x11 aparecen cuando arranquen los torneos de la Temporada 4.</p>
+    <div class="tabs">
+      <button class="tab active" data-league="vpug" onclick="switchTab('vpug','t4',this)">VPUG</button>
+      <button class="tab"        data-league="vpn"  onclick="switchTab('vpn','t4',this)">VPN</button>
+      <button class="tab"        data-league="e11"  onclick="switchTab('e11','t4',this)">11x11</button>
+    </div>
+
+    <!-- VPUG T4 — Liga Pretemporada VPUG (FC-27), grupo de TOP Secret -->
+    <div class="tab-pane active" id="t4-pane-vpug">
+      <div class="group-header">Liga Pretemporada · Grupo D</div>
+      <div class="table-wrap"><table class="standings-table" id="t4-vpug-table"></table></div>
+    </div>
+
+    <!-- VPN T4 -->
+    <div class="tab-pane" id="t4-pane-vpn">
+      <div class="prox-wrap">
+        <div class="prox-badge">Temporada 4 · VPN</div>
+        <div class="prox-title">Próximamente</div>
+        <p class="prox-sub">La tabla aparece cuando arranque el torneo.</p>
+      </div>
+    </div>
+
+    <!-- 11x11 T4 -->
+    <div class="tab-pane" id="t4-pane-e11">
+      <div class="prox-wrap">
+        <div class="prox-badge">Temporada 4 · 11x11</div>
+        <div class="prox-title">Próximamente</div>
+        <p class="prox-sub">La tabla aparece cuando arranque el torneo.</p>
+      </div>
     </div>
   </div>
 
@@ -420,6 +444,7 @@ const WORKER_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const VPN_URL  = WORKER_BASE + '/vpn-table';
 const VPUG_URL = WORKER_BASE + '/vpug-table';
 const VPUG_T3_URL = WORKER_BASE + '/vpug-table-t3';
+const VPUG_T4_URL = WORKER_BASE + '/vpug-table-t4?group=D';
 const E11_GROUPS_URL_T2 = 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/';
 const E11_GROUPS_URL_T3 = 'https://api.virtualprogaming.com/public/tournaments/CHALLENGERS-T4/groups/?season=1';
 
@@ -709,6 +734,34 @@ async function fetchT2VPUG() {
   }
 }
 
+// Liga Pretemporada VPUG (FC-27) (T7 CopáFácil), Grupo D — arrancó 2026-10-05 (fallback si /vpug-table-t4 falla)
+const VPUG_T4_DATA = [
+  {name:'TOP Secret', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, us:true, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2Jv60nc0HpcJisLGLT.png?alt=media&token=1&m=1790278667545'},
+  {name:'Villa Dalmine eSports', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2JRiVP2pCqmqxrPfis.png?alt=media&token=1&m=1790270899743'},
+  {name:'Inter Regional', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2OXy0twcTpDlidx8p-.png?alt=media&token=1&m=1790356227056'},
+  {name:'Real Envido', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2dRpWyb-B6cLLfTYAj.png?alt=media&token=1&m=1790623057205'},
+  {name:'Peñarol Creadores', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2nt3cP2umFGxBQ5FKa.png?alt=media&token=1&m=1790798403308'},
+  {name:'Cambaceres', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2sJ7lR0q6j546X1yLj.png?alt=media&token=1&m=1790872517335'},
+  {name:'Temperley eSports', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2xb8ufrcFsK91qcsrN.png?alt=media&token=1&m=1791045825948'},
+  {name:'Norpatagonicos eSports', gp:0, w:0, d:0, l:0, gf:0, gc:0, gd:0, pts:0, logo:'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P31SBjRST6W8mTvYHP0.png?alt=media&token=1&m=1791042652994'},
+];
+
+/* ── FETCH & RENDER T4 VPUG ── */
+async function fetchT4VPUG() {
+  try {
+    const r = await fetch(VPUG_T4_URL);
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    const data = normVPUG(Array.isArray(raw) ? raw : []);
+    if (!data.length) throw new Error('empty');
+    renderTable('t4-vpug-table', data, 'var(--vpug)');
+    gsap.to('#t4-vpug-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  } catch(e) {
+    renderTable('t4-vpug-table', normVPUG(VPUG_T4_DATA), 'var(--vpug)');
+    gsap.to('#t4-vpug-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  }
+}
+
 /* ── FETCH & RENDER T3 VPUG ── */
 async function fetchT3VPUG() {
   try {
@@ -843,6 +896,7 @@ fetchT2E11();
 fetchT3VPN();
 fetchT3E11();
 fetchT3VPUG();
+fetchT4VPUG();
 
 
 
