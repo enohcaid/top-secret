@@ -1,7 +1,10 @@
-// Escena del video de plantel / equipo de la noche. Corre dentro de la página que arma render.mjs:
-// ESCENA.preparar() carga todo y devuelve la cantidad de cuadros; ESCENA.cuadro(n) dibuja el cuadro n
-// y lo devuelve como JPEG en base64. Todo es determinístico (mismo n → mismo cuadro).
-(function () {
+// Escena del video de plantel / equipo de la noche. La usan dos lados:
+//  - render.mjs (PC): página con <canvas id="c"> y window.CFG → window.ESCENA; cuadros JPEG sueltos por http.
+//  - video-equipo.js (sitio, botón "Compartir video" de convocatoria): crearEscena(canvas, cfg) con cfg.sprite,
+//    una hoja de cuadros por jugador (R2 video-equipo/<ver>/<gt>.webp, armada por web-assets.mjs).
+// preparar() carga todo y devuelve la cantidad de cuadros; cuadro(n) dibuja el cuadro n (y lo devuelve como
+// JPEG en base64, salvo con {raw:true}). Todo es determinístico (mismo n → mismo cuadro).
+function crearEscena(cv, cfg) {
   const W = 1080, H = 1920, FW = 720, FH = 1280, NF = 150;
   const C = { bg: '#0a0a0a', gold: '#c9a84c', goldSoft: 'rgba(201,168,76,.35)', white: '#f4f1ea', mid: 'rgba(244,241,234,.6)' };
   const COND = "'Barlow Condensed', sans-serif";
@@ -14,8 +17,8 @@
   const TILE = 1;
   const HEADER_Y = 300;                    // la grilla arranca debajo del título
 
-  const cfg = window.CFG, items = cfg.items;
-  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const items = cfg.items;
+  const ctx = cv.getContext('2d');
   const cache = new Map();
   let crest = null, slots = [], total = 0;
 
@@ -34,6 +37,24 @@
   const frameSrc = (key, k) => `/frames/${encodeURIComponent(key)}/${String(k).padStart(3, '0')}.jpg`;
   // Imagen de la grilla: brazos cruzados (si render.mjs la habilitó) o la pose completa del gesto
   const tileSrc = key => cfg.grilla ? `/grilla/${encodeURIComponent(key)}/001.jpg` : frameSrc(key, TILE);
+
+  // Un cuadro = { im, sx, sy, sw, sh } (recorte de la imagen fuente, en proporción 720×1280).
+  // p = avance de la entrada (0 = primer plano, 1 = pose completa).
+  const SP = cfg.sprite;
+  const spriteSrc = key => SP.base + encodeURIComponent(key) + '.webp';
+  async function cuadroJugador(key, p) {
+    if (SP) {
+      const i = Math.round(clamp(p) * (SP.n - 1));
+      return { im: await img(spriteSrc(key)), sx: (i % SP.cols) * SP.fw, sy: Math.floor(i / SP.cols) * SP.fh, sw: SP.fw, sh: SP.fh };
+    }
+    const k = Math.min(NF, Math.max(1, Math.round(NF - (NF - TILE) * outCubic(clamp(p)))));
+    img(frameSrc(key, Math.max(TILE, k - 4)));                         // precarga
+    return { im: await img(frameSrc(key, k)), sx: 0, sy: 0, sw: FW, sh: FH };
+  }
+  async function cuadroGrilla(key) {
+    if (SP) return cuadroJugador(key, 1);
+    return { im: await img(tileSrc(key)), sx: 0, sy: 0, sw: FW, sh: FH };
+  }
 
   // ── Posiciones finales de cada jugador ──
   function calcularSlots() {
@@ -144,12 +165,14 @@
   }
 
   // Tarjeta de un jugador: imagen recortada + textos. big=1 → textos grandes; label=1 → rótulo chico de grilla
-  function tarjeta(im, it, x, y, w, h, srcH, radio, big, label, im2 = null, mix = 0) {
+  // fr / fr2 = cuadros { im, sx, sy, sw, sh }; srcH = alto visible en escala 720×1280 (recorte desde arriba)
+  function tarjeta(fr, it, x, y, w, h, srcH, radio, big, label, fr2 = null, mix = 0) {
     ctx.save();
     rr(x, y, w, h, radio); ctx.clip();
-    if (im && mix < 1) ctx.drawImage(im, 0, 0, FW, srcH, x, y, w, h);
-    if (im2 && mix > 0) { ctx.globalAlpha = mix; ctx.drawImage(im2, 0, 0, FW, srcH, x, y, w, h); ctx.globalAlpha = 1; }
-    if (im2 && mix > 0 && mix < 1) {   // destello dorado que disimula el cambio de pose
+    const pinta = f => ctx.drawImage(f.im, f.sx, f.sy, f.sw, f.sh * srcH / FH, x, y, w, h);
+    if (fr && fr.im && mix < 1) pinta(fr);
+    if (fr2 && fr2.im && mix > 0) { ctx.globalAlpha = mix; pinta(fr2); ctx.globalAlpha = 1; }
+    if (fr2 && mix > 0 && mix < 1) {   // destello dorado que disimula el cambio de pose
       const f = Math.sin(mix * Math.PI);
       const g = ctx.createRadialGradient(x + w / 2, y + h * .35, 0, x + w / 2, y + h * .35, Math.max(w, h) * .75);
       g.addColorStop(0, `rgba(255,236,180,${.75 * f})`); g.addColorStop(.5, `rgba(201,168,76,${.35 * f})`); g.addColorStop(1, 'rgba(201,168,76,0)');
@@ -195,7 +218,7 @@
   async function preparar() {
     await Promise.all([document.fonts.load(`900 100px ${COND}`), document.fonts.load(`800 40px ${COND}`), document.fonts.load(`700 30px ${COND}`)]).catch(() => {});
     crest = await img(CREST);
-    await Promise.all(items.map(it => img(tileSrc(it.key))));
+    await Promise.all(items.map(it => cuadroGrilla(it.key)));
     await Promise.all(partidos.map(async p => { p._img = p.badge ? await img(p.badge.startsWith('http') && !p.badge.includes('/media/') ? 'https://top-secret-proxy.juan-c-m-1985.workers.dev/img-proxy?url=' + encodeURIComponent(p.badge) : p.badge) : null; }));
     slots = calcularSlots();
     total = INTRO + (items.length - 1) * STEP + SEG + OUTRO;
@@ -205,7 +228,7 @@
   // Los primeros PORTADA cuadros son la imagen final (todos ubicados + partidos): es la miniatura que muestran
   // WhatsApp y las redes. Dura 2 cuadros, casi no se ve al reproducir.
   const PORTADA = 2;
-  async function cuadro(nOut) {
+  async function cuadro(nOut, opts = {}) {
     const portada = nOut < PORTADA;
     const n = portada ? total - 1 : nOut - PORTADA;
     fondo();
@@ -217,7 +240,7 @@
       const s0 = INTRO + i * STEP, t = n - s0;
       if (t >= SEG) {
         const sl = slots[i];
-        tarjeta(await img(tileSrc(items[i].key)), items[i], sl.x, sl.y, sl.w, sl.h, sl.srcH, 12, 0, 1);
+        tarjeta(await cuadroGrilla(items[i].key), items[i], sl.x, sl.y, sl.w, sl.h, sl.srcH, 12, 0, 1);
       } else if (t >= 0) {
         activos.push([i, t]);
         dim = Math.max(dim, seg(t, 0, APARECE) * (1 - seg(t, VUELA, SEG)));
@@ -231,9 +254,7 @@
     // Tarjetas entrando (la más nueva arriba)
     for (const [i, t] of activos) {
       const it = items[i], sl = slots[i];
-      const k = Math.round(NF - (NF - TILE) * outCubic(clamp(t / (SEG - 1))));
-      const im = await img(frameSrc(it.key, Math.min(NF, Math.max(1, k))));
-      img(frameSrc(it.key, Math.max(TILE, k - 4)));                     // precarga
+      const fr = await cuadroJugador(it.key, t / (SEG - 1));
       const bw = 760, bh = bw * 16 / 9, bx = (W - bw) / 2, by = HEADER_Y + 60 + (H - HEADER_Y - 60 - bh) / 2;
       const ap = outCubic(seg(t, 0, APARECE)), v = ease(seg(t, VUELA, SEG));
       const sc = lerp(.9, 1, ap);
@@ -241,8 +262,8 @@
       const cx = lerp(bx + bw / 2, sl.x + sl.w / 2, v), cy = lerp(by + bh / 2, sl.y + sl.h / 2, v);
       ctx.globalAlpha = ap;
       const mix = cfg.grilla ? ease(seg(t, VUELA + 2, SEG - 3)) : 0;
-      tarjeta(im, it, cx - w / 2, cy - h / 2, w, h, srcH, lerp(22, 12, v), (1 - seg(t, VUELA, VUELA + 6)) * seg(t, 4, 12), seg(t, SEG - 6, SEG),
-        cfg.grilla ? await img(tileSrc(it.key)) : null, mix);
+      tarjeta(fr, it, cx - w / 2, cy - h / 2, w, h, srcH, lerp(22, 12, v), (1 - seg(t, VUELA, VUELA + 6)) * seg(t, 4, 12), seg(t, SEG - 6, SEG),
+        cfg.grilla ? await cuadroGrilla(it.key) : null, mix);
       ctx.globalAlpha = 1;
     }
     // Cierre: barrido dorado y firma
@@ -262,8 +283,10 @@
         ctx.fillStyle = g; ctx.fillRect(0, HEADER_Y, W, H - HEADER_Y);
       }
     }
-    return cv.toDataURL('image/jpeg', .9).split(',')[1];
+    return opts.raw ? null : cv.toDataURL('image/jpeg', .9).split(',')[1];
   }
 
-  window.ESCENA = { preparar, cuadro };
-})();
+  return { preparar, cuadro, W, H };
+}
+window.crearEscena = crearEscena;
+if (window.CFG && document.getElementById('c')) window.ESCENA = crearEscena(document.getElementById('c'), window.CFG);

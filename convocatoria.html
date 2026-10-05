@@ -446,6 +446,7 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
           <button type="button" class="pb-btn" onclick="togglePbMenu(event)" aria-haspopup="true">Opciones<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div class="pb-drop" id="pbDrop">
             <button type="button" id="shareBtn" onclick="closePbMenu();doShare()">Compartir imagen</button>
+            <button type="button" id="shareVideoBtn" onclick="closePbMenu();compartirVideoEquipo()">Compartir video</button>
             <button type="button" id="copyLineupBtn" onclick="closePbMenu();copyLineup()">Copiar equipo</button>
             <button type="button" id="copyListBtn" onclick="closePbMenu();copyPlayerList()">Copiar lista de disponibilidad</button>
             <div class="pb-edit" id="pbEdit"></div>
@@ -2629,6 +2630,7 @@ if (!EDIT_MODE) {
   document.head.appendChild(styleRO);
 }
 </script>
+<script src="video-equipo.js?v=1"></script>
 <script src="layout.js?v=22"></script>
 </body>
 </html>

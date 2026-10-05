@@ -6,6 +6,10 @@ Reel vertical 1080×1920 a 30 fps. Cada jugador entra grande con su clip (acerca
 - **Equipo de hoy** (`--modo equipo`): la formación que se armó en la convocatoria (Firestore `convocatoria/state.lineup`: `formation` + `slots`, y `captain`). Las líneas salen de `FORMATIONS` de `convocatoria.html` (delanteros arriba, arquero abajo) y los nombres de puesto de `SLOT_LABEL_ES`. Entran de atrás para adelante. Puestos vacíos no salen (el script los avisa). El capitán lleva "Capitán" y una C. Abajo, los **partidos de hoy** (los que muestra la convocatoria publicada, `getTodayMatches`, amistosos incluidos; solo si `--fecha` es hoy). ~19 s. Música default: *Locked In*.
 - **Portada:** los 2 primeros cuadros son la imagen final (todos ubicados + partidos), que es la miniatura de WhatsApp y las redes. Se guarda también como `<video>-portada.jpg`.
 
+## Desde la convocatoria (sin PC)
+
+En `convocatoria.html` → Opciones → **Compartir video**: el navegador arma el video del equipo de hoy (`video-equipo.js` + esta misma `escena.js`, con WebCodecs y mp4-muxer; ~12 s en PC, más en celular) y al terminar ofrece **Compartir (WhatsApp)** o **Descargar**. Usa la formación, el capitán y los dorsales de la página y los partidos de `getTodayMatches()`. Los cuadros de cada jugador vienen de R2 `video-equipo/<VER>/<gt>.webp` (~400 KB c/u) + `musica.mp3`, armados con `node scripts/video-plantel/web-assets.mjs [gt]` (después de `prep.mjs`). Si cambian los cuadros de alguien, subir `VER` en `web-assets.mjs` **y** en `video-equipo.js` (caché immutable de `/media`). Jugador sin hoja de cuadros (p. ej. a prueba) → sale la tarjeta con su nombre, sin imagen.
+
 ## Pasos
 
 ```bash
