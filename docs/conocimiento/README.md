@@ -67,6 +67,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_cloudflare_y_r2](reference_cloudflare_y_r2.md) — Cómo desplegar el Worker y manejar el bucket R2 sin wrangler — credenciales en .env, scripts deploy-worker.mjs y r2.mjs
 - [reference_copafacil_api](reference_copafacil_api.md) — Cómo extraer datos de torneos de CopáFácil (Flutter SPA) vía Firebase RTDB — patrón usado en el Worker de Top Secret
 - [reference_kit_crop_generate_image](reference_kit_crop_generate_image.md) — generate-image-chatgpt.mjs recorta un solo kit de T3 Kits.png en vez de mandar el poster completo con los 3 — el script elige el color, no ChatGPT
+- [reference_placa_convocatoria](reference_placa_convocatoria.md) — Link /c/<fecha> con la placa del día como vista previa de WhatsApp (Browser Rendering + R2, secreto CF_BR_TOKEN)
 - [reference_publicar_redes](reference_publicar_redes.md) — Cómo se publica en YouTube/X/TikTok desde el Chrome CDP; Instagram/Facebook pendientes
 - [reference_renders_folder](reference_renders_folder.md) — Estructura y propósito de las carpetas en Renders/ — qué borrar y qué conservar
 - [reference_topsecret_daily_news_routine](reference_topsecret_daily_news_routine.md) — How to find and edit the cloud routine that writes Top Secret FC's daily news draft

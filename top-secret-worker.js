@@ -841,24 +841,24 @@ export default {
       // ── OG META REDIRECT (/og/<id>) ──────────────
       // Clean short link for WhatsApp previews. URL: /og/<articleId>
       // Article data comes from the NOTICIAS_OG map above — no KV, no query params.
-      // ── PLACA DE CONVOCATORIA (/c/<fecha>, /placa/<fecha|hoy>.png, /placa/refresh) ──
+      // ── PLACA DE CONVOCATORIA (/c/<fecha>, /placa/<fecha|hoy>.jpg, /placa/refresh) ──
       // Link para compartir la convocatoria con la placa del día como vista previa en WhatsApp.
       // La placa es una captura de calendario.html?placa (Cloudflare Browser Rendering, secreto
-      // CF_BR_TOKEN) guardada en R2 og/placa/<fecha>.png. Sin token → imagen OG fija de siempre.
-      const placaMatch = url.pathname.match(/^\/placa\/(hoy|\d{4}-\d{2}-\d{2})\.png$/);
+      // CF_BR_TOKEN) guardada en R2 og/placa/<fecha>.jpg (JPEG: WhatsApp ignora previews pesadas). Sin token → imagen OG fija de siempre.
+      const placaMatch = url.pathname.match(/^\/placa\/(hoy|\d{4}-\d{2}-\d{2})\.(?:jpg|png)$/);
       if (placaMatch && request.method === 'GET') {
         const today = artToday();
         const day = placaMatch[1] === 'hoy' ? today : placaMatch[1];
-        const obj = await env.MEDIA_BUCKET.get(`og/placa/${day}.png`);
+        const obj = await env.MEDIA_BUCKET.get(`og/placa/${day}.jpg`);
         const fresh = obj && Date.now() - Number(obj.customMetadata?.generatedAt || 0) < PLACA_TTL_MS;
         if (day === today && !fresh && env.CF_BR_TOKEN) {
           if (obj) ctx.waitUntil(generarPlaca(env).catch(() => {}));
           else {
             const buf = await generarPlaca(env).catch(() => null);
-            if (buf) return new Response(buf, { headers: { ...CORS_HEADERS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=300' } });
+            if (buf) return new Response(buf, { headers: { ...CORS_HEADERS, 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=300' } });
           }
         }
-        if (obj) return new Response(obj.body, { headers: { ...CORS_HEADERS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=300' } });
+        if (obj) return new Response(obj.body, { headers: { ...CORS_HEADERS, 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=300' } });
         return Response.redirect(PLACA_FALLBACK, 302);
       }
       if (url.pathname === '/placa/refresh' && request.method === 'POST') {
@@ -877,7 +877,7 @@ export default {
         const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
         const t = `Convocatoria · ${DIAS[dt.getUTCDay()]} ${dt.getUTCDate()} ${MESES[dt.getUTCMonth()]}`;
         const d = 'Partidos del día de Top Secret FC. Confirmá tu asistencia.';
-        const i = `${url.origin}/placa/${day}.png`;
+        const i = `${url.origin}/placa/${day}.jpg`;
         const r = SITE + 'convocatoria.html';
         const e = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         const html = `<!DOCTYPE html><html lang="es"><head>
@@ -887,7 +887,7 @@ export default {
 <meta property="og:title" content="${e(t)}">
 <meta property="og:description" content="${e(d)}">
 <meta property="og:image" content="${e(i)}">
-<meta property="og:image:type" content="image/png">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1080">
 <meta property="og:image:height" content="1350">
 <meta property="og:url" content="${e(url.origin + url.pathname)}">
@@ -1276,13 +1276,13 @@ async function generarPlaca(env) {
         viewport: { width: 1080, height: 1350 },
         gotoOptions: { waitUntil: 'networkidle2', timeout: 30000 },
         waitForSelector: { selector: '#placa-ready', timeout: 25000 },
-        screenshotOptions: { type: 'png' },
+        screenshotOptions: { type: 'jpeg', quality: 82 },
       }),
     });
     if (!r.ok || !/image/.test(r.headers.get('content-type') || '')) throw new Error('screenshot ' + r.status);
     const buf = await r.arrayBuffer();
-    await env.MEDIA_BUCKET.put(`og/placa/${artToday()}.png`, buf, {
-      httpMetadata: { contentType: 'image/png' },
+    await env.MEDIA_BUCKET.put(`og/placa/${artToday()}.jpg`, buf, {
+      httpMetadata: { contentType: 'image/jpeg' },
       customMetadata: { generatedAt: String(Date.now()) },
     });
     return buf;
