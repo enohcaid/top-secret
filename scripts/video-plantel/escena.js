@@ -9,7 +9,9 @@
   // Tiempos (cuadros a 30 fps)
   const INTRO = 54, SEG = 44, STEP = 38, OUTRO = 96;
   const APARECE = 8, VUELA = 28;          // dentro de cada segmento: aparece 0–8, se queda 8–28, vuela 28–44
-  const CLIP0 = 20;                        // primer cuadro del clip que se usa (el acercamiento termina en el 150)
+  // El clip de Canva es un acercamiento que termina en primer plano (y a veces tapa el gesto): se reproduce
+  // AL REVÉS, del primer plano (cuadro 150) a la pose completa (cuadro 1), que es la que queda en la grilla.
+  const TILE = 1;
   const HEADER_Y = 300;                    // la grilla arranca debajo del título
 
   const cfg = window.CFG, items = cfg.items;
@@ -30,6 +32,8 @@
     return p;
   }
   const frameSrc = (key, k) => `/frames/${encodeURIComponent(key)}/${String(k).padStart(3, '0')}.jpg`;
+  // Imagen de la grilla: brazos cruzados (si render.mjs la habilitó) o la pose completa del gesto
+  const tileSrc = key => cfg.grilla ? `/grilla/${encodeURIComponent(key)}/001.jpg` : frameSrc(key, TILE);
 
   // ── Posiciones finales de cada jugador ──
   function calcularSlots() {
@@ -108,10 +112,17 @@
   }
 
   // Tarjeta de un jugador: imagen recortada + textos. big=1 → textos grandes; label=1 → rótulo chico de grilla
-  function tarjeta(im, it, x, y, w, h, srcH, radio, big, label) {
+  function tarjeta(im, it, x, y, w, h, srcH, radio, big, label, im2 = null, mix = 0) {
     ctx.save();
     rr(x, y, w, h, radio); ctx.clip();
-    if (im) ctx.drawImage(im, 0, 0, FW, srcH, x, y, w, h);
+    if (im && mix < 1) ctx.drawImage(im, 0, 0, FW, srcH, x, y, w, h);
+    if (im2 && mix > 0) { ctx.globalAlpha = mix; ctx.drawImage(im2, 0, 0, FW, srcH, x, y, w, h); ctx.globalAlpha = 1; }
+    if (im2 && mix > 0 && mix < 1) {   // destello dorado que disimula el cambio de pose
+      const f = Math.sin(mix * Math.PI);
+      const g = ctx.createRadialGradient(x + w / 2, y + h * .35, 0, x + w / 2, y + h * .35, Math.max(w, h) * .75);
+      g.addColorStop(0, `rgba(255,236,180,${.75 * f})`); g.addColorStop(.5, `rgba(201,168,76,${.35 * f})`); g.addColorStop(1, 'rgba(201,168,76,0)');
+      ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    }
     const g = ctx.createLinearGradient(0, y + h * .55, 0, y + h);
     g.addColorStop(0, 'rgba(10,10,10,0)'); g.addColorStop(1, `rgba(10,10,10,${.85 * Math.max(big, label)})`);
     ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
@@ -152,7 +163,7 @@
   async function preparar() {
     await Promise.all([document.fonts.load(`900 100px ${COND}`), document.fonts.load(`800 40px ${COND}`), document.fonts.load(`700 30px ${COND}`)]).catch(() => {});
     crest = await img(CREST);
-    await Promise.all(items.map(it => img(frameSrc(it.key, NF))));
+    await Promise.all(items.map(it => img(tileSrc(it.key))));
     slots = calcularSlots();
     total = INTRO + (items.length - 1) * STEP + SEG + OUTRO;
     return total;
@@ -168,7 +179,7 @@
       const s0 = INTRO + i * STEP, t = n - s0;
       if (t >= SEG) {
         const sl = slots[i];
-        tarjeta(await img(frameSrc(items[i].key, NF)), items[i], sl.x, sl.y, sl.w, sl.h, sl.srcH, 12, 0, 1);
+        tarjeta(await img(tileSrc(items[i].key)), items[i], sl.x, sl.y, sl.w, sl.h, sl.srcH, 12, 0, 1);
       } else if (t >= 0) {
         activos.push([i, t]);
         dim = Math.max(dim, seg(t, 0, APARECE) * (1 - seg(t, VUELA, SEG)));
@@ -182,16 +193,18 @@
     // Tarjetas entrando (la más nueva arriba)
     for (const [i, t] of activos) {
       const it = items[i], sl = slots[i];
-      const k = Math.round(CLIP0 + (NF - CLIP0) * clamp(t / (SEG - 1)));
+      const k = Math.round(NF - (NF - TILE) * outCubic(clamp(t / (SEG - 1))));
       const im = await img(frameSrc(it.key, Math.min(NF, Math.max(1, k))));
-      img(frameSrc(it.key, Math.min(NF, k + 4)));                       // precarga
+      img(frameSrc(it.key, Math.max(TILE, k - 4)));                     // precarga
       const bw = 760, bh = bw * 16 / 9, bx = (W - bw) / 2, by = HEADER_Y + 60 + (H - HEADER_Y - 60 - bh) / 2;
       const ap = outCubic(seg(t, 0, APARECE)), v = ease(seg(t, VUELA, SEG));
       const sc = lerp(.9, 1, ap);
       const w = lerp(bw * sc, sl.w, v), srcH = lerp(FH, sl.srcH, v), h = w * srcH / FW;
       const cx = lerp(bx + bw / 2, sl.x + sl.w / 2, v), cy = lerp(by + bh / 2, sl.y + sl.h / 2, v);
       ctx.globalAlpha = ap;
-      tarjeta(im, it, cx - w / 2, cy - h / 2, w, h, srcH, lerp(22, 12, v), (1 - seg(t, VUELA, VUELA + 6)) * seg(t, 4, 12), seg(t, SEG - 6, SEG));
+      const mix = cfg.grilla ? ease(seg(t, VUELA + 2, SEG - 3)) : 0;
+      tarjeta(im, it, cx - w / 2, cy - h / 2, w, h, srcH, lerp(22, 12, v), (1 - seg(t, VUELA, VUELA + 6)) * seg(t, 4, 12), seg(t, SEG - 6, SEG),
+        cfg.grilla ? await img(tileSrc(it.key)) : null, mix);
       ctx.globalAlpha = 1;
     }
     // Cierre: barrido dorado y firma

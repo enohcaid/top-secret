@@ -69,14 +69,22 @@ const MUSICA = argv.includes('--sin-musica') ? null : opt('--musica', MODO === '
 const server = http.createServer((req, res) => {
   const u = decodeURIComponent(req.url.split('?')[0]);
   if (u === '/') { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); return res.end(PAGE); }
-  const f = path.join(D, u);
-  if (!f.startsWith(D) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+  // /grilla/<gt>/NNN.jpg → cuadros de la pose de la grilla (brazos cruzados), el resto → la pose de entrada
+  const base = u.startsWith('/grilla/') ? path.join(D_GRILLA, 'frames') : D;
+  const f = path.join(base, u.replace(/^\/grilla/, ''));
+  if (!f.startsWith(base) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { 'Content-Type': 'image/jpeg' }); fs.createReadStream(f).pipe(res);
 });
 await new Promise(r => server.listen(0, r));
 const PORT = server.address().port;
 
-const CFG = { items, layout, header, modo: MODO };
+// La grilla final es pareja: todos de brazos cruzados (Brazos4). Cada jugador entra con su gesto y, mientras
+// vuela a su lugar, pasa a brazos cruzados con un fundido + destello (la IA no anima de una pose a otra).
+const POSE_GRILLA = process.env.POSE_GRILLA || 'Brazos4';
+const D_GRILLA = path.join(ROOT, 'fuentes/video-plantel', POSE_GRILLA);
+const conGrilla = POSE_GRILLA !== POSE && items.every(it => fs.existsSync(path.join(D_GRILLA, 'frames', it.key, '001.jpg')));
+if (POSE_GRILLA !== POSE && !conGrilla) console.log(`Ojo: faltan cuadros de ${POSE_GRILLA} (POSE=${POSE_GRILLA} node scripts/video-plantel/prep.mjs); la grilla queda con la pose de entrada.`);
+const CFG = { items, layout, header, modo: MODO, grilla: conGrilla };
 const PAGE = `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@500;600&display=swap" rel="stylesheet">
 <style>html,body{margin:0;background:#000}</style></head><body><canvas id="c" width="1080" height="1920"></canvas>
