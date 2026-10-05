@@ -876,7 +876,6 @@ export default {
         const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
         const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
         const t = `Convocatoria · ${DIAS[dt.getUTCDay()]} ${dt.getUTCDate()} ${MESES[dt.getUTCMonth()]}`;
-        const d = 'Partidos del día de Top Secret FC. Confirmá tu asistencia.';
         const i = `${url.origin}/placa/${day}.jpg`;
         const r = SITE + 'convocatoria.html';
         const e = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -885,7 +884,6 @@ export default {
 <title>${e(t)}</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="${e(t)}">
-<meta property="og:description" content="${e(d)}">
 <meta property="og:image" content="${e(i)}">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
