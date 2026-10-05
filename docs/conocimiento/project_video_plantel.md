@@ -13,3 +13,4 @@ Herramienta en `scripts/video-plantel/` (ver su README). Primera versión 2026-1
 - El mismo formato sirve para el **equipo de la noche** (formación y capitán de la convocatoria en Firestore).
 
 **Gotchas:** el clip de Canva termina en primer plano y tapa el gesto → se reproduce al revés. En la tipografía de la espalda, ChatGPT escribe "KEE_VIINO3" (O por cero) y no lo corrige al pedírselo. Cupo de Canva: 19 clips ≈ 76% del mes (4% c/u).
+- **Botón "Compartir video" en convocatoria** (2026-10-05): genera el video del equipo de hoy en el navegador y lo comparte por WhatsApp (`video-equipo.js`, hojas de cuadros en R2 `video-equipo/<VER>/`). Ver README de scripts/video-plantel.
