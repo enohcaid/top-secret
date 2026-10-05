@@ -9,12 +9,27 @@
   const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
   const VER = 'v1';                                        // mismo VER que web-assets.mjs
   const SPRITE = { base: `${MEDIA}/video-equipo/${VER}/`, n: 22, cols: 6, fw: 480, fh: 854 };
-  const ESCENA_JS = 'scripts/video-plantel/escena.js?v=2';
+  const ESCENA_JS = 'scripts/video-plantel/escena.js?v=3';
   const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5/+esm';
   const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
   let enCurso = false;
+  // Limpieza: el video vive solo en memoria del navegador (nada se sube a ningún lado). Al cerrar el cartel o
+  // salir de la página se liberan el archivo, las URLs de vista previa/descarga, el canvas y las imágenes.
+  const urls = new Set();
+  let actual = null;                                        // { blob, file, canvas, escena }
+  const nuevaUrl = blob => { const u = URL.createObjectURL(blob); urls.add(u); return u; };
+  function limpiar() {
+    const m = document.getElementById('veModal');
+    const prev = m && m.querySelector('#vePrev');
+    if (prev) { prev.pause(); prev.removeAttribute('src'); prev.load(); }
+    urls.forEach(u => URL.revokeObjectURL(u)); urls.clear();
+    if (actual && actual.canvas) { actual.canvas.width = 0; actual.canvas.height = 0; }
+    actual = null;
+    if (m) m.remove();
+  }
+  window.addEventListener('pagehide', limpiar);
 
   function cargarScript(src) {
     if (window.crearEscena) return Promise.resolve();
@@ -28,7 +43,9 @@
     const items = def.filter(s => lineup.slots[s.key]).map(s => {
       const name = lineup.slots[s.key], p = porNombre[name] || {};
       return { key: name, num: p.num != null ? String(p.num) : '', slot: s.key, x: s.x, y: s.y,
-        puesto: (SLOT_LABEL_ES[formation] || {})[s.key] || s.l, capitan: captain === name };
+        puesto: (SLOT_LABEL_ES[formation] || {})[s.key] || s.l, capitan: captain === name,
+        // Arquero que juega de campo (campo:true en PLAYERS): fuera del arco usa su variante con kit de jugador
+        img: s.key !== 'GK' && p.campo ? name + '-campo' : undefined };
     });
     let partidos = [];
     try {
@@ -58,7 +75,7 @@
       <button id="veCerrar" style="margin-top:12px;background:none;border:0;color:#999;font-size:.85rem;cursor:pointer">Cerrar</button>
     </div>`;
     document.body.appendChild(m);
-    m.querySelector('#veCerrar').onclick = () => { m.remove(); };
+    m.querySelector('#veCerrar').onclick = limpiar;
     return m;
   }
   const estado = (txt, pct) => {
@@ -101,6 +118,7 @@
 
     const cv = document.createElement('canvas'); cv.width = 1080; cv.height = 1920;
     const escena = window.crearEscena(cv, cfg);
+    actual = { canvas: cv };
     const total = await escena.preparar();
 
     // Algunos teléfonos no codifican 1080×1920: se baja a 720×1280 dibujando la escena escalada
@@ -158,11 +176,12 @@
     const m = modal();
     try {
       const blob = await generar();
-      if (!blob) { m.remove(); return; }
+      if (!blob) { limpiar(); return; }
       const nombre = `TopSecret-FC-equipo-${TODAY}.mp4`;
       const file = new File([blob], nombre, { type: 'video/mp4' });
       estado('¡Listo!', 100);
-      const prev = m.querySelector('#vePrev'); prev.src = URL.createObjectURL(blob); prev.style.display = 'block'; prev.play().catch(() => {});
+      actual = { blob, file };
+      const prev = m.querySelector('#vePrev'); prev.src = nuevaUrl(blob); prev.style.display = 'block'; prev.play().catch(() => {});
       const bot = m.querySelector('#veBotones'); bot.style.display = 'flex'; bot.innerHTML = '';
       const boton = (txt, primario, fn) => {
         const b = document.createElement('button');
@@ -173,11 +192,14 @@
       // navigator.share necesita un toque del usuario: por eso va en un botón al terminar, no automático
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         boton('Compartir (WhatsApp)', true, async () => {
-          try { await navigator.share({ files: [file], title: 'Top Secret FC · Equipo de hoy' }); } catch (e) { if (e.name !== 'AbortError') showToast('No se pudo compartir', 'info'); }
+          try {
+            await navigator.share({ files: [file], title: 'Top Secret FC · Equipo de hoy' });
+            limpiar(); showToast('Video compartido');                 // compartido → se libera todo
+          } catch (e) { if (e.name !== 'AbortError') showToast('No se pudo compartir', 'info'); }
         });
       }
       boton('Descargar', false, () => {
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nombre;
+        const a = document.createElement('a'); a.href = nuevaUrl(blob); a.download = nombre;
         document.body.appendChild(a); a.click(); a.remove();
       });
     } catch (e) {

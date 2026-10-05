@@ -34,9 +34,11 @@ async function base(gt) {
   if (fs.existsSync(out)) return out;
   const prev = path.join(FICHAJES, gt + '.png');
   if (fs.existsSync(prev)) { fs.copyFileSync(prev, out); return out; }
-  const src = path.join(ROOT, 'Renders', gt, POSE + '.png');
-  if (!fs.existsSync(src)) execFileSync('node', [path.join(ROOT, 'scripts/r2.mjs'), 'get', `Renders/${gt}/${POSE}.png`, src], { stdio: 'ignore' });
-  if (!fs.existsSync(src)) throw new Error(`falta Renders/${gt}/${POSE}.png`);
+  // Variante "<gt>-campo" (arquero con kit de jugador): sale de Renders/<gt>/<POSE>-campo.png
+  const [jug, suf] = gt.endsWith('-campo') ? [gt.slice(0, -6), '-campo'] : [gt, ''];
+  const rel = `Renders/${jug}/${POSE}${suf}.png`, src = path.join(ROOT, rel);
+  if (!fs.existsSync(src)) execFileSync('node', [path.join(ROOT, 'scripts/r2.mjs'), 'get', rel, src], { stdio: 'ignore' });
+  if (!fs.existsSync(src)) throw new Error('falta ' + rel);
   // Alto 2700 (cabeza a rodillas en cuadro), salvo poses anchas (brazos abiertos/bíceps): se achican hasta
   // que el cuerpo entre a lo ancho con margen, así no quedan brazos cortados.
   // Contorno de lo opaco (alfa > 60): trim() a secas toma sombras casi transparentes y achica de más.
@@ -87,7 +89,9 @@ async function frames(gt, img) {
 
 fs.mkdirSync(D, { recursive: true });
 const pedidos = process.argv.slice(2);
-const lista = pedidos.length ? ROSTER_T4.filter(p => pedidos.includes(p.key)) : ROSTER_T4;
+// Sin argumentos: todo ROSTER_T4 + las variantes de campo que tengan su pose (Renders/<gt>/<POSE>-campo.png)
+const variantes = ROSTER_T4.filter(p => fs.existsSync(path.join(ROOT, 'Renders', p.key, POSE + '-campo.png'))).map(p => ({ key: p.key + '-campo' }));
+const lista = pedidos.length ? pedidos.map(k => ({ key: k })) : [...ROSTER_T4, ...variantes];
 const res = { canva: [], provisorio: [] };
 for (const p of lista) {
   const img = await base(p.key);

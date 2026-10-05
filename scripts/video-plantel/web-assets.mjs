@@ -28,7 +28,8 @@ const NF = 150, outCubic = t => 1 - Math.pow(1 - t, 3);
 const indices = Array.from({ length: SPRITE.n }, (_, i) => Math.round(NF - (NF - 1) * outCubic(i / (SPRITE.n - 1))));
 
 const pedidos = process.argv.slice(2);
-const lista = ROSTER_T4.map(p => p.key).filter(k => !pedidos.length || pedidos.includes(k));
+// Sin argumentos: todo ROSTER_T4 + variantes "<gt>-campo" que tengan cuadros
+const lista = pedidos.length ? pedidos : [...ROSTER_T4.map(p => p.key), ...ROSTER_T4.map(p => p.key + '-campo').filter(k => fs.existsSync(path.join(FR, k, '150.jpg')))];
 const rows = Math.ceil(SPRITE.n / SPRITE.cols);
 for (const gt of lista) {
   if (!fs.existsSync(path.join(FR, gt, '150.jpg'))) { console.log('sin cuadros (correr prep.mjs):', gt); continue; }

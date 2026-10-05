@@ -10,6 +10,15 @@ Reel vertical 1080×1920 a 30 fps. Cada jugador entra grande con su clip (acerca
 
 En `convocatoria.html` → Opciones → **Compartir video**: el navegador arma el video del equipo de hoy (`video-equipo.js` + esta misma `escena.js`, con WebCodecs y mp4-muxer; ~12 s en PC, más en celular) y al terminar ofrece **Compartir (WhatsApp)** o **Descargar**. Usa la formación, el capitán y los dorsales de la página y los partidos de `getTodayMatches()`. Los cuadros de cada jugador vienen de R2 `video-equipo/<VER>/<gt>.webp` (~400 KB c/u) + `musica.mp3`, armados con `node scripts/video-plantel/web-assets.mjs [gt]` (después de `prep.mjs`). Si cambian los cuadros de alguien, subir `VER` en `web-assets.mjs` **y** en `video-equipo.js` (caché immutable de `/media`). Jugador sin hoja de cuadros (p. ej. a prueba) → sale la tarjeta con su nombre, sin imagen.
 
+## Arqueros que juegan de campo
+
+Si un arquero tiene variante de campo (hoy: Ivan_Cabj_La12, `campo:true` en `PLAYERS` de convocatoria.html), fuera del arco el video usa `<gt>-campo` (camiseta negra) y en el arco la normal. Para armar una variante: `Frente4-campo.png` en `Renders/<gt>/` → gesto en `GESTOS_CAMPO` (`poses.mjs`) → `CAMPO=1 node scripts/video-plantel/poses.mjs <gt>` → subir `Gesto4-campo.png` a R2 → `prep.mjs <gt>-campo` → clip de Canva de `fuentes/video-plantel/Gesto4/<gt>-campo.png` → `prep.mjs <gt>-campo` → `web-assets.mjs <gt>-campo`.
+
+## Limpieza
+
+- **En el navegador** (botón de convocatoria): el video vive solo en memoria, no se sube a ningún lado. Al compartirlo, al tocar "Cerrar" o al salir de la página se liberan el archivo, las URLs de vista previa/descarga, el canvas y las imágenes.
+- **En la PC**: `render.mjs --modo equipo` borra los videos del equipo de días anteriores (`fuentes/video-plantel/Gesto4/equipo-*` y R2 `videos/equipo-*`). `--sin-limpiar` para conservarlos. El de plantel no se toca (es el publicado).
+
 ## Pasos
 
 ```bash

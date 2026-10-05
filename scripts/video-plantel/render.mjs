@@ -15,6 +15,7 @@ import { spawn, execFileSync } from 'child_process';
 import { chromium } from 'playwright';
 import ffmpegPath from 'ffmpeg-static';
 import { ROSTER_T4 } from '../../roster.js';
+import { list as r2list, del as r2del } from '../lib/r2.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')), '../..');
 const POSE = process.env.POSE || 'Gesto4';
@@ -51,6 +52,8 @@ if (MODO === 'plantel') {
   items = def.filter(s => porKey[slots[s.key]]).map(s => ({
     key: slots[s.key], num: porKey[slots[s.key]].num, slot: s.key, x: s.x, y: s.y,
     puesto: (SLOT_LABEL_ES[formation] || {})[s.key] || s.l, capitan: slots[s.key] === captain,
+    // Arquero que juega de campo (p. ej. Ivan_Cabj_La12): si tiene variante "<gt>-campo", se usa fuera del arco
+    img: s.key !== 'GK' && fs.existsSync(path.join(D, 'frames', slots[s.key] + '-campo', '150.jpg')) ? slots[s.key] + '-campo' : undefined,
   }));
   layout = { tipo: 'formacion' };
   const dt = new Date(FECHA + 'T12:00:00Z');
@@ -59,7 +62,7 @@ if (MODO === 'plantel') {
 
 const faltan = items.filter(it => !fs.existsSync(path.join(D, 'frames', it.key, '150.jpg'))).map(it => it.key);
 if (faltan.length) { console.error('Faltan cuadros, correr prep.mjs para:', faltan.join(' ')); process.exit(1); }
-const provis = items.filter(it => fs.existsSync(path.join(D, 'frames', it.key, 'PROVISORIO'))).map(it => it.key);
+const provis = items.filter(it => fs.existsSync(path.join(D, 'frames', it.img || it.key, 'PROVISORIO'))).map(it => it.img || it.key);
 if (provis.length) console.log(`Ojo: ${provis.length} jugadores con acercamiento simulado (sin clip de Canva): ${provis.join(', ')}`);
 
 const OUT = path.resolve(opt('--out', path.join(D, MODO === 'plantel' ? 'plantel-t4.mp4' : `equipo-${FECHA}.mp4`)));
@@ -143,3 +146,15 @@ if (MUSICA) {
   console.log('Música:', mp3);
 } else fs.renameSync(tmp, OUT);
 console.log('Listo:', OUT);
+
+// Limpieza: los videos del equipo son de un solo día. Al armar uno nuevo se borran los de días anteriores
+// (locales y, si se subieron, los de R2 videos/equipo-*). --sin-limpiar para conservarlos.
+if (MODO === 'equipo' && !argv.includes('--sin-limpiar')) {
+  const viejo = n => /^equipo-\d{4}-\d{2}-\d{2}(-portada\.jpg|\.mp4)$/.test(n) && !n.startsWith('equipo-' + FECHA);
+  const locales = fs.readdirSync(D).filter(viejo);
+  locales.forEach(n => fs.rmSync(path.join(D, n)));
+  let remotos = [];
+  try { remotos = (await r2list('videos/equipo-')).map(o => o.key).filter(k => viejo(k.slice('videos/'.length))); for (const k of remotos) await r2del(k); }
+  catch (e) { console.log('No pude limpiar R2:', e.message); }
+  if (locales.length || remotos.length) console.log(`Limpieza: ${locales.length} archivos locales y ${remotos.length} en R2 de días anteriores`);
+}

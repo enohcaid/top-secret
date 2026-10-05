@@ -218,7 +218,7 @@ function crearEscena(cv, cfg) {
   async function preparar() {
     await Promise.all([document.fonts.load(`900 100px ${COND}`), document.fonts.load(`800 40px ${COND}`), document.fonts.load(`700 30px ${COND}`)]).catch(() => {});
     crest = await img(CREST);
-    await Promise.all(items.map(it => cuadroGrilla(it.key)));
+    await Promise.all(items.map(it => cuadroGrilla(it.img || it.key)));
     await Promise.all(partidos.map(async p => { p._img = p.badge ? await img(p.badge.startsWith('http') && !p.badge.includes('/media/') ? 'https://top-secret-proxy.juan-c-m-1985.workers.dev/img-proxy?url=' + encodeURIComponent(p.badge) : p.badge) : null; }));
     slots = calcularSlots();
     total = INTRO + (items.length - 1) * STEP + SEG + OUTRO;
@@ -240,7 +240,7 @@ function crearEscena(cv, cfg) {
       const s0 = INTRO + i * STEP, t = n - s0;
       if (t >= SEG) {
         const sl = slots[i];
-        tarjeta(await cuadroGrilla(items[i].key), items[i], sl.x, sl.y, sl.w, sl.h, sl.srcH, 12, 0, 1);
+        tarjeta(await cuadroGrilla(items[i].img || items[i].key), items[i], sl.x, sl.y, sl.w, sl.h, sl.srcH, 12, 0, 1);
       } else if (t >= 0) {
         activos.push([i, t]);
         dim = Math.max(dim, seg(t, 0, APARECE) * (1 - seg(t, VUELA, SEG)));
@@ -254,7 +254,7 @@ function crearEscena(cv, cfg) {
     // Tarjetas entrando (la más nueva arriba)
     for (const [i, t] of activos) {
       const it = items[i], sl = slots[i];
-      const fr = await cuadroJugador(it.key, t / (SEG - 1));
+      const fr = await cuadroJugador(it.img || it.key, t / (SEG - 1));   // img: variante de material (p. ej. arquero con kit de campo)
       const bw = 760, bh = bw * 16 / 9, bx = (W - bw) / 2, by = HEADER_Y + 60 + (H - HEADER_Y - 60 - bh) / 2;
       const ap = outCubic(seg(t, 0, APARECE)), v = ease(seg(t, VUELA, SEG));
       const sc = lerp(.9, 1, ap);
@@ -263,7 +263,7 @@ function crearEscena(cv, cfg) {
       ctx.globalAlpha = ap;
       const mix = cfg.grilla ? ease(seg(t, VUELA + 2, SEG - 3)) : 0;
       tarjeta(fr, it, cx - w / 2, cy - h / 2, w, h, srcH, lerp(22, 12, v), (1 - seg(t, VUELA, VUELA + 6)) * seg(t, 4, 12), seg(t, SEG - 6, SEG),
-        cfg.grilla ? await cuadroGrilla(it.key) : null, mix);
+        cfg.grilla ? await cuadroGrilla(it.img || it.key) : null, mix);
       ctx.globalAlpha = 1;
     }
     // Cierre: barrido dorado y firma

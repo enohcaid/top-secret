@@ -39,7 +39,15 @@ export const GESTOS = {
 
 const FORMAT_BLOCK = 'Cuerpo entero de pies a cabeza, con margen de aire arriba y abajo, cámara frontal, encuadre de estudio tipo ficha de videojuego (tarjeta de jugador), formato vertical 1024x1536. Fondo PNG con canal alfa real, completamente transparente — cero viñeta, resplandor, aura de color o degradado. Iluminación de estudio limpia y uniforme. Nada de texto, títulos, marcos ni marcas de agua.';
 
-const prompt = gt => `Te adjunto el render aprobado de este jugador. Hacé exactamente al mismo jugador (misma cara, peinado, vello facial, tatuajes, accesorios, tono de piel y contextura), con el mismo kit idéntico (mismo escudo, swoosh, dorsal, medias, guantes y botines), de pie y MIRANDO A LA CÁMARA, en una pose fachera, con actitud y onda de jugador estrella (nada rígido ni de maniquí: peso en una pierna, hombros sueltos, expresión con personalidad). La pose: ${GESTOS[gt].replace(/\s*\(T3[^)]*\)/, '')}
+// Arqueros que también juegan de campo (campo:true en PLAYERS de convocatoria.html): CAMPO=1 genera
+// Renders/<gt>/Gesto4-campo.png desde su Frente4-campo.png (kit titular de jugador), con el gesto de GESTOS_CAMPO.
+export const GESTOS_CAMPO = {
+  Ivan_Cabj_La12: 'choca los dos puños cerrados frente al pecho (sin guantes), hombros hacia adelante, actitud de guerrero listo.',
+};
+const CAMPO = process.env.CAMPO === '1';
+const gesto = gt => (CAMPO ? GESTOS_CAMPO[gt] : GESTOS[gt]) || '';
+
+const prompt = gt => `Te adjunto el render aprobado de este jugador. Hacé exactamente al mismo jugador (misma cara, peinado, vello facial, tatuajes, accesorios, tono de piel y contextura), con el mismo kit idéntico (mismo escudo, swoosh, dorsal, medias, guantes y botines), de pie y MIRANDO A LA CÁMARA, en una pose fachera, con actitud y onda de jugador estrella (nada rígido ni de maniquí: peso en una pierna, hombros sueltos, expresión con personalidad). La pose: ${gesto(gt).replace(/\s*\(T3[^)]*\)/, '')}
 Las manos y los dedos tienen que verse anatómicamente correctos (cinco dedos). El escudo del pecho no se deforma.
 
 ${FORMAT_BLOCK}
@@ -55,9 +63,10 @@ if ((process.argv[1] || '').endsWith('poses.mjs')) {
   const res = [];
   try {
     for (const gt of lista) {
-      const dir = path.resolve('Renders', gt), dest = path.join(dir, 'Gesto4.png'), frente = path.join(dir, 'Frente4.png');
+      const dir = path.resolve('Renders', gt), suf = CAMPO ? '-campo' : '';
+      const dest = path.join(dir, `Gesto4${suf}.png`), frente = path.join(dir, `Frente4${suf}.png`);
       if (fs.existsSync(dest) && process.env.FORCE !== '1') { res.push(`= ${gt} (ya estaba)`); continue; }
-      if (!GESTOS[gt] || !fs.existsSync(frente)) { res.push(`FALTA ${gt} (sin gesto o sin Frente4)`); continue; }
+      if (!gesto(gt) || !fs.existsSync(frente)) { res.push(`FALTA ${gt} (sin gesto o sin Frente4${suf})`); continue; }
       console.log(`\n========== ${gt} ==========`);
       let ok = false;
       for (let intento = 1; intento <= 2 && !ok; intento++) {
