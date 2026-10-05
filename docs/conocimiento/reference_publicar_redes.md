@@ -5,6 +5,8 @@ metadata:
   type: reference
 ---
 
+**Script reutilizable (2026-10-05):** `node scripts/publicar-video.mjs youtube|x|tiktok <video.mp4> --texto "…" [--titulo "…"] [--hashtags "A,B"]` (capturas en `fuentes/redes/pub-<red>-*.png`). Instagram/Facebook: `scripts/meta.mjs ig-reel|fb-video <url R2> "<texto>"`. Con la música trap pegada al archivo se publica en las 5 redes sin pasos manuales (primer uso: presentación del plantel T4, 2026-10-05). Trampa de X: el botón Postear queda deshabilitado mientras procesa el video; el script espera a que se habilite (antes clickeaba antes de tiempo y no publicaba). TikTok toma como portada el primer cuadro: los videos de `scripts/video-plantel` arrancan con 2 cuadros de portada por eso.
+
 Primera publicación automatizada: 2026-10-01, reel "Expediente Top Secret: desclasificado" (scripts en `fuentes/redes/` no versionados; esto es el resumen reutilizable).
 
 - **YouTube** (sesión en el Chrome CDP, canal **TOP Secret FC** `UCEKzzKDMMPri12Q3E9S7IVw`; ojo: el perfil también tiene el canal personal de Juan): `studio.youtube.com/channel/<id>/videos/upload?d=ud` → `input[type=file]` → `#textbox` 0 = título, 1 = descripción → radio `VIDEO_MADE_FOR_KIDS_NOT_MFK` → `#next-button` ×3 → radio `PUBLIC` → `#done-button`. Vertical ≤60 s sale como Short. Resultado: https://youtube.com/shorts/7ykfCkHJuD8
