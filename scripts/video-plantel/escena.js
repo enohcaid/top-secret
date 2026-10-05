@@ -37,7 +37,7 @@
 
   // ── Posiciones finales de cada jugador ──
   function calcularSlots() {
-    const M = 56, GAP = 16, top = HEADER_Y + 40, bottom = H - 90;
+    const M = 56, GAP = 16, top = HEADER_Y + 40, bottom = H - 90 - altoPartidos();
     if (cfg.layout.tipo === 'grilla') {
       const cols = cfg.layout.cols, rows = Math.ceil(items.length / cols);
       const w = Math.floor(Math.min((W - 2 * M - (cols - 1) * GAP) / cols, ((bottom - top - (rows - 1) * GAP) / rows) * 3 / 4));
@@ -63,6 +63,38 @@
       f.forEach((it, c) => { out[it.i] = { x: (W - rowW) / 2 + c * (w + GAP), y: y0 + r * (h + RG), w, h, srcH: FW * h / w }; });
     });
     return out;
+  }
+
+  // ── Partidos de la noche (modo equipo): bloque abajo de la formación ──
+  const partidos = cfg.partidos || [];
+  const FILA_P = 66;
+  function altoPartidos() { return partidos.length ? 64 + FILA_P * partidos.length : 0; }
+  const LIGA = { VPN: '#f5c518', VPUG: '#3ecf8e', '11x11': '#4a9eff' };
+  function bloquePartidos(alpha) {
+    if (!partidos.length || alpha <= 0) return;
+    const M = 72, y0 = H - 90 - altoPartidos() + 18;
+    ctx.globalAlpha = alpha;
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    ctx.fillStyle = C.gold; ctx.font = `700 26px ${COND}`; ctx.letterSpacing = '7px';
+    ctx.fillText(partidos.length > 1 ? 'PARTIDOS DE HOY' : 'PARTIDO DE HOY', M, y0 + 10);
+    ctx.letterSpacing = '0px';
+    partidos.forEach((p, i) => {
+      const cy = y0 + 58 + i * FILA_P;
+      ctx.fillStyle = 'rgba(244,241,234,.12)'; ctx.fillRect(M, cy - FILA_P / 2, W - 2 * M, 1);
+      ctx.fillStyle = C.gold; ctx.font = `800 40px ${COND}`; ctx.fillText(p.time || '--:--', M, cy);
+      const bx = M + 118, bs = 46;
+      rr(bx, cy - bs / 2, bs, bs, 10); ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fill();
+      if (p._img) { const k = Math.min((bs - 6) / p._img.width, (bs - 6) / p._img.height); ctx.drawImage(p._img, bx + (bs - p._img.width * k) / 2, cy - p._img.height * k / 2, p._img.width * k, p._img.height * k); }
+      const lg = p.league || 'Amistoso', col = LIGA[lg] || '#b8b2a6';
+      ctx.font = `700 22px ${COND}`; ctx.letterSpacing = '3px';
+      const meta = lg.toUpperCase() + '  ·  ' + (p.isHome ? 'LOCAL' : 'VISITA');
+      const mw = ctx.measureText(meta).width;
+      ctx.fillStyle = col; ctx.fillText(meta, W - M - mw, cy);
+      ctx.letterSpacing = '0px';
+      const tx = bx + bs + 18, s = fit(p.rival, W - M - mw - 24 - tx, 40, 800);
+      ctx.fillStyle = C.white; ctx.font = `800 ${s}px ${COND}`; ctx.fillText(p.rival, tx, cy + 1);
+    });
+    ctx.globalAlpha = 1;
   }
 
   function rr(x, y, w, h, r) {
@@ -164,12 +196,18 @@
     await Promise.all([document.fonts.load(`900 100px ${COND}`), document.fonts.load(`800 40px ${COND}`), document.fonts.load(`700 30px ${COND}`)]).catch(() => {});
     crest = await img(CREST);
     await Promise.all(items.map(it => img(tileSrc(it.key))));
+    await Promise.all(partidos.map(async p => { p._img = p.badge ? await img(p.badge.startsWith('http') && !p.badge.includes('/media/') ? 'https://top-secret-proxy.juan-c-m-1985.workers.dev/img-proxy?url=' + encodeURIComponent(p.badge) : p.badge) : null; }));
     slots = calcularSlots();
     total = INTRO + (items.length - 1) * STEP + SEG + OUTRO;
-    return total;
+    return total + PORTADA;
   }
 
-  async function cuadro(n) {
+  // Los primeros PORTADA cuadros son la imagen final (todos ubicados + partidos): es la miniatura que muestran
+  // WhatsApp y las redes. Dura 2 cuadros, casi no se ve al reproducir.
+  const PORTADA = 2;
+  async function cuadro(nOut) {
+    const portada = nOut < PORTADA;
+    const n = portada ? total - 1 : nOut - PORTADA;
     fondo();
     cabecera(n);
     // Tarjetas ya ubicadas
@@ -209,13 +247,14 @@
     }
     // Cierre: barrido dorado y firma
     const o = n - (total - OUTRO);
+    bloquePartidos(portada ? 1 : seg(o, 6, 30));
     if (o > 0) {
       const a = seg(o, 10, 30);
       ctx.globalAlpha = a;
       ctx.fillStyle = C.gold; ctx.font = `700 30px ${COND}`; ctx.letterSpacing = '8px'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('#TOPSECRETFC', W / 2, H - 62);
       ctx.textAlign = 'left'; ctx.letterSpacing = '0px'; ctx.globalAlpha = 1;
-      const sw = seg(o, 0, 26);
+      const sw = portada ? 0 : seg(o, 0, 26);
       if (sw > 0 && sw < 1) {
         const gx = lerp(-300, W + 300, ease(sw));
         const g = ctx.createLinearGradient(gx - 220, 0, gx + 220, 0);

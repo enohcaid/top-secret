@@ -85,7 +85,23 @@ const POSE_GRILLA = process.env.POSE_GRILLA || POSE;
 const D_GRILLA = path.join(ROOT, 'fuentes/video-plantel', POSE_GRILLA);
 const conGrilla = POSE_GRILLA !== POSE && items.every(it => fs.existsSync(path.join(D_GRILLA, 'frames', it.key, '001.jpg')));
 if (POSE_GRILLA !== POSE && !conGrilla) console.log(`Ojo: faltan cuadros de ${POSE_GRILLA} (POSE=${POSE_GRILLA} node scripts/video-plantel/prep.mjs); la grilla queda con la pose de entrada.`);
-const CFG = { items, layout, header, modo: MODO, grilla: conGrilla };
+// Partidos de la noche (modo equipo): los mismos que muestra la convocatoria publicada (getTodayMatches:
+// oficiales VPN/VPUG/11x11 + amistosos cargados), igual que el bot de amistosos. Solo sirve para hoy.
+let partidos = [];
+if (MODO === 'equipo' && FECHA === HOY && !argv.includes('--sin-partidos')) {
+  const b0 = await chromium.launch({ channel: 'chrome' }).catch(() => chromium.launch());
+  try {
+    const pg = await b0.newPage();
+    await pg.goto('https://enohcaid.github.io/top-secret/convocatoria.html?vista&t=' + Date.now(), { waitUntil: 'load', timeout: 60000 });
+    await pg.waitForTimeout(8000);
+    partidos = await pg.evaluate(() => typeof getTodayMatches === 'function'
+      ? getTodayMatches().map(m => ({ time: m.time, rival: m.rival, league: m.league, isHome: !!m.isHome, badge: m.badge || m.rivalLogo || null })) : []);
+  } catch (e) { console.log('No pude leer los partidos de la convocatoria:', e.message.split('\n')[0]); }
+  await b0.close();
+  partidos.sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+  console.log('Partidos:', partidos.map(p => `${p.time} ${p.rival} (${p.league || 'Amistoso'})`).join(' · ') || 'ninguno');
+}
+const CFG = { items, layout, header, modo: MODO, grilla: conGrilla, partidos };
 const PAGE = `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@500;600&display=swap" rel="stylesheet">
 <style>html,body{margin:0;background:#000}</style></head><body><canvas id="c" width="1080" height="1920"></canvas>
@@ -104,6 +120,7 @@ const ff = spawn(ffmpegPath, ['-y', '-v', 'error', '-f', 'image2pipe', '-framera
 const t0 = Date.now();
 for (let f = 0; f < total; f++) {
   const b64 = await page.evaluate(n => window.ESCENA.cuadro(n), f);
+  if (f === 0) fs.writeFileSync(OUT.replace(/\.mp4$/, '-portada.jpg'), Buffer.from(b64, 'base64'));   // miniatura / portada
   if (!ff.stdin.write(Buffer.from(b64, 'base64'))) await new Promise(r => ff.stdin.once('drain', r));
   if (f % 150 === 0) process.stdout.write(`\r${f}/${total} cuadros`);
 }
