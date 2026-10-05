@@ -8,6 +8,10 @@
 const SITE = 'https://enohcaid.github.io/top-secret/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
+  'presentacion-plantel-t4': {
+    t: 'Diecinueve: así se presenta el plantel de la Temporada 4',
+    i: MEDIA + 'logos/noticias/plantel-t4-portada-v2.jpg',
+  },
   'expediente-desclasificado-2026': {
     t: 'Expediente Top Secret: desclasificado',
     i: MEDIA + 'logos/noticias/relanz-estadio-final.png',
