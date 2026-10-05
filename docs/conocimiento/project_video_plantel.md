@@ -14,3 +14,6 @@ Herramienta en `scripts/video-plantel/` (ver su README). Primera versión 2026-1
 
 **Gotchas:** el clip de Canva termina en primer plano y tapa el gesto → se reproduce al revés. En la tipografía de la espalda, ChatGPT escribe "KEE_VIINO3" (O por cero) y no lo corrige al pedírselo. Cupo de Canva: 19 clips ≈ 76% del mes (4% c/u).
 - **Botón "Compartir video" en convocatoria** (2026-10-05): genera el video del equipo de hoy en el navegador y lo comparte por WhatsApp (`video-equipo.js`, hojas de cuadros en R2 `video-equipo/<VER>/`). Ver README de scripts/video-plantel.
+- **Arquero de campo** (2026-10-05): Ivan_Cabj_La12 tiene variante `Ivan_Cabj_La12-campo` (camiseta negra, mismo gesto sin guantes); el video la usa cuando no está en el arco (pedido de Juan).
+- **Limpieza** (pedido de Juan, "importante"): el video del botón vive solo en memoria y se libera al compartir/cerrar/salir; en la PC, `render.mjs --modo equipo` borra los de días anteriores (local + R2 `videos/equipo-*`).
+- Cupo de IA de Canva: 100% usado el 2026-10-05 (se renueva el 2/11). Pasado el 100% Canva sigue, con ~5 min de espera por clip.
