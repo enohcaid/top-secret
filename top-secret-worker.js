@@ -841,6 +841,68 @@ export default {
       // ── OG META REDIRECT (/og/<id>) ──────────────
       // Clean short link for WhatsApp previews. URL: /og/<articleId>
       // Article data comes from the NOTICIAS_OG map above — no KV, no query params.
+      // ── PLACA DE CONVOCATORIA (/c/<fecha>, /placa/<fecha|hoy>.png, /placa/refresh) ──
+      // Link para compartir la convocatoria con la placa del día como vista previa en WhatsApp.
+      // La placa es una captura de calendario.html?placa (Cloudflare Browser Rendering, secreto
+      // CF_BR_TOKEN) guardada en R2 og/placa/<fecha>.png. Sin token → imagen OG fija de siempre.
+      const placaMatch = url.pathname.match(/^\/placa\/(hoy|\d{4}-\d{2}-\d{2})\.png$/);
+      if (placaMatch && request.method === 'GET') {
+        const today = artToday();
+        const day = placaMatch[1] === 'hoy' ? today : placaMatch[1];
+        const obj = await env.MEDIA_BUCKET.get(`og/placa/${day}.png`);
+        const fresh = obj && Date.now() - Number(obj.customMetadata?.generatedAt || 0) < PLACA_TTL_MS;
+        if (day === today && !fresh && env.CF_BR_TOKEN) {
+          if (obj) ctx.waitUntil(generarPlaca(env).catch(() => {}));
+          else {
+            const buf = await generarPlaca(env).catch(() => null);
+            if (buf) return new Response(buf, { headers: { ...CORS_HEADERS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=300' } });
+          }
+        }
+        if (obj) return new Response(obj.body, { headers: { ...CORS_HEADERS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=300' } });
+        return Response.redirect(PLACA_FALLBACK, 302);
+      }
+      if (url.pathname === '/placa/refresh' && request.method === 'POST') {
+        if (!env.CF_BR_TOKEN) return jsonResp({ ok: false, error: 'sin CF_BR_TOKEN' });
+        const last = Number(await env.TS_KV.get('placa_last_refresh') || 0);
+        if (Date.now() - last < 60000) return jsonResp({ ok: true, skipped: 'reciente' });
+        await env.TS_KV.put('placa_last_refresh', String(Date.now()), { expirationTtl: 120 });
+        ctx.waitUntil(generarPlaca(env).catch(() => {}));
+        return jsonResp({ ok: true });
+      }
+      const convoMatch = url.pathname.match(/^\/c(?:\/(\d{4}-\d{2}-\d{2}))?\/?$/);
+      if (convoMatch && request.method === 'GET') {
+        const day = convoMatch[1] || artToday();
+        const dt = new Date(day + 'T12:00:00Z');
+        const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+        const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        const t = `Convocatoria · ${DIAS[dt.getUTCDay()]} ${dt.getUTCDate()} ${MESES[dt.getUTCMonth()]}`;
+        const d = 'Partidos del día de Top Secret FC. Confirmá tu asistencia.';
+        const i = `${url.origin}/placa/${day}.png`;
+        const r = SITE + 'convocatoria.html';
+        const e = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const html = `<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8">
+<title>${e(t)}</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="${e(t)}">
+<meta property="og:description" content="${e(d)}">
+<meta property="og:image" content="${e(i)}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1080">
+<meta property="og:image:height" content="1350">
+<meta property="og:url" content="${e(url.origin + url.pathname)}">
+<meta property="og:site_name" content="Top Secret FC">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${e(t)}">
+<meta name="twitter:image" content="${e(i)}">
+<meta http-equiv="refresh" content="0;url=${e(r)}">
+</head><body>
+<script>window.location.replace(${JSON.stringify(r)});<\/script>
+<p>Redirigiendo… <a href="${e(r)}">Hacer clic aquí</a></p>
+</body></html>`;
+        return new Response(html, { headers: { 'Content-Type': 'text/html;charset=utf-8', 'Cache-Control': 'public, max-age=300' } });
+      }
+
       if (url.pathname.startsWith('/og') && request.method === 'GET') {
         const articleId = decodeURIComponent(url.pathname.slice(4).replace(/^\//, ''));
         let article = NOTICIAS_OG[articleId];
@@ -1186,8 +1248,48 @@ export default {
 
   async scheduled(event, env, ctx) {
     ctx.waitUntil(dailyConvocatoriaReset(env));
+    // Placa del día para la vista previa de /c: cada 30 min entre las 9 y las 24 ART.
+    const now = new Date(event.scheduledTime || Date.now());
+    const hourArt = (now.getUTCHours() + 21) % 24;
+    if (env.CF_BR_TOKEN && now.getUTCMinutes() % 30 === 0 && hourArt >= 9) {
+      ctx.waitUntil(generarPlaca(env).catch(() => {}));
+    }
   }
 };
+
+// ── PLACA DE CONVOCATORIA — captura de calendario.html?placa vía Browser Rendering ──
+const PLACA_TTL_MS = 15 * 60 * 1000;
+const PLACA_FALLBACK = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og/og-convocatoria-v2.jpg';
+function artToday() {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+}
+async function generarPlaca(env) {
+  // Lock corto en KV para no lanzar dos navegadores a la vez (cron + visita + botón).
+  if (await env.TS_KV.get('placa_lock')) throw new Error('en curso');
+  await env.TS_KV.put('placa_lock', '1', { expirationTtl: 60 });
+  try {
+    const r = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/browser-rendering/screenshot`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + env.CF_BR_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: SITE + 'calendario.html?placa&t=' + Date.now(),
+        viewport: { width: 1080, height: 1350 },
+        gotoOptions: { waitUntil: 'networkidle2', timeout: 30000 },
+        waitForSelector: { selector: '#placa-ready', timeout: 25000 },
+        screenshotOptions: { type: 'png' },
+      }),
+    });
+    if (!r.ok || !/image/.test(r.headers.get('content-type') || '')) throw new Error('screenshot ' + r.status);
+    const buf = await r.arrayBuffer();
+    await env.MEDIA_BUCKET.put(`og/placa/${artToday()}.png`, buf, {
+      httpMetadata: { contentType: 'image/png' },
+      customMetadata: { generatedAt: String(Date.now()) },
+    });
+    return buf;
+  } finally {
+    await env.TS_KV.delete('placa_lock').catch(() => {});
+  }
+}
 
 // ── CONVOCATORIA — reset diario server-side (Cron Trigger, cada 1 min) ───────
 // Antes esto lo decidía cada pestaña de convocatoria.html comparando su propio TODAY
