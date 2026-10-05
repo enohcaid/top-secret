@@ -3014,17 +3014,17 @@ window.shareMatchday  = shareMatchday;
 // ── Modo placa (calendario.html?placa) ──────────────────────────────────────
 // El Worker saca una captura de esta vista (Cloudflare Browser Rendering) para la vista previa
 // del link de convocatoria en WhatsApp (/c/<fecha>). Espera a que lleguen Firestore y CopáFácil,
-// reemplaza la página por la placa sola a 1080×1350 y marca #placa-ready.
+// reemplaza la página por la placa horizontal 1200×630 (la que WhatsApp muestra grande) y marca #placa-ready.
 if (new URLSearchParams(location.search).has('placa')) {
   setTimeout(async () => {
     const empty = { today: true, eyebrow: 'Hoy', title: 'Sin partidos', matches: [] };
-    const blob = await TSMatchdayCard.build(_shareData || empty);
+    const blob = await TSMatchdayCard.buildWide(_shareData || empty);
     const img = new Image();
     img.onload = () => {
       document.documentElement.style.background = '#0a0a0a';
       document.body.innerHTML = '';
       document.body.style.cssText = 'margin:0;padding:0;background:#0a0a0a;overflow:hidden';
-      img.style.cssText = 'display:block;width:1080px;height:1350px';
+      img.style.cssText = 'display:block;width:1200px;height:630px';
       img.id = 'placa-ready';
       document.body.appendChild(img);
     };
@@ -3077,7 +3077,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
-<script src="calendario-share.js?v=2"></script>
+<script src="calendario-share.js?v=3"></script>
 <script src="layout.js?v=22"></script>
 </body>
 </html>

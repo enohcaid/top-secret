@@ -888,8 +888,8 @@ export default {
 <meta property="og:description" content="${e(d)}">
 <meta property="og:image" content="${e(i)}">
 <meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="1080">
-<meta property="og:image:height" content="1350">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:url" content="${e(url.origin + url.pathname)}">
 <meta property="og:site_name" content="Top Secret FC">
 <meta name="twitter:card" content="summary_large_image">
@@ -1273,7 +1273,7 @@ async function generarPlaca(env) {
       headers: { Authorization: 'Bearer ' + env.CF_BR_TOKEN, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url: SITE + 'calendario.html?placa&t=' + Date.now(),
-        viewport: { width: 1080, height: 1350 },
+        viewport: { width: 1200, height: 630 },
         gotoOptions: { waitUntil: 'networkidle2', timeout: 30000 },
         waitForSelector: { selector: '#placa-ready', timeout: 25000 },
         screenshotOptions: { type: 'jpeg', quality: 82 },

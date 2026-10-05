@@ -164,5 +164,96 @@
     return new Promise(res => cv.toBlob(res, 'image/png'));
   }
 
-  window.TSMatchdayCard = { build };
+  // Versión horizontal 1200×630 para la vista previa del link en WhatsApp: con imágenes verticales
+  // WhatsApp muestra una miniatura chica al costado; la grande solo sale con proporción ~1.91:1.
+  async function buildWide({ eyebrow, title, matches }) {
+    const WW = 1200, WH = 630, P = 56;
+    await Promise.all([
+      document.fonts.load(`900 100px ${COND}`), document.fonts.load(`800 48px ${COND}`),
+      document.fonts.load(`700 24px ${COND}`), document.fonts.load(`600 24px 'Barlow'`),
+    ]).catch(() => {});
+    const list = [...matches].sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+    const [art, crest, ...badges] = await Promise.all([loadImg(ART), loadImg(CREST), ...list.map(m => loadImg(badgeSrc(m.badge)))]);
+
+    const cv = document.createElement('canvas');
+    cv.width = WW; cv.height = WH;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, WW, WH);
+
+    // Foto a la derecha, fundida hacia la izquierda y abajo
+    if (art) {
+      const aw = 600, ah = art.height * aw / art.width;
+      ctx.globalAlpha = .9; ctx.drawImage(art, WW - aw + 30, -20, aw, ah); ctx.globalAlpha = 1;
+    }
+    let g = ctx.createLinearGradient(560, 0, 900, 0);
+    g.addColorStop(0, C.bg); g.addColorStop(1, 'rgba(10,10,10,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 900, WH);
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, 560, WH);
+    g = ctx.createLinearGradient(0, WH - 160, 0, WH);
+    g.addColorStop(0, 'rgba(10,10,10,0)'); g.addColorStop(1, C.bg);
+    ctx.fillStyle = g; ctx.fillRect(0, WH - 160, WW, 160);
+
+    // Esquinas
+    const L = 26, I = 24;
+    ctx.strokeStyle = C.goldSoft; ctx.lineWidth = 2;
+    [[I, I, 1, 1], [WW - I, I, -1, 1], [I, WH - I, 1, -1], [WW - I, WH - I, -1, -1]].forEach(([x, y, dx, dy]) => {
+      ctx.beginPath(); ctx.moveTo(x, y + dy * L); ctx.lineTo(x, y); ctx.lineTo(x + dx * L, y); ctx.stroke();
+    });
+
+    // Cabecera
+    if (crest) ctx.drawImage(crest, P, 46, 40, 40 * crest.height / crest.width);
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = C.white; ctx.font = `800 24px ${COND}`; ctx.letterSpacing = '3px';
+    ctx.fillText('TOP SECRET FC', P + 54, 68);
+    ctx.fillStyle = C.gold; ctx.font = `700 24px ${COND}`; ctx.letterSpacing = '5px';
+    const eb = eyebrow.toUpperCase(), ebw = ctx.measureText(eb).width;
+    ctx.fillText(eb, WW - P - ebw, 68);
+    ctx.letterSpacing = '0px';
+
+    // Fecha
+    ctx.textBaseline = 'alphabetic';
+    const tSize = fitText(ctx, title.toUpperCase(), 720, 96, 900, COND);
+    ctx.fillStyle = C.white; ctx.font = `900 ${tSize}px ${COND}`;
+    ctx.fillText(title.toUpperCase(), P, 186);
+    ctx.fillStyle = C.gold; ctx.fillRect(P, 206, 90, 4);
+
+    // Partidos
+    const top = 236, bottom = WH - 40, n = Math.max(list.length, 1);
+    const rowH = Math.min(118, Math.floor((bottom - top) / n));
+    list.forEach((m, i) => {
+      const cy = top + i * rowH + rowH / 2;
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = C.gold; ctx.font = `800 ${Math.round(rowH * .44)}px ${COND}`;
+      ctx.fillText(m.time || '--:--', P, cy + 2);
+      const bs = Math.round(rowH * .72), bx = P + Math.round(rowH * 1.3);
+      roundRect(ctx, bx, cy - bs / 2, bs, bs, 12); ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fill();
+      const b = badges[i];
+      if (b) {
+        const inner = bs - 10, k = Math.min(inner / b.width, inner / b.height);
+        ctx.drawImage(b, bx + (bs - b.width * k) / 2, cy - b.height * k / 2, b.width * k, b.height * k);
+      } else {
+        const ini = m.rival.split(/\s+/).filter(w => /^[A-Za-zÁÉÍÓÚÑ0-9]/.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+        ctx.fillStyle = C.mid; ctx.font = `800 ${Math.round(bs * .38)}px ${COND}`; ctx.textAlign = 'center';
+        ctx.fillText(ini, bx + bs / 2, cy + 2); ctx.textAlign = 'left';
+      }
+      const tx = bx + bs + 22;
+      ctx.textBaseline = 'alphabetic';
+      const rs = fitText(ctx, m.rival, WW - P - tx, Math.round(rowH * .42), 800, COND);
+      ctx.fillStyle = C.white; ctx.font = `800 ${rs}px ${COND}`;
+      ctx.fillText(m.rival, tx, cy + 2);
+      const lg = m.league || 'Amistoso', col = C.league[lg] || C.league.Amistoso;
+      const meta = [lg.toUpperCase(), m.round != null ? 'Fecha ' + m.round : null, m.isHome ? 'Local' : 'Visita'].filter(Boolean);
+      ctx.textBaseline = 'middle';
+      ctx.font = `700 ${Math.round(rowH * .22)}px ${COND}`; ctx.letterSpacing = '2px';
+      ctx.fillStyle = col; ctx.fillText(meta[0], tx, cy + rowH * .26);
+      const lw = ctx.measureText(meta[0]).width;
+      ctx.letterSpacing = '0px';
+      ctx.fillStyle = C.mid; ctx.font = `600 ${Math.round(rowH * .22)}px 'Barlow', sans-serif`;
+      if (meta.length > 1) ctx.fillText('·  ' + meta.slice(1).join('  ·  '), tx + lw + 12, cy + rowH * .26);
+    });
+
+    return new Promise(res => cv.toBlob(res, 'image/png'));
+  }
+
+  window.TSMatchdayCard = { build, buildWide };
 })();
