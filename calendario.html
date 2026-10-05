@@ -1953,7 +1953,7 @@ function renderTodayCard() {
     .filter(({m}) => m.date === today && (!m.tipo || m.tipo === 'partido') && !customIsInRaw(m));
 
   const todayMatches = [...rawToday, ...customToday]
-    .sort((a,b) => lgOrder(a.m.league) - lgOrder(b.m.league) || (a.m.time||'').localeCompare(b.m.time||''));
+    .sort((a,b) => (a.m.time||'').localeCompare(b.m.time||'') || lgOrder(a.m.league) - lgOrder(b.m.league));
 
   const wrap = document.getElementById('todayCard');
   if (!wrap) return;
@@ -2073,7 +2073,7 @@ function renderNextHero() {
       });
     });
   }
-  upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || lgOrder(a.m.league) - lgOrder(b.m.league) || (a.m.time||'').localeCompare(b.m.time||''));
+  upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || (a.m.time||'').localeCompare(b.m.time||'') || lgOrder(a.m.league) - lgOrder(b.m.league));
 
   if (!upcoming.length) {
     hero.innerHTML = `<div class="nh-waiting">
@@ -2238,7 +2238,7 @@ function buildMonthCard(year, month, mbd, today) {
       monthMatchIds.push({id, ds});
     });
   }
-  monthMatchIds.sort((a,b) => a.ds.localeCompare(b.ds) || lgOrder(getAnyMatch(a.id).league) - lgOrder(getAnyMatch(b.id).league) || (getAnyMatch(a.id).time||'').localeCompare(getAnyMatch(b.id).time||''));
+  monthMatchIds.sort((a,b) => a.ds.localeCompare(b.ds) || (getAnyMatch(a.id).time||'').localeCompare(getAnyMatch(b.id).time||'') || lgOrder(getAnyMatch(a.id).league) - lgOrder(getAnyMatch(b.id).league));
 
   const hasMatches = monthMatchIds.length > 0;
   const MO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
