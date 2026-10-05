@@ -7,7 +7,7 @@
 //   node scripts/video-plantel/render.mjs --modo equipo      → equipo de la noche (formación de la convocatoria, Firestore)
 //   opciones: --fecha YYYY-MM-DD (equipo; default hoy ART) · --musica "<nombre>" · --sin-musica · --out archivo.mp4
 //
-// Antes: node scripts/video-plantel/prep.mjs (cuadros de cada jugador). Ver README.md.
+// Antes: node scripts/video-plantel/prep.mjs (cuadros de cada jugador). POSE=Brazos4 para la versión de brazos cruzados. Ver README.md.
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -17,7 +17,8 @@ import ffmpegPath from 'ffmpeg-static';
 import { ROSTER_T4 } from '../../roster.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')), '../..');
-const D = path.join(ROOT, 'fuentes/video-plantel');
+const POSE = process.env.POSE || 'Gesto4';
+const D = path.join(ROOT, 'fuentes/video-plantel', POSE);
 const argv = process.argv.slice(2);
 const opt = (k, def = null) => { const i = argv.indexOf(k); return i < 0 ? def : argv[i + 1]; };
 const MODO = opt('--modo', 'plantel');

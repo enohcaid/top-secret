@@ -3,9 +3,11 @@
 //
 //   node scripts/video-plantel/prep.mjs [gamertag ...]      (sin argumentos: todo ROSTER_T4)
 //
-// Por jugador, en fuentes/video-plantel/:
-//   <gt>.png          imagen base 1080×1920 (Renders/<gt>/Brazos4.png sobre fondo dorado, igual que el reel de fichajes)
-//   <gt>.mp4          clip de 5 s "Imagen a video" de Canva (se toma de fuentes/video-fichajes si ya existe;
+// POSE (env, default Gesto4) elige el render de origen: Renders/<gt>/<POSE>.png. Gesto4 = gesto propio de cada
+// jugador mirando a cámara (scripts/video-plantel/poses.mjs). Brazos4 = brazos cruzados (reusa el reel de fichajes).
+// Por jugador, en fuentes/video-plantel/<POSE>/:
+//   <gt>.png          imagen base 1080×1920 (el render sobre fondo dorado, igual que el reel de fichajes)
+//   <gt>.mp4          clip de 5 s "Imagen a video" de Canva (con Brazos4 se toma de fuentes/video-fichajes si existe;
 //                     si no hay, se genera con scripts/canva-imagen-a-video.mjs <gt>.png — ver README)
 //   frames/<gt>/NNN.jpg  los 150 cuadros del clip a 720×1280, los usa render.mjs
 // Si un jugador todavía no tiene clip de Canva, sus cuadros salen de un acercamiento simulado sobre la
@@ -18,8 +20,9 @@ import ffmpegPath from 'ffmpeg-static';
 import { ROSTER_T4 } from '../../roster.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')), '../..');
-const D = path.join(ROOT, 'fuentes/video-plantel');
-const FICHAJES = path.join(ROOT, 'fuentes/video-fichajes');
+const POSE = process.env.POSE || 'Gesto4';
+const D = path.join(ROOT, 'fuentes/video-plantel', POSE);
+const FICHAJES = POSE === 'Brazos4' ? path.join(ROOT, 'fuentes/video-fichajes') : path.join(D, '__no_existe__');
 const W = 1080, H = 1920, FW = 720, FH = 1280, N = 150;
 
 const bg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><defs>
@@ -31,12 +34,24 @@ async function base(gt) {
   if (fs.existsSync(out)) return out;
   const prev = path.join(FICHAJES, gt + '.png');
   if (fs.existsSync(prev)) { fs.copyFileSync(prev, out); return out; }
-  const src = path.join(ROOT, 'Renders', gt, 'Brazos4.png');
-  if (!fs.existsSync(src)) execFileSync('node', [path.join(ROOT, 'scripts/r2.mjs'), 'get', `Renders/${gt}/Brazos4.png`, src], { stdio: 'ignore' });
-  const big = await sharp(src).trim({ threshold: 5 }).resize({ height: 2700 }).png().toBuffer();
+  const src = path.join(ROOT, 'Renders', gt, POSE + '.png');
+  if (!fs.existsSync(src)) execFileSync('node', [path.join(ROOT, 'scripts/r2.mjs'), 'get', `Renders/${gt}/${POSE}.png`, src], { stdio: 'ignore' });
+  if (!fs.existsSync(src)) throw new Error(`falta Renders/${gt}/${POSE}.png`);
+  // Alto 2700 (cabeza a rodillas en cuadro), salvo poses anchas (brazos abiertos/bíceps): se achican hasta
+  // que el cuerpo entre a lo ancho con margen, así no quedan brazos cortados.
+  // Contorno de lo opaco (alfa > 60): trim() a secas toma sombras casi transparentes y achica de más.
+  const { data, info } = await sharp(src).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let x0 = info.width, x1 = 0, y0 = info.height, y1 = 0;
+  for (let y = 0; y < info.height; y++) for (let x = 0; x < info.width; x++)
+    if (data[(y * info.width + x) * 4 + 3] > 60) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  const trimmed = await sharp(src).extract({ left: x0, top: y0, width: x1 - x0 + 1, height: y1 - y0 + 1 }).png().toBuffer();
+  const tm = { width: x1 - x0 + 1, height: y1 - y0 + 1 };
+  // Como mucho se achica al 80% del tamaño normal, para que ningún jugador quede chico en la tarjeta.
+  const scale = Math.max(Math.min(2700 / tm.height, (W - 60) / tm.width), 0.8 * 2700 / tm.height);
+  const big = await sharp(trimmed).resize({ height: Math.round(tm.height * scale) }).png().toBuffer();
   const bm = await sharp(big).metadata();
   const cw = Math.min(bm.width, W);
-  const pl = await sharp(big).extract({ left: Math.round((bm.width - cw) / 2), top: 0, width: cw, height: H - 230 }).png().toBuffer();
+  const pl = await sharp(big).extract({ left: Math.round((bm.width - cw) / 2), top: 0, width: cw, height: Math.min(H - 230, bm.height) }).png().toBuffer();
   const m = await sharp(pl).metadata();
   await sharp(bg).composite([{ input: pl, left: Math.round((W - m.width) / 2), top: 230 }]).png().toFile(out);
   return out;
