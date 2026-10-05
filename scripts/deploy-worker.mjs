@@ -21,8 +21,6 @@ const metadata = {
   bindings: [
     { type: 'kv_namespace', name: 'TS_KV', namespace_id: KV_ID },
     { type: 'r2_bucket', name: 'MEDIA_BUCKET', bucket_name: process.env.R2_BUCKET || 'top-secret-media' },
-    // Para la placa de convocatoria (Browser Rendering); el token va como secreto CF_BR_TOKEN.
-    { type: 'plain_text', name: 'CF_ACCOUNT_ID', text: ACCOUNT },
   ],
 };
 const form = new FormData();
