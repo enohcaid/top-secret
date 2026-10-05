@@ -2959,11 +2959,8 @@ async function saveToFirebase(){
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────────────
-// Link corto del Worker: redirige a convocatoria.html y su vista previa en WhatsApp es la placa del día.
-// Va solo el link (sin texto) y con la hora de compartir: cada envío es una URL nueva, así WhatsApp
-// no reusa una vista previa vieja que ya tenga guardada en el teléfono.
-const _CONVO_LINK = () => 'https://top-secret-proxy.juan-c-m-1985.workers.dev/c/' + getToday() + '?h=' +
-  new Date().toLocaleTimeString('en-GB', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' }).replace(':', '');
+// El mensaje va al portapapeles; al chat se manda solo la imagen (sin texto ni link).
+const _CONVO_URL = 'https://enohcaid.github.io/top-secret/convocatoria.html';
 const _SHARE_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span>Compartir</span>`;
 const _CHECK_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>¡Listo!</span>`;
 const _LOAD_ICON  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Cargando…</span>`;
@@ -2974,10 +2971,10 @@ async function shareMatchday() {
 
   if (btn) { btn.innerHTML = _LOAD_ICON; btn.disabled = true; }
 
-  // Copy text to clipboard once
-  const shareMsg = _CONVO_LINK();
-  // Que la placa de la vista previa salga con lo último cargado (amistosos recién agregados)
-  fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/placa/refresh', { method: 'POST' }).catch(() => {});
+  // Mensaje al portapapeles para pegarlo en el grupo
+  const shareMsg = _shareData.today
+    ? `Estos son los partidos de hoy, confirmá tu asistencia: ${_CONVO_URL}`
+    : `Estos son los próximos partidos (${_shareData.title}), confirmá tu asistencia: ${_CONVO_URL}`;
   navigator.clipboard.writeText(shareMsg).catch(() => {});
 
   const restore = () => { if (btn) { btn.innerHTML = _SHARE_ICON; btn.disabled = false; btn.style.visibility = ''; } };
@@ -2988,14 +2985,15 @@ async function shareMatchday() {
     const file = new File([blob], 'partidos-top-secret.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], text: shareMsg });
+      await navigator.share({ files: [file] });
+      showToast('Mensaje copiado · pegalo en el grupo');
     } else {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = 'partidos-top-secret.png';
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-      showToast('📸 Imagen descargada · texto copiado');
+      showToast('Imagen descargada · mensaje copiado');
     }
 
     if (btn) { btn.innerHTML = _CHECK_ICON; btn.disabled = false; setTimeout(() => { btn.innerHTML = _SHARE_ICON; }, 2500); }
@@ -3035,26 +3033,6 @@ window.fetchPretemporada = fetchPretemporada;
 window.insertPreSection  = insertPreSection;
 window.shareMatchday  = shareMatchday;
 
-// ── Modo placa (calendario.html?placa) ──────────────────────────────────────
-// El Worker saca una captura de esta vista (Cloudflare Browser Rendering) para la vista previa
-// del link de convocatoria en WhatsApp (/c/<fecha>). Espera a que lleguen Firestore y CopáFácil,
-// reemplaza la página por la placa horizontal 1200×630 (la que WhatsApp muestra grande) y marca #placa-ready.
-if (new URLSearchParams(location.search).has('placa')) {
-  setTimeout(async () => {
-    const empty = { today: true, eyebrow: 'Hoy', title: 'Sin partidos', matches: [] };
-    const blob = await TSMatchdayCard.buildWide(_shareData || empty);
-    const img = new Image();
-    img.onload = () => {
-      document.documentElement.style.background = '#0a0a0a';
-      document.body.innerHTML = '';
-      document.body.style.cssText = 'margin:0;padding:0;background:#0a0a0a;overflow:hidden';
-      img.style.cssText = 'display:block;width:1200px;height:630px';
-      img.id = 'placa-ready';
-      document.body.appendChild(img);
-    };
-    img.src = URL.createObjectURL(blob);
-  }, 4500);
-}
 window.toggleAdmin    = toggleAdmin;
 window.handleResultClick = handleResultClick;
 window.openStatsPanel = openStatsPanel;
@@ -3101,7 +3079,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
-<script src="calendario-share.js?v=3"></script>
+<script src="calendario-share.js?v=4"></script>
 <script src="layout.js?v=22"></script>
 </body>
 </html>
