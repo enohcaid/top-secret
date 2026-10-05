@@ -78,9 +78,10 @@ const server = http.createServer((req, res) => {
 await new Promise(r => server.listen(0, r));
 const PORT = server.address().port;
 
-// La grilla final es pareja: todos de brazos cruzados (Brazos4). Cada jugador entra con su gesto y, mientras
-// vuela a su lugar, pasa a brazos cruzados con un fundido + destello (la IA no anima de una pose a otra).
-const POSE_GRILLA = process.env.POSE_GRILLA || 'Brazos4';
+// En la grilla cada jugador queda con su propia pose (decisión de Juan 2026-10-05, queda mejor).
+// POSE_GRILLA=Brazos4 deja la grilla pareja de brazos cruzados: cada uno pasa de su gesto a los brazos con un
+// fundido + destello mientras vuela a su lugar (la IA no anima de una pose a otra).
+const POSE_GRILLA = process.env.POSE_GRILLA || POSE;
 const D_GRILLA = path.join(ROOT, 'fuentes/video-plantel', POSE_GRILLA);
 const conGrilla = POSE_GRILLA !== POSE && items.every(it => fs.existsSync(path.join(D_GRILLA, 'frames', it.key, '001.jpg')));
 if (POSE_GRILLA !== POSE && !conGrilla) console.log(`Ojo: faltan cuadros de ${POSE_GRILLA} (POSE=${POSE_GRILLA} node scripts/video-plantel/prep.mjs); la grilla queda con la pose de entrada.`);
