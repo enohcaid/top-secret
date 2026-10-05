@@ -14,13 +14,14 @@ import { spawn, execFileSync } from 'child_process';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import ffmpegPath from 'ffmpeg-static';
+import { elegirMusica } from '../lib/musica.mjs';
 import { ROSTER_T4 } from '../../roster.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')), '../..');
 const HERE = path.join(ROOT, 'scripts/video-plantel');
 const argv = process.argv.slice(2);
 const opt = (k, def = null) => { const i = argv.indexOf(k); return i < 0 ? def : argv[i + 1]; };
-const valores = new Set(['--out', '--musica'].map(k => opt(k)).filter(Boolean));
+const valores = new Set(['--out', '--musica', '--id'].map(k => opt(k)).filter(Boolean));
 const keys = argv.filter(a => !a.startsWith('--') && !valores.has(a));
 if (!keys.length) { console.error('uso: node scripts/video-plantel/fichajes.mjs gt1 gt2 ...'); process.exit(1); }
 const porKey = Object.fromEntries(ROSTER_T4.map(p => [p.key, p]));
@@ -31,7 +32,10 @@ for (const it of items) for (const [p, d] of Object.entries(DIR))
   if (!fs.existsSync(path.join(d, it.key, '150.jpg'))) { console.error(`faltan cuadros ${p} de ${it.key} (prep.mjs)`); process.exit(1); }
 const OUT = path.resolve(opt('--out', path.join(ROOT, 'fuentes/video-plantel/fichajes/nuevos-fichajes-t4.mp4')));
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
-const MUSICA = argv.includes('--sin-musica') ? null : opt('--musica', 'Whoop');
+// Música: cada video publicado lleva un tema propio que no se repite (scripts/lib/musica.mjs + scripts/musica-usada.json).
+// --musica "<nombre>" para elegir uno (tiene que estar libre); --id para el nombre del video en el registro.
+const SIN_MUSICA = argv.includes('--sin-musica'), MUSICA = opt('--musica');
+const VIDEO_ID = opt('--id', path.basename(OUT, '.mp4'));
 
 // Recortes de la pose (fondo transparente, contorno de lo opaco) para la portada y el cierre
 const recortes = {};
@@ -88,11 +92,9 @@ await new Promise(r => ff.on('close', r));
 await browser.close(); server.close();
 console.log(`\r${total}/${total} cuadros en ${Math.round((Date.now() - t0) / 1000)} s`);
 
-if (MUSICA) {
-  const dirM = path.join(ROOT, 'fuentes/musica/trap');
-  if (!fs.existsSync(dirM)) execFileSync('node', [path.join(ROOT, 'scripts/r2.mjs'), 'sync-down', '_fuentes/musica', 'fuentes/musica'], { stdio: 'inherit', cwd: ROOT });
-  const mp3 = fs.readdirSync(dirM).find(f => f.toLowerCase().startsWith(MUSICA.toLowerCase()));
-  if (!mp3) throw new Error('no encuentro la música ' + MUSICA);
+if (!SIN_MUSICA) {
+  const mp3Path = elegirMusica(VIDEO_ID, { preferida: MUSICA });
+  const mp3 = path.basename(mp3Path), dirM = path.dirname(mp3Path);
   const dur = total / 30;
   execFileSync(ffmpegPath, ['-y', '-v', 'error', '-i', tmp, '-i', path.join(dirM, mp3),
     '-filter_complex', `[1:a]atrim=0:${dur},afade=t=in:d=0.5,afade=t=out:st=${(dur - 2).toFixed(2)}:d=2,loudnorm=I=-14:TP=-1.5,aresample=48000[a]`,

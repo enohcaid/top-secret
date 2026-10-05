@@ -14,6 +14,7 @@ import path from 'path';
 import { spawn, execFileSync } from 'child_process';
 import { chromium } from 'playwright';
 import ffmpegPath from 'ffmpeg-static';
+import { elegirMusica, musicaFija } from '../lib/musica.mjs';
 import { ROSTER_T4 } from '../../roster.js';
 import { list as r2list, del as r2del } from '../lib/r2.mjs';
 
@@ -66,7 +67,10 @@ const provis = items.filter(it => fs.existsSync(path.join(D, 'frames', it.img ||
 if (provis.length) console.log(`Ojo: ${provis.length} jugadores con acercamiento simulado (sin clip de Canva): ${provis.join(', ')}`);
 
 const OUT = path.resolve(opt('--out', path.join(D, MODO === 'plantel' ? 'plantel-t4.mp4' : `equipo-${FECHA}.mp4`)));
-const MUSICA = argv.includes('--sin-musica') ? null : opt('--musica', MODO === 'plantel' ? 'Whoop' : 'Locked In');
+// Música: cada video publicado lleva un tema propio que no se repite (scripts/lib/musica.mjs + scripts/musica-usada.json).
+// --musica "<nombre>" para elegir uno (tiene que estar libre); --id para el nombre del video en el registro.
+const SIN_MUSICA = argv.includes('--sin-musica'), MUSICA = opt('--musica');
+const VIDEO_ID = opt('--id', path.basename(OUT, '.mp4'));
 
 // ── Servidor local (los cuadros tienen que venir por http para que el canvas no quede "tainted") ──
 const server = http.createServer((req, res) => {
@@ -133,11 +137,9 @@ await browser.close(); server.close();
 console.log(`\r${total}/${total} cuadros en ${Math.round((Date.now() - t0) / 1000)} s`);
 
 // ── Música (trap libre, regla del club): fundido de entrada 0,5 s y de salida 2 s, loudnorm ──
-if (MUSICA) {
-  const dirM = path.join(ROOT, 'fuentes/musica/trap');
-  if (!fs.existsSync(dirM)) execFileSync('node', [path.join(ROOT, 'scripts/r2.mjs'), 'sync-down', '_fuentes/musica', 'fuentes/musica'], { stdio: 'inherit', cwd: ROOT });
-  const mp3 = fs.readdirSync(dirM).find(f => f.toLowerCase().startsWith(MUSICA.toLowerCase()));
-  if (!mp3) throw new Error('no encuentro la música ' + MUSICA);
+if (!SIN_MUSICA) {
+  const mp3Path = MODO === 'equipo' ? musicaFija('Locked In') : elegirMusica(VIDEO_ID, { preferida: MUSICA });
+  const mp3 = path.basename(mp3Path), dirM = path.dirname(mp3Path);
   const dur = total / 30;
   execFileSync(ffmpegPath, ['-y', '-v', 'error', '-i', tmp, '-i', path.join(dirM, mp3),
     '-filter_complex', `[1:a]atrim=0:${dur},afade=t=in:d=0.5,afade=t=out:st=${(dur - 2).toFixed(2)}:d=2,loudnorm=I=-14:TP=-1.5,aresample=48000[a]`,

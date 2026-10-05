@@ -23,6 +23,10 @@ Si un arquero tiene variante de campo (hoy: Ivan_Cabj_La12, `campo:true` en `PLA
 - **En el navegador** (botón de convocatoria): el video vive solo en memoria, no se sube a ningún lado. Al compartirlo, al tocar "Cerrar" o al salir de la página se liberan el archivo, las URLs de vista previa/descarga, el canvas y las imágenes.
 - **En la PC**: `render.mjs --modo equipo` borra los videos del equipo de días anteriores (`fuentes/video-plantel/Gesto4/equipo-*` y R2 `videos/equipo-*`). `--sin-limpiar` para conservarlos. El de plantel no se toca (es el publicado).
 
+## Música (regla: un tema por video)
+
+Cada video publicado lleva su propio tema y no se repite (Juan, 2026-10-05). `render.mjs` (plantel) y `fichajes.mjs` lo toman de `scripts/lib/musica.mjs`: primer tema libre de `fuentes/musica/trap` o el que pidas con `--musica` (si ya se usó, frena). El registro es `scripts/musica-usada.json` (versionado: commitearlo después de armar un video). Re-armar el mismo video (mismo `--id`, por defecto el nombre del archivo) conserva su tema. El video del equipo de la noche usa siempre *Locked In* (plantilla fija, en `fijos`).
+
 ## Pasos
 
 ```bash

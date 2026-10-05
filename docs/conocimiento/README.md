@@ -6,6 +6,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Reglas y preferencias (cómo trabajar)
 
+- [feedback_musica_unica](feedback_musica_unica.md) — Cada video publicado lleva su propia música, sin repetir temas (registro scripts/musica-usada.json); el video del equipo de la noche es fijo con Locked In
 - [feedback_11x11_two_schedule_sources](feedback_11x11_two_schedule_sources.md) — 11x11 (and other) fixture dates in top-secret live in TWO separate places that must both be edited to actually change what the site shows
 - [feedback_always_push](feedback_always_push.md) — User wants every git commit in top-secret pushed to main immediately, no confirmation needed
 - [feedback_alwayspresent_lo_pone_el_jugador](feedback_alwayspresent_lo_pone_el_jugador.md) — alwaysPresent ("fijo") en convocatoria nunca se marca automáticamente al promover/agregar un jugador — lo tiene que activar el jugador mismo
