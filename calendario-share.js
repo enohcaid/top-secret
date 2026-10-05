@@ -91,10 +91,10 @@
     ctx.fillStyle = '#3ecf8e'; ctx.beginPath(); ctx.arc(W - PAD - tw - 18, 102, 6, 0, Math.PI * 2); ctx.fill();
 
     // ── Filas: ancladas abajo, el título se apila encima ──
-    const footerY = H - 92;
+    const footerY = H - 164; // arranque de la franja "Confirmá tu asistencia"
     const n = list.length;
     const rowH = Math.min(132, Math.max(92, Math.floor(560 / Math.max(n, 1))));
-    const rowsTop = footerY - 40 - rowH * n;
+    const rowsTop = footerY - 36 - rowH * n;
 
     const titleY = rowsTop - 64;
     ctx.textBaseline = 'alphabetic';
@@ -104,7 +104,7 @@
     g = ctx.createLinearGradient(0, veilTop, 0, rowsTop);
     g.addColorStop(0, 'rgba(10,10,10,0)'); g.addColorStop(.6, 'rgba(10,10,10,.6)'); g.addColorStop(1, 'rgba(10,10,10,.9)');
     ctx.fillStyle = g; ctx.fillRect(0, veilTop, W, rowsTop - veilTop);
-    if (rowsTop < artH) { ctx.fillStyle = 'rgba(10,10,10,.9)'; ctx.fillRect(0, rowsTop, W, artH - rowsTop); }
+    ctx.fillStyle = C.bg; ctx.fillRect(0, rowsTop, W, H - rowsTop); corners(ctx);
     ctx.font = `900 ${tSize}px ${COND}`;
     ctx.fillStyle = C.white; ctx.font = `900 ${tSize}px ${COND}`;
     ctx.fillText(title.toUpperCase(), PAD, titleY);
@@ -152,14 +152,14 @@
     });
     ctx.fillStyle = C.line; ctx.fillRect(PAD, rowsTop + n * rowH, W - PAD * 2, 1);
 
-    // ── Pie ──
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = C.white; ctx.font = `700 28px ${COND}`; ctx.letterSpacing = '2px';
-    ctx.fillText('CONFIRMÁ TU ASISTENCIA', PAD, footerY + 16);
-    ctx.letterSpacing = '0px';
-    ctx.fillStyle = C.gold; ctx.font = `500 22px ${MONO}`;
-    const url = 'enohcaid.github.io/top-secret';
-    ctx.fillText(url, W - PAD - ctx.measureText(url).width, footerY + 16);
+    // ── Pie: franja dorada, llamado a confirmar ──
+    const fh = 92;
+    roundRect(ctx, PAD, footerY, W - PAD * 2, fh, 14);
+    ctx.fillStyle = C.gold; ctx.fill();
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    ctx.fillStyle = C.bg; ctx.font = `900 50px ${COND}`; ctx.letterSpacing = '6px';
+    ctx.fillText('CONFIRMÁ TU ASISTENCIA', W / 2 + 3, footerY + fh / 2 + 2);
+    ctx.letterSpacing = '0px'; ctx.textAlign = 'left';
 
     return new Promise(res => cv.toBlob(res, 'image/png'));
   }
