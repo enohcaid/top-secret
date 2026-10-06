@@ -5,6 +5,8 @@ metadata:
   type: reference
 ---
 
+**Etiquetas en Instagram (2026-10-05):** `meta.mjs ig-imagen|ig-historia … --etiquetar usuario1,usuario2`. Solo se puede al publicar: la API no deja etiquetar ni borrar algo ya publicado (probado: DELETE da "Insufficient permissions") → si falta una etiqueta, republicar y que Juan borre el viejo desde la app. La liga VPUG en Instagram es **@vpugvirtual_prouruguay_gaming**.
+
 **Historias de Instagram (2026-10-05):** `node scripts/meta.mjs ig-historia <url R2 .mp4|.jpg>` (API, 24 h). No admite stickers ni música de la biblioteca de Instagram: si Juan quiere un tema de la biblioteca, se sube a mano desde la app; si dice "sin música", sale muda por API.
 
 **Script reutilizable (2026-10-05):** `node scripts/publicar-video.mjs youtube|x|tiktok <video.mp4> --texto "…" [--titulo "…"] [--hashtags "A,B"]` (capturas en `fuentes/redes/pub-<red>-*.png`). Instagram/Facebook: `scripts/meta.mjs ig-reel|fb-video <url R2> "<texto>"`. Con la música trap pegada al archivo se publica en las 5 redes sin pasos manuales (primer uso: presentación del plantel T4, 2026-10-05). Trampa de X: el botón Postear queda deshabilitado mientras procesa el video; el script espera a que se habilite (antes clickeaba antes de tiempo y no publicaba). TikTok toma como portada el primer cuadro: los videos de `scripts/video-plantel` arrancan con 2 cuadros de portada por eso.

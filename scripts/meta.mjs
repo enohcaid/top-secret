@@ -13,6 +13,7 @@
  *   node scripts/meta.mjs fb-album  "<texto>" <url1> <url2> …    post de Facebook con varias fotos
  *   node scripts/meta.mjs fb-video  <url-publica.mp4> "<texto>"
  *   Agregar --prueba para crear el contenedor/validar sin publicar.
+ *   --etiquetar usuario1,usuario2 etiqueta cuentas en ig-imagen e ig-historia (solo al publicar: después la API no deja).
  *
  * Las URLs tienen que ser públicas (R2: https://top-secret-proxy.juan-c-m-1985.workers.dev/media/…).
  * Instagram exige JPEG para imágenes. Los reels con música se suben a mano desde la app (regla de Juan).
@@ -21,7 +22,11 @@ import { loadEnv } from './lib/env.mjs';
 const E = loadEnv();
 const G = 'https://graph.facebook.com/v21.0';
 const PRUEBA = process.argv.includes('--prueba');
-const [cmd, ...args] = process.argv.slice(2).filter(a => a !== '--prueba');
+// --etiquetar usuario1,usuario2 → etiqueta cuentas en ig-imagen / ig-historia (la API no deja hacerlo después de publicar)
+const _ai = process.argv.indexOf('--etiquetar');
+const ETIQUETAS = _ai > 0 ? process.argv[_ai + 1].split(',').map(u => u.trim().replace(/^@/, '')).filter(Boolean) : [];
+const [cmd, ...args] = process.argv.slice(2).filter((a, k, all) => a !== '--prueba' && a !== '--etiquetar' && all[k - 1] !== '--etiquetar');
+const userTags = (conPos) => ETIQUETAS.length ? { user_tags: JSON.stringify(ETIQUETAS.map((username, k) => conPos ? { username, x: 0.5, y: Math.min(0.9, 0.12 + k * 0.08) } : { username })) } : {};
 
 async function api(path, params = {}, method = 'POST') {
   const u = new URL(G + path);
@@ -59,7 +64,7 @@ if (cmd === 'estado') {
   const pg = await api(`/${E.META_PAGE_ID}`, { fields: 'name,followers_count', ...igTok() }, 'GET');
   console.log(`facebook ${pg.name}: ${pg.followers_count ?? '?'} seguidores`);
 } else if (cmd === 'ig-imagen') {
-  const c = await api(`/${E.META_IG_ID}/media`, { image_url: args[0], caption: args[1] || '', ...igTok() });
+  const c = await api(`/${E.META_IG_ID}/media`, { image_url: args[0], caption: args[1] || '', ...userTags(true), ...igTok() });
   await esperarContenedor(c.id); await publicarIG(c.id);
 } else if (cmd === 'ig-carrusel') {
   const [caption, ...urls] = args;
@@ -74,7 +79,7 @@ if (cmd === 'estado') {
 } else if (cmd === 'ig-historia') {
   // Historia (24 h) con un video o una imagen. La API no permite stickers ni música de la biblioteca: sale tal cual el archivo.
   const esVideo = /\.(mp4|mov)(\?|$)/i.test(args[0]);
-  const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'STORIES', [esVideo ? 'video_url' : 'image_url']: args[0], ...igTok() });
+  const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'STORIES', [esVideo ? 'video_url' : 'image_url']: args[0], ...userTags(false), ...igTok() });
   await esperarContenedor(c.id);
   if (PRUEBA) { console.log('[prueba] contenedor listo, no se publica:', c.id); process.exit(0); }
   const r = await api(`/${E.META_IG_ID}/media_publish`, { creation_id: c.id, ...igTok() });
