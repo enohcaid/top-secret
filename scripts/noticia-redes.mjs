@@ -18,7 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
-import { stampCrest, RAW_DIR, PLAYER_TRAITS } from './generate-image-chatgpt.mjs';
+import { RAW_DIR, PLAYER_TRAITS } from './generate-image-chatgpt.mjs';
 
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
@@ -60,8 +60,8 @@ function fechaCorta(n) {
   return d ? `${d}.${m}` : '';
 }
 
-// Foto de base: la copia sin escudo si está (para elegir la esquina pensando en el título);
-// si no, la publicada (que ya trae el escudo, y entonces no se estampa otro).
+// Foto de base: la copia sin escudo si está; si no, la publicada (que ya trae el escudo
+// en una esquina, y entonces el bloque del título no suma otro).
 async function fotoBase(url) {
   const nombre = decodeURIComponent(url.split('/').pop().split('?')[0]);
   const raw = path.join(RAW_DIR, nombre);
@@ -74,7 +74,7 @@ async function fotoBase(url) {
   return { file: tmp, conEscudo: true };
 }
 
-function html({ W, H, foto, titulo, kicker, historia }) {
+function html({ W, H, foto, titulo, kicker, historia, escudo }) {
   // Historia: el bloque de texto termina por encima del 20% inferior (barra de respuesta de IG).
   const bottom = historia ? Math.round(H * 0.20) + 40 : 84;
   return `<!doctype html><html><head><meta charset="utf-8">
@@ -85,6 +85,7 @@ body{width:${W}px;height:${H}px;position:relative;overflow:hidden;background:#0a
 .foto{position:absolute;inset:0;background:url('${foto}') center/cover no-repeat}
 .scrim{position:absolute;left:0;right:0;bottom:0;height:${historia ? 62 : 58}%;background:linear-gradient(to top,rgba(5,5,5,.94) 0%,rgba(5,5,5,.78) ${historia ? 42 : 34}%,rgba(5,5,5,0) 100%)}
 .txt{position:absolute;left:68px;right:68px;bottom:${bottom}px}
+.escudo{display:block;height:${historia ? 84 : 76}px;margin-bottom:26px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.6))}
 .barra{width:72px;height:6px;background:#c9a84c;margin-bottom:22px}
 .kicker{font-weight:800;font-size:30px;letter-spacing:8px;color:#c9a84c;margin-bottom:14px}
 h1{font-weight:900;font-size:${historia ? 124 : 112}px;line-height:.9;letter-spacing:.5px;text-wrap:balance}
@@ -92,7 +93,7 @@ h1 .gt{color:#c9a84c}
 .pie{margin-top:30px;font-weight:600;font-size:30px;letter-spacing:6px;color:rgba(244,241,234,.8)}
 </style></head><body>
 <div class="foto"></div><div class="scrim"></div>
-<div class="txt"><div class="barra"></div><div class="kicker">${kicker}</div><h1>${titulo}</h1>
+<div class="txt">${escudo ? `<img class="escudo" src="${escudo}">` : ''}<div class="barra"></div><div class="kicker">${kicker}</div><h1>${titulo}</h1>
 ${historia ? '<div class="pie">NOTA COMPLETA · LINK EN LA BIO</div>' : ''}</div>
 </body></html>`;
 }
@@ -105,6 +106,8 @@ export async function generarPiezas(n, { titulo } = {}) {
     { tipo: 'ig', W: 1080, H: 1350, src: n.imagePost || n.image, historia: false },
     { tipo: 'historia', W: 1080, H: 1920, src: n.imageStory || n.imagePost || n.image, historia: true },
   ];
+  // El escudo va dentro del bloque del título (firma de la pieza): no compite con la foto.
+  const escudo = 'data:image/png;base64,' + (await sharp(path.resolve('logos/rebrand/Clean logo.png')).resize({ height: 200 }).png().toBuffer()).toString('base64');
   const browser = await chromium.launch();
   const out = {};
   try {
@@ -112,17 +115,14 @@ export async function generarPiezas(n, { titulo } = {}) {
       const base = await fotoBase(p.src);
       const foto = 'data:image/jpeg;base64,' + (await sharp(base.file).resize(p.W, p.H, { fit: 'cover', position: 'attention' }).jpeg({ quality: 92 }).toBuffer()).toString('base64');
       const page = await browser.newPage({ viewport: { width: p.W, height: p.H } });
-      await page.setContent(html({ ...p, foto, titulo: t, kicker }), { waitUntil: 'networkidle' });
+      await page.setContent(html({ ...p, foto, titulo: t, kicker, escudo: base.conEscudo ? null : escudo }), { waitUntil: 'networkidle' });
       await page.evaluate(() => document.fonts.ready);
       const png = path.join(OUT_DIR, `${n.id}-${p.tipo}.png`);
       await page.screenshot({ path: png });
       await page.close();
-      // Escudo arriba (abajo está el título). Si la foto ya lo traía, no se suma otro.
-      if (!base.conEscudo) await stampCrest(png, { fresh: true, corners: ['tl', 'tr'] });
       const jpg = png.replace(/\.png$/, '.jpg');
       await sharp(png).jpeg({ quality: 90, mozjpeg: true }).toFile(jpg);
       fs.unlinkSync(png);
-      fs.rmSync(path.join(RAW_DIR, path.basename(png)), { force: true });
       if (base.file.includes('_base-')) fs.unlinkSync(base.file);
       out[p.tipo] = jpg;
       console.log(`  ${p.tipo}: ${path.relative(process.cwd(), jpg)}`);

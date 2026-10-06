@@ -969,22 +969,34 @@ async function pickCrestSpot(src, W, H, opts = {}) {
   const story = H / W > 1.5;
   const top = story ? Math.round(H * 0.14) : m;
   const bottom = story ? H - Math.round(H * 0.20) - h : H - m - h;
-  const all = { tl: [m, top], tr: [W - m - w, top], bl: [m, bottom], br: [W - m - w, bottom] };
+  // Solo las cuatro esquinas reales: el escudo es una firma, corrido hacia adentro parece un error
+  // (probado: terminaba al lado de un jugador del fondo). Si la esquina elegida tiene luces o
+  // detalle, el halo oscuro que va detrás del escudo le da el contraste.
+  const all = { tl: [[m, top, 0]], tr: [[W - m - w, top, 0]], bl: [[m, bottom, 0]], br: [[W - m - w, bottom, 0]] };
   const ids = opts.corners || Object.keys(all);
   // Se mide una zona un poco más grande que el escudo, para incluir el halo de luces cercanas.
   const pad = Math.round(w * 0.35);
+  const { data: img, info } = await sharp(src).greyscale().raw().toBuffer({ resolveWithObject: true });
+  // Saturación: los jugadores (camisetas de color) se separan del fondo oscuro del estadio.
+  const { data: rgb } = await sharp(src).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   let best = null;
-  for (const id of ids) {
-    const [x, y] = all[id];
-    const box = { left: Math.max(0, x - pad), top: Math.max(0, y - pad) };
-    box.width = Math.min(W - box.left, w + 2 * pad); box.height = Math.min(H - box.top, h + 2 * pad);
-    const { data } = await sharp(src).extract(box).greyscale().raw().toBuffer({ resolveWithObject: true });
-    let sum = 0, sq = 0, bright = 0;
-    for (const v of data) { sum += v; sq += v * v; if (v > 200) bright++; }
-    const n = data.length, mean = sum / n, stdev = Math.sqrt(Math.max(0, sq / n - mean * mean));
-    const brightFrac = bright / n;
-    const score = stdev + 400 * brightFrac;
-    if (!best || score < best.score) best = { id, x, y, w, h, mean, stdev, brightFrac, score };
+  for (const id of ids) for (const [x, y, lejos] of all[id]) {
+    const x0 = Math.max(1, x - pad), y0 = Math.max(1, y - pad);
+    const x1 = Math.min(W - 2, x + w + pad), y1 = Math.min(H - 2, y + h + pad);
+    let n = 0, sum = 0, bright = 0, edge = 0, sat = 0;
+    for (let yy = y0; yy <= y1; yy += 2) for (let xx = x0; xx <= x1; xx += 2) {
+      const i = yy * info.width + xx, v = img[i];
+      n++; sum += v; if (v > 200) bright++;
+      const r = rgb[i * 3], g = rgb[i * 3 + 1], b = rgb[i * 3 + 2];
+      sat += Math.max(r, g, b) - Math.min(r, g, b);
+      // Bordes (Laplaciano): manos, caras, carteles → el escudo se pierde o tapa algo.
+      edge += Math.abs(4 * v - img[i - 1] - img[i + 1] - img[i - info.width] - img[i + info.width]);
+    }
+    const mean = sum / n, brightFrac = bright / n, edges = edge / n;
+    // Más lejos de la esquina = un poco peor (el escudo tiene que seguir leyéndose como firma).
+    const score = edges + 250 * brightFrac + 0.3 * (sat / n) + 4 * lejos;
+    if (process.env.DEBUG_ESCUDO) console.log(`    ${id} ${x},${y} bordes ${edges.toFixed(1)} luces ${(brightFrac * 100).toFixed(0)}% sat ${(sat / n).toFixed(0)} → ${score.toFixed(1)}`);
+    if (!best || score < best.score) best = { id, x, y, w, h, mean, edges, brightFrac, score };
   }
   return best;
 }
@@ -1002,7 +1014,17 @@ async function stampCrest(file, opts = {}) {
   const logo = await sharp(CREST_CLEAN[color]).resize(w, h).png().toBuffer();
   const sombra = await sharp(CREST_CLEAN[color === 'white' ? 'black' : 'white']).resize(w, h).blur(Math.max(2, w * 0.06))
     .ensureAlpha().linear([1, 1, 1, 0.6], [0, 0, 0, 0]).png().toBuffer();
+  // Halo: mancha difusa (oscura bajo escudo blanco) que separa el escudo de luces o detalles.
+  const R = Math.round(w * 1.1), hx = Math.round(x + w / 2 - R), hy = Math.round(y + h / 2 - R);
+  const tono = color === 'white' ? '0,0,0' : '255,255,255';
+  const halo = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${2 * R}" height="${2 * R}"><defs><radialGradient id="g">` +
+    `<stop offset="0" stop-color="rgb(${tono})" stop-opacity="${best.brightFrac > 0.03 || best.edges > 6 ? 0.55 : 0.3}"/>` +
+    `<stop offset="1" stop-color="rgb(${tono})" stop-opacity="0"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#g)"/></svg>`);
+  const capas = [];
+  if (hx >= 0 && hy >= 0 && hx + 2 * R <= W && hy + 2 * R <= H) capas.push({ input: halo, left: hx, top: hy });
+  else capas.push({ input: await sharp(halo).png().toBuffer(), left: Math.max(0, hx), top: Math.max(0, hy), blend: 'over' });
   const buf = await sharp(raw).composite([
+    ...capas,
     { input: sombra, left: x, top: y + Math.round(w * 0.02) },
     { input: logo, left: x, top: y },
   ]).png().toBuffer();
