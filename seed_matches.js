@@ -2619,6 +2619,24 @@ const SEED_MATCHES = [
     {name:'Ivan Lopez',     matched:'Ivan_Cabj_La12',    played_pos:'PO',  rating:6.0, goals:0, assists:0, passes:7,   pass_accuracy:100, distance_km:6.7,  sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // ══ T4 · Liga Pretemporada VPUG (FC27) · Grupo D ══
+  { rival:'Norpatagonicos eSports', league:'VPUG', date:'2026-10-05', match_result:'3-1', isHome:false, uploadedAt:'2026-10-06T00:00:00.000Z',
+    notes:'Liga Pretemporada · Grupo D · Fecha 2 (Visita) · reporte https://youtu.be/W8Ws9Jy47IY', torneo:'Liga Pretemporada VPUG (FC27)',
+    team_stats:{posesion:49,tiros:6,tiros_arco:6,goles_esperados:2.70,pases:191,precision_pases:76,entradas:29,entradas_exito:12,intercepciones:null,paradas:0,faltas:2,fuera_juego:5,corneres:2,regates_exito:139,precision_tiro:100},
+  players:[
+    {name:'J. Martinez',  matched:'Juan_Martinez4',   played_pos:'MCD', rating:6.9,  goals:0, assists:0, passes:25,   pass_accuracy:52,   distance_km:18.2, sprints:null, tackles:null, interceptions:null},
+    {name:'NIKILEO527',   matched:'nikileo527',       played_pos:'DI',  rating:10.0, goals:3, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'NicoBJ 96',    matched:'NicoBJ_96',        played_pos:'DD',  rating:6.7,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pepo',         matched:'pepolemmo2710',    played_pos:'MI',  rating:8.7,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'c. mancini',   matched:'CipriMancini',     played_pos:'MCI', rating:8.4,  goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',      matched:'Guiidow',          played_pos:'MD',  rating:6.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32DaniSton', matched:'RS32-DaniStone',   played_pos:'MCD', rating:7.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Charly',       matched:'endiabladorojo66', played_pos:'DCI', rating:6.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'eli',          matched:'Elianja20',        played_pos:'DFC', rating:7.8,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12', matched:'Ivan_Cabj_La12',   played_pos:'DFC', rating:6.6,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Abuelo',       matched:'adri_cai',         played_pos:'PO',  rating:4.9,  goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
