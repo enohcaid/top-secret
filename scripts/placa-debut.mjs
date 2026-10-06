@@ -2,7 +2,8 @@
 // Placa de debut / partidos de una competencia (post de Instagram 4:5, 1080×1350): título grande, jugadores
 // recortados con sus poses (Renders/<gt>/Gesto4.png) y los partidos con escudo, hora y condición. Sin recuadros.
 //
-//   node scripts/placa-debut.mjs [--out archivo.png]
+//   node scripts/placa-debut.mjs [--historia] [--out archivo.png]
+// --historia: 1080×1920 (historia de Instagram), con aire arriba y abajo para la interfaz de la app.
 // Contenido en CFG (abajo). Primera versión: debut en la Liga Pretemporada VPUG, 2026-10-05.
 import fs from 'fs';
 import path from 'path';
@@ -23,8 +24,10 @@ const CFG = {
     { hora: '23:30', rival: 'Norpatagonicos eSports', cond: 'Visita', fecha: 'Fecha 2', escudo: 'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P31SBjRST6W8mTvYHP0.png?alt=media&token=1&m=1791042652994' },
   ],
 };
+const HISTORIA = process.argv.includes('--historia');
+const H = HISTORIA ? 1920 : 1350;
 const i = process.argv.indexOf('--out');
-const OUT = path.resolve(i > 0 ? process.argv[i + 1] : 'fuentes/placas/debut-vpug-pretemporada.png');
+const OUT = path.resolve(i > 0 ? process.argv[i + 1] : `fuentes/placas/debut-vpug-pretemporada${HISTORIA ? '-historia' : ''}.png`);
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
 async function recorte(gt) {
@@ -44,7 +47,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;box-sizing:border-box}
-body{width:1080px;height:1350px;position:relative;overflow:hidden;background:#0a0a0a;font-family:'Barlow Condensed',sans-serif;color:#f4f1ea}
+body{width:1080px;height:${H}px;position:relative;overflow:hidden;background:#0a0a0a;font-family:'Barlow Condensed',sans-serif;color:#f4f1ea}
 .glow{position:absolute;inset:0;background:radial-gradient(ellipse 75% 40% at 50% 16%,${CFG.color}40,transparent 70%),radial-gradient(ellipse 70% 45% at 50% 52%,rgba(201,168,76,.18),rgba(201,168,76,0) 70%),radial-gradient(ellipse 70% 30% at 50% 100%,${CFG.color}2e,transparent 70%)}
 .franja{position:absolute;left:0;right:0;top:0;height:8px;background:${CFG.color};z-index:6}
 .top{position:absolute;top:56px;left:64px;right:64px;display:flex;justify-content:space-between;align-items:center;z-index:5}
@@ -80,6 +83,17 @@ body{width:1080px;height:1350px;position:relative;overflow:hidden;background:#0a
 .cond{font-weight:700;font-size:24px;letter-spacing:6px;color:rgba(244,241,234,.6)}
 .hora{color:#c9a84c}
 .hash{position:absolute;bottom:42px;left:0;right:0;text-align:center;z-index:5;color:#c9a84c;font-weight:700;font-size:24px;letter-spacing:9px}
+${HISTORIA ? `/* historia: la app tapa ~220 px arriba y ~250 abajo */
+.top{top:150px}
+.tit{top:250px}
+.ligabig{height:290px}
+.copa .a{font-size:96px}.copa .b{font-size:150px}
+.jug.c{height:740px;top:910px}
+.jug.l,.jug.r{height:660px;top:960px}
+.jug.l{left:90px}.jug.r{right:90px}
+.fade{top:1180px;background:linear-gradient(rgba(10,10,10,0),rgba(10,10,10,.94) 34%,#0a0a0a 46%)}
+.part{bottom:330px}
+.hash{bottom:250px}` : ''}
 </style></head><body>
 <div class="glow"></div>
 <div class="top"><div class="marca"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp">TOP SECRET FC</div><img class="liga" src="${logo}"></div>
@@ -92,7 +106,7 @@ body{width:1080px;height:1350px;position:relative;overflow:hidden;background:#0a
 </body></html>`;
 
 const b = await chromium.launch();
-const p = await b.newPage({ viewport: { width: 1080, height: 1350 } });
+const p = await b.newPage({ viewport: { width: 1080, height: H } });
 await p.setContent(html, { waitUntil: 'networkidle' });
 await p.evaluate(() => document.fonts.ready);
 await p.screenshot({ path: OUT });
