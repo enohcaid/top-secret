@@ -955,27 +955,60 @@ async function generateImage(page, draft, format, prompt, { freshChat, excludeSr
 // destaque demasiado, en la esquina más despejada, blanco sobre fondo oscuro o negro sobre claro, con una
 // sombra suave para el contraste. Se estampa con sharp (no se le pide a ChatGPT: lo deforma).
 const CREST_CLEAN = { white: path.resolve('logos/rebrand/Clean logo.png'), black: path.resolve('logos/rebrand/Clean logo Negro.png') };
-async function stampCrest(file) {
-  const img = sharp(file);
-  const { width: W, height: H } = await img.metadata();
-  const w = Math.round(W * 0.085), h = Math.round(w * 1932 / 1740), m = Math.round(W * 0.04);
-  const corners = { tl: [m, m], tr: [W - m - w, m], bl: [m, H - m - h], br: [W - m - w, H - m - h] };
+// Copia sin escudo de cada imagen generada (gitignored): permite re-estampar o armar las
+// versiones para redes (scripts/noticia-redes.mjs) sin arrastrar el escudo ya puesto.
+const RAW_DIR = path.resolve('fuentes/daily-news-raw');
+
+// Elige dónde poner el escudo: la esquina más pareja Y sin luces fuertes (una luz de
+// estadio detrás de un escudo blanco lo borra — pasó en la historia del 2026-10-06).
+// En formato historia (alto/ancho > 1.5) se respeta la zona que tapa la interfaz de
+// Instagram (14% de arriba, 20% de abajo). opts.corners limita las esquinas candidatas
+// (las placas con título usan solo las de arriba).
+async function pickCrestSpot(src, W, H, opts = {}) {
+  const w = Math.round(W * (opts.size || 0.085)), h = Math.round(w * 1932 / 1740), m = Math.round(W * 0.04);
+  const story = H / W > 1.5;
+  const top = story ? Math.round(H * 0.14) : m;
+  const bottom = story ? H - Math.round(H * 0.20) - h : H - m - h;
+  const all = { tl: [m, top], tr: [W - m - w, top], bl: [m, bottom], br: [W - m - w, bottom] };
+  const ids = opts.corners || Object.keys(all);
+  // Se mide una zona un poco más grande que el escudo, para incluir el halo de luces cercanas.
+  const pad = Math.round(w * 0.35);
   let best = null;
-  for (const [id, [x, y]] of Object.entries(corners)) {
-    const st = await sharp(file).extract({ left: x, top: y, width: w, height: h }).greyscale().stats();
-    const { mean, stdev } = st.channels[0];
-    if (!best || stdev < best.stdev) best = { id, x, y, mean, stdev };
+  for (const id of ids) {
+    const [x, y] = all[id];
+    const box = { left: Math.max(0, x - pad), top: Math.max(0, y - pad) };
+    box.width = Math.min(W - box.left, w + 2 * pad); box.height = Math.min(H - box.top, h + 2 * pad);
+    const { data } = await sharp(src).extract(box).greyscale().raw().toBuffer({ resolveWithObject: true });
+    let sum = 0, sq = 0, bright = 0;
+    for (const v of data) { sum += v; sq += v * v; if (v > 200) bright++; }
+    const n = data.length, mean = sum / n, stdev = Math.sqrt(Math.max(0, sq / n - mean * mean));
+    const brightFrac = bright / n;
+    const score = stdev + 400 * brightFrac;
+    if (!best || score < best.score) best = { id, x, y, w, h, mean, stdev, brightFrac, score };
   }
-  const color = best.mean > 150 ? 'black' : 'white';
+  return best;
+}
+
+async function stampCrest(file, opts = {}) {
+  fs.mkdirSync(RAW_DIR, { recursive: true });
+  const raw = path.join(RAW_DIR, path.basename(file));
+  // Siempre se estampa sobre la copia limpia: re-estampar no acumula escudos.
+  if (!fs.existsSync(raw) || opts.fresh) fs.copyFileSync(file, raw);
+  const { width: W, height: H } = await sharp(raw).metadata();
+  const best = await pickCrestSpot(raw, W, H, opts);
+  // Blanco salvo fondo realmente claro; con algo de brillo alrededor, la sombra le da el contraste.
+  const color = best.mean > 160 && best.brightFrac > 0.3 ? 'black' : 'white';
+  const { x, y, w, h } = best;
   const logo = await sharp(CREST_CLEAN[color]).resize(w, h).png().toBuffer();
   const sombra = await sharp(CREST_CLEAN[color === 'white' ? 'black' : 'white']).resize(w, h).blur(Math.max(2, w * 0.06))
-    .ensureAlpha().linear([1, 1, 1, 0.55], [0, 0, 0, 0]).png().toBuffer();
-  const buf = await sharp(file).composite([
-    { input: sombra, left: best.x, top: best.y + Math.round(w * 0.02) },
-    { input: logo, left: best.x, top: best.y },
+    .ensureAlpha().linear([1, 1, 1, 0.6], [0, 0, 0, 0]).png().toBuffer();
+  const buf = await sharp(raw).composite([
+    { input: sombra, left: x, top: y + Math.round(w * 0.02) },
+    { input: logo, left: x, top: y },
   ]).png().toBuffer();
   fs.writeFileSync(file, buf);
-  console.log(`  Escudo estampado en ${path.basename(file)}: esquina ${best.id}, ${color}`);
+  console.log(`  Escudo estampado en ${path.basename(file)}: esquina ${best.id}, ${color} (luces ${(best.brightFrac * 100).toFixed(0)}%)`);
+  return { ...best, color };
 }
 
 function uploadImagesToR2(postFile, storyFile) {
@@ -1346,7 +1379,7 @@ async function main() {
     await deleteChatById(page, currentChatId(page));
 
     for (const f of [lastPostFile, storyFile]) {
-      try { await stampCrest(path.join(OUTPUT_DIR, f)); } catch (e) { console.warn('  No se pudo estampar el escudo en', f, e.message); }
+      try { await stampCrest(path.join(OUTPUT_DIR, f), { fresh: true }); } catch (e) { console.warn('  No se pudo estampar el escudo en', f, e.message); }
     }
     await updateDraft(draft, lastPostFile, storyFile);
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
@@ -1408,6 +1441,8 @@ export {
   generateImage,
   evaluateImage,
   stampCrest,
+  pickCrestSpot,
+  RAW_DIR,
   deleteChatById,
   currentChatId,
   uploadImagesToR2,
