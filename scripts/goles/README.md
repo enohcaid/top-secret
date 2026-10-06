@@ -35,3 +35,6 @@ node scripts/goles/compilado.cjs fuentes/goles/v<id>/datos.json --subir
 
 ## 5. Limpiar
 Borrar `fuentes/goles/v<id>/` entera (source.mp4 incluido). El compilado queda en R2.
+
+## Goles de la semana
+Cada noche con goles deja su compilado en R2 `videos/goles/<fecha>/compilado.mp4` (y los datos en `_fuentes/goles/datos/<fecha>.json`) para armar el video de los goles de la semana. Hasta ahora: 2026-09-30 (amistosos), 2026-10-05 (VPUG Liga Pretemporada, 3 goles de nikileo527). Recordar: el video semanal publicado lleva música propia que no se repite (scripts/lib/musica.mjs).
