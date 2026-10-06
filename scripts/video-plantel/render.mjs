@@ -152,7 +152,7 @@ console.log('Listo:', OUT);
 // Limpieza: los videos del equipo son de un solo día. Al armar uno nuevo se borran los de días anteriores
 // (locales y, si se subieron, los de R2 videos/equipo-*). --sin-limpiar para conservarlos.
 if (MODO === 'equipo' && !argv.includes('--sin-limpiar')) {
-  const viejo = n => /^equipo-\d{4}-\d{2}-\d{2}(-portada\.jpg|\.mp4)$/.test(n) && !n.startsWith('equipo-' + FECHA);
+  const viejo = n => /^equipo-\d{4}-\d{2}-\d{2}(-[a-z]+)?(-portada\.jpg|\.mp4)$/.test(n) && !n.startsWith('equipo-' + FECHA);
   const locales = fs.readdirSync(D).filter(viejo);
   locales.forEach(n => fs.rmSync(path.join(D, n)));
   let remotos = [];

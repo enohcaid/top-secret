@@ -8,6 +8,7 @@
  *   node scripts/meta.mjs ig-imagen  <url-publica> "<texto>"      post de una imagen
  *   node scripts/meta.mjs ig-carrusel "<texto>" <url1> <url2> …   carrusel (2-10 imágenes)
  *   node scripts/meta.mjs ig-reel   <url-publica.mp4> "<texto>"   reel (SIN música de la biblioteca: la API no la permite)
+ *   node scripts/meta.mjs ig-historia <url-publica.mp4|jpg>        historia (24 h), sin stickers ni música de la biblioteca
  *   node scripts/meta.mjs fb-foto   <url-publica> "<texto>"
  *   node scripts/meta.mjs fb-album  "<texto>" <url1> <url2> …    post de Facebook con varias fotos
  *   node scripts/meta.mjs fb-video  <url-publica.mp4> "<texto>"
@@ -70,6 +71,14 @@ if (cmd === 'estado') {
 } else if (cmd === 'ig-reel') {
   const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'REELS', video_url: args[0], caption: args[1] || '', share_to_feed: 'true', ...igTok() });
   await esperarContenedor(c.id); await publicarIG(c.id);
+} else if (cmd === 'ig-historia') {
+  // Historia (24 h) con un video o una imagen. La API no permite stickers ni música de la biblioteca: sale tal cual el archivo.
+  const esVideo = /\.(mp4|mov)(\?|$)/i.test(args[0]);
+  const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'STORIES', [esVideo ? 'video_url' : 'image_url']: args[0], ...igTok() });
+  await esperarContenedor(c.id);
+  if (PRUEBA) { console.log('[prueba] contenedor listo, no se publica:', c.id); process.exit(0); }
+  const r = await api(`/${E.META_IG_ID}/media_publish`, { creation_id: c.id, ...igTok() });
+  console.log('historia publicada en Instagram, id:', r.id, '(dura 24 h; se ve en instagram.com/stories/fctopsecret)');
 } else if (cmd === 'fb-foto') {
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
   const r = await api(`/${E.META_PAGE_ID}/photos`, { url: args[0], caption: args[1] || '', ...igTok() });
