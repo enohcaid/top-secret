@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Placa "EN VIVO en Twitch" para historia de Instagram (1080×1920): invita a ver los partidos oficiales en
-// twitch.tv/topsecretfc. Mismo lenguaje que placa-debut.mjs (sin recuadros, recortes con poses).
+// Placa "EN VIVO" para historia de Instagram (1080×1920): invita a ver los partidos oficiales en todas las
+// plataformas donde sale el vivo (CFG.canales: Twitch, Kick y YouTube). Mismo lenguaje que placa-debut.mjs (sin recuadros, recortes con poses).
 // La API de Instagram no deja poner el sticker de link: el link va escrito grande en la placa.
 //
 //   node scripts/placa-envivo.mjs [--out archivo.png]
@@ -17,7 +17,12 @@ const CFG = {
     { hora: '23:00', rival: 'Villa Dalmine eSports', escudo: 'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2JRiVP2pCqmqxrPfis.png?alt=media&token=1&m=1790270899743' },
     { hora: '23:30', rival: 'Norpatagonicos eSports', escudo: 'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P31SBjRST6W8mTvYHP0.png?alt=media&token=1&m=1791042652994' },
   ],
-  canal: 'twitch.tv/topsecretfc',
+  // Todas las plataformas donde se puede ver el vivo (sumar youtube cuando esté habilitado)
+  canales: [
+    { red: 'twitch', url: 'twitch.tv/topsecretfc' },
+    { red: 'kick', url: 'kick.com/topsecretfc' },
+    // { red: 'youtube', url: 'youtube.com/@TOPSecretFC' },
+  ],
 };
 const TW = '#9146ff';                                          // violeta de Twitch
 const i = process.argv.indexOf('--out');
@@ -35,7 +40,11 @@ async function recorte(gt) {
 }
 const [izq, centro, der] = await Promise.all(CFG.jugadores.map(recorte));
 const liga = 'data:image/png;base64,' + (await sharp(CFG.liga).png().toBuffer()).toString('base64');
-const TWITCH_SVG = `<svg viewBox="0 0 24 28" width="66" height="76"><path fill="${TW}" d="M2 0 0 5v19h6v4h3l4-4h5l6-6V0H2zm20 14-4 4h-6l-4 4v-4H3V2h19v12z"/><path fill="${TW}" d="M15 6h2v6h-2zM9 6h2v6H9z"/></svg>`;
+const ICONO = {
+  twitch: `<svg viewBox="0 0 24 28" width="46" height="54"><path fill="${TW}" d="M2 0 0 5v19h6v4h3l4-4h5l6-6V0H2zm20 14-4 4h-6l-4 4v-4H3V2h19v12z"/><path fill="${TW}" d="M15 6h2v6h-2zM9 6h2v6H9z"/></svg>`,
+  kick: `<svg viewBox="0 0 24 24" width="50" height="50"><rect width="24" height="24" rx="5" fill="#53fc18"/><path fill="#0a0a0a" d="M6 5h4v4h2V7h2V5h4v5h-2v2h-2v0h2v2h2v5h-4v-2h-2v-2h-2v4H6z"/></svg>`,
+  youtube: `<svg viewBox="0 0 28 20" width="56" height="40"><rect width="28" height="20" rx="5" fill="#ff0033"/><path fill="#fff" d="M11 5.5v9l8-4.5z"/></svg>`,
+};
 
 const html = `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -54,13 +63,15 @@ body{width:1080px;height:1920px;position:relative;overflow:hidden;background:#0a
 .jug.c{height:700px;left:50%;transform:translateX(-50%);top:770px;z-index:3}
 .jug.l,.jug.r{height:620px;top:830px;filter:brightness(.78)}.jug.l{left:110px}.jug.r{right:110px}
 .fade{position:absolute;left:0;right:0;top:1150px;bottom:0;z-index:4;background:linear-gradient(rgba(10,10,10,0),rgba(10,10,10,.94) 30%,#0a0a0a 42%)}
-.part{position:absolute;left:90px;right:90px;top:1360px;z-index:5}
+.part{position:absolute;left:90px;right:90px;top:1330px;z-index:5}
 .fila{display:flex;align-items:center;gap:22px;padding:12px 0;border-top:1px solid rgba(244,241,234,.14)}
 .fila:last-child{border-bottom:1px solid rgba(244,241,234,.14)}
 .hora{font-weight:800;font-size:50px;color:#c9a84c;width:124px}.esc{width:58px;height:58px;object-fit:contain}.riv{flex:1;font-weight:800;font-size:42px}
-.canal{position:absolute;left:0;right:0;top:1560px;z-index:5;display:flex;align-items:center;justify-content:center;gap:22px}
-.canal span{font-weight:900;font-size:66px;letter-spacing:1px;color:#fff}
-.cta{position:absolute;left:0;right:0;top:1660px;text-align:center;z-index:5;font-weight:700;font-size:30px;letter-spacing:9px;color:rgba(244,241,234,.7)}
+.canales{position:absolute;left:0;right:0;top:${CFG.canales.length > 2 ? 1500 : 1530}px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:14px}
+.canal{display:flex;align-items:center;gap:20px;width:640px}
+.canal .ic{width:60px;display:flex;justify-content:center}
+.canal span{font-weight:900;font-size:52px;letter-spacing:1px;color:#fff}
+.cta{position:absolute;left:0;right:0;top:${CFG.canales.length > 2 ? 1760 : 1700}px;text-align:center;z-index:5;font-weight:700;font-size:30px;letter-spacing:9px;color:rgba(244,241,234,.7)}
 </style></head><body>
 <div class="glow"></div>
 <div class="top"><img class="club" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp"><i></i><img class="liga" src="${liga}"></div>
@@ -68,8 +79,8 @@ body{width:1080px;height:1920px;position:relative;overflow:hidden;background:#0a
 <img class="jug l" src="${izq}"><img class="jug r" src="${der}"><img class="jug c" src="${centro}">
 <div class="fade"></div>
 <div class="part">${CFG.partidos.map(p => `<div class="fila"><div class="hora">${p.hora}</div><img class="esc" src="${p.escudo}"><div class="riv">${p.rival}</div></div>`).join('')}</div>
-<div class="canal">${TWITCH_SVG}<span>${CFG.canal}</span></div>
-<div class="cta">ENTRÁ Y ALENTÁ AL EQUIPO</div>
+<div class="canales">${CFG.canales.map(c => `<div class="canal"><div class="ic">${ICONO[c.red]}</div><span>${c.url}</span></div>`).join('')}</div>
+<div class="cta">MIRANOS DONDE QUIERAS</div>
 </body></html>`;
 
 const b = await chromium.launch();

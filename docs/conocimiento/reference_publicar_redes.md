@@ -5,7 +5,7 @@ metadata:
   type: reference
 ---
 
-**Historia "EN VIVO en Twitch" (2026-10-05):** `node scripts/placa-envivo.mjs` (editar CFG: partidos, jugadores) → JPEG → R2 `logos/placas/` → tarea programada de Windows de una sola vez que corre `scripts/envivo-historia.cmd <url>` a la hora del partido (log en `fuentes/placas/envivo-log.txt`). El link de Twitch va escrito en la placa: la API no permite el sticker de link (se agrega a mano desde la app si se quiere tocable).
+**Historia "EN VIVO" (2026-10-05):** pedido de Juan: la promo del vivo menciona **todas** las plataformas donde sale (Twitch, Kick y YouTube cuando esté habilitado: descomentar en `CFG.canales`), "que la gente nos pueda ver por cualquier lugar". `node scripts/placa-envivo.mjs` (editar CFG: partidos, jugadores) → JPEG → R2 `logos/placas/` → tarea programada de Windows de una sola vez que corre `scripts/envivo-historia.cmd <url>` a la hora del partido (log en `fuentes/placas/envivo-log.txt`). El link de Twitch va escrito en la placa: la API no permite el sticker de link (se agrega a mano desde la app si se quiere tocable).
 
 **Etiquetas en Instagram (2026-10-05):** `meta.mjs ig-imagen|ig-historia … --etiquetar usuario1,usuario2`. Solo se puede al publicar: la API no deja etiquetar ni borrar algo ya publicado (probado: DELETE da "Insufficient permissions") → si falta una etiqueta, republicar y que Juan borre el viejo desde la app. La liga VPUG en Instagram es **@vpugvirtual_prouruguay_gaming**.
 
