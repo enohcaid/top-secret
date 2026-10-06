@@ -12,6 +12,8 @@
  *   node scripts/meta.mjs fb-foto   <url-publica> "<texto>"
  *   node scripts/meta.mjs fb-album  "<texto>" <url1> <url2> …    post de Facebook con varias fotos
  *   node scripts/meta.mjs fb-video  <url-publica.mp4> "<texto>"
+ *   node scripts/meta.mjs fb-link   <link> "<texto>"              post con link (la vista previa sale del og:image/og:title)
+ *   node scripts/meta.mjs fb-historia <url-publica.jpg>             historia de la página (24 h)
  *   Agregar --prueba para crear el contenedor/validar sin publicar.
  *   --etiquetar usuario1,usuario2 etiqueta cuentas en ig-imagen e ig-historia (solo al publicar: después la API no deja).
  *
@@ -102,6 +104,16 @@ if (cmd === 'estado') {
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
   const r = await api(`/${E.META_PAGE_ID}/videos`, { file_url: args[0], description: args[1] || '', ...igTok() });
   console.log('publicado en Facebook (video):', `https://www.facebook.com/${r.id}`);
+} else if (cmd === 'fb-link') {
+  if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
+  const r = await api(`/${E.META_PAGE_ID}/feed`, { link: args[0], message: args[1] || '', ...igTok() });
+  console.log('publicado en Facebook:', `https://www.facebook.com/${r.id}`);
+} else if (cmd === 'fb-historia') {
+  // Historia de foto de la página: la foto se sube sin publicar y se usa como historia.
+  if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
+  const foto = await api(`/${E.META_PAGE_ID}/photos`, { url: args[0], published: 'false', ...igTok() });
+  const r = await api(`/${E.META_PAGE_ID}/photo_stories`, { photo_id: foto.id, ...igTok() });
+  console.log('historia publicada en Facebook, id:', r.post_id || r.id, '(dura 24 h)');
 } else {
   console.log('Ver la cabecera de scripts/meta.mjs para el uso.');
 }

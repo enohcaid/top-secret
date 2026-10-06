@@ -1034,9 +1034,14 @@ async function stampCrest(file, opts = {}) {
 }
 
 function uploadImagesToR2(postFile, storyFile) {
-  for (const f of [postFile, storyFile].filter(Boolean)) {
-    const localPath = path.join(OUTPUT_DIR, f);
-    const key = `Renders/Daily News/${f}`.split('/').map(encodeURIComponent).join('/');
+  // Además de las publicadas (con escudo), las copias limpias en raw/: las usan las piezas
+  // con título para redes (noticia-redes.js), que ponen el escudo junto al título.
+  const items = [postFile, storyFile].filter(Boolean).flatMap(f => [
+    { f, localPath: path.join(OUTPUT_DIR, f), rel: `Renders/Daily News/${f}` },
+    { f: `raw/${f}`, localPath: path.join(RAW_DIR, f), rel: `Renders/Daily News/raw/${f}` },
+  ]).filter(x => fs.existsSync(x.localPath));
+  for (const { f, localPath, rel } of items) {
+    const key = rel.split('/').map(encodeURIComponent).join('/');
     try {
       execSync(
         `curl -s -o NUL -w "%{http_code}" -X PUT --aws-sigv4 "aws:amz:auto:s3" --user "${R2_ACCESS_KEY}:${R2_SECRET_KEY}" -H "content-type: image/png" --data-binary @"${localPath}" "${R2_ENDPOINT}/${R2_BUCKET}/${key}"`,
@@ -1059,11 +1064,16 @@ async function updateDraft(draft, postFile, storyFile) {
     console.log('\nEl draft cambió durante la generación (regen/descarte) — no se actualiza Firestore.');
     return;
   }
+  const v = `?v=${Date.now().toString(36)}`;
   const updated = {
     ...fresh,
-    imagePost:  r2MediaUrl(`Renders/Daily News/${postFile}`),
-    imageStory: r2MediaUrl(`Renders/Daily News/${storyFile}`),
-    image:      r2MediaUrl(`Renders/Daily News/${postFile}`),
+    // ?v=: /media se cachea como immutable por URL — sin versión, una imagen regenerada
+    // con el mismo nombre seguiría saliendo vieja (también para Instagram al publicar).
+    imagePost:  r2MediaUrl(`Renders/Daily News/${postFile}`) + v,
+    imageStory: r2MediaUrl(`Renders/Daily News/${storyFile}`) + v,
+    image:      r2MediaUrl(`Renders/Daily News/${postFile}`) + v,
+    imagePostRaw:  r2MediaUrl(`Renders/Daily News/raw/${postFile}`) + v,
+    imageStoryRaw: r2MediaUrl(`Renders/Daily News/raw/${storyFile}`) + v,
   };
   const payload = { fields: { data: { stringValue: JSON.stringify(updated) } } };
   await fetch(FIRESTORE_DRAFT, {

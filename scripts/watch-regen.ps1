@@ -58,6 +58,20 @@ if ($discard -and $discard.requested) {
     if ($removed.Count -gt 0) { Log "R2 actualizado: $($removed.Count) imagen(es) eliminadas" }
 }
 
+# ── PASO R: publicacion en redes pedida desde noticias.html ("Publicar en redes") ──
+# Consulta barata al Worker; solo si hay algo en cola corre el publicador (Meta API + X por CDP).
+try {
+    $redes = Invoke-RestMethod "$worker/redes-estado" -TimeoutSec 10
+    if ($redes.job -and ($redes.job.destinos | Where-Object { $_.estado -eq 'pendiente' -or $_.estado -eq 'publicando' })) {
+        Log "Publicacion en redes en cola ($($redes.job.id))"
+        Push-Location $repoRoot
+        cmd /c "node scripts\publicar-noticia-redes.mjs >> scripts\daily-images.log 2>&1"
+        Pop-Location
+    }
+} catch {
+    Log "Error en publicacion en redes: $_"
+}
+
 # Verificar si hay pedido de regeneración pendiente
 try {
     $flag = Invoke-RestMethod "$worker/regen-flag" -TimeoutSec 10

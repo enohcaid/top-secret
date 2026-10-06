@@ -894,6 +894,8 @@ body{padding-left:0;padding-right:0;}
 
 <script src="noticias-data.js"></script>
 <script src="share-cards.js?v=1"></script>
+<script src="noticia-redes.js?v=1"></script>
+<script src="noticias-redes-ui.js?v=1"></script>
 <script src="layout.js?v=22"></script>
 
 <div class="page-wrap">
@@ -1061,6 +1063,10 @@ body{padding-left:0;padding-right:0;}
         <button class="share-btn share-btn-download" onclick="downloadStoryCard()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="14" x2="12" y2="6"/></svg>
           Descargar historia
+        </button>
+        <button class="share-btn share-btn-download" onclick="const n = _shareNews; closeShare(); TSRedesUI.open(n)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Publicar en redes
         </button>
         <button class="share-btn share-btn-copy" onclick="copyOgLink()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
@@ -1631,11 +1637,15 @@ async function unlockDraft() {
 async function publishDraft() {
   const r = await fetch(_WORKER + '/publish-noticia', { method: 'POST', headers: { 'Authorization': 'Bearer ' + _sessionPin } });
   if (!r.ok) { alert('Error al publicar. Intentá de nuevo.'); return; }
-  window._KV_NEWS = [{ ..._currentDraft, status: 'published', pinned: false }, ...window._KV_NEWS.filter(n => n.id !== _currentDraft.id)];
+  const publicada = { ..._currentDraft, status: 'published', pinned: false };
+  window._KV_NEWS = [publicada, ...window._KV_NEWS.filter(n => n.id !== _currentDraft.id)];
   renderAutoSection();
   document.getElementById('draft-banner').style.display  = 'none';
   document.getElementById('draft-trigger').style.display = 'none';
+  // Segundo paso: revisar qué sale en cada red y publicar (noticias-redes-ui.js)
+  const pin = _sessionPin;
   _currentDraft = null; _sessionPin = '';
+  TSRedesUI.open(publicada, pin);
 }
 
 async function discardDraft() {

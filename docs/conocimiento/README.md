@@ -71,6 +71,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_copafacil_api](reference_copafacil_api.md) — Cómo extraer datos de torneos de CopáFácil (Flutter SPA) vía Firebase RTDB — patrón usado en el Worker de Top Secret
 - [reference_kit_crop_generate_image](reference_kit_crop_generate_image.md) — generate-image-chatgpt.mjs recorta un solo kit de T3 Kits.png en vez de mandar el poster completo con los 3 — el script elige el color, no ChatGPT
 - [reference_retransmitir_twitch](reference_retransmitir_twitch.md) — Retransmitir el vivo de Twitch (PS5) a Kick y YouTube desde la PC con streamlink + ffmpeg; claves en .env
+- [reference_noticias_en_redes](reference_noticias_en_redes.md) — Publicar una noticia en las redes desde el sitio: paso de revisión por red, piezas con título (noticia-redes.js), publicación desde la PC (publicar-noticia-redes.mjs)
 - [reference_publicar_redes](reference_publicar_redes.md) — Cómo se publica en YouTube/X/TikTok desde el Chrome CDP; Instagram/Facebook pendientes
 - [reference_renders_folder](reference_renders_folder.md) — Estructura y propósito de las carpetas en Renders/ — qué borrar y qué conservar
 - [reference_topsecret_daily_news_routine](reference_topsecret_daily_news_routine.md) — How to find and edit the cloud routine that writes Top Secret FC's daily news draft

@@ -983,9 +983,9 @@ export default {
               const draft = JSON.parse(doc.fields?.data?.stringValue || 'null');
               if (draft) {
                 const files = [...new Set(
-                  [draft.imagePost, draft.imageStory, draft.image]
+                  [draft.imagePost, draft.imageStory, draft.image, draft.imagePostRaw, draft.imageStoryRaw]
                     .filter(f => typeof f === 'string' && f.startsWith(MEDIA))
-                    .map(f => decodeURIComponent(f.slice(MEDIA.length)))
+                    .map(f => decodeURIComponent(f.slice(MEDIA.length).split('?')[0]))
                     .filter(f => f.startsWith('Renders/Daily News/') && !f.includes('..'))
                 )];
                 if (!files.length && (draft.id || draft.date)) {
@@ -1073,6 +1073,54 @@ export default {
         await env.TS_KV.put('published_noticias', JSON.stringify([published, ...existing]));
         await fetch(FS_DRAFT, { method: 'DELETE' });
         return jsonResp({ ok: true, id: published.id });
+      }
+
+      // ── PUBLICAR NOTICIA EN REDES (POST /redes-publicar, GET /redes-estado) ──
+      // El paso "Publicar en redes" de noticias.html arma las piezas en el navegador y las
+      // manda acá: se guardan en R2 (logos/noticias/redes/) y queda un pedido en KV
+      // (redes_job) que la PC toma en el minuto (scripts/publicar-noticia-redes.mjs, desde
+      // watch-regen.ps1), publica en cada red y va anotando el estado de cada destino.
+      if (url.pathname === '/redes-publicar' && request.method === 'POST') {
+        const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+        if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
+        let body;
+        try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
+        const { id, link, piezas = {}, destinos = [] } = body || {};
+        const REDES = ['ig-post', 'ig-historia', 'fb-post', 'fb-historia', 'x'];
+        if (!id || !/^[\w-]+$/.test(id) || !destinos.length || destinos.some(d => !REDES.includes(d.red))) {
+          return jsonResp({ error: 'Pedido inválido' }, 400);
+        }
+        const prev = await env.TS_KV.get('redes_job', 'json');
+        if (prev && prev.destinos.some(d => d.estado === 'pendiente' || d.estado === 'publicando')) {
+          return jsonResp({ error: `Hay otra publicación en curso (${prev.id}). Esperá a que termine.` }, 409);
+        }
+        const v = Date.now().toString(36);
+        const urls = {};
+        for (const tipo of ['ig', 'historia']) {
+          const b64 = (piezas[tipo] || '').replace(/^data:image\/jpeg;base64,/, '');
+          if (!b64) continue;
+          const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+          const key = `logos/noticias/redes/${id}-${tipo}.jpg`;
+          await env.MEDIA_BUCKET.put(key, bytes, { httpMetadata: { contentType: 'image/jpeg' } });
+          urls[tipo] = `${url.origin}/media/${key}?v=${v}`;
+        }
+        const job = {
+          id, link: link || `${url.origin}/og/${id}`, creado: new Date().toISOString(),
+          destinos: destinos.map(d => ({
+            red: d.red, texto: String(d.texto || '').slice(0, 2200),
+            imagen: d.red === 'ig-post' ? urls.ig : (d.red.endsWith('historia') ? urls.historia : null),
+            estado: 'pendiente',
+          })),
+        };
+        if (job.destinos.some(d => (d.red === 'ig-post' || d.red.endsWith('historia')) && !d.imagen)) {
+          return jsonResp({ error: 'Falta la imagen de alguna pieza' }, 400);
+        }
+        await env.TS_KV.put('redes_job', JSON.stringify(job));
+        return jsonResp({ ok: true, job });
+      }
+      if (url.pathname === '/redes-estado' && request.method === 'GET') {
+        const job = await env.TS_KV.get('redes_job', 'json');
+        return jsonResp({ job: job || null });
       }
 
       // ── PUBLISHED NOTICIAS (GET /published-noticias) ─────────────────────────
