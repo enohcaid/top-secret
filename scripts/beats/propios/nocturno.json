@@ -1,15 +1,107 @@
 {
-  "_inspiracion": "Timeless (The Weeknd, Playboi Carti): oscuro, hipnótico, arpegio de sinte, energía alta",
-  "bpm": 140, "tonica": "F", "progresion": [0, 5, 2, 6],
-  "bombo": [0, 7, 10], "clap": [2], "hats": 16, "redobles": 0.55, "glides": 0.45,
-  "brillo_pad": 1600, "brillo_arp": 3400, "pasos_melodia": 8, "densidad": 0.3, "octava_melodia": 1,
-  "estructura": [
-    ["intro", 4, ["pad", "arpegio"]],
-    ["drop", 8, ["pad", "arpegio", "drums", "808"]],
-    ["hook", 12, ["pad", "arpegio", "pluck_mel", "drums", "808", "corte"]],
-    ["break", 4, ["pad", "campana"]],
-    ["hook", 12, ["pad", "arpegio", "pluck_mel", "drums", "808", "corte"]],
-    ["outro", 4, ["pad", "arpegio"]]
+ "_inspiracion": "Timeless (The Weeknd, Playboi Carti): oscuro, hipnótico, arpegio de sinte, energía alta",
+ "bpm": 140,
+ "tonica": "F",
+ "progresion": [
+  0,
+  5,
+  2,
+  6
+ ],
+ "bombo": [
+  0,
+  7,
+  10
+ ],
+ "clap": [
+  2
+ ],
+ "hats": 16,
+ "redobles": 0.55,
+ "glides": 0.45,
+ "brillo_pad": 1600,
+ "brillo_arp": 3400,
+ "pasos_melodia": 8,
+ "densidad": 0.3,
+ "octava_melodia": 1,
+ "estructura": [
+  [
+   "intro",
+   4,
+   [
+    "pad",
+    "arpegio"
+   ]
   ],
-  "ganancias": {"drums": 1.0, "bajo": 0.75, "armonia": 0.85, "melodia": 0.8}
+  [
+   "drop",
+   8,
+   [
+    "pad",
+    "arpegio",
+    "drums",
+    "808"
+   ]
+  ],
+  [
+   "hook",
+   12,
+   [
+    "pad",
+    "arpegio",
+    "pluck_mel",
+    "drums",
+    "808",
+    "corte",
+    "vox",
+    "tapestop"
+   ]
+  ],
+  [
+   "break",
+   4,
+   [
+    "pad",
+    "campana"
+   ]
+  ],
+  [
+   "hook",
+   12,
+   [
+    "pad",
+    "arpegio",
+    "pluck_mel",
+    "drums",
+    "808",
+    "corte",
+    "vox"
+   ]
+  ],
+  [
+   "outro",
+   4,
+   [
+    "pad",
+    "arpegio"
+   ]
+  ]
+ ],
+ "ganancias": {
+  "drums": 1.0,
+  "bajo": 0.75,
+  "armonia": 0.85,
+  "melodia": 0.8
+ },
+ "sucio": {
+  "cinta": 0.5,
+  "crush": 0.35,
+  "saturar": 0.5,
+  "swing": 0.25,
+  "humano": 0.6,
+  "vinilo": 0.4,
+  "tapestop": 0.6,
+  "stutter": 0.5,
+  "respira": 0.5
+ }
 }
