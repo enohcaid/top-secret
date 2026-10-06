@@ -380,15 +380,31 @@ function extractMentionedPlayers(draft) {
 // Rotación de protagonistas: entre los mencionados en la nota se priorizan los
 // que hace más tiempo no aparecen en una imagen (historial en Firestore), para
 // no mostrar siempre a los mismos. Empate → orden de aparición en la nota.
-function selectFeaturedPlayers(allMentioned, featuredHistory) {
-  const lastFeatured = new Map(); // player -> índice en el historial (0 = ayer)
-  featuredHistory.forEach((e, i) => {
+function selectFeaturedPlayers(allMentioned, featuredHistory, draft = {}) {
+  // La foto tiene que ser coherente con la nota (pedido de Juan, 2026-10-06: el hat-trick de nikileo527
+  // salió ilustrado con otros tres jugadores porque la rotación lo descartó). Si el imageBrief nombra
+  // jugadores, ESOS son los protagonistas, en ese orden — sin rotación. Si el brief existe y no nombra a
+  // nadie, la imagen es institucional (sin jugadores identificables).
+  const brief = typeof draft.imageBrief === 'string' ? draft.imageBrief : '';
+  if (brief.trim().length > 10) {
+    return PLAYERS_WITH_RENDERS
+      .filter(p => brief.includes(p))
+      .sort((x, y) => brief.indexOf(x) - brief.indexOf(y))
+      .slice(0, MAX_FEATURED_PLAYERS);
+  }
+  // Sin brief: el que nombra el título va primero; el resto rota (sin contar lo anotado hoy, que es la
+  // propia nota del día registrando a sus protagonistas).
+  const today = draft.date || '';
+  const title = draft.title || '';
+  const lastFeatured = new Map(); // player -> índice en el historial (0 = más reciente)
+  featuredHistory.filter(e => e.date !== today).forEach((e, i) => {
     if (!lastFeatured.has(e.player)) lastFeatured.set(e.player, i);
   });
   const recency = p => lastFeatured.has(p) ? lastFeatured.get(p) : Infinity;
-  return [...allMentioned]
-    .sort((a, b) => recency(b) - recency(a) || allMentioned.indexOf(a) - allMentioned.indexOf(b))
-    .slice(0, MAX_FEATURED_PLAYERS);
+  const enTitulo = allMentioned.filter(p => title.includes(p));
+  const resto = allMentioned.filter(p => !enTitulo.includes(p))
+    .sort((a, b) => recency(b) - recency(a) || allMentioned.indexOf(a) - allMentioned.indexOf(b));
+  return [...enTitulo, ...resto].slice(0, MAX_FEATURED_PLAYERS);
 }
 
 const FIRESTORE_FEATURED_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/featured_players_history';
@@ -935,6 +951,33 @@ async function generateImage(page, draft, format, prompt, { freshChat, excludeSr
   return { filename, imgUrl };
 }
 
+// Escudo del club en cada imagen (pedido de Juan, 2026-10-06): versión Clean (el espía solo) para que no
+// destaque demasiado, en la esquina más despejada, blanco sobre fondo oscuro o negro sobre claro, con una
+// sombra suave para el contraste. Se estampa con sharp (no se le pide a ChatGPT: lo deforma).
+const CREST_CLEAN = { white: path.resolve('logos/rebrand/Clean logo.png'), black: path.resolve('logos/rebrand/Clean logo Negro.png') };
+async function stampCrest(file) {
+  const img = sharp(file);
+  const { width: W, height: H } = await img.metadata();
+  const w = Math.round(W * 0.085), h = Math.round(w * 1932 / 1740), m = Math.round(W * 0.04);
+  const corners = { tl: [m, m], tr: [W - m - w, m], bl: [m, H - m - h], br: [W - m - w, H - m - h] };
+  let best = null;
+  for (const [id, [x, y]] of Object.entries(corners)) {
+    const st = await sharp(file).extract({ left: x, top: y, width: w, height: h }).greyscale().stats();
+    const { mean, stdev } = st.channels[0];
+    if (!best || stdev < best.stdev) best = { id, x, y, mean, stdev };
+  }
+  const color = best.mean > 150 ? 'black' : 'white';
+  const logo = await sharp(CREST_CLEAN[color]).resize(w, h).png().toBuffer();
+  const sombra = await sharp(CREST_CLEAN[color === 'white' ? 'black' : 'white']).resize(w, h).blur(Math.max(2, w * 0.06))
+    .ensureAlpha().linear([1, 1, 1, 0.55], [0, 0, 0, 0]).png().toBuffer();
+  const buf = await sharp(file).composite([
+    { input: sombra, left: best.x, top: best.y + Math.round(w * 0.02) },
+    { input: logo, left: best.x, top: best.y },
+  ]).png().toBuffer();
+  fs.writeFileSync(file, buf);
+  console.log(`  Escudo estampado en ${path.basename(file)}: esquina ${best.id}, ${color}`);
+}
+
 function uploadImagesToR2(postFile, storyFile) {
   for (const f of [postFile, storyFile].filter(Boolean)) {
     const localPath = path.join(OUTPUT_DIR, f);
@@ -1139,12 +1182,12 @@ async function main() {
     console.log('No se pudo chequear colisión de id contra published-noticias (siguiendo igual):', e.message);
   }
 
-  const allMentioned    = extractMentionedPlayers(draft);
+  const allMentioned    = [...new Set([...extractMentionedPlayers(draft), ...PLAYERS_WITH_RENDERS.filter(p => (draft.imageBrief || '').includes(p))])];
   const featuredHistory = await fetchFeaturedHistory();
-  const mentioned       = selectFeaturedPlayers(allMentioned, featuredHistory);
+  const mentioned       = selectFeaturedPlayers(allMentioned, featuredHistory, draft);
   if (mentioned.length > 0) {
     console.log('Jugadores mencionados con renders:', allMentioned.join(', '));
-    console.log('Protagonistas de la imagen (rotación):', mentioned.join(', '));
+    console.log('Protagonistas de la imagen:', mentioned.join(', '), draft.imageBrief ? '(según la nota)' : '(rotación)');
   } else {
     console.log('Sin jugadores específicos — composición institucional.');
   }
@@ -1302,6 +1345,9 @@ async function main() {
     // Imágenes descargadas — el chat de generación ya no hace falta
     await deleteChatById(page, currentChatId(page));
 
+    for (const f of [lastPostFile, storyFile]) {
+      try { await stampCrest(path.join(OUTPUT_DIR, f)); } catch (e) { console.warn('  No se pudo estampar el escudo en', f, e.message); }
+    }
     await updateDraft(draft, lastPostFile, storyFile);
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
     await saveKitHistory(chosenKit.id, dateStr, kitHistory);
@@ -1361,6 +1407,7 @@ export {
   saveFeaturedHistory,
   generateImage,
   evaluateImage,
+  stampCrest,
   deleteChatById,
   currentChatId,
   uploadImagesToR2,
