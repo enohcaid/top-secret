@@ -184,6 +184,7 @@
   // Foto sola con el logo (las descargas del modal Compartir). 'post' = la foto de la nota;
   // 'historia' = la vertical si existe, si no la misma foto sobre un fondo desenfocado 9:16.
   async function limpia(n, tipo) {
+    if (tipo === 'og') return og(n);
     const src = tipo === 'historia' ? (n.imageStory || n.imagePost || n.image) : (n.imagePost || n.image);
     const foto = await loadImg(src);
     if (!foto) return null;
@@ -205,6 +206,21 @@
     }
     const escudo = await loadImg(ESCUDO);
     if (escudo) estamparEscudo(ctx, escudo, c.width, c.height);
+    return c;
+  }
+
+  // Vista previa del link (og:image, 1200x630) para Facebook y X: la foto con el logo. El Worker
+  // la sirve en /og/<id> si existe (logos/noticias/redes/<id>-og.jpg).
+  async function og(n) {
+    const raw = n.imagePostRaw, pub = n.imagePost || n.image;
+    let foto = await loadImg(raw), yaTiene = false;
+    if (!foto) { foto = await loadImg(pub); yaTiene = estampada(pub); }
+    if (!foto) return null;
+    const c = document.createElement('canvas');
+    c.width = 1200; c.height = 630;
+    const ctx = c.getContext('2d');
+    cover(ctx, foto, 1200, 630, 0.3);
+    if (!yaTiene) { const escudo = await loadImg(ESCUDO); if (escudo) estamparEscudo(ctx, escudo, 1200, 630); }
     return c;
   }
 

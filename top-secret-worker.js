@@ -877,7 +877,13 @@ export default {
         }
 
         const t = article.t;
-        const i = article.i;
+        // Vista previa con el logo (regla: el logo va en todas las publicaciones): la arma el paso
+        // "Publicar en redes" de noticias.html. Si no existe, la imagen de la nota.
+        let i = article.i;
+        try {
+          const ogObj = await env.MEDIA_BUCKET.head(`logos/noticias/redes/${articleId}-og.jpg`);
+          if (ogObj) i = `${url.origin}/media/logos/noticias/redes/${encodeURIComponent(articleId)}-og.jpg?v=${ogObj.uploaded.getTime().toString(36)}`;
+        } catch(e) {}
         const r = SITE + 'noticias.html#' + articleId;
         const d = 'Top Secret FC · Noticias';
 
@@ -1096,7 +1102,7 @@ export default {
         }
         const v = Date.now().toString(36);
         const urls = {};
-        for (const tipo of ['ig', 'historia']) {
+        for (const tipo of ['ig', 'historia', 'og']) {
           const b64 = (piezas[tipo] || '').replace(/^data:image\/jpeg;base64,/, '');
           if (!b64) continue;
           const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));

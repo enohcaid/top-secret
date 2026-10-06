@@ -95,6 +95,9 @@ async function publicar(d, job) {
 const job = await leer();
 if (process.argv.includes('--estado')) { console.log(JSON.stringify(job, null, 2)); process.exit(0); }
 if (!job) process.exit(0);
+// Los pedidos de prueba (id "prueba…") solo los procesa una corrida con --prueba: así la tarea
+// de cada minuto nunca publica de verdad un pedido armado para probar.
+if (/^prueba/.test(job.id) && !PRUEBA) process.exit(0);
 // Otro proceso publicando hace menos de 10 min: no pisarlo.
 const enCurso = job.destinos.find(d => d.estado === 'publicando');
 if (enCurso && Date.now() - Date.parse(enCurso.desde || 0) < 10 * 60000) process.exit(0);

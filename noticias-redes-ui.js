@@ -170,6 +170,11 @@
     msg.textContent = 'Enviando…';
     try {
       if (!piezas.ig || !piezas.historia) await renderPiezas();
+      // Facebook y X muestran la vista previa del link: se manda la foto con el logo para /og.
+      if (destinos.some(d => d.red === 'fb-post' || d.red === 'x')) {
+        const c = await TSRedes.limpia(n, 'og');
+        if (c) piezas.og = c.toDataURL('image/jpeg', 0.9);
+      }
       const r = await fetch(`${WORKER}/redes-publicar`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + pin },
         body: JSON.stringify({ id: n.id, link: link(), piezas, destinos }),
