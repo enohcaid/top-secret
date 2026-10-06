@@ -1,0 +1,15 @@
+{
+  "_inspiracion": "Given Up On Me (The Weeknd): melancólico, sintes ochentosos, 808 pesado, crece hacia el drop",
+  "bpm": 80, "tonica": "A", "progresion": [5, 6, 0, 0],
+  "bombo": [0, 3, 8, 11], "clap": [1, 3], "hats": 16, "redobles": 0.45, "glides": 0.35,
+  "brillo_pad": 2300, "brillo_arp": 2800, "pasos_melodia": 8, "densidad": 0.28, "octava_melodia": 1, "delay": 0.32,
+  "estructura": [
+    ["intro", 2, ["pad"]],
+    ["verso", 8, ["pad", "lead", "drums", "808"]],
+    ["hook", 8, ["pad", "arpegio", "lead", "drums", "808", "corte"]],
+    ["break", 2, ["pad", "lead"]],
+    ["hook", 8, ["pad", "arpegio", "lead", "drums", "808", "corte"]],
+    ["outro", 2, ["pad"]]
+  ],
+  "ganancias": {"drums": 0.95, "bajo": 0.72, "armonia": 0.85, "melodia": 0.95}
+}

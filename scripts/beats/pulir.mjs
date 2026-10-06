@@ -20,7 +20,7 @@ const run = args => spawnSync(ffmpeg, ['-hide_banner', '-y', ...args], { encodin
 for (const estilo of estilos) {
   const dir = path.join(SALIDA, estilo);
   if (!fs.existsSync(dir)) { console.warn(`No hay beats de "${estilo}"`); continue; }
-  const mp3s = fs.readdirSync(dir).filter(f => f.endsWith('.mp3')).sort((a, b) => fs.statSync(path.join(dir, a)).mtimeMs - fs.statSync(path.join(dir, b)).mtimeMs);
+  const mp3s = fs.readdirSync(dir).filter(f => /\.(mp3|wav)$/.test(f)).sort((a, b) => fs.statSync(path.join(dir, a)).mtimeMs - fs.statSync(path.join(dir, b)).mtimeMs);
   mp3s.forEach((f, i) => {
     const src = path.join(dir, f);
     // Dónde empieza el silencio final (si lo hay) → duración útil.
