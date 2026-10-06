@@ -5,7 +5,7 @@
 //  - TV: la imagen completa → los cuerpos siguen hacia abajo y se funden en negro.
 //
 //   node scripts/banner-youtube.mjs [--out archivo.jpg]
-//   node scripts/banner-youtube.mjs --kick [--out archivo.jpg]   → banner de Kick 1920×1080 (franja visible central ~1920×480)
+//   node scripts/banner-youtube.mjs --kick [--out archivo.jpg]   → banner de Kick 2560×283 (Kick lo recorta a ~9:1; probado 2026-10-05)
 // Jugadores en IZQ / DER (el primero de cada lista es el más cercano al título). Pose: Brazos4.
 import fs from 'fs';
 import path from 'path';
@@ -15,8 +15,9 @@ import sharp from 'sharp';
 const IZQ = ['Juan_Martinez4', 'CipriMancini', 'RS32-DaniStone'];
 const DER = ['Lautavester7', 'NicoBJ_96', 'Cabers14'];
 const KICK = process.argv.includes('--kick');
-const [W, H, FT, FB] = KICK ? [1920, 1080, 300, 780] : [2560, 1440, 508, 931];   // lienzo y franja visible en PC
+const [W, H, FT, FB] = KICK ? [2560, 283, 0, 283] : [2560, 1440, 508, 931];   // lienzo y franja visible en PC
 const ESC = W / 2560;                                       // escala de posiciones/tipografía respecto del de YouTube
+const TXT = KICK ? 0.62 : 1;                                // tipografía en Kick (franja de 283 px)
 const i = process.argv.indexOf('--out');
 const OUT = path.resolve(i > 0 ? process.argv[i + 1] : `fuentes/redes/perfiles/out/${KICK ? 'kick-banner' : 'youtube-banner-v2'}.jpg`);
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
@@ -33,13 +34,14 @@ async function recorte(gt) {
 }
 
 // Alto del cuerpo: la cabeza arranca 36 px debajo del borde de la franja y la cintura cae en el borde de abajo
-const ALTO = Math.round((FB - FT - 36) / 0.5);
+const MARGEN = KICK ? 18 : 36;
+const ALTO = Math.round((FB - FT - MARGEN) / (KICK ? 0.4 : 0.5));
 const capa = async (lista, lado) => {
   const rs = await Promise.all(lista.map(recorte));
   return rs.map((r, k) => {
     const w = ALTO * r.ratio, centro = lado === 'izq' ? (660 - k * 290) * ESC : W - (660 - k * 290) * ESC;
     const esc = 1 - k * 0.06;                                // los de afuera, apenas más chicos y atrás
-    return `<img src="${r.url}" style="position:absolute;height:${ALTO * esc}px;left:${centro - (w * esc) / 2}px;top:${FT + 36 + (ALTO - ALTO * esc) * .25}px;z-index:${10 - k};filter:brightness(${1 - k * .12})">`;
+    return `<img src="${r.url}" style="position:absolute;height:${ALTO * esc}px;left:${centro - (w * esc) / 2}px;top:${FT + MARGEN + (ALTO - ALTO * esc) * .25}px;z-index:${10 - k};filter:brightness(${1 - k * .12})">`;
   }).join('');
 };
 
@@ -51,9 +53,9 @@ body{width:${W}px;height:${H}px;position:relative;overflow:hidden;background:#0a
 .glow{position:absolute;inset:0;background:radial-gradient(ellipse 45% 30% at 50% ${(FT + FB) / 2}px,rgba(201,168,76,.24),rgba(201,168,76,0) 70%)}
 .fade{position:absolute;left:0;right:0;top:${FB - 60}px;bottom:0;z-index:20;background:linear-gradient(rgba(10,10,10,0),#0a0a0a 55%)}
 .tit{position:absolute;left:0;right:0;top:${FT}px;height:${FB - FT}px;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.tit img{height:${84 * ESC * (KICK ? 1.2 : 1)}px;margin-bottom:${14 * ESC}px}
-.tit h1{font-weight:900;font-size:${170 * ESC * (KICK ? 1.2 : 1)}px;line-height:.86;letter-spacing:4px;background:linear-gradient(180deg,#fdfbf4 10%,#bdb6a3 55%,#f4f1ea 95%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))}
-.tit .sub{display:flex;align-items:center;gap:${22 * ESC}px;margin-top:${16 * ESC}px;color:#c9a84c;font-weight:800;font-size:${34 * ESC * (KICK ? 1.2 : 1)}px;letter-spacing:${16 * ESC}px}
+.tit img{height:${84 * ESC * TXT}px;margin-bottom:${14 * ESC * TXT}px}
+.tit h1{font-weight:900;font-size:${170 * ESC * TXT}px;line-height:.86;letter-spacing:4px;background:linear-gradient(180deg,#fdfbf4 10%,#bdb6a3 55%,#f4f1ea 95%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))}
+.tit .sub{display:flex;align-items:center;gap:${22 * ESC}px;margin-top:${16 * ESC}px;color:#c9a84c;font-weight:800;font-size:${34 * ESC * TXT}px;letter-spacing:${16 * ESC * TXT}px}
 .tit .sub i{display:block;width:${120 * ESC}px;height:2px;background:#c9a84c}
 </style></head><body>
 <div class="glow"></div>
