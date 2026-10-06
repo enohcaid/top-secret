@@ -18,6 +18,7 @@ const CFG = {
     { hora: '23:30', rival: 'Norpatagonicos eSports', escudo: 'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P31SBjRST6W8mTvYHP0.png?alt=media&token=1&m=1791042652994' },
   ],
   // Todas las plataformas donde se puede ver el vivo (sumar youtube cuando esté habilitado)
+  bio: 'LINK EN LA BIO',                                      // linktree en la bio de @fctopsecret (null para sacarlo)
   canales: [
     { red: 'twitch', url: 'twitch.tv/topsecretfc' },
     { red: 'kick', url: 'kick.com/topsecretfc' },
@@ -62,16 +63,18 @@ body{width:1080px;height:1920px;position:relative;overflow:hidden;background:#0a
 .jug{position:absolute;z-index:2}
 .jug.c{height:700px;left:50%;transform:translateX(-50%);top:770px;z-index:3}
 .jug.l,.jug.r{height:620px;top:830px;filter:brightness(.78)}.jug.l{left:110px}.jug.r{right:110px}
-.fade{position:absolute;left:0;right:0;top:1150px;bottom:0;z-index:4;background:linear-gradient(rgba(10,10,10,0),rgba(10,10,10,.94) 30%,#0a0a0a 42%)}
-.part{position:absolute;left:90px;right:90px;top:1330px;z-index:5}
+.fade{position:absolute;left:0;right:0;top:1060px;bottom:0;z-index:4;background:linear-gradient(rgba(10,10,10,0),rgba(10,10,10,.94) 30%,#0a0a0a 42%)}
+.part{position:absolute;left:90px;right:90px;top:1250px;z-index:5}
 .fila{display:flex;align-items:center;gap:22px;padding:12px 0;border-top:1px solid rgba(244,241,234,.14)}
 .fila:last-child{border-bottom:1px solid rgba(244,241,234,.14)}
 .hora{font-weight:800;font-size:50px;color:#c9a84c;width:124px}.esc{width:58px;height:58px;object-fit:contain}.riv{flex:1;font-weight:800;font-size:42px}
-.canales{position:absolute;left:0;right:0;top:${CFG.canales.length > 2 ? 1500 : 1530}px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:14px}
+.canales{position:absolute;left:0;right:0;top:${CFG.canales.length > 2 ? 1410 : 1430}px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:14px}
 .canal{display:flex;align-items:center;gap:20px;width:640px}
 .canal .ic{width:60px;display:flex;justify-content:center}
 .canal span{font-weight:900;font-size:52px;letter-spacing:1px;color:#fff}
-.cta{position:absolute;left:0;right:0;top:${CFG.canales.length > 2 ? 1760 : 1700}px;text-align:center;z-index:5;font-weight:700;font-size:30px;letter-spacing:9px;color:rgba(244,241,234,.7)}
+.bio{position:absolute;left:0;right:0;top:${CFG.canales.length > 2 ? 1700 : 1640}px;z-index:5;text-align:center}
+.bio span{display:inline-block;padding:14px 36px;border-radius:999px;background:#c9a84c;color:#0a0a0a;font-weight:900;font-size:36px;letter-spacing:8px}
+.cta{position:absolute;left:0;right:0;top:${CFG.canales.length > 2 ? 1650 : 1590}px;text-align:center;z-index:5;font-weight:700;font-size:30px;letter-spacing:9px;color:rgba(244,241,234,.7)}
 </style></head><body>
 <div class="glow"></div>
 <div class="top"><img class="club" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp"><i></i><img class="liga" src="${liga}"></div>
@@ -80,7 +83,7 @@ body{width:1080px;height:1920px;position:relative;overflow:hidden;background:#0a
 <div class="fade"></div>
 <div class="part">${CFG.partidos.map(p => `<div class="fila"><div class="hora">${p.hora}</div><img class="esc" src="${p.escudo}"><div class="riv">${p.rival}</div></div>`).join('')}</div>
 <div class="canales">${CFG.canales.map(c => `<div class="canal"><div class="ic">${ICONO[c.red]}</div><span>${c.url}</span></div>`).join('')}</div>
-<div class="cta">MIRANOS DONDE QUIERAS</div>
+<div class="cta">MIRANOS DONDE QUIERAS</div>${CFG.bio ? `<div class="bio"><span>${CFG.bio}</span></div>` : ''}
 </body></html>`;
 
 const b = await chromium.launch();
