@@ -11,6 +11,7 @@ En los reportes de partido el juego a veces muestra un nombre distinto al gamert
 |---|---|---|
 | Abuela | `nikileo527` | 2026-09-30 (indicado por el usuario) |
 | Abuelo | `adri_cai` | 2026-09-30 (indicado por el usuario) |
+| Charly | `endiabladorojo66` | 2026-10-06 (confirmado por el usuario) |
 | M. Crespo / Crespo | — no mapear (bug del juego, corrección del usuario 2026-06-16) | |
 
 Ejemplo: `{name:'Abuela', matched:'nikileo527', rating:…}`.
