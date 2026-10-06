@@ -437,7 +437,7 @@
       .article-modal-img { object-fit: cover; }
     }
 
-    /* ── Share modal: placas generadas (share-cards.js) ── */
+    /* ── Share modal: foto de la nota con el logo (TSRedes.limpia) ── */
     .share-modal { max-width: 720px !important; }
     .sc-previews { display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; align-items: end; margin-bottom: 20px; }
     .sc-prev { margin: 0; }
@@ -893,8 +893,7 @@ body{padding-left:0;padding-right:0;}
 <body>
 
 <script src="noticias-data.js"></script>
-<script src="share-cards.js?v=1"></script>
-<script src="noticia-redes.js?v=1"></script>
+<script src="noticia-redes.js?v=2"></script>
 <script src="noticias-redes-ui.js?v=1"></script>
 <script src="layout.js?v=22"></script>
 
@@ -1032,7 +1031,7 @@ body{padding-left:0;padding-right:0;}
     </div>
     <div class="share-modal-body">
       <div class="sc-previews">
-        <figure class="sc-prev sc-post"><div class="canvas-wrap"><img id="share-preview" src="" alt="Post para Instagram"><div class="canvas-loading" id="canvas-loading">Armando placa…</div></div><figcaption>Post · 4:5</figcaption></figure>
+        <figure class="sc-prev sc-post"><div class="canvas-wrap"><img id="share-preview" src="" alt="Post para Instagram"><div class="canvas-loading" id="canvas-loading">Preparando imagen…</div></div><figcaption>Post · 4:5</figcaption></figure>
         <figure class="sc-prev sc-story"><div class="canvas-wrap"><img id="share-preview-story" src="" alt="Historia"></div><figcaption>Historia · 9:16</figcaption></figure>
       </div>
       <div class="share-caption-label">Texto para la publicación</div>
@@ -1377,14 +1376,13 @@ function closeShare() {
 }
 
 // ── IMAGE PREVIEW + DESCARGA DIRECTA ─────────────────────────────────────────
-// Placas con estética de expediente (share-cards.js): post 4:5 para compartir
-// e historia 9:16 para descargar. Se arman una vez por noticia y se cachean.
+// La foto de la nota sola con el logo (noticia-redes.js → TSRedes.limpia): post y
+// historia para descargar. Se arman una vez por noticia y se cachean.
 const _cards = {};
-function cardMeta(n) { return { id: expId(n), file: fileName(n) }; }
 function getCard(n, kind) {
   const key = n.id + ':' + kind;
-  if (!_cards[key]) _cards[key] = TSCards[kind](n, cardMeta(n))
-    .then(cv => TSCards.toBlob(cv))
+  if (!_cards[key]) _cards[key] = TSRedes.limpia(n, kind === 'story' ? 'historia' : 'post')
+    .then(cv => cv && new Promise(res => cv.toBlob(res, 'image/jpeg', 0.92)))
     .catch(() => null);
   return _cards[key];
 }
