@@ -2,17 +2,20 @@
 
 Concepto: espionaje. Top Secret = una misión nocturna. Lo que tiene que transmitir: tensión con actitud.
 Rasgo distintivo: el acorde de las películas de espías (menor con séptima mayor) y su línea cromática
-interna 5 - #5 - 6 - #5 como gancho, más una firma en código Morse "T S" (— · · ·).
+interna 5 - #5 - 6 - #5 como gancho, más una firma en código Morse "T S" (— · · ·) que NO suena como
+pitido: es el ritmo con el que se corta el propio acorde, bajado de octava y saturado (v2, pedido de
+Juan: insinuar en vez de ser explícito — pitchear, invertir, cortar, distorsionar).
 
 Narrativa (52 compases, 142 BPM, mi menor, medio tiempo):
-  intro   8  transmisión interceptada: todo por "radio" (banda angosta, bitcrush, estática, chirridos),
-             firma Morse; en los compases 7-8 el filtro se abre, sube un riser y un compás antes entra un swell
+  intro   8  transmisión interceptada: todo por "radio" (banda angosta, bitcrush), textura granular
+             hecha del pad, notas "rebobinadas" (invertidas y frenando), firma Morse; en los compases 7-8
+             el filtro se abre y sube un riser
   verso   8  entra el operativo: 808 distorsionado, batería contenida (hats en corcheas, después semicorcheas)
   gancho 16  melodía de vidrio (llamada y respuesta), golpe de metales grave al entrar, hats en semicorcheas
              con acentos y redobles al cierre de cada frase, cambio a tresillos en la segunda mitad,
              cuerdas fantasma doblando la melodía en los últimos 8
   puente  8  estilo John Carpenter: bajo pulsante en corcheas, batería filtrada, sin 808, cuerdas
-  gancho2 8  vuelve todo; un único corte repetido (stutter) en el último compás
+  gancho2 8  arranca con la llamada a media velocidad (cinta lenta, octava abajo); un único stutter al final
   final   4  la transmisión se cierra: vuelve a la radio, Morse y estática
 
 Influencias investigadas (2026-10-06): Metro Boomin (bandas de sonido, espacio, emoción concreta),
@@ -117,33 +120,77 @@ def bajo_carpenter(m, dur):
     return lp(x, 900) * np.exp(-t * 9) * 0.35
 
 
-def morse(texto_codigo, t0, buf, unidad=S16, f=880, gan=0.18, pan=0.0):
-    """Pone pitidos Morse: '-' = 3 unidades, '.' = 1, ' ' = separación de letra."""
-    t = t0
-    for ch in texto_codigo:
+# Fuentes "escondidas": los sonidos de espionaje salen del material del propio tema (pedido de Juan:
+# nada de pitidos de computadora explícitos — pitchear, invertir, cortar, distorsionar).
+_FUENTES = {}
+
+
+def fuente(nombre):
+    if nombre not in _FUENTES:
+        if nombre == 'acorde':
+            # El acorde espía una octava abajo, saturado: el Morse se "dice" cortando este sonido
+            x = pad([n(x) + 12 for x in ACORDES['EmM9'][:4]], 2.0, 2200).mean(axis=0)
+            x = repitch(x, 0.5)
+            _FUENTES[nombre] = saturar(np.stack([x, x]), 0.8)[0]
+        elif nombre == 'perc':
+            # Pedacitos de clap y hi-hat transportados hacia arriba, en loop
+            _FUENTES[nombre] = np.tile(np.concatenate([repitch(clap(), 1.7)[:int(0.05 * SR)], repitch(hat(), 0.7)]), 40)
+        elif nombre == 'grano':
+            _FUENTES[nombre] = pad([n(x) + 12 for x in ACORDES['Cmaj7']], 3.0, 3000).mean(axis=0)
+    return _FUENTES[nombre]
+
+
+def morse(codigo, t0, buf, unidad=S16, origen='acorde', gan=0.18, pan=0.0, invertir=True):
+    """El ritmo Morse ('-' = 3 unidades, '.' = 1) cortando un sonido del tema; algunos golpes invertidos."""
+    src = fuente(origen)
+    t, pos, k = t0, int(0.1 * SR), 0
+    for ch in codigo:
         if ch == ' ':
             t += unidad * 2
             continue
-        largo = unidad * (3 if ch == '-' else 1)
-        tt = t_arr(largo)
-        x = np.sin(2 * np.pi * f * tt) * env_adsr(len(tt), 0.004, 0.0, 1, 0.01, largo)
+        largo = int(unidad * (3 if ch == '-' else 1) * SR)
+        x = src[pos:pos + largo].copy()
+        if len(x) < largo:
+            pos, x = 0, src[:largo].copy()
+        if invertir and k % 2 == 1:
+            x = x[::-1]
+        f = min(len(x) // 4, int(0.004 * SR))
+        x[:f] *= np.linspace(0, 1, f)
+        x[-f:] *= np.linspace(1, 0, f)
         poner(buf, paneo(x * gan, pan), t)
-        t += largo + unidad
+        pos += largo
+        t += largo / SR + unidad
+        k += 1
     return t
 
 
-def chirrido(t0, buf, gan=0.15):
-    """Chirrido de radio: barrido de tono hacia abajo con ruido."""
-    tt = t_arr(0.16)
-    f = 2400 * np.exp(-tt * 12) + 380
-    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * 0.6 + bp(rng.standard_normal(len(tt)), 1200, 4000) * 0.5
-    poner(buf, paneo(x * np.exp(-tt * 8) * gan, rng.uniform(-0.3, 0.3)), t0)
+def rebobinado(t0, buf, gan=0.15):
+    """Una nota de la melodía invertida que se frena bajando de tono, como una cinta que vuelve atrás."""
+    nota = n(str(rng.choice(['E5', 'B4', 'D#5', 'G4'])))
+    x = vidrio(nota, 0.5)[::-1]
+    vel = np.linspace(1.0, 0.3, len(x))
+    pos = np.cumsum(vel)
+    pos = pos[pos < len(x) - 1]
+    y = saturar(np.stack([np.interp(pos, np.arange(len(x)), x)] * 2), 0.5)[0]
+    poner(buf, paneo(y * gan, rng.uniform(-0.4, 0.4)), t0)
 
 
 def estatica(dur, gan=0.05):
-    x = bp(rng.standard_normal(int(dur * SR)), 900, 4500)
-    mod = np.clip(lp(rng.standard_normal(len(x)), 6) * 8, 0.15, 1)    # la estática va y viene
-    return np.stack([x * mod, np.roll(x, 777) * mod]) * gan
+    """Textura granular hecha del pad: granos de 20-70 ms, algunos invertidos o a otra octava, que van y vienen."""
+    src = fuente('grano')
+    out = np.zeros((2, int(dur * SR)))
+    for _ in range(int(dur * 22)):
+        largo = int(rng.uniform(0.02, 0.07) * SR)
+        i = int(rng.integers(0, len(src) - largo * 2))
+        g = src[i:i + largo * 2]
+        g = repitch(g, float(rng.choice([0.5, 1.0, 2.0])))[:largo]
+        if rng.random() < 0.5:
+            g = g[::-1]
+        g = g * np.hanning(len(g))
+        poner(out, paneo(g, float(rng.uniform(-0.8, 0.8))), rng.uniform(0, dur))
+    out = lp(bitcrush(hp(out, 600), 0.4), 7000, 4)
+    mod = np.clip(lp(rng.standard_normal(out.shape[1]), 3) * 10, 0.1, 1)
+    return out * mod * gan * 6
 
 
 def radio(st):
@@ -152,7 +199,8 @@ def radio(st):
     x = bp(mono, 420, 2900, 3)
     x = saturar(np.stack([x, x]), 0.6)
     x = bitcrush(x, 0.55)
-    return x * 0.8
+    # El bitcrush deja un silbido fijo (~15 kHz, la frecuencia del muestreo reducido): se filtra
+    return lp(x, 3400, 4) * 0.8
 
 
 def riser(dur):
@@ -201,12 +249,17 @@ def render():
             if nombre.startswith('gancho'):
                 frase = LLAMADA if (c % 4) < 2 else RESPUESTA
                 mitad = (c % 2) * 8
+                media_vel = nombre == 'gancho2' and c < 2           # se arma después, a media velocidad
                 for (p, nota, l) in frase:
-                    if mitad <= p < mitad + 8:
+                    if mitad <= p < mitad + 8 and not media_vel:
                         t_n = t_c + (p - mitad) * BEAT / 2
                         poner(bus['melodia'], paneo(vidrio(n(nota), l * BEAT / 2), 0.15), t_n)
+                        if p == 0:
+                            # Pre-eco: la reverb de la nota, invertida, desemboca en la nota
+                            pre = con_reverb(paneo(vidrio(n(nota), BEAT), 0.15), ir, 1.0)[:, :int(BEAT * 1.6 * SR)][:, ::-1]
+                            poner(bus['melodia'], pre * 0.6, t_n - pre.shape[1] / SR)
                         # Cuerdas fantasma doblando la melodía en la segunda mitad del gancho y en el gancho 2
-                        if (nombre == 'gancho' and c >= 8) or nombre == 'gancho2':
+                        if (nombre == 'gancho' and c >= 8) or (nombre == 'gancho2' and not media_vel):
                             poner(bus['armonia'], cuerdas([n(nota) - 12], l * BEAT / 2) * 0.5, t_n)
 
             # Cuerdas en acordes en el puente
@@ -271,7 +324,7 @@ def render():
                         poner(bus['drums'], paneo(ho * 0.55, -0.3), t_c + 6 * S16)
                 # Morse como percusión, bajito y agudo, en la segunda mitad del gancho
                 if nombre == 'gancho' and c >= 8 and c % 2 == 1:
-                    morse('- ...', t_c + 12 * S16, bus['fx'], unidad=S16 / 2, f=1760, gan=0.05, pan=0.6)
+                    morse('- ...', t_c + 12 * S16, bus['fx'], unidad=S16 / 2, origen='perc', gan=0.12, pan=0.6)
 
             # ── 808: raíz del acorde; glide solo hacia el primer tiempo del compás siguiente ──
             if nombre in ('verso', 'gancho', 'gancho2'):
@@ -296,7 +349,7 @@ def render():
     morse('- ...', T(0) + BEAT * 0.5, bus['intro'], gan=0.35)
     morse('- ...', T(4) + BEAT * 0.5, bus['intro'], gan=0.3)
     for k in range(6):
-        chirrido(T(rng.uniform(0, 6)), bus['fx'], 0.08)
+        rebobinado(T(rng.uniform(0, 6)), bus['fx'], 0.12)
     poner(bus['fx'], estatica(T(6), 0.04), 0)
     poner(bus['fx'], riser(T(2) - BEAT), T(6))
     # Swell en reversa hacia cada entrada fuerte
@@ -307,7 +360,14 @@ def render():
     fi = inicio['final']
     poner(bus['fx'], estatica(T(4), 0.035), T(fi))
     morse('- ...', T(fi + 2) + BEAT, bus['intro'], gan=0.35)
-    chirrido(T(fi + 3) + BEAT * 2, bus['fx'], 0.12)
+    rebobinado(T(fi + 3) + BEAT * 2, bus['fx'], 0.16)
+
+    # Gancho 2: el primer compás de la llamada a media velocidad (una octava abajo, el doble de largo),
+    # como una cinta que gira lento, antes de que la melodía vuelva normal
+    g0, g2i = int(T(inicio['gancho']) * SR), inicio['gancho2']
+    lento = repitch(bus['melodia'][:, g0:g0 + int(COMPAS * SR)], 0.5)
+    lento = cinta(saturar(lento, 0.4), 0.6, rng)
+    poner(bus['melodia'], lento * 0.7, T(g2i))
 
     if notas808:
         sucio = ochocientos(notas808, N / SR, 5.0)          # 808 bien distorsionado (Southside)
@@ -330,7 +390,7 @@ def render():
     intro = con_reverb(intro, ir, 0.25)
     arm = cinta(bus['armonia'], 0.25, rng)                    # leve deriva de cinta solo en la armonía
     arm = con_reverb(arm * sc, ir, 0.35)
-    mel = delay_pingpong(bus['melodia'], BEAT * 0.75, 0.38, 0.28)
+    mel = delay_pingpong(cinta(bus['melodia'], 0.2, rng), BEAT * 0.75, 0.38, 0.28)
     mel = con_reverb(saturar(mel, 0.25) * sc, ir, 0.38)
     drums = bus['drums']
     # Puente: batería filtrada (lowpass) como si viniera de otra sala
@@ -339,7 +399,7 @@ def render():
     drums = con_reverb(saturar(drums, 0.2), ir_corta, 0.1)
     braam_bus = con_reverb(bus['braam'], ir, 0.5)
     # La intro queda más baja a propósito: contraste para que la entrada del verso pegue
-    mix = intro * 1.0 + drums * 1.0 + bus['bajo'] * 0.8 + arm * 0.85 + mel * 0.95 + bus['fx'] + braam_bus * 0.8
+    mix = intro * 1.3 + drums * 1.0 + bus['bajo'] * 0.8 + arm * 0.85 + mel * 0.95 + bus['fx'] + braam_bus * 0.8
     # Un único stutter: último medio compás del gancho 2
     g2 = inicio['gancho2'] + 8
     mix = stutter(mix, T(g2) - BEAT * 2, BEAT * 2, BEAT / 4)
