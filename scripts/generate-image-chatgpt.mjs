@@ -1,8 +1,8 @@
 /**
  * Genera imágenes para la noticia diaria de Top Secret FC usando ChatGPT.
  * Usa el proyecto "TOP Secret FC" en ChatGPT y adjunta a cada mensaje las
- * referencias visuales desde el repo local (escudo, indumentaria y renders
- * de Renders/T3-Frentes/) — los archivos del proyecto no llegan al generador
+ * referencias visuales desde el repo local (escudo Clean dorado y renders T4
+ * de cada jugador, que ya llevan puesto el kit del día) — los archivos del proyecto no llegan al generador
  * de imágenes. Conecta al Chrome del usuario via CDP en localhost:9222.
  *
  * Uso:
@@ -58,48 +58,43 @@ async function imageRatio(filePath) {
 // Referencias visuales que se ADJUNTAN a cada mensaje de generación.
 // Los archivos del proyecto de ChatGPT no llegan de forma confiable al
 // generador de imágenes (por eso inventaba escudos) — los adjuntos sí.
-const CREST_PATH = path.resolve('Top-Secret.png');
-const CREST_WHITE_PATH = path.resolve('logos/Top Secret white.png');
-// T3 Kits.png (tres kits puestos en jugadores) y no el póster-catálogo de
-// indumentaria: una infografía densa como referencia contamina la generación.
+// Temporada 4 (2026-10): escudo "Clean logo" (el espía solo) en dorado — es el que llevan las camisetas.
+const CREST_PATH = path.resolve('logos/rebrand/Clean logo Dorado.png');
+const CREST_WHITE_PATH = path.resolve('logos/rebrand/Clean logo.png');
+// Póster viejo de kits T3 (con AIA) — ya no se usa en la generación diaria; queda exportado para scripts one-off viejos.
 const KITS_PATH  = path.resolve('logos/T3 Kits.png');
 
-// Adjuntar las TRES fotos de kit juntas y dejar que ChatGPT "elija" salía mal
-// seguido (mezclaba elementos entre kits, o directamente copiaba el kit falso
-// del render del jugador — sponsor "AIA" y swoosh de Nike incluidos). Ahora el
-// SCRIPT elige un solo color por corrida y recorta SOLO esa figura de
-// "T3 Kits.png" (los tres kits están en una fila a lo ancho de la imagen
-// 941×1672 — coordenadas medidas a mano sobre ese archivo, recortar de nuevo
-// si se reemplaza el poster de kits).
-const KIT_CROP_TOP    = 385;
-const KIT_CROP_BOTTOM = 1580;
+// Kits T4: el render T4 de cada jugador YA tiene puesto el kit (Renders/T4-Frentes = titular,
+// Renders/T4-Frentes-K2 = alternativa), así que la referencia del uniforme es el propio render —
+// no hace falta recortar un póster de kits ni dejar que ChatGPT mezcle prendas. Los arqueros usan
+// siempre su conjunto naranja (están en T4-Frentes, no tienen versión K2).
+const T4_FRENTES_DIR    = path.resolve('Renders/T4-Frentes');
+const T4_FRENTES_K2_DIR = path.resolve('Renders/T4-Frentes-K2');
+const GOALKEEPERS = ['Ivan_Cabj_La12', 'adri_cai'];
 const KIT_COLORS = [
   {
-    id: 'negro', label: 'negro',
-    x: 308, w: 325,
-    desc: 'camiseta negra de textura sutil, cuello redondo negro; escudo circular del club a la izquierda del pecho, sponsor "AIA" en el centro del pecho y swoosh de Nike a la derecha (igual que en la foto de referencia — son elementos reales del kit, no se quitan). Short negro con dorsal blanco y swoosh de Nike. Medias negras con "TSFC" y swoosh de Nike.',
+    id: 'titular', label: 'titular negro y dorado', dir: T4_FRENTES_DIR,
+    desc: 'camiseta NEGRA con cuello en V y guarda de laureles dorados en el cuello y los puños, vivos dorados finos; escudo del club (espía con sombrero y anteojos, dorado) a la izquierda del pecho y swoosh de Nike dorado a la derecha; SIN sponsor en el pecho. Short negro con swoosh dorado y dorsal blanco. Medias negras con banda dorada ornamental.',
   },
   {
-    id: 'blanco', label: 'blanco',
-    x: 0, w: 305,
-    desc: 'camiseta blanca con hombros y mangas raglán azul marino y cuello azul marino; escudo circular del club a la izquierda del pecho, sponsor "AIA" en rojo en el centro del pecho y swoosh de Nike a la derecha (igual que en la foto de referencia — son elementos reales del kit, no se quitan). Short blanco con dorsal azul marino y swoosh de Nike. Medias blancas con puño azul marino, "TSFC" y swoosh de Nike.',
-  },
-  {
-    id: 'amarillo', label: 'amarillo',
-    x: 633, w: 308,
-    desc: 'camiseta amarilla con cuello en V azul marino y vivos azul marino; escudo circular del club a la izquierda del pecho, sponsor "AIA" en el centro del pecho y swoosh de Nike a la derecha (igual que en la foto de referencia — son elementos reales del kit, no se quitan). Short amarillo con dorsal azul marino y swoosh de Nike. Medias amarillas con "TSFC" y swoosh de Nike.',
+    id: 'alternativa', label: 'alternativo azul francia', dir: T4_FRENTES_K2_DIR,
+    desc: 'camiseta AZUL FRANCIA con textura geométrica tono sobre tono, cuello polo y vivos amarillos a los costados; escudo del club dorado a la izquierda del pecho y swoosh de Nike amarillo; SIN sponsor en el pecho. Short azul. Medias blancas con banda azul.',
   },
 ];
+const GK_KIT_DESC = 'conjunto de ARQUERO: camiseta NARANJA con estampado de ondas amarillas, escudo del club en BLANCO y swoosh de Nike blanco, short y medias ROJAS, guantes de arquero.';
 
-async function cropKitImage(kitId) {
-  const kit = KIT_COLORS.find(k => k.id === kitId);
-  if (!kit) throw new Error(`Color de kit desconocido: ${kitId}`);
-  const outPath = path.join(os.tmpdir(), `ts-kit-${kit.id}.png`);
-  await sharp(KITS_PATH)
-    .extract({ left: kit.x, top: KIT_CROP_TOP, width: kit.w, height: KIT_CROP_BOTTOM - KIT_CROP_TOP })
-    .toFile(outPath);
-  return outPath;
+// Render de un jugador con el kit del día (arqueros: siempre el suyo, naranja).
+function renderForKit(player, kit) {
+  const dirs = GOALKEEPERS.includes(player) ? [T4_FRENTES_DIR] : [kit.dir, T4_FRENTES_DIR];
+  for (const d of dirs) for (const ext of ['png', 'jpg']) {
+    const f = path.join(d, `${player}.${ext}`);
+    if (fs.existsSync(f)) return f;
+  }
+  return null;
 }
+
+// Compatibilidad con scripts one-off viejos (T3). La generación diaria ya no recorta kits.
+async function cropKitImage() { return null; }
 
 async function fetchKitHistory() {
   try {
@@ -151,7 +146,7 @@ ${mentioned.map(playerIdentityLine).join('\n')}
     : '';
   return `Sos el Director Creativo de Top Secret FC, club de fútbol virtual argentino de élite.
 
-Te adjunto DOS imágenes: la PRIMERA es la imagen a evaluar; la SEGUNDA es el escudo oficial del club (referencia — insignia circular metálica plateada/negra con un espía de sombrero y anteojos).
+Te adjunto DOS imágenes: la PRIMERA es la imagen a evaluar; la SEGUNDA es el escudo oficial del club (referencia — el espía con sombrero, anteojos y cuello de gabardina, sin marco, en dorado).
 
 Evaluá si la PRIMERA imagen sirve para publicar la noticia de hoy en redes.
 
@@ -162,17 +157,17 @@ ESTILO VISUAL ELEGIDO PARA HOY: ${style.label}
 - Dirección de arte: ${style.prompt}
 
 CRITERIOS (todos deben cumplirse):
-- Si aparece el escudo del club, su DISEÑO es el de la segunda imagen adjunta: circular, con el espía de sombrero y anteojos, texto "TOP SECRET" / "FOOTBALL CLUB". La versión monocromática BLANCA plana del MISMO diseño también es válida (se usa como elemento gráfico). Un escudo de diseño distinto (otra forma, estrellas, otro ícono) = RECHAZADA sí o sí. PERO: que la luz ambiental de la escena tiña el escudo (dorado en luz cálida, azulado de noche) es fotografía normal y NO es motivo de rechazo
+- Si aparece el escudo del club, su DISEÑO es el de la segunda imagen adjunta: el espía con sombrero, anteojos y cuello de gabardina, sin marco. La versión BLANCA plana del MISMO diseño también es válida (es la del kit de arquero). Un escudo de diseño distinto (león, estrellas, otro ícono) = RECHAZADA sí o sí. PERO: que la luz ambiental de la escena tiña el escudo (dorado en luz cálida, azulado de noche) es fotografía normal y NO es motivo de rechazo
 - El ambiente respeta la paleta del estilo de hoy (NO exijas negro/dorado si el estilo pide otra cosa)
 - El uniforme del jugador se ve nítido, sin teñirse con la paleta del ambiente
 ${isSeleccion
   ? `- Esta noticia es de la Selección Argentina: la camiseta CELESTE Y BLANCA de la Selección es VÁLIDA para jugadores o elementos que representen a la Selección. Si aparece un jugador de Top Secret como jugador del club, su camiseta tiene que ser la del kit ${kit.label.toUpperCase()} de hoy (ningún otro color del club, ni azul/rojo/otro) = si no, RECHAZADA`
   : `- El kit de HOY es el ${kit.label.toUpperCase()} — ninguna otra camiseta del club (ni negra si hoy es blanco/amarillo, ni ningún otro color) es válida = RECHAZADA si el color no coincide`}
-- El sponsor "AIA" en el pecho y el swoosh de Nike SON parte real y esperada del kit — su presencia es correcta y NO es motivo de rechazo. Lo que SÍ es RECHAZADA: cualquier sponsor distinto de "AIA", cualquier logo de marca deportiva que no sea Nike, o el escudo/identidad de un club real (Tottenham, Real Madrid, Boca, etc.) en vez del escudo de Top Secret FC
+- El kit de Temporada 4 NO lleva sponsor en el pecho: cualquier sponsor o texto en el pecho (incluido el viejo "AIA") = RECHAZADA. El swoosh de Nike es correcto. También RECHAZADA: cualquier otra marca deportiva o el escudo/identidad de un club real (Chelsea, Tottenham, Real Madrid, Boca, etc.) en vez del escudo de Top Secret FC
 - Dorsales: si se ve un número de camiseta, los dígitos están bien formados, en orientación correcta y NO espejados ni invertidos (un "01" donde debería decir "10", dígitos al revés como en un reflejo, números deformes) = RECHAZADA
-- FORMATO "EXPEDIENTE TOP SECRET": la imagen respeta el sistema visual del club — fondo negro carbón con textura de papel/archivo, grano de película, sello "TOP SECRET" estampado, tipografía stencil/typewriter, un solo color de acento. Si parece un póster genérico de IA (explosiones de partículas, humo o luces de colores, lens flares plásticos, fondo de estadio brillante) = RECHAZADA
+- ESTÉTICA DEL CLUB (Temporada 4): foto de campaña deportiva limpia y premium, estilo lanzamiento de camisetas de un club grande — luz cuidada, negros profundos, un acento dorado. SIN texto, sin titulares, sin sellos, sin papeles/carpetas/expedientes ni collages. Si parece un póster genérico de IA (explosiones de partículas, humo o luces de colores, lens flares plásticos) = RECHAZADA
 - La imagen comunica visualmente el tema de la noticia
-- Si hay texto/titular, es legible y con ortografía correcta
+- La imagen NO tiene texto (ni titular, ni rótulos, ni watermarks) — el título lo pone el sitio
 - Sin franja/barra de marca en el borde inferior, sin watermarks
 - Anatomía correcta (manos, proporciones, caras)
 
@@ -181,47 +176,45 @@ APROBADA - [motivo breve]
 RECHAZADA - [qué falla específicamente, en una línea accionable para el generador de imágenes]`;
 }
 
-// Formato de marca "EXPEDIENTE TOP SECRET" (elegido 2026-07-17): todas las
-// imágenes comparten el mismo sistema visual de dossier clasificado/espionaje.
-// La rotación ya no cambia de estética — solo varía la PIEZA dentro del sistema.
+// Estética Temporada 4 (rediseño 2026-09-28, regla de Juan 2026-09-29): fotos de campaña limpias,
+// estilo lanzamiento de camisetas de un club grande — sin texto, sin sellos ni papeles de "expediente".
+// El título y la marca los pone el sitio (share-cards.js), no la imagen. La rotación varía la ESCENA.
 const IMAGE_STYLES = [
-  { id: 'EXPEDIENTE_FICHA',
-    label: 'Expediente — Ficha de agente',
-    palette: 'carbón negro con textura de papel de archivo, blanco y grises; acento único DORADO #C8A84B en sellos y subrayados',
-    prompt: 'Ficha de agente clasificada: retrato frontal del jugador con flash duro directo, estilo foto de credencial/archivo policial pero heroica, pegada a la carpeta con un clip metálico. Alrededor, campos de ficha en tipografía typewriter (alias, posición) parcialmente censurados con barras negras.' },
-  { id: 'EXPEDIENTE_VIGILANCIA',
-    label: 'Expediente — Foto de vigilancia',
-    palette: 'noche azulada monocromática con acento único AZUL #4a9eff; grano alto, negros profundos',
-    prompt: 'Foto de vigilancia nocturna con teleobjetivo: el jugador captado en acción o caminando, grano de película alto, ligero desenfoque de movimiento, marcas de encuadre y cruz de mira sutiles, timestamp typewriter en una esquina. La foto está impresa y pegada dentro del expediente.' },
-  { id: 'EXPEDIENTE_DOSSIER',
-    label: 'Expediente — Dossier abierto',
-    palette: 'carbón y papel envejecido, blanco y negro; acento único DORADO #C8A84B',
-    prompt: 'Carpeta de dossier abierta vista desde arriba: una foto principal grande del/los jugador(es) pegada con clip, una o dos fotos secundarias pequeñas tipo polaroid, notas manuscritas censuradas, sellos estampados. Composición de escritorio de agencia de inteligencia, luz de lámpara puntual.' },
-  { id: 'EXPEDIENTE_OPERATIVO',
-    label: 'Expediente — Operativo en cancha',
-    palette: 'blanco y negro de alto contraste con acento único DORADO #C8A84B en sellos y titular',
-    prompt: 'Foto de acción del partido tratada como documento de archivo: jugada congelada con grano de película grueso, revelado duro en blanco y negro, sello TOP SECRET estampado encima en diagonal, borde de fotografía impresa con fecha typewriter.' },
-  { id: 'EXPEDIENTE_COMUNICADO',
-    label: 'Expediente — Comunicado oficial',
-    palette: 'negro carbón y blanco, composición tipográfica dominante; acento único AZUL #4a9eff',
-    prompt: 'Comunicado oficial de la agencia: pieza dominada por la tipografía — titular stencil enorme ocupando la mayor parte, membrete del club arriba, una única foto chica del jugador o del escudo abajo como anexo, líneas de texto censuradas con barras negras como textura gráfica.' },
+  { id: 'CAMPANA_ESTUDIO',
+    label: 'Campaña — Estudio oscuro',
+    palette: 'fondo negro profundo de estudio, luz rasante cálida, un único acento DORADO #C9A84C',
+    prompt: 'Retrato de campaña en estudio: el/los jugador(es) sobre fondo negro limpio, luz lateral rasante que esculpe la cara y el kit, sombras profundas, postura firme mirando a cámara. Composición sobria y premium, mucho aire negro alrededor.' },
+  { id: 'ESTADIO_NOCHE',
+    label: 'Campaña — Estadio de noche',
+    palette: 'noche azul profunda, reflectores blancos fríos, césped verde oscuro, acento DORADO en la luz de contra',
+    prompt: 'Foto de campaña en el estadio de noche: el/los jugador(es) en el césped bajo los reflectores, contraluz que recorta la silueta, tribunas desenfocadas al fondo, atmósfera de noche grande.' },
+  { id: 'TUNEL',
+    label: 'Campaña — Túnel',
+    palette: 'túnel de hormigón en penumbra, luz cálida al fondo, negros y grises con acento DORADO',
+    prompt: 'Foto en el túnel de salida a la cancha: el/los jugador(es) caminando hacia la luz, perspectiva profunda del túnel, concentración previa al partido, luz cálida que entra desde la cancha.' },
+  { id: 'RETRATO_EDITORIAL',
+    label: 'Campaña — Retrato editorial',
+    palette: 'gris carbón y negro, luz suave de ventana, piel natural, acento DORADO mínimo',
+    prompt: 'Retrato editorial de revista deportiva: plano medio cercano del jugador, mirada a cámara o tres cuartos, luz suave y natural, fondo liso desenfocado, textura real de la tela del kit.' },
+  { id: 'ACCION_PARTIDO',
+    label: 'Campaña — Acción en cancha',
+    palette: 'verde del césped, cielo nocturno, luces de estadio; contraste alto, acento DORADO',
+    prompt: 'Foto de acción congelada en pleno partido: el jugador en movimiento (remate, carrera, festejo), teleobjetivo, fondo de estadio desenfocado, gotas de sudor y pasto levantado, nitidez total en el kit y la cara.' },
+  { id: 'VESTUARIO',
+    label: 'Campaña — Vestuario',
+    palette: 'vestuario oscuro de madera y metal, luz cálida puntual, acento DORADO',
+    prompt: 'Foto íntima en el vestuario: el/los jugador(es) sentados o de pie junto a los casilleros, camisetas colgadas, luz cálida puntual, momento de concentración o charla de equipo.' },
 ];
 
-// Bloque de identidad visual constante — se inyecta en TODOS los prompts de
-// generación. La variación del día elige la pieza; esto define el sistema.
-function brandFormatBlock(draft) {
-  const code = `TS-${draft.date || ''}`;
-  return `═══ FORMATO DE MARCA — "EXPEDIENTE TOP SECRET" (OBLIGATORIO SIEMPRE) ═══
-Toda imagen de noticias del club pertenece al mismo sistema visual: un EXPEDIENTE CLASIFICADO de una agencia de espionaje (coherente con el escudo del espía). Elementos invariables:
-- Fondo negro carbón con textura sutil de papel/carpeta de archivo. Nada de degradados brillantes ni fondos de estadio genéricos.
-- Sello estampado "TOP SECRET" tipo tampón de tinta desgastado, semitransparente, integrado a la composición (una sola vez).
-- Etiqueta de expediente con el código "${code}" en tipografía typewriter, pequeña, cerca de un borde.
-- Tipografía: titular en STENCIL o condensed bold mayúsculas; textos secundarios en typewriter/monoespaciada. Nada de tipografías futuristas de videojuego.
-- Tratamiento fotográfico: grano de película visible, flash duro o luz puntual, viñeta — la foto parece tomada y archivada por un agente real, NO un render 3D pulido.
-- Recursos gráficos permitidos: barras de censura negras, clips metálicos, esquinas de carpeta, texto "CONFIDENCIAL", marcas de registro de imprenta.
-- Paleta: blanco/negro/grises + UN SOLO color de acento por pieza (el que indica la variación del día). Nunca más de un color de acento.
-- El escudo del club (versión blanca plana) SIEMPRE presente, pequeño y discreto, en la esquina inferior.
-PROHIBIDO (rompe el formato): explosiones de partículas, humo o luces de colores, lens flares plásticos, look de póster de videojuego o de imagen de IA genérica.`;
+// Bloque de identidad visual constante — se inyecta en TODOS los prompts de generación.
+function brandFormatBlock() {
+  return `═══ ESTÉTICA DEL CLUB — TEMPORADA 4 (OBLIGATORIA SIEMPRE) ═══
+Las imágenes de noticias de Top Secret FC son FOTOS DE CAMPAÑA: limpias, premium, con el nivel de una campaña de lanzamiento de camisetas de un club grande de Europa.
+- Fotografía realista y cuidada: luz dirigida, negros profundos, piel y tela con textura real. Un solo color de acento: DORADO.
+- SIN NINGÚN TEXTO en la imagen: nada de titulares, rótulos, sellos, watermarks ni tipografía. El título lo agrega el sitio después.
+- PROHIBIDO el estilo viejo de "expediente": nada de papeles, carpetas, clips, sellos "TOP SECRET", barras de censura, polaroids ni collages.
+- PROHIBIDO el look de póster de videojuego o de imagen de IA genérica: explosiones de partículas, humo de colores, lens flares plásticos, rayos de luz exagerados.
+- Composición pensada para que el sitio pueda poner el título arriba o abajo: dejá aire libre (fondo limpio) en el tercio superior o inferior.`;
 }
 
 // ── CLI flags ─────────────────────────────────────────────────────────────────
@@ -236,42 +229,42 @@ const FLAG_STORY    = _args.includes('--story-only');
 const _fbIdx        = _args.indexOf('--feedback');
 const FLAG_FEEDBACK = _fbIdx >= 0 ? _args[_fbIdx + 1] : null;
 
-// Jugadores con render disponible (Renders/T3-Frentes/ local)
-// Basta con agregar el PNG acá — se adjunta al mensaje de generación; ya no
-// hace falta subirlo al proyecto de ChatGPT
-const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');
+// Jugadores con render disponible (Renders/T4-Frentes/ local, gitignored; en R2 como Renders/<gt>/Frente4.png).
+// Basta con agregar el PNG ahí — se adjunta al mensaje de generación.
+const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');   // solo para scripts one-off viejos
 
-// Jugadores con licencia/baja temporal: siguen en el plantel y su render se
-// mantiene en T3-Frentes/, pero no se los usa como protagonistas de imágenes
-// de noticias hasta nuevo aviso. Sacar del array cuando vuelvan a estar disponibles.
-// - BlackPanther-CG: con licencia desde 2026-07-23, hasta nuevo aviso.
-const PLAYERS_ON_LEAVE = ['BlackPanther-CG'];
+// Jugadores con licencia/baja temporal: no se los usa como protagonistas de imágenes hasta nuevo aviso.
+const PLAYERS_ON_LEAVE = [];
 
-const PLAYERS_WITH_RENDERS = fs.readdirSync(T3_FRENTES_DIR)
+const PLAYERS_WITH_RENDERS = fs.readdirSync(T4_FRENTES_DIR)
   .filter(f => /\.(png|jpg)$/i.test(f))
   .map(f => f.replace(/\.(png|jpg)$/i, ''))
   .filter(p => !PLAYERS_ON_LEAVE.includes(p));
 
-// Rasgos físicos de cada render — el generador de imágenes de ChatGPT NO ve los
-// nombres de archivo de los adjuntos, así que el mapeo cara→gamertag tiene que
-// viajar como TEXTO en el prompt o mezcla identidades (nombres/dorsales sobre el
-// jugador equivocado, pasó el 2026-07-16). dorsal:null = no confirmado, no mostrarlo.
+// Rasgos físicos de cada render T4 — el generador de imágenes de ChatGPT NO ve los nombres de
+// archivo de los adjuntos, así que el mapeo cara→gamertag viaja como TEXTO en el prompt o mezcla
+// identidades (pasó el 2026-07-16). Dorsales: los pisa Firestore (plantel/activo.numeros).
+// Actualizar cuando cambie un look (ver Renders/<gt>/Frente4.png).
 const PLAYER_TRAITS = {
-  'Alexisraies23':   { dorsal: 3,    desc: 'piel morena, dreadlocks negros hasta los hombros, barba negra, anteojos deportivos celestes, venda blanca en la mano izquierda' },
-  'BlackPanther-CG': { dorsal: 11,   desc: 'piel morena, pelo muy corto rosa/magenta, máscara de calavera blanca cubriendo nariz y boca, brazos completamente tatuados' },
-  'Cabers14':        { dorsal: 5,    desc: 'piel muy oscura, dreadlocks negros largos y sueltos, máscara de calavera blanca cubriendo nariz y boca, mangas largas negras' },
-  'CipriMancini':    { dorsal: 32,   desc: 'piel trigueña, AFRO AZUL gigante y esponjoso, anteojos deportivos oscuros, cuello y brazos tatuados, manga blanca en el brazo derecho' },
-  'Guiidow':         { dorsal: 20,   desc: 'piel trigueña, pelo oscuro rapado a los costados con cresta corta, chivita fina, cara descubierta sin anteojos ni máscara' },
-  'Huber236':        { dorsal: 8,    desc: 'piel clara, pelo negro abundante peinado hacia arriba, barba negra completa y prolija, mangas largas negras' },
-  'Ivan_Cabj_La12':  { dorsal: 12,   desc: 'ARQUERO: camiseta de arquero magenta y pantalón largo negro, piel clara, pelo negro corto, barba corta, anteojos deportivos azules, brazos tatuados en tinta azul, guantes de arquero con puño amarillo' },
-  'Juanchyroman08':  { dorsal: 18,   desc: 'piel clara, pelo largo azul asomando bajo una gorra gris puesta al revés, dos franjas azules pintadas bajo los ojos, tatuaje tribal azul en el brazo izquierdo, tatuaje en la pantorrilla derecha' },
-  'Juan_Martinez4':  { dorsal: 6,    desc: 'piel clara, pelo rubio con raya al costado, barba castaña prolija, cinta de capitán en el brazo, mangas largas negras' },
-  'kee_viin03':      { dorsal: 21,   desc: 'piel oscura, afro grande y voluminoso teñido de rojo/rosa intenso, sin barba, contextura atlética' },
-  'Lautavester7':    { dorsal: 7,    desc: 'piel oscura, pelo muy corto con tinte azul claro, barba negra tupida, visor deportivo verde espejado' },
-  'Lil_Dekuroko':    { dorsal: 22,   desc: 'piel morena, pelo corto rizado teñido rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca, tatuaje en el antebrazo derecho' },
-  'Ringhiio':        { dorsal: 70,   desc: 'piel trigueña, melena despeinada VIOLETA, anteojos de sol negros' },
-  'rivarola90':      { dorsal: 2,    desc: 'piel oscura, melena gris plateada hasta los hombros con vincha negra, chivita canosa, mangas largas oscuras' },
-  'RS32-DaniStone':  { dorsal: 13,   desc: 'piel clara, pelo revuelto turquesa/verde agua, máscara celeste cubriendo nariz y boca, anteojos, una manga azul en el brazo derecho' },
+  'Ivan_Cabj_La12':   { dorsal: 12, desc: 'ARQUERO: piel oscura, trenzas largas azul oscuro recogidas hacia atrás, barba corta canosa' },
+  'adri_cai':         { dorsal: 32, desc: 'ARQUERO: piel clara, cabeza rapada, barba castaña corta' },
+  'rivarola90':       { dorsal: 2,  desc: 'piel oscura, melena gris plateada hasta los hombros con vincha negra, chivita canosa' },
+  'Alexisraies23':    { dorsal: 3,  desc: 'piel morena, dreadlocks negros hasta los hombros, barba negra, anteojos deportivos celestes espejados' },
+  'Cabers14':         { dorsal: 5,  desc: 'rasgos del este asiático, piel clara, pelo negro corto y lacio, sin barba' },
+  'Elianja20':        { dorsal: 24, desc: 'piel trigueña, pelo blanco/plateado muy rizado, anteojos deportivos rojos espejados, barba negra' },
+  'endiabladorojo66': { dorsal: 66, desc: 'piel clara, pelo castaño ondulado largo atrás (mullet), barba de pocos días' },
+  'Huber236':         { dorsal: 8,  desc: 'piel clara, pelo negro abundante peinado hacia arriba, barba negra completa y prolija' },
+  'Guiidow':          { dorsal: 20, desc: 'piel trigueña, pelo rapado a los costados con cresta corta, chivita fina, cara descubierta' },
+  'nikileo527':       { dorsal: 10, desc: 'piel clara, pelo castaño corto peinado, sin barba, cara joven' },
+  'pepolemmo2710':    { dorsal: 15, desc: 'piel trigueña, vincha roja en la frente, anteojos deportivos naranja/rojos espejados, barba negra' },
+  'Juan_Martinez4':   { dorsal: 6,  desc: 'piel clara, pelo rubio con raya al costado, barba castaña prolija, cinta de capitán en el brazo' },
+  'RS32-DaniStone':   { dorsal: 13, desc: 'piel clara, pelo violeta/azul tipo mullet, sin barba' },
+  'CipriMancini':     { dorsal: 14, desc: 'piel trigueña, pelo castaño con rulos por encima de los hombros, anteojos deportivos rojos, manga térmica azul con estampado rojo en el brazo derecho y manga azul en el izquierdo' },
+  'Lil_Dekuroko':     { dorsal: 22, desc: 'piel morena, pelo corto rizado rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca' },
+  'Lautavester7':     { dorsal: 7,  desc: 'piel oscura, pelo muy corto teñido azul claro, barba negra tupida, anteojos deportivos rojos espejados' },
+  'Juanchyroman08':   { dorsal: 18, desc: 'piel clara, gorra gris puesta al revés, pelo azul largo, dos franjas azules pintadas bajo los ojos, tatuaje en el brazo' },
+  'kee_viin03':       { dorsal: 21, desc: 'piel oscura, afro grande y voluminoso rojo/rosa intenso, sin barba' },
+  'NicoBJ_96':        { dorsal: 9,  desc: 'piel oscura, pelo corto rubio platinado, barba negra larga y tupida' },
 };
 
 // Dorsales vigentes desde Firestore (plantel/activo.numeros) — la misma fuente
@@ -323,14 +316,16 @@ async function fetchStyleHistory() {
 // cae al pool completo (la rotación anti-repetición siempre manda).
 const STYLE_AFFINITY = [
   { match: (d, t) => /victoria|triunfo|goleada|ganamos|campe[oó]n|ascenso/.test(t),
-    styles: ['ESTADIO_NOCTURNO', 'ACCION_DINAMICA', 'CROMATICO_DORADO', 'CONTRALUZ_EPICO'] },
+    styles: ['ESTADIO_NOCHE', 'ACCION_PARTIDO', 'VESTUARIO'] },
   { match: (d, t) => /derrota|perdimos|ca[ií]da|golpe/.test(t),
-    styles: ['CINEMATICO_LLUVIA', 'CONTRALUZ_EPICO', 'VESTUARIO_INTIMO', 'RETRATO_DRAMATICO'] },
+    styles: ['VESTUARIO', 'TUNEL', 'RETRATO_EDITORIAL'] },
   { match: (d, t) => /entrevista|mano a mano|nos cont[oó]/.test(t) || (d.category || '') === 'Entrevista',
-    styles: ['RETRATO_DRAMATICO', 'EDITORIAL_REVISTA', 'VESTUARIO_INTIMO'] },
-  { match: (d, t) => (d.category || '') === 'Institución' || /kits?|indumentaria|sponsor|marca|aniversario/.test(t),
-    styles: ['EDITORIAL_REVISTA', 'MINIMALISTA_GEOMETRICO', 'CROMATICO_DORADO', 'POSTER_CONCEPTUAL'] },
-];
+    styles: ['RETRATO_EDITORIAL', 'CAMPANA_ESTUDIO', 'VESTUARIO'] },
+  { match: (d, t) => /previa|esta noche|hoy juega|se juega hoy/.test(t),
+    styles: ['TUNEL', 'ESTADIO_NOCHE'] },
+  { match: (d, t) => (d.category || '') === 'Institución' || /kits?|indumentaria|camiseta|marca|aniversario/.test(t),
+    styles: ['CAMPANA_ESTUDIO', 'RETRATO_EDITORIAL'] },
+]
 
 function pickStyle(history, draft = {}) {
   const recentIds = new Set(history.slice(0, 5).map(h => h.style));
@@ -372,8 +367,11 @@ async function fetchDraft() {
 // puede mezclar.
 const MAX_FEATURED_PLAYERS = 3;
 
+// El body puede traer bloques ({h}, {quote}, {specs}, {pair}) además de strings HTML.
+const bodyText = draft => (draft.body || []).map(b => typeof b === 'string' ? b : [b.h, b.quote, b.caption, ...(b.specs || []).flat()].filter(Boolean).join(' ')).join(' ');
+
 function extractMentionedPlayers(draft) {
-  const text = [draft.title, draft.excerpt, ...(draft.body || [])].join(' ');
+  const text = [draft.title, draft.excerpt, bodyText(draft)].join(' ');
   return PLAYERS_WITH_RENDERS
     .filter(p => text.includes(p))
     .sort((a, b) => text.indexOf(a) - text.indexOf(b));
@@ -435,8 +433,7 @@ function buildScene(draft, mentionedPlayers) {
   }
 
   const title    = draft.title || '';
-  const bodyText = (draft.body || []).join(' ').replace(/<[^>]+>/g, ' ');
-  const full     = (title + ' ' + bodyText).toLowerCase();
+  const full     = (title + ' ' + bodyText(draft).replace(/<[^>]+>/g, ' ')).toLowerCase();
   const category = draft.category || 'Análisis';
   const players  = mentionedPlayers.join(', ') || null;
 
@@ -558,9 +555,9 @@ Reglas de identidad:
     : `Sin jugadores específicos — composición institucional:
 ${action}`;
 
-  return `Creá una imagen editorial deportiva para Top Secret FC, un club argentino de fútbol virtual (esports). Todos los jugadores que se mencionan en las noticias son NUESTROS PROPIOS JUGADORES — tenés sus renders subidos al proyecto para usarlos como referencia visual.
+  return `Creá una FOTO DE CAMPAÑA para una noticia de Top Secret FC, un club argentino de fútbol virtual (esports). Todos los jugadores que se mencionan son NUESTROS PROPIOS JUGADORES — sus renders van adjuntos a este mensaje como referencia visual.
 
-⚠️ CRÍTICO — RENDERS Y UNIFORME: Los archivos de renders son imágenes de referencia de nuestros jugadores reales. Si un jugador aparece mencionado, DEBÉS usar su render del proyecto para representarlo — no inventes su cara ni apariencia. El uniforme que aparece en el render es intocable: los colores del kit del jugador no deben ser modificados por la paleta del fondo ni por el estilo del día. La paleta aplica SOLO al ambiente, fondo y elementos gráficos.
+⚠️ CRÍTICO — RENDERS Y UNIFORME: cada render adjunto muestra a uno de nuestros jugadores reales CON EL KIT DE HOY YA PUESTO. Usalo para representarlo: misma cara, pelo, piel, accesorios Y el mismo uniforme (colores, escudo, swoosh, dorsal). No inventes ni cambies nada de eso. La paleta del día aplica SOLO al ambiente y la luz, nunca al kit.
 
 ═══ SPECS TÉCNICAS ═══
 - Formato: POST de feed de Instagram — proporción 4:5, VERTICAL: el ancho es aproximadamente el 80% del alto (ej. 1086×1448 px). SIGUE SIENDO MÁS ALTO QUE ANCHO, solo menos extremo que una Story.
@@ -568,51 +565,38 @@ ${action}`;
   ⚠️ PROHIBIDO TAMBIÉN el encuadre APAISADO/HORIZONTAL (ancho mayor que el alto, tipo panorámica o 16:9) — el post NUNCA es más ancho que alto. "Más ancho que la Story" significa menos angosto, no horizontal.
 - Paleta del día (fondo y diseño gráfico, no el uniforme): ${style.palette}
 
-${brandFormatBlock(draft)}
+${brandFormatBlock()}
 
-═══ PIEZA DEL DÍA (variación dentro del formato) ═══
+═══ ESCENA DEL DÍA ═══
 ${style.prompt}
-Aplicá esta pieza como base compositiva, siempre dentro del FORMATO DE MARCA de arriba. La paleta define el AMBIENTE y el DISEÑO de la imagen — el kit del jugador es el canónico descrito abajo, nunca teñido por la paleta.
+Aplicá esta escena como base, siempre dentro de la ESTÉTICA DEL CLUB de arriba. La paleta define el AMBIENTE y la LUZ — el kit del jugador es el de su render, nunca teñido por la paleta.
 
 ═══ ESCENA Y ACCIÓN ═══
 Atmósfera: ${scene}
 ${playerBlock}
 
 ═══ IMÁGENES ADJUNTAS A ESTE MENSAJE — REFERENCIAS OBLIGATORIAS ═══
-⚠️ Los adjuntos son SOLO referencias visuales para copiar el diseño del escudo, del kit y las caras de los jugadores. NO son el contenido ni el layout de la imagen: no hagas un catálogo, una grilla de productos, un mosaico ni una reproducción de los adjuntos. La imagen a crear es la ESCENA de la noticia descrita arriba.
+⚠️ Los adjuntos son SOLO referencias visuales (escudo, kit y caras). NO son el layout: no hagas un catálogo, una grilla ni un mosaico de los adjuntos. La imagen a crear es la ESCENA de la noticia descrita arriba.
 
-Usá cada adjunto según su función:
+• "Clean logo Dorado.png" (adjunto) → el ÚNICO escudo de Top Secret FC: un espía con sombrero fedora, anteojos oscuros y cuello de gabardina levantado, SIN marco ni texto, en dorado. Es el que va bordado en el pecho de la camiseta. Reproducilo EXACTAMENTE: PROHIBIDO rediseñarlo, ponerle un marco circular, texto, estrellas, o reemplazarlo por un león u otro escudo.
 
-• "Top-Secret.png" y "Top Secret white.png" (adjuntos) → son las DOS únicas versiones válidas del escudo de Top Secret FC. El diseño es el mismo en ambas: insignia CIRCULAR con un espía (sombrero fedora y anteojos oscuros) en el centro y el texto "TOP SECRET" arriba y "FOOTBALL CLUB" abajo.
-  - "Top Secret white.png": versión monocromática blanca plana — PREFERILA cuando el escudo funciona como elemento gráfico de la composición (placa, marca de agua, esquina, overlay), porque es menos invasiva y se integra mejor al diseño.
-  - "Top-Secret.png": versión metálica plateada/negra — usala cuando el escudo es un objeto físico de la escena (banderín, parche en la camiseta, trofeo, pared del vestuario).
-  Reproducí el diseño EXACTAMENTE como en los adjuntos. PROHIBIDO rediseñarlo, cambiarle la forma o inventar un escudo distinto (nada de escudos con estrellas, formas de escudo heráldico ni otros diseños).
-
-• Foto de kit adjunta (una sola persona, camiseta ${kit.label}) → referencia de silueta, corte, color Y BRANDING del uniforme de HOY. Ya está decidido por producción que la nota de hoy usa el kit ${kit.label} — no hay otra opción, no menciones ni muestres los otros colores. El diseño CANÓNICO de este kit es el que sigue (este texto manda por sobre la imagen adjunta si hay alguna diferencia menor, pero el sponsor y el logo SÍ hay que reproducirlos):
+• Renders de jugadores adjuntos → cada uno es la referencia obligatoria de la persona (cara, pelo, piel, accesorios, físico) Y de su uniforme de hoy. Identificá cuál es cuál por los rasgos de la lista de IDENTIDAD de arriba.
+  Kit del día: ${kit.label}. Diseño canónico (este texto manda si el render no se ve claro):
   ${kit.desc}
-  ⚠️ El sponsor "AIA" en el pecho y el swoosh de Nike son parte REAL y oficial de la identidad del club (Nike es el proveedor técnico, AIA el sponsor principal) — SIEMPRE tienen que aparecer, reproducilos fielmente tal como están en la foto de referencia. NO los quites, NO los reemplaces por otro sponsor ni por espacio en blanco.
-  ⚠️ El color de la camiseta es ${kit.label.toUpperCase()} y NINGÚN OTRO — no lo cambies por negro/blanco/amarillo alternativo, azul, rojo, bordó ni ningún otro color. El único escudo de club en la ropa es el de Top Secret FC (nunca el de un club real como Tottenham, Real Madrid o Boca).${isSeleccion ? `
-  ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: esta nota es sobre la Selección Argentina. La camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA y preferible para jugadores o elementos que representen a la Selección (sin el sponsor AIA, esa es la camiseta de la Selección real). El kit ${kit.label} del club (con AIA y Nike) aplica solo si aparece un jugador de Top Secret representando al club (por ejemplo, el plantel mirando el partido).` : ''}
-
-• Renders de jugadores adjuntos: cada render es la referencia obligatoria de la CARA, el PELO, la PIEL, los accesorios (máscaras, anteojos, vinchas, vendas) y el físico de uno de nuestros jugadores. Identificá cuál es cuál por los rasgos de la lista de IDENTIDAD de arriba.
-  La camiseta del jugador en tu imagen sale de la foto de kit ${kit.label} adjunta (incluyendo el sponsor AIA y el swoosh de Nike, como se indicó arriba), no la inventes de cero. Del render tomás la persona (cara, pelo, piel, accesorios); del kit de referencia tomás la ropa completa con su branding.
+  Los ARQUEROS usan siempre su conjunto propio: ${GK_KIT_DESC}
+  ⚠️ El kit de Temporada 4 NO tiene sponsor en el pecho: no agregues "AIA" ni ningún otro texto o marca en la camiseta. El escudo del pecho es el espía dorado del adjunto (en blanco en el kit de arquero), nunca el de un club real (Chelsea, Tottenham, Real Madrid, Boca…).${isSeleccion ? `
+  ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: la camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA para jugadores o elementos que representen a la Selección. El kit del club aplica solo si aparece un jugador de Top Secret representando al club.` : ''}
+  Si en la escena aparecen jugadores del club sin render adjunto (relleno), usan el MISMO kit del día, de espaldas o fuera de foco, sin nombre ni dorsal legible.
 
 ⚠️ DORSALES Y NOMBRES: usá EXACTAMENTE los dorsales y nombres de la lista de IDENTIDAD — mismos dígitos, en el mismo orden, sobre el jugador correcto. PROHIBIDO espejar o invertir dígitos (ej. "10" convertido en "01"), intercambiar números o nombres entre jugadores, e inventar dorsales que no estén en la lista.
 
-⚠️ No incluyas logos ni escudos de otros clubes, y no inventes ningún elemento de marca que no esté en los adjuntos.
-
-═══ TITULAR EN LA IMAGEN ═══
-Incluí el siguiente título como texto prominente en la imagen — en letras GRANDES, mayúsculas, en tipografía STENCIL o condensed bold (según la pieza del día), como si fuera el rótulo del expediente. El texto debe ser inmediatamente legible y ocupar un lugar dominante en la composición:
-
-"${draft.title}"
-
-Si el título es largo, podés dividirlo en dos líneas o quedarte con las palabras más impactantes. El objetivo es que alguien que pase rápido por la imagen entienda de qué se trata sin leer el artículo. El color del texto debe contrastar fuerte con el fondo — blanco puro, dorado (#C8A84B), o el que mejor funcione según la paleta del día.
+⚠️ SIN TEXTO: la imagen no lleva titular, rótulos, sellos ni watermarks. No inventes logos de otros clubes ni elementos de marca que no estén en los adjuntos.
 
 ═══ CONTEXTO DE LA NOTA ═══
-La imagen tiene que contar visualmente de qué trata la nota. Que un hincha la vea y entienda el tema sin leer nada.${correction ? `
+La imagen tiene que contar visualmente de qué trata la nota (título: "${draft.title}"), sin escribir nada en ella: que un hincha la vea y entienda el tema por la escena.${correction ? `
 
 ═══ CORRECCIÓN vs. VERSIÓN ANTERIOR ═══
-La imagen generada anteriormente no cumplió con la identidad visual del club. Tené en cuenta este feedback para la nueva versión:
+La imagen generada anteriormente no cumplió con lo pedido. Tené en cuenta este feedback para la nueva versión:
 "${correction}"
 Este punto debe ser claramente diferente y mejor en la imagen nueva.` : ''}`;
 }
@@ -1189,7 +1173,6 @@ async function main() {
   const chosenStyle  = pickStyle(styleHistory, draft);
   const kitHistory   = await fetchKitHistory();
   const chosenKit    = pickKitColor(kitHistory);
-  const kitCropPath  = await cropKitImage(chosenKit.id);
   console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
   console.log(`Kit del día: ${chosenKit.label}`);
   if (draft.imageBrief) console.log(`Brief visual del artículo: ${draft.imageBrief.slice(0, 100)}...`);
@@ -1237,18 +1220,12 @@ async function main() {
           ));
         } else {
           const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction);
-          // Referencias visuales adjuntas al mensaje: escudo + kit del día (ya
-          // recortado a una sola prenda, no las tres) + renders de los
-          // jugadores mencionados
-          const refAttachments = [
-            CREST_PATH,
-            CREST_WHITE_PATH,
-            kitCropPath,
-            ...mentioned.map(p => {
-              const png = path.join(T3_FRENTES_DIR, `${p}.png`);
-              return fs.existsSync(png) ? png : path.join(T3_FRENTES_DIR, `${p}.jpg`);
-            }),
-          ];
+          // Referencias visuales adjuntas al mensaje: escudo Clean dorado + renders T4 de los
+          // jugadores mencionados con el kit del día (el render ya tiene puesto el uniforme).
+          // Sin jugadores: se adjunta el render de Juan_Martinez4 solo como referencia del kit.
+          const playerRefs = mentioned.map(p => renderForKit(p, chosenKit)).filter(Boolean);
+          const kitRef = playerRefs.length ? [] : [renderForKit('Juan_Martinez4', chosenKit)].filter(Boolean);
+          const refAttachments = [CREST_PATH, ...playerRefs, ...kitRef];
           ({ filename: postFile, imgUrl: postImgUrl } = await generateImage(
             page, draft, 'post', postPrompt, { freshChat: true, excludeSrcs: [], attachments: refAttachments }
           ));
@@ -1358,6 +1335,9 @@ export {
   CREST_WHITE_PATH,
   KITS_PATH,
   KIT_COLORS,
+  GK_KIT_DESC,
+  renderForKit,
+  T4_FRENTES_DIR,
   cropKitImage,
   pickKitColor,
   fetchKitHistory,

@@ -1138,7 +1138,7 @@ function refreshTools() { buildCats(); applyFilters(); }
    {h}, {img, caption, wide}, {pair:[img, img], caption}, {quote, by}, {specs:[[clave, valor]]}. */
 function bodyHtml(body) {
   return (body || []).map(b => {
-    if (typeof b === 'string') return `<p>${b}</p>`;
+    if (typeof b === 'string') return /^\s*<(p|h\d|ul|ol|blockquote)[\s>]/i.test(b) ? b : `<p>${b}</p>`;   // las notas diarias viejas traen '<p>…</p>'
     if (b.h) return `<h3 class="xb-h">${b.h}</h3>`;
     if (b.img) return `<figure class="xb-fig${b.wide ? ' wide' : ''}"><img src="${webp(b.img)}" alt="" loading="lazy" onerror="${webpFallback(b.img)}"><figcaption>${b.caption || ''}</figcaption></figure>`;
     if (b.pair) return `<figure class="xb-pair"${b.ratio ? ` style="--r:${b.ratio}"` : ""}>${b.pair.map(u => `<img src="${webp(u)}" alt="" loading="lazy" onerror="${webpFallback(u)}">`).join('')}<figcaption>${b.caption || ''}</figcaption></figure>`;
@@ -1650,7 +1650,8 @@ async function discardDraft() {
 function editDraft() {
   if (!_currentDraft) return;
   document.getElementById('draft-edit-title').value       = _currentDraft.title || '';
-  document.getElementById('draft-edit-body').value        = (_currentDraft.body || []).join('\n');
+  // Los bloques ({h}, {quote}, {specs}, {pair}) se editan como una línea JSON cada uno
+  document.getElementById('draft-edit-body').value        = (_currentDraft.body || []).map(b => typeof b === 'string' ? b : JSON.stringify(b)).join('\n');
   document.getElementById('draft-edit-wrap').style.display = 'block';
   document.getElementById('draft-actions').style.display  = 'none';
 }
@@ -1662,7 +1663,8 @@ function cancelDraftEdit() {
 
 async function saveDraftEdit() {
   const newTitle = document.getElementById('draft-edit-title').value.trim();
-  const newBody  = document.getElementById('draft-edit-body').value.split('\n').filter(s => s.trim());
+  const newBody  = document.getElementById('draft-edit-body').value.split('\n').filter(s => s.trim())
+    .map(l => { const t = l.trim(); if (t.startsWith('{')) { try { return JSON.parse(t); } catch (_) {} } return l; });
   const r = await fetch(_WORKER + '/draft-noticia', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + _sessionPin, 'Content-Type': 'application/json' },
