@@ -63,6 +63,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Referencias técnicas
 
+- [reference_beats_propios](reference_beats_propios.md) — Beats de trap propios con ACE-Step 1.5 (MIT, local en la 1070): scripts/beats/generar.mjs + pulir.mjs, estilos en scripts/beats/estilos
 - [reference_calendario_dead_code](reference_calendario_dead_code.md) — calendario.html tiene funciones de renderizado muertas (nunca invocadas) que pueden confundir — dónde está el widget "HOY" real
 - [reference_canva_imagen_a_video](reference_canva_imagen_a_video.md) — Automatización de "Imagen a video" de Canva (videos de 5 s desde una imagen) con scripts/canva-imagen-a-video.mjs vía el Chrome CDP
 - [reference_canva_resumen_semanal](reference_canva_resumen_semanal.md) — Proceso completo y limitaciones reales para armar el video 'Resumen Semanal' (goles de la semana) en Canva, distinto del proceso de 'Formación Titular'
