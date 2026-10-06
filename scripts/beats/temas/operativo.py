@@ -33,7 +33,7 @@ import soundfile as sf
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from componer import (SR, RAIZ, hz, t_arr, lp, hp, bp, saw, env_adsr, poner, repitch, reverb_ir, con_reverb,  # noqa: E402
-                      delay_pingpong, paneo, cinta, bitcrush, saturar, stutter, bombo, clap, hat, ochocientos, pad)
+                      delay_pingpong, paneo, cinta, bitcrush, saturar, stutter, tape_stop, bombo, clap, hat, ochocientos, pad)
 
 BPM = 142
 BEAT = 60 / BPM
@@ -85,9 +85,12 @@ def vidrio(m, dur):
         x += 0.25 * np.sin(2 * np.pi * 3 * f * det * t) * np.exp(-t * 9)
         out.append(x)
     x = (out[0] + out[1]) * 0.5                     # el leve batido entre las dos voces da el brillo
-    x[:int(0.01 * SR)] += hp(rng.standard_normal(int(0.01 * SR)), 3000) * 0.3
-    e = env_adsr(len(t), 0.004, 0.25, 0.55, 0.45, dur) * np.exp(-t * 0.8)
-    return x * e * 0.28
+    # Cuerpo: sierra filtrada debajo (v3: el seno solo sonaba a "beep")
+    x += lp(saw(f, t, 0.003) + saw(f, t, -0.003), 1400) * 0.35
+    x[:int(0.012 * SR)] += hp(rng.standard_normal(int(0.012 * SR)), 2500) * 0.15
+    x = np.tanh(x * 1.6) / np.tanh(1.6)
+    e = env_adsr(len(t), 0.015, 0.25, 0.55, 0.45, dur) * np.exp(-t * 0.8)
+    return x * e * 0.26
 
 
 def cuerdas(notas, dur):
@@ -203,6 +206,13 @@ def radio(st):
     return lp(x, 3400, 4) * 0.8
 
 
+def velocidad(st, curva):
+    """Reproduce st con una velocidad de cinta que varía en el tiempo (1 = normal, 0.5 = media/octava abajo, 0 = parada)."""
+    pos = np.cumsum(curva)
+    pos = pos[pos < st.shape[1] - 1]
+    return np.stack([np.interp(pos, np.arange(st.shape[1]), c) for c in st])
+
+
 def riser(dur):
     t = t_arr(dur)
     r = (t / dur) ** 2
@@ -238,18 +248,18 @@ def render():
             # Colchón oscuro de fondo (pegamento), siempre
             poner(bus[destino], pad([m + 12 for m in ac[:4]], COMPAS, 1100) * 0.7, t_c)
 
-            # Línea cromática espía (negras); en el gancho baja de octava y de volumen
-            if nombre in ('intro', 'verso', 'puente', 'final') or (nombre.startswith('gancho') and c % 2 == 0):
-                oct_ = -12 if nombre.startswith('gancho') else 0
-                g = 0.45 if nombre.startswith('gancho') else 0.8
+            # Línea cromática espía: ya no suena constante (v3: era "el beep del misterio"). En el verso
+            # aparece solo dos veces y con las notas invertidas; la intro y el final la usan desde la cinta.
+            if nombre == 'verso' and c in (2, 6):
                 for k, nota in enumerate(LINEA[ac_n]):
-                    poner(bus[destino], paneo(vidrio(n(nota) + oct_, BEAT * 0.9), -0.35) * g, t_c + k * BEAT)
+                    x = vidrio(n(nota) - 12, BEAT * 0.9)[::-1]
+                    poner(bus['armonia'], paneo(x, -0.35) * 0.6, t_c + k * BEAT)
 
             # Melodía del gancho: llamada y respuesta (4 compases)
             if nombre.startswith('gancho'):
                 frase = LLAMADA if (c % 4) < 2 else RESPUESTA
                 mitad = (c % 2) * 8
-                media_vel = nombre == 'gancho2' and c < 2           # se arma después, a media velocidad
+                media_vel = nombre == 'gancho2' and c < 4           # se arma después, a media velocidad
                 for (p, nota, l) in frase:
                     if mitad <= p < mitad + 8 and not media_vel:
                         t_n = t_c + (p - mitad) * BEAT / 2
@@ -362,12 +372,32 @@ def render():
     morse('- ...', T(fi + 2) + BEAT, bus['intro'], gan=0.35)
     rebobinado(T(fi + 3) + BEAT * 2, bus['fx'], 0.16)
 
-    # Gancho 2: el primer compás de la llamada a media velocidad (una octava abajo, el doble de largo),
-    # como una cinta que gira lento, antes de que la melodía vuelva normal
+    # ── La cinta del espía: la velocidad de la cinta como recurso narrativo ──
+    # Línea cromática a velocidad normal (4 compases), materia prima de intro y final
+    linea = np.zeros((2, int(4 * COMPAS * SR) + SR))
+    for k, ac_n in enumerate(PROG['intro']):
+        for j, nota in enumerate(LINEA[ac_n]):
+            poner(linea, paneo(vidrio(n(nota), BEAT * 0.9), -0.2), k * COMPAS + j * BEAT)
+    linea = np.tile(linea[:, :int(4 * COMPAS * SR)], 4)
+    # Intro: la cinta gira a media velocidad (una octava abajo) y en los compases 7-8 acelera hasta la real
+    curva = np.full(int(T(8) * SR), 0.5)
+    a = int(T(6) * SR)
+    curva[a:] = 0.5 + 0.5 * np.linspace(0, 1, len(curva) - a) ** 1.5
+    poner(bus['intro'], velocidad(linea, curva) * 0.9, 0)
+    # Gancho 2: la llamada (2 compases) a media velocidad → 4 compases, como una cinta lenta
     g0, g2i = int(T(inicio['gancho']) * SR), inicio['gancho2']
-    lento = repitch(bus['melodia'][:, g0:g0 + int(COMPAS * SR)], 0.5)
+    lento = repitch(bus['melodia'][:, g0:g0 + int(2 * COMPAS * SR)], 0.5)
     lento = cinta(saturar(lento, 0.4), 0.6, rng)
     poner(bus['melodia'], lento * 0.7, T(g2i))
+    # Puente: la melodía del gancho (4 compases) a media velocidad → 8 compases; el tramo del medio, invertido
+    puente = repitch(bus['melodia'][:, g0:g0 + int(4 * COMPAS * SR)], 0.5)
+    m0, m1 = int(2 * COMPAS * SR), int(4 * COMPAS * SR)
+    puente[:, m0:m1] = puente[:, m0:m1][:, ::-1]
+    puente = cinta(saturar(puente, 0.3), 0.7, rng)
+    poner(bus['melodia'], puente * 0.55, T(inicio['puente']))
+    # Final: la llamada a media velocidad que se va frenando hasta pararse, por radio
+    curva_f = np.linspace(0.5, 0.0, int(T(4) * SR)) ** 0.8
+    poner(bus['intro'], velocidad(bus['melodia'][:, g0:g0 + int(4 * COMPAS * SR)], curva_f) * 1.2, T(inicio['final']))
 
     if notas808:
         sucio = ochocientos(notas808, N / SR, 5.0)          # 808 bien distorsionado (Southside)
@@ -399,7 +429,10 @@ def render():
     drums = con_reverb(saturar(drums, 0.2), ir_corta, 0.1)
     braam_bus = con_reverb(bus['braam'], ir, 0.5)
     # La intro queda más baja a propósito: contraste para que la entrada del verso pegue
-    mix = intro * 1.3 + drums * 1.0 + bus['bajo'] * 0.8 + arm * 0.85 + mel * 0.95 + bus['fx'] + braam_bus * 0.8
+    mix = intro * 1.75 + drums * 1.0 + bus['bajo'] * 0.8 + arm * 0.85 + mel * 0.95 + bus['fx'] + braam_bus * 0.8
+    # Fin del gancho 1: la cinta frena (último tiempo y medio) y el puente entra desde ahí
+    p_ini = inicio['puente']
+    mix = tape_stop(mix, T(p_ini) - BEAT * 1.5, BEAT * 1.5)
     # Un único stutter: último medio compás del gancho 2
     g2 = inicio['gancho2'] + 8
     mix = stutter(mix, T(g2) - BEAT * 2, BEAT * 2, BEAT / 4)
