@@ -12,3 +12,6 @@ Juan transmite **directo desde la PS5 a Twitch** (twitch.tv/topsecretfc). La PS5
 - **Gotcha:** Twitch entrega HLS en fMP4 (tag `avc1`) y el FLV de salida falla con "Tag avc1 incompatible" → forzar `-tag:v 7 -tag:a 10`.
 - Tarea programada "TopSecret - Retransmitir Twitch" (`scripts/retransmitir.vbs`, sin ventana). La PC tiene que estar prendida y la subida debe aguantar una copia por destino (~6 Mbps c/u).
 - Kick del club: https://kick.com/topsecretfc (creado 2026-10-05).
+
+- **Primer uso (2026-10-05):** funcionó (Kick al aire desde las 22:38, con espectadores). Kick sale con título/categoría/idioma por defecto ("My first stream.", Just Chatting, English): cambiarlos en dashboard.kick.com/stream → Información del stream (lápiz) → textarea title, categoría "EA Sports FC 27", idioma "Spanish" → Guardar. Kick los recuerda para los próximos vivos.
+- **Aviso de Kick "MAL CONFIGURADO":** pide fotogramas clave cada 2 s; la PS5 manda otro intervalo y con `-c copy` no se puede cambiar. El stream igual se ve. Si diera problemas (cortes, más retraso), recodificar el video (`-c:v h264_nvenc -g 60` si hay GPU NVIDIA, si no `libx264 -preset veryfast -g 60`, pesado en 1080p60).
