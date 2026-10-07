@@ -207,6 +207,20 @@ td.left { text-align: left; }
 .prox-sub { font-size:.88rem; color:var(--mid); max-width:420px; margin:0 auto; }
 .prox-tables { margin-top:40px; opacity:.35; pointer-events:none; }
 
+/* ── PRETEMPORADA T4: aclara que la copa es la preparación, no la T4 oficial ── */
+.preseason {
+  display:flex; align-items:flex-start; gap:18px; padding:20px 22px; margin-bottom:28px;
+  border-radius:14px; border:1px solid var(--border); border-left:3px solid var(--vpug);
+  background:var(--card);
+}
+.preseason-kicker { font-size:.65rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--vpug); }
+.preseason-title {
+  font-family:'Barlow Condensed',sans-serif; font-size:clamp(1.5rem,3vw,2rem); font-weight:900;
+  text-transform:uppercase; line-height:1; color:var(--text); margin:6px 0 8px;
+}
+.preseason-sub { font-size:.88rem; line-height:1.5; color:var(--mid); max-width:640px; }
+.preseason-sub strong { color:var(--text); font-weight:600; }
+
 /* ── GROUP HEADER ── */
 .group-header {
   font-family:'Barlow Condensed',sans-serif; font-size:.7rem; font-weight:800;
@@ -289,7 +303,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
     </button>
     <button class="season-btn active" id="sbtn-t4" onclick="switchSeason('t4',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
       <span class="sb-label">T4 2026</span>
-      <span class="sb-sub">En curso</span>
+      <span class="sb-sub">Pretemporada</span>
     </button>
   </div>
 
@@ -363,14 +377,21 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
   <!-- ════════════ TEMPORADA 4 ════════════ -->
   <div id="s-t4">
     <div class="tabs">
-      <button class="tab active" data-league="vpug" onclick="switchTab('vpug','t4',this)">VPUG</button>
+      <button class="tab active" data-league="vpug" onclick="switchTab('vpug','t4',this)">VPUG · Pretemporada</button>
       <button class="tab"        data-league="vpn"  onclick="switchTab('vpn','t4',this)">VPN</button>
       <button class="tab"        data-league="e11"  onclick="switchTab('e11','t4',this)">11x11</button>
     </div>
 
     <!-- VPUG T4 — Liga Pretemporada VPUG (FC-27), grupo de TOP Secret -->
     <div class="tab-pane active" id="t4-pane-vpug">
-      <div class="group-header">Liga Pretemporada · Grupo D</div>
+      <div class="preseason">
+        <div>
+          <div class="preseason-kicker">Temporada 4 · Pretemporada</div>
+          <div class="preseason-title">Copa de Pretemporada VPUG</div>
+          <p class="preseason-sub">La <strong>Temporada 4 oficial todavía no arrancó</strong>: esta copa es la preparación del plantel antes del comienzo. Jugamos en el Grupo D, los lunes y miércoles.</p>
+        </div>
+      </div>
+      <div class="group-header">Copa de Pretemporada · Grupo D</div>
       <div class="table-wrap"><table class="standings-table" id="t4-vpug-table"></table></div>
     </div>
 
@@ -379,7 +400,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <div class="prox-wrap">
         <div class="prox-badge">Temporada 4 · VPN</div>
         <div class="prox-title">Próximamente</div>
-        <p class="prox-sub">La tabla aparece cuando arranque el torneo.</p>
+        <p class="prox-sub">La tabla aparece cuando arranque la Temporada 4 oficial. Por ahora jugamos la Copa de Pretemporada de VPUG.</p>
       </div>
     </div>
 
@@ -388,7 +409,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <div class="prox-wrap">
         <div class="prox-badge">Temporada 4 · 11x11</div>
         <div class="prox-title">Próximamente</div>
-        <p class="prox-sub">La tabla aparece cuando arranque el torneo.</p>
+        <p class="prox-sub">La tabla aparece cuando arranque la Temporada 4 oficial. Por ahora jugamos la Copa de Pretemporada de VPUG.</p>
       </div>
     </div>
   </div>
