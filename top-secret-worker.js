@@ -595,7 +595,9 @@ export default {
           .filter(t => !groupFilter || (t.g || '').toUpperCase() === groupFilter)
           .map(t => {
             const stats = {};
-            const dtKeys = Object.keys(t.dt || {}).sort();
+            // Cada equipo trae una entrada por fase; la de la fase siguiente existe desde el
+            // arranque pero vacía (solo col/g), así que se toma la última que tenga stats.
+            const dtKeys = Object.keys(t.dt || {}).filter(k => t.dt[k] && t.dt[k].dt).sort();
             const latest = dtKeys.length ? t.dt[dtKeys[dtKeys.length - 1]] : null;
             if (latest && latest.dt) {
               latest.dt.split('#').forEach(pair => {
