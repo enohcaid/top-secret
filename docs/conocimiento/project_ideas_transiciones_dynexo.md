@@ -70,3 +70,14 @@ Ventajas sobre FrameFusion: usa el cupo de IA de Canva (~4% por clip, sin pagar 
 Implementación: el flujo del script `scripts/canva-imagen-a-video.mjs` sirve tal cual, pero si en el Chrome CDP hay pestañas de Kick abiertas Playwright se cuelga: para la prueba se rehízo el flujo con CDP crudo (WebSocket a la pestaña). Al pasar a producción, hacer que el script use ese modo o cerrar las pestañas de Kick. Ojo: el clic en "Generar video de 5 segundos" a veces no registra; reintentar el clic si a los ~30 s no apareció el video.
 
 **Criterio de Juan (2026-10-07): transiciones poco exigentes.** Cada clip pide un solo movimiento simple (avanzar, girar o elevarse un poco), entre escenas cercanas, sin transformar objetos ni pedir cambios grandes de lugar o de luz. Cuanto más se le pide al modelo, más detalle se pierde: en la prueba se deformaron las líneas de la cancha y una camiseta desapareció de su casillero. Preferir más clips cortos y suaves que pocos clips con mucho viaje; los saltos grandes de escena se resuelven con un pase de diseño (máscara del escudo, fundido), no con la IA.
+
+## Decisión (2026-10-07): "Del escudo al jugador" + una sección del index por transición
+
+Juan eligió esta transición (descartó el acceso a la cancha: "no me genera nada"; quiere algo con los jugadores y el logo):
+- Arranca en un primer plano del escudo Clean dorado del pecho de la camiseta T4; al scrollear la cámara se aleja y aparece el jugador entero; luego avanza al escudo del pecho del siguiente jugador hasta llenar la pantalla, y ese escudo es el del próximo (corte por coincidencia: mismo escudo, mismo lugar y tamaño → pase perfecto sin pedirle nada a la IA).
+- A la IA solo se le pide un movimiento por clip (alejarse o acercarse), partiendo de los renders T4 propios (kit y escudo correctos). Encadenar con el último cuadro como en la prueba de Canva.
+- **Después de cada transición aparece una nueva sección del index** (noticias, miembros, competencias, etc.): el recorrido de jugadores es el hilo que va presentando las secciones, no un video aislado arriba de la página.
+- Cierre posible: la "rueda de reconocimiento" con todo el plantel (imagen ancha armada con los renders, desplazamiento sin IA).
+- Descartadas por ahora: la silueta que se revela (cambio de luz muy exigente).
+
+Próximo paso cuando se retome: prueba con dos jugadores (alejarse del escudo de uno → acercarse al escudo del otro, ~3 clips, ~12% del cupo de Canva).
