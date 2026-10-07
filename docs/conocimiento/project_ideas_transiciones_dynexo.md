@@ -32,3 +32,12 @@ React + Lenis (scroll suave), animaciones CSS disparadas con IntersectionObserve
 **Cuidados:** la secuencia de cuadros pesa (3–5 MB) → en celular menos cuadros o video corto; respetar `prefers-reduced-motion` (todo estático); no romper la nav de `layout.js`.
 
 **Plan sugerido:** 1) página de prueba aparte sin link en el menú (p. ej. `inicio-v2.html`) para revisarla en PC y celular; 2) empezar por el inicio con scroll para entrar + pase con el escudo + texto que se ilumina; 3) si gusta, pasar a `index.html` y sumar galería del plantel y contadores. Lo más trabajoso es generar el video de la entrada; Juan no eligió escena todavía (se propuso la bóveda, que ya tiene imagen en R2 `logos/plan/boveda.webp`).
+
+## Herramienta candidata: skill `scroll-world` (agregado 2026-10-06)
+
+Juan la encontró en TikTok. Repo: https://github.com/oso95/scroll-world (MIT, ~9.7k estrellas). Arma landings "fly through the world": al scrollear, una cámara vuela sin cortes desde afuera de cada escena hacia adentro y sigue a la siguiente (dioramas isométricos generados por IA). El scroll controla un video cuadro por cuadro con JS vanilla (encaja con el sitio: sin frameworks).
+
+- Cómo lo hace: imagen fija por escena (GPT Image vía Higgsfield, o Codex CLI con suscripción ChatGPT) → video de "zambullida" por escena + video conector entre escenas (Seedance 2.0 vía Monid), usando el cuadro real de cada corte para que las uniones calcen → ffmpeg extrae/encodea cuadros.
+- Requisitos: CLI de Monid con API key (pago por uso, ~USD 27 por una cadena de 6 escenas en 1080p), Higgsfield con créditos, ffmpeg, Python 3 + Pillow.
+- Instalación como skill: `/plugin marketplace add oso95/scroll-world` y `/plugin install scroll-world@scroll-world`.
+- Para Top Secret: las imágenes fijas podrían salir del pipeline de ChatGPT que ya tenemos (CDP) con renders T4 y escudo como referencia; lo que cuesta plata es el video. Probar primero en una página aparte y revisar el código del repo antes de instalarlo. Podría ser el "scroll para entrar" de la portada (escenas: estadio → túnel → vestuario → cancha).
