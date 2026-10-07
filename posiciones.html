@@ -148,6 +148,7 @@ td.left { text-align: left; }
   object-fit: contain; flex-shrink: 0;
   background: var(--gray);
 }
+.td-logo.us { background: none; }   /* escudo oficial sin fondo, sobre la fila resaltada */
 .td-name {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: .92rem; font-weight: 700; color: var(--text);
@@ -653,7 +654,7 @@ function normE11(raw) {
 
 /* ── RENDER TABLE ── */
 // En todas las tablas nuestra fila usa el escudo oficial, no el que cargó cada liga.
-const OUR_LOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/badge-metal-96.webp';
+const OUR_LOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/badge-dorado-96.webp';
 
 function renderTable(tableId, data, accentColor) {
   const table = document.getElementById(tableId);
@@ -683,7 +684,7 @@ function renderTable(tableId, data, accentColor) {
     const rowClass = t.us ? 'highlight' : '';
     const logo = t.us ? OUR_LOGO : t.logo;
     const logoHtml = logo
-      ? `<img class="td-logo" src="${logo}" alt="${t.abbr}" onerror="this.style.display='none'">`
+      ? `<img class="td-logo${t.us ? ' us' : ''}" src="${logo}" alt="${t.abbr}" onerror="this.style.display='none'">`
       : `<div class="td-logo" style="display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:900;color:#888">${t.abbr}</div>`;
 
     const tr = document.createElement('tr');
