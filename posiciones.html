@@ -652,6 +652,9 @@ function normE11(raw) {
 }
 
 /* ── RENDER TABLE ── */
+// En todas las tablas nuestra fila usa el escudo oficial, no el que cargó cada liga.
+const OUR_LOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/badge-metal-96.webp';
+
 function renderTable(tableId, data, accentColor) {
   const table = document.getElementById(tableId);
   table.style.display = '';
@@ -678,8 +681,9 @@ function renderTable(tableId, data, accentColor) {
     const posClass = pos === 1 ? 'p1' : pos === 2 ? 'p2' : pos === 3 ? 'p3' : '';
     const gdClass = t.gd > 0 ? 'pos' : t.gd < 0 ? 'neg' : '';
     const rowClass = t.us ? 'highlight' : '';
-    const logoHtml = t.logo
-      ? `<img class="td-logo" src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">`
+    const logo = t.us ? OUR_LOGO : t.logo;
+    const logoHtml = logo
+      ? `<img class="td-logo" src="${logo}" alt="${t.abbr}" onerror="this.style.display='none'">`
       : `<div class="td-logo" style="display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:900;color:#888">${t.abbr}</div>`;
 
     const tr = document.createElement('tr');
