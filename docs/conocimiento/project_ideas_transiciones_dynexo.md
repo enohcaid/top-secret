@@ -1,11 +1,11 @@
 ---
 name: project_ideas_transiciones_dynexo
-description: Ideas de transiciones con scroll inspiradas en dynexo.io, guardadas el 2026-10-05 para la próxima temporada (T5) — no implementadas
+description: Ideas de transiciones con scroll inspiradas en dynexo.io, guardadas el 2026-10-05; se preparan para el arranque oficial de la T4 (decidido 2026-10-07) — no implementadas
 metadata:
   type: project
 ---
 
-**Estado:** idea guardada a pedido de Juan (2026-10-05) para retomar en la próxima temporada. Nada implementado todavía.
+**Estado:** idea guardada a pedido de Juan (2026-10-05) para retomar en la próxima temporada. **2026-10-07: Juan adelantó el plan — se prepara para el comienzo oficial de la T4** (la T4 todavía no arrancó; estamos en la pretemporada). Nada implementado todavía.
 
 ## Qué tiene dynexo.io (relevado 2026-10-05)
 
