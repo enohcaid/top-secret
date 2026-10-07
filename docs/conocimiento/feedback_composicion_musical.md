@@ -28,4 +28,4 @@ Todo lo aprendido componiendo los beats propios del club (2026-10-06/07). Proces
 - **Arreglo como narrativa:** intro · gancho/verso · build · gancho con más capas · beat switch o puente · gancho final con variación · final. Silencios y cortes antes de las entradas.
 - **Dinámica por sección:** el verso más bajo que los ganchos, intro/final ~6-8 dB abajo (no 12: en un celular no se oye). Master suave; normalizar por percentil 99.95, no por el pico.
 - **Revisión sin oídos:** espectrograma (`showspectrumpic`) para ver estructura, graves y artefactos; `ebur128` por sección. Ojo: el bitcrush deja un silbido fijo ~15 kHz → filtrar después.
-- **Referencias de Juan:** Timeless y Given Up On Me (The Weeknd), Too Many Nights (Metro Boomin). Las inspiraciones solo se describen; nunca se usa su audio.
+- **Referencias de Juan:** Timeless y Given Up On Me (The Weeknd), Too Many Nights (Metro Boomin), Stuff (Lil Baby y Travis Scott, prod. Wheezy — oscuro, hipnótico, rebote con aplomo). Las inspiraciones solo se describen; nunca se usa su audio.
