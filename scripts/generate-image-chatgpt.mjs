@@ -40,6 +40,9 @@ const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const DEBUG_DIR       = path.resolve('scripts'); // screenshots de debug fuera de Daily News (no se commitean)
 const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
 const MAX_ATTEMPTS    = 3;
+// Timeout por acción de Playwright (click, evaluate, etc.). Antes era 0
+// (infinito) y un click trabado colgaba la corrida para siempre.
+const ACTION_TIMEOUT_MS = 2 * 60 * 1000;
 // ChatGPT ignora los píxeles pedidos en texto y a veces devuelve el post en la
 // misma proporción angosta de la story (bug 2026-07-20: las dos imágenes
 // salieron 941x1672), o directamente APAISADO/horizontal (bug 2026-07-20 a
@@ -631,7 +634,9 @@ function buildResizePrompt() {
 
 async function waitForGeneratedImage(page, excludeSrcs = []) {
   console.log('  Esperando imagen (hasta 25 min)...');
-  page.setDefaultTimeout(0);
+  // La espera larga la maneja el loop de abajo con su propio deadline; cada
+  // acción individual tiene que poder fallar (timeout 0 = colgarse para siempre).
+  page.setDefaultTimeout(ACTION_TIMEOUT_MS);
 
   await page.screenshot({ path: path.join(DEBUG_DIR, 'debug-after-send.png'), fullPage: false });
 
@@ -841,7 +846,36 @@ async function gotoProjectComposer(page, maxTries = 5) {
   throw new Error('La página del proyecto de ChatGPT no cargó el composer tras varios intentos (posible falla del lado de ChatGPT). Screenshot en scripts/debug-project-load.png');
 }
 
+// Si la ventana de Chrome está minimizada (o la pestaña nunca se pintó), la
+// página queda con viewport 0x0: Playwright nunca ve "visible" el composer y,
+// con timeouts infinitos, el click esperaba para siempre — el proceso quedaba
+// colgado horas y el reintento externo de run-daily-images.ps1 no corría
+// (bug recurrente, diagnosticado 2026-10-07). Restaurar la ventana y traer la
+// pestaña al frente antes de interactuar; si sigue sin tamaño, fallar rápido.
+async function ensureWindowVisible(page) {
+  try {
+    const cdp = await page.context().newCDPSession(page);
+    const { windowId, bounds } = await cdp.send('Browser.getWindowForTarget');
+    if (bounds.windowState === 'minimized' || bounds.windowState === 'fullscreen') {
+      await cdp.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'normal' } });
+    }
+    if (bounds.windowState !== 'maximized' && ((bounds.width || 0) < 1000 || (bounds.height || 0) < 700)) {
+      await cdp.send('Browser.setWindowBounds', { windowId, bounds: { width: 1280, height: 900 } }).catch(() => {});
+    }
+    await cdp.detach().catch(() => {});
+  } catch (e) {
+    console.log(`  (No se pudo ajustar la ventana de Chrome: ${e.message})`);
+  }
+  await page.bringToFront().catch(() => {});
+  await page.waitForTimeout(1500);
+  const [w, h] = await page.evaluate(() => [innerWidth, innerHeight]);
+  if (!w || !h) {
+    throw new Error(`La pestaña de ChatGPT tiene tamaño ${w}x${h} (ventana de Chrome minimizada u oculta) — no se puede interactuar.`);
+  }
+}
+
 async function sendPromptInProject(page, prompt, { freshChat = true, attachments = [] } = {}) {
+  await ensureWindowVisible(page);
   if (freshChat) {
     await gotoProjectComposer(page);
   } else {
@@ -1127,7 +1161,7 @@ async function waitForTextResponse(page) {
 async function evaluateImage(context, imagePath, evalPrompt, extraRefs = []) {
   console.log('\n  Evaluando imagen con ChatGPT Vision...');
   const page = await context.newPage();
-  page.setDefaultTimeout(0);
+  page.setDefaultTimeout(ACTION_TIMEOUT_MS);
 
   try {
     await page.goto('https://chatgpt.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -1272,7 +1306,7 @@ async function main() {
   if (!page) {
     page = await context.newPage();
   }
-  page.setDefaultTimeout(0);
+  page.setDefaultTimeout(ACTION_TIMEOUT_MS);
   console.log('Conectado.');
 
   const dateStr      = draft.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
@@ -1432,6 +1466,13 @@ async function main() {
 // desde un one-off (p.ej. scripts/fix-story-once.mjs) sin disparar main().
 const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isDirectRun) {
+  // Watchdog: post + story esperan como mucho 25 min cada una; si la corrida
+  // entera pasa de 70 min algo quedó colgado. Salir con error para que
+  // run-daily-images.ps1 haga su reintento en vez de esperar para siempre.
+  setTimeout(() => {
+    console.error('Error: watchdog — la corrida superó 70 min sin terminar, se aborta.');
+    process.exit(1);
+  }, 70 * 60 * 1000).unref();
   main().catch(e => { console.error('Error:', e.message); process.exit(1); });
 }
 
