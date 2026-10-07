@@ -5,7 +5,7 @@ metadata:
   type: reference
 ---
 
-Idea de Juan (2026-10-06): generar trap propio en vez de depender de bibliotecas. Gratis y local.
+Idea de Juan (2026-10-06): generar trap propio en vez de depender de bibliotecas. Gratis y local. **Antes de componer, leer [[feedback_composicion_musical]]** (reglas y feedback de Juan).
 
 - **Modelo:** ACE-Step 1.5 (código y pesos MIT → uso libre en redes). Instalado en `fuentes/beats/ACE-Step-1.5` (gitignored): `git clone https://github.com/ace-step/ACE-Step-1.5` + `python -m uv sync` (Python 3.11 lo pone uv; torch 2.7.1+cu128 sí soporta la GTX 1070, Pascal sm_61). Pesos ~10 GB en `checkpoints/`, se bajan solos la primera vez (~1 h con HTTP común; `hf_xet` acelera).
 - **Generar:** `node scripts/beats/generar.mjs <estilo> [--n 2] [--duracion 90] [--seed N]` → `fuentes/beats/salida/<estilo>/`. ~10 min por tanda de 2×90 s en la 1070 (DiT 2B turbo + LM 0.6B backend `pt`, vLLM no corre en Pascal). Estilos = `.toml` en `scripts/beats/estilos/` (caption en inglés, bpm, tonalidad).
