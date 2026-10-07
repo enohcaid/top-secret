@@ -41,3 +41,20 @@ Juan la encontró en TikTok. Repo: https://github.com/oso95/scroll-world (MIT, ~
 - Requisitos: CLI de Monid con API key (pago por uso, ~USD 27 por una cadena de 6 escenas en 1080p), Higgsfield con créditos, ffmpeg, Python 3 + Pillow.
 - Instalación como skill: `/plugin marketplace add oso95/scroll-world` y `/plugin install scroll-world@scroll-world`.
 - Para Top Secret: las imágenes fijas podrían salir del pipeline de ChatGPT que ya tenemos (CDP) con renders T4 y escudo como referencia; lo que cuesta plata es el video. Probar primero en una página aparte y revisar el código del repo antes de instalarlo. Podría ser el "scroll para entrar" de la portada (escenas: estadio → túnel → vestuario → cancha).
+
+## Video con primer y último cuadro dentro de Canva (probado 2026-10-07)
+
+Apps de Canva con fotograma inicial + final (todas cobran créditos propios, NO el cupo de IA de Canva):
+
+| App | Qué tiene | Créditos en esta cuenta |
+|---|---|---|
+| **FrameFusion** | inicio + final, instrucciones, modo Classic/Film, 5 o 10 s | **1 gratis por día**; suscripción = 30/día |
+| Gen Video (MiraclesKit) | Seedance 2.5/2.0, Kling, Veo 3.1, Sora 2, Hailuo, Wan… | 85 créditos por video, la cuenta tiene 1/mes → requiere plan pago |
+| Frame Flow (VertexTurbo) | inicio + final, duración | sin créditos, solo comprando |
+| Image Animate / Reference to Video (Vimmerse) | 1-2 fotos + texto, cámara | piden cuenta en Vimmerse |
+
+**Prueba FrameFusion (modo Film, 5 s)**: sala digital → estadio (`logos/noticias/relanz-sala-digital` → `relanz-estadio-final`). Tardó < 1 min. Resultado: la cámara avanza al escudo de la pantalla, lo atraviesa (pase por fundido de ~0,3 s, no un vuelo 3D real) y sale en el estadio con el espía. Se ve bien y la identidad (escudo, silueta) se mantiene.
+- **El último cuadro NO es exactamente la imagen final**: termina más cerca (encuadre recortado arriba, sin césped). Para encadenar escenas, el clip siguiente tiene que arrancar desde el último cuadro real exportado, no desde la imagen original.
+- **Resolución baja**: el modo Film entrega 480×736 (para 2:3). Falta probar Classic, que quizá sale más grande.
+- Bajar el video: la app lo agrega al diseño como blob (no se puede descargar ni capturar por canvas). Se hace agrandando el video en el diseño (Posición → ancho/alto/X/Y) y exportando el diseño en MP4 con la API de Canva (MCP `export-design`), después se recorta la zona con ffmpeg.
+- Gotcha CDP: con las pestañas de Kick abiertas en el Chrome de CDP, Playwright y Puppeteer se cuelgan al conectarse (`connectOverCDP` timeout). Funciona abrir la pestaña con `PUT /json/new` y hablarle por WebSocket directo a `ws://localhost:9222/devtools/page/<id>`; los paneles de las apps son iframes de `*.canva-apps.com` (entrar con `Target.setAutoAttach` flatten y `DOM.setFileInputFiles` con `objectId` para subir archivos).
