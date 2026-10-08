@@ -67,3 +67,24 @@ export function buscarEquipo(texto, equipos, alias = {}) {
   if (mejor && distintos.length > 1) return { ...mejor, dudoso: [...new Set(empatados.map(x => x.nombre))] };
   return mejor;
 }
+
+/**
+ * Para nombres escritos a propósito (Juan con "+ 23:40 comunicaciones cantera", "F ok <equipo>"):
+ * todas las palabras escritas tienen que estar en el nombre del equipo. Así "comunicaciones cantera"
+ * no cae en "Comunicaciones" (le sobra "cantera"), pero "parke" sí encuentra "Parke Avellane".
+ * Si varios cumplen, gana el que no tiene palabras de más; si siguen siendo varios, es dudoso.
+ */
+export function buscarEquipoExacto(texto, equipos, alias = {}) {
+  const t = norm(texto);
+  for (const [a, nombre] of Object.entries(alias)) if (norm(a) === t) return { ...(equipos.find(x => x.nombre === nombre) || { nombre, div: '?', logo: null }), score: 1, via: 'alias' };
+  const tw = palabras(texto);
+  if (!tw.length) return null;
+  const cubre = (a, b) => a.every(x => b.some(w => parecida(x, w)));
+  const cands = equipos.filter(e => { const ew = palabras(e.nombre); return ew.length && (cubre(tw, ew) || compacto(e.nombre) === compacto(texto)); });
+  const exactos = cands.filter(e => cubre(palabras(e.nombre), tw));
+  const pool = exactos.length ? exactos : cands;
+  const distintos = [...new Set(pool.map(e => compacto(e.nombre)))];
+  if (!pool.length) return null;
+  if (distintos.length > 1) return { ...pool[0], score: 0.7, dudoso: [...new Set(pool.map(e => e.nombre))] };
+  return { ...pool[0], score: 1 };
+}

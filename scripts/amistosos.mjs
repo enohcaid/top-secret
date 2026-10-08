@@ -32,7 +32,7 @@ import fs from 'fs';
 import path from 'path';
 import { execFile } from 'child_process';
 import { ROOT } from './lib/env.mjs';
-import { buscarEquipo as matchEquipo } from './lib/equipos-match.mjs';
+import { buscarEquipo as matchEquipo, buscarEquipoExacto } from './lib/equipos-match.mjs';
 import { buscarEscudo } from './lib/escudos.mjs';
 import { leerPedido } from './lib/pedido-amistoso.mjs';
 
@@ -97,6 +97,18 @@ async function cargarEquipos() {
 function buscarEquipo(texto, autor) {
   if (autor && APR.autores[autor]) { const n = APR.autores[autor]; return { ...(EQUIPOS.find(e => e.nombre === n) || { nombre: n, div: '?', logo: null }), score: 1, via: 'conocido' }; }
   return matchEquipo(texto, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
+}
+
+// Equipo escrito a propósito por Juan ("+ 23:40 comunicaciones cantera", "F ok <equipo>"): si no coincide
+// entero con un equipo de 1ra/2da, va el nombre tal cual lo escribió (nunca uno parecido: "comunicaciones
+// cantera" no es "Comunicaciones"), con el escudo del más parecido, que suele ser el mismo club.
+function equipoEscrito(txt) {
+  const al = { ...ALIAS.alias, ...APR.alias };
+  const ex = buscarEquipoExacto(txt, EQUIPOS, al);
+  if (ex?.dudoso) return { dudoso: ex.dudoso };
+  if (ex) return { nombre: ex.nombre, div: ex.div, logo: ex.logo };
+  const nombre = txt.trim().replace(/\s+/g, ' ').replace(/(^|\s)(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
+  return { nombre, div: '?', logo: matchEquipo(txt, EQUIPOS, al)?.logo || null };
 }
 
 // ── Firestore: agregar el amistoso a calendario/estado.custom (arrayUnion atómico) ─────────
@@ -349,8 +361,9 @@ async function ofrecer(id, slot, equipoTxt) {
   const p = st.pedidos[id];
   if (!p) return avisar(`⚠️ No existe el pedido ${id}.`);
   if (equipoTxt) {
-    const eq = matchEquipo(equipoTxt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
-    p.equipo = eq ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : { nombre: equipoTxt, div: '?', logo: null };
+    const eq = equipoEscrito(equipoTxt);
+    if (eq.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *${id} <equipo>*.`);
+    p.equipo = eq;
     APR.autores[p.autor] = p.equipo.nombre;                           // la próxima vez lo reconoce por el número
     if (p.contacto) APR.alias[p.contacto.toLowerCase()] = p.equipo.nombre;
     guardarAprendido();
@@ -432,11 +445,11 @@ async function comando(body) {
   const man = body.match(/^(?:\+|agregar)\s*(\d{1,2})[:.](\d{2})\s+(.+)$/i);
   if (man) {
     const hora = `${man[1].padStart(2, '0')}:${man[2]}`, txt = man[3].trim();
-    const eq = matchEquipo(txt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
-    if (eq?.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *+ ${hora} <equipo>*.`);
+    const eq = equipoEscrito(txt);
+    if (eq.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *+ ${hora} <equipo>*.`);
     const id = letra(st.siguiente++);
     st.pedidos[id] = { autor: '', contacto: '', texto: body, manual: true, estado: 'nuevo', ts: Date.now(),
-      equipo: eq ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : { nombre: txt, div: '?', logo: null } };
+      equipo: eq };
     save();
     await confirmar(id, hora);
     // Fuera de los horarios fijos: ocupa el horario fijo que quede a menos de 20 min.
@@ -458,8 +471,9 @@ async function comando(body) {
     // "F ok Los Pibes" / "F ok 23:40 Los Pibes": define el equipo y confirma.
     const eqTxt = resto.replace(/^ok\b/i, '').replace(/\b\d{1,2}[:.]\d{2}\b/, '').trim();
     if (eqTxt) {
-      const p = st.pedidos[id], eq = matchEquipo(eqTxt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
-      p.equipo = eq && !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : { nombre: eqTxt, div: '?', logo: null };
+      const p = st.pedidos[id], eq = equipoEscrito(eqTxt);
+      if (eq.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *${id} ok <equipo>*.`);
+      p.equipo = eq;
       if (p.autor) { APR.autores[p.autor] = p.equipo.nombre; guardarAprendido(); }
       save();
     }
