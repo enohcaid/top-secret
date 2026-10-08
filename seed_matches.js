@@ -2656,7 +2656,7 @@ const SEED_MATCHES = [
 
   // En el juego figuramos como visitante ("CD Cambaceres 1-2 Top Secret"); el fixture lo da de local.
   { rival:'Cambaceres', league:'VPUG', date:'2026-10-07', match_result:'2-1', isHome:true, uploadedAt:'2026-10-08T00:00:00.000Z',
-    notes:'Liga Pretemporada · Grupo D · Fecha 3 · goles: MostiYt 6\' (CAM), NicoBJ_96 36\', Lautavester7 80\' · reporte: fotos de pantalla', torneo:'Liga Pretemporada VPUG (FC27)',
+    notes:'Liga Pretemporada · Grupo D · Fecha 3 · goles: MostiYt 6\' (CAM), NicoBJ_96 36\', Lautavester7 80\' · arquero bot (nos faltó un jugador) · reporte: fotos de pantalla', torneo:'Liga Pretemporada VPUG (FC27)',
     team_stats:{posesion:null,tiros:2,tiros_arco:2,goles_esperados:null,pases:163,precision_pases:85,entradas:45,entradas_exito:15,intercepciones:null,paradas:null,faltas:1,fuera_juego:1,corneres:null,regates_exito:141,precision_tiro:100},
   players:[
     {name:'Lautavester7', matched:'Lautavester7',     played_pos:'DI',  rating:7.4, goals:1, assists:0, passes:13,   pass_accuracy:92,   distance_km:18.6, sprints:null, tackles:null, interceptions:null},
