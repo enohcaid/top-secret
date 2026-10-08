@@ -65,6 +65,11 @@ const save = () => fs.writeFileSync(STATE_FILE, JSON.stringify(st, null, 2));
 const letra = n => String.fromCharCode(65 + (n % 26)) + (n >= 26 ? Math.floor(n / 26) : '');
 const ocupados = () => new Set([...Object.keys(st.confirmados), ...Object.values(st.pedidos).filter(p => p.estado === 'ofrecido').map(p => p.slot)]);
 const libre = () => SLOTS.find(s => !ocupados().has(s)) || null;
+// Pedidos simultáneos: cada pedido nuevo reserva el horario que se le propone, así dos equipos que
+// piden 22:40 a la vez no reciben el mismo; el segundo va a otro horario que tenga libre o queda en espera.
+const reservados = salvo => new Set([...ocupados(), ...Object.entries(st.pedidos)
+  .filter(([k, p]) => k !== salvo && p.estado === 'nuevo' && p.propuesto).map(([, p]) => p.propuesto)]);
+const proponerHora = id => (st.pedidos[id].horas || SLOTS).find(h => !reservados(id).has(h)) || null;
 
 // ── Equipos de 1ra y 2da VPN ────────────────────────────────────────────────
 let EQUIPOS = [];
@@ -291,11 +296,33 @@ async function pedidoGrupo(msg) {
   if (susLibres && !susLibres.length) { log('pedido ignorado (sin horarios libres en común):', eq.nombre, '|', breve); return; }
   const id = letra(st.siguiente++);
   st.pedidos[id] = { autor, contacto: nombreContacto, texto: msg.body.slice(0, 300), equipo: !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : null, estado: 'nuevo', ts: Date.now() };
-  if (susLibres) Object.assign(st.pedidos[id], { horas: susLibres, horaPedida: susLibres[0] });
+  const p = st.pedidos[id];
+  if (susLibres) p.horas = susLibres;
+  p.propuesto = proponerHora(id);
   save();
-  log(`pedido ${id}:`, nombreContacto, '→', eq ? `${eq.nombre} (${eq.div})` : 'equipo sin identificar');
-  await avisar(`📣 *Pedido ${id}* — ${eq?.dudoso ? `¿${eq.dudoso.join(' o ')}?` : eq ? `*${eq.nombre}* (${eq.div})` : '_equipo sin identificar_'}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${libre() ? `Le ofrezco *${st.pedidos[id].horaPedida || libre()}*${st.pedidos[id].horas ? (st.pedidos[id].horas.length === 1 ? ' (la única que tiene libre)' : ` (tiene libres ${st.pedidos[id].horas.join(', ')})`) : ''}.` : '_Sin horarios libres hoy: solo para ver la detección._'} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq && !eq.dudoso ? '' : `, *${id} <equipo>* para definir el equipo`}, o *${id} no*.`);
-  if (AUTO && eq && !eq.dudoso && eq.div !== '?') await ofrecer(id, null, null);
+  log(`pedido ${id}:`, nombreContacto, '→', eq ? `${eq.nombre} (${eq.div})` : 'equipo sin identificar', p.propuesto ? `propongo ${p.propuesto}` : 'en espera');
+  const susHoras = p.horas ? (p.horas.length === 1 ? 'la única que tiene libre' : `tiene libres ${p.horas.join(', ')}`) : '';
+  const corrida = p.propuesto && (p.horas || SLOTS.filter(s => !ocupados().has(s)))[0] !== p.propuesto ? `; ${(p.horas || SLOTS.filter(s => !ocupados().has(s)))[0]} ya se la propuse a otro pedido` : '';
+  const oferta = p.propuesto ? `Le ofrezco *${p.propuesto}*${susHoras || corrida ? ` (${[susHoras, corrida.slice(2)].filter(Boolean).join('; ')})` : ''}.`
+    : `_En espera_: ${p.horas ? `sus horarios (${p.horas.join(', ')})` : 'los horarios libres'} ya están propuestos a otros pedidos. Si se libera alguno, se lo ofrezco.`;
+  await avisar(`📣 *Pedido ${id}* — ${eq?.dudoso ? `¿${eq.dudoso.join(' o ')}?` : `*${eq.nombre}* (${eq.div})`}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${oferta} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${!eq.dudoso ? '' : `, *${id} <equipo>* para definir el equipo`}, o *${id} no*.`);
+  if (AUTO && p.propuesto && !eq.dudoso && eq.div !== '?') await ofrecer(id, null, null);
+}
+
+// Cuando cambian los horarios (se ofrece, confirma, rechaza o descarta algo), revisa los pedidos que
+// esperan: el que tenía propuesto un horario que ya no está, pasa a otro libre; el que estaba en espera,
+// toma el que se liberó. En --auto se lo ofrece solo; si no, le avisa a Juan.
+async function reacomodar() {
+  for (const [id, p] of Object.entries(st.pedidos).filter(([, p]) => p.estado === 'nuevo' && !p.manual).sort((a, b) => a[1].ts - b[1].ts)) {
+    if (p.propuesto && !reservados(id).has(p.propuesto)) continue;
+    const antes = p.propuesto, nueva = proponerHora(id);
+    if (nueva === antes) continue;
+    p.propuesto = nueva; save();
+    log(`${id}: propuesta ${antes || 'en espera'} → ${nueva || 'en espera'}`);
+    if (AUTO && nueva && p.equipo && p.equipo.div !== '?') { await ofrecer(id, null, null); continue; }
+    await avisar(nueva ? `📣 *${id}* ${p.equipo?.nombre || ''}: ${antes ? `${antes} ya no está libre` : 'se liberó un horario'}, ahora le ofrezco *${nueva}*. Respondé *${id}* para mandar o *${id} no*.`
+      : `📣 *${id}* ${p.equipo?.nombre || ''}: ${antes} ya no está libre y no le queda otro de sus horarios. Queda en espera.`);
+  }
 }
 
 async function ofrecer(id, slot, equipoTxt) {
@@ -309,8 +336,8 @@ async function ofrecer(id, slot, equipoTxt) {
     guardarAprendido();
   }
   if (!p.equipo) return avisar(`⚠️ ${id}: decime qué equipo es (*${id} <equipo>*).`);
-  slot = slot || (p.estado === 'ofrecido' ? p.slot : p.horas ? p.horas.find(h => !ocupados().has(h)) : libre());
-  if (!slot && p.horas) return avisar(`⚠️ ${id}: ya no queda libre ninguno de sus horarios (${p.horas.join(', ')}). Si querés otro: *${id} 23:40*.`);
+  slot = slot || (p.estado === 'ofrecido' ? p.slot : (p.propuesto && !reservados(id).has(p.propuesto) ? p.propuesto : proponerHora(id)));
+  if (!slot && p.horas) return avisar(`⚠️ ${id}: sus horarios (${p.horas.join(', ')}) ya están tomados o propuestos a otro pedido. Si querés otro: *${id} 23:40*.`);
   if (!slot) return avisar('⚠️ Ya no quedan horarios libres.');
   if (ocupados().has(slot) && p.slot !== slot) return avisar(`⚠️ ${slot} ya está tomado u ofrecido. Libres: ${SLOTS.filter(s => !ocupados().has(s)).join(', ') || 'ninguno'}.`);
   const texto = `Buenas, soy de Top Secret, jugamos a las ${slot} hs?`;
@@ -319,6 +346,7 @@ async function ofrecer(id, slot, equipoTxt) {
   Object.assign(p, { estado: 'ofrecido', slot, ofrecidoTs: Date.now() });
   save();
   await avisar(`✅ ${id}: le escribí a ${p.contacto || p.equipo.nombre} (${p.equipo.nombre}) → “${texto}”${PRUEBA ? ' _(prueba: no enviado)_' : ''}`);
+  await reacomodar();
 }
 
 // rival = true cuando confirma el bot por la respuesta del rival: si quedó cargado, le contesta "Anotado".
@@ -340,6 +368,7 @@ async function confirmar(id, slot, rival = false) {
     }
   }
   await avisar(`✅ *Amistoso confirmado*: Top Secret vs *${p.equipo.nombre}* a las *${p.slot}*.${ok ? ' Cargado en el calendario y la convocatoria.' : ' ⚠️ No pude cargarlo en el sitio: agregalo a mano (al rival no le contesté).'}${anotado}\nQuedan: ${SLOTS.filter(s => !st.confirmados[s]).join(', ') || 'ninguno 🎉'}`);
+  await reacomodar();
   if (SLOTS.every(s => st.confirmados[s])) { await avisar('🎉 Los 4 horarios están cubiertos. Apago el bot.'); setTimeout(() => process.exit(0), 3000); }
 }
 
@@ -354,7 +383,8 @@ async function respuestaPrivada(msg) {
   }
   if (NO.test(txt) && !SI.test(txt)) {
     p.estado = 'rechazado'; save();
-    return avisar(`💬 ${id} *${p.equipo.nombre}* dijo que no: “${txt.slice(0, 200)}”. Libero ${p.slot}.`);
+    await avisar(`💬 ${id} *${p.equipo.nombre}* dijo que no: “${txt.slice(0, 200)}”. Libero ${p.slot}.`);
+    return reacomodar();
   }
   await avisar(`💬 ${id} *${p.equipo.nombre}* respondió: “${txt.slice(0, 250)}”\nSi confirma, respondé *${id} ok* (o *${id} ok 23:20* si es otro horario). Si no, *${id} no*.`);
 }
@@ -377,7 +407,7 @@ async function comando(body) {
     const min = t => { const [h, mm] = t.split(':').map(Number); return h * 60 + mm; };
     for (const s of SLOTS) if (s !== hora && !st.confirmados[s] && Math.abs(min(s) - min(hora)) < 20) st.confirmados[s] = st.pedidos[id].equipo.nombre;
     save();
-    return;
+    return reacomodar();
   }
   if (/^estado$/i.test(body)) {
     const lista = Object.entries(st.pedidos).filter(([, p]) => p.estado !== 'descartado').map(([id, p]) => `${id} ${p.equipo ? p.equipo.nombre : '?'} — ${p.estado}${p.slot ? ' ' + p.slot : ''}`);
@@ -387,7 +417,7 @@ async function comando(body) {
   const id = m[1].toUpperCase(), resto = m[2].trim();
   const hora = (resto.match(/\b(\d{1,2})[:.](\d{2})\b/) || [])[0]?.replace('.', ':');
   if (hora && !SLOTS.includes(hora)) return avisar(`⚠️ ${hora} no es uno de los horarios (${SLOTS.join(', ')}).`);
-  if (/^no\b/i.test(resto)) { st.pedidos[id].estado = 'descartado'; save(); return avisar(`🗑️ ${id} descartado.`); }
+  if (/^no\b/i.test(resto)) { st.pedidos[id].estado = 'descartado'; save(); await avisar(`🗑️ ${id} descartado.`); return reacomodar(); }
   if (/^ok\b/i.test(resto)) return confirmar(id, hora);
   const equipoTxt = resto.replace(/\b\d{1,2}[:.]\d{2}\b/, '').trim();
   return ofrecer(id, hora, equipoTxt || null);
