@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// Retransmite el vivo de Twitch (twitch.tv/topsecretfc, que sale directo de la PS5) a Kick — y a YouTube cuando
-// esté habilitado. Espera a que el canal esté en vivo, toma el video con streamlink y lo reenvía con ffmpeg SIN
+// Retransmite el vivo de Twitch (twitch.tv/topsecretfc, que sale directo de la PS5) a Kick y
+// YouTube. Al detectar el vivo publica (una vez por noche) la historia "EN VIVO" en Instagram (placa-envivo.mjs). Espera a que el canal esté en vivo, toma el video con streamlink y lo reenvía con ffmpeg SIN
 // recodificar (-c copy): casi no usa CPU; sale con ~10–20 s de retraso respecto de Twitch. Si se corta, reintenta.
 //
-//   node scripts/retransmitir.mjs [--hasta HH:MM]     (corta a esa hora ART; default 03:00)
+//   node scripts/retransmitir.mjs [--hasta HH:MM] [--sin-historia]     (corta a esa hora ART; default 00:30)
 // Destinos en .env: KICK_RTMP_URL + KICK_STREAM_KEY (y opcional YT_RTMP_URL + YT_STREAM_KEY).
 // Requisitos: Python con streamlink (python -m pip install --user streamlink). Log: fuentes/redes/retransmitir.log
 import fs from 'fs';
 import path from 'path';
-import { spawn, execFileSync } from 'child_process';
+import { spawn, execFile, execFileSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { loadEnv } from './lib/env.mjs';
 
@@ -29,12 +29,30 @@ const ocultarClaves = t => claves.reduce((x, k) => x.split(k).join('***'), t);
 if (!destinos.length) { log('No hay destinos en .env (KICK_RTMP_URL/KICK_STREAM_KEY, YT_RTMP_URL/YT_STREAM_KEY).'); process.exit(1); }
 
 const i = process.argv.indexOf('--hasta');
-const [hh, mm] = (i > 0 ? process.argv[i + 1] : '03:00').split(':').map(Number);
+const [hh, mm] = (i > 0 ? process.argv[i + 1] : '00:30').split(':').map(Number);
 const limite = (() => {                                     // próxima ocurrencia de HH:MM ART
   const art = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
   const fin = new Date(art); fin.setHours(hh, mm, 0, 0); if (fin <= art) fin.setDate(fin.getDate() + 1);
   return Date.now() + (fin - art);
 })();
+
+// Historia "EN VIVO" en Instagram: una sola vez por noche (marca en fuentes/redes), en paralelo a la retransmisión.
+const NOCHE = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });   // fecha de la noche (al arrancar)
+const MARCA = path.resolve(`fuentes/redes/envivo-publicada-${NOCHE}.txt`);
+async function publicarHistoria() {
+  if (process.argv.includes('--sin-historia') || fs.existsSync(MARCA)) return;
+  fs.writeFileSync(MARCA, ahora());
+  const node = (...a) => new Promise((ok, mal) => execFile(process.execPath, a, { timeout: 300000 }, (e, out, err) => e ? mal(new Error(String(err || e.message).slice(0, 300))) : ok(out)));
+  try {
+    const jpg = `fuentes/placas/envivo-${NOCHE}.jpg`, clave = `logos/placas/envivo-${NOCHE}.jpg`;
+    const info = await node('scripts/placa-envivo.mjs', '--fecha', NOCHE, '--out', jpg);
+    log('Placa EN VIVO:', info.split('\n')[0]);
+    await node('scripts/r2.mjs', 'put', jpg, clave);
+    const tags = /\(VPUG\)/.test(info) ? ['--etiquetar', 'vpugvirtual_prouruguay_gaming'] : [];
+    const res = await node('scripts/meta.mjs', 'ig-historia', `https://top-secret-proxy.juan-c-m-1985.workers.dev/media/${clave}`, ...tags);
+    log('Historia EN VIVO publicada en Instagram.', res.trim().split('\n').pop().slice(0, 150));
+  } catch (e) { log('No se pudo publicar la historia EN VIVO:', e.message); fs.rmSync(MARCA, { force: true }); }
+}
 
 function enVivo() {
   try { const j = JSON.parse(execFileSync('python', ['-m', 'streamlink', '--json', CANAL], { encoding: 'utf8', timeout: 60000 })); return !j.error; }
@@ -63,6 +81,7 @@ log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}. Esperand
 while (Date.now() < limite) {
   if (enVivo()) {
     log('Twitch en vivo: empiezo a retransmitir.');
+    publicarHistoria();
     const code = await retransmitir();
     log(`Retransmisión terminada (ffmpeg ${code}). Vuelvo a esperar.`);
     await new Promise(r => setTimeout(r, 10000));
