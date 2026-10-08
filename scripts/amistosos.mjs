@@ -219,7 +219,9 @@ client.on('message_create', async msg => {
   try {
     if (!yo) return;
     // 1) Comandos de Juan en su chat consigo mismo.
-    if (msg.fromMe && msg.to === yo && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) return comando(msg.body.trim());
+    if (msg.fromMe && !msg.to.endsWith('@g.us') && !/^(🕵️|📣|✅|💬|⚠️|📋)/u.test(msg.body)) log('mío', msg.from, '→', msg.to, msg.body.slice(0, 20));
+    // El chat consigo mismo puede venir como @c.us o como @lid: en ese caso to === from.
+    if (msg.fromMe && (msg.to === yo || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) return comando(msg.body.trim());
     if (msg.fromMe) return;
     // 2) Pedidos en el grupo.
     if (msg.from.endsWith('@g.us') && await esGrupoAmistosos(msg)) return pedidoGrupo(msg);
@@ -320,6 +322,7 @@ async function respuestaPrivada(msg) {
 }
 
 async function comando(body) {
+  log('comando:', body.slice(0, 40));
   const m = body.match(/^([A-Z]{1,2}\d?)\b\s*(.*)$/i);
   if (/^estado$/i.test(body)) {
     const lista = Object.entries(st.pedidos).filter(([, p]) => p.estado !== 'descartado').map(([id, p]) => `${id} ${p.equipo ? p.equipo.nombre : '?'} — ${p.estado}${p.slot ? ' ' + p.slot : ''}`);
