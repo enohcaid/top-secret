@@ -1,4 +1,4 @@
-# OCR con el motor nativo de Windows 10/11 (Windows.Media.Ocr), sin instalar nada.
+﻿# OCR con el motor nativo de Windows 10/11 (Windows.Media.Ocr), sin instalar nada.
 # Uso: powershell -File ocr-windows.ps1 <img1> [<img2> ...]
 #      sin argumentos = modo servidor: lee una ruta por línea de stdin y responde una línea JSON por ruta.
 # Salida: una línea JSON por imagen {"file":..., "lines":[{"text":..., "x":..,"y":..,"w":..,"h":..}]}
