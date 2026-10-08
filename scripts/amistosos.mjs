@@ -151,7 +151,7 @@ const client = new Client({
   puppeteer: { headless: true, executablePath: CHROME, protocolTimeout: 180000, handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false,
     args: ['--no-first-run', '--disable-extensions', '--disable-gpu'] },
 });
-let yo = null, grupoId = null;
+let yo = null, yoLid = null, grupoId = null;
 
 client.on('qr', async qr => {
   const png = path.join(DIR, 'qr-vincular.png');
@@ -167,7 +167,8 @@ async function avisar(texto) { await client.sendMessage(yo, texto); }
 
 client.on('ready', async () => {
   yo = client.info.wid._serialized;
-  log('conectado como', client.info.pushname, yo, PRUEBA ? '(MODO PRUEBA)' : '');
+  try { yoLid = await client.pupPage.evaluate(() => window.require('WAWebUserPrefsMeUser').getMaybeMeLidUser()?._serialized || null); } catch (e) {}
+  log('conectado como', client.info.pushname, yo, yoLid || '(sin lid)', PRUEBA ? '(MODO PRUEBA)' : '');
   // No se usa getChats()/msg.getChat(): fallan con contactos @lid en whatsapp-web.js. El grupo se
   // busca directo en las colecciones internas de WhatsApp Web (ver buscarGrupo).
   await buscarGrupo();
@@ -220,8 +221,8 @@ client.on('message_create', async msg => {
     if (!yo) return;
     // 1) Comandos de Juan en su chat consigo mismo.
     if (msg.fromMe && !msg.to.endsWith('@g.us') && !/^(🕵️|📣|✅|💬|⚠️|📋)/u.test(msg.body)) log('mío', msg.from, '→', msg.to, msg.body.slice(0, 20));
-    // El chat consigo mismo puede venir como @c.us o como @lid: en ese caso to === from.
-    if (msg.fromMe && (msg.to === yo || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) return comando(msg.body.trim());
+    // El chat consigo mismo puede venir como @c.us o como @lid (yoLid).
+    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) return comando(msg.body.trim());
     if (msg.fromMe) return;
     // 2) Pedidos en el grupo.
     if (msg.from.endsWith('@g.us') && await esGrupoAmistosos(msg)) return pedidoGrupo(msg);
