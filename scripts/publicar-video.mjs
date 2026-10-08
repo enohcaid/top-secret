@@ -11,6 +11,7 @@
 import fs from 'fs';
 import path from 'path';
 import { chromium } from 'playwright';
+import { asegurarVentana, enfocar } from './lib/ventana.mjs';
 
 const argv = process.argv.slice(2);
 const opt = k => { const i = argv.indexOf(k); return i < 0 ? null : argv[i + 1]; };
@@ -28,6 +29,7 @@ const YT_CANAL = 'UCEKzzKDMMPri12Q3E9S7IVw';   // TOP Secret FC (el perfil tambi
 const b = await chromium.connectOverCDP('http://localhost:9222', { timeout: 20000 });
 const ctx = b.contexts()[0];
 const p = await ctx.newPage();
+await asegurarVentana(p);
 const shot = n => p.screenshot({ path: path.join(SHOTS, `pub-${red}-${n}.png`) }).catch(() => {});
 const espera = ms => p.waitForTimeout(ms);
 
@@ -59,7 +61,7 @@ try {
   if (red === 'x') {
     await p.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await espera(6000);
-    await p.locator('[data-testid="tweetTextarea_0"]').first().click();
+    await enfocar(p, '[data-testid="tweetTextarea_0"]');
     await p.keyboard.type(TEXTO, { delay: 5 });
     await p.locator('input[data-testid="fileInput"]').first().setInputFiles(VIDEO);
     // Listo = el botón Postear se habilita (X lo deja deshabilitado mientras procesa el video)

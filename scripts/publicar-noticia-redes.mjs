@@ -17,6 +17,7 @@ import { spawnSync } from 'child_process';
 import path from 'path';
 import { chromium } from 'playwright';
 import { need, ROOT } from './lib/env.mjs';
+import { asegurarVentana, enfocar } from './lib/ventana.mjs';
 
 const KV = `https://api.cloudflare.com/client/v4/accounts/${need('CF_ACCOUNT_ID')}/storage/kv/namespaces/${need('KV_NAMESPACE_ID')}/values/redes_job`;
 const AUTH = { 'X-Auth-Email': need('CF_EMAIL'), 'X-Auth-Key': need('CF_API_KEY') };
@@ -48,9 +49,10 @@ async function publicarX(texto) {
   catch (e) { throw new Error('El Chrome con CDP no está abierto (scripts/abrir-chrome-chatgpt.ps1)'); }
   const p = await b.contexts()[0].newPage();
   try {
+    await asegurarVentana(p);
     await p.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await espera(6000);
-    await p.locator('[data-testid="tweetTextarea_0"]').first().click();
+    await enfocar(p, '[data-testid="tweetTextarea_0"]');
     await p.keyboard.type(texto, { delay: 5 });
     await espera(6000);   // que X arme la tarjeta del link
     const ok = await p.evaluate(() => {
@@ -75,6 +77,9 @@ async function publicarX(texto) {
     }, inicio);
     if (!url) throw new Error('No encontré el post en el perfil: revisar x.com/FCTOPSecret');
     return url;
+  } catch (e) {
+    await p.screenshot({ path: path.join(ROOT, 'scripts', 'debug-x.png') }).catch(() => {});
+    throw new Error(`${e.message.split('\n')[0]} (captura en scripts/debug-x.png)`);
   } finally {
     await p.close().catch(() => {});
     await b.close().catch(() => {});
