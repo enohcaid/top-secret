@@ -72,6 +72,24 @@ try {
     Log "Error en publicacion en redes: $_"
 }
 
+# ── PASO V: vigía del vivo de Twitch (goles + pantallas del reporte) ──────────
+# Si topsecretfc está en vivo y no hay vigía corriendo (lock con PID vivo), lo lanza en segundo plano.
+try {
+    $gql = Invoke-RestMethod 'https://gql.twitch.tv/gql' -Method POST -TimeoutSec 10 `
+        -Headers @{ 'Client-ID' = 'kimne78kx3ncx6brgo4mv6wki5h1ko' } `
+        -Body '{"query":"query{user(login:\"topsecretfc\"){stream{id}}}"}'
+    if ($gql.data.user.stream) {
+        $lock = "$repoRoot\fuentes\vivo\.vigia.lock"
+        $corriendo = $false
+        if (Test-Path $lock) { $corriendo = [bool](Get-Process -Id ([int](Get-Content $lock)) -ErrorAction SilentlyContinue) }
+        if (-not $corriendo) {
+            Log "topsecretfc en vivo: lanzando vigia-vivo.mjs"
+            Start-Process -FilePath 'cmd.exe' -WorkingDirectory $repoRoot -WindowStyle Hidden `
+                -ArgumentList '/c', 'node scripts\vigia-vivo.mjs >> scripts\vigia-vivo.log 2>&1'
+        }
+    }
+} catch { }
+
 # Verificar si hay pedido de regeneración pendiente
 try {
     $flag = Invoke-RestMethod "$worker/regen-flag" -TimeoutSec 10

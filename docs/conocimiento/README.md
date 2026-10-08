@@ -74,6 +74,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_copafacil_api](reference_copafacil_api.md) — Cómo extraer datos de torneos de CopáFácil (Flutter SPA) vía Firebase RTDB — patrón usado en el Worker de Top Secret
 - [reference_kit_crop_generate_image](reference_kit_crop_generate_image.md) — generate-image-chatgpt.mjs recorta un solo kit de T3 Kits.png en vez de mandar el poster completo con los 3 — el script elige el color, no ChatGPT
 - [reference_retransmitir_twitch](reference_retransmitir_twitch.md) — Retransmitir el vivo de Twitch (PS5) a Kick y YouTube desde la PC con streamlink + ffmpeg; claves en .env
+- [reference_vigia_vivo_twitch](reference_vigia_vivo_twitch.md) — Vigía del vivo: goles por cambio del marcador FC27 + capturas de las pantallas del reporte (OCR Windows), arranca solo vía watch-regen; scripts/vigia-vivo.mjs
 - [reference_noticias_en_redes](reference_noticias_en_redes.md) — Publicar una noticia en las redes desde el sitio: paso de revisión por red, piezas con título (noticia-redes.js), publicación desde la PC (publicar-noticia-redes.mjs)
 - [reference_publicar_redes](reference_publicar_redes.md) — Cómo se publica en YouTube/X/TikTok desde el Chrome CDP; Instagram/Facebook pendientes
 - [reference_renders_folder](reference_renders_folder.md) — Estructura y propósito de las carpetas en Renders/ — qué borrar y qué conservar
