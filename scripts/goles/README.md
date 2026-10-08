@@ -2,6 +2,8 @@
 
 Proceso validado el 2026-10-01 con los amistosos del 30/9. Juan lo pide junto con el reporte de cada día de competencia: los datos salen **del vivo en `twitch.tv/topsecretfc`**, ya no de los videos de YouTube.
 
+> **Desde 2026-10-08 el vigía del vivo hace los pasos 1 y 2 solo** (lunes a jueves 22:30–00:30): deja `fuentes/goles/v<clave>/source.mp4`, un clip por gol de TOP y un `datos.json` borrador. Solo queda el paso 3 (goleador, minuto) y el 4. Ver `docs/conocimiento/reference_vigia_vivo_twitch.md`. Lo de abajo sigue valiendo para VODs viejos o si el vigía no corrió.
+
 ## 1. Bajar el VOD
 ```bash
 node_modules/yt-dlp-exec/bin/yt-dlp.exe --flat-playlist --dump-json --playlist-end 3 https://www.twitch.tv/topsecretfc/videos   # id, título, duración

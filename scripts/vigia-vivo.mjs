@@ -1,17 +1,19 @@
 // Vigía del vivo de Twitch (topsecretfc): mira la transmisión a 1 cuadro/segundo y deja
 //   - goles: cada cambio en los números del marcador de FC27 (recorte + cuadro completo + hora del stream)
 //   - reporte: cada pantalla de estadísticas post-partido (Resumen/Eventos/Rendimiento...) en 720p + su OCR
-//   - grabación del vivo en segmentos .ts (para cortar clips sin bajar el VOD)
+//   - grabación del vivo y, al terminar, un clip por cada gol nuestro + datos.json borrador para
+//     scripts/goles/compilado.cjs (la grabación queda como fuentes/goles/v<clave>/source.mp4)
 // Salida: fuentes/vivo/<fecha>-<id>/ (gitignored). Al terminar escribe resumen.md.
 //
 //   node scripts/vigia-vivo.mjs                 -> si topsecretfc está en vivo, lo vigila hasta que corte
 //   node scripts/vigia-vivo.mjs --vod <id>      -> corre lo mismo sobre un VOD (prueba/calibración)
-//   opciones: --sin-grabar, --hasta HH:MM (corte en vivo, default 00:30)
+//   node scripts/vigia-vivo.mjs --solo-clips <carpeta>  -> rehace los clips de una sesión ya vigilada
+//   opciones: --sin-grabar (sin clips), --hasta HH:MM (corte en vivo, default 00:30)
 //
 // watch-regen.ps1 lo lanza solo lunes a jueves 22:30-00:30 si el canal está en vivo; un lock evita
 // dos vigías a la vez. A la hora de --hasta se corta aunque la transmisión siga.
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, unlinkSync } from 'node:fs';
+import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, unlinkSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import sharp from 'sharp';
@@ -33,7 +35,8 @@ const PESTANAS = ['resumen', 'posesión', 'posesion', 'tiros', 'pases', 'defensa
 
 const args = process.argv.slice(2);
 const vodId = args.includes('--vod') ? args[args.indexOf('--vod') + 1].replace(/^v/, '') : null;
-const grabar = !args.includes('--sin-grabar') && !vodId;
+const grabar = !args.includes('--sin-grabar');
+const soloClips = args.includes('--solo-clips') ? path.resolve(args[args.indexOf('--solo-clips') + 1]) : null;
 const hasta = args.includes('--hasta') ? args[args.indexOf('--hasta') + 1] : '00:30';
 
 // Próxima ocurrencia de HH:MM (hora local de la PC = ART)
@@ -94,13 +97,108 @@ const hayMarcador = caja => frac(caja, v => v > 200) > 0.45 && frac(caja, v => v
 // Cifras binarizadas por fila (local / visita); cambio = XOR/unión de píxeles oscuros.
 // Calibrado 2026-10-08 sobre el VOD 2893092714: ruido <= 0.09, de 2 a 3 = 0.23.
 const filas = num => [num.subarray(0, num.length / 2), num.subarray(num.length / 2)].map(r => Uint8Array.from(r, v => v < 110));
-const difer = (A, B) => Math.max(...A.map((a, k) => {
+const diferFilas = (A, B) => A.map((a, k) => {
   let x = 0, u = 0; for (let i = 0; i < a.length; i++) { x += a[i] ^ B[k][i]; u += a[i] | B[k][i]; }
   return x / Math.max(u, 1);
-}));
+});
+const difer = (A, B) => Math.max(...diferFilas(A, B));
 const UMBRAL = 0.16, AUSENCIA_PARTIDO = 90; // s sin marcador = el próximo que aparezca es otro partido
 
+// ── Clips de goles ───────────────────────────────────────────────────────────
+// En FC27 online no hay repetición: gol → festejo (cortes de cámara, ~5 s) → saque del medio. El marcador
+// cambia en el momento del gol o recién con el saque, según el caso. El clip termina justo antes del primer
+// corte de cámara entre 14 s antes y 4 s después del cambio (= arranca el festejo; medido hasta +2,4 s) y empieza
+// 15 s antes (criterio de scripts/goles/README.md). Sin corte (gol sin festejo, pasa directo al saque con una
+// transición suave) el marcador cambió con el gol: fin = cambio + 0,3 s. Escena (VOD 2893092714, 60 fps): juego <= 0,02; corte al festejo 0,27.
+function ff(argsFf) {
+  return new Promise((res, rej) => {
+    const p = spawn(ffmpeg, ['-hide_banner', ...argsFf], { stdio: ['ignore', 'ignore', 'pipe'] });
+    let err = ''; p.stderr.on('data', d => { err += d; });
+    p.on('exit', c => c === 0 ? res(err) : rej(new Error(err.split('\n').slice(-3).join(' '))));
+  });
+}
+
+async function cortesDeCamara(src, desde, dur) {
+  const log = await ff(['-ss', String(desde), '-t', String(dur), '-i', src, '-an',
+    '-vf', "scale=320:-2,select='gt(scene,0.12)',showinfo", '-f', 'null', '-']);
+  return [...log.matchAll(/pts_time:([\d.]+)/g)].map(m => desde + Number(m[1]));
+}
+
+// El contador de cuadros del vigía puede quedar unos segundos corrido respecto de la grabación
+// (medido: ~6 s en el VOD 2893092714; también hay reconexiones en vivo). Por eso cada gol se
+// re-ubica en source.mp4: se busca el cambio de cifras del marcador a 4 fps en [seg-10, seg+25].
+async function cambioEnGrabacion(src, seg) {
+  const desde = Math.max(0, seg - 10), FPS = 4;
+  const R = { x: SB_CAJA.left, y: SB_CAJA.top, w: SB_NUM.left + SB_NUM.width - SB_CAJA.left, h: SB_NUM.top + SB_NUM.height - SB_CAJA.top };
+  const buf = await new Promise((res, rej) => {
+    const p = spawn(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-ss', String(desde), '-t', '35', '-i', src, '-an',
+      '-vf', `fps=${FPS},scale=${W}:${H},crop=${R.w}:${R.h}:${R.x}:${R.y},format=gray`, '-f', 'rawvideo', 'pipe:1'],
+      { stdio: ['ignore', 'pipe', 'inherit'] });
+    const parts = []; p.stdout.on('data', d => parts.push(d));
+    p.on('exit', c => c === 0 ? res(Buffer.concat(parts)) : rej(new Error('ffmpeg alineando')));
+  });
+  const n = R.w * R.h, cuadros = [];
+  for (let o = 0; o + n <= buf.length; o += n) {
+    const f = buf.subarray(o, o + n);
+    const sub = (x, y, w, h) => { const out = new Uint8Array(w * h); for (let j = 0; j < h; j++) out.set(f.subarray((y + j) * R.w + x, (y + j) * R.w + x + w), j * w); return out; };
+    const caja = sub(0, 0, SB_CAJA.width, SB_CAJA.height);
+    cuadros.push(hayMarcador(caja) ? filas(sub(SB_NUM.left - R.x, SB_NUM.top - R.y, SB_NUM.width, SB_NUM.height)) : null);
+  }
+  const base = cuadros.find(Boolean);
+  if (!base) return null;
+  for (let i = 0; i + 3 < cuadros.length; i++) {
+    const v = cuadros.slice(i, i + 4);
+    if (v.every(c => c && difer(c, base) > UMBRAL)) return desde + i / FPS;
+  }
+  return null;
+}
+
+const leerEventos = OUT => existsSync(path.join(OUT, 'eventos.jsonl'))
+  ? readFileSync(path.join(OUT, 'eventos.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse) : [];
+
+async function armarClips(OUT, clave) {
+  const recDir = path.join(OUT, 'rec');
+  const golesTop = leerEventos(OUT).filter(e => e.tipo === 'gol' && e.aFavor !== false);
+  const GDIR = path.join(ROOT, 'fuentes/goles', 'v' + clave);
+  const src = path.join(GDIR, 'source.mp4');
+  mkdirSync(GDIR, { recursive: true });
+  if (!existsSync(src)) {
+    const ts = existsSync(recDir) ? readdirSync(recDir).filter(f => f.endsWith('.ts')).sort() : [];
+    if (!ts.length) { console.log('Sin grabación: no hay clips.'); return []; }
+    const lista = path.join(recDir, 'lista.txt');
+    writeFileSync(lista, ts.map(f => `file '${path.join(recDir, f).replace(/\\/g, '/')}'`).join('\n'));
+    await ff(['-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lista, '-c', 'copy', '-bsf:a', 'aac_adtstoasc', '-y', src]);
+    for (const f of [...ts, 'lista.txt']) try { unlinkSync(path.join(recDir, f)); } catch {}
+  }
+  const clips = [];
+  for (const g of golesTop) {
+    const cambio = await cambioEnGrabacion(src, g.seg).catch(e => { console.error('alinear:', e.message); return null; }) ?? g.seg;
+    const cortes = (await cortesDeCamara(src, Math.max(0, cambio - 14), 18));
+    const fin = +(cortes.length ? cortes[0] - 0.1 : cambio + 0.3).toFixed(2);
+    const inicio = +Math.max(0, fin - 15).toFixed(2);
+    const archivo = path.join(OUT, 'goles', `gol-${String(g.n).padStart(2, '0')}.mp4`);
+    await ff(['-loglevel', 'error', '-ss', String(inicio), '-t', String(+(fin - inicio).toFixed(2)), '-i', src,
+      '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-movflags', '+faststart', '-y', archivo]);
+    clips.push({ ...g, inicio, fin, porCorte: cortes.length > 0, archivo });
+    console.log(`clip gol #${g.n}: ${hms(inicio)} → ${hms(fin)}${cortes.length ? '' : ' (sin festejo: termina en el cambio de marcador)'}`);
+  }
+  // Borrador para el compilado: completar minuto, goleador, número, rival y escudo (ver README de goles)
+  const fecha = clave.startsWith('vivo-') ? clave.slice(5) : hoyArt();
+  writeFileSync(path.join(GDIR, 'datos.json'), JSON.stringify({
+    _ayuda: 'Borrador del vigía. Completar marcador/rival/escudoRival/minuto/goleador/numero (pantalla Eventos del reporte) y revisar inicio/fin. Ver scripts/goles/README.md.',
+    vod: clave, fecha, etiqueta: '', titulo: '', hudTopRightHasta: 100,
+    goles: clips.map(c => ({ inicio: c.inicio, fin: c.fin, marcador: '', rival: c.rival || '', escudoRival: '',
+      minuto: '', goleador: '', numero: '', _hora: hms(c.seg), _porCorte: c.porCorte })),
+  }, null, 2));
+  return clips;
+}
+
 async function main() {
+  if (soloClips) {
+    const clave = path.basename(soloClips).replace(/^vod-/, '').replace(/^(\d{4}-\d{2}-\d{2})-.*/, 'vivo-$1');
+    await armarClips(soloClips, clave);
+    return;
+  }
   let stream = null;
   if (!vodId) {
     stream = await enVivo();
@@ -119,6 +217,16 @@ async function main() {
   let base = null;           // números del marcador "estables"
   let candidato = null, candN = 0;
   let ultimoMarcador = -1e9, inicioMarcador = 0, partidos = 0;
+  let filaTop = null, rival = '', archivoPartido = '';
+  // ¿En qué fila del marcador está TOP? (el OCR lee bien las siglas ampliadas, no las cifras)
+  const leerEquipos = async png => {
+    const lineas = ((await ocr.leer(png)).lines || []).filter(l => /^[A-Z0-9]{3}/.test(l.text) && l.y < 130);
+    const top = lineas.find(l => /^TOP/.test(l.text));
+    if (!top) return false;
+    filaTop = top.y < 65 ? 0 : 1;
+    rival = lineas.find(l => l !== top)?.text.slice(0, 3) || rival;
+    return true;
+  };
   let ultimoReporte = '';
   let reportes = 0, goles = 0;
   let trabajando = Promise.resolve();
@@ -135,21 +243,34 @@ async function main() {
         // vuelve el marcador tras un rato largo: arranca (o sigue tras el entretiempo) un partido
         base = num; candidato = null; candN = 0; partidos++; inicioMarcador = seg;
         const nombre = `partido-${String(partidos).padStart(2, '0')}-${hms(seg).replace(/:/g, '')}`;
-        await img().extract(SB_RECORTE).resize(450).png().toFile(path.join(OUT, 'goles', `${nombre}-marcador.png`));
+        filaTop = null;
+        archivoPartido = path.join(OUT, 'goles', `${nombre}-marcador.png`);
         log('partido', { n: partidos, seg, hora: hms(seg) });
         console.log(`[${hms(seg)}] marcador en pantalla (partido/tiempo #${partidos})`);
       } else if (seg - inicioMarcador < 5) {
         base = num;   // el marcador recién entra con animación: se asienta antes de comparar
+      } else if (seg - inicioMarcador === 6) {
+        // ya quieto: recorte del partido + qué fila es TOP y siglas del rival
+        await img().extract(SB_RECORTE).resize(450).png().toFile(archivoPartido);
+        if (await leerEquipos(archivoPartido)) {
+          log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival });
+          console.log(`[${hms(seg)}]   TOP ${filaTop ? 'visitante' : 'local'} vs ${rival}`);
+        }
       } else if (difer(num, base) > UMBRAL) {
         // cambio sostenido 3 s = gol (descarta animaciones y repeticiones)
         if (candidato && difer(num, candidato) < UMBRAL) candN++; else { candidato = num; candN = 1; }
         if (candN >= 3) {
+          const df = diferFilas(candidato, base);
+          const fila = df[0] > df[1] ? 0 : 1;
           base = candidato; candidato = null; candN = 0; goles++;
           const ts = seg - 2, nombre = `gol-${String(goles).padStart(2, '0')}-${hms(ts).replace(/:/g, '')}`;
-          await img().extract(SB_RECORTE).resize(450).png().toFile(path.join(OUT, 'goles', `${nombre}-marcador.png`));
+          const pngGol = path.join(OUT, 'goles', `${nombre}-marcador.png`);
+          await img().extract(SB_RECORTE).resize(450).png().toFile(pngGol);
+          if (filaTop === null) await leerEquipos(pngGol);     // reintento si al arranque no se leyó
+          const aFavor = filaTop === null ? null : fila === filaTop;
           await img().jpeg({ quality: 88 }).toFile(path.join(OUT, 'goles', `${nombre}.jpg`));
-          log('gol', { n: goles, seg: ts, hora: hms(ts) });
-          console.log(`[${hms(ts)}] cambio de marcador #${goles}`);
+          log('gol', { n: goles, seg: ts, hora: hms(ts), aFavor, rival });
+          console.log(`[${hms(ts)}] cambio de marcador #${goles}${aFavor === null ? '' : aFavor ? ' — GOL DE TOP' : ' — gol en contra'}`);
         }
       } else { candidato = null; candN = 0; }
       ultimoMarcador = seg;
@@ -220,12 +341,18 @@ async function main() {
   await trabajando;
   ocr.cerrar();
 
-  // Resumen para revisar (y para cargar el partido / cortar clips)
-  const ev = existsSync(path.join(OUT, 'eventos.jsonl'))
-    ? readFileSync(path.join(OUT, 'eventos.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse) : [];
+  const clave = vodId || `vivo-${hoyArt()}`;
+  let clips = [];
+  if (grabar) { try { clips = await armarClips(OUT, clave); } catch (e) { console.error('Clips:', e.message); } }
+
+  // Resumen para revisar (y para cargar el partido / armar el compilado)
+  const ev = leerEventos(OUT);
   const md = [`# Vigía ${id}`, '', `Analizado: ${hms(t)} de stream.`, '',
     '## Marcador (partidos y goles)', ...ev.filter(e => e.tipo === 'gol' || e.tipo === 'partido')
-      .map(e => e.tipo === 'gol' ? `- ${e.hora} gol → goles/gol-${String(e.n).padStart(2, '0')}-*` : `- ${e.hora} **arranca partido/tiempo** → goles/partido-${String(e.n).padStart(2, '0')}-*`),
+      .map(e => e.tipo === 'gol'
+        ? `- ${e.hora} ${e.aFavor === false ? 'gol en contra' : e.aFavor ? '**GOL DE TOP**' : 'gol (¿de quién?)'}${e.rival ? ` vs ${e.rival}` : ''} → goles/gol-${String(e.n).padStart(2, '0')}-*`
+        : `- ${e.hora} **arranca partido/tiempo**${e.rival ? ` vs ${e.rival}` : ''} → goles/partido-${String(e.n).padStart(2, '0')}-*`),
+    '', '## Clips', clips.length ? `${clips.length} clips en goles/gol-NN.mp4; borrador del compilado en fuentes/goles/v${clave}/datos.json` : 'Sin clips.',
     '', '## Pantallas del reporte', ...ev.filter(e => e.tipo === 'reporte').map(e => `- ${e.hora} — ${e.titulo}`), ''];
   writeFileSync(path.join(OUT, 'resumen.md'), md.join('\n'));
   console.log(`Listo: ${goles} cambios de marcador, ${reportes} pantallas de reporte → ${OUT}`);
