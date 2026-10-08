@@ -168,8 +168,9 @@ async function avisar(texto) { await client.sendMessage(yo, texto); }
 client.on('ready', async () => {
   yo = client.info.wid._serialized;
   log('conectado como', client.info.pushname, yo, PRUEBA ? '(MODO PRUEBA)' : '');
-  // No se usa getChats(): con muchos chats falla en whatsapp-web.js. El grupo se reconoce por el
-  // nombre cuando llega su primer mensaje (ver esGrupoAmistosos).
+  // No se usa getChats()/msg.getChat(): fallan con contactos @lid en whatsapp-web.js. El grupo se
+  // busca directo en las colecciones internas de WhatsApp Web (ver buscarGrupo).
+  await buscarGrupo();
   await cargarEquipos();
   await leerOcupadosDelSitio();
   if (!libre()) {
@@ -180,7 +181,38 @@ client.on('ready', async () => {
     }
   }
   await avisar(`🕵️ *Bot de amistosos activo*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*.`);
+  if (!grupoId) await avisar('⚠️ No encontré el grupo de amistosos en tus chats: lo voy a reconocer cuando llegue un mensaje.');
+  await revisarAtrasados();
 });
+
+// Busca el grupo por nombre en las colecciones internas de WhatsApp Web.
+async function buscarGrupo() {
+  try {
+    const g = await client.pupPage.evaluate(src => {
+      const re = new RegExp(src, 'i');
+      const c = window.require('WAWebCollections').Chat.getModelsArray()
+        .find(c => c.id.server === 'g.us' && re.test(c.formattedTitle || c.name || c.groupMetadata?.subject || ''));
+      return c ? { id: c.id._serialized, nombre: c.formattedTitle || c.name } : null;
+    }, GRUPO.source);
+    if (g) { grupoId = g.id; log('grupo encontrado:', g.nombre, g.id); }
+    else log('grupo no encontrado entre los chats cargados');
+  } catch (e) { log('no pude buscar el grupo:', e.message.split('\n')[0]); }
+}
+
+// Pedidos que llegaron al grupo antes de que arrancara el bot (hoy desde las 12:00 ART).
+async function revisarAtrasados() {
+  if (!grupoId) return;
+  try {
+    const desde = Math.floor(new Date(`${hoy()}T12:00:00-03:00`).getTime() / 1000);
+    const msgs = await client.pupPage.evaluate((id, desde) => {
+      const chat = window.require('WAWebCollections').Chat.get(id);
+      return (chat?.msgs.getModelsArray() || []).filter(m => m.t >= desde && !m.id.fromMe && m.body)
+        .map(m => ({ id: m.id._serialized, body: m.body, author: m.author?._serialized || m.id.participant?._serialized || '', notify: m.notifyName || m.senderObj?.pushname || '' }));
+    }, grupoId, desde);
+    log(`mensajes de hoy en el grupo: ${msgs.length}`);
+    for (const m of msgs) await pedidoGrupo({ id: { _serialized: m.id }, body: m.body, from: grupoId, author: m.author, _data: { notifyName: m.notify } });
+  } catch (e) { log('no pude leer mensajes anteriores:', e.message.split('\n')[0]); }
+}
 
 // Mensajes nuevos (de otros y míos).
 client.on('message_create', async msg => {
@@ -197,20 +229,32 @@ client.on('message_create', async msg => {
 });
 
 const gruposVistos = {};
+const vistos = new Set();                                             // ids de mensajes ya procesados
 async function esGrupoAmistosos(msg) {
   if (grupoId) return msg.from === grupoId;
   if (msg.from in gruposVistos) return gruposVistos[msg.from];
   let nombre = '';
-  try { nombre = (await msg.getChat()).name || ''; } catch (e) {}
+  try {
+    nombre = await client.pupPage.evaluate(id => {
+      const c = window.require('WAWebCollections').Chat.get(id);
+      return c ? (c.formattedTitle || c.name || c.groupMetadata?.subject || '') : '';
+    }, msg.from);
+  } catch (e) { log('no pude leer el nombre del grupo', msg.from, e.message.split('\n')[0]); }
+  if (!nombre) return false;                                           // no cachear un fallo
   gruposVistos[msg.from] = GRUPO.test(nombre);
   if (gruposVistos[msg.from]) { grupoId = msg.from; log('grupo encontrado:', nombre); }
   return gruposVistos[msg.from];
 }
 
 async function pedidoGrupo(msg) {
-  if (!PIDE.test(msg.body)) return;
+  const mid = msg.id?._serialized;
+  if (mid && vistos.has(mid)) return;
+  if (mid) vistos.add(mid);
+  if (!PIDE.test(msg.body)) { log('mensaje del grupo sin pedido:', msg.body.slice(0, 60).replace(/\n/g, ' ')); return; }
   if (!libre() && !PRUEBA) return;
-  const contacto = await msg.getContact();
+  let contacto = {};
+  try { contacto = await msg.getContact(); } catch (e) {}
+  if (!contacto.pushname && !contacto.name) contacto = { pushname: msg._data?.notifyName || '' };
   const autor = msg.author || msg.from;
   if (Object.values(st.pedidos).some(p => p.autor === autor && p.estado !== 'descartado')) return;   // ya lo tenemos
   const nombreContacto = contacto.pushname || contacto.name || '';
