@@ -1250,8 +1250,62 @@ export default {
 
   async scheduled(event, env, ctx) {
     ctx.waitUntil(dailyConvocatoriaReset(env));
+    ctx.waitUntil(purgarAmistososPasados(env));
   }
 };
+
+// ── CALENDARIO — borrar amistosos ya jugados (Cron, cada 1 min) ──────────────
+// Regla del usuario (2026-10-08): de un amistoso nunca se reporta resultado, así que
+// una vez pasado su día se borra de calendario/estado.custom. results/edits/suspended
+// guardan las entradas custom como 'c<índice>': al sacar elementos del array hay que
+// reindexar esas claves (igual que deleteCustom() en calendario.html) o quedarían
+// apuntando a otro partido. La escritura lleva precondición updateTime: si alguien
+// guardó el calendario entre el GET y el PATCH, falla y se reintenta al minuto.
+async function purgarAmistososPasados(env) {
+  const FS_CAL = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado';
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+  try {
+    const resp = await fetch(FS_CAL);
+    if (!resp.ok) return;
+    const doc = await resp.json();
+    const custom = doc.fields?.custom?.arrayValue?.values || [];
+    const vencido = v => {
+      const f = v.mapValue?.fields || {};
+      return f.league?.stringValue === 'Amistoso' && (f.date?.stringValue || '9999') < today;
+    };
+    if (!custom.some(vencido)) return;
+
+    const nuevoIndice = {}; // índice viejo → nuevo (los borrados no figuran)
+    const kept = [];
+    custom.forEach((v, i) => { if (!vencido(v)) { nuevoIndice[i] = kept.length; kept.push(v); } });
+
+    const remap = name => {
+      const src = doc.fields?.[name]?.mapValue?.fields || {};
+      const out = {};
+      for (const [k, val] of Object.entries(src)) {
+        const m = /^c(\d+)$/.exec(k);
+        if (!m) { out[k] = val; continue; }
+        const ni = nuevoIndice[+m[1]];
+        if (ni !== undefined) out['c' + ni] = val;
+      }
+      return { mapValue: { fields: out } };
+    };
+
+    const fields = {
+      custom: { arrayValue: { values: kept } },
+      results: remap('results'),
+      edits: remap('edits'),
+      suspended: remap('suspended'),
+    };
+    const params = Object.keys(fields).map(p => 'updateMask.fieldPaths=' + p)
+      .concat('currentDocument.updateTime=' + encodeURIComponent(doc.updateTime)).join('&');
+    await fetch(FS_CAL + '?' + params, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields }),
+    });
+  } catch (e) { /* se reintenta en el próximo disparo del cron */ }
+}
 
 // ── CONVOCATORIA — reset diario server-side (Cron Trigger, cada 1 min) ───────
 // Antes esto lo decidía cada pestaña de convocatoria.html comparando su propio TODAY
