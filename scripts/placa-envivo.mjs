@@ -12,10 +12,10 @@ import { chromium } from 'playwright';
 import sharp from 'sharp';
 
 const CFG = {
-  ligas: {                                                    // copa = subtítulo de la placa (actualizar al cambiar de torneo)
-    VPUG: { logo: 'logos/VPUG logo.png', color: '#3ecf8e', copa: 'Liga Pretemporada' },
-    VPN: { logo: 'logos/VPN logo.png', color: '#f5c518', copa: 'VPN' },
-    '11x11': { logo: 'logos/11x11 logo.png', color: '#4a9eff', copa: '11x11' },
+  ligas: {                                                    // el torneo (subtítulo) sale de cada partido: ver torneoDe()
+    VPUG: { logo: 'logos/VPUG logo.png', color: '#3ecf8e' },
+    VPN: { logo: 'logos/VPN logo.png', color: '#f5c518' },
+    '11x11': { logo: 'logos/11x11 logo.png', color: '#4a9eff' },
   },
   bio: 'LINK EN LA BIO',                                      // linktree en la bio de @fctopsecret (null para sacarlo)
   canales: [
@@ -36,19 +36,33 @@ const literal = (src, desde) => { const k = src.indexOf(desde); const ini = src.
 const cal = fs.readFileSync('calendario.html', 'utf8');
 const RAW = literal(cal, 'const RAW = [');
 const BADGES = literal(cal, 'const VPUG_T4_BADGES = {');
+// Torneo de cada partido de RAW: el bloque "// ══ <LIGA> T? — <torneo> ══" bajo el que está anotado en calendario.html
+// ("VPUG T4 — Liga Pretemporada VPUG (FC-27) (T7 CopáFácil), Grupo D" → "Liga Pretemporada"). Sin nombre → la liga sola.
+const torneoDe = (h, liga) => {
+  const t = (h.split(/\s+—\s+/)[1] || '').replace(/\(.*?\)/g, '').replace(/,.*$/, '').replace(/#\d+/g, '')
+    .replace(new RegExp('\\b' + liga + '\\b', 'gi'), '').replace(/\s+/g, ' ').trim();
+  return !t || /^temporada\b|^partidos jugados/i.test(t) ? liga : t.replace(/\b(\p{Lu})(\p{Lu}+)\b/gu, (_, a, b) => a + b.toLowerCase());
+};
+const rawSrc = cal.slice(cal.indexOf('const RAW = ['), cal.indexOf('\n];', cal.indexOf('const RAW = [')));
+const TORNEOS = []; let cab = '';
+for (const l of rawSrc.split('\n')) { const h = l.match(/\/\/\s*══\s*(.*?)\s*══/); if (h) cab = h[1]; else if (/^\s*\{\s*date:/.test(l)) TORNEOS.push(cab); }
+if (TORNEOS.length !== RAW.length) TORNEOS.length = 0;          // si no cuadra, cae a la liga sola
 const un = v => v.mapValue ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, un(x)]))
   : v.arrayValue ? (v.arrayValue.values || []).map(un) : Object.values(v)[0];
 let est = {};
 try { est = un({ mapValue: (await (await fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado')).json()) }); }
 catch (e) { console.warn('Firestore no responde, uso solo calendario.html:', e.message); }
 const partidos = [
-  ...RAW.map((m, k) => ({ ...m, ...(est.edits?.[k] || {}), date: est.suspended?.[k]?.newDate || m.date })),
-  ...(est.custom || []).filter(c => c.tipo === 'partido'),
+  ...RAW.map((m, k) => { const x = { ...m, ...(est.edits?.[k] || {}), date: est.suspended?.[k]?.newDate || m.date };
+    return { ...x, torneo: TORNEOS[k] ? torneoDe(TORNEOS[k], x.league) : x.league }; }),
+  ...(est.custom || []).filter(c => c.tipo === 'partido')
+    .map(c => ({ ...c, torneo: c.league === 'Amistoso' ? 'Amistoso' : c.instancia ? `${c.league} · ${c.instancia}` : c.league })),
 ].filter(m => m.date === FECHA).sort((x, y) => x.time.localeCompare(y.time))
-  .map(m => ({ hora: m.time, rival: m.rival, liga: m.league, escudo: BADGES[m.rival] || m.badge || null }));
+  .map(m => ({ hora: m.time, rival: m.rival, liga: m.league, torneo: m.torneo, escudo: BADGES[m.rival] || m.badge || null }));
 const ligas = [...new Set(partidos.map(p => p.liga).filter(l => CFG.ligas[l]))];
-const L0 = CFG.ligas[ligas[0]] || { color: '#c9a84c', copa: partidos.length ? 'Amistoso' : 'Top Secret FC' };
-console.log(`${FECHA}: ${partidos.length} partido(s)`, partidos.map(p => `${p.hora} ${p.rival} (${p.liga})`).join(' · '));
+const torneos = [...new Set(partidos.map(p => p.torneo))];
+const L0 = { color: ligas.length === 1 ? CFG.ligas[ligas[0]].color : '#c9a84c', copa: torneos.join(' · ') || 'Top Secret FC' };
+console.log(`${FECHA}: ${partidos.length} partido(s)`, partidos.map(p => `${p.hora} ${p.rival} (${p.liga} — ${p.torneo})`).join(' · '));
 
 // ── Jugadores: 3 del plantel T4 con Gesto4, rotando por día ──
 const rost = fs.readFileSync('roster.js', 'utf8'); const t4 = rost.slice(rost.indexOf('const ROSTER_T4'));
@@ -84,7 +98,7 @@ body{width:1080px;height:1920px;position:relative;overflow:hidden;background:#0a
 .badge{display:inline-flex;align-items:center;gap:16px;font-weight:800;font-size:40px;letter-spacing:10px;color:#fff}
 .badge b{width:24px;height:24px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 0 10px rgba(255,59,59,.22),0 0 30px #ff3b3b}
 .vivo h1{font-weight:900;font-size:236px;line-height:.84;letter-spacing:4px;margin-top:18px;background:linear-gradient(180deg,#fff 20%,#c9a84c 100%);-webkit-background-clip:text;color:transparent}
-.vivo .sub{font-weight:800;font-size:46px;letter-spacing:12px;color:${L0.color};margin-top:10px}
+.vivo .sub{font-weight:800;font-size:${L0.copa.length > 22 ? 34 : 46}px;letter-spacing:${L0.copa.length > 22 ? 6 : 12}px;color:${L0.color};margin-top:10px}
 .jug{position:absolute;z-index:2}
 .jug.c{height:600px;left:50%;transform:translateX(-50%);top:680px;z-index:3}
 .jug.l,.jug.r{height:530px;top:740px;filter:brightness(.78)}.jug.l{left:130px}.jug.r{right:130px}
@@ -108,7 +122,7 @@ body{width:1080px;height:1920px;position:relative;overflow:hidden;background:#0a
 <div class="vivo"><div class="badge"><b></b>AHORA</div><h1>EN VIVO</h1><div class="sub">${L0.copa.toUpperCase()}</div></div>
 <img class="jug l" src="${izq}"><img class="jug r" src="${der}"><img class="jug c" src="${centro}">
 <div class="fade"></div>
-<div class="abajo">${partidos.length ? `<div class="part">${partidos.map(p => `<div class="fila"><div class="hora">${p.hora}</div>${p.escudo ? `<img class="esc" src="${p.escudo}">` : ''}<div class="riv">${p.rival}</div>${ligas.length > 1 || !CFG.ligas[p.liga] ? `<div class="tag">${p.liga.toUpperCase()}</div>` : ''}</div>`).join('')}</div>` : ''}
+<div class="abajo">${partidos.length ? `<div class="part">${partidos.map(p => `<div class="fila"><div class="hora">${p.hora}</div>${p.escudo ? `<img class="esc" src="${p.escudo}">` : ''}<div class="riv">${p.rival}</div>${torneos.length > 1 ? `<div class="tag">${p.torneo.toUpperCase()}</div>` : ''}</div>`).join('')}</div>` : ''}
 <div class="cta">MIRANOS DONDE QUIERAS</div>
 <div class="canales">${CFG.canales.map(c => `<div class="canal"><div class="ic">${ICONO[c.red]}</div><span>${c.url}</span></div>`).join('')}</div>
 ${CFG.bio ? `<div class="bio"><span>${CFG.bio}</span></div>` : ''}</div>
