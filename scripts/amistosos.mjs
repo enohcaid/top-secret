@@ -259,7 +259,7 @@ client.on('message_create', async msg => {
     if (!yo) return;
     // 1) Comandos de Juan en su chat consigo mismo.
     // El chat consigo mismo puede venir como @c.us o como @lid (yoLid).
-    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉)/u.test(msg.body)) {
+    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉|⏱️)/u.test(msg.body)) {
       // Varios comandos en un mismo mensaje, uno por línea ("B\nC no\nD no").
       for (const linea of msg.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
       return;
@@ -307,12 +307,15 @@ async function pedidoGrupo(msg) {
   // que ya tiene agendados: "22:40 vs instituto senior").
   const { equipoTxt, horas } = leerPedido(msg.body);
   const eq = buscarEquipo(equipoTxt || nombreContacto, autor) || (equipoTxt && nombreContacto ? buscarEquipo(nombreContacto) : null);
-  if (!eq) { log('pedido ignorado (equipo fuera de 1ra/2da o sin identificar):', equipoTxt || nombreContacto, '|', breve); return; }
+  // Nombra un equipo que no es de 1ra/2da → se ignora. No dice equipo pero sí horarios ("23 / 23.40") → se le pregunta cuál es.
+  if (!eq && (equipoTxt || !horas.length)) { log('pedido ignorado (equipo fuera de 1ra/2da o sin identificar):', equipoTxt || nombreContacto, '|', breve); return; }
+  const preguntar = !eq;
   // Si el pedido lista horarios, solo sirven los que tiene libres y nosotros también.
   const susLibres = horas.length ? horas.filter(h => h.libre).map(h => h.hora).filter(h => SLOTS.includes(h) && !ocupados().has(h)) : null;
-  if (susLibres && !susLibres.length) { log('pedido ignorado (sin horarios libres en común):', eq.nombre, '|', breve); return; }
+  if (susLibres && !susLibres.length) { log('pedido ignorado (sin horarios libres en común):', eq?.nombre || nombreContacto, '|', breve); return; }
   const id = letra(st.siguiente++);
-  st.pedidos[id] = { autor, contacto: nombreContacto, texto: msg.body.slice(0, 300), equipo: !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : null, estado: 'nuevo', ts: Date.now() };
+  st.pedidos[id] = { autor, contacto: nombreContacto, texto: msg.body.slice(0, 300), equipo: eq && !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : null, estado: 'nuevo', ts: Date.now() };
+  if (preguntar) st.pedidos[id].preguntar = true;
   const p = st.pedidos[id];
   if (susLibres) p.horas = susLibres;
   p.propuesto = proponerHora(id);
@@ -322,8 +325,8 @@ async function pedidoGrupo(msg) {
   const corrida = p.propuesto && (p.horas || SLOTS.filter(s => !ocupados().has(s)))[0] !== p.propuesto ? `; ${(p.horas || SLOTS.filter(s => !ocupados().has(s)))[0]} ya se la propuse a otro pedido` : '';
   const oferta = p.propuesto ? `Le ofrezco *${p.propuesto}*${susHoras || corrida ? ` (${[susHoras, corrida.slice(2)].filter(Boolean).join('; ')})` : ''}.`
     : `_En espera_: ${p.horas ? `sus horarios (${p.horas.join(', ')})` : 'los horarios libres'} ya están propuestos a otros pedidos. Si se libera alguno, se lo ofrezco.`;
-  await avisar(`📣 *Pedido ${id}* — ${eq?.dudoso ? `¿${eq.dudoso.join(' o ')}?` : `*${eq.nombre}* (${eq.div})`}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${oferta} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${!eq.dudoso ? '' : `, *${id} <equipo>* para definir el equipo`}, o *${id} no*.`);
-  if (AUTO && p.propuesto && !eq.dudoso && eq.div !== '?') await ofrecer(id, null, null);
+  await avisar(`📣 *Pedido ${id}* — ${preguntar ? '_no dice qué equipo es: se lo pregunto al ofrecerle_' : eq.dudoso ? `¿${eq.dudoso.join(' o ')}?` : `*${eq.nombre}* (${eq.div})`}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${oferta} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq?.dudoso ? `, *${id} <equipo>* para definir el equipo` : ''}, o *${id} no*.`);
+  if (AUTO && p.propuesto && (preguntar || (!eq.dudoso && eq.div !== '?'))) await ofrecer(id, null, null);
 }
 
 // Cuando cambian los horarios (se ofrece, confirma, rechaza o descarta algo), revisa los pedidos que
@@ -336,7 +339,7 @@ async function reacomodar() {
     if (nueva === antes) continue;
     p.propuesto = nueva; save();
     log(`${id}: propuesta ${antes || 'en espera'} → ${nueva || 'en espera'}`);
-    if (AUTO && nueva && p.equipo && p.equipo.div !== '?') { await ofrecer(id, null, null); continue; }
+    if (AUTO && nueva && (p.preguntar || (p.equipo && p.equipo.div !== '?'))) { await ofrecer(id, null, null); continue; }
     await avisar(nueva ? `📣 *${id}* ${p.equipo?.nombre || ''}: ${antes ? `${antes} ya no está libre` : 'se liberó un horario'}, ahora le ofrezco *${nueva}*. Respondé *${id}* para mandar o *${id} no*.`
       : `📣 *${id}* ${p.equipo?.nombre || ''}: ${antes} ya no está libre y no le queda otro de sus horarios. Queda en espera.`);
   }
@@ -352,17 +355,18 @@ async function ofrecer(id, slot, equipoTxt) {
     if (p.contacto) APR.alias[p.contacto.toLowerCase()] = p.equipo.nombre;
     guardarAprendido();
   }
-  if (!p.equipo) return avisar(`⚠️ ${id}: decime qué equipo es (*${id} <equipo>*).`);
+  if (equipoTxt && p.estado === 'ofrecido' && !slot) return avisar(`📋 ${id}: equipo *${p.equipo.nombre}*. Si confirma, respondé *${id} ok*.`);
+  if (!p.equipo && !p.preguntar) return avisar(`⚠️ ${id}: decime qué equipo es (*${id} <equipo>*).`);
   slot = slot || (p.estado === 'ofrecido' ? p.slot : (p.propuesto && !reservados(id).has(p.propuesto) ? p.propuesto : proponerHora(id)));
   if (!slot && p.horas) return avisar(`⚠️ ${id}: sus horarios (${p.horas.join(', ')}) ya están tomados o propuestos a otro pedido. Si querés otro: *${id} 23:40*.`);
   if (!slot) return avisar('⚠️ Ya no quedan horarios libres.');
   if (ocupados().has(slot) && p.slot !== slot) return avisar(`⚠️ ${slot} ya está tomado u ofrecido. Libres: ${SLOTS.filter(s => !ocupados().has(s)).join(', ') || 'ninguno'}.`);
-  const texto = `Buenas, soy de Top Secret, jugamos a las ${slot} hs?`;
+  const texto = `Buenas, soy de Top Secret, jugamos a las ${slot} hs?${p.equipo ? '' : ' Qué equipo son?'}`;
   if (PRUEBA) log(`[prueba] no se envía a ${p.contacto}: ${texto}`);
   else await client.sendMessage(p.autor, texto);
   Object.assign(p, { estado: 'ofrecido', slot, ofrecidoTs: Date.now() });
   save();
-  await avisar(`✅ ${id}: le escribí a ${p.contacto || p.equipo.nombre} (${p.equipo.nombre}) → “${texto}”${PRUEBA ? ' _(prueba: no enviado)_' : ''}`);
+  await avisar(`✅ ${id}: le escribí a ${p.contacto || p.equipo?.nombre || 'el contacto'}${p.equipo ? ` (${p.equipo.nombre})` : ''} → “${texto}”${PRUEBA ? ' _(prueba: no enviado)_' : ''}`);
   await reacomodar();
 }
 
@@ -390,20 +394,35 @@ async function confirmar(id, slot, rival = false) {
 }
 
 async function respuestaPrivada(msg) {
-  const [id, p] = Object.entries(st.pedidos).find(([, p]) => p.estado === 'ofrecido' && p.autor === msg.from) || [];
+  const [id, p] = Object.entries(st.pedidos).find(([, p]) => ['ofrecido', 'vencido'].includes(p.estado) && p.autor === msg.from) || [];
   if (!p) { return; }
   const txt = msg.body || '';
+  // Pedido sin equipo: la respuesta a "Qué equipo son?" trae el nombre.
+  if (!p.equipo) {
+    const eq = matchEquipo(txt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
+    if (eq && !eq.dudoso) {
+      p.equipo = { nombre: eq.nombre, div: eq.div, logo: eq.logo }; save();
+      APR.autores[p.autor] = eq.nombre; guardarAprendido();
+      log(`${id}: el contacto es de ${eq.nombre} (${eq.div})`);
+    }
+  }
+  const quien = p.equipo ? `*${p.equipo.nombre}*` : `${p.contacto || 'el contacto'} _(equipo sin reconocer)_`;
+  if (p.estado === 'vencido') {
+    const libreAun = !reservados(id).has(p.slot);
+    return avisar(`💬 ${id} ${quien} respondió tarde (ya había liberado ${p.slot}): “${txt.slice(0, 200)}”\n${libreAun ? `${p.slot} sigue libre: si confirma, *${id} ok${p.equipo ? '' : ' <equipo>'}*.` : `${p.slot} ya está tomado: si querés otro, *${id} ok 23:40${p.equipo ? '' : ' <equipo>'}*.`} Si no, *${id} no*.`);
+  }
   const otraHora = (txt.match(/\b(\d{1,2})[:.](\d{2})(?!\d)/) || [])[0];
   if (SI.test(txt) && !NO.test(txt) && (!otraHora || otraHora.replace('.', ':') === p.slot)) {
+    if (!p.equipo) return avisar(`💬 ${id} ${quien} dijo que sí: “${txt.slice(0, 200)}”\nNo sé qué equipo es: respondé *${id} ok <equipo>* para confirmarlo, o *${id} no*.`);
     log(`${id}: respuesta positiva de ${p.equipo.nombre}: ${txt}`);
     return confirmar(id, null, true);
   }
   if (NO.test(txt) && !SI.test(txt)) {
     p.estado = 'rechazado'; save();
-    await avisar(`💬 ${id} *${p.equipo.nombre}* dijo que no: “${txt.slice(0, 200)}”. Libero ${p.slot}.`);
+    await avisar(`💬 ${id} ${quien} dijo que no: “${txt.slice(0, 200)}”. Libero ${p.slot}.`);
     return reacomodar();
   }
-  await avisar(`💬 ${id} *${p.equipo.nombre}* respondió: “${txt.slice(0, 250)}”\nSi confirma, respondé *${id} ok* (o *${id} ok 23:20* si es otro horario). Si no, *${id} no*.`);
+  await avisar(`💬 ${id} ${quien} respondió: “${txt.slice(0, 250)}”\nSi confirma, respondé *${id} ok${p.equipo ? '' : ' <equipo>'}* (o *${id} ok 23:20* si es otro horario). Si no, *${id} no*.`);
 }
 
 async function comando(body) {
@@ -435,13 +454,37 @@ async function comando(body) {
   const hora = (resto.match(/\b(\d{1,2})[:.](\d{2})\b/) || [])[0]?.replace('.', ':');
   if (hora && !SLOTS.includes(hora)) return avisar(`⚠️ ${hora} no es uno de los horarios (${SLOTS.join(', ')}).`);
   if (/^no\b/i.test(resto)) { st.pedidos[id].estado = 'descartado'; save(); await avisar(`🗑️ ${id} descartado.`); return reacomodar(); }
-  if (/^ok\b/i.test(resto)) return confirmar(id, hora);
+  if (/^ok\b/i.test(resto)) {
+    // "F ok Los Pibes" / "F ok 23:40 Los Pibes": define el equipo y confirma.
+    const eqTxt = resto.replace(/^ok\b/i, '').replace(/\b\d{1,2}[:.]\d{2}\b/, '').trim();
+    if (eqTxt) {
+      const p = st.pedidos[id], eq = matchEquipo(eqTxt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
+      p.equipo = eq && !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : { nombre: eqTxt, div: '?', logo: null };
+      if (p.autor) { APR.autores[p.autor] = p.equipo.nombre; guardarAprendido(); }
+      save();
+    }
+    return confirmar(id, hora);
+  }
   const equipoTxt = resto.replace(/\b\d{1,2}[:.]\d{2}\b/, '').trim();
   return ofrecer(id, hora, equipoTxt || null);
 }
 
 // Corte automático a las 23:45 ART.
-setInterval(() => { if (horaArt() >= '23:45') { log('23:45: fin del día, apago.'); process.exit(0); } }, 60000);
+setInterval(() => { if (horaArt() >= '23:45') { log('23:45: fin del día, apago.'); process.exit(0); } vencerOfertas().catch(e => log('error:', e.message)); }, 60000);
+
+// Oferta sin respuesta en 30 min: se libera el horario para otro pedido. Si el rival contesta
+// después, el aviso a Juan dice que llegó tarde (ver respuestaPrivada).
+const VENCE_MIN = 30;
+async function vencerOfertas() {
+  const vencidos = Object.entries(st.pedidos).filter(([, p]) => p.estado === 'ofrecido' && Date.now() - (p.ofrecidoTs || 0) > VENCE_MIN * 60000);
+  if (!vencidos.length) return;
+  for (const [id, p] of vencidos) {
+    p.estado = 'vencido'; save();
+    log(`${id}: sin respuesta en ${VENCE_MIN} min, libero ${p.slot}`);
+    await avisar(`⏱️ ${id} ${p.equipo?.nombre || p.contacto || ''} no contestó en ${VENCE_MIN} min: libero *${p.slot}*.`);
+  }
+  await reacomodar();
+}
 process.on('SIGINT', async () => { try { await client.destroy(); } catch {} process.exit(0); });
 
 // Al recuperar la sesión, WhatsApp Web a veces recarga la página mientras se inyecta el bot
