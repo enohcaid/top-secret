@@ -2672,6 +2672,23 @@ const SEED_MATCHES = [
     {name:'F. van Dijk',  matched:null,               played_pos:'PO',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  { rival:'Real Envido', league:'VPUG', date:'2026-10-07', match_result:'3-1', isHome:false, uploadedAt:'2026-10-08T00:00:00.000Z',
+    notes:'Liga Pretemporada · Grupo D · Fecha 4 (Visita) · goles: NicoBJ_96 1\' y 29\', Peron 45\' (REN), Lautavester7 (2T) · reporte: fotos de pantalla', torneo:'Liga Pretemporada VPUG (FC27)',
+    team_stats:{posesion:null,tiros:null,tiros_arco:null,goles_esperados:null,pases:203,precision_pases:85,entradas:36,entradas_exito:17,intercepciones:null,paradas:null,faltas:0,fuera_juego:0,corneres:null,regates_exito:160,precision_tiro:null},
+  players:[
+    {name:'Lautavester7', matched:'Lautavester7',     played_pos:'DI',  rating:7.8, goals:1, assists:1, passes:11,   pass_accuracy:91,   distance_km:17.8, sprints:null, tackles:null, interceptions:null},
+    {name:'NicoBJ 96',    matched:'NicoBJ_96',        played_pos:'DD',  rating:9.1, goals:2, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'NIKILEO527',   matched:'nikileo527',       played_pos:'MI',  rating:7.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'c. mancini',   matched:'CipriMancini',     played_pos:'MCI', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pepo',         matched:'pepolemmo2710',    played_pos:'MCD', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',      matched:'Guiidow',          played_pos:'MD',  rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32DaniSton', matched:'RS32-DaniStone',   played_pos:'MCD', rating:8.8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Charly',       matched:'endiabladorojo66', played_pos:'DCI', rating:8.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',     matched:'Cabers14',         played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Huber',        matched:'Huber236',         played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12', matched:'Ivan_Cabj_La12',   played_pos:'PO',  rating:5.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
