@@ -308,7 +308,8 @@ async function ofrecer(id, slot, equipoTxt) {
   await avisar(`✅ ${id}: le escribí a ${p.contacto || p.equipo.nombre} (${p.equipo.nombre}) → “${texto}”${PRUEBA ? ' _(prueba: no enviado)_' : ''}`);
 }
 
-async function confirmar(id, slot) {
+// rival = true cuando confirma el bot por la respuesta del rival: si quedó cargado, le contesta "Anotado".
+async function confirmar(id, slot, rival = false) {
   const p = st.pedidos[id];
   if (!p || !p.equipo) return avisar(`⚠️ ${id}: no hay pedido con equipo definido.`);
   p.slot = slot || p.slot || libre();
@@ -316,7 +317,16 @@ async function confirmar(id, slot) {
   if (st.confirmados[p.slot] && st.confirmados[p.slot] !== p.equipo.nombre) return avisar(`⚠️ ${p.slot} ya está confirmado con ${st.confirmados[p.slot]}.`);
   const ok = await cargarEnSitio(p);
   p.estado = 'confirmado'; st.confirmados[p.slot] = p.equipo.nombre; save();
-  await avisar(`✅ *Amistoso confirmado*: Top Secret vs *${p.equipo.nombre}* a las *${p.slot}*.${ok ? ' Cargado en el calendario y la convocatoria.' : ' ⚠️ No pude cargarlo en el sitio: agregalo a mano.'}\nQuedan: ${SLOTS.filter(s => !st.confirmados[s]).join(', ') || 'ninguno 🎉'}`);
+  let anotado = '';
+  if (rival && ok) {
+    const texto = `Anotado, ${p.slot} 👍`;
+    if (PRUEBA) { log(`[prueba] no se envía a ${p.contacto}: ${texto}`); anotado = ' _(prueba: “Anotado” no enviado)_'; }
+    else {
+      try { await client.sendMessage(p.autor, texto); anotado = ` Le contesté “${texto}”.`; }
+      catch (e) { log('no pude mandar el anotado:', e.message.split('\n')[0]); anotado = ' ⚠️ No le pude contestar “Anotado”: escribile vos.'; }
+    }
+  }
+  await avisar(`✅ *Amistoso confirmado*: Top Secret vs *${p.equipo.nombre}* a las *${p.slot}*.${ok ? ' Cargado en el calendario y la convocatoria.' : ' ⚠️ No pude cargarlo en el sitio: agregalo a mano (al rival no le contesté).'}${anotado}\nQuedan: ${SLOTS.filter(s => !st.confirmados[s]).join(', ') || 'ninguno 🎉'}`);
   if (SLOTS.every(s => st.confirmados[s])) { await avisar('🎉 Los 4 horarios están cubiertos. Apago el bot.'); setTimeout(() => process.exit(0), 3000); }
 }
 
@@ -327,7 +337,7 @@ async function respuestaPrivada(msg) {
   const otraHora = (txt.match(/\b(\d{1,2})[:.](\d{2})(?!\d)/) || [])[0];
   if (SI.test(txt) && !NO.test(txt) && (!otraHora || otraHora.replace('.', ':') === p.slot)) {
     log(`${id}: respuesta positiva de ${p.equipo.nombre}: ${txt}`);
-    return confirmar(id);
+    return confirmar(id, null, true);
   }
   if (NO.test(txt) && !SI.test(txt)) {
     p.estado = 'rechazado'; save();
