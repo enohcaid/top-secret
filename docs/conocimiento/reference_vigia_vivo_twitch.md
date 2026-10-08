@@ -12,7 +12,9 @@ metadata:
 - `reporte/reporte-NNN-*.png` + `.json`: cada pantalla de estadísticas post-partido (Resumen/Eventos/Rendimiento, una por pestaña o jugador) en 720p, con el OCR de Windows. De ahí sale la carga en `seed_matches.js`: resultado, goleadores con minuto, nota/G/AST por jugador y stats del equipo. Juan abre estas pantallas al final de cada partido oficial; en los amistosos hay que pedirle que las deje ~5 s.
 - `resumen.md` y `eventos.jsonl`: el índice de todo lo anterior.
 
-**Arranque automático:** `watch-regen.ps1` (cada minuto) consulta Twitch y, si está en vivo y no hay vigía (lock `fuentes/vivo/.vigia.lock` con PID vivo), lo lanza oculto. Log: `scripts/vigia-vivo.log`. Corta solo cuando termina la transmisión (reintenta si se cae la lectura). Va en paralelo a `retransmitir.mjs` ([[reference_retransmitir_twitch]]); son conexiones independientes a Twitch.
+**Horario (pedido de Juan 2026-10-08): solo lunes a jueves 22:30–00:30**, la misma ventana que la retransmisión. Fuera de esa ventana ni siquiera se consulta Twitch, y el vigía se corta solo a las 00:30 (`--hasta HH:MM` para cambiarlo) aunque el vivo siga. Si cambian los días u horarios de partido, actualizar `$ventanaVigia` en `watch-regen.ps1` y el default de `--hasta`.
+
+**Arranque automático:** dentro de esa ventana, `watch-regen.ps1` (cada minuto) consulta Twitch y, si está en vivo y no hay vigía (lock `fuentes/vivo/.vigia.lock` con PID vivo), lo lanza oculto. Log: `scripts/vigia-vivo.log`. Corta solo cuando termina la transmisión (reintenta si se cae la lectura). Va en paralelo a `retransmitir.mjs` ([[reference_retransmitir_twitch]]); son conexiones independientes a Twitch.
 
 **Prueba sobre un VOD:** `node scripts/vigia-vivo.mjs --vod <id>` (no graba). Con el VOD 2893092714 (2026-10-06, RAF 1-1 y NPS 1-3) detectó los 6 goles y 10 pantallas de reporte en unos 10 min.
 

@@ -6,9 +6,10 @@
 //
 //   node scripts/vigia-vivo.mjs                 -> si topsecretfc está en vivo, lo vigila hasta que corte
 //   node scripts/vigia-vivo.mjs --vod <id>      -> corre lo mismo sobre un VOD (prueba/calibración)
-//   opciones: --sin-grabar
+//   opciones: --sin-grabar, --hasta HH:MM (corte en vivo, default 00:30)
 //
-// watch-regen.ps1 lo lanza cada minuto si el canal está en vivo; un lock evita dos vigías a la vez.
+// watch-regen.ps1 lo lanza solo lunes a jueves 22:30-00:30 si el canal está en vivo; un lock evita
+// dos vigías a la vez. A la hora de --hasta se corta aunque la transmisión siga.
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
@@ -33,6 +34,15 @@ const PESTANAS = ['resumen', 'posesión', 'posesion', 'tiros', 'pases', 'defensa
 const args = process.argv.slice(2);
 const vodId = args.includes('--vod') ? args[args.indexOf('--vod') + 1].replace(/^v/, '') : null;
 const grabar = !args.includes('--sin-grabar') && !vodId;
+const hasta = args.includes('--hasta') ? args[args.indexOf('--hasta') + 1] : '00:30';
+
+// Próxima ocurrencia de HH:MM (hora local de la PC = ART)
+function msHasta(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const fin = new Date(); fin.setHours(h, m, 0, 0);
+  if (fin <= new Date()) fin.setDate(fin.getDate() + 1);
+  return fin - new Date();
+}
 
 async function enVivo() {
   const r = await fetch('https://gql.twitch.tv/gql', {
@@ -170,12 +180,22 @@ async function main() {
   };
 
   // ffmpeg: 1 cuadro/s crudo por stdout (+ grabación copiada en segmentos)
+  let ffmpegActual = null, cortado = false;
+  if (!vodId) {
+    setTimeout(() => {
+      cortado = true;
+      console.log(`Son las ${hasta}: corto el vigía.`);
+      ffmpegActual?.kill();
+    }, msHasta(hasta)).unref();
+  }
+
   const correr = url => new Promise(res => {
     const a = ['-hide_banner', '-loglevel', 'error', '-i', url];
     if (grabar) a.push('-map', '0', '-c', 'copy', '-f', 'segment', '-segment_time', '900',
       path.join(OUT, 'rec', `${Date.now()}-%03d.ts`));
     a.push('-map', '0:v', '-vf', `fps=1,scale=${W}:${H}`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1');
     const p = spawn(ffmpeg, a, { stdio: ['ignore', 'pipe', 'inherit'] });
+    ffmpegActual = p;
     let pend = Buffer.alloc(0);
     p.stdout.on('data', chunk => {
       pend = Buffer.concat([pend, chunk]);
@@ -190,8 +210,8 @@ async function main() {
   for (let intento = 0; ; intento++) {
     let url;
     try { url = hlsUrl(); } catch (e) { console.error('No pude obtener el stream:', e.message.split('\n')[0]); }
-    if (url) await correr(url);
-    if (vodId) break;
+    if (url && !cortado) await correr(url);
+    if (vodId || cortado) break;
     if (!(await enVivo())) break;                     // cortó la transmisión
     console.log('Se cortó la lectura pero el canal sigue en vivo: reconectando…');
     await new Promise(r => setTimeout(r, 5000));

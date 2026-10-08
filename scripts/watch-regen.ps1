@@ -74,7 +74,12 @@ try {
 
 # ── PASO V: vigía del vivo de Twitch (goles + pantallas del reporte) ──────────
 # Si topsecretfc está en vivo y no hay vigía corriendo (lock con PID vivo), lo lanza en segundo plano.
-try {
+# Solo en la ventana de partidos que pidió Juan: lunes a jueves 22:30-00:30 (misma que retransmitir).
+$ahora = Get-Date
+$min = $ahora.Hour * 60 + $ahora.Minute
+$dia = [int]$ahora.DayOfWeek   # 0 = domingo
+$ventanaVigia = (($dia -ge 1 -and $dia -le 4) -and $min -ge 1350) -or (($dia -ge 2 -and $dia -le 5) -and $min -lt 30)
+if ($ventanaVigia) { try {
     $gql = Invoke-RestMethod 'https://gql.twitch.tv/gql' -Method POST -TimeoutSec 10 `
         -Headers @{ 'Client-ID' = 'kimne78kx3ncx6brgo4mv6wki5h1ko' } `
         -Body '{"query":"query{user(login:\"topsecretfc\"){stream{id}}}"}'
@@ -88,7 +93,7 @@ try {
                 -ArgumentList '/c', 'node scripts\vigia-vivo.mjs >> scripts\vigia-vivo.log 2>&1'
         }
     }
-} catch { }
+} catch { } }
 
 # Verificar si hay pedido de regeneración pendiente
 try {
