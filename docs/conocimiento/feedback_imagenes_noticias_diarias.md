@@ -59,3 +59,14 @@ El generador produjo una réplica exacta de la camiseta del Tottenham (sponsor "
 **Why:** "Camiseta blanca" sin más restricción hace que el modelo recurra a kits reales famosos que conoce.
 
 **How to apply:** Ya hay reglas en el prompt y evaluador (prohibidos sponsors reales y diseños de kits de clubes existentes; solo el diseño de "T3 Kits.png"). Al revisar imágenes, chequear que la camiseta no tenga sponsor ni sea reconocible de un club real.
+
+**7. Jugadores inventados y festejo repetido (2026-10-08)**
+La portada del 08/10 (NicoBJ_96) repitió la del 06/10 (nikileo527): de rodillas en el césped, brazos abiertos, estadio de noche, con compañeros genéricos corriendo atrás que no son del plantel. Causas: el `imageBrief` de la rutina ("bajo los reflectores… con el plantel corriendo hacia él") le pasaba por encima al estilo sorteado (ese día era RETRATO_EDITORIAL), y el prompt permitía "jugadores genéricos de relleno".
+
+**How to apply** (ya en `scripts/generate-image-chatgpt.mjs`):
+- En la imagen solo aparecen jugadores con render adjunto; prohibido el relleno. Si el brief pide plantel/compañeros, `selectTeammates()` suma hasta 2 compañeros reales (primero los que nombra la nota, después los que hace más que no salen; nunca arqueros).
+- El estilo del día define lugar, encuadre y luz; del brief se toma quién y qué emoción.
+- `pickGesto()` elige el gesto de festejo y rota contra los últimos 3 (campo `gesto` en `news/image_style_history`); el de rodillas en el césped está prohibido explícitamente.
+
+**8. Renders con escudo defectuoso**
+`Renders/NicoBJ_96/Gesto4.png` salió de ChatGPT con un escudo inventado (caja/casco amarillo) en camiseta y short; se emparchó con el Clean logo Dorado (original en `Renders/_descartes-gesto4/NicoBJ_96-escudo-mal.png`). `logos/noticias/plantel-t4/<gt>.webp` = recorte 1080×1350 desde y=120 de la base dorada de `fuentes/video-plantel/Gesto4/<gt>.png`, a 720×900. Al generar poses nuevas, mirar el escudo de cerca antes de usarlas.

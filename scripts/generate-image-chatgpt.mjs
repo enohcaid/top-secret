@@ -310,6 +310,7 @@ async function fetchStyleHistory() {
     return values.map(v => ({
       style: v.mapValue.fields.style.stringValue,
       date:  v.mapValue.fields.date.stringValue,
+      gesto: v.mapValue.fields.gesto?.stringValue || null,
     }));
   } catch { return []; }
 }
@@ -345,11 +346,12 @@ function pickStyle(history, draft = {}) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-async function saveStyleHistory(styleId, date, history) {
-  const updated = [{ style: styleId, date }, ...history].slice(0, 10);
+async function saveStyleHistory(styleId, date, history, gestoId = null) {
+  const updated = [{ style: styleId, date, gesto: gestoId }, ...history].slice(0, 10);
   const values = updated.map(e => ({ mapValue: { fields: {
     style: { stringValue: e.style },
     date:  { stringValue: e.date  },
+    ...(e.gesto ? { gesto: { stringValue: e.gesto } } : {}),
   }}}));
   await fetch(FIRESTORE_STYLE_HISTORY, {
     method: 'PATCH',
@@ -408,6 +410,47 @@ function selectFeaturedPlayers(allMentioned, featuredHistory, draft = {}) {
   const resto = allMentioned.filter(p => !enTitulo.includes(p))
     .sort((a, b) => recency(b) - recency(a) || allMentioned.indexOf(a) - allMentioned.indexOf(b));
   return [...enTitulo, ...resto].slice(0, MAX_FEATURED_PLAYERS);
+}
+
+// Compañeros de fondo (pedido de Juan, 2026-10-08): si el brief pone al plantel/compañeros en la
+// escena, ChatGPT inventaba jugadores genéricos que no son del club. Ahora esos compañeros son
+// jugadores REALES con render adjunto (los que hace más que no salen; nunca arqueros, que irían de
+// naranja en un festejo de campo). Si el brief no pide compañeros, en la escena no hay nadie más.
+const MAX_TEAMMATES = 2;
+function selectTeammates(featured, featuredHistory, draft = {}, mentionedInNote = []) {
+  const brief = (typeof draft.imageBrief === 'string' ? draft.imageBrief : '').toLowerCase();
+  if (!/plantel|compañer|companer|equipo|grupo|abraz|vestuario|todos/.test(brief)) return [];
+  const lastFeatured = new Map();
+  featuredHistory.forEach((e, i) => { if (!lastFeatured.has(e.player)) lastFeatured.set(e.player, i); });
+  const recency = p => lastFeatured.has(p) ? lastFeatured.get(p) : Infinity;
+  const slots = Math.min(MAX_TEAMMATES, MAX_FEATURED_PLAYERS + MAX_TEAMMATES - featured.length);
+  // Primero los otros jugadores que nombra la nota; después, los que hace más que no salen.
+  const pool = PLAYERS_WITH_RENDERS.filter(p => !featured.includes(p) && !GOALKEEPERS.includes(p));
+  const inNote = pool.filter(p => mentionedInNote.includes(p));
+  const rest = pool.filter(p => !inNote.includes(p))
+    .sort((a, b) => recency(b) - recency(a) || Math.random() - 0.5);
+  return [...inNote, ...rest].slice(0, slots);
+}
+
+// Gestos de festejo: el brief de la rutina pide "celebrando" casi todos los días de resultado y
+// ChatGPT caía siempre en el mismo (de rodillas en el césped, brazos abiertos — 06/10 y 08/10).
+// El script elige el gesto y rota contra los últimos usados (guardados en image_style_history).
+const GESTOS_FESTEJO = [
+  { id: 'GRITO_PUNOS',   desc: 'de pie, gritando de frente con los dos puños cerrados a la altura del pecho, venas marcadas' },
+  { id: 'ESCUDO',        desc: 'de pie, agarrando y besando el escudo del pecho de la camiseta, ojos cerrados' },
+  { id: 'DEDO_CIELO',    desc: 'trotando, señalando al cielo con un dedo y mirada hacia arriba, sonrisa contenida' },
+  { id: 'SALTO',         desc: 'en el aire, saltando con un puño en alto, piernas recogidas' },
+  { id: 'SENALA_DORSAL', desc: 'de espaldas a cámara, señalándose el nombre y el dorsal con los pulgares, girando la cara por sobre el hombro' },
+  { id: 'SERENO',        desc: 'caminando tranquilo, sin festejo exagerado, mirada fría a cámara, sello de jugador que sabe lo que hizo' },
+];
+const GESTO_REPEAT_WINDOW = 3;
+function pickGesto(history, draft = {}) {
+  const text = ((draft.imageBrief || '') + ' ' + (draft.title || '')).toLowerCase();
+  if (!/festej|celebr|gol|euforia|victoria|triunfo/.test(text)) return null;
+  const recent = new Set(history.filter(h => h.gesto).slice(0, GESTO_REPEAT_WINDOW).map(h => h.gesto));
+  const pool = GESTOS_FESTEJO.filter(g => !recent.has(g.id));
+  const from = pool.length ? pool : GESTOS_FESTEJO;
+  return from[Math.floor(Math.random() * from.length)];
 }
 
 const FIRESTORE_FEATURED_HISTORY = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/featured_players_history';
@@ -555,24 +598,28 @@ function buildScene(draft, mentionedPlayers) {
   };
 }
 
-function buildPrompt(draft, mentionedPlayers, style, kit, correction = null) {
+function buildPrompt(draft, mentionedPlayers, style, kit, correction = null, teammates = [], gesto = null) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
   const isSeleccion = /^selecc/i.test(draft.category || '');
+  const everyone = [...mentionedPlayers, ...teammates];
 
   const playerBlock = mentionedPlayers.length > 0
     ? `JUGADORES MENCIONADOS EN ESTA NOTICIA (son nuestros jugadores):
 Sus renders van ADJUNTOS a este mensaje como referencia visual directa — no inventes su apariencia.
-Acción: ${action}
+Acción: ${action}${gesto ? `
+Gesto de festejo del protagonista (${mentionedPlayers[0]}): ${gesto.desc}. Usá ESTE gesto y no otro — PROHIBIDO el festejo de rodillas deslizándose en el césped con los brazos abiertos (ya se usó).` : ''}${teammates.length ? `
+Compañeros en plano secundario (también nuestros jugadores, con render adjunto): ${teammates.join(', ')} — más atrás o al costado, acompañando la escena, sin robarle el foco al protagonista.` : ''}
 
 ⚠️ IDENTIDAD — LEÉ ESTO ANTES DE DIBUJAR NOMBRES O DORSALES: los adjuntos NO llevan el nombre del jugador, así que identificá cada render por sus RASGOS FÍSICOS según esta lista. Cada nombre y dorsal SOLO puede aparecer sobre el jugador cuyos rasgos coinciden — un nombre o número sobre otro jugador es un ERROR grave:
-${mentionedPlayers.map(playerIdentityLine).join('\n')}
+${everyone.map(playerIdentityLine).join('\n')}
 
 Reglas de identidad:
 - Si mostrás el nombre o el dorsal de un jugador, tienen que estar sobre el cuerpo cuyos rasgos coinciden con la lista (pelo, piel, barba, máscara, anteojos). NUNCA mezcles rasgos de dos jugadores en uno.
-- No inventes jugadores extra con rasgos distintivos (afros, dreadlocks, máscaras, pelo de colores) que no estén en la lista. Si necesitás relleno, usá jugadores genéricos vistos de espaldas o fuera de foco, SIN nombre ni dorsal legible.
+- ⚠️ EN LA IMAGEN SOLO APARECEN LOS JUGADORES DE ESTA LISTA (${everyone.length}). PROHIBIDO agregar cualquier otro jugador, compañero, rival o persona en el campo de juego, el túnel o el vestuario — ni de relleno, ni de espaldas, ni fuera de foco: cada persona inventada es alguien que NO es del club. Si el brief habla del "plantel" o de "compañeros" y no hay compañeros en la lista, la escena es solo del protagonista. El público de la tribuna puede verse, lejano y desenfocado.
 - Si no estás seguro de qué jugador es, mostralo SIN nombre ni dorsal antes que etiquetarlo mal.`
     : `Sin jugadores específicos — composición institucional:
-${action}`;
+${action}
+⚠️ Sin jugadores identificables: no inventes jugadores ni personas en primer plano (nadie que parezca ser del club sin serlo).`;
 
   return `Creá una FOTO DE CAMPAÑA para una noticia de Top Secret FC, un club argentino de fútbol virtual (esports). Todos los jugadores que se mencionan son NUESTROS PROPIOS JUGADORES — sus renders van adjuntos a este mensaje como referencia visual.
 
@@ -591,7 +638,8 @@ ${style.prompt}
 Aplicá esta escena como base, siempre dentro de la ESTÉTICA DEL CLUB de arriba. La paleta define el AMBIENTE y la LUZ — el kit del jugador es el de su render, nunca teñido por la paleta.
 
 ═══ ESCENA Y ACCIÓN ═══
-Atmósfera: ${scene}
+Contenido de la nota (quién y qué emoción): ${scene}
+⚠️ El LUGAR, el ENCUADRE y la LUZ los define la ESCENA DEL DÍA de arriba (${style.label}), no esta descripción: si acá se menciona otro lugar (estadio, reflectores, túnel, césped…), trasladá la emoción y los protagonistas a la escena del día. Así cada noticia tiene una foto distinta.
 ${playerBlock}
 
 ═══ IMÁGENES ADJUNTAS A ESTE MENSAJE — REFERENCIAS OBLIGATORIAS ═══
@@ -605,7 +653,7 @@ ${playerBlock}
   Los ARQUEROS usan siempre su conjunto propio: ${GK_KIT_DESC}
   ⚠️ El kit de Temporada 4 NO tiene sponsor en el pecho: no agregues "AIA" ni ningún otro texto o marca en la camiseta. El escudo del pecho es el espía dorado del adjunto (en blanco en el kit de arquero), nunca el de un club real (Chelsea, Tottenham, Real Madrid, Boca…).${isSeleccion ? `
   ⚠️ EXCEPCIÓN — NOTICIA DE LA SELECCIÓN ARGENTINA: la camiseta CELESTE Y BLANCA a bastones de la Selección es VÁLIDA para jugadores o elementos que representen a la Selección. El kit del club aplica solo si aparece un jugador de Top Secret representando al club.` : ''}
-  Si en la escena aparecen jugadores del club sin render adjunto (relleno), usan el MISMO kit del día, de espaldas o fuera de foco, sin nombre ni dorsal legible.
+  No hay jugadores de relleno: todo el que lleve el kit del club tiene su render adjunto.
 
 ⚠️ DORSALES Y NOMBRES: usá EXACTAMENTE los dorsales y nombres de la lista de IDENTIDAD — mismos dígitos, en el mismo orden, sobre el jugador correcto. PROHIBIDO espejar o invertir dígitos (ej. "10" convertido en "01"), intercambiar números o nombres entre jugadores, e inventar dorsales que no estén en la lista.
 
@@ -1284,6 +1332,8 @@ async function main() {
   const allMentioned    = [...new Set([...extractMentionedPlayers(draft), ...PLAYERS_WITH_RENDERS.filter(p => (draft.imageBrief || '').includes(p))])];
   const featuredHistory = await fetchFeaturedHistory();
   const mentioned       = selectFeaturedPlayers(allMentioned, featuredHistory, draft);
+  const teammates       = mentioned.length ? selectTeammates(mentioned, featuredHistory, draft, allMentioned) : [];
+  if (teammates.length) console.log('Compañeros de fondo (renders reales):', teammates.join(', '));
   if (mentioned.length > 0) {
     console.log('Jugadores mencionados con renders:', allMentioned.join(', '));
     console.log('Protagonistas de la imagen:', mentioned.join(', '), draft.imageBrief ? '(según la nota)' : '(rotación)');
@@ -1317,6 +1367,8 @@ async function main() {
   const chosenKit    = pickKitColor(kitHistory);
   console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
   console.log(`Kit del día: ${chosenKit.label}`);
+  const chosenGesto  = mentioned.length ? pickGesto(styleHistory, draft) : null;
+  if (chosenGesto) console.log(`Gesto de festejo: ${chosenGesto.id}`);
   if (draft.imageBrief) console.log(`Brief visual del artículo: ${draft.imageBrief.slice(0, 100)}...`);
 
   let correction     = FLAG_FEEDBACK;
@@ -1361,11 +1413,11 @@ async function main() {
             page, draft, 'post', followUp, sendOpts
           ));
         } else {
-          const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction);
+          const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction, teammates, chosenGesto);
           // Referencias visuales adjuntas al mensaje: escudo Clean dorado + renders T4 de los
           // jugadores mencionados con el kit del día (el render ya tiene puesto el uniforme).
           // Sin jugadores: se adjunta el render de Juan_Martinez4 solo como referencia del kit.
-          const playerRefs = mentioned.map(p => renderForKit(p, chosenKit)).filter(Boolean);
+          const playerRefs = [...mentioned, ...teammates].map(p => renderForKit(p, chosenKit)).filter(Boolean);
           const kitRef = playerRefs.length ? [] : [renderForKit('Juan_Martinez4', chosenKit)].filter(Boolean);
           const refAttachments = [CREST_PATH, ...playerRefs, ...kitRef];
           ({ filename: postFile, imgUrl: postImgUrl } = await generateImage(
@@ -1448,9 +1500,9 @@ async function main() {
       try { await stampCrest(path.join(OUTPUT_DIR, f), { fresh: true }); } catch (e) { console.warn('  No se pudo estampar el escudo en', f, e.message); }
     }
     await updateDraft(draft, lastPostFile, storyFile);
-    await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
+    await saveStyleHistory(chosenStyle.id, dateStr, styleHistory, chosenGesto?.id);
     await saveKitHistory(chosenKit.id, dateStr, kitHistory);
-    if (mentioned.length > 0) await saveFeaturedHistory(mentioned, dateStr, featuredHistory);
+    if (mentioned.length > 0) await saveFeaturedHistory([...mentioned, ...teammates], dateStr, featuredHistory);
     uploadImagesToR2(lastPostFile, storyFile);
 
     console.log('\n✓ Listo.');
@@ -1501,6 +1553,8 @@ export {
   buildEvalPrompt,
   buildResizePrompt,
   buildPrompt,
+  selectTeammates,
+  pickGesto,
   buildScene,
   brandFormatBlock,
   playerIdentityLine,
