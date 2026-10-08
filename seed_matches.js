@@ -2654,6 +2654,24 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12', matched:'Ivan_Cabj_La12',   played_pos:'PO',  rating:5.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
   ]},
 
+  // En el juego figuramos como visitante ("CD Cambaceres 1-2 Top Secret"); el fixture lo da de local.
+  { rival:'Cambaceres', league:'VPUG', date:'2026-10-07', match_result:'2-1', isHome:true, uploadedAt:'2026-10-08T00:00:00.000Z',
+    notes:'Liga Pretemporada · Grupo D · Fecha 3 · goles: MostiYt 6\' (CAM), NicoBJ_96 36\', Lautavester7 80\' · reporte: fotos de pantalla', torneo:'Liga Pretemporada VPUG (FC27)',
+    team_stats:{posesion:null,tiros:2,tiros_arco:2,goles_esperados:null,pases:163,precision_pases:85,entradas:45,entradas_exito:15,intercepciones:null,paradas:null,faltas:1,fuera_juego:1,corneres:null,regates_exito:141,precision_tiro:100},
+  players:[
+    {name:'Lautavester7', matched:'Lautavester7',     played_pos:'DI',  rating:7.4, goals:1, assists:0, passes:13,   pass_accuracy:92,   distance_km:18.6, sprints:null, tackles:null, interceptions:null},
+    {name:'NicoBJ 96',    matched:'NicoBJ_96',        played_pos:'DD',  rating:7.1, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'NIKILEO527',   matched:'nikileo527',       played_pos:'MI',  rating:7.3, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'c. mancini',   matched:'CipriMancini',     played_pos:'MCI', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pepo',         matched:'pepolemmo2710',    played_pos:'MCD', rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow',      matched:'Guiidow',          played_pos:'MD',  rating:6.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32DaniSton', matched:'RS32-DaniStone',   played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Charly',       matched:'endiabladorojo66', played_pos:'DCI', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14',     matched:'Cabers14',         played_pos:'DFC', rating:7.3, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12', matched:'Ivan_Cabj_La12',   played_pos:'DFC', rating:8.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'F. van Dijk',  matched:null,               played_pos:'PO',  rating:6.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+
 ];
 
 
