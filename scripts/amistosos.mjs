@@ -184,6 +184,7 @@ client.on('ready', async () => {
   await avisar(`🕵️ *Bot de amistosos activo*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*.`);
   if (!grupoId) await avisar('⚠️ No encontré el grupo de amistosos en tus chats: lo voy a reconocer cuando llegue un mensaje.');
   await revisarAtrasados();
+  await revisarRespuestas();
 });
 
 // Busca el grupo por nombre en las colecciones internas de WhatsApp Web.
@@ -213,6 +214,19 @@ async function revisarAtrasados() {
     log(`mensajes de hoy en el grupo: ${msgs.length}`);
     for (const m of msgs) await pedidoGrupo({ id: { _serialized: m.id }, body: m.body, from: grupoId, author: m.author, _data: { notifyName: m.notify } });
   } catch (e) { log('no pude leer mensajes anteriores:', e.message.split('\n')[0]); }
+}
+
+// Respuestas a ofertas que llegaron con el bot apagado (p. ej. durante un reinicio).
+async function revisarRespuestas() {
+  for (const p of Object.values(st.pedidos).filter(p => p.estado === 'ofrecido')) {
+    try {
+      const msgs = await client.pupPage.evaluate((id, desde) => {
+        const chat = window.require('WAWebCollections').Chat.get(id);
+        return (chat?.msgs.getModelsArray() || []).filter(m => m.t >= desde && !m.id.fromMe && m.body).map(m => m.body);
+      }, p.autor, Math.floor((p.ofrecidoTs || 0) / 1000));
+      if (msgs.length) { log('respuesta atrasada de', p.contacto, ':', msgs.join(' / ').slice(0, 80)); await respuestaPrivada({ from: p.autor, body: msgs.join(' ') }); }
+    } catch (e) { log('no pude leer el chat de', p.contacto, e.message.split('\n')[0]); }
+  }
 }
 
 // Mensajes nuevos (de otros y míos).
@@ -308,9 +322,9 @@ async function confirmar(id, slot) {
 
 async function respuestaPrivada(msg) {
   const [id, p] = Object.entries(st.pedidos).find(([, p]) => p.estado === 'ofrecido' && p.autor === msg.from) || [];
-  if (!p) return;
+  if (!p) { if (Object.values(st.pedidos).some(p => p.estado === 'ofrecido')) log('privado sin pedido:', msg.from, (msg.body || '').slice(0, 30)); return; }
   const txt = msg.body || '';
-  const otraHora = (txt.match(/\b(\d{1,2})[:.](\d{2})\b/) || [])[0];
+  const otraHora = (txt.match(/\b(\d{1,2})[:.](\d{2})(?!\d)/) || [])[0];
   if (SI.test(txt) && !NO.test(txt) && (!otraHora || otraHora.replace('.', ':') === p.slot)) {
     log(`${id}: respuesta positiva de ${p.equipo.nombre}: ${txt}`);
     return confirmar(id);
