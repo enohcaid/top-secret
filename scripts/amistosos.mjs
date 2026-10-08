@@ -166,7 +166,24 @@ client.on('qr', async qr => {
   log('Escaneá el QR con tu celular: WhatsApp → Dispositivos vinculados → Vincular un dispositivo. Imagen:', png);
   if (process.platform === 'win32') execFile('cmd', ['/c', 'start', '', png]);
 });
-client.on('authenticated', () => log('sesión autenticada'));
+client.on('authenticated', () => { log('sesión autenticada'); cerrarNovedades(); });
+// WhatsApp Web a veces muestra "Novedades en WhatsApp Web" con un botón Continuar: mientras está
+// abierta, el bot nunca queda listo (2026-10-08 quedó colgado así). Se cierra sola durante 5 min.
+async function cerrarNovedades() {
+  for (let i = 0; i < 60 && !yo; i++) {
+    await new Promise(r => setTimeout(r, 5000));
+    try {
+      const ok = await client.pupPage.evaluate(() => {
+        const d = document.querySelector('[role=dialog]') || document.body;
+        if (!/novedades|what.?s new/i.test(d.innerText || '')) return false;
+        const b = [...d.querySelectorAll('button,[role=button]')].find(e => /^(continuar|continue|ok|entendido)$/i.test(e.innerText.trim()));
+        if (b) b.click();
+        return !!b;
+      });
+      if (ok) log('cerré la ventana de novedades de WhatsApp Web');
+    } catch (e) {}
+  }
+}
 client.on('auth_failure', m => log('fallo de autenticación:', m));
 client.on('disconnected', r => { log('desconectado:', r); process.exit(1); });
 
