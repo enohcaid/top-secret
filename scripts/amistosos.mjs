@@ -34,6 +34,7 @@ import { execFile } from 'child_process';
 import { ROOT } from './lib/env.mjs';
 import { buscarEquipo as matchEquipo } from './lib/equipos-match.mjs';
 import { buscarEscudo } from './lib/escudos.mjs';
+import { leerPedido } from './lib/pedido-amistoso.mjs';
 
 const { Client, LocalAuth } = wweb;
 const PRUEBA = process.argv.includes('--prueba');
@@ -279,14 +280,21 @@ async function pedidoGrupo(msg) {
   const autor = msg.author || msg.from;
   if (Object.values(st.pedidos).some(p => p.autor === autor && p.estado !== 'descartado')) return;   // ya lo tenemos
   const nombreContacto = contacto.pushname || contacto.name || '';
-  const eq = buscarEquipo(msg.body + ' ' + nombreContacto, autor);
+  const breve = msg.body.slice(0, 50).replace(/\n/g, ' ');
+  // El equipo sale del encabezado del pedido, nunca de las líneas de horario (ahí están los rivales
+  // que ya tiene agendados: "22:40 vs instituto senior").
+  const { equipoTxt, horas } = leerPedido(msg.body);
+  const eq = buscarEquipo(equipoTxt || nombreContacto, autor) || (equipoTxt && nombreContacto ? buscarEquipo(nombreContacto) : null);
+  if (!eq) { log('pedido ignorado (equipo fuera de 1ra/2da o sin identificar):', equipoTxt || nombreContacto, '|', breve); return; }
+  // Si el pedido lista horarios, solo sirven los que tiene libres y nosotros también.
+  const susLibres = horas.length ? horas.filter(h => h.libre).map(h => h.hora).filter(h => SLOTS.includes(h) && !ocupados().has(h)) : null;
+  if (susLibres && !susLibres.length) { log('pedido ignorado (sin horarios libres en común):', eq.nombre, '|', breve); return; }
   const id = letra(st.siguiente++);
-  st.pedidos[id] = { autor, contacto: nombreContacto, texto: msg.body.slice(0, 300), equipo: eq && !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : null, estado: 'nuevo', ts: Date.now() };
-  const hp = (msg.body.match(/\b(2[23])[:.]([0-5]\d)(?!\d)/) || [])[0];   // no \b al final: "23:20hs" va pegado
-  if (hp && SLOTS.includes(hp.replace('.', ':')) && !ocupados().has(hp.replace('.', ':'))) st.pedidos[id].horaPedida = hp.replace('.', ':');
+  st.pedidos[id] = { autor, contacto: nombreContacto, texto: msg.body.slice(0, 300), equipo: !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : null, estado: 'nuevo', ts: Date.now() };
+  if (susLibres) Object.assign(st.pedidos[id], { horas: susLibres, horaPedida: susLibres[0] });
   save();
   log(`pedido ${id}:`, nombreContacto, '→', eq ? `${eq.nombre} (${eq.div})` : 'equipo sin identificar');
-  await avisar(`📣 *Pedido ${id}* — ${eq?.dudoso ? `¿${eq.dudoso.join(' o ')}?` : eq ? `*${eq.nombre}* (${eq.div})` : '_equipo sin identificar_'}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${libre() ? `Le ofrezco *${st.pedidos[id].horaPedida || libre()}*${st.pedidos[id].horaPedida ? ' (la que pidió)' : ''}.` : '_Sin horarios libres hoy: solo para ver la detección._'} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq && !eq.dudoso ? '' : `, *${id} <equipo>* para definir el equipo`}, o *${id} no*.`);
+  await avisar(`📣 *Pedido ${id}* — ${eq?.dudoso ? `¿${eq.dudoso.join(' o ')}?` : eq ? `*${eq.nombre}* (${eq.div})` : '_equipo sin identificar_'}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${libre() ? `Le ofrezco *${st.pedidos[id].horaPedida || libre()}*${st.pedidos[id].horas ? (st.pedidos[id].horas.length === 1 ? ' (la única que tiene libre)' : ` (tiene libres ${st.pedidos[id].horas.join(', ')})`) : ''}.` : '_Sin horarios libres hoy: solo para ver la detección._'} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq && !eq.dudoso ? '' : `, *${id} <equipo>* para definir el equipo`}, o *${id} no*.`);
   if (AUTO && eq && !eq.dudoso && eq.div !== '?') await ofrecer(id, null, null);
 }
 
@@ -301,7 +309,8 @@ async function ofrecer(id, slot, equipoTxt) {
     guardarAprendido();
   }
   if (!p.equipo) return avisar(`⚠️ ${id}: decime qué equipo es (*${id} <equipo>*).`);
-  slot = slot || (p.estado === 'ofrecido' ? p.slot : (p.horaPedida && !ocupados().has(p.horaPedida) ? p.horaPedida : libre()));
+  slot = slot || (p.estado === 'ofrecido' ? p.slot : p.horas ? p.horas.find(h => !ocupados().has(h)) : libre());
+  if (!slot && p.horas) return avisar(`⚠️ ${id}: ya no queda libre ninguno de sus horarios (${p.horas.join(', ')}). Si querés otro: *${id} 23:40*.`);
   if (!slot) return avisar('⚠️ Ya no quedan horarios libres.');
   if (ocupados().has(slot) && p.slot !== slot) return avisar(`⚠️ ${slot} ya está tomado u ofrecido. Libres: ${SLOTS.filter(s => !ocupados().has(s)).join(', ') || 'ninguno'}.`);
   const texto = `Buenas, soy de Top Secret, jugamos a las ${slot} hs?`;
