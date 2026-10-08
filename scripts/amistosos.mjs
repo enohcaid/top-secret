@@ -21,6 +21,7 @@
  *                                A no         → descarta el pedido
  *                                A ok [hh:mm] → da por confirmado el amistoso (si el rival respondió algo raro)
  *                                estado       → lista horarios y pedidos
+ *                                + 23:00 Chacarita → carga un amistoso que Juan coordinó por su cuenta
  * 3. Si el rival contesta que sí ("dale", "de una", 👍…), carga el amistoso solo en el calendario
  *    (Firestore calendario/estado.custom, league 'Amistoso', con escudo) → sale en la convocatoria
  *    y en la formación exportada. Cualquier otra respuesta se la reenvía a Juan para que decida.
@@ -181,7 +182,7 @@ client.on('ready', async () => {
       setTimeout(() => process.exit(0), 3000); return;
     }
   }
-  await avisar(`🕵️ *Bot de amistosos activo*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*.`);
+  await avisar(`🕵️ *Bot de amistosos activo*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.`);
   if (!grupoId) await avisar('⚠️ No encontré el grupo de amistosos en tus chats: lo voy a reconocer cuando llegue un mensaje.');
   await revisarAtrasados();
   await revisarRespuestas();
@@ -234,9 +235,8 @@ client.on('message_create', async msg => {
   try {
     if (!yo) return;
     // 1) Comandos de Juan en su chat consigo mismo.
-    if (msg.fromMe && !msg.to.endsWith('@g.us') && !/^(🕵️|📣|✅|💬|⚠️|📋)/u.test(msg.body)) log('mío', msg.from, '→', msg.to, msg.body.slice(0, 20));
     // El chat consigo mismo puede venir como @c.us o como @lid (yoLid).
-    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) {
+    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉)/u.test(msg.body)) {
       // Varios comandos en un mismo mensaje, uno por línea ("B\nC no\nD no").
       for (const linea of msg.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
       return;
@@ -336,7 +336,7 @@ async function confirmar(id, slot, rival = false) {
 
 async function respuestaPrivada(msg) {
   const [id, p] = Object.entries(st.pedidos).find(([, p]) => p.estado === 'ofrecido' && p.autor === msg.from) || [];
-  if (!p) { if (Object.values(st.pedidos).some(p => p.estado === 'ofrecido')) log('privado sin pedido:', msg.from, (msg.body || '').slice(0, 30)); return; }
+  if (!p) { return; }
   const txt = msg.body || '';
   const otraHora = (txt.match(/\b(\d{1,2})[:.](\d{2})(?!\d)/) || [])[0];
   if (SI.test(txt) && !NO.test(txt) && (!otraHora || otraHora.replace('.', ':') === p.slot)) {
@@ -353,6 +353,23 @@ async function respuestaPrivada(msg) {
 async function comando(body) {
   log('comando:', body.slice(0, 40));
   const m = body.match(/^([A-Z]{1,2}\d?)\b\s*(.*)$/i);
+  // Amistoso que coordinó Juan por su cuenta: "+ 23:00 Chacarita" (o "agregar 23:00 Chacarita").
+  const man = body.match(/^(?:\+|agregar)\s*(\d{1,2})[:.](\d{2})\s+(.+)$/i);
+  if (man) {
+    const hora = `${man[1].padStart(2, '0')}:${man[2]}`, txt = man[3].trim();
+    const eq = matchEquipo(txt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
+    if (eq?.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *+ ${hora} <equipo>*.`);
+    const id = letra(st.siguiente++);
+    st.pedidos[id] = { autor: '', contacto: '', texto: body, manual: true, estado: 'nuevo', ts: Date.now(),
+      equipo: eq ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : { nombre: txt, div: '?', logo: null } };
+    save();
+    await confirmar(id, hora);
+    // Fuera de los horarios fijos: ocupa el horario fijo que quede a menos de 20 min.
+    const min = t => { const [h, mm] = t.split(':').map(Number); return h * 60 + mm; };
+    for (const s of SLOTS) if (s !== hora && !st.confirmados[s] && Math.abs(min(s) - min(hora)) < 20) st.confirmados[s] = st.pedidos[id].equipo.nombre;
+    save();
+    return;
+  }
   if (/^estado$/i.test(body)) {
     const lista = Object.entries(st.pedidos).filter(([, p]) => p.estado !== 'descartado').map(([id, p]) => `${id} ${p.equipo ? p.equipo.nombre : '?'} — ${p.estado}${p.slot ? ' ' + p.slot : ''}`);
     return avisar(`📋 Horarios: ${SLOTS.map(s => `${s} ${st.confirmados[s] ? '✅ ' + st.confirmados[s] : (ocupados().has(s) ? '⏳' : 'libre')}`).join(' · ')}\n${lista.join('\n') || 'Sin pedidos.'}`);
