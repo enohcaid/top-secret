@@ -236,7 +236,11 @@ client.on('message_create', async msg => {
     // 1) Comandos de Juan en su chat consigo mismo.
     if (msg.fromMe && !msg.to.endsWith('@g.us') && !/^(🕵️|📣|✅|💬|⚠️|📋)/u.test(msg.body)) log('mío', msg.from, '→', msg.to, msg.body.slice(0, 20));
     // El chat consigo mismo puede venir como @c.us o como @lid (yoLid).
-    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) return comando(msg.body.trim());
+    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋)/.test(msg.body)) {
+      // Varios comandos en un mismo mensaje, uno por línea ("B\nC no\nD no").
+      for (const linea of msg.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
+      return;
+    }
     if (msg.fromMe) return;
     // 2) Pedidos en el grupo.
     if (msg.from.endsWith('@g.us') && await esGrupoAmistosos(msg)) return pedidoGrupo(msg);
