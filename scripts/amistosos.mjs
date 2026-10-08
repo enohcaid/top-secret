@@ -264,7 +264,7 @@ async function pedidoGrupo(msg) {
   const eq = buscarEquipo(msg.body + ' ' + nombreContacto, autor);
   const id = letra(st.siguiente++);
   st.pedidos[id] = { autor, contacto: nombreContacto, texto: msg.body.slice(0, 300), equipo: eq && !eq.dudoso ? { nombre: eq.nombre, div: eq.div, logo: eq.logo } : null, estado: 'nuevo', ts: Date.now() };
-  const hp = (msg.body.match(/\b(2[23])[:.]([0-5]\d)\b/) || [])[0];
+  const hp = (msg.body.match(/\b(2[23])[:.]([0-5]\d)(?!\d)/) || [])[0];   // no \b al final: "23:20hs" va pegado
   if (hp && SLOTS.includes(hp.replace('.', ':')) && !ocupados().has(hp.replace('.', ':'))) st.pedidos[id].horaPedida = hp.replace('.', ':');
   save();
   log(`pedido ${id}:`, nombreContacto, '→', eq ? `${eq.nombre} (${eq.div})` : 'equipo sin identificar');
