@@ -28,3 +28,5 @@ Pedido de Juan (2026-09-30): en días sin competencia busca amistosos en el grup
 **Ventana "Novedades en WhatsApp Web" (2026-10-08):** con ese modal abierto el bot queda en "sesión autenticada" y nunca llega a `ready` (se colgó 20 min). `cerrarNovedades()` lo cierra solo durante los primeros 5 min. Para diagnosticar un arranque colgado: el puerto de depuración del Chrome del bot está en `scripts/.wa-personal/session/DevToolsActivePort` → `puppeteer.connect` + screenshot.
 
 **Plan:** martes 2026-10-13 probar el modo automático completo (`--auto`) para conseguir los 4 amistosos sin aprobación de Juan, si el semiautomático anduvo bien.
+
+**Descartado (Juan, 2026-10-08):** que el bot publique su propio "Top Secret busca amistosos" en el grupo. Las respuestas a una publicación propia no son lineales: no se sabe quién contesta, hay que preguntarle el equipo y la gente escribe cualquier cosa. El bot solo responde a pedidos de otros, que traen el equipo y los horarios en el mensaje.
