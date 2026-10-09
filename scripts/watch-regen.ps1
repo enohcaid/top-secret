@@ -12,7 +12,9 @@ $triggerId  = 'trig_01Kz9ev31E5WfSN2mkVrHq7a'
 
 function Log($msg) {
     $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    "$ts [watch-regen] $msg" | Add-Content $logFile -Encoding UTF8
+    # Si otro proceso tiene el log tomado (pasó 2026-10-09 con un tail -f), no
+    # cortar el script: con ErrorActionPreference=Stop eso frenaba la publicación en redes.
+    try { "$ts [watch-regen] $msg" | Add-Content $logFile -Encoding UTF8 } catch {}
 }
 
 # ── PASO 0: Limpieza de imágenes de noticias descartadas ─────────────────────
