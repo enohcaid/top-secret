@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Plantilla "La semana en datos" (scripts/social). La renderiza Playwright: pintar(DATA, formato) arma
+     las escenas y mostrar(n, t) deja visible la escena n en el segundo t de su animación (t grande = estado final,
+     lo que usa el carrusel). Formatos: post 1080x1350 (carrusel) y story 1080x1920 (Reel/TikTok/Short). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0907;--gold:#C9A84C;--gold2:#E6CF85;--text:#F4EFE0;--text2:rgba(244,239,224,.62);--line:rgba(201,168,76,.28);--win:#3ECF8E;--loss:#E0645A}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;overflow:hidden;color:var(--text);font-family:Barlow,sans-serif;background:var(--bg)}
+.post #lienzo{width:1080px;height:1350px}
+.story #lienzo{width:1080px;height:1920px}
+.escena{position:absolute;inset:0;display:none}
+.escena.ver{display:block}
+/* Fondo: viñeta cálida + grano + líneas finas de cancha */
+.fondo{position:absolute;inset:0;background:
+  radial-gradient(120% 70% at 50% 8%, rgba(201,168,76,.16), transparent 60%),
+  radial-gradient(90% 60% at 50% 110%, rgba(201,168,76,.10), transparent 60%), var(--bg)}
+.fondo::after{content:"";position:absolute;inset:0;opacity:.07;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.cancha{position:absolute;left:50%;top:50%;width:1500px;height:1500px;transform:translate(-50%,-50%);border:2px solid rgba(201,168,76,.07);border-radius:50%}
+.marca{position:absolute;top:56px;left:64px;right:64px;display:flex;justify-content:space-between;align-items:center;font:700 22px 'Barlow Condensed';letter-spacing:.22em;text-transform:uppercase;color:var(--text2)}
+.marca img{height:58px}
+.pie{position:absolute;z-index:5;bottom:52px;left:64px;right:64px;display:flex;justify-content:space-between;font:700 20px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;color:var(--text2);text-shadow:0 2px 12px rgba(0,0,0,.9)}
+.pie b{color:var(--gold)}
+.kicker{font:800 26px 'Barlow Condensed';letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+.titulo{font-family:'Bebas Neue';font-weight:400;line-height:.86;letter-spacing:.01em}
+.oro{color:var(--gold)}
+.raya{height:3px;width:120px;background:var(--gold);margin:26px 0}
+.jug{position:absolute;bottom:0;filter:drop-shadow(0 0 38px rgba(201,168,76,.22)) drop-shadow(0 30px 40px rgba(0,0,0,.6))}
+.desvanece{position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(transparent,var(--bg) 82%)}
+
+/* 0 · portada */
+.e0 .bloque{position:absolute;left:64px;right:64px}
+.e0 .hero{position:absolute;inset:0;background-size:cover;background-position:center 30%}
+.e0 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,7,.55) 0%,rgba(10,9,7,.05) 30%,rgba(10,9,7,.25) 55%,var(--bg) 88%)}
+.e0 .cifras{display:flex;gap:46px;margin-top:30px}
+.e0 .cifra b{display:block;font:400 118px/1 'Bebas Neue';color:var(--gold)}
+.e0 .cifra span{font:700 22px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;color:var(--text2)}
+
+/* 1 · resultados */
+.lista{position:absolute;left:64px;right:64px}
+.fila{display:grid;grid-template-columns:150px 92px 1fr auto;align-items:center;gap:22px;padding:26px 0;border-bottom:1px solid var(--line)}
+.fila .fecha{font:700 24px 'Barlow Condensed';letter-spacing:.12em;text-transform:uppercase;color:var(--text2);line-height:1.15}
+.fila .fecha b{display:block;color:var(--text);font-size:30px;letter-spacing:.04em}
+.fila img{width:92px;height:92px;object-fit:contain}
+.fila .rival{font:800 34px/1.05 'Barlow Condensed';text-transform:uppercase}
+.fila .rival small{display:block;font:700 19px 'Barlow Condensed';letter-spacing:.2em;color:var(--text2);margin-top:6px}
+.fila .score{font:400 92px/1 'Bebas Neue';display:flex;align-items:center;gap:16px}
+.fila .score i{font:800 22px 'Barlow Condensed';font-style:normal;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#0A0907}
+.V i{background:var(--win)} .D i{background:var(--loss)} .E i{background:var(--text2)}
+
+/* 2 · goleadores */
+.podio{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end}
+.podio .col{position:relative;width:350px;display:flex;flex-direction:column;align-items:center}
+.podio .col img{height:var(--alto-jug,860px);width:auto;margin:0 -120px;filter:drop-shadow(0 0 30px rgba(201,168,76,.2)) drop-shadow(0 30px 40px rgba(0,0,0,.6))}
+.podio .col:nth-child(2){z-index:2}
+.podio .dato{text-align:center;margin-bottom:-6px;position:relative;z-index:3}
+.podio .dato b{display:block;font:400 168px/.86 'Bebas Neue';color:var(--gold);text-shadow:0 8px 30px rgba(0,0,0,.7)}
+.podio .dato span{display:block;font:800 26px 'Barlow Condensed';letter-spacing:.04em;margin-top:4px}
+.podio .dato small{display:block;font:700 18px 'Barlow Condensed';letter-spacing:.22em;text-transform:uppercase;color:var(--text2);margin-top:2px}
+
+/* 3 · figura */
+.e3 .jug{right:-60px}
+.e3 .info{position:absolute;left:64px}
+.e3 .nota{font:400 230px/.82 'Bebas Neue';color:var(--gold)}
+.e3 .gt{font:800 54px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.02em;margin-top:18px}
+.e3 .sub{font:700 26px 'Barlow Condensed';letter-spacing:.16em;text-transform:uppercase;color:var(--text2);margin-top:12px;line-height:1.5}
+
+/* 4 · números */
+.grilla{position:absolute;left:64px;right:64px;display:grid;grid-template-columns:1fr 1fr;gap:0}
+.grilla .n{padding:52px 0 46px;border-bottom:1px solid var(--line)}
+.grilla .n b{font-size:210px}
+.grilla .n:nth-child(odd){padding-right:30px;border-right:1px solid var(--line)}
+.grilla .n:nth-child(even){padding-left:40px}
+.grilla b{display:block;font:400 168px/.85 'Bebas Neue'}
+.grilla span{font:800 24px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;color:var(--text2)}
+
+/* 5 · lo que viene */
+.prox .fila{grid-template-columns:150px 120px 1fr auto;padding:40px 0}
+.prox .fila img{width:120px;height:120px}
+.prox .hora{font:400 64px/1 'Bebas Neue';color:var(--gold)}
+.vivo{position:absolute;left:64px;right:64px;display:flex;align-items:center;gap:18px;font:800 28px 'Barlow Condensed';letter-spacing:.14em;text-transform:uppercase}
+.vivo .rec{width:18px;height:18px;border-radius:50%;background:var(--loss);box-shadow:0 0 0 8px rgba(224,100,90,.18)}
+
+/* Vertical 9:16: más aire y todo más grande, para que la pantalla del celular quede llena */
+.story .fila{padding:46px 0;grid-template-columns:170px 130px 1fr auto}
+.story .fila img{width:130px;height:130px}
+.story .fila .rival{font-size:40px}
+.story .fila .score{font-size:124px}
+.story .prox .fila{padding:64px 0}
+.story .grilla .n{padding:92px 0 80px}
+.story .grilla .n b{font-size:270px}
+.story .e3 .nota{font-size:280px}
+
+/* Gancho del video (primer segundo) */
+.gancho{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:var(--bg);z-index:10;text-align:center}
+.gancho .titulo{font-size:176px}
+</style>
+</head>
+<body>
+<div id="lienzo"></div>
+<script>
+const $ = (h) => { const t = document.createElement('template'); t.innerHTML = h.trim(); return t.content.firstChild; };
+let F = 'post', ESC = [];
+
+function marca(D) {
+  return `<div class="marca"><span>${D.kicker}</span><img src="${D.escudo}"></div>`;
+}
+function pie(D, n) { return `<div class="pie"><span>Top Secret FC</span><span><b>${String(n + 1).padStart(2, '0')}</b> / ${String(D.total).padStart(2, '0')}</span></div>`; }
+
+function pintar(D, formato) {
+  F = formato; document.body.className = formato;
+  const L = document.getElementById('lienzo'); L.innerHTML = '';
+  const alto = formato === 'story' ? 1920 : 1350, s = formato === 'story';
+  const Y = (post, story) => s ? story : post;   // posiciones según formato
+  D.total = 6;
+  const escenas = [];
+
+  // 0 · portada
+  escenas.push(`<section class="escena e0"><div class="fondo"></div>
+    ${D.hero ? `<div class="hero" style="background-image:url('${D.hero}')"></div>` :
+      `<div class="podio" style="top:${Y(120, 200)}px;bottom:auto;--alto-jug:${Y(1020, 1300)}px" data-zoom="1">${D.goleadores.slice(0, 3).map(g => `<div class="col"><img src="${g.img}"></div>`).join('')}</div><div class="desvanece" style="height:${Y(62, 55)}%"></div>`}
+    ${marca(D)}
+    <div class="bloque" style="bottom:${Y(110, 210)}px" data-in="0.15">
+      <div class="kicker">${D.portada.kicker}</div>
+      <div class="titulo" style="font-size:${Y(150, 178)}px;margin-top:14px">${D.portada.titulo}</div>
+      <div class="cifras">${D.portada.cifras.map((c, i) => `<div class="cifra" data-in="${0.45 + i * 0.15}"><b data-count="${c.n}">${c.n}</b><span>${c.t}</span></div>`).join('')}</div>
+    </div>
+    ${pie(D, 0)}</section>`);
+
+  // 1 · resultados
+  escenas.push(`<section class="escena e1"><div class="fondo"></div><div class="cancha"></div>${marca(D)}
+    <div class="lista" style="top:${Y(170, 300)}px">
+      <div data-in="0.05"><div class="kicker">Resultados</div><div class="titulo" style="font-size:${Y(112, 140)}px;margin:10px 0 18px">${D.resultadosTitulo}</div></div>
+      ${D.partidos.map((p, i) => `<div class="fila ${p.res}" data-in="${0.3 + i * 0.16}">
+        <div class="fecha">${p.dia}<b>${p.fecha}</b></div><img src="${p.escudo}">
+        <div class="rival">${p.rival}<small>${p.lv}</small></div>
+        <div class="score">${p.gf}-${p.gc}<i>${p.res}</i></div></div>`).join('')}
+    </div>${pie(D, 1)}</section>`);
+
+  // 2 · goleadores
+  escenas.push(`<section class="escena e2"><div class="fondo"></div><div class="cancha"></div>${marca(D)}
+    <div class="lista" style="top:${Y(170, 300)}px" data-in="0.05"><div class="kicker">Goleadores</div>
+      <div class="titulo" style="font-size:${Y(112, 140)}px;margin-top:10px">${D.goleadoresTitulo}</div></div>
+    <div class="podio" style="bottom:${Y(-250, -120)}px;--alto-jug:${Y(940, 1240)}px">${D.goleadores.slice(0, 3).map((g, i) => `<div class="col" data-in="${0.3 + i * 0.18}">
+      <div class="dato"><b data-count="${g.goles}">${g.goles}</b><span>${g.gt}</span><small>${g.goles === 1 ? 'gol' : 'goles'}</small></div><img src="${g.img}"></div>`).join('')}</div>
+    <div class="desvanece" style="height:${Y(16, 14)}%"></div>${pie(D, 2)}</section>`);
+
+  // 3 · figura (mejor promedio)
+  const f = D.figura;
+  escenas.push(`<section class="escena e3"><div class="fondo"></div><div class="cancha"></div>
+    <img class="jug" src="${f.img}" style="height:${Y(1180, 1500)}px;bottom:${Y(-40, 160)}px" data-zoom="1">
+    <div class="desvanece"></div>${marca(D)}
+    <div class="info" style="top:${Y(190, 330)}px">
+      <div class="kicker" data-in="0.05">Mejor promedio</div>
+      <div class="nota" data-in="0.25" data-count="${f.nota}" data-dec="2">${f.nota}</div>
+      <div class="gt" data-in="0.45">${f.gt}</div>
+      <div class="sub" data-in="0.6">${f.lineas.join('<br>')}</div>
+    </div>${pie(D, 3)}</section>`);
+
+  // 4 · el equipo en números
+  escenas.push(`<section class="escena e4"><div class="fondo"></div><div class="cancha"></div>${marca(D)}
+    <div class="lista" style="top:${Y(170, 300)}px" data-in="0.05"><div class="kicker">El equipo</div>
+      <div class="titulo" style="font-size:${Y(112, 140)}px;margin-top:10px">En números</div></div>
+    <div class="grilla" style="top:${Y(420, 620)}px">${D.numeros.map((n, i) => `<div class="n" data-in="${0.25 + i * 0.14}">
+      <b class="${n.oro ? 'oro' : ''}" data-count="${n.n}" ${n.dec ? `data-dec="${n.dec}"` : ''} ${n.suf ? `data-suf="${n.suf}"` : ''}>${n.n}${n.suf || ''}</b><span>${n.t}</span></div>`).join('')}</div>
+    ${pie(D, 4)}</section>`);
+
+  // 5 · lo que viene
+  escenas.push(`<section class="escena e5"><div class="fondo"></div><div class="cancha"></div>${marca(D)}
+    <div class="lista prox" style="top:${Y(170, 300)}px">
+      <div data-in="0.05"><div class="kicker">Lo que viene</div><div class="titulo" style="font-size:${Y(112, 140)}px;margin:10px 0 18px">${D.proxTitulo}</div></div>
+      ${D.proximos.map((p, i) => `<div class="fila" data-in="${0.3 + i * 0.16}">
+        <div class="fecha">${p.dia}<b>${p.fecha}</b></div><img src="${p.escudo}">
+        <div class="rival">${p.rival}<small>${p.lv}</small></div><div class="hora">${p.hora}</div></div>`).join('')}
+    </div>
+    <div class="vivo" style="bottom:${Y(130, 230)}px" data-in="${0.4 + D.proximos.length * 0.16}"><span class="rec"></span>En vivo por Twitch y Kick · topsecretfc</div>
+    ${pie(D, 5)}</section>`);
+
+  for (const h of escenas) L.appendChild($(h));
+  if (D.gancho) L.appendChild($(`<div class="gancho"><div class="kicker" style="margin-bottom:26px">${D.gancho.kicker}</div><div class="titulo">${D.gancho.lineas.join('<br>')}</div></div>`));
+  ESC = [...L.querySelectorAll('.escena')];
+  return ESC.length;
+}
+
+const suave = p => 1 - Math.pow(1 - Math.min(1, Math.max(0, p)), 3);
+// Muestra la escena n en el segundo t de su animación. gancho=true: pantalla del gancho del video.
+function mostrar(n, t = 99, gancho = false) {
+  const g = document.querySelector('.gancho');
+  if (g) g.style.display = gancho ? 'flex' : 'none';
+  ESC.forEach((e, i) => e.classList.toggle('ver', i === n));
+  const e = ESC[n]; if (!e) return;
+  e.querySelectorAll('[data-in]').forEach(el => {
+    const p = suave((t - Number(el.dataset.in)) / 0.55);
+    el.style.opacity = p;
+    el.style.transform = `translateY(${(1 - p) * 46}px)`;
+  });
+  e.querySelectorAll('[data-count]').forEach(el => {
+    const fin = Number(el.dataset.count), dec = Number(el.dataset.dec || 0);
+    const host = el.closest('[data-in]');
+    const p = suave((t - Number(host?.dataset.in || 0) - 0.1) / 0.9);
+    el.textContent = (fin * p).toFixed(dec).replace('.', ',') + (el.dataset.suf || '');
+  });
+  e.querySelectorAll('[data-zoom]').forEach(el => { el.style.transform = `scale(${1.06 - 0.06 * suave(t / 3.2)})`; el.style.transformOrigin = '60% 100%'; });
+}
+</script>
+</body>
+</html>

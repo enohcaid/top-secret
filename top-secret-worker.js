@@ -1131,6 +1131,36 @@ export default {
         return jsonResp({ job: job || null });
       }
 
+      // ── APROBACIONES (aprobar.html — la única página de aprobación, pedido de Juan 2026-10-09) ──
+      // La PC deja en KV `aprobaciones` los lotes a revisar (p. ej. la ronda de redes de las 14:00,
+      // scripts/social/), cada uno con sus piezas por red. Juan aprueba, descarta o corrige el texto de
+      // cada pieza desde la página; la PC publica las aprobadas y anota el resultado en el mismo KV.
+      if (url.pathname === '/aprobaciones' && request.method === 'GET') {
+        const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+        if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
+        const data = await env.TS_KV.get('aprobaciones', 'json');
+        return jsonResp({ lotes: data?.lotes || [] });
+      }
+      if (url.pathname === '/aprobaciones/decidir' && request.method === 'POST') {
+        const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
+        if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
+        let body;
+        try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
+        const { lote, piezas = [], decision, texto } = body || {};
+        if (decision && !['aprobada', 'descartada', 'pendiente'].includes(decision)) return jsonResp({ error: 'Decisión inválida' }, 400);
+        const data = (await env.TS_KV.get('aprobaciones', 'json')) || { lotes: [] };
+        const l = data.lotes.find(x => x.id === lote);
+        if (!l) return jsonResp({ error: 'No existe ese lote' }, 404);
+        const ahora = new Date().toISOString();
+        for (const p of l.piezas.filter(p => piezas.includes(p.id))) {
+          if (p.estado === 'publicado' || p.estado === 'publicando') continue;   // ya salió: no se toca
+          if (decision) { p.decision = decision; p.decididoEn = ahora; }
+          if (typeof texto === 'string') p.texto = texto.slice(0, 5000);
+        }
+        await env.TS_KV.put('aprobaciones', JSON.stringify(data));
+        return jsonResp({ ok: true, lote: l });
+      }
+
       // ── PUBLISHED NOTICIAS (GET /published-noticias) ─────────────────────────
       if (url.pathname === '/published-noticias' && request.method === 'GET') {
         let articles = [];

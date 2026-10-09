@@ -74,6 +74,16 @@ try {
     Log "Error en publicacion en redes: $_"
 }
 
+# ── PASO A: piezas aprobadas en aprobar.html (ronda de redes) cuya hora ya llegó ──
+# Sale enseguida si no hay nada que publicar (una lectura de KV).
+try {
+    Push-Location $repoRoot
+    cmd /c "node scripts\social\publicar.mjs >> scripts\ronda-redes.log 2>&1"
+    Pop-Location
+} catch {
+    Log "Error en publicacion de la ronda: $_"
+}
+
 # ── PASO V: vigía del vivo de Twitch (goles + pantallas del reporte) ──────────
 # Si topsecretfc está en vivo y no hay vigía corriendo (lock con PID vivo), lo lanza en segundo plano.
 # Solo en la ventana de partidos que pidió Juan: lunes a jueves 22:30-00:30 (misma que retransmitir).
