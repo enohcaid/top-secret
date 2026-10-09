@@ -1,0 +1,23 @@
+---
+name: project_ronda_redes
+description: Ronda de redes de las 14:00 — contenido distinto por red (carrusel, Reel, Short, TikTok, X, Facebook) con datos reales, aprobado por Juan en aprobar.html (la página única de aprobación) y publicado solo por la PC
+metadata:
+  type: project
+---
+
+Plan de Juan (2026-10-09): generar contenido propio para cada red con los formatos que más rinden, para ganar visibilidad.
+
+**Decisiones de Juan:**
+- **Revisa él todo antes de publicar**, siempre en la MISMA página: `aprobar.html` (sin link en el menú, pide el PIN de admin). Se le abre sola en el navegador predeterminado cuando el lote está listo.
+- **Ritmo:** el día siguiente a cada jornada + los sábados (repaso semanal); si pasan más de 2 días sin ronda, igual sale una. Hora: 14:00.
+- **No limitarse a lo que ya existe:** crear lo necesario (diseño, animación, imágenes, renders) para que el contenido sea de calidad.
+- Música: el tema original del día ([[reference_beats_propios]]), uno distinto por video ([[feedback_musica_unica]]).
+
+**Cómo funciona (scripts/social/):**
+- `ronda.mjs` (tarea `TopSecretFC-RondaRedes`, 12:30, log `scripts/ronda-redes.log`): decide si toca, arma las piezas, pide los textos a Claude (`textos-encargo.md`, reglas por red), sube a R2 `social/<fecha>/`, deja el lote en KV `aprobaciones` y abre la página. `--fecha`, `--forzar`, `--no-abrir`, `--sin-textos`.
+- Formato actual: **"La semana/jornada en datos"** (`formatos/semana.mjs` + `plantillas/semana.html`): 6 escenas (portada con goleadores, resultados con escudos, goleadores, mejor promedio, el equipo en números, lo que viene) como carrusel 4:5 y como video 9:16 de ~25 s (cuadros renderizados con Playwright, animación determinística `mostrar(n, t)`, ffmpeg + música). Datos: `lib/datos.mjs` (seed_matches.js + VPUG_T4_SCHEDULE/BADGES de convocatoria.html).
+- Piezas por red: Instagram carrusel + Reel, Facebook álbum (video opcional, viene descartado), X post con 4 imágenes, TikTok, YouTube Short.
+- `publicar.mjs` (watch-regen, cada minuto): publica lo **aprobado** cuando llega `publicarA` (meta.mjs, publicar-video.mjs, X con imágenes por CDP) y anota estado/link en el lote y en KV `social_historial`.
+- Worker: `GET /aprobaciones` y `POST /aprobaciones/decidir` (PIN). Lotes nuevos de cualquier tipo van al mismo KV para salir en la misma página.
+
+**Pendiente:** formato "gol de la fecha" (los clips del vigía todavía no son confiables: del 8/10 no quedó ninguno), formatos para días sin partido, métricas por red (Instagram devuelve likes pero no alcance/vistas: al token le falta `instagram_manage_insights`), migrar el paso "Publicar en redes" de noticias a aprobar.html.
