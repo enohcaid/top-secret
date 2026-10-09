@@ -48,7 +48,7 @@ const PIDE = /(amistos|busc|disponib|libre|rival|jugar|partido|\bhoy\b|\bx\s*1\b
 // Palabras sueltas sin \b (con tildes falla: "sí"). Si hay DUDA, la respuesta va a Juan aunque tenga
 // un sí: "ok dejame ver", "bueno, pregunto y te digo" no confirman nada.
 const SI = /(^|[^\p{L}])(dale+|(s[ií]+)+|ok+|oka|okey|de una|va|vamos|listo|joya|perfecto|confirm\p{L}*|hecho|obvio|genial|buen[ií]simo|claro|seguro|anotado)(?!\p{L})|👍|🤝|✅|💪|👌|🔥/iu;
-const NO = /(^|[^\p{L}])((no+)+|nop|imposible|ocupad\p{L}*|ya tenemos|ya conseguimos|otro d[ií]a|mañana|no podemos)(?!\p{L})|❌|👎/iu;
+const NO = /(^|[^\p{L}])((no+)+|nop|imposible|ocupad\p{L}*|ya (tengo|tenemos|tienen|consegu[ií]\p{L}*|cerr[eé]\p{L}*|cerramos|arregl[eé]\p{L}*|arreglamos|estamos|est[aá] (cubierto|completo|lleno))|consegu[ií]\p{L}* (rival|equipo|otro)|completos?|cubiertos?|otro d[ií]a|mañana|no podemos)(?!\p{L})|❌|👎/iu;
 const DUDA = /d[eé]j[aá]me|te (aviso|confirmo|digo|escribo)|pregunt|consult|(^|[^\p{L}])veo(?!\p{L})|a ver|despu[eé]s|en un rato|m[aá]s tarde|ahora vemos|no s[eé]|capaz|quiz[aá]s|tal vez|\?/iu;
 const LIGAS = [[2119, 6409, 'Primera'], [2127, 6410, 'Segunda']];
 const FS_DOC = 'projects/top-secret-fc/databases/(default)/documents/calendario/estado';
@@ -429,6 +429,19 @@ async function respuestaPrivada(msg) {
     const que = { ptt: 'un audio', audio: 'un audio', sticker: 'un sticker', image: 'una imagen', video: 'un video' }[msg.type] || 'algo que no es texto';
     return avisar(`💬 ${id} ${p.equipo?.nombre || p.contacto || ''} mandó ${que}: fijate en el chat. Si confirma, *${id} ok*; si no, *${id} no*.`);
   }
+  // La gente contesta en varios mensajes seguidos ("amigo" / "ya conseguí"): se juntan los que llegan
+  // con menos de 20 s entre uno y otro, y se evalúan juntos.
+  const b = juntando[id] || (juntando[id] = { txts: [] });
+  b.txts.push(txt);
+  clearTimeout(b.timer);
+  b.timer = setTimeout(() => { delete juntando[id]; evaluarRespuesta(id, b.txts.join('\n')).catch(e => log('error:', e.message)); }, 20000);
+}
+const juntando = {};
+
+async function evaluarRespuesta(id, txt) {
+  const p = st.pedidos[id];
+  if (!p || !['ofrecido', 'vencido'].includes(p.estado)) return;
+  log(`${id}: llegó la respuesta del rival`);
   // Pedido sin equipo: la respuesta a "Qué equipo son?" trae el nombre.
   if (!p.equipo) {
     const eq = matchEquipo(txt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
