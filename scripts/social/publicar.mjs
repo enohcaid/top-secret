@@ -16,15 +16,16 @@ import { leer, actualizarPieza, leerKV, guardarKV } from './lib/aprobaciones.mjs
 const espera = ms => new Promise(r => setTimeout(r, ms));
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [publicar] ${m}`);
 
+// Sin process.exit(): en Windows, salir así con conexiones de fetch abiertas tira
+// "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)" (código 9). Se deja terminar solo.
 const data = await leer();
-if (process.argv.includes('--estado')) {
+const ESTADO = process.argv.includes('--estado');
+if (ESTADO) {
   for (const l of data.lotes) { console.log(`${l.id} (${l.publicarA})`); for (const p of l.piezas) console.log(`  ${p.id.padEnd(12)} ${(p.decision || '').padEnd(10)} ${p.estado || ''} ${p.url || p.error || ''}`); }
-  process.exit(0);
 }
 const ahora = Date.now();
-const cola = data.lotes.filter(l => l.publicarA && Date.parse(l.publicarA) <= ahora && ahora - Date.parse(l.publicarA) < 36 * 3600000)
+const cola = ESTADO ? [] : data.lotes.filter(l => l.publicarA && Date.parse(l.publicarA) <= ahora && ahora - Date.parse(l.publicarA) < 36 * 3600000)
   .flatMap(l => l.piezas.filter(p => p.decision === 'aprobada' && (!p.estado || (p.estado === 'publicando' && ahora - Date.parse(p.desde || 0) > 15 * 60000))).map(p => ({ l, p })));
-if (!cola.length) process.exit(0);
 
 function correr(script, args) {
   const r = spawnSync(process.execPath, [path.join(ROOT, script), ...args], { cwd: ROOT, encoding: 'utf8', timeout: 20 * 60000 });

@@ -40,7 +40,11 @@ const sinRonda = !!ultima && (Date.parse(FECHA) - Date.parse(ultima)) / 86400000
 
 // ── ¿Toca hoy? ───────────────────────────────────────────────────────────────
 const motivo = esSabado ? 'sábado (repaso semanal)' : jugoAyer ? `jornada del ${diaSemana(ayer)}` : sinRonda ? `más de 2 días sin ronda (última: ${ultima || 'ninguna'})` : null;
-if (!motivo && !argv.includes('--forzar')) { log(`${FECHA}: hoy no toca ronda.`); process.exit(0); }
+// Sin process.exit() después de un fetch: en Windows tira "Assertion failed … UV_HANDLE_CLOSING" (código 9).
+if (!motivo && !argv.includes('--forzar')) log(`${FECHA}: hoy no toca ronda.`);
+else await armar();
+
+async function armar() {
 log(`Ronda ${FECHA} ${HORA} — ${motivo || 'forzada'}`);
 
 // ── Qué se cuenta: la jornada de ayer o la semana ──────────────────────────
@@ -48,7 +52,7 @@ log(`Ronda ${FECHA} ${HORA} — ${motivo || 'forzada'}`);
 const repaso = esSabado || !jugoAyer;
 const desde = repaso ? sumar(FECHA, -7) : ayer, hasta = ayer;
 const pieza = semana.datos(d, { desde, hasta, semana: Math.max(1, Math.ceil((Date.parse(hasta) - Date.parse(TEMPORADA.desde)) / (7 * 86400000))) });
-if (!pieza) { log(`No hay partidos entre ${desde} y ${hasta}: no hay ronda de datos. (Falta el formato sin partidos.)`); process.exit(0); }
+if (!pieza) { log(`No hay partidos entre ${desde} y ${hasta}: no hay ronda de datos. (Falta el formato sin partidos.)`); return; }
 if (!repaso) {
   pieza.plantilla.portada.kicker = `La jornada del ${diaSemana(ayer)} ${fechaCorta(ayer)}`;
   pieza.plantilla.kicker = `${TEMPORADA.torneo} · ${fechaCorta(ayer)}`;
@@ -114,3 +118,4 @@ await agregarLote({
 log(`Lote ${id} listo para aprobar: ${piezas.length} piezas.`);
 
 if (!argv.includes('--no-abrir')) spawn('cmd', ['/c', 'start', '', PAGINA], { detached: true, stdio: 'ignore' }).unref();
+}
