@@ -5,6 +5,8 @@ metadata:
   type: reference
 ---
 
+**TEMA DEL DÍA (desde 2026-10-09, regla de Juan):** un beat nuevo y 100% original por día, automático y sin aprobación previa. `node scripts/beats/diario.mjs` (tarea programada `TopSecretFC-TemaDelDia`, 10:00, log `scripts/tema-diario.log`) le encarga la composición a Claude Code (`claude -p --model opus`, encargo editable en `scripts/beats/diario-encargo.md`): escribe `scripts/beats/temas/diario_<fecha>.py` con las reglas de [[feedback_composicion_musical]], lo renderiza y lo controla (duración 75-105 s, niveles por sección, espectrograma). Después el script lo pule (-14 LUFS, fundido), lo sube a R2 `_fuentes/musica/propios/<fecha> - <Nombre>.mp3`, lo registra en `scripts/beats/temas-diarios.json` (concepto, tempo, tonalidad, rasgo, recursos: el encargo del día siguiente los lee para no repetirse) y commitea. Todo lo anterior (Operativo, Fachero, estilos `propios/`, biblioteca trap) fue prueba: no se reusa su material. Si un día falla, correrlo a mano; con `--fecha` se rehace un día puntual.
+
 Idea de Juan (2026-10-06): generar trap propio en vez de depender de bibliotecas. Gratis y local. **Antes de componer, leer [[feedback_composicion_musical]]** (reglas y feedback de Juan).
 
 - **Modelo:** ACE-Step 1.5 (código y pesos MIT → uso libre en redes). Instalado en `fuentes/beats/ACE-Step-1.5` (gitignored): `git clone https://github.com/ace-step/ACE-Step-1.5` + `python -m uv sync` (Python 3.11 lo pone uv; torch 2.7.1+cu128 sí soporta la GTX 1070, Pascal sm_61). Pesos ~10 GB en `checkpoints/`, se bajan solos la primera vez (~1 h con HTTP común; `hf_xet` acelera).

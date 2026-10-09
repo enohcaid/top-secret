@@ -6,7 +6,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Reglas y preferencias (cómo trabajar)
 
-- [feedback_musica_unica](feedback_musica_unica.md) — Cada video publicado lleva su propia música, sin repetir temas (registro scripts/musica-usada.json); el video del equipo de la noche es fijo con Locked In
+- [feedback_musica_unica](feedback_musica_unica.md) — Cada video publicado lleva su propia música, sin repetir temas (registro scripts/musica-usada.json); desde 2026-10-09 solo temas originales del día (scripts/beats/diario.mjs); el video del equipo de la noche es fijo con Locked In
 - [feedback_11x11_two_schedule_sources](feedback_11x11_two_schedule_sources.md) — 11x11 (and other) fixture dates in top-secret live in TWO separate places that must both be edited to actually change what the site shows
 - [feedback_always_push](feedback_always_push.md) — User wants every git commit in top-secret pushed to main immediately, no confirmation needed
 - [feedback_alwayspresent_lo_pone_el_jugador](feedback_alwayspresent_lo_pone_el_jugador.md) — alwaysPresent ("fijo") en convocatoria nunca se marca automáticamente al promover/agregar un jugador — lo tiene que activar el jugador mismo
@@ -31,7 +31,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [feedback_kit_sponsor_aia_nike](feedback_kit_sponsor_aia_nike.md) — El sponsor AIA y el swoosh de Nike SI forman parte del kit real del club — nunca instruir al generador de imagenes que los quite
 - [feedback_league_naming_news](feedback_league_naming_news.md) — News writing style: leagues get short names only (VPN/VPUG/11x11, no season suffixes), and the club is always the grammatical subject
 - [feedback_nombres_en_reportes](feedback_nombres_en_reportes.md) — Tabla de alias — nombres que muestran los reportes de partido (EA FC) que no coinciden con el gamertag real del jugador
-- [feedback_musica_trap](feedback_musica_trap.md) — Regla: la música de las publicaciones es trap libre de derechos; biblioteca en R2
+- [feedback_musica_trap](feedback_musica_trap.md) — Regla: la música de las publicaciones es trap libre de derechos; desde 2026-10-09 solo temas originales del club (la biblioteca de YouTube quedó retirada)
 - [feedback_no_achicar_fuente_para_encajar](feedback_no_achicar_fuente_para_encajar.md) — Cuando un texto nuevo (rival largo, etc.) no entra en el tamaño de fuente original de un elemento (Canva u otros editores), NUNCA achicar el font_size para que entre — escribir el texto al tamaño original y centrar/ajustar el recuadro (box) en su lugar
 - [feedback_no_copiar_brief_textual](feedback_no_copiar_brief_textual.md) — When the user dictates a detailed brief/explanation for content, treat it as raw material to transform — not text to trim and paste as final copy
 - [feedback_noticias_expediente_digital](feedback_noticias_expediente_digital.md) — Desde 2026-09-29 las noticias de Top Secret abandonan la estética de fichero/expediente de papel; noticias.html es un "expediente de computadora" limpio y gráfico
@@ -66,7 +66,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Referencias técnicas
 
-- [reference_beats_propios](reference_beats_propios.md) — Beats de trap propios con ACE-Step 1.5 (MIT, local en la 1070): scripts/beats/generar.mjs + pulir.mjs, estilos en scripts/beats/estilos
+- [reference_beats_propios](reference_beats_propios.md) — Tema del día (scripts/beats/diario.mjs, 10:00, automático) + herramientas de composición por código; ACE-Step quedó descartado
 - [reference_calendario_dead_code](reference_calendario_dead_code.md) — calendario.html tiene funciones de renderizado muertas (nunca invocadas) que pueden confundir — dónde está el widget "HOY" real
 - [reference_canva_imagen_a_video](reference_canva_imagen_a_video.md) — Automatización de "Imagen a video" de Canva (videos de 5 s desde una imagen) con scripts/canva-imagen-a-video.mjs vía el Chrome CDP
 - [reference_canva_resumen_semanal](reference_canva_resumen_semanal.md) — Proceso completo y limitaciones reales para armar el video 'Resumen Semanal' (goles de la semana) en Canva, distinto del proceso de 'Formación Titular'
