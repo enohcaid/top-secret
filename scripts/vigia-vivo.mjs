@@ -18,6 +18,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import sharp from 'sharp';
 import ffmpeg from 'ffmpeg-static';
+import { SB_CAJA, SB_NUM, SB_RECORTE, hayMarcador, crearDetector } from './lib/marcador.mjs';
 
 sharp.cache(false);
 
@@ -27,10 +28,8 @@ const CANAL = 'topsecretfc';
 const W = 1280, H = 720, FRAME = W * H * 3;
 const LOCK = path.join(ROOT, 'fuentes/vivo/.vigia.lock');
 
-// Marcador FC27 (720p): caja blanca arriba a la izquierda, números en la columna derecha.
-const SB_CAJA = { left: 103, top: 38, width: 60, height: 36 };   // letras sobre blanco: presencia del marcador
-const SB_NUM  = { left: 166, top: 40, width: 26, height: 32 };   // las dos cifras (local arriba, visita abajo)
-const SB_RECORTE = { left: 60, top: 30, width: 150, height: 66 }; // lo que se guarda como evidencia
+// Marcador FC27 (720p): recortes y detector de goles en scripts/lib/marcador.mjs
+// (probarlo sobre una grabación: node scripts/probar-marcador.mjs <video>)
 const PESTANAS = ['resumen', 'posesión', 'posesion', 'tiros', 'pases', 'defensa', 'eventos', 'portería', 'porteria'];
 
 const args = process.argv.slice(2);
@@ -91,18 +90,7 @@ function ocrServer() {
 async function gris(raw, reg) {
   return sharp(raw, { raw: { width: W, height: H, channels: 3 } }).extract(reg).greyscale().raw().toBuffer();
 }
-const frac = (buf, f) => buf.reduce((n, v) => n + f(v), 0) / buf.length;
-// Marcador presente: caja mayormente blanca pero con letras oscuras (descarta pantallas blancas)
-const hayMarcador = caja => frac(caja, v => v > 200) > 0.45 && frac(caja, v => v < 80) > 0.05;
-// Cifras binarizadas por fila (local / visita); cambio = XOR/unión de píxeles oscuros.
-// Calibrado 2026-10-08 sobre el VOD 2893092714: ruido <= 0.09, de 2 a 3 = 0.23.
-const filas = num => [num.subarray(0, num.length / 2), num.subarray(num.length / 2)].map(r => Uint8Array.from(r, v => v < 110));
-const diferFilas = (A, B) => A.map((a, k) => {
-  let x = 0, u = 0; for (let i = 0; i < a.length; i++) { x += a[i] ^ B[k][i]; u += a[i] | B[k][i]; }
-  return x / Math.max(u, 1);
-});
-const difer = (A, B) => Math.max(...diferFilas(A, B));
-const UMBRAL = 0.16, AUSENCIA_PARTIDO = 90; // s sin marcador = el próximo que aparezca es otro partido
+const AUSENCIA_PARTIDO = 90; // s sin marcador = el próximo que aparezca es otro partido
 
 // ── Clips de goles ───────────────────────────────────────────────────────────
 // En FC27 online no hay repetición: gol → festejo (cortes de cámara, ~5 s) → saque del medio. El marcador
@@ -126,7 +114,8 @@ async function cortesDeCamara(src, desde, dur) {
 
 // El contador de cuadros del vigía puede quedar unos segundos corrido respecto de la grabación
 // (medido: ~6 s en el VOD 2893092714; también hay reconexiones en vivo). Por eso cada gol se
-// re-ubica en source.mp4: se busca el cambio de cifras del marcador a 4 fps en [seg-10, seg+25].
+// re-ubica en source.mp4: se busca el cambio de cifras del marcador a 4 fps en [seg-10, seg+25], con el mismo
+// detector que en vivo (mediana de 5 cuadros = 1,25 s; sostenido 8 cuadros = 2 s).
 async function cambioEnGrabacion(src, seg) {
   const desde = Math.max(0, seg - 10), FPS = 4;
   const R = { x: SB_CAJA.left, y: SB_CAJA.top, w: SB_NUM.left + SB_NUM.width - SB_CAJA.left, h: SB_NUM.top + SB_NUM.height - SB_CAJA.top };
@@ -137,24 +126,33 @@ async function cambioEnGrabacion(src, seg) {
     const parts = []; p.stdout.on('data', d => parts.push(d));
     p.on('exit', c => c === 0 ? res(Buffer.concat(parts)) : rej(new Error('ffmpeg alineando')));
   });
-  const n = R.w * R.h, cuadros = [];
-  for (let o = 0; o + n <= buf.length; o += n) {
+  const n = R.w * R.h, det = crearDetector({ sostener: 8 });
+  for (let o = 0, i = 0, vistos = 0; o + n <= buf.length; o += n, i++) {
     const f = buf.subarray(o, o + n);
     const sub = (x, y, w, h) => { const out = new Uint8Array(w * h); for (let j = 0; j < h; j++) out.set(f.subarray((y + j) * R.w + x, (y + j) * R.w + x + w), j * w); return out; };
     const caja = sub(0, 0, SB_CAJA.width, SB_CAJA.height);
-    cuadros.push(hayMarcador(caja) ? filas(sub(SB_NUM.left - R.x, SB_NUM.top - R.y, SB_NUM.width, SB_NUM.height)) : null);
-  }
-  const base = cuadros.find(Boolean);
-  if (!base) return null;
-  for (let i = 0; i + 3 < cuadros.length; i++) {
-    const v = cuadros.slice(i, i + 4);
-    if (v.every(c => c && difer(c, base) > UMBRAL)) return desde + i / FPS;
+    if (!hayMarcador(caja)) continue;
+    const ev = det.paso(sub(SB_NUM.left - R.x, SB_NUM.top - R.y, SB_NUM.width, SB_NUM.height), caja, desde + i / FPS);
+    if (++vistos === 5) det.asentar();
+    if (ev) return ev.seg;
   }
   return null;
 }
 
-const leerEventos = OUT => existsSync(path.join(OUT, 'eventos.jsonl'))
-  ? readFileSync(path.join(OUT, 'eventos.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse) : [];
+// Si las siglas se leyeron recién en un gol posterior del mismo partido, los goles anteriores quedaron
+// "¿de quién?" (aFavor null): se completan con la fila de TOP que se supo después.
+const leerEventos = OUT => {
+  const ev = existsSync(path.join(OUT, 'eventos.jsonl'))
+    ? readFileSync(path.join(OUT, 'eventos.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse) : [];
+  const filaTop = {}; let partido = 0;
+  for (const e of ev) { if (e.tipo === 'partido') partido = e.n; e._partido = partido; if (e.tipo === 'equipos') filaTop[partido] = e.filaTop; }
+  for (const e of ev) {
+    const ft = filaTop[e._partido];
+    if (e.tipo === 'gol' && e.aFavor == null && e.fila != null && ft != null) e.aFavor = e.fila === ft;
+    delete e._partido;
+  }
+  return ev;
+};
 
 async function armarClips(OUT, clave) {
   const recDir = path.join(OUT, 'rec');
@@ -214,10 +212,9 @@ async function main() {
 
   const ocr = ocrServer();
   let t = 0;                 // segundos de stream analizados en esta sesión
-  let base = null;           // números del marcador "estables"
-  let candidato = null, candN = 0;
+  const det = crearDetector();
   let ultimoMarcador = -1e9, inicioMarcador = 0, partidos = 0;
-  let filaTop = null, rival = '', archivoPartido = '';
+  let filaTop = null, rival = '', archivoPartido = '', recortePartido = false;
   // ¿En qué fila del marcador está TOP? (el OCR lee bien las siglas ampliadas, no las cifras)
   const leerEquipos = async png => {
     const lineas = ((await ocr.leer(png)).lines || []).filter(l => /^[A-Z0-9]{3}/.test(l.text) && l.y < 130);
@@ -237,43 +234,42 @@ async function main() {
     const caja = await gris(raw, SB_CAJA);
     const enJuego = hayMarcador(caja);
     if (enJuego) {
-      const num = filas(await gris(raw, SB_NUM));
       const img = () => sharp(raw, { raw: { width: W, height: H, channels: 3 } });
       if (seg - ultimoMarcador > AUSENCIA_PARTIDO) {
         // vuelve el marcador tras un rato largo: arranca (o sigue tras el entretiempo) un partido
-        base = num; candidato = null; candN = 0; partidos++; inicioMarcador = seg;
+        det.reiniciar(); partidos++; inicioMarcador = seg; recortePartido = false;
         const nombre = `partido-${String(partidos).padStart(2, '0')}-${hms(seg).replace(/:/g, '')}`;
         filaTop = null;
         archivoPartido = path.join(OUT, 'goles', `${nombre}-marcador.png`);
         log('partido', { n: partidos, seg, hora: hms(seg) });
         console.log(`[${hms(seg)}] marcador en pantalla (partido/tiempo #${partidos})`);
-      } else if (seg - inicioMarcador < 5) {
-        base = num;   // el marcador recién entra con animación: se asienta antes de comparar
-      } else if (seg - inicioMarcador === 6) {
+      }
+      ultimoMarcador = seg;
+      // el detector descarta cuadros borrosos/rotos y exige que cambie una sola fila, sostenido (lib/marcador.mjs)
+      const ev = det.paso(await gris(raw, SB_NUM), caja, seg);
+      // el marcador entra con animación: lo de los primeros 5 s queda como resultado y siglas de partida
+      if (seg - inicioMarcador >= 5 && !det.asentado) det.asentar();
+      if (seg - inicioMarcador >= 6 && !recortePartido) {
         // ya quieto: recorte del partido + qué fila es TOP y siglas del rival
+        recortePartido = true;
         await img().extract(SB_RECORTE).resize(450).png().toFile(archivoPartido);
         if (await leerEquipos(archivoPartido)) {
           log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival });
           console.log(`[${hms(seg)}]   TOP ${filaTop ? 'visitante' : 'local'} vs ${rival}`);
         }
-      } else if (difer(num, base) > UMBRAL) {
-        // cambio sostenido 3 s = gol (descarta animaciones y repeticiones)
-        if (candidato && difer(num, candidato) < UMBRAL) candN++; else { candidato = num; candN = 1; }
-        if (candN >= 3) {
-          const df = diferFilas(candidato, base);
-          const fila = df[0] > df[1] ? 0 : 1;
-          base = candidato; candidato = null; candN = 0; goles++;
-          const ts = seg - 2, nombre = `gol-${String(goles).padStart(2, '0')}-${hms(ts).replace(/:/g, '')}`;
-          const pngGol = path.join(OUT, 'goles', `${nombre}-marcador.png`);
-          await img().extract(SB_RECORTE).resize(450).png().toFile(pngGol);
-          if (filaTop === null) await leerEquipos(pngGol);     // reintento si al arranque no se leyó
-          const aFavor = filaTop === null ? null : fila === filaTop;
-          await img().jpeg({ quality: 88 }).toFile(path.join(OUT, 'goles', `${nombre}.jpg`));
-          log('gol', { n: goles, seg: ts, hora: hms(ts), aFavor, rival });
-          console.log(`[${hms(ts)}] cambio de marcador #${goles}${aFavor === null ? '' : aFavor ? ' — GOL DE TOP' : ' — gol en contra'}`);
-        }
-      } else { candidato = null; candN = 0; }
-      ultimoMarcador = seg;
+      }
+      if (ev && seg - inicioMarcador >= 5) {
+        goles++;
+        const ts = ev.seg, nombre = `gol-${String(goles).padStart(2, '0')}-${hms(ts).replace(/:/g, '')}`;
+        const pngGol = path.join(OUT, 'goles', `${nombre}-marcador.png`);
+        await img().extract(SB_RECORTE).resize(450).png().toFile(pngGol);
+        if (filaTop === null && await leerEquipos(pngGol))   // reintento si al arranque no se leyó
+          log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival });
+        const aFavor = filaTop === null ? null : ev.fila === filaTop;
+        await img().jpeg({ quality: 88 }).toFile(path.join(OUT, 'goles', `${nombre}.jpg`));
+        log('gol', { n: goles, seg: ts, hora: hms(ts), fila: ev.fila, aFavor, rival });
+        console.log(`[${hms(ts)}] cambio de marcador #${goles}${aFavor === null ? '' : aFavor ? ' — GOL DE TOP' : ' — gol en contra'}`);
+      }
     }
     // 2) Pantallas del reporte: OCR cada 2 s, solo fuera de juego (sin marcador en pantalla)
     if (seg % 2 === 0 && !enJuego) {

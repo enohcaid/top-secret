@@ -22,7 +22,13 @@ metadata:
 
 Detalles técnicos y gotchas:
 - **Marcador FC27 (720p):** caja blanca en x103-163/y38-74 (presencia: >45 % blanco **y** >5 % oscuro, para descartar pantallas blancas); cifras en x166-192/y40-72. Si FC cambia el HUD o la PS5 transmite en otra resolución, recalibrar `SB_*` en el script.
-- **Cambio de cifras:** binarizado por fila (local/visita), XOR/unión de píxeles oscuros. Umbral 0,16: el ruido llega a 0,09 y el paso de 2 a 3 da 0,23. Con diferencia de grises simple no se detectaba el 2→3.
+- **Cambio de cifras** (detector en `scripts/lib/marcador.mjs`, rehecho 2026-10-09): binarizado por fila (local/visita), XOR/unión de píxeles oscuros. Con diferencia de grises simple no se detectaba el 2→3. El 2026-10-08 la versión anterior (cuadro suelto contra la base, umbral 0,16, 3 s) dio **9 cambios con 5 falsos**: con poco bitrate un cuadro suelto llega a 0,23 de ruido, el marcador se ve borroso en las transiciones y en los últimos segundos antes de que se corte la señal sale roto. Ahora:
+  - compara la **mediana de los últimos 5 cuadros** (el ruido de compresión se cancela);
+  - un gol cambia **una sola fila** (> 0,19 y la otra < 0,12); si cambian las dos es borroso/transición y se ignora (si dura 20 cuadros se toma como base nueva). Margen chico: el 2→3 da 0,21–0,24 y lo borroso llega a 0,18 (con 0,25 se perdía el 2→3 del VOD 2893092714; con 0,17 aparecía un falso el 2026-10-08);
+  - **sostenido 6 cuadros** en vivo (8 a 4 fps al re-ubicar el clip); los goles reales aguantan 8+;
+  - descarta el cuadro si la caja de siglas (TOP/PKE) no se parece a la del arranque del partido (correlación < 0,5; normal ≥ 0,89).
+  - Cada gol guarda su `fila`; si las siglas se leyeron recién en un gol posterior, `leerEventos()` completa los "¿de quién?" anteriores del mismo partido (antes se clipeaban también goles en contra).
+  - **Probar un cambio:** `node scripts/probar-marcador.mjs <video.mp4 | url HLS> [--salida <carpeta>]` corre solo el detector (sin OCR ni clips); opciones del detector con `MARCADOR_OPC='{"sostener":6}'`, métricas por cuadro con `MARCADOR_DEBUG=1`. Referencias: el `source.mp4` del 2026-10-08 (`fuentes/goles/vvivo-2026-10-08/`) tiene que dar 4 goles (16:11, 20:20, 20:51, 31:54) y el VOD 2893092714 (URL con `yt-dlp -g`), 6.
 - **El OCR de Windows** (`scripts/lib/ocr-windows.ps1`, sin instalar nada, idioma es) lee bien el texto grande, pero en las cifras chicas del marcador confunde 0/O. Por eso los goles se detectan por píxeles y el dato oficial (quién y en qué minuto) sale de la pantalla "Eventos".
 - Usar un archivo temporal **distinto por cuadro**: el proceso de OCR puede tener abierto el anterior y sharp falla con "unable to open for write".
 - Estado en vivo sin credenciales: GQL de Twitch con el Client-ID público `kimne78kx3ncx6brgo4mv6wki5h1ko`.
