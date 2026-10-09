@@ -353,8 +353,30 @@ const STYLE_AFFINITY = [
     styles: ['CAMPANA_ESTUDIO', 'RETRATO_EDITORIAL'] },
 ]
 
+// La escena de la nota manda (pedido de Juan, 2026-10-09: "la imagen en coherencia con la noticia").
+// Antes el estilo salía de la rotación y le ganaba al brief: un "festejo bajo los reflectores con el
+// plantel" (08/10) terminó como retrato editorial quieto. Si el brief nombra un lugar, ese es el estilo;
+// la rotación queda solo para briefs que no dicen dónde. Orden = prioridad (el primero que matchea).
+const STYLE_FROM_BRIEF = [
+  { re: /estudio/,                                             style: 'CAMPANA_ESTUDIO' },
+  { re: /t[uú]nel/,                                            style: 'TUNEL' },
+  { re: /vestuario|casilleros/,                                style: 'VESTUARIO' },
+  { re: /(festej|celebr|gol|remate|corr|abraz|euforia|en juego|jugada|disput)/, style: 'ACCION_PARTIDO', also: /cancha|c[eé]sped|estadio|reflector|partido/ },
+  { re: /cancha|c[eé]sped|estadio|reflector|tribuna/,          style: 'ESTADIO_NOCHE' },
+  { re: /retrato|primer plano|plano cercano/,                  style: 'RETRATO_EDITORIAL' },
+];
+
+function styleFromBrief(draft = {}) {
+  const brief = (typeof draft.imageBrief === 'string' ? draft.imageBrief : '').toLowerCase();
+  if (brief.trim().length <= 10) return null;
+  const hit = STYLE_FROM_BRIEF.find(r => r.re.test(brief) && (!r.also || r.also.test(brief)));
+  return hit ? IMAGE_STYLES.find(s => s.id === hit.style) : null;
+}
+
 function pickStyle(history, draft = {}) {
-  const recentIds = new Set(history.slice(0, 5).map(h => h.style));
+  const fromBrief = styleFromBrief(draft);
+  if (fromBrief) return fromBrief;
+  const recentIds = new Set(history.slice(0, 3).map(h => h.style));
   const available = IMAGE_STYLES.filter(s => !recentIds.has(s.id));
   let pool = available.length > 0 ? available : IMAGE_STYLES;
 
@@ -467,8 +489,12 @@ const GESTOS_FESTEJO = [
 ];
 const GESTO_REPEAT_WINDOW = 3;
 function pickGesto(history, draft = {}) {
-  const text = ((draft.imageBrief || '') + ' ' + (draft.title || '')).toLowerCase();
-  if (!/festej|celebr|gol|euforia|victoria|triunfo/.test(text)) return null;
+  // Solo la escena decide (el título puede decir "victoria" y la foto ser del vestuario antes del partido).
+  const text = (draft.imageBrief || '').toLowerCase();
+  if (!/festej|celebr|\bgol(es)?\b|euforia/.test(text)) return null;
+  if (/derrota|ca[ií]da|sin festejo|cabizbaj|bronca|silencio/.test(text)) return null;
+  // Si la nota ya dice cómo festeja, se respeta (la escena manda); se sortea solo si no lo dice.
+  if (/pu[ñn]os?|brazos|besa|beso|se[ñn]al|salt|grit|abraz|rodilla|dedo/.test(text)) return null;
   const recent = new Set(history.filter(h => h.gesto).slice(0, GESTO_REPEAT_WINDOW).map(h => h.gesto));
   const pool = GESTOS_FESTEJO.filter(g => !recent.has(g.id));
   const from = pool.length ? pool : GESTOS_FESTEJO;
@@ -655,14 +681,14 @@ ${action}
 
 ${brandFormatBlock()}
 
-═══ ESCENA DEL DÍA ═══
-${style.prompt}
-Aplicá esta escena como base, siempre dentro de la ESTÉTICA DEL CLUB de arriba. La paleta define el AMBIENTE y la LUZ — el kit del jugador es el de su render, nunca teñido por la paleta.
-
-═══ ESCENA Y ACCIÓN ═══
-Contenido de la nota (quién y qué emoción): ${scene}
-⚠️ El LUGAR, el ENCUADRE y la LUZ los define la ESCENA DEL DÍA de arriba (${style.label}), no esta descripción: si acá se menciona otro lugar (estadio, reflectores, túnel, césped…), trasladá la emoción y los protagonistas a la escena del día. Así cada noticia tiene una foto distinta.
+═══ LA ESCENA (lo más importante) ═══
+${scene}
+⚠️ Esta escena sale de la noticia y MANDA: respetá el lugar, la acción, la emoción y cuántos jugadores aparecen. Tiene que ser una foto con VIDA — gente haciendo algo, expresiones reales, cuerpo en movimiento o en tensión — no una pose quieta de catálogo, salvo que la escena pida explícitamente un retrato.
 ${playerBlock}
+
+═══ LUZ Y TRATAMIENTO ═══
+Referencia de tratamiento fotográfico (${style.label}): ${style.prompt}
+Tomá de acá la luz, la paleta y el acabado premium, siempre dentro de la ESTÉTICA DEL CLUB de arriba. Si algo de esta referencia choca con LA ESCENA (otro lugar, otra pose, otra cantidad de jugadores), gana LA ESCENA. La paleta define el AMBIENTE y la LUZ — el kit del jugador es el de su render, nunca teñido por la paleta.
 
 ═══ IMÁGENES ADJUNTAS A ESTE MENSAJE — REFERENCIAS OBLIGATORIAS ═══
 ⚠️ Los adjuntos son SOLO referencias visuales (escudo, kit y caras). NO son el layout: no hagas un catálogo, una grilla ni un mosaico de los adjuntos. La imagen a crear es la ESCENA de la noticia descrita arriba.
@@ -1391,7 +1417,7 @@ async function main() {
   const chosenStyle  = pickStyle(styleHistory, draft);
   const kitHistory   = await fetchKitHistory();
   const chosenKit    = pickKitColor(kitHistory);
-  console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})`);
+  console.log(`Estilo del día: ${chosenStyle.label} (${chosenStyle.id})${styleFromBrief(draft) ? ' — según el lugar que pide la nota' : ' — rotación'}`);
   console.log(`Kit del día: ${chosenKit.label}`);
   const chosenGesto  = mentioned.length ? pickGesto(styleHistory, draft) : null;
   if (chosenGesto) console.log(`Gesto de festejo: ${chosenGesto.id}`);
@@ -1556,6 +1582,7 @@ if (isDirectRun) {
 
 export {
   IMAGE_STYLES,
+  styleFromBrief,
   PROJECT_URL,
   MAX_ATTEMPTS,
   POST_MIN_RATIO,
