@@ -92,13 +92,46 @@
     </article>`;
   }
 
+  // Guion de una pieza viral (etapa 1): se aprueba la IDEA antes de producirla. El texto editable son los
+  // comentarios de Juan para ajustarla.
+  function guion(l, p) {
+    const g = p.guion || {};
+    const estado = p.decision || 'pendiente';
+    return `<article class="pieza guion ${p.decision || ''}" data-lote="${esc(l.id)}" data-pieza="${esc(p.id)}">
+      <div class="pieza-cab">
+        <div><div class="cuando">${esc(g.cuando || '')}</div><div class="formato">${esc(p.formato)}</div>
+          <div class="redes-chips">${(g.redes || []).map(r => `<span>${esc(r)}</span>`).join('')}</div></div>
+        <span class="chip ${estado}">${estado === 'aprobada' ? 'Idea aprobada' : ESTADO[estado] || estado}</span>
+      </div>
+      ${p.media?.length ? medio(p) : ''}
+      <div class="g-gancho">${esc(g.gancho || '')}</div>
+      ${g.escenas?.length ? `<ol class="g-escenas">${g.escenas.map(e => `<li>${esc(e)}</li>`).join('')}</ol>` : ''}
+      ${g.texto ? `<div class="g-bloque"><b>Texto de la publicación</b>${esc(g.texto)}</div>` : ''}
+      ${g.porque ? `<div class="g-bloque"><b>Por qué puede funcionar</b>${esc(g.porque)}</div>` : ''}
+      ${g.crear ? `<div class="g-bloque"><b>Qué hay que crear</b>${esc(g.crear)}</div>` : ''}
+      <div class="texto"><label>Tus comentarios para ajustarla</label><textarea data-lim="2000" placeholder="Opcional: qué cambiarías">${esc(p.texto || '')}</textarea><div class="cuenta"></div></div>
+      <div class="botones">
+        <button class="no" data-accion="descartada">Descartar idea</button>
+        <button class="si" data-accion="aprobada" ${p.decision === 'aprobada' ? 'disabled' : ''}>${p.decision === 'aprobada' ? 'Idea aprobada' : 'Aprobar idea'}</button>
+      </div>
+    </article>`;
+  }
+
   function lote(l) {
+    if (l.etapa === 'guion') {
+      const pend = l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length;
+      return `<section class="lote" data-lote="${esc(l.id)}">
+        <div class="lote-cab"><div><h2>${esc(l.titulo)}</h2><div class="meta">${esc(l.bajada || '')}${pend ? ` · ${pend} idea${pend > 1 ? 's' : ''} sin decidir` : ' · todo decidido'}</div></div>
+          <div class="acciones"><button class="si" data-todo="aprobada" ${pend ? '' : 'disabled'}>Aprobar todas las ideas</button></div></div>
+        <div class="piezas">${l.piezas.map(p => guion(l, p)).join('')}</div>
+      </section>`;
+    }
     const pend = l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length;
     const redes = Object.keys(REDES).filter(r => l.piezas.some(p => p.red === r));
     return `<section class="lote" data-lote="${esc(l.id)}">
       <div class="lote-cab">
         <div><h2>${esc(l.titulo)}</h2>
-          <div class="meta">${l.publicarA ? 'Sale ' + fechaHora(l.publicarA) : ''}${pend ? ` · ${pend} pieza${pend > 1 ? 's' : ''} sin decidir` : ' · todo decidido'}</div></div>
+          <div class="meta">${l.publicarA ? 'Sale ' + fechaHora(l.publicarA) : l.simulacro ? 'Simulacro: no se publica' : ''}${pend ? ` · ${pend} pieza${pend > 1 ? 's' : ''} sin decidir` : ' · todo decidido'}</div></div>
         <div class="acciones"><button class="si" data-todo="aprobada" ${pend ? '' : 'disabled'}>Aprobar todo lo pendiente</button></div>
       </div>
       ${redes.map(r => `<div class="red">
@@ -117,9 +150,37 @@
     // Si el foco está en un texto que se está editando, no redibujar (se perdería lo escrito).
     if (['TEXTAREA', 'INPUT'].includes(document.activeElement?.tagName)) return;
     const vivos = lotes.filter(l => l.piezas.some(p => p.estado !== 'publicado' && p.decision !== 'descartada') || Date.now() - Date.parse(l.creado) < 3 * 86400000);
-    $('#lotes').innerHTML = vivos.length ? vivos.map(lote).join('') : '<div class="vacio">No hay nada para aprobar por ahora.</div>';
+    pintarPestanas(vivos);
+  }
+
+  // Dos pestañas: noticias y resultados (resumen semanal, notas) / contenido viral (guiones + piezas).
+  const PESTANAS = [
+    { id: 'noticias', nombre: 'Noticias y resultados', es: l => l.tipo !== 'viral' },
+    { id: 'viral', nombre: 'Contenido viral', es: l => l.tipo === 'viral' },
+  ];
+  let pestana = (() => { try { return localStorage.getItem('ts_aprobar_tab') || 'noticias'; } catch { return 'noticias'; } })();
+  const pendientes = ls => ls.reduce((s, l) => s + l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length, 0);
+  function pintarPestanas(vivos) {
+    const P = PESTANAS.find(x => x.id === pestana) || PESTANAS[0];
+    const tabs = `<nav class="tabs">${PESTANAS.map(x => { const n = pendientes(vivos.filter(x.es)); return `<button class="tab ${x.id === P.id ? 'on' : ''}" data-tab="${x.id}">${x.nombre}${n ? `<i>${n}</i>` : ''}</button>`; }).join('')}</nav>`;
+    const mios = vivos.filter(P.es);
+    let cuerpo;
+    if (P.id === 'viral') {
+      const g = mios.filter(l => l.etapa === 'guion'), listos = mios.filter(l => l.etapa !== 'guion');
+      cuerpo = `<h2 class="seccion">Guiones para aprobar</h2><p class="seccion-sub">Primero se aprueba la idea; después se produce y vuelve abajo para el visto bueno final.</p>
+        ${g.length ? g.map(lote).join('') : '<div class="vacio">No hay guiones nuevos.</div>'}
+        <h2 class="seccion">Listo para publicar</h2>${listos.length ? listos.map(lote).join('') : '<div class="vacio">Nada producido por ahora.</div>'}`;
+    } else cuerpo = mios.length ? mios.map(lote).join('') : '<div class="vacio">No hay noticias ni resultados para aprobar.</div>';
+    $('#lotes').innerHTML = tabs + cuerpo;
     document.querySelectorAll('textarea').forEach(contar);
   }
+  document.addEventListener('click', e => {
+    const t = e.target.closest('button[data-tab]');
+    if (!t) return;
+    pestana = t.dataset.tab;
+    try { localStorage.setItem('ts_aprobar_tab', pestana); } catch {}
+    cargar();
+  });
 
   function contar(t) {
     const c = t.parentElement.querySelector('.cuenta'), lim = Number(t.dataset.lim);

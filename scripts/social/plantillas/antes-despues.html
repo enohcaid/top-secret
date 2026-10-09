@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "Antes y después" (formato viral de transformación): el mismo jugador temporada por temporada, cortes al
+     pulso y la revelación de la versión actual. Video 9:16 corto, pensado para verse en loop (el final vuelve a
+     la primera imagen). pintar(D, 'story') / mostrar(n, t). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0907;--gold:#C9A84C;--gold2:#E6CF85;--text:#F4EFE0;--text2:rgba(244,239,224,.6)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text)}
+.escena{position:absolute;inset:0;display:none}
+.escena.ver{display:block}
+.piso{position:absolute;left:50%;bottom:330px;width:820px;height:120px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(0,0,0,.65),transparent)}
+.jug{position:absolute;left:50%;bottom:350px;height:1180px;transform:translateX(-50%);transform-origin:50% 100%}
+.vieja .jug{image-rendering:pixelated;filter:saturate(.7) contrast(.95)}
+.etq{position:absolute;left:0;right:0;top:250px;text-align:center}
+.etq b{display:block;font:400 150px/.9 'Bebas Neue';letter-spacing:.02em}
+.etq span{font:800 30px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;color:var(--text2)}
+.abajo{position:absolute;left:0;right:0;bottom:190px;text-align:center;font:800 54px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.04em}
+.gancho{position:absolute;left:0;right:0;top:110px;text-align:center;font:400 96px/.95 'Bebas Neue'}
+.gancho em{font-style:normal;color:var(--gold)}
+.halo{position:absolute;left:50%;top:46%;width:1500px;height:1500px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(201,168,76,.42),rgba(201,168,76,.08) 55%,transparent 72%)}
+.rayos{position:absolute;left:50%;top:46%;width:2400px;height:2400px;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,rgba(201,168,76,.10) 0deg 6deg,transparent 6deg 18deg);mask:radial-gradient(closest-side,#000 20%,transparent 70%)}
+.nueva .jug{filter:drop-shadow(0 0 50px rgba(201,168,76,.45)) drop-shadow(0 40px 50px rgba(0,0,0,.7))}
+.flash{position:absolute;inset:0;background:#FFF6DC;pointer-events:none;opacity:0}
+.escudo{position:absolute;right:64px;top:64px;height:70px}
+.ruido{position:absolute;inset:0;opacity:.10;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+</style>
+</head>
+<body>
+<div id="lienzo"></div>
+<script>
+let ESC = [];
+function pintar(D) {
+  const L = document.getElementById('lienzo'); L.innerHTML = '';
+  const n = D.versiones.length;
+  D.versiones.forEach((v, i) => {
+    const ultima = i === n - 1;
+    L.insertAdjacentHTML('beforeend', `<section class="escena ${ultima ? 'nueva' : 'vieja'}">
+      ${ultima ? '<div class="rayos"></div><div class="halo"></div>' : '<div class="ruido"></div>'}
+      <div class="piso"></div><img class="jug" src="${v.img}">
+      ${i === 0 ? `<div class="gancho">${D.gancho}</div>` : ''}
+      <div class="etq" ${i === 0 ? 'style="top:420px"' : ''}><b class="${ultima ? '' : ''}" style="${ultima ? 'color:var(--gold)' : ''}">${v.titulo}</b><span>${v.sub}</span></div>
+      ${ultima ? `<div class="abajo">${D.final}</div><img class="escudo" src="${D.escudo}"><div class="flash"></div>` : ''}
+    </section>`);
+  });
+  ESC = [...L.querySelectorAll('.escena')];
+  return ESC.length;
+}
+const suave = p => 1 - Math.pow(1 - Math.min(1, Math.max(0, p)), 3);
+function mostrar(n, t = 99) {
+  ESC.forEach((e, i) => e.classList.toggle('ver', i === n));
+  const e = ESC[n]; if (!e) return;
+  const jug = e.querySelector('.jug'), nueva = e.classList.contains('nueva');
+  if (nueva) {
+    e.querySelector('.flash').style.opacity = Math.max(0, 1 - t / 0.4);
+    jug.style.transform = `translateX(-50%) scale(${1.14 - 0.14 * suave(t / 0.7)})`;
+    e.querySelector('.rayos').style.transform = `translate(-50%,-50%) rotate(${t * 9}deg)`;
+    const a = e.querySelector('.abajo'); a.style.opacity = suave((t - 0.9) / 0.5); a.style.transform = `translateY(${(1 - suave((t - 0.9) / 0.5)) * 30}px)`;
+  } else {
+    // "golpe" de cámara en cada corte: entra un poco más grande y se asienta
+    jug.style.transform = `translateX(-50%) scale(${1.06 - 0.06 * suave(t / 0.25)})`;
+  }
+}
+</script>
+</body>
+</html>
