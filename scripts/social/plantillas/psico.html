@@ -23,11 +23,11 @@ html,body{background:var(--bg);overflow:hidden}
 .t{font:400 128px/.88 'Bebas Neue';margin-top:14px}
 .t em{font-style:normal;color:var(--gold)}
 .num{position:absolute;right:40px;top:110px;font:400 420px/.8 'Bebas Neue';color:rgba(201,168,76,.10)}
-.bloque{margin-top:40px;padding:30px 34px;background:var(--card);border-left:4px solid var(--line);border-radius:4px}
+.bloque{margin-top:52px;padding:34px 36px;background:var(--card);border-left:4px solid var(--line);border-radius:4px}
 .bloque.hacer{border-left-color:var(--gold)}
 .bloque h4{font:800 22px 'Barlow Condensed';letter-spacing:.24em;text-transform:uppercase;color:var(--text2);margin-bottom:12px}
 .bloque.hacer h4{color:var(--gold)}
-.bloque p{font:500 36px/1.32 Barlow}
+.bloque p{font:500 40px/1.34 Barlow}
 .bloque p strong{color:var(--gold2);font-weight:700}
 .jug{position:absolute;bottom:-30px;right:-90px;height:900px;opacity:.95;filter:drop-shadow(0 0 40px rgba(201,168,76,.18))}
 .sombra{position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(transparent,var(--bg) 85%)}
@@ -35,7 +35,7 @@ html,body{background:var(--bg);overflow:hidden}
 .marcador div{display:flex;justify-content:space-between;align-items:center;padding:24px 0;border-bottom:1px solid var(--line);font:800 38px 'Barlow Condensed';text-transform:uppercase}
 .marcador b{font:400 84px/1 'Bebas Neue'}
 .marcador .D b{color:var(--loss)} .marcador .V b{color:var(--win)}
-.cta{margin-top:60px;font:600 40px/1.35 Barlow}
+.cta{margin-top:60px;font:600 40px/1.35 Barlow;max-width:600px}
 .cta b{color:var(--gold)}
 </style>
 </head>
@@ -49,8 +49,8 @@ function pintar(D) {
   const marca = `<div class="marca"><span>${D.serie}</span><img src="${D.escudo}"></div>`;
   const pie = i => `<div class="pie"><span>Top Secret FC</span><span><b>${String(i + 1).padStart(2, '0')}</b> / ${String(total).padStart(2, '0')}</span></div>`;
   const h = [];
-  h.push(`<section class="escena"><div class="fondo"></div><img class="jug" src="${D.portada.img}"><div class="sombra"></div>${marca}
-    <div class="cont" style="top:auto;bottom:150px"><div class="kicker">${D.portada.kicker}</div><div class="t" style="font-size:150px">${D.portada.titulo}</div></div>${pie(0)}</section>`);
+  h.push(`<section class="escena"><div class="fondo"></div><img class="jug" src="${D.portada.img}" style="height:1240px;right:-250px;bottom:-60px"><div class="sombra" style="height:30%"></div>${marca}
+    <div class="cont" style="top:auto;bottom:150px;right:auto;max-width:620px"><div class="kicker">${D.portada.kicker}</div><div class="t" style="font-size:150px;text-shadow:0 6px 30px rgba(0,0,0,.8)">${D.portada.titulo}</div></div>${pie(0)}</section>`);
   D.errores.forEach((e, i) => h.push(`<section class="escena"><div class="fondo"></div><div class="num">0${i + 1}</div>${marca}
     <div class="cont"><div class="kicker">Error ${i + 1}</div><div class="t">${e.titulo}</div>
       <div class="bloque"><h4>Qué pasa</h4><p>${e.pasa}</p></div>

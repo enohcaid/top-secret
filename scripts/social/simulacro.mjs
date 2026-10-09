@@ -142,4 +142,4 @@ await agregarLote({
 });
 
 console.log('Listo.');
-spawn('cmd', ['/c', 'start', '', PAGINA], { detached: true, stdio: 'ignore' }).unref();
+if (!process.argv.includes('--no-abrir')) spawn('cmd', ['/c', 'start', '', PAGINA], { detached: true, stdio: 'ignore' }).unref();

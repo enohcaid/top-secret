@@ -13,13 +13,13 @@ html,body{background:var(--bg);overflow:hidden}
 #lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text)}
 .escena{position:absolute;inset:0;display:none}
 .escena.ver{display:block}
-.piso{position:absolute;left:50%;bottom:330px;width:820px;height:120px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(0,0,0,.65),transparent)}
-.jug{position:absolute;left:50%;bottom:350px;height:1180px;transform:translateX(-50%);transform-origin:50% 100%}
+.piso{position:absolute;left:50%;bottom:240px;width:820px;height:120px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(0,0,0,.65),transparent)}
+.jug{position:absolute;left:50%;bottom:260px;height:1060px;transform:translateX(-50%);transform-origin:50% 100%}
 .vieja .jug{image-rendering:pixelated;filter:saturate(.7) contrast(.95)}
-.etq{position:absolute;left:0;right:0;top:250px;text-align:center}
+.etq{position:absolute;left:0;right:0;top:200px;text-align:center}
 .etq b{display:block;font:400 150px/.9 'Bebas Neue';letter-spacing:.02em}
 .etq span{font:800 30px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;color:var(--text2)}
-.abajo{position:absolute;left:0;right:0;bottom:190px;text-align:center;font:800 54px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.04em}
+.abajo{position:absolute;left:0;right:0;bottom:120px;text-align:center;font:800 54px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.04em}
 .gancho{position:absolute;left:0;right:0;top:110px;text-align:center;font:400 96px/.95 'Bebas Neue'}
 .gancho em{font-style:normal;color:var(--gold)}
 .halo{position:absolute;left:50%;top:46%;width:1500px;height:1500px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(201,168,76,.42),rgba(201,168,76,.08) 55%,transparent 72%)}
@@ -43,7 +43,7 @@ function pintar(D) {
       ${ultima ? '<div class="rayos"></div><div class="halo"></div>' : '<div class="ruido"></div>'}
       <div class="piso"></div><img class="jug" src="${v.img}">
       ${i === 0 ? `<div class="gancho">${D.gancho}</div>` : ''}
-      <div class="etq" ${i === 0 ? 'style="top:420px"' : ''}><b class="${ultima ? '' : ''}" style="${ultima ? 'color:var(--gold)' : ''}">${v.titulo}</b><span>${v.sub}</span></div>
+      <div class="etq" ${i === 0 ? 'style="top:360px"' : ''}><b class="${ultima ? '' : ''}" style="${ultima ? 'color:var(--gold)' : ''}">${v.titulo}</b><span>${v.sub}</span></div>
       ${ultima ? `<div class="abajo">${D.final}</div><img class="escudo" src="${D.escudo}"><div class="flash"></div>` : ''}
     </section>`);
   });
