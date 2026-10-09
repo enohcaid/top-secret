@@ -333,6 +333,7 @@ async function fetchStyleHistory() {
       style: v.mapValue.fields.style.stringValue,
       date:  v.mapValue.fields.date.stringValue,
       gesto: v.mapValue.fields.gesto?.stringValue || null,
+      toma:  v.mapValue.fields.toma?.stringValue || null,
     }));
   } catch { return []; }
 }
@@ -390,12 +391,15 @@ function pickStyle(history, draft = {}) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-async function saveStyleHistory(styleId, date, history, gestoId = null) {
-  const updated = [{ style: styleId, date, gesto: gestoId }, ...history].slice(0, 10);
+// `toma`: qué foto de prensa eligió la rutina para la nota (FESTEJO_GOL, PITAZO_FINAL, VESTUARIO_FESTEJO…,
+// campo `toma` del draft). Se guarda acá para que la rutina no repita la misma toma en victorias seguidas.
+async function saveStyleHistory(styleId, date, history, gestoId = null, toma = null) {
+  const updated = [{ style: styleId, date, gesto: gestoId, toma }, ...history].slice(0, 10);
   const values = updated.map(e => ({ mapValue: { fields: {
     style: { stringValue: e.style },
     date:  { stringValue: e.date  },
     ...(e.gesto ? { gesto: { stringValue: e.gesto } } : {}),
+    ...(e.toma  ? { toma:  { stringValue: e.toma  } } : {}),
   }}}));
   await fetch(FIRESTORE_STYLE_HISTORY, {
     method: 'PATCH',
@@ -490,6 +494,8 @@ const GESTOS_FESTEJO = [
 const GESTO_REPEAT_WINDOW = 3;
 function pickGesto(history, draft = {}) {
   // Solo la escena decide (el título puede decir "victoria" y la foto ser del vestuario antes del partido).
+  // Si la rutina eligió otra toma (pitazo final, vestuario, túnel…), no se le mete un gesto de gol.
+  if (draft.toma && draft.toma !== 'FESTEJO_GOL') return null;
   const text = (draft.imageBrief || '').toLowerCase();
   if (!/festej|celebr|\bgol(es)?\b|euforia/.test(text)) return null;
   if (/derrota|ca[ií]da|sin festejo|cabizbaj|bronca|silencio/.test(text)) return null;
@@ -1552,7 +1558,7 @@ async function main() {
       try { await stampCrest(path.join(OUTPUT_DIR, f), { fresh: true }); } catch (e) { console.warn('  No se pudo estampar el escudo en', f, e.message); }
     }
     await updateDraft(draft, lastPostFile, storyFile);
-    await saveStyleHistory(chosenStyle.id, dateStr, styleHistory, chosenGesto?.id);
+    await saveStyleHistory(chosenStyle.id, dateStr, styleHistory, chosenGesto?.id, typeof draft.toma === 'string' ? draft.toma : null);
     await saveKitHistory(chosenKit.id, dateStr, kitHistory);
     if (mentioned.length > 0) await saveFeaturedHistory([...mentioned, ...teammates], dateStr, featuredHistory);
     uploadImagesToR2(lastPostFile, storyFile);
