@@ -36,6 +36,12 @@ while ((Get-Date) -lt $deadline) {
 }
 
 if (-not $draftOk) {
+    # Los sabados sin resultado ni previa la rutina no escribe nota (el resumen semanal sale por
+    # scripts/social/resumen-semanal.mjs): no es un error.
+    if ((Get-Date).ToUniversalTime().AddHours(-3).DayOfWeek -eq 'Saturday') {
+        Log "Sabado sin draft de hoy: el resumen semanal sale aparte (resumen-semanal.mjs). Nada que generar."
+        exit 0
+    }
     Log "Timeout (45 min) esperando el draft de hoy ($today) - abortando."
     exit 1
 }

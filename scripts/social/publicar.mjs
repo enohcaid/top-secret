@@ -72,11 +72,27 @@ async function xConImagenes(texto, archivos) {
   } finally { await page.close().catch(() => {}); await b.close().catch(() => {}); }
 }
 
+// Noticia del sitio (resumen semanal): los 4 párrafos editables de aprobar.html vuelven a su lugar en el cuerpo
+// (apertura, goles, lo que viene, cierre) y la nota entra a published_noticias, igual que las del pipeline diario.
+async function noticiaSitio(p) {
+  const n = structuredClone(p.noticia);
+  const parr = p.texto.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+  const huecos = n.body.map((b, i) => typeof b === 'string' ? i : -1).filter(i => i >= 0);
+  if (parr.length !== huecos.length) throw new Error(`La noticia tiene que tener ${huecos.length} párrafos separados por una línea en blanco (tiene ${parr.length}).`);
+  huecos.forEach((i, k) => { n.body[i] = k === huecos.length - 1 && !/<a /.test(parr[k]) ? `${parr[k]} <a href='calendario.html'>Calendario</a>` : parr[k]; });
+  n.title = p.titulo || n.title;
+  n.publishedAt = new Date().toISOString();
+  const lista = await leerKV('published_noticias', []);
+  await guardarKV('published_noticias', [n, ...lista.filter(a => a.id !== n.id)]);
+  return `https://enohcaid.github.io/top-secret/noticias.html?id=${n.id}`;
+}
+
 async function publicar(p) {
   const video = p.local?.video && fs.existsSync(p.local.video) ? p.local.video : null;
   const necesitaLocal = ['x-imagenes', 'tiktok', 'youtube', 'x-video'].includes(p.metodo);
   if (necesitaLocal && !video && !(p.local?.slides || []).every(f => fs.existsSync(f))) throw new Error('No están los archivos locales de la pieza (fuentes/redes/ronda).');
   switch (p.metodo) {
+    case 'sitio-noticia': return noticiaSitio(p);
     case 'ig-carrusel': return link(correr('scripts/meta.mjs', ['ig-carrusel', p.texto, ...urls(p)]));
     case 'ig-reel':     return link(correr('scripts/meta.mjs', ['ig-reel', urls(p)[0], p.texto]));
     case 'fb-album':    return link(correr('scripts/meta.mjs', ['fb-album', p.texto, ...urls(p)]));

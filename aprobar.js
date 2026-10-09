@@ -5,6 +5,7 @@
 (() => {
   const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
   const REDES = {
+    sitio:     { nombre: 'Sitio web', color: '#C8A84B' },
     instagram: { nombre: 'Instagram', color: '#E1306C' },
     facebook:  { nombre: 'Facebook',  color: '#1877F2' },
     x:         { nombre: 'X',         color: '#F2EEE0' },
@@ -12,7 +13,7 @@
     youtube:   { nombre: 'YouTube',   color: '#FF0033' },
   };
   // Límites de texto por red (los usa el contador; X cuenta el link como 23).
-  const LIMITE = { instagram: 2200, facebook: 5000, x: 280, tiktok: 2200, youtube: 100 };
+  const LIMITE = { sitio: 5000, instagram: 2200, facebook: 5000, x: 280, tiktok: 2200, youtube: 5000 };
   const ESTADO = { pendiente: 'Pendiente', aprobada: 'Aprobada', descartada: 'Descartada', publicando: 'Publicando…', publicado: 'Publicada', error: 'Error' };
 
   let pin = '';
@@ -75,7 +76,7 @@
         <span class="chip ${estado}">${ESTADO[estado] || estado}</span>
       </div>
       ${medio(p)}
-      ${p.titulo !== undefined ? `<div class="extra"><b>Título:</b> ${esc(p.titulo)}</div>` : ''}
+      ${p.titulo !== undefined ? `<div class="texto"><label>Título</label><input class="titulo" ${cerrada ? 'disabled' : ''} value="${esc(p.titulo)}"></div>` : ''}
       ${p.musica ? `<div class="extra"><b>Música:</b> ${esc(p.musica)}</div>` : ''}
       <div class="texto">
         <label>Texto de la publicación</label>
@@ -114,7 +115,7 @@
       lotes = (await api('/aprobaciones')).lotes;
     } catch (e) { if (pin) aviso(e.message); return; }
     // Si el foco está en un texto que se está editando, no redibujar (se perdería lo escrito).
-    if (document.activeElement?.tagName === 'TEXTAREA') return;
+    if (['TEXTAREA', 'INPUT'].includes(document.activeElement?.tagName)) return;
     const vivos = lotes.filter(l => l.piezas.some(p => p.estado !== 'publicado' && p.decision !== 'descartada') || Date.now() - Date.parse(l.creado) < 3 * 86400000);
     $('#lotes').innerHTML = vivos.length ? vivos.map(lote).join('') : '<div class="vacio">No hay nada para aprobar por ahora.</div>';
     document.querySelectorAll('textarea').forEach(contar);
@@ -141,8 +142,8 @@
     const b = e.target.closest('button[data-accion]');
     if (b) {
       const art = b.closest('.pieza');
-      const t = art.querySelector('textarea');
-      return decidir(art.dataset.lote, [art.dataset.pieza], { decision: b.dataset.accion, texto: t.value });
+      const t = art.querySelector('textarea'), ti = art.querySelector('input.titulo');
+      return decidir(art.dataset.lote, [art.dataset.pieza], { decision: b.dataset.accion, texto: t.value, ...(ti ? { titulo: ti.value } : {}) });
     }
     const todo = e.target.closest('button[data-todo]');
     if (todo) {
@@ -152,11 +153,12 @@
     }
   });
   document.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') contar(e.target); });
-  // El texto corregido se guarda al salir del cuadro.
+  // El texto y el título corregidos se guardan al salir del cuadro.
   document.addEventListener('change', e => {
-    if (e.target.tagName !== 'TEXTAREA') return;
     const art = e.target.closest('.pieza');
-    decidir(art.dataset.lote, [art.dataset.pieza], { texto: e.target.value });
+    if (!art) return;
+    if (e.target.tagName === 'TEXTAREA') decidir(art.dataset.lote, [art.dataset.pieza], { texto: e.target.value });
+    else if (e.target.classList.contains('titulo')) decidir(art.dataset.lote, [art.dataset.pieza], { titulo: e.target.value });
   });
 
   cargar();

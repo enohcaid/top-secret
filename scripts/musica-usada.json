@@ -4,8 +4,24 @@
     "Locked In - Anno Domini Beats.mp3": "Video del equipo de la noche (scripts/video-plantel render --modo equipo y botón Compartir video de convocatoria) — plantilla fija, decisión de Juan 2026-10-05"
   },
   "usados": {
-    "Whoop - Anno Domini Beats.mp3": { "video": "plantel-t4", "fecha": "2026-10-05", "nota": "También quedó en nuevos-fichajes-t4 (publicado el mismo día, antes de la regla)" },
-    "Twin Lynches - Density & Time": { "video": "relanzamiento-t4", "fecha": "2026-10-01", "nota": "Biblioteca de audio de YouTube; versiones de YouTube y X" },
-    "Red Right Hand - Nick Cave & The Bad Seeds": { "video": "relanzamiento-t4", "fecha": "2026-10-01", "nota": "Comercial, desde la app en TikTok e Instagram — no volver a usar música comercial" }
+    "Whoop - Anno Domini Beats.mp3": {
+      "video": "plantel-t4",
+      "fecha": "2026-10-05",
+      "nota": "También quedó en nuevos-fichajes-t4 (publicado el mismo día, antes de la regla)"
+    },
+    "Twin Lynches - Density & Time": {
+      "video": "relanzamiento-t4",
+      "fecha": "2026-10-01",
+      "nota": "Biblioteca de audio de YouTube; versiones de YouTube y X"
+    },
+    "Red Right Hand - Nick Cave & The Bad Seeds": {
+      "video": "relanzamiento-t4",
+      "fecha": "2026-10-01",
+      "nota": "Comercial, desde la app en TikTok e Instagram — no volver a usar música comercial"
+    },
+    "2026-10-09 - Madrugada.mp3": {
+      "video": "resumen-2026-10-10",
+      "fecha": "2026-10-09"
+    }
   }
 }

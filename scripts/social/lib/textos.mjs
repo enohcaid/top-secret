@@ -10,8 +10,17 @@ const CLAUDE = [path.join(os.homedir(), '.local/bin/claude.exe'), path.join(os.h
 const CLAVES = ['instagram_carrusel', 'instagram_reel', 'facebook', 'x', 'tiktok', 'youtube_titulo', 'youtube_texto'];
 
 export function escribirTextos({ pieza, datos }) {
-  const encargo = fs.readFileSync(path.join(ROOT, 'scripts/social/textos-encargo.md'), 'utf8')
-    .replace('{{PIEZA}}', pieza).replace('{{DATOS}}', typeof datos === 'string' ? datos : JSON.stringify(datos, null, 2));
+  return pedir('textos-encargo.md', { PIEZA: pieza, DATOS: datos }, CLAVES);
+}
+
+// Texto de la noticia del sitio (resumen semanal): titulo, bajada y los párrafos del cuerpo.
+export function escribirNoticia({ datos }) {
+  return pedir('noticia-encargo.md', { DATOS: datos }, ['titulo', 'bajada', 'apertura', 'goles', 'viene', 'cierre']);
+}
+
+function pedir(archivoEncargo, vars, claves) {
+  let encargo = fs.readFileSync(path.join(ROOT, 'scripts/social', archivoEncargo), 'utf8');
+  for (const [k, v] of Object.entries(vars)) encargo = encargo.replace(`{{${k}}}`, typeof v === 'string' ? v : JSON.stringify(v, null, 2));
   for (let intento = 1; intento <= 2; intento++) {
     const r = spawnSync(CLAUDE, ['-p', '--model', 'opus', '--output-format', 'json'], {
       cwd: ROOT, input: encargo, encoding: 'utf8', timeout: 10 * 60000, maxBuffer: 16 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'),
@@ -19,7 +28,7 @@ export function escribirTextos({ pieza, datos }) {
     try {
       const res = JSON.parse(r.stdout).result;
       const j = JSON.parse(res.slice(res.indexOf('{'), res.lastIndexOf('}') + 1));
-      if (CLAVES.every(k => typeof j[k] === 'string' && j[k].trim())) return j;
+      if (claves.every(k => typeof j[k] === 'string' && j[k].trim())) return j;
       throw new Error('faltan claves');
     } catch (e) {
       console.log(`  Textos: respuesta inválida (intento ${intento}): ${e.message}`);

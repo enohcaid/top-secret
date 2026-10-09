@@ -1146,7 +1146,7 @@ export default {
         if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         let body;
         try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
-        const { lote, piezas = [], decision, texto } = body || {};
+        const { lote, piezas = [], decision, texto, titulo } = body || {};
         if (decision && !['aprobada', 'descartada', 'pendiente'].includes(decision)) return jsonResp({ error: 'Decisión inválida' }, 400);
         const data = (await env.TS_KV.get('aprobaciones', 'json')) || { lotes: [] };
         const l = data.lotes.find(x => x.id === lote);
@@ -1156,6 +1156,7 @@ export default {
           if (p.estado === 'publicado' || p.estado === 'publicando') continue;   // ya salió: no se toca
           if (decision) { p.decision = decision; p.decididoEn = ahora; }
           if (typeof texto === 'string') p.texto = texto.slice(0, 5000);
+          if (typeof titulo === 'string' && p.titulo !== undefined) p.titulo = titulo.slice(0, 200);
         }
         await env.TS_KV.put('aprobaciones', JSON.stringify(data));
         return jsonResp({ ok: true, lote: l });
