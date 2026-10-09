@@ -99,6 +99,28 @@ function renderForKit(player, kit) {
 // Compatibilidad con scripts one-off viejos (T3). La generación diaria ya no recorta kits.
 async function cropKitImage() { return null; }
 
+// Prueba cada pestaña por CDP (Runtime.evaluate) y cierra las que no
+// responden en 8 s. Si el Chrome no está, no hace nada (lo reporta el connect).
+async function closeHungTabs() {
+  let targets;
+  try { targets = await (await fetch('http://localhost:9222/json/list')).json(); }
+  catch { return; }
+  for (const t of targets.filter(t => t.type === 'page' && t.webSocketDebuggerUrl)) {
+    const ok = await new Promise(res => {
+      let ws;
+      const to = setTimeout(() => { try { ws.close(); } catch {} res(false); }, 8000);
+      try { ws = new WebSocket(t.webSocketDebuggerUrl); } catch { clearTimeout(to); return res(true); }
+      ws.onopen = () => ws.send(JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: '1' } }));
+      ws.onmessage = () => { clearTimeout(to); ws.close(); res(true); };
+      ws.onerror = () => { clearTimeout(to); res(true); };
+    });
+    if (!ok) {
+      console.log(`  Pestaña colgada, se cierra: ${t.title || t.url}`);
+      try { await fetch(`http://localhost:9222/json/close/${t.id}`); } catch {}
+    }
+  }
+}
+
 async function fetchKitHistory() {
   try {
     const res = await fetch(FIRESTORE_KIT_HISTORY);
@@ -1342,12 +1364,16 @@ async function main() {
   }
 
   console.log('Conectando al Chrome abierto...');
+  // Una pestaña colgada (ej. "Profile - Kick Streaming", 2026-10-09) hace que
+  // connectOverCDP espere para siempre a que responda: se cerraba en timeout
+  // y el día quedaba sin imagen. Se cierran antes las pestañas que no contestan.
+  await closeHungTabs();
   let browser;
   try {
-    browser = await chromium.connectOverCDP('http://localhost:9222');
+    browser = await chromium.connectOverCDP('http://localhost:9222', { timeout: 60000 });
   } catch(e) {
-    console.error('Chrome no está disponible en localhost:9222.');
-    console.error('Abrí Chrome con: chrome.exe --remote-debugging-port=9222');
+    console.error('No se pudo conectar al Chrome en localhost:9222: ' + String(e.message).split('\n')[0]);
+    console.error('Si no está abierto: scripts/abrir-chrome-chatgpt.ps1');
     process.exit(1);
   }
   const context = browser.contexts()[0];
