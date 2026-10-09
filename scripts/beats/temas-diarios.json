@@ -1,0 +1,22 @@
+{
+  "temas": [
+    {
+      "fecha": "2026-10-09",
+      "archivo": "2026-10-09 - Madrugada.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_09.py",
+      "duracion": 91,
+      "nombre": "Madrugada",
+      "concepto": "La noche antes de una final, cuando no podés dormir — la cabeza alterna entre la duda y la convicción hasta que, al amanecer, sabés que estás listo.",
+      "bpm": 130,
+      "tonalidad": "re menor",
+      "rasgo": "piano lejano: un piano reverberado y filtrado que suena desde otra habitación; en los ganchos se acerca (más seco, más brillante)",
+      "recursos": [
+        "transición espacial lejos/cerca del piano",
+        "808 melódico con saltos de octava",
+        "cuerdas pad en los ganchos",
+        "tape stop al final del build"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 4 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    }
+  ]
+}
