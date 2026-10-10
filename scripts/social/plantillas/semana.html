@@ -219,7 +219,7 @@ function construirMotion(D) {
   gsap.registerPlugin(SplitText, ScrambleTextPlugin, CustomEase, CustomWiggle);
   CustomWiggle.create('temblor', { wiggles: 8, type: 'easeOut' });
   const L = document.getElementById('lienzo');
-  L.insertAdjacentHTML('beforeend', '<canvas id="grano" width="540" height="960"></canvas><div class="cine" id="cineA"></div><div class="cine" id="cineB"></div><div id="flashS"></div>');
+  L.insertAdjacentHTML('beforeend', '<canvas id="grano" width="540" height="960"></canvas><div id="flashS"></div>');
   if (D.heroClip) {
     const e0 = ESC[0];
     e0.querySelectorAll('.podio,.desvanece,.hero').forEach(x => x.remove());

@@ -28,8 +28,11 @@ const nSemana = Math.max(1, Math.ceil((Date.parse(hasta) - Date.parse(TEMPORADA.
 const hero = path.join(dir, 'hero.png');
 const pieza = semana.datos(d, { desde, hasta, semana: nSemana, hero: fs.existsSync(hero) ? hero : null });
 
-console.log('Carrusel con la portada nueva…');
-const slides = await carrusel('semana.html', pieza.plantilla, dir, 'slide');
+// --solo-video: rehace solo el video y toca solo las piezas de video (las demás conservan su decisión).
+const SOLO_VIDEO = argv.includes('--solo-video');
+console.log(SOLO_VIDEO ? 'Solo el video…' : 'Carrusel con la portada nueva…');
+const slides = SOLO_VIDEO ? fs.readdirSync(dir).filter(f => /^slide-\d+\.jpg$/.test(f)).sort((a, b) => parseInt(a.slice(6)) - parseInt(b.slice(6))).map(f => path.join(dir, f))
+  : await carrusel('semana.html', pieza.plantilla, dir, 'slide');
 
 console.log('Video con motion + clip IA…');
 const GANCHO = 1.6;
@@ -43,13 +46,19 @@ await video('semana.html', plantillaVideo, mp4, { escenas: semana.ESCENAS_VIDEO,
 console.log('Subiendo y actualizando el lote…');
 const v = Date.now().toString(36), MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 const subir = async f => { const key = `social/${FECHA}/${path.basename(f)}`; await putFile(f, key); return `${MEDIA}/${key}?v=${v}`; };
-const urlsSlides = []; for (const s of slides) urlsSlides.push(await subir(s));
+const urlsSlides = []; for (const s of slides) urlsSlides.push(SOLO_VIDEO ? null : await subir(s));
 const urlVideo = await subir(mp4);
 const data = await leer();
 const l = data.lotes.find(x => x.id === id);
 for (const p of l.piezas) {
   if (p.estado === 'publicado' || p.estado === 'publicando') continue;
   const esVideo = p.media?.some(m => m.tipo === 'video');
+  if (SOLO_VIDEO) {
+    if (!esVideo) continue;
+    p.media = [{ ...p.media[0], url: urlVideo }];
+    p.decision = 'pendiente';
+    continue;
+  }
   if (esVideo) p.media = [{ tipo: 'video', url: urlVideo, vertical: true, poster: urlsSlides[0] }];
   else if (p.id === 'x-post') p.media = urlsSlides.slice(0, 4).map(url => ({ tipo: 'imagen', url }));
   else if (p.id === 'sitio') { p.media = [{ tipo: 'imagen', url: urlsSlides[0] }]; p.noticia.image = p.noticia.imagePost = urlsSlides[0]; p.noticia.body = p.noticia.body.map(b => b.img ? { ...b, img: urlsSlides[urlsSlides.findIndex(u => u.split('?')[0].endsWith(b.img.split('?')[0].split('/').pop()))] || b.img } : b.pair ? { ...b, pair: b.pair.map(x => urlsSlides.find(u => u.split('?')[0].endsWith(x.split('?')[0].split('/').pop())) || x) } : b); }
