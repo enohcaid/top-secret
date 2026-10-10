@@ -12,6 +12,7 @@ import { chromium } from 'playwright';
 import { ROOT } from '../lib/env.mjs';
 import { asegurarVentana, enfocar } from '../lib/ventana.mjs';
 import { leer, actualizarPieza, leerKV, guardarKV } from './lib/aprobaciones.mjs';
+import { asegurarChrome } from './lib/chrome.mjs';
 
 const espera = ms => new Promise(r => setTimeout(r, ms));
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [publicar] ${m}`);
@@ -104,6 +105,9 @@ async function publicar(p) {
     default: throw new Error('Método desconocido: ' + p.metodo);
   }
 }
+
+// X, TikTok y YouTube van por el Chrome con CDP: si está cerrado, se abre antes de empezar.
+if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'tiktok', 'youtube'].includes(p.metodo))) await asegurarChrome().catch(e => log(e.message));
 
 for (const { l, p } of cola) {
   log(`${l.id} · ${p.id}: publicando…`);

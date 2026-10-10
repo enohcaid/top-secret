@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "Cabeza fría" en video (psicología del deporte, habla el club). Fondo: clips de 5 s animados con IA (Canva)
+     a partir de imágenes nuevas generadas con ChatGPT, pasados a cuadros JPG. Encima: grading por escena, grano,
+     barras de cine, tipografía cinética, glitch entre escenas, marcadores que golpean en el drop.
+     Línea de tiempo continua: mostrar(0, t) (async: espera que cargue el cuadro del clip). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060504;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.7);--loss:#E5484D;--win:#3ECF8E}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text)}
+#cam{position:absolute;inset:-50px}
+#clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#franjas{position:absolute;inset:0;display:none}
+#franjas div{position:absolute;left:0;right:0;overflow:hidden}
+#franjas img{position:absolute;left:0;width:100%;height:2020px;object-fit:cover}
+#grade{position:absolute;inset:0;mix-blend-mode:soft-light}
+#oscuro{position:absolute;inset:0}
+#grano{position:absolute;inset:0;width:100%;height:100%;opacity:.12;mix-blend-mode:overlay}
+#vineta{position:absolute;inset:0;background:radial-gradient(80% 62% at 50% 46%,transparent 50%,rgba(0,0,0,.8))}
+.barra{position:absolute;left:0;right:0;background:#000;z-index:4}
+#b1{top:0} #b2{bottom:0}
+#flash{position:absolute;inset:0;background:#FFF5DA;opacity:0;z-index:9}
+.capa{position:absolute;left:72px;right:72px;z-index:6}
+.k{font:800 30px 'Barlow Condensed';letter-spacing:.32em;text-transform:uppercase;color:var(--gold);display:inline-block}
+.p{display:inline-block;font:400 150px/.92 'Bebas Neue';margin-right:.18em;text-shadow:0 10px 40px rgba(0,0,0,.65)}
+.p.oro{color:var(--gold)} .p.rojo{color:var(--loss)}
+#titulo{top:300px}
+#sub{bottom:300px}
+#hacer{bottom:250px;padding:34px 38px;background:rgba(6,5,4,.78);border-left:6px solid var(--gold);backdrop-filter:blur(6px)}
+#hacer .k{margin-bottom:12px}
+#hacer p{font:700 46px/1.25 Barlow}
+#hacer p b{color:var(--gold2)}
+#marcadores{top:760px;text-align:center}
+.score{font:400 330px/.85 'Bebas Neue';display:inline-block;margin:0 30px;color:var(--gold);text-shadow:0 0 60px rgba(201,168,76,.5)}
+#tarjeta{position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(70% 50% at 50% 50%,rgba(201,168,76,.18),transparent 70%),var(--bg)}
+#tarjeta h1{font:400 250px/.85 'Bebas Neue';letter-spacing:.02em}
+#tarjeta h1 span{color:var(--gold)}
+#tarjeta p{font:800 34px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;color:var(--text2);margin-top:26px}
+#tarjeta img{height:120px;margin-top:70px}
+#tarjeta p.cta{font:700 50px/1.3 Barlow;letter-spacing:0;text-transform:none;color:var(--text);max-width:820px}
+#tarjeta p.cta b{color:var(--gold)}
+#num{position:absolute;right:60px;top:210px;font:400 520px/.8 'Bebas Neue';color:transparent;-webkit-text-stroke:3px rgba(201,168,76,.45);z-index:5}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="cam"><img id="clip"><div id="franjas"></div><div id="grade"></div><div id="oscuro"></div><canvas id="grano" width="540" height="1010"></canvas><div id="vineta"></div></div>
+  <div id="num"></div>
+  <div class="barra" id="b1"></div><div class="barra" id="b2"></div>
+  <div class="capa" id="titulo"></div>
+  <div class="capa" id="marcadores"></div>
+  <div class="capa" id="hacer" style="display:none"><div class="k">Qué hacer</div><p></p></div>
+  <div id="tarjeta"></div>
+  <div id="flash"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eOutBack = p => { p = clamp(p); const c = 1.9; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+let D, E = [];   // E: escenas con su inicio y fin en segundos
+const NF = 12;
+
+function pintar(datos) {
+  D = datos; let t = 0;
+  E = D.escenas.map(e => { const o = { ...e, t0: t, t1: t + e.dur }; t += e.dur; return o; });
+  $('#franjas').innerHTML = Array.from({ length: NF }, (_, k) => `<div style="top:${k * 100 / NF}%;height:${100 / NF + .3}%"><img></div>`).join('');
+  return 1;
+}
+function grano(t) {
+  const c = $('#grano'), g = c.getContext('2d'), img = g.createImageData(c.width, c.height);
+  let s = Math.floor(t * 24) * 7919 + 3;
+  for (let i = 0; i < img.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = s & 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  g.putImageData(img, 0, 0);
+}
+const cuadro = (e, lt) => e.clip ? `${e.clip.dir}/${String(Math.min(e.clip.n, 1 + Math.floor(lt * 30 * (e.vel || 1)))).padStart(4, '0')}.jpg` : '';
+// Palabras que entran de golpe una por una (escala + desenfoque), con color por palabra.
+function palabras(el, lista, lt, t0 = 0, paso = 0.13) {
+  if (el.dataset.k !== lista.map(w => w.t).join('|')) {
+    el.dataset.k = lista.map(w => w.t).join('|');
+    el.innerHTML = lista.map(w => `${w.br ? '<br>' : ''}${w.k ? `<span class="k" style="display:block;margin-bottom:18px">${w.t}</span>` : `<span class="p ${w.c || ''}">${w.t}</span>`}`).join('');
+  }
+  let golpe = 0;
+  [...el.children].filter(x => x.tagName === 'SPAN').forEach((s, i) => {
+    const q = (lt - t0 - i * paso) / 0.2;
+    s.style.opacity = q < 0 ? 0 : 1;
+    s.style.transform = `scale(${q < 0 ? 2.6 : 2.6 - 1.6 * eOut(q)})`;
+    s.style.filter = q < 1 ? `blur(${(1 - clamp(q)) * 12}px)` : 'none';
+    if (q > 0 && q < 1.3) golpe = Math.max(golpe, 1 - q / 1.3);
+  });
+  return golpe;
+}
+
+async function mostrar(n, t = 0) {
+  grano(t);
+  const e = E.find(x => t >= x.t0 && t < x.t1) || E[E.length - 1], lt = t - e.t0, i = E.indexOf(e);
+  let cam = { s: 1.04 + lt * 0.012, x: 0, y: 0 }, flash = 0, temblor = 0;
+  const clip = $('#clip'), src = cuadro(e, lt);
+  // fondo: cuadro del clip (o negro en las tarjetas)
+  clip.style.display = src ? 'block' : 'none';
+  if (src && clip.getAttribute('src') !== src) { clip.setAttribute('src', src); await clip.decode().catch(() => {}); }
+  $('#grade').style.background = e.grade || 'transparent';
+  $('#oscuro').style.background = e.oscuro || 'linear-gradient(transparent 40%,rgba(6,5,4,.85))';
+  // transición de entrada: glitch en franjas los primeros 0,2 s de cada escena con clip
+  const fr = $('#franjas');
+  if (src && lt < 0.22 && i > 0) {
+    fr.style.display = 'block';
+    [...fr.children].forEach((d, k) => { const im = d.firstChild; if (im.getAttribute('src') !== src) im.setAttribute('src', src);
+      im.style.top = `${-k * 2020 / NF}px`; im.style.transform = `translateX(${(rnd(k * 7 + Math.floor(t * 60)) - .5) * (1 - lt / 0.22) * 320}px)`; });
+    clip.style.filter = `drop-shadow(10px 0 0 rgba(255,40,60,.6)) drop-shadow(-10px 0 0 rgba(40,220,255,.6))`;
+    flash = Math.max(flash, 0.25 * (1 - lt / 0.22));
+  } else { fr.style.display = 'none'; clip.style.filter = 'none'; }
+
+  // barras de cine
+  $('#b1').style.height = $('#b2').style.height = `${e.barras ?? 120}px`;
+
+  // textos
+  const ti = $('#titulo'), ha = $('#hacer'), ma = $('#marcadores'), ta = $('#tarjeta'), nu = $('#num');
+  ti.style.display = 'none'; ha.style.display = 'none'; ma.style.display = 'none'; ta.style.display = 'none'; nu.textContent = '';
+  if (e.tipo === 'apertura') {
+    ti.style.display = 'block'; ti.style.top = '260px';
+    temblor = palabras(ti, e.palabras, lt, 0.4, 0.42);
+    if (e.marcador && lt > e.marcador.t) {
+      ma.style.display = 'block'; ma.style.top = '1240px';
+      const q = (lt - e.marcador.t) / 0.18;
+      ma.innerHTML = `<span class="score" style="color:var(--loss);text-shadow:0 0 60px rgba(229,72,77,.5);transform:scale(${2.4 - 1.4 * eOut(q)})">${e.marcador.txt}</span>`;
+      if (q < 1.5) { temblor = Math.max(temblor, 1 - q / 1.5); flash = Math.max(flash, 0.3 * (1 - clamp(q))); }
+    }
+  } else if (e.tipo === 'tarjeta' || e.tipo === 'cierre') {
+    ta.style.display = 'flex'; ta.id = e.tipo === 'cierre' ? 'tarjeta' : 'tarjeta';
+    if (ta.dataset.k !== e.tipo) { ta.dataset.k = e.tipo; ta.innerHTML = e.html; }
+    const h = ta.querySelector('h1'), q = lt / 0.35;
+    h.style.transform = `scale(${1.6 - 0.6 * eOutBack(q)})`; h.style.filter = q < 1 ? `blur(${(1 - clamp(q)) * 16}px)` : 'none';
+    h.style.letterSpacing = `${0.02 + (1 - eOut(lt / 1.2)) * 0.12}em`;
+    [...ta.querySelectorAll('p,img')].forEach((x, k) => { const qq = (lt - 0.35 - k * 0.2) / 0.4; x.style.opacity = eOut(qq); x.style.transform = `translateY(${(1 - eOut(qq)) * 40}px)`; });
+    if (lt < 0.12) flash = Math.max(flash, 0.5 * (1 - lt / 0.12));
+    // glitch del título al entrar
+    h.style.textShadow = lt < 0.3 ? `${(rnd(Math.floor(t * 60)) - .5) * 30}px 0 0 rgba(255,40,60,.7), ${(rnd(Math.floor(t * 60) + 1) - .5) * 30}px 0 0 rgba(40,220,255,.7)` : 'none';
+  } else if (e.tipo === 'error') {
+    nu.textContent = e.num; nu.style.opacity = eOut(lt / 0.4) * 0.9; nu.style.transform = `translateY(${(1 - eOut(lt / 0.5)) * 80}px)`;
+    ti.style.display = 'block'; ti.style.top = '250px';
+    temblor = palabras(ti, e.palabras, lt, 0.15, 0.12);
+    const q = (lt - e.hacerEn) / 0.45;
+    if (q > 0) {
+      ha.style.display = 'block';
+      if (ha.dataset.k !== e.hacer) { ha.dataset.k = e.hacer; ha.querySelector('p').innerHTML = e.hacer; }
+      ha.style.transform = `translateY(${(1 - eOutBack(q)) * 260}px)`; ha.style.opacity = eOut(q);
+      $('#oscuro').style.background = `linear-gradient(transparent 30%,rgba(6,5,4,${0.6 + 0.3 * eOut(q)}))`;
+    }
+  } else if (e.tipo === 'remate') {
+    ti.style.display = 'block'; ti.style.top = '250px';
+    temblor = palabras(ti, e.palabras, lt, 0.05, 0.16);
+    ma.style.display = 'block'; ma.style.top = '1180px';
+    ma.innerHTML = e.marcadores.map((m, k) => { const q = (lt - m.t) / 0.18; return q < 0 ? '' : `<span class="score" style="transform:scale(${2.6 - 1.6 * eOut(q)});opacity:${eOut(q * 2)}">${m.txt}</span>`; }).join('');
+    e.marcadores.forEach(m => { const q = (lt - m.t) / 1.2; if (q > 0 && q < 1) { temblor = Math.max(temblor, 1 - q); flash = Math.max(flash, 0.45 * (1 - q * 3)); } });
+    cam.s += Math.max(0, 0.06 - lt * 0.1);
+  }
+  if (temblor > 0) { const k = temblor * 22; cam.x = (rnd(Math.floor(t * 60)) - .5) * k; cam.y = (rnd(Math.floor(t * 60) + 4) - .5) * k; }
+  $('#cam').style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.s})`;
+  $('#flash').style.opacity = clamp(flash);
+  // salida a negro al final (para el loop)
+  const fin = E[E.length - 1].t1;
+  $('#lienzo').style.filter = t > fin - 0.3 ? `brightness(${clamp((fin - t) / 0.3)})` : 'none';
+}
+</script>
+</body>
+</html>
