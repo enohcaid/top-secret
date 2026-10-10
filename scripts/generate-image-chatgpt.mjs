@@ -1004,8 +1004,15 @@ async function sendPromptInProject(page, prompt, { freshChat = true, attachments
   if (attachments.length > 0) {
     const existing = attachments.filter(f => fs.existsSync(f));
     if (existing.length > 0) {
-      const fileInput = page.locator('input[type="file"]').first();
-      await fileInput.setInputFiles(existing);
+      // DOM 2026-10: el primer input[type=file] pasó a ser el de "Hacer una foto" (capture, un solo archivo)
+      // y con 2+ adjuntos tiraba "Non-multiple file input can only accept single file". Se usa el que acepta
+      // varios; si no hay, se suben de a uno por el que no es de cámara.
+      const multiple = page.locator('input[type="file"][multiple]').first();
+      if (await multiple.count()) await multiple.setInputFiles(existing);
+      else {
+        const simple = page.locator('input[type="file"]:not([capture])').first();
+        for (const f of existing) { await simple.setInputFiles(f); await page.waitForTimeout(1500); }
+      }
       console.log(`  Adjuntos: ${existing.map(f => path.basename(f)).join(', ')}`);
       await page.waitForTimeout(3000);
     }
