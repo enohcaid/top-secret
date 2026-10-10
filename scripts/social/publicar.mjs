@@ -24,6 +24,34 @@ const ESTADO = process.argv.includes('--estado');
 if (ESTADO) {
   for (const l of data.lotes) { console.log(`${l.id} (${l.publicarA})`); for (const p of l.piezas) console.log(`  ${p.id.padEnd(12)} ${(p.decision || '').padEnd(10)} ${p.estado || ''} ${p.url || p.error || ''}`); }
 }
+// ── Agenda automática del contenido viral (pedido de Juan, 2026-10-10) ──────────────────────────────────────────
+// Un lote viral ya producido (no guion, no simulacro) sin hora, con todas sus piezas decididas y alguna aprobada,
+// va al próximo TURNO libre: martes, jueves y sábado a las 14:00 (ART), uno por turno y con al menos 3 h de margen.
+// Calidad > cantidad: si no hay piezas, el turno queda vacío (no se rellena).
+const TURNOS = { dias: [2, 4, 6], hora: '14:00' };
+function proximoTurno(ocupados, desde) {
+  for (let k = 0; k < 60; k++) {
+    const f = new Date(desde + k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const iso = `${f}T${TURNOS.hora}:00-03:00`;
+    if (TURNOS.dias.includes(new Date(f + 'T12:00:00-03:00').getUTCDay()) && Date.parse(iso) > desde + 3 * 3600000 && !ocupados.has(iso)) return iso;
+  }
+  return null;
+}
+if (!ESTADO) {
+  const ocupados = new Set(data.lotes.filter(l => l.tipo === 'viral' && l.publicarA).map(l => l.publicarA));
+  const sinHora = data.lotes.filter(l => l.tipo === 'viral' && l.etapa !== 'guion' && !l.simulacro && !l.publicarA
+    && l.piezas.length && l.piezas.every(p => p.decision && p.decision !== 'pendiente') && l.piezas.some(p => p.decision === 'aprobada'))
+    .sort((a, b) => a.creado.localeCompare(b.creado));
+  let cambio = false;
+  for (const l of sinHora) {
+    const t = proximoTurno(ocupados, Date.now());
+    if (!t) break;
+    l.publicarA = t; ocupados.add(t); cambio = true;
+    log(`${l.id}: agendado para ${t}`);
+  }
+  if (cambio) await guardarKV('aprobaciones', data);
+}
+
 const ahora = Date.now();
 const cola = ESTADO ? [] : data.lotes.filter(l => l.publicarA && Date.parse(l.publicarA) <= ahora && ahora - Date.parse(l.publicarA) < 36 * 3600000)
   .flatMap(l => l.piezas.filter(p => p.decision === 'aprobada' && (!p.estado || (p.estado === 'publicando' && ahora - Date.parse(p.desde || 0) > 15 * 60000))).map(p => ({ l, p })));
