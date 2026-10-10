@@ -37,6 +37,26 @@
         "swell invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 2"
+    },
+    {
+      "fecha": "2026-10-10",
+      "id": "2026-10-10-2",
+      "archivo": "2026-10-10-2 - Deuda.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_10_2.py",
+      "duracion": 94,
+      "nombre": "Deuda",
+      "concepto": "Le debés una al equipo — te bancaron cuando no rendías, ahora te toca a vos; el peso de lo que debés, el impulso para devolverlo, y el alivio cuando finalmente lo hacés.",
+      "bpm": 116,
+      "tonalidad": "mi menor",
+      "rasgo": "cuerda oscura: una cuerda pulsada sombría (tipo nylon sintetizado) que lleva la melodía siempre aislada — cuando toca, las demás capas bajan; en el gancho C suena acompañada por primera vez",
+      "recursos": [
+        "cuerda oscura pulsada (firma del tema)",
+        "pad de pulso hueco (ondas cuadradas detuneadas, timbre distinto del supersaw)",
+        "lead cálido con vibrato (responde a la cuerda en ganchos B y C)",
+        "808 melódico con línea descendente E-C-A-B",
+        "swell invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 2"
     }
   ]
 }
