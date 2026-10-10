@@ -38,14 +38,33 @@ export async function carrusel(plantilla, datos, carpeta, prefijo = 'slide') {
   return salida;
 }
 
+// Segundo del tema en que entra el primer gancho ("drop"), según la ficha del tema del día
+// (scripts/beats/temas-diarios.json: bpm + estructura "intro 4 · gancho A 8 · …" en compases de 4 tiempos).
+export function dropDelTema(musica) {
+  try {
+    const reg = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/beats/temas-diarios.json'), 'utf8'));
+    const t = reg.temas.find(x => x.archivo === path.basename(musica));
+    if (!t?.bpm || !t.estructura) return null;
+    let compases = 0;
+    for (const parte of t.estructura.split('·').map(s => s.trim())) {
+      if (/^gancho/i.test(parte)) break;
+      compases += Number((parte.match(/(\d+)\s*$/) || [])[1] || 0);
+    }
+    return { drop: compases * 4 * 60 / t.bpm, bpm: t.bpm };
+  } catch { return null; }
+}
+
 // escenas: [{ n, dur }]; gancho: segundos de la pantalla de gancho al principio (0 = sin gancho).
-export async function video(plantilla, datos, salida, { escenas, gancho = 0, musica = null, fps = 30 }) {
+// fps 60 + desenfoque: se renderiza a 60 cuadros y se mezclan de a 2 (desenfoque de movimiento real) → 30 fps.
+// musicaDesde: segundo del tema en que arranca el audio (para que el drop caiga en el momento clave del video).
+export async function video(plantilla, datos, salida, { escenas, gancho = 0, musica = null, fps = 30, desenfoque = false, musicaDesde = 0 }) {
   fs.mkdirSync(path.dirname(salida), { recursive: true });
   const { browser, page } = await abrir(plantilla, 'story', datos);
   const total = gancho + escenas.reduce((s, e) => s + e.dur, 0);
   const args = ['-hide_banner', '-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-'];
-  if (musica) args.push('-i', musica);
-  args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(fps));
+  if (musica) args.push('-ss', musicaDesde.toFixed(3), '-i', musica);
+  if (desenfoque) args.push('-vf', 'tmix=frames=2:weights=1 1,fps=30');
+  args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', desenfoque ? '30' : String(fps));
   if (musica) args.push('-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:d=0.3,afade=t=out:st=${(total - 1.2).toFixed(2)}:d=1.2`, '-shortest');
   args.push('-movflags', '+faststart', salida);
   const ff = spawn(ffmpeg, args, { stdio: ['pipe', 'ignore', 'pipe'] });

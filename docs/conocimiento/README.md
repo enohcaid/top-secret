@@ -6,6 +6,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Reglas y preferencias (cómo trabajar)
 
+- [feedback_contenido_visual_motion](feedback_contenido_visual_motion.md) — Regla de Juan: el contenido de redes se tiene que ver de otro nivel; videos con motion design sincronizado a la música (60 fps, desenfoque); el club se comunica por audio, no por chat
 - [feedback_musica_unica](feedback_musica_unica.md) — Cada video publicado lleva su propia música, sin repetir temas (registro scripts/musica-usada.json); desde 2026-10-09 solo temas originales del día (scripts/beats/diario.mjs); el video del equipo de la noche es fijo con Locked In
 - [feedback_11x11_two_schedule_sources](feedback_11x11_two_schedule_sources.md) — 11x11 (and other) fixture dates in top-secret live in TWO separate places that must both be edited to actually change what the site shows
 - [feedback_always_push](feedback_always_push.md) — User wants every git commit in top-secret pushed to main immediately, no confirmation needed
