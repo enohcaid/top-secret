@@ -20,7 +20,11 @@ import { ROOT } from '../lib/env.mjs';
 const argv = process.argv.slice(2);
 const opt = k => { const i = argv.indexOf(k); return i < 0 ? null : argv[i + 1]; };
 const FECHA = opt('--fecha') || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
-const ARCHIVO = `diario_${FECHA.replace(/-/g, '_')}.py`;
+// --parte N: varios temas por día (pedido de Juan 2026-10-10: "componer de a 2, estamos atrasados"). Cada uno se
+// identifica como <fecha>-<N> (archivos, registro y biblioteca); sin --parte, como <fecha>.
+const PARTE = opt('--parte');
+const ID = PARTE ? `${FECHA}-${PARTE}` : FECHA;
+const ARCHIVO = `diario_${ID.replace(/-/g, '_')}.py`;
 const REG = path.join(ROOT, 'scripts/beats/temas-diarios.json');
 const SALIDA = path.join(ROOT, 'fuentes/beats/salida/diario');
 const BIBLIO = path.join(ROOT, 'fuentes/musica/propios');
@@ -28,18 +32,18 @@ const CLAUDE = [path.join(os.homedir(), '.local/bin/claude.exe'), path.join(os.h
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [tema-diario] ${m}`);
 
 const reg = fs.existsSync(REG) ? JSON.parse(fs.readFileSync(REG, 'utf8')) : { temas: [] };
-if (reg.temas.some(t => t.fecha === FECHA)) { log(`El tema de ${FECHA} ya existe.`); process.exit(0); }
+if (reg.temas.some(t => (t.id || t.fecha) === ID)) { log(`El tema ${ID} ya existe.`); process.exit(0); }
 fs.mkdirSync(SALIDA, { recursive: true });
 fs.mkdirSync(BIBLIO, { recursive: true });
-const wav = path.join(SALIDA, `${FECHA}.wav`), ficha = path.join(SALIDA, `${FECHA}.json`);
+const wav = path.join(SALIDA, `${ID}.wav`), ficha = path.join(SALIDA, `${ID}.json`);
 
 // ── 1. Composición ───────────────────────────────────────────────────────────
 if (!fs.existsSync(wav) || !fs.existsSync(ficha)) {
   const anteriores = reg.temas.slice(-20).map(t => `- ${t.fecha} · "${t.nombre}" · ${t.bpm} BPM, ${t.tonalidad} · concepto: ${t.concepto} · rasgo: ${t.rasgo} · recursos: ${(t.recursos || []).join(', ')}`).join('\n') || '(ninguno todavía: este es el primero)';
   const encargo = fs.readFileSync(path.join(ROOT, 'scripts/beats/diario-encargo.md'), 'utf8')
-    .replaceAll('{{FECHA}}', FECHA).replaceAll('{{ARCHIVO}}', ARCHIVO)
+    .replaceAll('{{FECHA}}', ID).replaceAll('{{ARCHIVO}}', ARCHIVO)
     .replaceAll('{{ANTERIORES}}', anteriores).replaceAll('{{FFMPEG}}', ffmpeg.replace(/\\/g, '/'));
-  log(`Componiendo el tema de ${FECHA} (${ARCHIVO})…`);
+  log(`Componiendo el tema ${ID} (${ARCHIVO})…`);
   const r = spawnSync(CLAUDE, ['-p', '--model', 'opus', '--permission-mode', 'acceptEdits',
     '--allowedTools', 'Read Write Edit Glob Grep Bash'], {
     cwd: ROOT, input: encargo, encoding: 'utf8', timeout: 75 * 60000, maxBuffer: 64 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'),
@@ -57,7 +61,7 @@ if (!meta.nombre) { log('ERROR: la ficha no tiene nombre.'); process.exit(1); }
 const dur = Number((spawnSync(ffmpeg, ['-hide_banner', '-i', wav], { encoding: 'utf8' }).stderr.match(/Duration: (\d+):(\d+):([\d.]+)/) || [])
   .slice(1).reduce((s, v, i) => s + Number(v) * [3600, 60, 1][i], 0));
 if (!(dur >= 60 && dur <= 130)) { log(`ERROR: duración fuera de rango (${dur.toFixed(1)} s).`); process.exit(1); }
-const nombreArchivo = `${FECHA} - ${meta.nombre.replace(/[\\/:*?"<>|]/g, '')}.mp3`;
+const nombreArchivo = `${ID} - ${meta.nombre.replace(/[\\/:*?"<>|]/g, '')}.mp3`;
 const mp3 = path.join(BIBLIO, nombreArchivo);
 const p = spawnSync(ffmpeg, ['-hide_banner', '-y', '-i', wav, '-af',
   `areverse,silenceremove=start_periods=1:start_threshold=-60dB,areverse,loudnorm=I=-14:TP=-1.5:LRA=11,afade=t=out:st=${Math.max(0, dur - 2.5).toFixed(2)}:d=2`,
@@ -67,12 +71,12 @@ if (p.status !== 0) { log('ERROR al pulir: ' + p.stderr.slice(-400)); process.ex
 // ── 3. Biblioteca (R2) + registro + commit ──────────────────────────────────
 const up = spawnSync(process.execPath, [path.join(ROOT, 'scripts/r2.mjs'), 'put', mp3, `_fuentes/musica/propios/${nombreArchivo}`], { cwd: ROOT, encoding: 'utf8' });
 if (up.status !== 0) { log('ERROR subiendo a R2: ' + (up.stderr || up.stdout).slice(-300)); process.exit(1); }
-reg.temas.push({ fecha: FECHA, archivo: nombreArchivo, script: `scripts/beats/temas/${ARCHIVO}`, duracion: Math.round(dur), ...meta });
+reg.temas.push({ fecha: FECHA, id: ID, archivo: nombreArchivo, script: `scripts/beats/temas/${ARCHIVO}`, duracion: Math.round(dur), ...meta });
 fs.writeFileSync(REG, JSON.stringify(reg, null, 2) + '\n');
 log(`Tema del día: "${meta.nombre}" (${meta.bpm} BPM, ${meta.tonalidad}, ${Math.round(dur)} s) → ${nombreArchivo}`);
 
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
 git('add', `scripts/beats/temas/${ARCHIVO}`, 'scripts/beats/temas-diarios.json');
-const c = git('commit', '-m', `feat: tema del día ${FECHA} — "${meta.nombre}" (${meta.concepto})\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`);
+const c = git('commit', '-m', `feat: tema del día ${ID} — "${meta.nombre}" (${meta.concepto})\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`);
 if (c.status === 0) { const ps = git('push', '-q'); log(ps.status === 0 ? 'Commit y push hechos.' : 'Push falló: ' + ps.stderr.slice(-200)); }
 else log('Commit no hecho: ' + (c.stdout + c.stderr).slice(-200));
