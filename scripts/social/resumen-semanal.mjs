@@ -17,7 +17,7 @@ import { elegirMusica } from '../lib/musica.mjs';
 import { cargar, hoyART, diaSemana, fechaCorta, TEMPORADA } from './lib/datos.mjs';
 import { carrusel, video } from './lib/render.mjs';
 import { escribirTextos, escribirNoticia } from './lib/textos.mjs';
-import { agregarLote, PAGINA } from './lib/aprobaciones.mjs';
+import { agregarLote, leer, PAGINA } from './lib/aprobaciones.mjs';
 import * as semana from './formatos/semana.mjs';
 
 const argv = process.argv.slice(2);
@@ -35,6 +35,12 @@ if (!esSabado && !argv.includes('--forzar')) log(`${FECHA}: el resumen semanal s
 else await armar();
 
 async function armar() {
+  // Si el lote de ese sábado ya existe (armado antes y quizás ya aprobado), no se pisa: reemplazarlo dejaba
+  // todo otra vez "pendiente" (pasó el 2026-10-10 con la tarea de las 08:00). --forzar para rehacerlo.
+  if ((await leer()).lotes.some(l => l.id === `resumen-${FECHA}`) && !argv.includes('--forzar')) {
+    log(`El resumen ${FECHA} ya está armado: no se rehace (usar --forzar).`);
+    return;
+  }
   const d = await cargar();
   d.fixture = d.fixture.map(f => ({ ...f, escudo: f.escudo || d.escudos[f.rival] || '' }));
   const desde = sumar(FECHA, -7), hasta = sumar(FECHA, -1);
