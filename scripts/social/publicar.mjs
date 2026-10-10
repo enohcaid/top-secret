@@ -76,7 +76,8 @@ async function xConImagenes(texto, archivos) {
     await espera(6000);
     await enfocar(page, '[data-testid="tweetTextarea_0"]');
     await page.keyboard.type(texto, { delay: 5 });
-    await page.locator('input[data-testid="fileInput"]').first().setInputFiles(archivos);
+    if (archivos.length) await page.locator('input[data-testid="fileInput"]').first().setInputFiles(archivos);
+    else await espera(6000);   // solo texto + link: que X arme la tarjeta del link
     // Que terminen de subir las imágenes: el botón se habilita recién ahí.
     for (let i = 0; i < 30; i++) {
       await espera(2000);
@@ -118,12 +119,35 @@ async function noticiaSitio(p) {
   return `https://enohcaid.github.io/top-secret/noticias.html?id=${n.id}`;
 }
 
+// Noticia del día (lote "noticia", aprobar.html): toma el borrador de Firestore, le aplica el título y el cuerpo
+// corregidos (un párrafo o bloque JSON por línea), la publica en published_noticias y borra el borrador — lo mismo
+// que hacía /publish-noticia desde el botón oculto de noticias.html.
+const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
+async function noticiaBorrador(p) {
+  const doc = await (await fetch(FS_DRAFT)).json();
+  const draft = JSON.parse(doc.fields?.data?.stringValue || 'null') || p.noticia;
+  if (!draft || draft.id !== p.noticia.id) throw new Error('El borrador de Firestore ya no es esta noticia (¿se regeneró?).');
+  const body = p.texto.split('\n').map(l => l.trim()).filter(Boolean).map(l => { if (l.startsWith('{')) { try { return JSON.parse(l); } catch {} } return l; });
+  const n = { ...draft, title: p.titulo || draft.title, body, status: 'published', publishedAt: new Date().toISOString() };
+  const lista = await leerKV('published_noticias', []);
+  if (lista.some(a => a.id === n.id)) throw new Error(`La noticia ${n.id} ya estaba publicada.`);
+  await guardarKV('published_noticias', [n, ...lista]);
+  await fetch(FS_DRAFT, { method: 'DELETE' });
+  return `https://enohcaid.github.io/top-secret/noticias.html?id=${n.id}`;
+}
+
 async function publicar(p) {
   const video = p.local?.video && fs.existsSync(p.local.video) ? p.local.video : null;
   const necesitaLocal = ['x-imagenes', 'tiktok', 'youtube', 'x-video'].includes(p.metodo);
   if (necesitaLocal && !video && !(p.local?.slides || []).every(f => fs.existsSync(f))) throw new Error('No están los archivos locales de la pieza (fuentes/redes/ronda).');
   switch (p.metodo) {
     case 'sitio-noticia': return noticiaSitio(p);
+    case 'sitio-borrador': return noticiaBorrador(p);
+    case 'ig-imagen':   return link(correr('scripts/meta.mjs', ['ig-imagen', urls(p)[0], p.texto]));
+    case 'ig-historia': correr('scripts/meta.mjs', ['ig-historia', urls(p)[0]]); return 'https://www.instagram.com/stories/fctopsecret/';
+    case 'fb-link':     return link(correr('scripts/meta.mjs', ['fb-link', p.link, p.texto]));
+    case 'fb-historia': correr('scripts/meta.mjs', ['fb-historia', urls(p)[0]]); return null;
+    case 'x-texto':     return xConImagenes(p.texto, []);
     case 'ig-carrusel': return link(correr('scripts/meta.mjs', ['ig-carrusel', p.texto, ...urls(p)]));
     case 'ig-reel':     return link(correr('scripts/meta.mjs', ['ig-reel', urls(p)[0], p.texto]));
     case 'fb-album':    return link(correr('scripts/meta.mjs', ['fb-album', p.texto, ...urls(p)]));
@@ -137,7 +161,7 @@ async function publicar(p) {
 }
 
 // X, TikTok y YouTube van por el Chrome con CDP: si está cerrado, se abre antes de empezar.
-if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'tiktok', 'youtube'].includes(p.metodo))) await asegurarChrome().catch(e => log(e.message));
+if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'x-texto', 'tiktok', 'youtube'].includes(p.metodo))) await asegurarChrome().catch(e => log(e.message));
 
 for (const { l, p } of cola) {
   log(`${l.id} · ${p.id}: publicando…`);

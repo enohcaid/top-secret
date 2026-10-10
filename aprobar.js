@@ -13,7 +13,7 @@
     youtube:   { nombre: 'YouTube',   color: '#FF0033' },
   };
   // Límites de texto por red (los usa el contador; X cuenta el link como 23).
-  const LIMITE = { sitio: 5000, instagram: 2200, facebook: 5000, x: 280, tiktok: 2200, youtube: 5000 };
+  const LIMITE = { sitio: 20000, instagram: 2200, facebook: 5000, x: 280, tiktok: 2200, youtube: 5000 };
   const ESTADO = { pendiente: 'Pendiente', aprobada: 'Aprobada', descartada: 'Descartada', publicando: 'Publicando…', publicado: 'Publicada', error: 'Error' };
 
   let pin = '';
@@ -66,6 +66,20 @@
     return `<div class="medio"><div class="carrusel">${m.map(uno).join('')}</div><span class="contador">${m.length} imágenes · deslizá</span></div>`;
   }
 
+  // Vista previa de una nota del sitio: los mismos bloques que noticias.html (párrafos, {h}, {specs}, {quote}, {img}, {pair}).
+  function vistaNoticia(n) {
+    const b = x => typeof x === 'string' ? `<p>${x}</p>`
+      : x.h ? `<h4>${esc(x.h)}</h4>`
+      : x.specs ? `<dl>${x.specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`
+      : x.quote ? `<blockquote>“${esc(x.quote)}”${x.by ? `<cite>${esc(x.by)}</cite>` : ''}</blockquote>`
+      : x.img ? `<figure><img src="${esc(x.img)}" loading="lazy"><figcaption>${esc(x.caption || '')}</figcaption></figure>`
+      : x.pair ? `<figure class="par">${x.pair.map(u => `<img src="${esc(u)}" loading="lazy">`).join('')}<figcaption>${esc(x.caption || '')}</figcaption></figure>`
+      : '';
+    return `<details class="vista"><summary>Ver la nota completa</summary><div class="nota">
+      <div class="nota-cat">${esc(n.category || '')} · ${esc(n.dateLabel || n.date || '')}</div>
+      <h3>${esc(n.title)}</h3><p class="bajada">${esc(n.excerpt || '')}</p>${(n.body || []).map(b).join('')}</div></details>`;
+  }
+
   function pieza(l, p) {
     const estado = p.estado || p.decision || 'pendiente';
     const cerrada = p.estado === 'publicado' || p.estado === 'publicando';
@@ -78,8 +92,9 @@
       ${medio(p)}
       ${p.titulo !== undefined ? `<div class="texto"><label>Título</label><input class="titulo" ${cerrada ? 'disabled' : ''} value="${esc(p.titulo)}"></div>` : ''}
       ${p.musica ? `<div class="extra"><b>Música:</b> ${esc(p.musica)}</div>` : ''}
+      ${p.noticia ? vistaNoticia({ ...p.noticia, title: p.titulo || p.noticia.title }) : ''}
       <div class="texto">
-        <label>Texto de la publicación</label>
+        <label>${esc(p.etiquetaTexto || 'Texto de la publicación')}</label>
         <textarea ${cerrada ? 'disabled' : ''} data-lim="${lim}">${esc(p.texto || '')}</textarea>
         <div class="cuenta"></div>
       </div>

@@ -93,6 +93,25 @@ button:disabled{opacity:.4;cursor:default}
 .g-escenas li{margin-bottom:6px}
 .g-bloque{margin:12px 16px 0;font-size:14px;line-height:1.5;color:var(--text2);white-space:pre-line}
 .g-bloque b{display:block;color:var(--text);font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.vista{margin:12px 16px 0;border:1px solid var(--border);border-radius:10px;background:var(--card2)}
+.vista summary{cursor:pointer;padding:10px 14px;font-weight:700;font-size:14px;color:var(--gold2)}
+.nota{padding:4px 18px 18px;font-size:15px;line-height:1.55;color:var(--text2)}
+.nota-cat{font:800 12px 'Barlow Condensed',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.nota h3{font-family:'Barlow Condensed',sans-serif;font-size:26px;line-height:1.05;color:var(--text);margin:6px 0 8px}
+.nota .bajada{color:var(--text);font-weight:600}
+.nota h4{font-family:'Barlow Condensed',sans-serif;font-size:19px;color:var(--text);margin:16px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.nota dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.nota dl div{background:var(--card);border-radius:8px;padding:8px 10px}
+.nota dt{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--mid)}
+.nota dd{margin:2px 0 0;color:var(--text);font-weight:700}
+.nota blockquote{margin:14px 0;padding-left:14px;border-left:3px solid var(--gold);color:var(--text);font-style:italic}
+.nota cite{display:block;font-style:normal;font-size:13px;color:var(--mid);margin-top:4px}
+.nota figure{margin:12px 0}
+.nota figure img{width:100%;border-radius:8px;display:block}
+.nota figure.par{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nota figure.par figcaption{grid-column:1/-1}
+.nota figcaption{font-size:12px;color:var(--mid);margin-top:4px}
+.nota a{color:var(--gold2)}
 #pin{display:none;max-width:360px;margin:40px auto;text-align:center}
 #pin input{width:100%;font:600 22px Barlow,sans-serif;text-align:center;letter-spacing:.3em;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);margin:14px 0}
 .aviso{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
@@ -112,7 +131,7 @@ button:disabled{opacity:.4;cursor:default}
   <div id="lotes"></div>
 </div>
 <div class="aviso" id="aviso"></div>
-<script src="aprobar.js?v=4"></script>
+<script src="aprobar.js?v=5"></script>
 <script src="layout.js?v=22"></script>
 </body>
 </html>

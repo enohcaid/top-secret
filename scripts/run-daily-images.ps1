@@ -97,3 +97,8 @@ if (-not $success) {
     Log "Generacion de imagenes fallo tras $maxAttempts intentos - requiere revision manual."
     exit 1
 }
+
+# La noticia del dia se aprueba en aprobar.html (pedido de Juan 2026-10-10: sin el boton oculto de noticias.html):
+# arma su lote (nota del sitio + piezas para redes) y abre la pagina.
+cmd /c "node scripts\social\noticia-lote.mjs >> scripts\daily-images.log 2>&1"
+Log "Noticia del dia lista para aprobar en aprobar.html."

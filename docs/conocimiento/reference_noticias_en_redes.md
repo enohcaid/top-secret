@@ -5,6 +5,8 @@ metadata:
   type: reference
 ---
 
+**ACTUALIZACIÓN 2026-10-10 — la noticia del día se aprueba en aprobar.html.** Juan pidió sacar el botón oculto (▪ ▪ ▪) de noticias.html: ya no existe el panel del borrador (publicar/editar/regenerar/descartar). Ahora `run-daily-images.ps1`, apenas el borrador tiene imágenes, corre `scripts/social/noticia-lote.mjs`: arma el lote `noticia-<id>` (pestaña Noticias y resultados) con la nota del sitio (vista previa completa; título y cuerpo editables, un párrafo o bloque JSON por línea), post e historia de Instagram con título (`noticia-redes.mjs`), post con link e historia de Facebook y X con link, y abre la página. Sale apenas se aprueba: `publicar.mjs` publica primero la nota (`sitio-borrador`: borrador de Firestore + correcciones → `published_noticias`, borra el borrador) y después cada red. El paso "Publicar en redes" del modal Compartir sigue disponible para noticias ya publicadas. Lo de abajo describe el flujo anterior.
+
 **Desde 2026-10-06** las noticias se publican en las redes desde el propio sitio, con un paso de revisión (pedido de Juan: "un paso que me muestre qué se publica en cada sitio" + opción de publicar en todas). **Sin música** (decisión de Juan: las noticias salen como imagen; la regla de música única es para los videos, ver [[feedback_musica_unica]]).
 
 **Qué sale en cada red** (criterio: donde hay link con vista previa, la foto va limpia; donde no hay link tocable, la imagen lleva título):

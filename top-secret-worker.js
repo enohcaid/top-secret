@@ -1155,7 +1155,7 @@ export default {
         for (const p of l.piezas.filter(p => piezas.includes(p.id))) {
           if (p.estado === 'publicado' || p.estado === 'publicando') continue;   // ya salió: no se toca
           if (decision) { p.decision = decision; p.decididoEn = ahora; }
-          if (typeof texto === 'string') p.texto = texto.slice(0, 5000);
+          if (typeof texto === 'string') p.texto = texto.slice(0, 20000);   // el cuerpo de una nota (bloques JSON) supera los 5000
           if (typeof titulo === 'string' && p.titulo !== undefined) p.titulo = titulo.slice(0, 200);
         }
         await env.TS_KV.put('aprobaciones', JSON.stringify(data));

@@ -910,52 +910,7 @@ body{padding-left:0;padding-right:0;}
     </div>
   </div>
 
-  <!-- Trigger admin: siempre visible pero discreto -->
-  <div id="draft-trigger" onclick="expandDraftBanner()" style="text-align:center;padding:10px 0 2px;cursor:pointer;opacity:.12;font-size:9px;letter-spacing:3px;color:var(--gold);user-select:none">▪ ▪ ▪</div>
-
-  <!-- Draft banner — plegado por defecto, se expande al click del trigger -->
-  <div id="draft-banner" style="display:none">
-    <div class="draft-banner">
-      <div class="draft-banner-header">
-        <span class="draft-banner-label">Borrador de hoy</span>
-        <button onclick="collapseDraftBanner()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;line-height:1;padding:0 4px" title="Plegar">╌</button>
-      </div>
-      <!-- Contenido: oculto hasta unlock -->
-      <div id="draft-content" style="display:none">
-        <div class="draft-banner-title" id="draft-title"></div>
-        <div class="draft-banner-meta" id="draft-meta"></div>
-        <div class="draft-banner-excerpt" id="draft-excerpt"></div>
-        <div class="draft-images" id="draft-images"></div>
-      </div>
-      <!-- Unlock row -->
-      <div class="draft-actions" id="draft-unlock-row">
-        <div class="pin-row">
-          <input class="pin-input" id="draft-pin" type="password" maxlength="8" placeholder="PIN admin" inputmode="numeric"
-                 onkeydown="if(event.key==='Enter')unlockDraft()">
-          <button class="btn-secondary" onclick="unlockDraft()">Desbloquear</button>
-        </div>
-        <span class="pin-error" id="pin-error">PIN incorrecto</span>
-      </div>
-      <!-- Acciones: visibles sólo después de desbloquear -->
-      <div class="draft-actions" id="draft-actions" style="display:none">
-        <div class="pin-row">
-          <button class="btn-primary" onclick="publishDraft()">Publicar</button>
-          <button class="btn-secondary" onclick="editDraft()">Editar</button>
-          <button class="btn-secondary" onclick="regenDraft()" title="Borrar esta noticia y generar una nueva">Regenerar</button>
-          <button class="btn-danger" onclick="discardDraft()">Descartar</button>
-        </div>
-      </div>
-      <!-- Formulario de edición -->
-      <div class="draft-edit-wrap" id="draft-edit-wrap">
-        <input class="draft-edit-title-input" id="draft-edit-title" type="text" placeholder="Título">
-        <textarea class="draft-edit-body-input" id="draft-edit-body" rows="8" placeholder="Cuerpo del artículo (HTML, un párrafo por línea)"></textarea>
-        <div class="draft-edit-actions">
-          <button class="btn-primary" onclick="saveDraftEdit()">Guardar cambios</button>
-          <button class="btn-secondary" onclick="cancelDraftEdit()">Cancelar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- El borrador de la noticia del día ya no se aprueba acá: va a aprobar.html (pedido de Juan, 2026-10-10). -->
 
   <!-- Featured card injected by JS -->
   <div id="featured-slot"></div>
@@ -1559,15 +1514,7 @@ async function loadKvContent() {
     }
   } catch(e) {}
 
-  // Load pending draft
-  try {
-    const r = await fetch(_WORKER + '/draft-noticia');
-    if (!r.ok) return;
-    const { draft } = await r.json();
-    if (!draft) return;
-    _currentDraft = draft;
-    _renderDraftBanner(draft);
-  } catch(e) {}
+  // El borrador del día se revisa y aprueba en aprobar.html (scripts/social/noticia-lote.mjs).
 }
 
 function _renderDraftBanner(draft) {
