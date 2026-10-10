@@ -256,7 +256,7 @@ function mostrar(n, t = 0) {
     etq.style.transform = `scale(${1.4 - 0.4 * eOutBack(dt / 0.45)})`;
     etq.style.opacity = eOut(dt / 0.15);
     // barras de cine que entran
-    const barra = eOut((dt - 0.2) / 0.6) * 150;
+    const barra = 0;   // sin barras de cine en verticales (pedido de Juan 2026-10-10)
     $('#barra1').style.height = $('#barra2').style.height = barra + 'px';
   } else {
     br.style.display = 'none'; $('#onda').style.opacity = 0; $('#halo').style.opacity = 0;

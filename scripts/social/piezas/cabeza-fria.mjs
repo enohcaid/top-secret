@@ -57,19 +57,20 @@ else {
   // (el jugador de la escena 1 se da vuelta, en la 3 el dedo toca la cara, en la 4 la jugada se vuelve chilena).
   const escenas = [
     { tipo: 'apertura', dur: 8 * B, clip: clips['1-desconexion'], vel: 0.55, grade: 'linear-gradient(rgba(30,60,120,.35),rgba(0,0,0,.2))',
-      kicker: 'Miércoles', palabras: [W('Se', ''), W('cae', ''), W('un', ''), W('compañero.', '', { br: true })], marcador: { t: 4.6 * B, txt: '0-1' } },
+      kicker: 'Miércoles · VPUG', palabras: [W('Se', ''), W('desconecta', ''), W('un', '', { br: true }), W('compañero.', '')], marcador: { t: 4.6 * B, txt: '0-1' } },
     { tipo: 'tarjeta', dur: 4 * B, titulo: ['Cabeza', 'fría'], sub: '3 errores que te hacen perder' },
-    { tipo: 'error', dur: 9 * B, clip: clips['2-repeticion'], num: '01', kicker: 'Error 01', grade: 'linear-gradient(rgba(20,80,120,.3),transparent)', hacerEn: 4 * B,
+    // "Qué hacer": máximo ~10 palabras y ~3,5 s en pantalla (antes eran 20 palabras en 2,3 s: no se llegaban a leer).
+    { tipo: 'error', dur: 11 * B, clip: clips['2-repeticion'], num: '01', kicker: 'Error 01', grade: 'linear-gradient(rgba(20,80,120,.3),transparent)', hacerEn: 3.5 * B,
       palabras: [W('Seguir', ''), W('jugando', ''), W('el', '', { br: true }), W('gol', 'oro'), W('que', ''), W('te', '', { br: true }), W('hicieron', 'oro')],
-      hacer: 'Un <b>reseteo concreto</b> al sacar del medio: una palabra o un gesto que signifique "siguiente". Siempre el mismo.' },
-    { tipo: 'error', dur: 9 * B, clip: clips['3-audio'], vel: 0.28, num: '02', kicker: 'Error 02', grade: 'linear-gradient(rgba(140,30,30,.28),transparent)', hacerEn: 4 * B,
+      hacer: 'Una palabra para <b>resetear</b> al sacar del medio. Siempre la misma.' },
+    { tipo: 'error', dur: 11 * B, clip: clips['3-audio'], vel: 0.24, num: '02', kicker: 'Error 02', grade: 'linear-gradient(rgba(140,30,30,.28),transparent)', hacerEn: 3.5 * B,
       palabras: [W('Buscar', ''), W('culpables', 'rojo', { br: true }), W('por', ''), W('el', ''), W('audio', 'oro')],
-      hacer: 'Decir <b>qué hay que hacer</b>, no qué salió mal: "cerrá la banda" en vez de "¿por qué no volviste?".' },
-    { tipo: 'error', dur: 9 * B, clip: clips['4-remate'], vel: 0.28, num: '03', kicker: 'Error 03', grade: 'linear-gradient(rgba(120,90,20,.25),transparent)', hacerEn: 4 * B,
+      hacer: 'Por el audio, <b>qué hay que hacer</b>. No qué salió mal.' },
+    { tipo: 'error', dur: 11 * B, clip: clips['4-remate'], vel: 0.24, num: '03', kicker: 'Error 03', grade: 'linear-gradient(rgba(120,90,20,.25),transparent)', hacerEn: 3.5 * B,
       palabras: [W('Querer', ''), W('arreglarlo', 'oro', { br: true }), W('todo', 'oro'), W('en', ''), W('una', '', { br: true }), W('jugada', '')],
-      hacer: 'Partir el partido en <b>tramos de 10 minutos</b>. El objetivo es ganar el próximo tramo, no el resultado.' },
+      hacer: 'Jugá <b>tramos de 10 minutos</b>. Ganá el próximo.' },
     { tipo: 'remate', dur: 10 * B, clip: clips['5-festejo'], grade: 'linear-gradient(rgba(201,168,76,.25),transparent)', barras: 0,
-      palabras: [W('Esa', ''), W('misma', ''), W('noche', 'oro')], marcadores: [{ txt: '2-1', t: 2 * B }, { txt: '3-1', t: 4 * B }] },
+      palabras: [W('Esa', ''), W('misma', ''), W('noche', 'oro')], marcadores: [{ txt: '2-1', rival: 'vs Cambaceres', t: 2 * B }, { txt: '3-1', rival: 'vs Real Envido', t: 4 * B }] },
     { tipo: 'cierre', dur: 8 * B, barras: 0, titulo: ['Cabeza', 'fría'], cta: 'Guardalo para cuando te toque.<br><b>Mandáselo</b> al que todavía discute el gol del primer tiempo.', escudo: archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png')) },
   ];
   const inicioRemate = escenas.slice(0, 5).reduce((s, e) => s + e.dur, 0);

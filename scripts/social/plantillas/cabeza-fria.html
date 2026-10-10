@@ -49,6 +49,7 @@ html,body{background:var(--bg);overflow:hidden}
 .hacer p{font:700 47px/1.25 Barlow;margin-top:14px}
 .hacer p b{color:var(--gold2)}
 .hacer svg{position:absolute;left:40px;top:84px;overflow:visible}
+.score small.rival{display:block;font:800 36px 'Barlow Condensed';letter-spacing:.24em;text-transform:uppercase;color:var(--text);text-shadow:0 4px 18px rgba(0,0,0,.9);margin-top:-10px}
 .score{font:400 340px/.85 'Bebas Neue';color:var(--gold);text-shadow:0 0 60px rgba(201,168,76,.5);display:inline-block}
 .tarjeta{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(70% 50% at 50% 50%,rgba(201,168,76,.2),transparent 70%),var(--bg)}
 .tarjeta h1{font:400 260px/.84 'Bebas Neue';font-kerning:none}
@@ -89,7 +90,7 @@ function html(e, i) {
   if (e.tipo === 'error') return `<div class="g" id="g${i}"><div class="num">${e.num}</div><div class="bloque" style="top:250px"><div class="k">${e.kicker}</div><div class="t sp" style="margin-top:18px">${pal(e.palabras)}</div></div>
     <div class="hacer"><div class="barra-oro"></div><div class="k">Qué hacer</div><svg width="300" height="10"><path d="M0 5 H300" stroke="#C9A84C" stroke-width="5" fill="none"/></svg><p>${e.hacer}</p></div></div>`;
   if (e.tipo === 'remate') return `<div class="g" id="g${i}"><div class="bloque" style="top:250px;text-align:center"><div class="t sp" style="font-size:170px">${pal(e.palabras)}</div></div>
-    <div class="bloque" style="top:980px;text-align:center">${e.marcadores.map((m, k) => `<span class="score sc" style="display:block;font-size:280px;margin-top:${k ? -20 : 0}px">${m.txt}</span>`).join('')}</div></div>`;
+    <div class="bloque" style="top:980px;text-align:center">${e.marcadores.map((m, k) => `<span class="score sc" style="display:block;font-size:260px;margin-top:${k ? 10 : 0}px">${m.txt}${m.rival ? `<small class="rival">${m.rival}</small>` : ''}</span>`).join('')}</div></div>`;
   return `<div class="g" id="g${i}"></div>`;
 }
 

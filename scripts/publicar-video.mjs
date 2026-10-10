@@ -38,7 +38,7 @@ try {
     if (!TITULO) throw new Error('falta --titulo');
     await p.goto(`https://studio.youtube.com/channel/${YT_CANAL}/videos/upload?d=ud`, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await espera(6000);
-    await p.locator('input[type=file]').first().setInputFiles(VIDEO);
+    await p.locator('input[type=file]').first().setInputFiles(VIDEO, { timeout: 5 * 60000 });   // videos de 60 fps pesan ~30 MB: por CDP tardan más de 30 s
     await espera(12000);
     const boxes = p.locator('#textbox');
     await boxes.nth(0).click(); await p.keyboard.press('Control+A'); await p.keyboard.press('Delete');
@@ -63,7 +63,7 @@ try {
     await espera(6000);
     await enfocar(p, '[data-testid="tweetTextarea_0"]');
     await p.keyboard.type(TEXTO, { delay: 5 });
-    await p.locator('input[data-testid="fileInput"]').first().setInputFiles(VIDEO);
+    await p.locator('input[data-testid="fileInput"]').first().setInputFiles(VIDEO, { timeout: 5 * 60000 });   // videos de 60 fps pesan ~30 MB: por CDP tardan más de 30 s
     // Listo = el botón Postear se habilita (X lo deja deshabilitado mientras procesa el video)
     let listo = false;
     for (let i = 0; i < 100 && !listo; i++) {
@@ -90,7 +90,7 @@ try {
   if (red === 'tiktok') {
     await p.goto('https://www.tiktok.com/tiktokstudio/upload?from=webapp', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await espera(8000);
-    await p.locator('input[type=file]').first().setInputFiles(VIDEO);
+    await p.locator('input[type=file]').first().setInputFiles(VIDEO, { timeout: 5 * 60000 });   // videos de 60 fps pesan ~30 MB: por CDP tardan más de 30 s
     await espera(25000);
     for (const t of ['Cancelar', 'Entendido']) { try { await p.getByRole('button', { name: t, exact: true }).first().click({ timeout: 4000 }); await espera(800); } catch {} }
     await p.evaluate(() => window.scrollTo(0, 0)); await espera(800);

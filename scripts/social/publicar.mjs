@@ -31,7 +31,9 @@ const cola = ESTADO ? [] : data.lotes.filter(l => l.publicarA && Date.parse(l.pu
 function correr(script, args) {
   const r = spawnSync(process.execPath, [path.join(ROOT, script), ...args], { cwd: ROOT, encoding: 'utf8', timeout: 20 * 60000 });
   const out = `${r.stdout || ''}${r.stderr || ''}`.trim();
-  if (r.status !== 0) throw new Error(out.split('\n').filter(Boolean).pop() || `${script} salió con ${r.status}`);
+  // El motivo real (no la última línea de Node, "Node.js v24…"): la primera línea con Error/Timeout.
+  const motivo = out.split('\n').map(s => s.trim()).find(s => /error|timeout|exceeded|no encontr/i.test(s) && !/^at /.test(s) && !/^Node\.js/.test(s));
+  if (r.status !== 0) throw new Error(motivo || out.split('\n').filter(Boolean).pop() || `${script} salió con ${r.status}`);
   return out;
 }
 const link = s => (s.match(/https:\/\/\S+/g) || []).pop() || null;
