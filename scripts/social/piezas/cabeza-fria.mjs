@@ -53,22 +53,24 @@ else {
   const tema = dropDelTema(musica) || { drop: 0, bpm: 130 };
   const B = 60 / tema.bpm;
   const W = (t, c, extra = {}) => ({ t, c, ...extra });
+  // vel < 1 = cámara lenta del clip de Canva: también evita los tramos finales donde la IA se desvía
+  // (el jugador de la escena 1 se da vuelta, en la 3 el dedo toca la cara, en la 4 la jugada se vuelve chilena).
   const escenas = [
-    { tipo: 'apertura', dur: 8 * B, clip: clips['1-desconexion'], grade: 'linear-gradient(rgba(30,60,120,.35),rgba(0,0,0,.2))',
-      palabras: [W('Miércoles', '', { k: true }), W('Se', ''), W('cae', ''), W('un', '', { br: true }), W('compañero.', '')], marcador: { t: 5.4 * B, txt: '0-1' } },
-    { tipo: 'tarjeta', dur: 4 * B, html: '<h1>Cabeza<br><span>fría</span></h1><p>3 errores que te hacen perder</p>' },
-    { tipo: 'error', dur: 9 * B, clip: clips['2-repeticion'], num: '01', grade: 'linear-gradient(rgba(20,80,120,.3),transparent)', hacerEn: 4 * B,
-      palabras: [W('Error 01', '', { k: true }), W('Seguir', ''), W('jugando', ''), W('el', '', { br: true }), W('gol', 'oro'), W('que', ''), W('te', '', { br: true }), W('hicieron', 'oro')],
+    { tipo: 'apertura', dur: 8 * B, clip: clips['1-desconexion'], vel: 0.55, grade: 'linear-gradient(rgba(30,60,120,.35),rgba(0,0,0,.2))',
+      kicker: 'Miércoles', palabras: [W('Se', ''), W('cae', ''), W('un', ''), W('compañero.', '', { br: true })], marcador: { t: 4.6 * B, txt: '0-1' } },
+    { tipo: 'tarjeta', dur: 4 * B, titulo: ['Cabeza', 'fría'], sub: '3 errores que te hacen perder' },
+    { tipo: 'error', dur: 9 * B, clip: clips['2-repeticion'], num: '01', kicker: 'Error 01', grade: 'linear-gradient(rgba(20,80,120,.3),transparent)', hacerEn: 4 * B,
+      palabras: [W('Seguir', ''), W('jugando', ''), W('el', '', { br: true }), W('gol', 'oro'), W('que', ''), W('te', '', { br: true }), W('hicieron', 'oro')],
       hacer: 'Un <b>reseteo concreto</b> al sacar del medio: una palabra o un gesto que signifique "siguiente". Siempre el mismo.' },
-    { tipo: 'error', dur: 9 * B, clip: clips['3-audio'], num: '02', grade: 'linear-gradient(rgba(140,30,30,.28),transparent)', hacerEn: 4 * B,
-      palabras: [W('Error 02', '', { k: true }), W('Buscar', ''), W('culpables', 'rojo', { br: true }), W('por', ''), W('el', ''), W('audio', 'oro')],
+    { tipo: 'error', dur: 9 * B, clip: clips['3-audio'], vel: 0.28, num: '02', kicker: 'Error 02', grade: 'linear-gradient(rgba(140,30,30,.28),transparent)', hacerEn: 4 * B,
+      palabras: [W('Buscar', ''), W('culpables', 'rojo', { br: true }), W('por', ''), W('el', ''), W('audio', 'oro')],
       hacer: 'Decir <b>qué hay que hacer</b>, no qué salió mal: "cerrá la banda" en vez de "¿por qué no volviste?".' },
-    { tipo: 'error', dur: 9 * B, clip: clips['4-remate'], num: '03', grade: 'linear-gradient(rgba(120,90,20,.25),transparent)', hacerEn: 4 * B,
-      palabras: [W('Error 03', '', { k: true }), W('Querer', ''), W('arreglarlo', 'oro', { br: true }), W('todo', 'oro'), W('en', ''), W('una', '', { br: true }), W('jugada', '')],
+    { tipo: 'error', dur: 9 * B, clip: clips['4-remate'], vel: 0.28, num: '03', kicker: 'Error 03', grade: 'linear-gradient(rgba(120,90,20,.25),transparent)', hacerEn: 4 * B,
+      palabras: [W('Querer', ''), W('arreglarlo', 'oro', { br: true }), W('todo', 'oro'), W('en', ''), W('una', '', { br: true }), W('jugada', '')],
       hacer: 'Partir el partido en <b>tramos de 10 minutos</b>. El objetivo es ganar el próximo tramo, no el resultado.' },
     { tipo: 'remate', dur: 10 * B, clip: clips['5-festejo'], grade: 'linear-gradient(rgba(201,168,76,.25),transparent)', barras: 0,
       palabras: [W('Esa', ''), W('misma', ''), W('noche', 'oro')], marcadores: [{ txt: '2-1', t: 2 * B }, { txt: '3-1', t: 4 * B }] },
-    { tipo: 'cierre', dur: 8 * B, barras: 0, html: `<h1>Cabeza<br><span>fría</span></h1><p class="cta">Guardalo para cuando te toque.<br><b>Mandáselo</b> al que todavía discute el gol del primer tiempo.</p><img src="${archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png'))}">` },
+    { tipo: 'cierre', dur: 8 * B, barras: 0, titulo: ['Cabeza', 'fría'], cta: 'Guardalo para cuando te toque.<br><b>Mandáselo</b> al que todavía discute el gol del primer tiempo.', escudo: archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png')) },
   ];
   const inicioRemate = escenas.slice(0, 5).reduce((s, e) => s + e.dur, 0);
   const total = escenas.reduce((s, e) => s + e.dur, 0);

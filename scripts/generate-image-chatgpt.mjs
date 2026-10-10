@@ -38,7 +38,9 @@ const FIRESTORE_KIT_HISTORY  = 'https://firestore.googleapis.com/v1/projects/top
 const FIRESTORE_PLANTEL      = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/plantel/activo';
 const OUTPUT_DIR      = path.resolve('Renders/Daily News');
 const DEBUG_DIR       = path.resolve('scripts'); // screenshots de debug fuera de Daily News (no se commitean)
-const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400/';
+// Dirección canónica del proyecto (2026-10): con el sufijo /project el composer carga enseguida; sin él la página
+// quedaba cargando y fallaban los 5 intentos (pasó el 9 y el 10/10).
+const PROJECT_URL     = 'https://chatgpt.com/g/g-p-6a420887ce04819182396abfcbd40400-top-secret-fc/project';
 const MAX_ATTEMPTS    = 3;
 // Timeout por acción de Playwright (click, evaluate, etc.). Antes era 0
 // (infinito) y un click trabado colgaba la corrida para siempre.

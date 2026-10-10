@@ -2,170 +2,203 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<!-- "Cabeza fría" en video (psicología del deporte, habla el club). Fondo: clips de 5 s animados con IA (Canva)
-     a partir de imágenes nuevas generadas con ChatGPT, pasados a cuadros JPG. Encima: grading por escena, grano,
-     barras de cine, tipografía cinética, glitch entre escenas, marcadores que golpean en el drop.
-     Línea de tiempo continua: mostrar(0, t) (async: espera que cargue el cuadro del clip). -->
+<!-- "Cabeza fría" en video (psicología del deporte, habla el club). v2 sobre GSAP (skills gsap-timeline/plugins):
+     una línea de tiempo maestra en pausa, y mostrar(0, t) la posiciona en el segundo t (tl.seek) → render cuadro por
+     cuadro exacto a 60 fps. Fondo: clips de 5 s animados con IA (Canva) desde imágenes nuevas (ChatGPT), en cuadros JPG.
+     Plugins: SplitText (letras con giro 3D y máscara), ScrambleText (texto que se descifra), DrawSVG (tachado y
+     subrayado que se dibujan), CustomWiggle/CustomBounce (temblor y rebote), Physics2D (chispas con gravedad). -->
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="../../../node_modules/gsap/dist/gsap.min.js"></script>
+<script src="../../../node_modules/gsap/dist/SplitText.min.js"></script>
+<script src="../../../node_modules/gsap/dist/ScrambleTextPlugin.min.js"></script>
+<script src="../../../node_modules/gsap/dist/DrawSVGPlugin.min.js"></script>
+<script src="../../../node_modules/gsap/dist/CustomEase.min.js"></script>
+<script src="../../../node_modules/gsap/dist/CustomWiggle.min.js"></script>
+<script src="../../../node_modules/gsap/dist/CustomBounce.min.js"></script>
+<script src="../../../node_modules/gsap/dist/Physics2DPlugin.min.js"></script>
 <style>
-:root{--bg:#060504;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.7);--loss:#E5484D;--win:#3ECF8E}
+:root{--bg:#060504;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.72);--loss:#E5484D}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:var(--bg);overflow:hidden}
-#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text)}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);perspective:1600px}
 #cam{position:absolute;inset:-50px}
 #clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #franjas{position:absolute;inset:0;display:none}
 #franjas div{position:absolute;left:0;right:0;overflow:hidden}
 #franjas img{position:absolute;left:0;width:100%;height:2020px;object-fit:cover}
 #grade{position:absolute;inset:0;mix-blend-mode:soft-light}
-#oscuro{position:absolute;inset:0}
+#oscuro{position:absolute;inset:0;background:linear-gradient(transparent 38%,rgba(6,5,4,.88))}
+#arriba{position:absolute;inset:0;background:linear-gradient(rgba(6,5,4,.75),transparent 34%)}
 #grano{position:absolute;inset:0;width:100%;height:100%;opacity:.12;mix-blend-mode:overlay}
 #vineta{position:absolute;inset:0;background:radial-gradient(80% 62% at 50% 46%,transparent 50%,rgba(0,0,0,.8))}
-.barra{position:absolute;left:0;right:0;background:#000;z-index:4}
+.barra{position:absolute;left:0;right:0;height:120px;background:#000;z-index:4}
 #b1{top:0} #b2{bottom:0}
-#flash{position:absolute;inset:0;background:#FFF5DA;opacity:0;z-index:9}
-.capa{position:absolute;left:72px;right:72px;z-index:6}
-.k{font:800 30px 'Barlow Condensed';letter-spacing:.32em;text-transform:uppercase;color:var(--gold);display:inline-block}
-.p{display:inline-block;font:400 150px/.92 'Bebas Neue';margin-right:.18em;text-shadow:0 10px 40px rgba(0,0,0,.65)}
-.p.oro{color:var(--gold)} .p.rojo{color:var(--loss)}
-#titulo{top:300px}
-#sub{bottom:300px}
-#hacer{bottom:250px;padding:34px 38px;background:rgba(6,5,4,.78);border-left:6px solid var(--gold);backdrop-filter:blur(6px)}
-#hacer .k{margin-bottom:12px}
-#hacer p{font:700 46px/1.25 Barlow}
-#hacer p b{color:var(--gold2)}
-#marcadores{top:760px;text-align:center}
-.score{font:400 330px/.85 'Bebas Neue';display:inline-block;margin:0 30px;color:var(--gold);text-shadow:0 0 60px rgba(201,168,76,.5)}
-#tarjeta{position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(70% 50% at 50% 50%,rgba(201,168,76,.18),transparent 70%),var(--bg)}
-#tarjeta h1{font:400 250px/.85 'Bebas Neue';letter-spacing:.02em}
-#tarjeta h1 span{color:var(--gold)}
-#tarjeta p{font:800 34px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;color:var(--text2);margin-top:26px}
-#tarjeta img{height:120px;margin-top:70px}
-#tarjeta p.cta{font:700 50px/1.3 Barlow;letter-spacing:0;text-transform:none;color:var(--text);max-width:820px}
-#tarjeta p.cta b{color:var(--gold)}
-#num{position:absolute;right:60px;top:210px;font:400 520px/.8 'Bebas Neue';color:transparent;-webkit-text-stroke:3px rgba(201,168,76,.45);z-index:5}
+#flash{position:absolute;inset:0;background:#FFF5DA;opacity:0;z-index:20;pointer-events:none}
+#chispas{position:absolute;left:540px;top:1180px;z-index:8}
+#chispas i{position:absolute;width:14px;height:5px;border-radius:3px;background:var(--gold2);box-shadow:0 0 12px rgba(241,220,151,.9);opacity:0}
+.g{position:absolute;inset:0;z-index:6;visibility:hidden}
+.k{font:800 30px 'Barlow Condensed';letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+.t{font:400 158px/1.04 'Bebas Neue';text-shadow:0 10px 40px rgba(0,0,0,.6);font-kerning:none}
+/* la máscara de SplitText recorta a la altura de la línea: aire arriba para tildes y la Ñ */
+.t div, .tarjeta h1 div{padding-top:.14em;margin-top:-.14em}
+.oro{color:var(--gold)} .rojo{color:var(--loss)}
+.bloque{position:absolute;left:72px;right:72px}
+.num{position:absolute;right:60px;top:170px;font:400 520px/.8 'Bebas Neue';color:transparent;-webkit-text-stroke:3px rgba(201,168,76,.5)}
+.hacer{position:absolute;left:72px;right:72px;bottom:240px;padding:36px 40px 38px;background:rgba(6,5,4,.8);backdrop-filter:blur(8px)}
+.hacer .barra-oro{position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--gold);transform-origin:50% 0}
+.hacer p{font:700 47px/1.25 Barlow;margin-top:14px}
+.hacer p b{color:var(--gold2)}
+.hacer svg{position:absolute;left:40px;top:84px;overflow:visible}
+.score{font:400 340px/.85 'Bebas Neue';color:var(--gold);text-shadow:0 0 60px rgba(201,168,76,.5);display:inline-block}
+.tarjeta{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(70% 50% at 50% 50%,rgba(201,168,76,.2),transparent 70%),var(--bg)}
+.tarjeta h1{font:400 260px/.84 'Bebas Neue';font-kerning:none}
+.tarjeta h1 .oro{display:block}
+.tarjeta p{font:800 34px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;color:var(--text2);margin-top:28px}
+.tarjeta p.cta{font:700 50px/1.3 Barlow;letter-spacing:0;text-transform:none;color:var(--text);max-width:840px}
+.tarjeta p.cta b{color:var(--gold)}
+.tarjeta img{height:120px;margin-top:70px}
+.linea-oro{display:block;margin:30px auto 0}
 </style>
 </head>
 <body>
 <div id="lienzo">
-  <div id="cam"><img id="clip"><div id="franjas"></div><div id="grade"></div><div id="oscuro"></div><canvas id="grano" width="540" height="1010"></canvas><div id="vineta"></div></div>
-  <div id="num"></div>
+  <div id="cam"><img id="clip"><div id="franjas"></div><div id="grade"></div><div id="oscuro"></div><div id="arriba"></div><canvas id="grano" width="540" height="1010"></canvas><div id="vineta"></div></div>
   <div class="barra" id="b1"></div><div class="barra" id="b2"></div>
-  <div class="capa" id="titulo"></div>
-  <div class="capa" id="marcadores"></div>
-  <div class="capa" id="hacer" style="display:none"><div class="k">Qué hacer</div><p></p></div>
-  <div id="tarjeta"></div>
+  <div id="escenas"></div>
+  <div id="chispas"></div>
   <div id="flash"></div>
 </div>
 <script>
+gsap.registerPlugin(SplitText, ScrambleTextPlugin, DrawSVGPlugin, CustomEase, CustomWiggle, CustomBounce, Physics2DPlugin);
 const $ = s => document.querySelector(s);
-const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
-const eOutBack = p => { p = clamp(p); const c = 1.9; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
 const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
-let D, E = [];   // E: escenas con su inicio y fin en segundos
+let D, E = [], tl;
 const NF = 12;
+CustomWiggle.create('temblor', { wiggles: 9, type: 'easeOut' });
+CustomBounce.create('rebote', { strength: 0.55, squash: 1.4, squashID: 'rebote-squash' });
 
-function pintar(datos) {
-  D = datos; let t = 0;
+// Grupo de textos de cada escena (todos en el DOM; la línea de tiempo prende/apaga cada uno).
+function html(e, i) {
+  const pal = l => l.map(w => `${w.br ? '<br>' : ''}<span class="${w.c || ''}">${w.t}</span>`).join(' ');
+  if (e.tipo === 'apertura') return `<div class="g" id="g${i}"><div class="bloque" style="top:250px"><div class="k scr">${e.kicker}</div><div class="t sp" style="margin-top:20px">${pal(e.palabras)}</div></div>
+    <div class="bloque" style="top:1150px;text-align:center"><span class="score rojo sc" style="color:var(--loss);text-shadow:0 0 60px rgba(229,72,77,.5)">${e.marcador.txt}</span>
+    <svg width="760" height="360" style="position:absolute;left:50%;top:-20px;margin-left:-380px;overflow:visible"><path class="tacha" d="M30 250 C 220 210, 520 120, 730 60" fill="none" stroke="#E5484D" stroke-width="22" stroke-linecap="round"/></svg></div></div>`;
+  if (e.tipo === 'tarjeta' || e.tipo === 'cierre') return `<div class="g tarjeta" id="g${i}"><h1><span class="scr">${e.titulo[0]}</span><span class="oro sp">${e.titulo[1]}</span></h1>
+    <svg class="linea-oro" width="520" height="12"><path d="M6 6 H514" stroke="#C9A84C" stroke-width="8" stroke-linecap="round" fill="none"/></svg>
+    ${e.sub ? `<p class="sub">${e.sub}</p>` : ''}${e.cta ? `<p class="cta sub">${e.cta}</p>` : ''}${e.escudo ? `<img class="escudo" src="${e.escudo}">` : ''}</div>`;
+  if (e.tipo === 'error') return `<div class="g" id="g${i}"><div class="num">${e.num}</div><div class="bloque" style="top:250px"><div class="k">${e.kicker}</div><div class="t sp" style="margin-top:18px">${pal(e.palabras)}</div></div>
+    <div class="hacer"><div class="barra-oro"></div><div class="k">Qué hacer</div><svg width="300" height="10"><path d="M0 5 H300" stroke="#C9A84C" stroke-width="5" fill="none"/></svg><p>${e.hacer}</p></div></div>`;
+  if (e.tipo === 'remate') return `<div class="g" id="g${i}"><div class="bloque" style="top:250px;text-align:center"><div class="t sp" style="font-size:170px">${pal(e.palabras)}</div></div>
+    <div class="bloque" style="top:980px;text-align:center">${e.marcadores.map((m, k) => `<span class="score sc" style="display:block;font-size:280px;margin-top:${k ? -20 : 0}px">${m.txt}</span>`).join('')}</div></div>`;
+  return `<div class="g" id="g${i}"></div>`;
+}
+
+// Entrada de letras: giro 3D desde abajo, con máscara por palabra y desenfoque que se aclara.
+function letras(el, pos, paso = 0.025) {
+  const s = SplitText.create(el, { type: 'words,chars', mask: 'words' });
+  tl.from(s.chars, { yPercent: 115, rotateX: -95, opacity: 0, filter: 'blur(10px)', duration: 0.55, ease: 'expo.out', stagger: paso }, pos);
+  return s;
+}
+const golpe = (pos, fuerza = 26) => {
+  tl.fromTo('#cam', { x: 0, y: 0 }, { x: fuerza, y: fuerza * 0.6, duration: 0.6, ease: 'temblor', immediateRender: false }, pos);
+  tl.fromTo('#flash', { opacity: 0.35 }, { opacity: 0, duration: 0.35, ease: 'power2.out', immediateRender: false }, pos);
+};
+
+async function pintar(datos) {
+  D = datos;
+  await document.fonts.ready;
+  let t = 0;
   E = D.escenas.map(e => { const o = { ...e, t0: t, t1: t + e.dur }; t += e.dur; return o; });
+  $('#escenas').innerHTML = E.map(html).join('');
   $('#franjas').innerHTML = Array.from({ length: NF }, (_, k) => `<div style="top:${k * 100 / NF}%;height:${100 / NF + .3}%"><img></div>`).join('');
+  $('#chispas').innerHTML = Array.from({ length: 70 }, () => '<i></i>').join('');
+
+  tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  E.forEach((e, i) => {
+    const g = `#g${i}`, a = e.t0;
+    tl.addLabel(`e${i}`, a);
+    tl.set(g, { visibility: 'visible' }, a).set(g, { visibility: 'hidden' }, e.t1);
+    tl.set('.barra', { height: e.barras ?? 120 }, a);
+    if (e.tipo === 'apertura') {
+      tl.fromTo(`${g} .scr`, { scrambleText: { text: '' } }, { duration: 0.9, scrambleText: { text: e.kicker, chars: 'TOPSECRET01', revealDelay: 0.2 } }, a + 0.2);
+      letras(`${g} .sp`, a + 0.55, 0.035);
+      const m = a + e.marcador.t;
+      tl.from(`${g} .sc`, { scale: 3.2, opacity: 0, filter: 'blur(14px)', duration: 0.5, ease: 'rebote' }, m);
+      golpe(m, 30);
+      tl.fromTo(`${g} .tacha`, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.35, ease: 'power4.inOut' }, m + 0.55);
+      golpe(m + 0.6, 14);
+    }
+    if (e.tipo === 'tarjeta' || e.tipo === 'cierre') {
+      tl.fromTo(`${g} .scr`, { scrambleText: { text: '' } }, { duration: 0.8, scrambleText: { text: e.titulo[0], chars: 'upperCase', speed: 0.6 } }, a + 0.05);
+      tl.from(`${g} .oro`, { yPercent: -60, opacity: 0, scale: 1.6, duration: 0.8, ease: 'rebote' }, a + 0.35);
+      tl.fromTo(`${g} .linea-oro path`, { drawSVG: '50% 50%' }, { drawSVG: '0% 100%', duration: 0.6, ease: 'expo.inOut' }, a + 0.7);
+      tl.from(`${g} .sub`, { opacity: 0, y: 40, filter: 'blur(8px)', duration: 0.6, stagger: 0.15 }, a + 0.95);
+      if (e.escudo) tl.from(`${g} .escudo`, { scale: 0, rotate: -40, duration: 0.7, ease: 'back.out(2)' }, a + 1.3);
+      tl.fromTo('#flash', { opacity: 0.5 }, { opacity: 0, duration: 0.3, immediateRender: false }, a);
+      tl.from(`${g} h1`, { letterSpacing: '0.14em', duration: 1.4, ease: 'expo.out' }, a);
+    }
+    if (e.tipo === 'error') {
+      tl.from(`${g} .num`, { xPercent: 40, opacity: 0, duration: 0.9, ease: 'expo.out' }, a);
+      tl.from(`${g} .k`, { opacity: 0, x: -30, duration: 0.4 }, a + 0.1);
+      letras(`${g} .sp`, a + 0.15, 0.018);
+      const h = a + e.hacerEn;
+      tl.fromTo(`${g} .hacer`, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.6, ease: 'expo.inOut' }, h);
+      tl.from(`${g} .barra-oro`, { scaleY: 0, duration: 0.5, ease: 'expo.out' }, h + 0.2);
+      tl.fromTo(`${g} .hacer svg path`, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.5, ease: 'power2.inOut' }, h + 0.35);
+      const p = SplitText.create(`${g} .hacer p`, { type: 'lines', mask: 'lines' });
+      tl.from(p.lines, { yPercent: 105, duration: 0.6, ease: 'expo.out', stagger: 0.08 }, h + 0.4);
+      tl.to('#oscuro', { background: 'linear-gradient(transparent 22%,rgba(6,5,4,.93))', duration: 0.6 }, h);
+      tl.set('#oscuro', { background: 'linear-gradient(transparent 38%,rgba(6,5,4,.88))' }, e.t1);
+    }
+    if (e.tipo === 'remate') {
+      letras(`${g} .sp`, a + 0.05, 0.03);
+      e.marcadores.forEach((m, k) => {
+        const p = a + m.t;
+        tl.from(`${g} .sc:nth-child(${k + 1})`, { scale: 3, yPercent: -40, opacity: 0, filter: 'blur(12px)', duration: 0.7, ease: 'rebote' }, p);
+        golpe(p, 34);
+        // chispas con gravedad (Physics2D) desde el marcador; valores fijos por chispa (render repetible)
+        [...document.querySelectorAll('#chispas i')].forEach((el, j) => {
+          const ang = 190 + rnd(j + k * 100) * 160;
+          tl.set(el, { x: (k ? 1 : -1) * 190, y: 0, opacity: 1, rotate: -ang }, p);
+          tl.to(el, { duration: 1.1 + rnd(j + 7) * 0.6, opacity: 0, ease: 'power1.in', physics2D: { velocity: 500 + rnd(j + 31 + k) * 900, angle: ang, gravity: 1300 } }, p);
+        });
+      });
+    }
+  });
   return 1;
 }
+
 function grano(t) {
   const c = $('#grano'), g = c.getContext('2d'), img = g.createImageData(c.width, c.height);
   let s = Math.floor(t * 24) * 7919 + 3;
   for (let i = 0; i < img.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = s & 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
   g.putImageData(img, 0, 0);
 }
-const cuadro = (e, lt) => e.clip ? `${e.clip.dir}/${String(Math.min(e.clip.n, 1 + Math.floor(lt * 30 * (e.vel || 1)))).padStart(4, '0')}.jpg` : '';
-// Palabras que entran de golpe una por una (escala + desenfoque), con color por palabra.
-function palabras(el, lista, lt, t0 = 0, paso = 0.13) {
-  if (el.dataset.k !== lista.map(w => w.t).join('|')) {
-    el.dataset.k = lista.map(w => w.t).join('|');
-    el.innerHTML = lista.map(w => `${w.br ? '<br>' : ''}${w.k ? `<span class="k" style="display:block;margin-bottom:18px">${w.t}</span>` : `<span class="p ${w.c || ''}">${w.t}</span>`}`).join('');
-  }
-  let golpe = 0;
-  [...el.children].filter(x => x.tagName === 'SPAN').forEach((s, i) => {
-    const q = (lt - t0 - i * paso) / 0.2;
-    s.style.opacity = q < 0 ? 0 : 1;
-    s.style.transform = `scale(${q < 0 ? 2.6 : 2.6 - 1.6 * eOut(q)})`;
-    s.style.filter = q < 1 ? `blur(${(1 - clamp(q)) * 12}px)` : 'none';
-    if (q > 0 && q < 1.3) golpe = Math.max(golpe, 1 - q / 1.3);
-  });
-  return golpe;
-}
+// e.desde: cuadros a saltear al principio del clip (Canva arranca con un fundido desde claro)
+const cuadro = (e, lt) => e.clip ? `${e.clip.dir}/${String(Math.min(e.clip.n, 1 + (e.desde ?? 9) + Math.floor(lt * 30 * (e.vel || 1)))).padStart(4, '0')}.jpg` : '';
 
 async function mostrar(n, t = 0) {
   grano(t);
   const e = E.find(x => t >= x.t0 && t < x.t1) || E[E.length - 1], lt = t - e.t0, i = E.indexOf(e);
-  let cam = { s: 1.04 + lt * 0.012, x: 0, y: 0 }, flash = 0, temblor = 0;
+  // fondo: el cuadro del clip (cámara lenta con e.vel) con un empuje lento de cámara
   const clip = $('#clip'), src = cuadro(e, lt);
-  // fondo: cuadro del clip (o negro en las tarjetas)
   clip.style.display = src ? 'block' : 'none';
   if (src && clip.getAttribute('src') !== src) { clip.setAttribute('src', src); await clip.decode().catch(() => {}); }
+  clip.style.transform = `scale(${1.04 + lt * 0.014})`;
   $('#grade').style.background = e.grade || 'transparent';
-  $('#oscuro').style.background = e.oscuro || 'linear-gradient(transparent 40%,rgba(6,5,4,.85))';
-  // transición de entrada: glitch en franjas los primeros 0,2 s de cada escena con clip
+  // glitch en franjas al entrar a cada escena con clip
   const fr = $('#franjas');
   if (src && lt < 0.22 && i > 0) {
     fr.style.display = 'block';
     [...fr.children].forEach((d, k) => { const im = d.firstChild; if (im.getAttribute('src') !== src) im.setAttribute('src', src);
       im.style.top = `${-k * 2020 / NF}px`; im.style.transform = `translateX(${(rnd(k * 7 + Math.floor(t * 60)) - .5) * (1 - lt / 0.22) * 320}px)`; });
-    clip.style.filter = `drop-shadow(10px 0 0 rgba(255,40,60,.6)) drop-shadow(-10px 0 0 rgba(40,220,255,.6))`;
-    flash = Math.max(flash, 0.25 * (1 - lt / 0.22));
+    clip.style.filter = 'drop-shadow(10px 0 0 rgba(255,40,60,.6)) drop-shadow(-10px 0 0 rgba(40,220,255,.6))';
+    await Promise.all([...fr.querySelectorAll('img')].map(im => im.decode().catch(() => {})));
   } else { fr.style.display = 'none'; clip.style.filter = 'none'; }
-
-  // barras de cine
-  $('#b1').style.height = $('#b2').style.height = `${e.barras ?? 120}px`;
-
-  // textos
-  const ti = $('#titulo'), ha = $('#hacer'), ma = $('#marcadores'), ta = $('#tarjeta'), nu = $('#num');
-  ti.style.display = 'none'; ha.style.display = 'none'; ma.style.display = 'none'; ta.style.display = 'none'; nu.textContent = '';
-  if (e.tipo === 'apertura') {
-    ti.style.display = 'block'; ti.style.top = '260px';
-    temblor = palabras(ti, e.palabras, lt, 0.4, 0.42);
-    if (e.marcador && lt > e.marcador.t) {
-      ma.style.display = 'block'; ma.style.top = '1240px';
-      const q = (lt - e.marcador.t) / 0.18;
-      ma.innerHTML = `<span class="score" style="color:var(--loss);text-shadow:0 0 60px rgba(229,72,77,.5);transform:scale(${2.4 - 1.4 * eOut(q)})">${e.marcador.txt}</span>`;
-      if (q < 1.5) { temblor = Math.max(temblor, 1 - q / 1.5); flash = Math.max(flash, 0.3 * (1 - clamp(q))); }
-    }
-  } else if (e.tipo === 'tarjeta' || e.tipo === 'cierre') {
-    ta.style.display = 'flex'; ta.id = e.tipo === 'cierre' ? 'tarjeta' : 'tarjeta';
-    if (ta.dataset.k !== e.tipo) { ta.dataset.k = e.tipo; ta.innerHTML = e.html; }
-    const h = ta.querySelector('h1'), q = lt / 0.35;
-    h.style.transform = `scale(${1.6 - 0.6 * eOutBack(q)})`; h.style.filter = q < 1 ? `blur(${(1 - clamp(q)) * 16}px)` : 'none';
-    h.style.letterSpacing = `${0.02 + (1 - eOut(lt / 1.2)) * 0.12}em`;
-    [...ta.querySelectorAll('p,img')].forEach((x, k) => { const qq = (lt - 0.35 - k * 0.2) / 0.4; x.style.opacity = eOut(qq); x.style.transform = `translateY(${(1 - eOut(qq)) * 40}px)`; });
-    if (lt < 0.12) flash = Math.max(flash, 0.5 * (1 - lt / 0.12));
-    // glitch del título al entrar
-    h.style.textShadow = lt < 0.3 ? `${(rnd(Math.floor(t * 60)) - .5) * 30}px 0 0 rgba(255,40,60,.7), ${(rnd(Math.floor(t * 60) + 1) - .5) * 30}px 0 0 rgba(40,220,255,.7)` : 'none';
-  } else if (e.tipo === 'error') {
-    nu.textContent = e.num; nu.style.opacity = eOut(lt / 0.4) * 0.9; nu.style.transform = `translateY(${(1 - eOut(lt / 0.5)) * 80}px)`;
-    ti.style.display = 'block'; ti.style.top = '250px';
-    temblor = palabras(ti, e.palabras, lt, 0.15, 0.12);
-    const q = (lt - e.hacerEn) / 0.45;
-    if (q > 0) {
-      ha.style.display = 'block';
-      if (ha.dataset.k !== e.hacer) { ha.dataset.k = e.hacer; ha.querySelector('p').innerHTML = e.hacer; }
-      ha.style.transform = `translateY(${(1 - eOutBack(q)) * 260}px)`; ha.style.opacity = eOut(q);
-      $('#oscuro').style.background = `linear-gradient(transparent 30%,rgba(6,5,4,${0.6 + 0.3 * eOut(q)}))`;
-    }
-  } else if (e.tipo === 'remate') {
-    ti.style.display = 'block'; ti.style.top = '250px';
-    temblor = palabras(ti, e.palabras, lt, 0.05, 0.16);
-    ma.style.display = 'block'; ma.style.top = '1180px';
-    ma.innerHTML = e.marcadores.map((m, k) => { const q = (lt - m.t) / 0.18; return q < 0 ? '' : `<span class="score" style="transform:scale(${2.6 - 1.6 * eOut(q)});opacity:${eOut(q * 2)}">${m.txt}</span>`; }).join('');
-    e.marcadores.forEach(m => { const q = (lt - m.t) / 1.2; if (q > 0 && q < 1) { temblor = Math.max(temblor, 1 - q); flash = Math.max(flash, 0.45 * (1 - q * 3)); } });
-    cam.s += Math.max(0, 0.06 - lt * 0.1);
-  }
-  if (temblor > 0) { const k = temblor * 22; cam.x = (rnd(Math.floor(t * 60)) - .5) * k; cam.y = (rnd(Math.floor(t * 60) + 4) - .5) * k; }
-  $('#cam').style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.s})`;
-  $('#flash').style.opacity = clamp(flash);
+  tl.seek(t, true);
   // salida a negro al final (para el loop)
   const fin = E[E.length - 1].t1;
-  $('#lienzo').style.filter = t > fin - 0.3 ? `brightness(${clamp((fin - t) / 0.3)})` : 'none';
+  $('#lienzo').style.filter = t > fin - 0.3 ? `brightness(${Math.max(0, (fin - t) / 0.3)})` : 'none';
 }
 </script>
 </body>
