@@ -7,6 +7,11 @@ metadata:
 
 **Regla:** "En general el contenido no tiene algo visualmente llamativo y ese es mi principal objetivo: se tiene que ver de otro nivel, todo se tiene que ver increíble. Agregale animaciones en motion, sobre todo a los videos." (Juan, 2026-10-10, al revisar el simulacro viral.)
 
+**Piso de calidad (Juan, 2026-10-10, al ver el antes y después v2 con motion):** "Mucho mejor. Este tiene que ser el piso de la calidad de las cosas que me propongas; cada nueva propuesta tiene que ser mejor, mejor calidad, más producción. Prefiero publicar más espaciado y con calidad que mucho y que sea feo, plano, reciclado."
+- El antes y después v2 (`plantillas/antes-despues.html`) es el MÍNIMO. Nada por debajo de eso se le propone.
+- Cada propuesta nueva suma producción respecto de la anterior (una técnica, una capa o un recurso nuevo); no se recicla una plantilla tal cual.
+- Menos piezas y mejores: si una pieza no llega al nivel, no se propone (se espacia la publicación, no se rellena).
+
 **Why:** el contenido compite en el feed con cuentas grandes; una placa prolija pero quieta no frena el scroll.
 
 **How to apply:**
