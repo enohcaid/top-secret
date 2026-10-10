@@ -49,7 +49,7 @@
     if (!pin) return;
     try { sessionStorage.setItem('ts_pin', pin); } catch {}
     $('#pin').style.display = 'none';
-    cargar();
+    cargar(true);
   };
   $('#pin-in').addEventListener('keydown', e => { if (e.key === 'Enter') $('#pin-ok').click(); });
 
@@ -141,14 +141,20 @@
     </section>`;
   }
 
-  let lotes = [];
-  async function cargar() {
+  let lotes = [], ultimo = '';
+  async function cargar(forzar = false) {
     if (!pin) return pedirPin();
+    let nuevos;
     try {
-      lotes = (await api('/aprobaciones')).lotes;
+      nuevos = (await api('/aprobaciones')).lotes;
     } catch (e) { if (pin) aviso(e.message); return; }
-    // Si el foco está en un texto que se está editando, no redibujar (se perdería lo escrito).
-    if (['TEXTAREA', 'INPUT'].includes(document.activeElement?.tagName)) return;
+    // El refresco automático solo redibuja si algo cambió de verdad, y nunca mientras se está editando un texto
+    // o reproduciendo un video (redibujar cortaba la reproducción).
+    const firma = JSON.stringify(nuevos);
+    if (!forzar && firma === ultimo) return;
+    if (!forzar && ['TEXTAREA', 'INPUT'].includes(document.activeElement?.tagName)) return;
+    if (!forzar && [...document.querySelectorAll('video')].some(v => !v.paused && !v.ended)) return;
+    lotes = nuevos; ultimo = firma;
     const vivos = lotes.filter(l => l.piezas.some(p => p.estado !== 'publicado' && p.decision !== 'descartada') || Date.now() - Date.parse(l.creado) < 3 * 86400000);
     pintarPestanas(vivos);
   }
@@ -179,7 +185,7 @@
     if (!t) return;
     pestana = t.dataset.tab;
     try { localStorage.setItem('ts_aprobar_tab', pestana); } catch {}
-    cargar();
+    cargar(true);
   });
 
   function contar(t) {
@@ -222,6 +228,6 @@
     else if (e.target.classList.contains('titulo')) decidir(art.dataset.lote, [art.dataset.pieza], { titulo: e.target.value });
   });
 
-  cargar();
+  cargar(true);
   setInterval(cargar, 20000);   // ver el estado de publicación sin recargar
 })();
