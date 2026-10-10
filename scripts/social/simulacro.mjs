@@ -27,9 +27,9 @@ const psico = {
   escudo: ESCUDO,
   portada: { kicker: 'Cabeza fría', titulo: '3 errores<br>mentales que<br>te hacen <em>perder</em><br>en Pro Clubs', img: archivo(path.join(ROOT, 'Renders/Guiidow/Brazos4.png')) },
   errores: [
-    { titulo: 'Seguir jugando<br>el gol que <em>te hicieron</em>', pasa: 'La cabeza se queda repitiendo la jugada anterior. Mientras tanto, la siguiente ya empezó y llegás tarde a todo.', hacer: 'Un <strong>reseteo concreto</strong> al sacar del medio: una palabra o un gesto que signifique "siguiente". Siempre el mismo.' },
-    { titulo: 'Buscar <em>culpables</em><br>por el audio', pasa: 'Culpar a un compañero en pleno partido sube la tensión de todo el equipo. Con tensión se decide peor y se arriesga menos.', hacer: 'Por el audio, decir <strong>lo que hay que hacer</strong>, no lo que salió mal: "cerrá la banda" en vez de "¿por qué no volviste?".' },
-    { titulo: 'Querer <em>arreglarlo todo</em><br>en una jugada', pasa: 'Abajo en el marcador aparecen el pase imposible y el remate de 40 metros. El apuro regala la pelota.', hacer: 'Partir el partido en <strong>tramos de 10 minutos</strong>. El objetivo no es el resultado: es ganar el próximo tramo.' },
+    { titulo: 'Seguir <em>pensando</em><br>en el gol que te hicieron', pasa: 'La cabeza se queda repitiendo la jugada anterior. Mientras tanto, la siguiente ya empezó y llegás tarde a todo.', hacer: 'Al sacar del medio, decite una palabra («siguiente») y enfocate <strong>solo en la próxima jugada</strong>.' },
+    { titulo: '<em>Culpar</em> a un compañero<br>por el audio', pasa: 'Culpar a un compañero en pleno partido sube la tensión de todo el equipo. Con tensión se decide peor y se arriesga menos.', hacer: 'Hablale para <strong>corregir, no para culpar</strong>: en vez de «¿por qué no volviste?», decile «volvé a tu marca».' },
+    { titulo: 'Querer <em>empatar</em><br>en una sola jugada', pasa: 'Abajo en el marcador aparecen el pase imposible y el remate de 40 metros. El apuro regala la pelota.', hacer: 'Olvidate del marcador por un rato: proponete <strong>ganar los próximos 10 minutos</strong>, jugada por jugada.' },
   ],
   prueba: {
     kicker: 'Nos pasó el miércoles', titulo: 'Del 0-1 a<br><em>dos victorias</em>',

@@ -146,8 +146,9 @@ async function pintar(datos) {
       tl.fromTo(`${g} .hacer`, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.6, ease: 'expo.inOut' }, h);
       tl.from(`${g} .barra-oro`, { scaleY: 0, duration: 0.5, ease: 'expo.out' }, h + 0.2);
       tl.fromTo(`${g} .hacer svg path`, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.5, ease: 'power2.inOut' }, h + 0.35);
-      const p = SplitText.create(`${g} .hacer p`, { type: 'lines', mask: 'lines' });
-      tl.from(p.lines, { yPercent: 105, duration: 0.6, ease: 'expo.out', stagger: 0.08 }, h + 0.4);
+      // El párrafo entra entero (máscara + desenfoque): partirlo en líneas con SplitText cortaba mal las frases
+      // que tienen palabras resaltadas (<b>) — "en la próxima / jugada.".
+      tl.fromTo(`${g} .hacer p`, { clipPath: 'inset(0 0 100% 0)', y: 24, filter: 'blur(6px)' }, { clipPath: 'inset(0 0 0% 0)', y: 0, filter: 'blur(0px)', duration: 0.7, ease: 'expo.out', immediateRender: false }, h + 0.4);
       tl.to('#oscuro', { background: 'linear-gradient(transparent 22%,rgba(6,5,4,.93))', duration: 0.6 }, h);
       tl.set('#oscuro', { background: 'linear-gradient(transparent 38%,rgba(6,5,4,.88))' }, e.t1);
     }
