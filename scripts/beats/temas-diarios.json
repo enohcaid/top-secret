@@ -17,6 +17,26 @@
         "tape stop al final del build"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 4 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-10",
+      "id": "2026-10-10-1",
+      "archivo": "2026-10-10-1 - Frío.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_10_1.py",
+      "duracion": 79,
+      "nombre": "Frío",
+      "concepto": "Salir a jugar a las 11 de la noche en invierno — las manos heladas, el pasto mojado — pero adentro de la cancha el frío no existe; cada sección es un grado más caliente.",
+      "bpm": 138,
+      "tonalidad": "sib menor",
+      "rasgo": "cristales: campanas FM agudas con detune y reverb largo que evocan escarcha; omnipresentes al principio, desaparecen progresivamente hasta que el calor de la cancha las derrite",
+      "recursos": [
+        "cristales FM con reverb frío (firma del tema)",
+        "pad supersaw con brillo variable por sección (frío→caliente)",
+        "lead tibio con ataque lento (ganchos B y C)",
+        "808 melódico con saltos de octava",
+        "swell invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 2"
     }
   ]
 }
