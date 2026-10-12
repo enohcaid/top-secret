@@ -47,6 +47,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [feedback_sin_verificacion_calidad_imagenes](feedback_sin_verificacion_calidad_imagenes.md) — generate-image-chatgpt.mjs ya no evalúa con ChatGPT Vision ni reintenta por formato en el flujo default — un solo intento por imagen, revisión humana en el preview de publicación
 - [feedback_triage_antes_de_debug_profundo](feedback_triage_antes_de_debug_profundo.md) — Antes de multiplicar hipótesis debugueando un fallo que puede ser externo (no de este lado), hacer 2-3 chequeos mínimos de triage primero
 - [feedback_video_formacion_fixture_block](feedback_video_formacion_fixture_block.md) — Los videos 'Formación Titular' llevan el partido de VPUG del día en el bloque de fixture — pero la copia grande y la copia chica del bloque NO tienen por qué mostrar las mismas filas: eso es el formato real, no un bug
+- [feedback_solo_automatizable](feedback_solo_automatizable.md) — Redes: no proponer nada que Juan tenga que hacer a mano desde la app (ej. destacadas de IG, que la API no permite); solo lo automatizable
 
 ## Estado y decisiones del proyecto
 
