@@ -44,6 +44,8 @@ const hArg = process.argv.indexOf('--horarios');
 const SLOTS = hArg > 0 ? process.argv[hArg + 1].split(',').map(h => h.trim().replace('.', ':').padStart(5, '0')) : TODOS;
 if (SLOTS.some(h => !/^\d{2}:\d{2}$/.test(h))) { console.error('Horarios inválidos:', SLOTS.join(', ')); process.exit(1); }
 const GRUPO = /amistosos.*vpn/i;
+// Palabras del encabezado que no nombran a ningún equipo ("alguno disponible?", "rival x1 1ra VPN").
+const RELLENO = /(^|[^\p{L}\p{N}])(alguno?s?|alguien|rival(es)?|equipo|disponibles?|libres?|x\s*1|ida|vuelta|prioridad|divisi[oó]n|1ra|2da|3ra|4ta|primera|segunda|vpn|vpug|11x11|ya|por favor|porfa|gente|che|buenas|hola|somos|tenemos|quiere|quieren|juega|juegan|jugamos|partido|sala|hs|hrs)(?![\p{L}\p{N}])/giu;
 const PIDE = /(amistos|busc|disponib|libre|rival|jugar|partido|\bhoy\b|\bx\s*1\b|\b\d{1,2}[:.]\d{2}\b|\b2[23]\s*(hs|h)\b)/i;
 // Palabras sueltas sin \b (con tildes falla: "sí"). Si hay DUDA, la respuesta va a Juan aunque tenga
 // un sí: "ok dejame ver", "bueno, pregunto y te digo" no confirman nada.
@@ -328,7 +330,10 @@ async function pedidoGrupo(msg) {
   // El equipo sale del encabezado del pedido, nunca de las líneas de horario (ahí están los rivales
   // que ya tiene agendados: "22:40 vs instituto senior").
   const { equipoTxt, horas } = leerPedido(msg.body);
-  const eq = buscarEquipo(equipoTxt || nombreContacto, autor) || (equipoTxt && nombreContacto ? buscarEquipo(nombreContacto) : null);
+  // Si el encabezado nombra un equipo, manda ese nombre: nunca se cambia por el del contacto ni por
+  // el equipo aprendido de ese número ("Cuervo" ofreciendo a CADU no es San Lorenzo).
+  const nombraEquipo = equipoTxt.replace(RELLENO, ' ').replace(/[^\p{L}]/gu, '').length >= 3;
+  const eq = nombraEquipo ? buscarEquipo(equipoTxt) : buscarEquipo(nombreContacto, autor);
   // Nombra un equipo que no es de 1ra/2da → se ignora. No dice equipo pero sí horarios ("23 / 23.40") → se le pregunta cuál es.
   if (!eq && (equipoTxt || !horas.length)) { log('pedido ignorado (equipo fuera de 1ra/2da o sin identificar):', equipoTxt || nombreContacto, '|', breve); return; }
   const preguntar = !eq;
