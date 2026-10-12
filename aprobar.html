@@ -23,17 +23,23 @@ h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(40px,6vw,
 .lead{color:var(--text2);margin:10px 0 28px;max-width:720px}
 .vacio{padding:48px;border:1px dashed var(--border);border-radius:14px;text-align:center;color:var(--mid)}
 
-.lote{margin-bottom:56px}
 .lote-cab{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:22px}
 .lote-cab h2{font-family:'Barlow Condensed',sans-serif;font-size:28px;margin:0;letter-spacing:.01em}
 .lote-cab .meta{color:var(--mid);font-size:14px;margin-top:4px}
 .lote-cab .acciones{display:flex;gap:10px;flex-wrap:wrap}
 
-.red{margin-bottom:34px}
-.red-cab{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.red-cab h3{font-family:'Barlow Condensed',sans-serif;font-size:21px;margin:0;text-transform:uppercase;letter-spacing:.06em}
-.red-cab .punto{width:10px;height:10px;border-radius:50%}
-.piezas{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.lote{margin-bottom:34px}
+.lote.cerrado{margin-bottom:14px}
+.lote.cerrado .lote-cab{margin-bottom:0}
+.lote.cerrado .fila{display:none}
+.lote-cab .meta .mal{color:var(--rival)}
+/* Una fila horizontal por lote: la página no se estira con cada red */
+.fila{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,350px);gap:18px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding-bottom:12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.celda{scroll-snap-align:start;display:flex;flex-direction:column;min-width:0}
+.celda>.pieza{flex:1}
+.red-tag{display:flex;align-items:center;gap:8px;margin:0 0 8px 2px;font:700 14px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--text2)}
+.red-tag .punto{width:9px;height:9px;border-radius:50%}
+button.plegar{background:none}
 
 .pieza{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .pieza.aprobada{border-color:rgba(62,207,142,.55)}
@@ -116,7 +122,7 @@ button:disabled{opacity:.4;cursor:default}
 #pin input{width:100%;font:600 22px Barlow,sans-serif;text-align:center;letter-spacing:.3em;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);margin:14px 0}
 .aviso{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
 .aviso.ver{opacity:1}
-@media (max-width:520px){.piezas{grid-template-columns:1fr}.lote-cab .acciones{width:100%}.lote-cab .acciones button{flex:1}}
+@media (max-width:520px){.fila{grid-auto-columns:86%}.lote-cab .acciones{width:100%}.lote-cab .acciones button{flex:1}}
 </style>
 </head>
 <body>
@@ -131,7 +137,7 @@ button:disabled{opacity:.4;cursor:default}
   <div id="lotes"></div>
 </div>
 <div class="aviso" id="aviso"></div>
-<script src="aprobar.js?v=5"></script>
+<script src="aprobar.js?v=6"></script>
 <script src="layout.js?v=22"></script>
 </body>
 </html>

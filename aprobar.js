@@ -1,6 +1,6 @@
 // aprobar.html — la única página de aprobación del club (pedido de Juan, 2026-10-09).
-// Lee los lotes pendientes del Worker (/aprobaciones, con PIN) y muestra cada pieza agrupada por red con
-// su vista previa real. Aprobar, descartar o corregir el texto se guarda al toque (/aprobaciones/decidir);
+// Lee los lotes del Worker (/aprobaciones, con PIN) y los reparte en tres pestañas por estado (para aprobar,
+// programadas, publicadas); cada lote es una fila horizontal de tarjetas con su vista previa real. Aprobar, descartar o corregir el texto se guarda al toque (/aprobaciones/decidir);
 // la PC publica lo aprobado a la hora del lote y el estado de cada pieza se ve acá mismo.
 (() => {
   const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
@@ -53,7 +53,7 @@
   };
   $('#pin-in').addEventListener('keydown', e => { if (e.key === 'Enter') $('#pin-ok').click(); });
 
-  const fechaHora = iso => new Date(iso).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  const fechaHora = iso => new Date(iso).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 
   function medio(p) {
     const m = p.media || [];
@@ -132,27 +132,35 @@
     </article>`;
   }
 
+  // Cada lote es una cabecera + UNA fila horizontal de tarjetas (antes: una grilla por red, la página se hacía
+  // eterna). Los lotes ya decididos arrancan plegados; el usuario puede abrir/cerrar cualquiera y se recuerda.
+  const sinDecidir = l => l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length;
+  const abiertos = new Set(), cerrados = new Set();
+  const plegado = l => cerrados.has(l.id) || (!abiertos.has(l.id) && !sinDecidir(l) && !l.piezas.some(p => p.estado === 'error'));
   function lote(l) {
-    if (l.etapa === 'guion') {
-      const pend = l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length;
-      return `<section class="lote" data-lote="${esc(l.id)}">
-        <div class="lote-cab"><div><h2>${esc(l.titulo)}</h2><div class="meta">${esc(l.bajada || '')}${pend ? ` · ${pend} idea${pend > 1 ? 's' : ''} sin decidir` : ' · todo decidido'}</div></div>
-          <div class="acciones"><button class="si" data-todo="aprobada" ${pend ? '' : 'disabled'}>Aprobar todas las ideas</button></div></div>
-        <div class="piezas">${l.piezas.map(p => guion(l, p)).join('')}</div>
-      </section>`;
-    }
-    const pend = l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length;
-    const redes = Object.keys(REDES).filter(r => l.piezas.some(p => p.red === r));
-    return `<section class="lote" data-lote="${esc(l.id)}">
+    const pend = sinDecidir(l), esGuion = l.etapa === 'guion';
+    const orden = esGuion ? l.piezas
+      : Object.keys(REDES).flatMap(r => l.piezas.filter(p => p.red === r))
+          .concat(l.piezas.filter(p => !REDES[p.red]));
+    // Lo descartado va al final de la fila, para que lo que importa quede a la vista.
+    const fila = [...orden.filter(p => p.decision !== 'descartada'), ...orden.filter(p => p.decision === 'descartada')];
+    const celda = p => esGuion ? `<div class="celda">${guion(l, p)}</div>`
+      : `<div class="celda"><div class="red-tag"><span class="punto" style="background:${REDES[p.red]?.color || 'var(--mid)'}"></span>${esc(REDES[p.red]?.nombre || p.red)}</div>${pieza(l, p)}</div>`;
+    const errores = l.piezas.filter(p => p.estado === 'error').length;
+    const aprob = l.piezas.filter(p => p.decision === 'aprobada').length;
+    const meta = esGuion
+      ? `${esc(l.bajada || '')}${pend ? ` · ${pend} idea${pend > 1 ? 's' : ''} sin decidir` : ` · ${aprob} idea${aprob === 1 ? '' : 's'} aprobada${aprob === 1 ? '' : 's'}`}`
+      : `${l.publicarA ? 'Sale ' + fechaHora(l.publicarA) : l.simulacro ? 'Simulacro: no se publica' : ''}${pend ? ` · ${pend} pieza${pend > 1 ? 's' : ''} sin decidir` : ` · ${aprob} aprobada${aprob === 1 ? '' : 's'}`}${errores ? ` · <b class="mal">${errores} con error</b>` : ''}`;
+    const cerrado = plegado(l);
+    return `<section class="lote${cerrado ? ' cerrado' : ''}" data-lote="${esc(l.id)}">
       <div class="lote-cab">
-        <div><h2>${esc(l.titulo)}</h2>
-          <div class="meta">${l.publicarA ? 'Sale ' + fechaHora(l.publicarA) : l.simulacro ? 'Simulacro: no se publica' : ''}${pend ? ` · ${pend} pieza${pend > 1 ? 's' : ''} sin decidir` : ' · todo decidido'}</div></div>
-        <div class="acciones"><button class="si" data-todo="aprobada" ${pend ? '' : 'disabled'}>Aprobar todo lo pendiente</button></div>
+        <div><h2>${esc(l.titulo)}</h2><div class="meta">${meta}</div></div>
+        <div class="acciones">
+          ${pend ? `<button class="si" data-todo="aprobada">${esGuion ? 'Aprobar todas las ideas' : 'Aprobar todo lo pendiente'}</button>` : ''}
+          <button class="plegar" data-plegar>${cerrado ? `Ver ${fila.length} ${esGuion ? 'ideas' : 'piezas'}` : 'Ocultar'}</button>
+        </div>
       </div>
-      ${redes.map(r => `<div class="red">
-        <div class="red-cab"><span class="punto" style="background:${REDES[r].color}"></span><h3>${REDES[r].nombre}</h3></div>
-        <div class="piezas">${l.piezas.filter(p => p.red === r).map(p => pieza(l, p)).join('')}</div>
-      </div>`).join('')}
+      <div class="fila">${fila.map(celda).join('')}</div>
     </section>`;
   }
 
@@ -170,37 +178,70 @@
     if (!forzar && ['TEXTAREA', 'INPUT'].includes(document.activeElement?.tagName)) return;
     if (!forzar && [...document.querySelectorAll('video')].some(v => !v.paused && !v.ended)) return;
     lotes = nuevos; ultimo = firma;
-    const vivos = lotes.filter(l => l.piezas.some(p => p.estado !== 'publicado' && p.decision !== 'descartada') || Date.now() - Date.parse(l.creado) < 3 * 86400000);
-    pintarPestanas(vivos);
+    pintar();
   }
 
-  // Dos pestañas: noticias y resultados (resumen semanal, notas) / contenido viral (guiones + piezas).
+  // Tres pestañas por ESTADO (pedido de Juan, 2026-10-12): lo que espera su decisión, lo aprobado que todavía no
+  // salió (con su hora) y lo ya publicado. Un lote está "para aprobar" mientras tenga alguna pieza sin decidir.
+  const DIA = 86400000;
+  // Fin de la semana que cubre un lote de guiones (id viral-guiones-AAAA-MM-DD = lunes): después ya no se muestra.
+  const finGuion = l => l.semanaHasta ? Date.parse(l.semanaHasta) + DIA
+    : (m => m ? Date.parse(m[1] + 'T00:00:00-03:00') + 7 * DIA : Date.parse(l.creado) + 10 * DIA)(l.id.match(/(\d{4}-\d{2}-\d{2})$/));
+  const estadoLote = l => {
+    if (sinDecidir(l)) return 'aprobar';
+    if (l.etapa === 'guion') return Date.now() < finGuion(l) && l.piezas.some(p => p.decision === 'aprobada') ? 'programadas' : null;
+    if (l.piezas.some(p => p.decision === 'aprobada' && p.estado !== 'publicado')) return 'programadas';
+    return Date.now() - Date.parse(l.publicarA || l.creado) < 7 * DIA ? 'publicadas' : null;
+  };
   const PESTANAS = [
-    { id: 'noticias', nombre: 'Noticias y resultados', es: l => l.tipo !== 'viral' },
-    { id: 'viral', nombre: 'Contenido viral', es: l => l.tipo === 'viral' },
+    { id: 'aprobar', nombre: 'Para aprobar' },
+    { id: 'programadas', nombre: 'Programadas' },
+    { id: 'publicadas', nombre: 'Publicadas' },
   ];
-  let pestana = (() => { try { return localStorage.getItem('ts_aprobar_tab') || 'noticias'; } catch { return 'noticias'; } })();
-  const pendientes = ls => ls.reduce((s, l) => s + l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length, 0);
-  function pintarPestanas(vivos) {
-    const P = PESTANAS.find(x => x.id === pestana) || PESTANAS[0];
-    const tabs = `<nav class="tabs">${PESTANAS.map(x => { const n = pendientes(vivos.filter(x.es)); return `<button class="tab ${x.id === P.id ? 'on' : ''}" data-tab="${x.id}">${x.nombre}${n ? `<i>${n}</i>` : ''}</button>`; }).join('')}</nav>`;
-    const mios = vivos.filter(P.es);
+  let pestana = (() => { try { return localStorage.getItem('ts_aprobar_tab2') || 'aprobar'; } catch { return 'aprobar'; } })();
+  const cuando = l => Date.parse(l.publicarA || l.creado);
+  function bloque(titulo, sub, ls, vacio) {
+    return `<h2 class="seccion">${titulo}</h2>${sub ? `<p class="seccion-sub">${sub}</p>` : ''}${ls.length ? ls.map(lote).join('') : `<div class="vacio">${vacio}</div>`}`;
+  }
+  function pintar() {
+    const por = { aprobar: [], programadas: [], publicadas: [] };
+    lotes.forEach(l => { const e = estadoLote(l); if (e) por[e].push(l); });
+    if (!PESTANAS.some(x => x.id === pestana)) pestana = 'aprobar';
+    const badge = { aprobar: por.aprobar.reduce((s, l) => s + sinDecidir(l), 0), programadas: por.programadas.filter(l => l.etapa !== 'guion').length, publicadas: 0 };
+    const tabs = `<nav class="tabs">${PESTANAS.map(x => `<button class="tab ${x.id === pestana ? 'on' : ''}" data-tab="${x.id}">${x.nombre}${badge[x.id] ? `<i>${badge[x.id]}</i>` : ''}</button>`).join('')}</nav>`;
     let cuerpo;
-    if (P.id === 'viral') {
-      const g = mios.filter(l => l.etapa === 'guion'), listos = mios.filter(l => l.etapa !== 'guion');
-      cuerpo = `<h2 class="seccion">Guiones para aprobar</h2><p class="seccion-sub">Primero se aprueba la idea; después se produce y vuelve abajo para el visto bueno final.</p>
-        ${g.length ? g.map(lote).join('') : '<div class="vacio">No hay guiones nuevos.</div>'}
-        <h2 class="seccion">Listo para publicar</h2>${listos.length ? listos.map(lote).join('') : '<div class="vacio">Nada producido por ahora.</div>'}`;
-    } else cuerpo = mios.length ? mios.map(lote).join('') : '<div class="vacio">No hay noticias ni resultados para aprobar.</div>';
+    if (pestana === 'aprobar') {
+      const g = por.aprobar.filter(l => l.etapa === 'guion'), resto = por.aprobar.filter(l => l.etapa !== 'guion').sort((a, b) => cuando(a) - cuando(b));
+      cuerpo = (g.length ? bloque('Ideas para la próxima semana', 'Primero se aprueba la idea; después se produce y vuelve acá para el visto bueno final.', g, '') : '')
+        + bloque('Visto bueno final', 'Piezas ya producidas: revisalas, corregí el texto si hace falta y aprobalas.', resto, g.length ? 'No hay piezas producidas esperando.' : 'Nada para aprobar por ahora.');
+    } else if (pestana === 'programadas') {
+      const listas = por.programadas.filter(l => l.etapa !== 'guion').sort((a, b) => cuando(a) - cuando(b));
+      const prod = por.programadas.filter(l => l.etapa === 'guion');
+      cuerpo = bloque('Por publicarse', 'Aprobado y con hora: sale solo. Hasta que salga, todavía podés corregir el texto o descartarlo.', listas, 'No hay nada programado.')
+        + (prod.length ? bloque('Ideas aprobadas, en producción', 'Se están produciendo; cuando estén listas vuelven a "Para aprobar".', prod, '') : '');
+    } else {
+      cuerpo = bloque('Publicadas', 'Lo que salió en los últimos 7 días.', por.publicadas.sort((a, b) => cuando(b) - cuando(a)), 'Nada publicado en los últimos días.');
+    }
+    // Redibujar sin perder la posición de cada fila horizontal.
+    const scroll = {};
+    document.querySelectorAll('.lote').forEach(s => { scroll[s.dataset.lote] = s.querySelector('.fila')?.scrollLeft || 0; });
     $('#lotes').innerHTML = tabs + cuerpo;
+    document.querySelectorAll('.lote').forEach(s => { const f = s.querySelector('.fila'); if (f && scroll[s.dataset.lote]) f.scrollLeft = scroll[s.dataset.lote]; });
     document.querySelectorAll('textarea').forEach(contar);
   }
   document.addEventListener('click', e => {
     const t = e.target.closest('button[data-tab]');
-    if (!t) return;
-    pestana = t.dataset.tab;
-    try { localStorage.setItem('ts_aprobar_tab', pestana); } catch {}
-    cargar(true);
+    if (t) {
+      pestana = t.dataset.tab;
+      try { localStorage.setItem('ts_aprobar_tab2', pestana); } catch {}
+      return pintar();
+    }
+    const pl = e.target.closest('button[data-plegar]');
+    if (pl) {
+      const id = pl.closest('.lote').dataset.lote, l = lotes.find(x => x.id === id);
+      if (plegado(l)) { cerrados.delete(id); abiertos.add(id); } else { abiertos.delete(id); cerrados.add(id); }
+      pintar();
+    }
   });
 
   function contar(t) {
@@ -214,8 +255,8 @@
     try {
       const { lote: l } = await api('/aprobaciones/decidir', { lote: loteId, piezas, ...cambios });
       lotes = lotes.map(x => x.id === l.id ? l : x);
-      const sec = document.querySelector(`.lote[data-lote="${CSS.escape(l.id)}"]`);
-      if (sec && cambios.decision) { sec.outerHTML = lote(l); document.querySelectorAll('textarea').forEach(contar); }
+      // El lote queda abierto donde está (aunque ya esté todo decidido) hasta el próximo cambio de pestaña o recarga.
+      if (cambios.decision) { if (!cerrados.has(l.id)) abiertos.add(l.id); pintar(); }
       aviso(cambios.decision ? (cambios.decision === 'aprobada' ? 'Aprobado' : cambios.decision === 'descartada' ? 'Descartado' : 'Guardado') : 'Texto guardado');
     } catch (e) { aviso(e.message); }
   }
