@@ -83,3 +83,4 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_publicar_redes](reference_publicar_redes.md) — Cómo se publica en YouTube/X/TikTok desde el Chrome CDP; Instagram/Facebook pendientes
 - [reference_renders_folder](reference_renders_folder.md) — Estructura y propósito de las carpetas en Renders/ — qué borrar y qué conservar
 - [reference_topsecret_daily_news_routine](reference_topsecret_daily_news_routine.md) — How to find and edit the cloud routine that writes Top Secret FC's daily news draft
+- [reference_wa_enviar_reporte_angel](reference_wa_enviar_reporte_angel.md) — Mandar fotos desde el WhatsApp personal (scripts/wa-enviar.mjs); reporte de VPUG a Angel; MessageMedia roto y el input de sticker
