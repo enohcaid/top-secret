@@ -206,6 +206,7 @@ const FETCH_ALLOWED_DOMAINS = [
   'copafacil-web.firebaseio.com',
   'copafacil.gg',
   'copafacil-storage.b-cdn.net',
+  'espaciogamer.cl',
   'challonge.com',
   'toornament.com',
   'smash.gg',
@@ -614,6 +615,43 @@ export default {
             };
           });
         teams.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name));
+        return jsonResp(teams);
+      }
+
+      // ── ESPACIO GAMER (/eg-table) ─────────────────────────────────────
+      // Desde la T4 la ex-liga 11x11 es "Espacio Gamer": CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA,
+      // https://espaciogamer.cl/division/challengers-2-espacio-gamer-argentina/ (WordPress).
+      // La tabla la arma su plugin por admin-ajax (action eg_obtener_ranking) con un nonce que
+      // sale de la misma página: se lee el nonce y los ids de división/temporada del HTML y se
+      // parsea la tabla que devuelve (orden = el de la liga, ya con sus desempates).
+      if (url.pathname === '/eg-table' && request.method === 'GET') {
+        const EG = 'https://espaciogamer.cl';
+        const DIV_URL = EG + '/division/challengers-2-espacio-gamer-argentina/tabla-posiciones/';
+        const UA = { 'User-Agent': 'Mozilla/5.0 (TopSecretFC site)' };
+        const page = await (await fetch(DIV_URL, { headers: UA })).text();
+        const nonce = (page.match(/egRankingsData\s*=\s*\{[^}]*"nonce":"([a-f0-9]+)"/) || [])[1];
+        const divId = (page.match(/data-division-id="(\d+)"/) || [])[1] || '10';
+        const tempId = (page.match(/data-temporada-id="(\d+)"/) || [])[1] || '6';
+        if (!nonce) return jsonResp({ error: 'nonce not found', fallback: true }, 200);
+        const body = new URLSearchParams({
+          action: 'eg_obtener_ranking', nonce, metrica: 'posiciones',
+          division_id: divId, temporada_id: tempId, limite: '40', club_destacado: '0'
+        });
+        const aj = await (await fetch(EG + '/wp-admin/admin-ajax.php', {
+          method: 'POST', headers: { ...UA, 'Content-Type': 'application/x-www-form-urlencoded' }, body
+        })).json();
+        if (!aj || !aj.success || !aj.data || !aj.data.html) return jsonResp({ error: 'bad ajax response', fallback: true }, 200);
+        const decode = s => s.replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').trim();
+        const teams = aj.data.html.split('<tbody class="eg-tp-club">').slice(1).map(chunk => {
+          const nums = [...chunk.matchAll(/<td class="eg-tp-c-(?:pts|num)[^"]*">\s*(-?\d+)\s*<\/td>/g)].map(m => +m[1]);
+          const det = n => +((chunk.match(new RegExp('<dt>' + n + '<\\/dt><dd>(-?\\d+)<\\/dd>')) || [])[1] || 0);
+          const [pts = 0, gp = 0, w = 0, d = 0, l = 0, gd = 0] = nums;
+          return {
+            name: decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || ''),
+            logo: (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
+            gp, w, d, l, gf: det('Goles a favor'), gc: det('Goles en contra'), gd, pts
+          };
+        }).filter(t => t.name);
         return jsonResp(teams);
       }
 

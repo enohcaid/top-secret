@@ -220,12 +220,10 @@ $('social-grid').innerHTML = (window.TS_SOCIAL || []).map(s => `
   load('vpug', WORKER + '/vpug-table-t4?group=D', raw => (Array.isArray(raw) ? raw : []).map(e => ({
     name: e.name || '', gp: e.gp || 0, w: e.w || 0, d: e.d || 0, l: e.l || 0,
     gf: e.gf ?? null, gc: e.gc ?? null, gd: e.gd ?? null, pts: e.pts || 0 })));
-  load('e11', 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/', raw => {
-    const g1 = Array.isArray(raw[0]) ? raw[0] : Object.values(raw[0] || {});
-    return g1.map(e => ({
-      name: e.team_name || e.name || '', gp: e.played ?? e.gp ?? 0, w: e.wins ?? e.w ?? 0, d: e.draws ?? e.d ?? 0,
-      l: e.losses ?? e.l ?? 0, gf: e.score_for ?? e.gf ?? null, gc: e.score_against ?? e.gc ?? null, gd: e.gd ?? null, pts: e.points ?? e.pts ?? 0 }));
-  });
+  // Espacio Gamer (ex 11x11 desde la T4): CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA
+  load('e11', WORKER + '/eg-table', raw => (Array.isArray(raw) ? raw : []).map(e => ({
+    name: e.name || '', gp: e.gp || 0, w: e.w || 0, d: e.d || 0, l: e.l || 0,
+    gf: e.gf ?? null, gc: e.gc ?? null, gd: e.gd ?? null, pts: e.pts || 0 })));
 })();
 
 /* ── MODAL DE JUGADOR ── */

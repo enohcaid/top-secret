@@ -23,7 +23,7 @@
       { label: 'Plan de juego', desc: 'Táctica del equipo',             url: 'plan-de-juego.html' },
     ]},
     { id: 'competencias', label: 'Competencias', url: 'posiciones.html', match: ['posiciones.html', 'calendario.html', 'estadisticas.html'], items: [
-      { label: 'Posiciones',    desc: 'VPN · VPUG · 11x11',             url: 'posiciones.html' },
+      { label: 'Posiciones',    desc: 'VPN · VPUG · Espacio Gamer',             url: 'posiciones.html' },
       { label: 'Calendario',    desc: 'Fixture y resultados',           url: 'calendario.html' },
       { label: 'Estadísticas',  desc: 'Goles, asistencias, ratings',    url: 'estadisticas.html' },
     ]},

@@ -17,6 +17,8 @@
     vpug: { name: 'VPUG',  color: '#3ECF8E' },
     e11:  { name: '11x11', color: '#4A9EFF' },
   };
+  // Desde la T4 la ex-liga 11x11 se llama Espacio Gamer (las tablas T1–T3 siguen como 11x11).
+  const lgName = t => (t.league === 'e11' && +t.season.slice(1) >= 4) ? 'Espacio Gamer' : lgName(t);
   const COND = '"Barlow Condensed", Barlow, sans-serif';
   const W = 1080, P = 56;
   const tables = {};        // tableId -> { data, season, league, group }
@@ -241,7 +243,7 @@
     const H = Math.max(1350, top + colH + rowH * n + foot);
     const [cv, ctx] = newCanvas(H);
     background(ctx, H, color);
-    await drawHeader(ctx, { title: LEAGUE[t.league].name, titleColor: color, sub: [seasonName(t.season), t.group].filter(Boolean).join(' · '), season: t.season });
+    await drawHeader(ctx, { title: lgName(t), titleColor: color, sub: [seasonName(t.season), t.group].filter(Boolean).join(' · '), season: t.season });
     // Centra el bloque de la tabla en el espacio disponible.
     const block = colH + rowH * n;
     const y0 = top + Math.max(0, Math.floor((H - foot - top - block) / 2));
@@ -258,7 +260,7 @@
     const H = top + list.reduce((s, t) => s + secH + colH + rowH * t.data.length, 0) + gap * (list.length - 1) + foot + 20;
     const [cv, ctx] = newCanvas(H);
     background(ctx, H, C.gold);
-    const leagues = [...new Set(list.map(t => LEAGUE[t.league].name))].join(' · ');
+    const leagues = [...new Set(list.map(t => lgName(t)))].join(' · ');
     await drawHeader(ctx, { title: 'POSICIONES', titleColor: C.ink, sub: seasonName(season) + ' · ' + leagues, season });
     let y = top;
     for (const t of list) {
@@ -266,8 +268,8 @@
       ctx.fillStyle = color; ctx.fillRect(P, y + 28, 8, 48);
       ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
       ctx.font = `900 58px ${COND}`; ctx.fillStyle = color;
-      ctx.fillText(LEAGUE[t.league].name, P + 26, y + 74);
-      const lw = ctx.measureText(LEAGUE[t.league].name).width;
+      ctx.fillText(lgName(t), P + 26, y + 74);
+      const lw = ctx.measureText(lgName(t)).width;
       if (t.group) {
         ctx.font = `600 30px ${COND}`; ctx.fillStyle = C.dim;
         ctx.fillText(ellipsis(ctx, t.group, W - P * 2 - lw - 50), P + 26 + lw + 22, y + 72);
@@ -332,8 +334,8 @@
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
       if (current !== token || !blob) return;
       const t = list[0];
-      const what = list.length === 1 ? [LEAGUE[t.league].name, t.group].filter(Boolean).join(' · ') : seasonName(t.season);
-      const slug = list.length === 1 ? `${t.season}-${LEAGUE[t.league].name}${t.group ? '-' + t.group.split(' ').pop() : ''}` : `${t.season}-todas`;
+      const what = list.length === 1 ? [lgName(t), t.group].filter(Boolean).join(' · ') : seasonName(t.season);
+      const slug = list.length === 1 ? `${t.season}-${lgName(t)}${t.group ? '-' + t.group.split(' ').pop() : ''}` : `${t.season}-todas`;
       Object.assign(token, {
         blob,
         name: `top-secret-posiciones-${slug}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-') + '.png',

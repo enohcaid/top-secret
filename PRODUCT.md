@@ -4,7 +4,7 @@ register: brand
 
 ## Qué es
 
-Sitio oficial de **Top Secret FC**, club argentino de fútbol virtual (EA Sports FC Clubs Pro) que compite en tres ligas (VPN, VPUG, 11x11). El sitio es la cara pública del club: resultados, plantel, estadísticas, noticias diarias generadas por IA, y herramientas internas (convocatoria, calendario admin).
+Sitio oficial de **Top Secret FC**, club argentino de fútbol virtual (EA Sports FC Clubs Pro) que compite en tres ligas (VPN, VPUG y Espacio Gamer — la ex 11x11, renombrada desde la T4). El sitio es la cara pública del club: resultados, plantel, estadísticas, noticias diarias generadas por IA, y herramientas internas (convocatoria, calendario admin).
 
 ## Usuarios
 
