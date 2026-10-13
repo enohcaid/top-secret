@@ -4,7 +4,7 @@
  * dispositivo más (whatsapp-web.js, sesión en scripts/.wa-personal/, gitignored). No tiene nada
  * que ver con el bot de Losinno (otro número, otra sesión).
  *
- *   node scripts/amistosos.mjs            corre hasta llenar los horarios o hasta las 23:45 ART
+ *   node scripts/amistosos.mjs            corre hasta llenar los horarios o hasta las 22:00 ART
  *   node scripts/amistosos.mjs --prueba   no manda nada a terceros ni carga en el sitio: solo avisa a Juan
  *   --horarios 23:00,23:20                buscar solo esos horarios (por defecto 22:40, 23:00, 23:20, 23:40)
  *   --auto                                le escribe solo a los equipos reconocidos (sin esperar la aprobación de Juan)
@@ -21,7 +21,7 @@
  *                                A no         → descarta el pedido
  *                                A ok [hh:mm] → da por confirmado el amistoso (si el rival respondió algo raro)
  *                                estado       → lista horarios y pedidos
- *                                apagar       → deja de buscar por hoy (sigue conectado hasta 23:45 esperando "activar")
+ *                                apagar       → deja de buscar por hoy (sigue conectado hasta 22:00 esperando "activar")
  *                                desactivar   → idem y no vuelve a buscar los días siguientes (arranca dormido)
  *                                activar      → vuelve a buscar ya y los días siguientes
  *                                + 23:00 Chacarita → carga un amistoso que Juan coordinó por su cuenta
@@ -70,7 +70,7 @@ const STATE_FILE = path.join(DIR, `${hoy()}.json`);
 const st = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))
   : { fecha: hoy(), confirmados: {}, pedidos: {}, siguiente: 0 };   // confirmados: slot → equipo
 const save = () => fs.writeFileSync(STATE_FILE, JSON.stringify(st, null, 2));
-// Pausa por WhatsApp: "apagar" duerme el bot hasta las 23:45; "desactivar" además deja este archivo,
+// Pausa por WhatsApp: "apagar" duerme el bot hasta las 22:00; "desactivar" además deja este archivo,
 // y mientras exista el bot arranca a las 17:00 dormido (conectado, sin buscar ni avisar) hasta "activar".
 const OFF_FILE = path.join(DIR, 'desactivado.json');
 let dormido = fs.existsSync(OFF_FILE);
@@ -495,7 +495,7 @@ async function comando(body) {
     dormido = true;
     log(siempre ? 'desactivado por WhatsApp' : 'apagado por hoy por WhatsApp');
     return avisar(siempre
-      ? '🕵️ *Bot de amistosos desactivado.* No busca más hasta que mandes *activar* (lunes a jueves de 17:00 a 23:45, que es cuando está conectado).'
+      ? '🕵️ *Bot de amistosos desactivado.* No busca más hasta que mandes *activar* (lunes a jueves de 17:00 a 22:00, que es cuando está conectado).'
       : '🕵️ *Bot de amistosos apagado por hoy.* Mañana arranca solo a las 17:00. Si querés que vuelva hoy, mandá *activar*.');
   }
   if (/^(activar|prender)$/i.test(body)) {
@@ -553,8 +553,8 @@ async function comando(body) {
   return ofrecer(id, hora, equipoTxt || null);
 }
 
-// Corte automático a las 23:45 ART.
-setInterval(() => { if (horaArt() >= '23:45') { log('23:45: fin del día, apago.'); process.exit(0); } if (!dormido) vencerOfertas().catch(e => log('error:', e.message)); }, 60000);
+// Corte automático a las 22:00 ART (pedido de Juan 2026-10-13: la búsqueda es de 17 a 22).
+setInterval(() => { if (horaArt() >= '22:00') { log('22:00: fin del día, apago.'); process.exit(0); } if (!dormido) vencerOfertas().catch(e => log('error:', e.message)); }, 60000);
 
 // Oferta sin respuesta en 30 min: se libera el horario para otro pedido. Si el rival contesta
 // después, el aviso a Juan dice que llegó tarde (ver respuestaPrivada).

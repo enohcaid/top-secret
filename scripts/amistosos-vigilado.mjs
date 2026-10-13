@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Corre el bot de amistosos y lo vuelve a levantar si se cae (WhatsApp desconectado, arranque colgado,
-// error) antes de las 23:40 ART. Espera 2 min entre intentos y prueba 5 veces como mucho: reiniciar en
+// error) antes de las 21:55 ART. Espera 2 min entre intentos y prueba 5 veces como mucho: reiniciar en
 // ráfaga mientras WhatsApp conecta puede romper la sesión guardada. Salida 0 del bot = terminó bien
-// (horarios cubiertos o 23:45): no se relanza.
+// (horarios cubiertos o 22:00): no se relanza.
 //   node scripts/amistosos-vigilado.mjs [--auto] [...]   (los argumentos pasan tal cual al bot)
 import { spawn } from 'child_process';
 import path from 'path';
@@ -21,7 +21,7 @@ for (let intento = 0; ; intento++) {
     p.on('exit', c => res(c ?? 1));
   });
   if (codigo === 0) break;
-  if (hora() >= '23:40') { console.log(hora(), 'vigilante: el bot se cortó cerca del cierre, no lo relanzo'); break; }
+  if (hora() >= '21:55') { console.log(hora(), 'vigilante: el bot se cortó cerca del cierre, no lo relanzo'); break; }
   if (intento + 1 >= MAX) { console.log(hora(), `vigilante: el bot se cayó ${MAX} veces, me rindo por hoy`); break; }
   console.log(hora(), `vigilante: el bot salió con código ${codigo}, lo relanzo en 2 min (intento ${intento + 2} de ${MAX})`);
   await new Promise(r => setTimeout(r, ESPERA_MS));
