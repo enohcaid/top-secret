@@ -57,6 +57,26 @@
         "swell invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 2"
+    },
+    {
+      "fecha": "2026-10-13",
+      "id": "2026-10-13-1",
+      "archivo": "2026-10-13-1 - Marca.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_13_1.py",
+      "duracion": 93,
+      "nombre": "Marca",
+      "concepto": "Una derrota que dejó marca — el gol en contra se repite en tu cabeza cada noche hasta que el dolor se transforma en hambre y la próxima vez que pisás la cancha sos otro.",
+      "bpm": 124,
+      "tonalidad": "sol menor",
+      "rasgo": "eco que cae: delay descendente (cada repetición más grave y oscura) sobre golpes de piano grave; en el gancho C sube en vez de caer",
+      "recursos": [
+        "eco descendente del piano (firma del tema)",
+        "pad orgánico con modulación rotatoria",
+        "lead raspado con overdrive controlado",
+        "808 melódico con saltos de octava",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · verso 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
