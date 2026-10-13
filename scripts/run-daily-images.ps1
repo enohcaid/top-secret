@@ -12,7 +12,9 @@ $chromeExe  = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 
 function Log($msg) {
     $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    "$ts [run-daily] $msg" | Add-Content $logFile -Encoding UTF8
+    # Si otro proceso tiene el log tomado (ej. un tail -F colgado), no abortar
+    # todo el dia por eso: con ErrorActionPreference=Stop el 13/10 murio aca.
+    try { "$ts [run-daily] $msg" | Add-Content $logFile -Encoding UTF8 } catch {}
 }
 
 # Esperar a que el agente cloud haya dejado el draft de HOY (max 45 min).
