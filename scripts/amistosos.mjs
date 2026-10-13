@@ -21,6 +21,9 @@
  *                                A no         → descarta el pedido
  *                                A ok [hh:mm] → da por confirmado el amistoso (si el rival respondió algo raro)
  *                                estado       → lista horarios y pedidos
+ *                                apagar       → deja de buscar por hoy (sigue conectado hasta 23:45 esperando "activar")
+ *                                desactivar   → idem y no vuelve a buscar los días siguientes (arranca dormido)
+ *                                activar      → vuelve a buscar ya y los días siguientes
  *                                + 23:00 Chacarita → carga un amistoso que Juan coordinó por su cuenta
  * 3. Si el rival contesta que sí ("dale", "de una", 👍…), carga el amistoso solo en el calendario
  *    (Firestore calendario/estado.custom, league 'Amistoso', con escudo) → sale en la convocatoria
@@ -67,6 +70,10 @@ const STATE_FILE = path.join(DIR, `${hoy()}.json`);
 const st = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))
   : { fecha: hoy(), confirmados: {}, pedidos: {}, siguiente: 0 };   // confirmados: slot → equipo
 const save = () => fs.writeFileSync(STATE_FILE, JSON.stringify(st, null, 2));
+// Pausa por WhatsApp: "apagar" duerme el bot hasta las 23:45; "desactivar" además deja este archivo,
+// y mientras exista el bot arranca a las 17:00 dormido (conectado, sin buscar ni avisar) hasta "activar".
+const OFF_FILE = path.join(DIR, 'desactivado.json');
+let dormido = fs.existsSync(OFF_FILE);
 const letra = n => String.fromCharCode(65 + (n % 26)) + (n >= 26 ? Math.floor(n / 26) : '');
 // Un horario al que le faltan menos de 5 min ya no se ofrece (a las 23:00 no tiene sentido ofrecer 22:40).
 const minutos = t => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
@@ -217,6 +224,11 @@ client.on('ready', async () => {
   yo = client.info.wid._serialized;
   try { yoLid = await client.pupPage.evaluate(() => window.require('WAWebUserPrefsMeUser').getMaybeMeLidUser()?._serialized || null); } catch (e) {}
   log('conectado como', client.info.pushname, yo, yoLid || '(sin lid)', PRUEBA ? '(MODO PRUEBA)' : '');
+  if (dormido) { log('desactivado por WhatsApp: espero "activar"'); return; }
+  await arrancarBusqueda();
+});
+
+async function arrancarBusqueda() {
   // No se usa getChats()/msg.getChat(): fallan con contactos @lid en whatsapp-web.js. El grupo se
   // busca directo en las colecciones internas de WhatsApp Web (ver buscarGrupo).
   await buscarGrupo();
@@ -229,11 +241,11 @@ client.on('ready', async () => {
       setTimeout(() => process.exit(0), 3000); return;
     }
   }
-  await avisar(`🕵️ *Bot de amistosos ${+process.env.AMISTOSOS_REINICIO ? 'reiniciado' : 'activo'}*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.`);
+  await avisar(`🕵️ *Bot de amistosos ${+process.env.AMISTOSOS_REINICIO ? 'reiniciado' : 'activo'}*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.\nPara pararlo: *apagar* (por hoy) o *desactivar* (hasta que mandes *activar*).`);
   if (!grupoId) await avisar('⚠️ No encontré el grupo de amistosos en tus chats: lo voy a reconocer cuando llegue un mensaje.');
   await revisarAtrasados();
   await revisarRespuestas();
-});
+}
 
 // Busca el grupo por nombre en las colecciones internas de WhatsApp Web.
 async function buscarGrupo() {
@@ -288,7 +300,7 @@ client.on('message_create', async msg => {
       for (const linea of msg.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
       return;
     }
-    if (msg.fromMe) return;
+    if (msg.fromMe || dormido) return;
     // 2) Pedidos en el grupo.
     if (msg.from.endsWith('@g.us') && await esGrupoAmistosos(msg)) return pedidoGrupo(msg);
     // 3) Respuestas por privado de equipos a los que les ofrecimos.
@@ -477,6 +489,27 @@ async function evaluarRespuesta(id, txt) {
 
 async function comando(body) {
   log('comando:', body.slice(0, 40));
+  if (/^(apagar|desactivar)$/i.test(body)) {
+    const siempre = /^desactivar$/i.test(body);
+    if (siempre) fs.writeFileSync(OFF_FILE, JSON.stringify({ desde: new Date().toISOString() }));
+    dormido = true;
+    log(siempre ? 'desactivado por WhatsApp' : 'apagado por hoy por WhatsApp');
+    return avisar(siempre
+      ? '🕵️ *Bot de amistosos desactivado.* No busca más hasta que mandes *activar* (lunes a jueves de 17:00 a 23:45, que es cuando está conectado).'
+      : '🕵️ *Bot de amistosos apagado por hoy.* Mañana arranca solo a las 17:00. Si querés que vuelva hoy, mandá *activar*.');
+  }
+  if (/^(activar|prender)$/i.test(body)) {
+    const estaba = dormido || fs.existsSync(OFF_FILE);
+    fs.rmSync(OFF_FILE, { force: true });
+    if (!dormido) return avisar(estaba ? '🕵️ Listo: vuelve a arrancar solo de lunes a jueves a las 17:00 (hoy ya estaba buscando).' : '🕵️ El bot ya está activo.');
+    dormido = false;
+    log('activado por WhatsApp');
+    return arrancarBusqueda();
+  }
+  if (dormido) {
+    if (/^estado$/i.test(body)) return avisar(`🕵️ Bot ${fs.existsSync(OFF_FILE) ? 'desactivado' : 'apagado por hoy'}. Mandá *activar* para que busque.`);
+    return;
+  }
   const m = body.match(/^([A-Z]{1,2}\d?)\b\s*(.*)$/i);
   // Amistoso que coordinó Juan por su cuenta: "+ 23:00 Chacarita" (o "agregar 23:00 Chacarita").
   const man = body.match(/^(?:\+|agregar)\s*(\d{1,2})[:.](\d{2})\s+(.+)$/i);
@@ -521,7 +554,7 @@ async function comando(body) {
 }
 
 // Corte automático a las 23:45 ART.
-setInterval(() => { if (horaArt() >= '23:45') { log('23:45: fin del día, apago.'); process.exit(0); } vencerOfertas().catch(e => log('error:', e.message)); }, 60000);
+setInterval(() => { if (horaArt() >= '23:45') { log('23:45: fin del día, apago.'); process.exit(0); } if (!dormido) vencerOfertas().catch(e => log('error:', e.message)); }, 60000);
 
 // Oferta sin respuesta en 30 min: se libera el horario para otro pedido. Si el rival contesta
 // después, el aviso a Juan dice que llegó tarde (ver respuestaPrivada).
