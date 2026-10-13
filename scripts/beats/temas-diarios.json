@@ -77,6 +77,26 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · verso 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-13",
+      "id": "2026-10-13-2",
+      "archivo": "2026-10-13-2 - Vértigo.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_13_2.py",
+      "duracion": 78,
+      "nombre": "Vértigo",
+      "concepto": "Los últimos cinco minutos ganando 1-0 — cada segundo es eterno, el rival empuja, el cuerpo no da, pero en ese borde entre ganar y perder es donde más vivo te sentís.",
+      "bpm": 148,
+      "tonalidad": "fa menor",
+      "rasgo": "tic que estira: pulso metálico que se atrasa dentro de cada frase como un reloj que se frena; en el gancho C se acelera",
+      "recursos": [
+        "tic metálico con timing variable (firma del tema)",
+        "cuerdas articuladas con arco y vibrato",
+        "lead pizzicato con reverb largo",
+        "808 con ostinato rítmico",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · verso 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
