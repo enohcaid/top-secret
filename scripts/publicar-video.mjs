@@ -91,8 +91,17 @@ try {
     await p.goto('https://www.tiktok.com/tiktokstudio/upload?from=webapp', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await espera(8000);
     await p.locator('input[type=file]').first().setInputFiles(VIDEO, { timeout: 5 * 60000 });   // videos de 60 fps pesan ~30 MB: por CDP tardan más de 30 s
-    await espera(25000);
-    for (const t of ['Cancelar', 'Entendido']) { try { await p.getByRole('button', { name: t, exact: true }).first().click({ timeout: 4000 }); await espera(800); } catch {} }
+    // Esperar a que termine la subida ("Cargado" en el estado). Antes se esperaban 25 s fijos y después se tocaba
+    // "Cancelar" para cerrar carteles: si la subida seguía en curso, ese "Cancelar" era el de la subida (2026-10-13).
+    let subido = false;
+    for (let i = 0; i < 100 && !subido; i++) {
+      await espera(3000);
+      subido = await p.evaluate(() => /Cargado|Uploaded|Sustituir|Replace/i.test(document.querySelector('[data-e2e="upload_status_container"]')?.innerText || ''));
+    }
+    if (!subido) { await shot('error'); throw new Error('TikTok no terminó de subir el video (5 min)'); }
+    await espera(3000);
+    // Carteles (comprobación de contenido, novedades): solo botones dentro de un diálogo, nunca el Cancelar de la subida
+    for (const t of ['Cancelar', 'Entendido']) { try { await p.locator('[role=dialog]').getByRole('button', { name: t, exact: true }).first().click({ timeout: 4000 }); await espera(800); } catch {} }
     await p.evaluate(() => window.scrollTo(0, 0)); await espera(800);
     const ed = p.locator('.public-DraftEditor-content, [contenteditable="true"]').first();
     await ed.click(); await p.keyboard.press('Control+A'); await p.keyboard.press('Delete');
@@ -100,7 +109,7 @@ try {
     for (const h of HASHTAGS) { await p.keyboard.type('#' + h, { delay: 30 }); await espera(1500); await p.keyboard.press('Space'); }
     await espera(1500);
     await shot('1');
-    const pub = p.locator('button', { hasText: /^Publicar$/ }).last();
+    const pub = p.locator('[data-e2e="post_video_button"]').or(p.locator('button', { hasText: /^Publicar$/ })).last();
     await pub.scrollIntoViewIfNeeded(); await pub.click();
     await espera(6000);
     for (const t of ['Publicar ahora', 'Publicar de todos modos', 'Entendido']) { try { await p.getByRole('button', { name: t }).first().click({ timeout: 3000 }); await espera(3000); } catch {} }
