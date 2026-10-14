@@ -157,7 +157,7 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 **New match played**
 1. Read the report (image in `reportes/` or user-provided) → append the match object to `SEED_MATCHES`.
 2. Verify rival name matches existing fixture entries.
-3. Run `node scripts/ea-completar.mjs` (then `--aplicar`) to fill the per-player stats the video lacks from EA (stored by the Worker, see `docs/conocimiento/reference_ea_proclubs_api.md`). EA only keeps 5 matches per type in its API, but the Worker cron saves them all. Commit.
+3. Run `node scripts/ea-completar.mjs` (then `--aplicar`) to fill the per-player stats the video lacks from EA (stored by the Worker, see `docs/conocimiento/reference_ea_proclubs_api.md`). EA only keeps 5 matches per type in its API, but the Worker cron saves every official calendar match. If a knockout series (ida/vuelta) ended won-one-lost-one by the same goal difference, the Worker auto-adds the 3rd match to the calendar; load its report as a separate entry with `notes` containing "Desempate (3er partido)". Commit.
 
 **New manual news article**
 1. Add entry at the top of `NOTICIAS` in `noticias-data.js` (exact gamertags; image committed to `logos/` or `Renders/`).

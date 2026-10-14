@@ -45,8 +45,13 @@ for (const ea of hist.partidos) {
   const eaGts = new Set(ea.jugadores.map(j => j.gamertag));
   // El Worker ya asignó cada partido a uno del calendario (rival y fecha del sitio)
   const cal = ea.calendario;
+  // 3er partido de una serie (el Worker lo agregó al calendario): fecha ±1 día porque su
+  // horario es estimado, y solo contra una entrada marcada como desempate — nunca la ida/vuelta
+  const esDesempate = cal?.origen === 'desempate';
   const cands = SEED_MATCHES.filter(s =>
-    (cal ? (s.rival === cal.rival && s.date === cal.fecha)
+    (cal ? (s.rival === cal.rival && (esDesempate
+            ? difDias(s.date, cal.fecha) <= 1 && /desempate|3er|tercer/i.test(`${s.notes || ''} ${s.torneo || ''}`)
+            : s.date === cal.fecha))
          : (mismoRival(ea.rival.nombre, s.rival) && difDias(s.date, ea.fecha) <= 1)) &&
     (s.players || []).filter(p => eaGts.has(p.matched)).length >= 6);
   const titulo = `${ea.fecha} ${ea.hora} · EA ${ea.gf}-${ea.gc} ${ea.rival.nombre} (${ea.tipo})`;

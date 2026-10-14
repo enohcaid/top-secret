@@ -1455,19 +1455,81 @@ async function cargarCalendarioOficial() {
 // Un partido de EA es oficial si TERMINÓ entre 10 y 75 min después del horario de un
 // partido del calendario (EA fecha al final; los slots son de 30 min, así que puede caer
 // en dos ventanas: gana el rival que coincide y, si no, el horario más cercano).
-function eaAsignarCalendario(ea, calendario) {
+function eaAsignarCalendario(ea, calendario, guardados = []) {
   const finMs = ea.ts * 1000;
   const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const ruido = new Set(['esports', 'esport', 'club', 'gaming', 'team']);
   const pal = s => norm(s).split(/[^a-z0-9]+/).filter(w => w.length >= 4 && !ruido.has(w));
   const palEa = new Set(pal(ea.rival.nombre));
-  const cands = calendario
+  // Un horario que ya tiene un partido válido guardado no recibe otro (los cortados no
+  // ocupan: el reinicio va al mismo horario). Así el 3er partido de una serie no cae en la vuelta.
+  const ocupado = c => guardados.some(g => g.id !== ea.id && !g.sospechoso && g.calendario?.origen === c.origen);
+  const cands = calendario.filter(c => !ocupado(c))
     .map(c => ({ c, ini: Date.parse(`${c.date}T${c.time}:00-03:00`) }))
     .filter(({ ini }) => finMs >= ini + 10 * 60000 && finMs <= ini + 75 * 60000);
   if (!cands.length) return null;
   const porRival = cands.filter(({ c }) => pal(c.rival).some(w => palEa.has(w)));
   const elegido = (porRival.length ? porRival : cands).sort((a, b) => b.ini - a.ini)[0].c;
   return { fecha: elegido.date, hora: elegido.time, liga: elegido.league, rival: elegido.rival, origen: elegido.origen, rival_coincide: porRival.length > 0 };
+}
+
+// ── Tercer partido de una serie eliminatoria (regla de Juan, 2026-10-13) ──
+// Ida y vuelta = dos partidos oficiales del calendario contra el mismo rival, misma liga,
+// a menos de 3 h. Si se ganó uno y se perdió el otro por la misma diferencia de gol, se
+// juega un tercero que no está en el calendario. Se reconoce SOLO si: ida y vuelta están
+// guardados desde EA y ninguno es `sospechoso`, la serie quedó empatada así, y el partido
+// es contra el mismo club de EA (mismo id) y terminó DESPUÉS de la vuelta, dentro de 75 min.
+function eaDetectarDesempate(p, guardados, calendario) {
+  const norm = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const ini = c => Date.parse(`${c.date}T${c.time}:00-03:00`);
+  for (const vuelta of calendario) {
+    const ida = calendario.find(c => c !== vuelta && c.league === vuelta.league && norm(c.rival) === norm(vuelta.rival)
+      && ini(c) < ini(vuelta) && ini(vuelta) - ini(c) <= 3 * 3600000);
+    if (!ida) continue;
+    const eaIda = guardados.find(g => g.calendario?.origen === ida.origen);
+    const eaVuelta = guardados.find(g => g.calendario?.origen === vuelta.origen);
+    if (!eaIda || !eaVuelta || eaIda.sospechoso || eaVuelta.sospechoso) continue;
+    const dIda = eaIda.gf - eaIda.gc, dVuelta = eaVuelta.gf - eaVuelta.gc;
+    if (dIda === 0 || dIda !== -dVuelta) continue;
+    if (!p.rival.id || p.rival.id !== eaIda.rival.id || p.rival.id !== eaVuelta.rival.id) continue;
+    if (p.ts <= eaVuelta.ts || p.ts > eaVuelta.ts + 75 * 60) continue;
+    if (guardados.some(g => g.calendario?.origen === 'desempate' && g.calendario.serie?.[1] === vuelta.origen)) continue;
+    // Horario estimado: 30 min después de la vuelta (los slots del calendario van de a 30)
+    const t = new Date(ini(vuelta) + 30 * 60000);
+    return {
+      fecha: t.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }),
+      hora: t.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false }),
+      liga: vuelta.league, rival: vuelta.rival, origen: 'desempate', serie: [ida.origen, vuelta.origen],
+      isHome: ida.isHome === undefined ? null : !!ida.isHome, rival_coincide: true,
+    };
+  }
+  return null;
+}
+
+// Agrega el tercer partido a calendario/estado.custom (con resultado salvo que sea
+// sospechoso). Precondición updateTime: si alguien guardó el calendario en el medio,
+// falla y se reintenta en la próxima pasada (el partido no se guarda en KV hasta lograrlo).
+async function eaAgregarDesempateCalendario(p) {
+  const FS_CAL = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado';
+  const doc = await (await fetch(FS_CAL)).json();
+  const custom = doc.fields?.custom?.arrayValue?.values || [];
+  if (custom.some(v => v.mapValue?.fields?.ea_match_id?.stringValue === p.id)) return true;
+  const c = p.calendario;
+  const S = v => ({ stringValue: String(v) });
+  const fields = { tipo: S('partido'), date: S(c.fecha), time: S(c.hora), rival: S(c.rival), league: S(c.liga),
+    instancia: S('Playoff'), playoff: S('Desempate (3er partido)'), ea_match_id: S(p.id) };
+  if (c.isHome !== null) fields.isHome = { booleanValue: c.isHome };
+  const results = { ...(doc.fields?.results?.mapValue?.fields || {}) };
+  if (!p.sospechoso) {
+    const home = c.isHome === false ? [p.gc, p.gf] : [p.gf, p.gc];
+    const res = { arrayValue: { values: home.map(g => ({ integerValue: String(g) })) } };
+    fields.result = res;
+    results['c' + custom.length] = res;
+  }
+  const body = { fields: { custom: { arrayValue: { values: [...custom, { mapValue: { fields } }] } }, results: { mapValue: { fields: results } } } };
+  const params = ['updateMask.fieldPaths=custom', 'updateMask.fieldPaths=results', 'currentDocument.updateTime=' + encodeURIComponent(doc.updateTime)].join('&');
+  const r = await fetch(FS_CAL + '?' + params, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  return r.ok;
 }
 
 async function syncEaPartidos(env, conMiembros, limpiar = false) {
@@ -1490,14 +1552,30 @@ async function syncEaPartidos(env, conMiembros, limpiar = false) {
       const calendario = await cargarCalendarioOficial();
       if (limpiar) {
         const antes = guardados.length;
-        guardados = guardados.filter(p => p.tipo === 'friendlyMatch').map(p => ({ ...p, calendario: eaAsignarCalendario(p, calendario) })).filter(p => p.calendario);
+        const previos = guardados.filter(p => p.tipo === 'friendlyMatch').sort((a, b) => a.ts - b.ts);
+        guardados = [];
+        for (const p of previos) {
+          const cal = p.calendario?.origen === 'desempate' ? p.calendario : eaAsignarCalendario(p, calendario, guardados);
+          if (cal) guardados.push({ ...p, calendario: cal });
+        }
         res.descartados += antes - guardados.length;
         cambio = true;
       }
       const nuevos = [];
-      for (const p of candidatos) {
-        const cal = eaAsignarCalendario(p, calendario);
-        if (cal) nuevos.push({ ...p, calendario: cal }); else res.descartados++;
+      // En orden cronológico: así ida y vuelta ya están cuando se evalúa un posible tercero
+      for (const p of candidatos.sort((a, b) => a.ts - b.ts)) {
+        const cal = eaAsignarCalendario(p, calendario, [...nuevos, ...guardados]);
+        if (cal) { nuevos.push({ ...p, calendario: cal }); continue; }
+        const des = eaDetectarDesempate(p, [...nuevos, ...guardados], calendario);
+        if (des) {
+          const conCal = { ...p, calendario: des };
+          try {
+            if (await eaAgregarDesempateCalendario(conCal)) { nuevos.push(conCal); res.desempates = (res.desempates || 0) + 1; }
+            else res.errores.push('desempate: no se pudo escribir el calendario (se reintenta)');
+          } catch (e) { res.errores.push('desempate: ' + e.message); }
+          continue;
+        }
+        res.descartados++;
       }
       if (nuevos.length) { guardados = [...nuevos, ...guardados]; res.nuevos = nuevos.length; cambio = true; }
     }
