@@ -96,6 +96,8 @@
       if (!Array.isArray(fases) || !fases.length) throw new Error('vacío');
       cont.innerHTML = cuadro(fases.find(f => !/plata/i.test(f.titulo)), fases.find(f => /plata/i.test(f.titulo)));
       wrap.hidden = false;
+      // Botón "Compartir cuadro" (placa en posiciones-share.js)
+      if (window.TSPos && TSPos.registerBracket) TSPos.registerBracket(fases, wrap, 't4');
       // Celular: el cuadro es más ancho que la pantalla → arranca centrado en nuestra llave
       const sc = cont.querySelector('.br-scroll');
       const centrar = suave => {
