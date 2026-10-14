@@ -297,6 +297,7 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
 .mph-av{width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--black);}
 .mph-name{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;}
 .mph-sub{font-size:.72rem;color:#8b92aa;margin-top:2px;}
+.mph-edit{font-size:.66rem;color:var(--mid);margin-top:3px;letter-spacing:.02em;}
 .sopts{display:flex;flex-direction:column;gap:7px;}
 .sopt{width:100%;padding:12px 14px;text-align:left;font-family:'Barlow',sans-serif;font-size:.88rem;font-weight:600;background:#0f1117;border:1px solid #252a38;color:#dde1ec;border-radius:9px;cursor:pointer;transition:border-color .14s, background-color .14s;}
 .sopt:hover{border-color:#8b92aa;background:#13161e;}
@@ -1084,7 +1085,7 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-08-19T15:55:00-03:00';
+const BUILD_VERSION = '2026-10-14T10:30:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
@@ -1113,6 +1114,7 @@ const EDIT_MODE = !new URLSearchParams(location.search).has('vista');
 let availability    = {};   // non-alwaysPresent players + vacation (black) for everyone
 let dailyOverrides  = {};   // { name: {status, day, note?} } — alwaysPresent daily overrides
 let alwaysPresent   = [];   // players always present unless overridden
+let statusEdits     = {};   // { name: {at, status, note} } — último cambio de estado de cada jugador (pedido de Juan, 2026-10-14)
 let captain         = null;
 let lineup          = { formation:'4-3-3', slots:{} };
 let currentPlayer   = null;
@@ -1135,7 +1137,7 @@ async function _loadBackup() {
 function _saveBackup() {
   if (!EDIT_MODE) return; // modo vista: nunca escribe
   if (!BACKUP_DOC || !alwaysPresent.length) return; // no guardar estado vacío/corrupto
-  BACKUP_DOC.set({ availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY, savedAt: new Date().toISOString() })
+  BACKUP_DOC.set({ availability, dailyOverrides, alwaysPresent, statusEdits, captain, lineup, resetDate: TODAY, savedAt: new Date().toISOString() })
     .catch(e => console.warn('[conv] backup write error:', e));
 }
 
@@ -1163,6 +1165,7 @@ function applyData(rawData) {
   availability    = data.availability   || {};
   dailyOverrides  = data.dailyOverrides || {};
   alwaysPresent   = data.alwaysPresent  || [];
+  statusEdits     = data.statusEdits    || {};
   captain         = data.captain        || null;
   lineup          = data.lineup         || { formation:'4-3-3', slots:{} };
   if (lineup.formation === '3-5-2' && lineup.slots && 'CM3' in lineup.slots) lineup.formation = '3-1-4-2';
@@ -1174,6 +1177,7 @@ function applyData(rawData) {
     availability:   { ...(baselineSource.availability   || {}) },
     dailyOverrides: { ...(baselineSource.dailyOverrides || {}) },
     alwaysPresent:  [ ...(baselineSource.alwaysPresent  || []) ],
+    statusEdits:    { ...(baselineSource.statusEdits    || {}) },
     captain:        baselineSource.captain != null ? baselineSource.captain : null,
     lineup:         JSON.parse(JSON.stringify(baselineSource.lineup || { formation:'4-3-3', slots:{} })),
     resetDate:      baselineSource.resetDate || '',
@@ -1219,12 +1223,13 @@ function loadState() {
         checkDailyReset();
       } else {
         _firestoreLoaded = true; // new doc — safe to seed
-        const seed = { availability, dailyOverrides, alwaysPresent, captain, lineup, resetDate: TODAY };
+        const seed = { availability, dailyOverrides, alwaysPresent, statusEdits, captain, lineup, resetDate: TODAY };
         CONV_DOC.set(seed).catch(e => console.warn('[conv] seed write error:', e));
         _baseline = {
           availability:   { ...availability },
           dailyOverrides: { ...dailyOverrides },
           alwaysPresent:  [ ...alwaysPresent ],
+          statusEdits:    { ...statusEdits },
           captain, lineup: JSON.parse(JSON.stringify(lineup)), resetDate: TODAY,
         };
       }
@@ -1283,6 +1288,7 @@ function saveState(source) {
     const deletedKeys = [];
     _pushMapDiff('availability',   availability,   _baseline.availability,   args, deletedKeys);
     _pushMapDiff('dailyOverrides', dailyOverrides, _baseline.dailyOverrides, args, deletedKeys);
+    _pushMapDiff('statusEdits',    statusEdits,    _baseline.statusEdits || {}, args);   // solo agrega/actualiza: no cuenta como borrado
     if (JSON.stringify(alwaysPresent) !== JSON.stringify(_baseline.alwaysPresent)) args.push('alwaysPresent', alwaysPresent);
     if (captain !== _baseline.captain) args.push('captain', captain);
     if (JSON.stringify(lineup) !== JSON.stringify(_baseline.lineup)) args.push('lineup', lineup);
@@ -1315,6 +1321,7 @@ function saveState(source) {
           availability:   { ...availability },
           dailyOverrides: { ...dailyOverrides },
           alwaysPresent:  [ ...alwaysPresent ],
+          statusEdits:    { ...statusEdits },
           captain, lineup: JSON.parse(JSON.stringify(lineup)), resetDate: TODAY,
         };
       }).catch(e => {
@@ -1351,6 +1358,26 @@ function getNote(name) {
     if (ov && ov.day === TODAY && ov.note) return ov.note;
   }
   return availability[name]?.note || '';
+}
+// Último cambio de estado: se anota en cada acción del modal de estado (no en vencimientos automáticos).
+function markEdit(name) {
+  const st = getStatus(name);
+  statusEdits[name] = { at: new Date().toISOString(), status: alwaysPresent.includes(name) && st === 'green' ? 'always' : st, note: getNote(name) || '' };
+}
+// "hoy 09:33" / "ayer 22:10" / "12/10 18:05" (hora argentina)
+function fmtEdit(name) {
+  const e = statusEdits[name];
+  if (!e || !e.at) return '';
+  const d = new Date(e.at);
+  if (isNaN(d)) return '';
+  const tz = { timeZone: 'America/Argentina/Buenos_Aires' };
+  const dia = d.toLocaleDateString('sv', tz);
+  const hora = d.toLocaleTimeString('es-AR', { ...tz, hour: '2-digit', minute: '2-digit', hour12: false });
+  const ayer = new Date(Date.parse(TODAY + 'T12:00:00-03:00') - 864e5).toLocaleDateString('sv', tz);
+  if (dia === TODAY) return 'hoy ' + hora;
+  if (dia === ayer) return 'ayer ' + hora;
+  const [, m, dd] = dia.split('-');
+  return `${+dd}/${+m} ${hora}`;
 }
 
 /* ─── PHOTO HELPERS ─── */
@@ -1468,6 +1495,8 @@ function renderPlayers() {
 
       const card = document.createElement('div');
       card.className = 'pcard tile ' + (always && st === 'green' ? 'always' : st);
+      const edit = _firestoreLoaded ? fmtEdit(p.name) : '';
+      if (edit) card.title = 'Estado editado ' + edit;
       card.draggable = true;
       card.addEventListener('dragstart', e => {
         e.dataTransfer.setData('playerName', p.name);
@@ -1760,6 +1789,8 @@ function openStatusModal(name) {
   const note = getNote(p.name);
   txt.appendChild(nm); txt.appendChild(sub);
   if (note) { const nd = document.createElement('div'); nd.style.cssText = 'font-size:.7rem;color:var(--yellow);font-weight:600;margin-top:2px;'; nd.textContent = note; txt.appendChild(nd); }
+  const edit = fmtEdit(p.name);
+  if (edit) { const ed = document.createElement('div'); ed.className = 'mph-edit'; ed.textContent = 'Estado editado ' + edit; txt.appendChild(ed); }
   mph.appendChild(av); mph.appendChild(txt);
   // Actualizar botón capitán
   const capBtn = document.getElementById('captainBtn');
@@ -1835,6 +1866,7 @@ function confirmStatus(status) {
     if (!alwaysPresent.includes(name)) alwaysPresent.push(name);
     delete dailyOverrides[name];  // clear any daily override
     delete availability[name];    // remove from regular availability
+    markEdit(name);
     saveState();
     render(); showToast(name + ' → Siempre presente');
     return;
@@ -1845,6 +1877,7 @@ function confirmStatus(status) {
     delete dailyOverrides[name];
   }
   availability[name] = { status };
+  markEdit(name);
   saveState();
   render(); showToast(name + ' → ' + (status === 'green' ? 'Presente (ya no siempre)' : 'Ausente'));
 }
@@ -1859,6 +1892,7 @@ function saveLateTime() {
   } else {
     availability[currentPlayer] = { status:'yellow', note };
   }
+  markEdit(currentPlayer);
   saveState();
   closeModal('lateOverlay'); render();
   showToast(currentPlayer + ' → Tarde (~' + time + ')');
@@ -1874,6 +1908,7 @@ function saveBlackDate() {
   const _apIdx = alwaysPresent.indexOf(currentPlayer);
   if (_apIdx !== -1) alwaysPresent.splice(_apIdx, 1);
   delete dailyOverrides[currentPlayer];
+  markEdit(currentPlayer);
   saveState();
   closeModal('blackOverlay'); render();
   showToast(currentPlayer + ' → Ausente hasta ' + fmt);
@@ -1885,6 +1920,7 @@ function saveBlackIndefinite() {
   const _apIdx = alwaysPresent.indexOf(currentPlayer);
   if (_apIdx !== -1) alwaysPresent.splice(_apIdx, 1);
   delete dailyOverrides[currentPlayer];
+  markEdit(currentPlayer);
   saveState();
   closeModal('blackOverlay'); render();
   showToast(currentPlayer + ' → Ausente por tiempo indefinido');
@@ -1899,6 +1935,7 @@ function saveRedStatus() {
   } else {
     availability[name] = { status:'red', note:motivo };
   }
+  markEdit(name);
   saveState();
   closeModal('motivoOverlay'); render();
   showToast(name + ' → Ausente');
@@ -1911,6 +1948,7 @@ function clearPlayerStatus() {
   const idx = alwaysPresent.indexOf(name);
   if (idx !== -1) alwaysPresent.splice(idx, 1);
   delete dailyOverrides[name];
+  markEdit(name);
   saveState();
   render();
   showToast(name + ' → Sin confirmar');
