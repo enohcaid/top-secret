@@ -24,7 +24,8 @@
     const btn = document.getElementById('convocarBtn');
     if (btn && btn.disabled) return;
     const partidos = getTodayMatches().slice().sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
-    const para = partidos.length > 1 ? 'los partidos de hoy' : partidos.length ? 'el partido de hoy' : 'el entrenamiento de hoy';
+    // Siempre "los partidos de hoy", aunque sea uno solo (pedido de Juan)
+    const para = partidos.length ? 'los partidos de hoy' : 'el entrenamiento de hoy';
     // El portapapeles primero, mientras dura el gesto del usuario
     const copiado = await copiar(`Buenas! Ya pueden confirmar para ${para}!\n${URL_EDITABLE}`);
 
