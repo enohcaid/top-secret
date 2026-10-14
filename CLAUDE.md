@@ -156,7 +156,8 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 
 **New match played**
 1. Read the report (image in `reportes/` or user-provided) → append the match object to `SEED_MATCHES`.
-2. Verify rival name matches existing fixture entries. Commit.
+2. Verify rival name matches existing fixture entries.
+3. Run `node scripts/ea-completar.mjs` (then `--aplicar`) to fill the per-player stats the video lacks from EA (stored by the Worker, see `docs/conocimiento/reference_ea_proclubs_api.md`). EA only keeps 5 matches per type in its API, but the Worker cron saves them all. Commit.
 
 **New manual news article**
 1. Add entry at the top of `NOTICIAS` in `noticias-data.js` (exact gamertags; image committed to `logos/` or `Renders/`).

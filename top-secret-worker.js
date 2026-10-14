@@ -196,8 +196,30 @@ const EA_ALLOWED_PATHS = [
   'clubs/members/stats',
   'clubs/matches',
   'clubs/search',
+  'clubs/info',
+  'members/stats',
+  'members/career/stats',
+  'allTimeLeaderboard/search',
   'ping',
 ];
+
+// Headers que pasan el Akamai de EA (desde la IP de Cloudflare funciona; curl/Node local no)
+const EA_HEADERS = {
+  'Accept':          'application/json, text/plain, */*',
+  'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
+  'Cache-Control':   'no-cache',
+  'Referer':         'https://www.ea.com/games/ea-sports-fc/clubs/rankings',
+  'Origin':          'https://www.ea.com',
+  'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Sec-Fetch-Dest':  'empty',
+  'Sec-Fetch-Mode':  'cors',
+  'Sec-Fetch-Site':  'same-site',
+};
+
+// Club en FC 27 (ver docs/conocimiento/reference_ea_proclubs_api.md)
+const EA_CLUB_ID = '404340';
+const EA_PLATFORM = 'common-gen5';
+const EA_MATCH_TYPES = ['friendlyMatch', 'leagueMatch', 'playoffMatch'];
 
 // Dominios permitidos para proxy de URLs de torneos
 const FETCH_ALLOWED_DOMAINS = [
@@ -289,17 +311,7 @@ export default {
         const eaUrl = `https://proclubs.ea.com/api/fc/${eaPath}`;
 
         const resp = await fetch(eaUrl, {
-          headers: {
-            'Accept':          'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
-            'Cache-Control':   'no-cache',
-            'Referer':         'https://www.ea.com/games/ea-sports-fc/clubs/rankings',
-            'Origin':          'https://www.ea.com',
-            'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Sec-Fetch-Dest':  'empty',
-            'Sec-Fetch-Mode':  'cors',
-            'Sec-Fetch-Site':  'same-site',
-          },
+          headers: EA_HEADERS,
           cf: { cacheTtl: 120, cacheEverything: true },
         });
 
@@ -322,6 +334,22 @@ export default {
             'Cache-Control': 'public, max-age=120',
           }
         });
+      }
+
+      // ── HISTORIAL EA (/ea-historial) ──────────────
+      // Partidos de EA guardados por el cron (EA solo devuelve los últimos 5 por tipo)
+      // + foto de los miembros. POST /ea-historial/refrescar fuerza una sincronización.
+      if (url.pathname === '/ea-historial' && request.method === 'GET') {
+        const [partidos, miembros, meta] = await Promise.all([
+          env.TS_KV.get('ea_partidos', 'json'),
+          env.TS_KV.get('ea_miembros', 'json'),
+          env.TS_KV.get('ea_sync_meta', 'json'),
+        ]);
+        return jsonResp({ club: EA_CLUB_ID, platform: EA_PLATFORM, partidos: partidos || [], miembros: miembros || null, sync: meta || null });
+      }
+      if (url.pathname === '/ea-historial/refrescar' && request.method === 'POST') {
+        const r = await syncEaPartidos(env, true);
+        return jsonResp(r);
       }
 
       // ── IMAGE PROXY (/img-proxy) ──────────────────
@@ -1320,8 +1348,95 @@ export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(dailyConvocatoriaReset(env));
     ctx.waitUntil(purgarAmistososPasados(env));
+    // EA cada 10 min (el cron corre cada minuto); los miembros a la hora en punto
+    const min = new Date(event.scheduledTime).getUTCMinutes();
+    if (min % 10 === 0) ctx.waitUntil(syncEaPartidos(env, min === 0));
   }
 };
+
+// ── EA PRO CLUBS — guardar cada partido (Cron, cada 10 min) ──────────────────
+// EA solo devuelve los últimos 5 partidos de cada tipo: si no se guardan al jugarse,
+// se pierden. KV 'ea_partidos' = array compacto (más nuevo primero), solo se escribe
+// cuando entra algo nuevo. Los partidos cortados/reiniciados o con desconexión quedan
+// marcados con `sospechoso` (EA los registra como 3-0 / 0-3 con stats vacías).
+async function eaGet(path) {
+  const r = await fetch(`https://proclubs.ea.com/api/fc/${path}`, { headers: EA_HEADERS });
+  const body = await r.text();
+  if (!r.ok || !/^\s*[\[{]/.test(body)) throw new Error(`EA ${r.status} en ${path.split('?')[0]}`);
+  return JSON.parse(body);
+}
+
+function eaCompactar(m, tipo) {
+  const n = v => (v === undefined || v === null || v === '') ? null : Number(v);
+  const mio = m.clubs?.[EA_CLUB_ID] || {};
+  const rivalId = Object.keys(m.clubs || {}).find(id => id !== EA_CLUB_ID);
+  const riv = m.clubs?.[rivalId] || {};
+  const agg = m.aggregate || {};
+  const fechaArt = new Date(m.timestamp * 1000);
+  const jugadores = Object.values(m.players?.[EA_CLUB_ID] || {}).map(p => ({
+    gamertag: p.playername, pos: p.pos, arq: n(p.archetypeid), nota: n(p.rating),
+    goles: n(p.goals), asist: n(p.assists), tiros: n(p.shots),
+    pases: n(p.passesmade), pases_int: n(p.passattempts),
+    entradas: n(p.tacklesmade), entradas_int: n(p.tackleattempts),
+    atajadas: n(p.saves), rojas: n(p.redcards), mvp: p.mom === '1',
+    seg: n(p.secondsPlayed), vallas_def: n(p.cleansheetsdef), vallas_gk: n(p.cleansheetsgk),
+  }));
+  const segs = jugadores.map(j => j.seg || 0).sort((a, b) => a - b);
+  const segMediana = segs.length ? segs[Math.floor(segs.length / 2)] : 0;
+  const aggMio = agg[EA_CLUB_ID] || {}, aggRiv = agg[rivalId] || {};
+  const tirosTot = (n(aggMio.shots) || 0) + (n(aggRiv.shots) || 0);
+  const pasesTot = n(aggMio.passattempts) || 0;
+  let sospechoso = null;
+  if (segMediana < 60 * 60) sospechoso = `duró ${Math.round(segMediana / 60)} min (cortado, reiniciado o abandono)`;
+  else if (tirosTot === 0 && pasesTot < 60) sospechoso = 'stats vacías (desconexión)';
+  else if (riv.winnerByDnf === '1' || mio.winnerByDnf === '1') sospechoso = 'ganado por abandono';
+  return {
+    id: String(m.matchId), ts: m.timestamp, tipo,
+    fecha: fechaArt.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }),
+    hora: fechaArt.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false }),
+    gf: n(mio.goals), gc: n(riv.goals),
+    rival: { id: rivalId || null, nombre: riv.details?.name || null },
+    sospechoso,
+    equipo: { tiros: n(aggMio.shots), pases: n(aggMio.passesmade), pases_int: n(aggMio.passattempts), entradas: n(aggMio.tacklesmade), entradas_int: n(aggMio.tackleattempts), atajadas: n(aggMio.saves), rojas: n(aggMio.redcards) },
+    equipo_rival: { tiros: n(aggRiv.shots), pases: n(aggRiv.passesmade), pases_int: n(aggRiv.passattempts), entradas: n(aggRiv.tacklesmade), entradas_int: n(aggRiv.tackleattempts), atajadas: n(aggRiv.saves) },
+    jugadores,
+  };
+}
+
+async function syncEaPartidos(env, conMiembros) {
+  const res = { nuevos: 0, errores: [] };
+  try {
+    const guardados = (await env.TS_KV.get('ea_partidos', 'json')) || [];
+    const ids = new Set(guardados.map(p => p.id));
+    const nuevos = [];
+    for (const tipo of EA_MATCH_TYPES) {
+      try {
+        const lista = await eaGet(`clubs/matches?platform=${EA_PLATFORM}&clubIds=${EA_CLUB_ID}&matchType=${tipo}`);
+        for (const m of (Array.isArray(lista) ? lista : [])) {
+          if (!ids.has(String(m.matchId))) { nuevos.push(eaCompactar(m, tipo)); ids.add(String(m.matchId)); }
+        }
+      } catch (e) { res.errores.push(e.message); }
+    }
+    if (nuevos.length) {
+      const todos = [...nuevos, ...guardados].sort((a, b) => b.ts - a.ts);
+      await env.TS_KV.put('ea_partidos', JSON.stringify(todos));
+      res.nuevos = nuevos.length;
+    }
+    if (conMiembros) {
+      try {
+        const [stats, carrera] = await Promise.all([
+          eaGet(`members/stats?platform=${EA_PLATFORM}&clubId=${EA_CLUB_ID}`),
+          eaGet(`members/career/stats?platform=${EA_PLATFORM}&clubId=${EA_CLUB_ID}`),
+        ]);
+        await env.TS_KV.put('ea_miembros', JSON.stringify({ ts: Date.now(), stats: stats.members || [], carrera: carrera.members || [] }));
+      } catch (e) { res.errores.push(e.message); }
+    }
+    if (res.nuevos || res.errores.length || conMiembros) {
+      await env.TS_KV.put('ea_sync_meta', JSON.stringify({ ts: Date.now(), ...res, total: ids.size }));
+    }
+  } catch (e) { res.errores.push(e.message); }
+  return res;
+}
 
 // ── CALENDARIO — borrar amistosos ya jugados (Cron, cada 1 min) ──────────────
 // Regla del usuario (2026-10-08): de un amistoso nunca se reporta resultado, así que

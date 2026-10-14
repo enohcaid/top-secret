@@ -683,9 +683,9 @@ footer span{color:#C9A84C;}
       </div>
       <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
         <div class="cea-platform-btns">
-          <button class="cea-pbtn" onclick="ceaSetPlatform('common-gen5',this)">Current Gen</button>
+          <button class="cea-pbtn active" onclick="ceaSetPlatform('common-gen5',this)">Current Gen</button>
           <button class="cea-pbtn" onclick="ceaSetPlatform('ps4',this)">PS4/XO</button>
-          <button class="cea-pbtn active" onclick="ceaSetPlatform('pc',this)">PC</button>
+          <button class="cea-pbtn" onclick="ceaSetPlatform('pc',this)">PC</button>
         </div>
         <a href="https://proclubs.io/club/16051" target="_blank" class="cea-link-badge">↗ Ver en PROCLUBS.IO</a>
       </div>
@@ -2271,8 +2271,8 @@ cloudLoad().then(()=>renderSeason());
 // ════════════════════════════════════════════
 // CLUB EA — Stats desde EA Sports API
 // ════════════════════════════════════════════
-const CEA_CLUB_ID = '16051';
-let ceaPlatform = 'pc';
+const CEA_CLUB_ID = '404340';   // club en FC 27 (ver docs/conocimiento/reference_ea_proclubs_api.md)
+let ceaPlatform = 'common-gen5';
 let ceaLoaded = false;
 
 const CEA_PLATFORMS = {
@@ -2323,7 +2323,7 @@ async function ceaFetch(path) {
 }
 
 // Plataformas a probar en orden
-const CEA_PLATFORMS_ORDER = ['pc', 'common-gen5', 'ps4'];
+const CEA_PLATFORMS_ORDER = ['common-gen5', 'pc', 'ps4'];
 const CEA_CLUB_NAME = 'Top Secret';   // nombre de búsqueda
 
 function ceaSetStatus(msg) {
@@ -2350,7 +2350,7 @@ async function ceaLoad() {
 
   for (const plat of platforms) {
     try {
-      const searchPath = `clubs/search?platform=${plat}&clubName=${encodeURIComponent(CEA_CLUB_NAME)}`;
+      const searchPath = `allTimeLeaderboard/search?platform=${plat}&clubName=${encodeURIComponent(CEA_CLUB_NAME)}`;
       const results = await ceaFetch(searchPath);
       if (results && results.error) continue;
       const list = Array.isArray(results) ? results : (results?.clubs || []);
@@ -2385,7 +2385,7 @@ async function ceaLoad() {
   try {
     const [overallRes, matchesRes] = await Promise.allSettled([
       ceaFetch(`clubs/overallStats?platform=${resolvedPlat}&clubIds=${resolvedId}`),
-      ceaFetch(`clubs/matches?platform=${resolvedPlat}&clubIds=${resolvedId}`)
+      ceaFetch(`clubs/matches?platform=${resolvedPlat}&clubIds=${resolvedId}&matchType=friendlyMatch`)
     ]);
 
     const overall = overallRes.status === 'fulfilled' && !overallRes.value?.error ? overallRes.value : null;
@@ -2659,7 +2659,7 @@ function ceaRenderInto(container, overall, members, matches, resolvedId, resolve
       <div class="cea-block-head">
         <h3>🏟️ Rendimiento General</h3>
         ${bestDiv ? `<span style="font-size:.63rem;padding:2px 8px;border-radius:4px;background:rgba(200,168,75,.12);color:var(--gold);font-weight:700">Mejor div: ${bestDiv}</span>` : ''}
-        <span class="cea-src" style="margin-left:auto">PC · EA Sports</span>
+        <span class="cea-src" style="margin-left:auto">${CEA_PLATFORMS[resolvedPlat] || resolvedPlat} · EA Sports</span>
       </div>
       <div style="padding:14px 18px">
         <div style="display:flex;gap:3px;height:12px;border-radius:6px;overflow:hidden;margin-bottom:8px">
