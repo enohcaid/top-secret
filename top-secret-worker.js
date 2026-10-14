@@ -219,7 +219,9 @@ const EA_HEADERS = {
 // Club en FC 27 (ver docs/conocimiento/reference_ea_proclubs_api.md)
 const EA_CLUB_ID = '404340';
 const EA_PLATFORM = 'common-gen5';
-const EA_MATCH_TYPES = ['friendlyMatch', 'leagueMatch', 'playoffMatch'];
+// Solo partidos privados: ahí se juegan los oficiales (VPN/VPUG/Espacio Gamer). Los de
+// liga de EA (Division Rivals) y sus playoffs nunca son oficiales.
+const EA_MATCH_TYPES = ['friendlyMatch'];
 
 // Dominios permitidos para proxy de URLs de torneos
 const FETCH_ALLOWED_DOMAINS = [
@@ -348,7 +350,7 @@ export default {
         return jsonResp({ club: EA_CLUB_ID, platform: EA_PLATFORM, partidos: partidos || [], miembros: miembros || null, sync: meta || null });
       }
       if (url.pathname === '/ea-historial/refrescar' && request.method === 'POST') {
-        const r = await syncEaPartidos(env, true);
+        const r = await syncEaPartidos(env, true, url.searchParams.get('limpiar') === '1');
         return jsonResp(r);
       }
 
@@ -1359,6 +1361,8 @@ export default {
 // se pierden. KV 'ea_partidos' = array compacto (más nuevo primero), solo se escribe
 // cuando entra algo nuevo. Los partidos cortados/reiniciados o con desconexión quedan
 // marcados con `sospechoso` (EA los registra como 3-0 / 0-3 con stats vacías).
+// Regla (Juan, 2026-10-13): solo se guardan los partidos del calendario oficial, dentro
+// de su horario (ver eaAsignarCalendario); cada uno lleva `calendario` con el partido asignado.
 async function eaGet(path) {
   const r = await fetch(`https://proclubs.ea.com/api/fc/${path}`, { headers: EA_HEADERS });
   const body = await r.text();
@@ -1403,24 +1407,103 @@ function eaCompactar(m, tipo) {
   };
 }
 
-async function syncEaPartidos(env, conMiembros) {
-  const res = { nuevos: 0, errores: [] };
+// Partidos oficiales del calendario, armados igual que calendario.html: RAW (leído del
+// HTML publicado) con edits/suspended de Firestore aplicados por índice + los custom.
+// Solo ligas oficiales (VPN, VPUG, 11x11 = Espacio Gamer); amistosos y demás afuera.
+const EA_LIGAS_OFICIALES = new Set(['VPN', 'VPUG', '11x11']);
+const CALENDARIO_HTML_URL = 'https://enohcaid.github.io/top-secret/calendario.html';
+
+function parseObjLiteral(linea) {
+  const o = {};
+  for (const m of linea.matchAll(/(\w+)\s*:\s*('(?:[^'\\]|\\.)*'|true|false|null|-?\d+(?:\.\d+)?)/g)) {
+    const v = m[2];
+    o[m[1]] = v.startsWith("'") ? v.slice(1, -1).replace(/\\'/g, "'") : v === 'null' ? null : v === 'true' ? true : v === 'false' ? false : Number(v);
+  }
+  return o;
+}
+function fsVal(v) {
+  if (!v || typeof v !== 'object') return null;
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('doubleValue' in v) return v.doubleValue;
+  if ('booleanValue' in v) return v.booleanValue;
+  if ('nullValue' in v) return null;
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(fsVal);
+  if ('mapValue' in v) { const o = {}; for (const [k, x] of Object.entries(v.mapValue.fields || {})) o[k] = fsVal(x); return o; }
+  return null;
+}
+async function cargarCalendarioOficial() {
+  const [html, fsDoc] = await Promise.all([
+    fetch(CALENDARIO_HTML_URL, { cf: { cacheTtl: 300 } }).then(r => r.ok ? r.text() : Promise.reject(new Error(`calendario.html ${r.status}`))),
+    fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado').then(r => r.json()),
+  ]);
+  const ini = html.indexOf('const RAW = [');
+  if (ini < 0) throw new Error('RAW no encontrado en calendario.html');
+  const fin = html.indexOf('\n];', ini);
+  const raw = html.slice(ini, fin).split('\n').map(l => l.trim()).filter(l => l.startsWith('{')).map(parseObjLiteral);
+  const estado = fsVal({ mapValue: { fields: fsDoc.fields || {} } }) || {};
+  const edits = estado.edits || {}, suspended = estado.suspended || {};
+  const lista = raw.map((m, i) => {
+    const b = { ...m, ...(edits[i] || {}), origen: `RAW#${i}` };
+    if (suspended[i]?.newDate) b.date = suspended[i].newDate;
+    return b;
+  });
+  (estado.custom || []).forEach((m, i) => lista.push({ ...m, origen: `c${i}` }));
+  return lista.filter(m => EA_LIGAS_OFICIALES.has(m.league) && /^\d{4}-\d\d-\d\d$/.test(m.date || '') && /^\d\d:\d\d$/.test(m.time || ''));
+}
+
+// Un partido de EA es oficial si TERMINÓ entre 10 y 75 min después del horario de un
+// partido del calendario (EA fecha al final; los slots son de 30 min, así que puede caer
+// en dos ventanas: gana el rival que coincide y, si no, el horario más cercano).
+function eaAsignarCalendario(ea, calendario) {
+  const finMs = ea.ts * 1000;
+  const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const ruido = new Set(['esports', 'esport', 'club', 'gaming', 'team']);
+  const pal = s => norm(s).split(/[^a-z0-9]+/).filter(w => w.length >= 4 && !ruido.has(w));
+  const palEa = new Set(pal(ea.rival.nombre));
+  const cands = calendario
+    .map(c => ({ c, ini: Date.parse(`${c.date}T${c.time}:00-03:00`) }))
+    .filter(({ ini }) => finMs >= ini + 10 * 60000 && finMs <= ini + 75 * 60000);
+  if (!cands.length) return null;
+  const porRival = cands.filter(({ c }) => pal(c.rival).some(w => palEa.has(w)));
+  const elegido = (porRival.length ? porRival : cands).sort((a, b) => b.ini - a.ini)[0].c;
+  return { fecha: elegido.date, hora: elegido.time, liga: elegido.league, rival: elegido.rival, origen: elegido.origen, rival_coincide: porRival.length > 0 };
+}
+
+async function syncEaPartidos(env, conMiembros, limpiar = false) {
+  const res = { nuevos: 0, descartados: 0, errores: [] };
   try {
-    const guardados = (await env.TS_KV.get('ea_partidos', 'json')) || [];
+    let guardados = (await env.TS_KV.get('ea_partidos', 'json')) || [];
     const ids = new Set(guardados.map(p => p.id));
-    const nuevos = [];
+    const candidatos = [];
     for (const tipo of EA_MATCH_TYPES) {
       try {
         const lista = await eaGet(`clubs/matches?platform=${EA_PLATFORM}&clubIds=${EA_CLUB_ID}&matchType=${tipo}`);
         for (const m of (Array.isArray(lista) ? lista : [])) {
-          if (!ids.has(String(m.matchId))) { nuevos.push(eaCompactar(m, tipo)); ids.add(String(m.matchId)); }
+          if (!ids.has(String(m.matchId))) candidatos.push(eaCompactar(m, tipo));
         }
       } catch (e) { res.errores.push(e.message); }
     }
-    if (nuevos.length) {
-      const todos = [...nuevos, ...guardados].sort((a, b) => b.ts - a.ts);
-      await env.TS_KV.put('ea_partidos', JSON.stringify(todos));
-      res.nuevos = nuevos.length;
+    // El calendario solo se lee si hay algo que decidir
+    let cambio = false;
+    if (candidatos.length || limpiar) {
+      const calendario = await cargarCalendarioOficial();
+      if (limpiar) {
+        const antes = guardados.length;
+        guardados = guardados.filter(p => p.tipo === 'friendlyMatch').map(p => ({ ...p, calendario: eaAsignarCalendario(p, calendario) })).filter(p => p.calendario);
+        res.descartados += antes - guardados.length;
+        cambio = true;
+      }
+      const nuevos = [];
+      for (const p of candidatos) {
+        const cal = eaAsignarCalendario(p, calendario);
+        if (cal) nuevos.push({ ...p, calendario: cal }); else res.descartados++;
+      }
+      if (nuevos.length) { guardados = [...nuevos, ...guardados]; res.nuevos = nuevos.length; cambio = true; }
+    }
+    if (cambio) {
+      guardados.sort((a, b) => b.ts - a.ts);
+      await env.TS_KV.put('ea_partidos', JSON.stringify(guardados));
     }
     if (conMiembros) {
       try {
@@ -1432,7 +1515,7 @@ async function syncEaPartidos(env, conMiembros) {
       } catch (e) { res.errores.push(e.message); }
     }
     if (res.nuevos || res.errores.length || conMiembros) {
-      await env.TS_KV.put('ea_sync_meta', JSON.stringify({ ts: Date.now(), ...res, total: ids.size }));
+      await env.TS_KV.put('ea_sync_meta', JSON.stringify({ ts: Date.now(), ...res, total: guardados.length }));
     }
   } catch (e) { res.errores.push(e.message); }
   return res;

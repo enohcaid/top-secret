@@ -8,10 +8,11 @@
 //   node scripts/ea-completar.mjs            → muestra qué haría (no escribe)
 //   node scripts/ea-completar.mjs --aplicar  → escribe seed_matches.js
 //
-// Cruce: mismo rival (alias en ea-alias-rivales.json o palabra en común), fecha ±1 día
-// (EA fecha al terminar: un partido de las 23:50 queda al día siguiente) y al menos 6
-// gamertags en común. Los partidos marcados `sospechoso` por el Worker (cortados,
-// desconexiones) no se usan.
+// El Worker solo guarda partidos del calendario oficial y anota a cuál corresponde
+// (`calendario.rival` + `calendario.fecha`): con eso se cruza contra SEED_MATCHES, más al
+// menos 6 gamertags en común. Sin esa anotación (datos viejos) se cae al cruce por rival
+// (alias en ea-alias-rivales.json o palabra en común) y fecha ±1 día. Los partidos
+// marcados `sospechoso` por el Worker (cortados, desconexiones) no se usan.
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -42,8 +43,11 @@ let cambios = 0;
 
 for (const ea of hist.partidos) {
   const eaGts = new Set(ea.jugadores.map(j => j.gamertag));
+  // El Worker ya asignó cada partido a uno del calendario (rival y fecha del sitio)
+  const cal = ea.calendario;
   const cands = SEED_MATCHES.filter(s =>
-    mismoRival(ea.rival.nombre, s.rival) && difDias(s.date, ea.fecha) <= 1 &&
+    (cal ? (s.rival === cal.rival && s.date === cal.fecha)
+         : (mismoRival(ea.rival.nombre, s.rival) && difDias(s.date, ea.fecha) <= 1)) &&
     (s.players || []).filter(p => eaGts.has(p.matched)).length >= 6);
   const titulo = `${ea.fecha} ${ea.hora} · EA ${ea.gf}-${ea.gc} ${ea.rival.nombre} (${ea.tipo})`;
   if (!cands.length) { informe.push(`— ${titulo}: no está en SEED_MATCHES`); continue; }
