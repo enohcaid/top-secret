@@ -21,3 +21,8 @@ Páginas como proclubs.io leen la API pública (sin login) de EA: `https://procl
 - `members/career/stats?platform=…&clubId=404340` — carrera total por miembro.
 
 **Límite clave**: EA solo devuelve los últimos 5 partidos por tipo. Para tener historial hay que guardarlos (p. ej. cron del Worker → KV/Firestore) a medida que se juegan.
+
+**Comparación con el reporte del video (2026-10-13, partidos VPUG del 12/10)**: notas, goles, asistencias, tiros, pases y atajadas coinciden exactos cuando el partido terminó normal. Pero:
+- Un partido cortado/reiniciado queda en EA como un registro aparte con 3-0 (ej. "3-0 CSyD La Mochila" de 5 minutos antes del 1-0 real). Si alguien se desconecta, EA puede registrar un 0-3 con stats casi vacías (Temperley: el sitio dice 0-0, EA 0-3 con 0 tiros de ambos lados y Huber236 con 0 minutos). No tomar el marcador de EA a ciegas: filtrar por duración (`secondsPlayed`) y stats vacías.
+- El nombre del rival en EA es el del club en el juego, no el de la liga ("CREADORES CAP" = Peñarol Creadores, "Temperley eSp" = Temperley eSports) → hace falta un mapa de alias.
+- EA no trae posesión, xG, córners, offsides, faltas, regates, distancia, minuto de cada gol ni la posición exacta (solo forward/midfielder/defender/goalkeeper). Sí trae, para los 11, pases, entradas, tiros, atajadas, minutos jugados, MVP y arquetipo.
