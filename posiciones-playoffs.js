@@ -1,55 +1,62 @@
 // ─── Posiciones · Playoffs de la Copa de Pretemporada VPUG (T4) ──────────────
-// Cuadros de cruces de la Fase Oro (izquierda) y la Fase Plata (derecha), en vivo desde
-// CopáFácil vía el Worker /vpug-playoffs-t4. Se carga después del script inline de
-// posiciones.html (usa WORKER_BASE y OUR_LOGO). Si el Worker falla, la sección se oculta.
+// Cuadro de eliminación como el de CopáFácil (rondas en columnas, líneas que unen cada
+// par de llaves con la siguiente): Fase Oro a la izquierda, Fase Plata a la derecha.
+// En vivo desde CopáFácil vía el Worker /vpug-playoffs-t4. Se carga después del script
+// inline de posiciones.html (usa WORKER_BASE y OUR_LOGO). Si el Worker falla, se oculta.
 (function () {
   const URL_PLAYOFFS = WORKER_BASE + '/vpug-playoffs-t4';
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const esNos = t => /top.?secret/i.test(t?.name || '');
   const g = v => (v === null || v === undefined) ? '–' : v;
-  // "Ganador Octavos de final #1" no entra en la tarjeta → "Ganador Octavos 1"
-  const corto = s => String(s ?? '').replace(/(Octavos|Cuartos) de final #(\d+)/g, '$1 $2').replace(/Semifinal #(\d+)/g, 'Semi $1');
+  // "Ganador Octavos de final #1" no entra en la llave → "Ganador 8vos 1"
+  const corto = s => String(s ?? '')
+    .replace(/Octavos de final #(\d+)/g, '8vos $1').replace(/Cuartos de final #(\d+)/g, '4tos $1')
+    .replace(/Semifinal #(\d+)/g, 'Semi $1').replace(/(\d+)° Grupo ([A-Z])/g, '$1° $2');
 
-  function fila(t, ida, vta, glob, estado) {
+  function fila(t, ida, vta, estado) {
     const nos = esNos(t);
     const logo = nos ? OUR_LOGO : t.logo;
     const img = logo
-      ? `<img class="po-logo${nos ? ' us' : ''}" src="${esc(logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
-      : '<span class="po-logo po-logo-vacio"></span>';
-    return `<div class="po-fila${nos ? ' us' : ''}${estado ? ' ' + estado : ''}">
-      ${img}<span class="po-equipo">${esc(corto(t.name))}</span>
-      <span class="po-gol">${g(ida)}</span><span class="po-gol">${g(vta)}</span><span class="po-gol po-glob">${g(glob)}</span>
+      ? `<img class="br-logo" src="${esc(logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+      : '<span class="br-logo br-logo-vacio"></span>';
+    // Lugar todavía sin definir ("Ganador 8vos 1"): más corto y en gris
+    const pendiente = !t.logo && /^Ganador /.test(t.name || '');
+    const nombre = pendiente ? corto(t.name).replace(/^Ganador /, 'Gan. ') : corto(t.name);
+    return `<div class="br-fila${nos ? ' us' : ''}${pendiente ? ' pendiente' : ''}${estado ? ' ' + estado : ''}">
+      ${img}<span class="br-equipo" title="${esc(nombre)}">${esc(nombre)}</span>
+      <span class="br-gol">${g(ida)}</span><span class="br-gol">${g(vta)}</span>
     </div>`;
   }
 
-  function serie(s) {
+  function llave(s) {
     const nos = esNos(s.a) || esNos(s.b);
     const estA = s.ganador === 'a' ? 'gana' : s.ganador === 'b' ? 'queda' : '';
     const estB = s.ganador === 'b' ? 'gana' : s.ganador === 'a' ? 'queda' : '';
-    const llave = (s.nombre.match(/#(\d+)/) || [])[1];
-    return `<div class="po-serie${nos ? ' us' : ''}">
-      <div class="po-serie-head">
-        <span class="po-llave">Llave ${esc(llave || '')}</span>
-        <span class="po-cupo">${esc(corto(s.cupo))}</span>
+    const n = (s.nombre.match(/#(\d+)/) || [])[1] || '';
+    const glob = s.global ? ` · Global ${s.global[0]}-${s.global[1]}` : '';
+    return `<div class="br-match">
+      <div class="br-card${nos ? ' us' : ''}">
+        <div class="br-tag" title="${esc(s.cupo)}">Llave ${esc(n)} · ${esc(corto(s.cupo))}${esc(glob)}</div>
+        ${fila(s.a, s.ida?.[0], s.vuelta?.[1], estA)}
+        ${fila(s.b, s.ida?.[1], s.vuelta?.[0], estB)}
       </div>
-      <div class="po-cols"><span></span><span></span><span>Ida</span><span>Vta</span><span>Gl</span></div>
-      ${fila(s.a, s.ida?.[0], s.vuelta?.[1], s.global?.[0], estA)}
-      ${fila(s.b, s.ida?.[1], s.vuelta?.[0], s.global?.[1], estB)}
     </div>`;
   }
 
   function fase(f) {
     const tipo = /plata/i.test(f.titulo) ? 'plata' : 'oro';
     const nombre = f.titulo.replace(/^playoff\s*/i, '');
-    return `<section class="po-fase po-${tipo}">
-      <div class="po-fase-head">
-        <span class="po-fase-kicker">Playoff</span>
-        <span class="po-fase-titulo">${esc(nombre)}</span>
+    return `<section class="br-fase br-${tipo}">
+      <div class="br-fase-head">
+        <span class="br-fase-kicker">Playoff · ida y vuelta</span>
+        <span class="br-fase-titulo">${esc(nombre)}</span>
       </div>
-      ${f.rondas.map(r => `<div class="po-ronda">
-        <div class="po-ronda-titulo">${esc(r.titulo)}</div>
-        <div class="po-series">${r.series.map(serie).join('')}</div>
-      </div>`).join('')}
+      <div class="br-scroll">
+        <div class="br-cuadro" style="--br-rondas:${f.rondas.length}">
+          ${f.rondas.map(r => `<div class="br-ronda-titulo">${esc(r.titulo)}</div>`).join('')}
+          ${f.rondas.map((r, i) => `<div class="br-ronda${i === 0 ? ' primera' : ''}${i === f.rondas.length - 1 ? ' ultima' : ''}">${r.series.map(llave).join('')}</div>`).join('')}
+        </div>
+      </div>
     </section>`;
   }
 
