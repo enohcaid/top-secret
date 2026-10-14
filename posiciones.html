@@ -223,27 +223,51 @@ td.left { text-align: left; }
 .preseason-sub { font-size:.88rem; line-height:1.5; color:var(--mid); max-width:640px; }
 .preseason-sub strong { color:var(--text); font-weight:600; }
 .preseason-sub a { color:var(--text); text-decoration:underline; text-underline-offset:3px; }
-/* ── PLAYOFFS T4 (posiciones-playoffs.js): cuadro de eliminación, Oro izquierda, Plata derecha ── */
-.po-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; margin-bottom:8px; }
-.br-fase { --br-acc:var(--gold); --br-linea:color-mix(in srgb, var(--br-acc) 45%, transparent); border:1px solid var(--border); border-top:3px solid var(--br-acc); border-radius:14px; background:var(--card); padding:18px 14px 16px; min-width:0; }
-.br-fase.br-plata { --br-acc:var(--plata); }
-.br-fase-head { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
-.br-fase-kicker { font-size:.62rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--br-acc); }
-.br-fase-titulo { font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; font-weight:900; text-transform:uppercase; line-height:1; color:var(--text); }
+/* ── PLAYOFFS T4 (posiciones-playoffs.js): cuadro enfrentado — Oro izquierda, Plata espejada a la derecha, finales en el medio ── */
+.po-grid { border:1px solid var(--border); border-radius:14px; background:var(--card); padding:18px 14px 16px; margin-bottom:8px; }
 .br-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-.br-cuadro { display:grid; grid-template-columns:minmax(175px,1.35fr) repeat(calc(var(--br-rondas) - 1),minmax(140px,1fr)); min-width:640px; }
-.br-ronda-titulo { font-family:'Barlow Condensed',sans-serif; font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--br-acc); text-align:center; padding:4px 0 10px; border-bottom:1px solid var(--border); margin:0 6px 4px; }
+.br-hint { display:none; }
+@media(max-width:760px){
+  /* Celular: ventana deslizable en las dos direcciones, centrada en nuestra llave al cargar */
+  .po-grid { padding:12px 8px; }
+  .br-scroll { max-height:70vh; overflow:auto; border-radius:10px; }
+  .po-grid .br-cuadro { min-width:1300px; }
+  .br-hint { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 4px 10px; font-size:.72rem; color:var(--mid); }
+  .br-ir { flex-shrink:0; padding:6px 12px; border-radius:999px; border:1px solid color-mix(in srgb, var(--gold) 55%, transparent); background:color-mix(in srgb, var(--gold) 10%, transparent); color:var(--gold); font-family:inherit; font-size:.7rem; font-weight:700; letter-spacing:.06em; cursor:pointer; }
+  .br-ir[hidden] { display:none; }
+}
+.br-cuadro { display:grid; min-width:1150px; }
+.oro   { --br-acc:var(--gold); }
+.plata { --br-acc:var(--plata); }
+.br-ronda, .br-ronda-titulo, .br-fase-head { --br-linea:color-mix(in srgb, var(--br-acc) 45%, transparent); }
+.br-fase-head { padding:0 10px 12px; }
+.br-fase-head.plata { text-align:right; }
+.br-fase-titulo { font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; font-weight:900; text-transform:uppercase; line-height:1; color:var(--br-acc); }
+.br-ronda-titulo { font-family:'Barlow Condensed',sans-serif; font-size:.7rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--br-acc); text-align:center; padding:4px 0 10px; border-bottom:1px solid var(--border); margin:0 6px 4px; }
+.br-ronda-titulo.br-finales { color:var(--text); }
 .br-ronda { display:flex; flex-direction:column; }
 .br-match { flex:1; display:flex; align-items:center; position:relative; padding:20px 10px 6px; }
-/* Líneas: cada par de llaves se une hacia la llave de la ronda siguiente */
-.br-ronda:not(.ultima) .br-match::after { content:''; position:absolute; right:0; width:10px; border-right:1px solid var(--br-linea); }
-.br-ronda:not(.ultima) .br-match:nth-child(odd)::after { top:calc(50% + 7px); bottom:0; border-top:1px solid var(--br-linea); }
-.br-ronda:not(.ultima) .br-match:nth-child(even)::after { top:0; bottom:calc(50% - 7px); border-bottom:1px solid var(--br-linea); }
-.br-ronda:not(.primera) .br-match::before { content:''; position:absolute; left:0; top:calc(50% + 7px); width:10px; border-top:1px solid var(--br-linea); }
+/* Líneas: cada par de llaves se une hacia la llave de la ronda siguiente (en Plata, hacia la izquierda) */
+.br-ronda:not(.final) .br-match::after { content:''; position:absolute; width:10px; }
+.br-ronda.oro:not(.final) .br-match::after { right:0; border-right:1px solid var(--br-linea); }
+.br-ronda.plata:not(.final) .br-match::after { left:0; border-left:1px solid var(--br-linea); }
+.br-ronda:not(.final) .br-match:nth-child(odd)::after { top:calc(50% + 7px); bottom:0; border-top:1px solid var(--br-linea); }
+.br-ronda:not(.final) .br-match:nth-child(even)::after { top:0; bottom:calc(50% - 7px); border-bottom:1px solid var(--br-linea); }
+.br-ronda:not(.primera) .br-match::before { content:''; position:absolute; top:calc(50% + 7px); width:10px; border-top:1px solid var(--br-linea); }
+.br-ronda.oro:not(.primera) .br-match::before { left:0; }
+.br-ronda.plata:not(.primera) .br-match::before { right:0; }
+/* Las dos finales, juntas en el medio, unidas por una línea */
+.br-ronda.final.oro .br-match::after, .br-ronda.final.plata .br-match::after { content:''; position:absolute; top:calc(50% + 7px); width:10px; border-top:1px solid var(--br-linea); }
+.br-ronda.final.oro .br-match::after { right:0; }
+.br-ronda.final.plata .br-match::after { left:0; }
 .br-card { position:relative; width:100%; border:1px solid var(--border); border-radius:8px; background:color-mix(in srgb, var(--text, #fff) 3%, transparent); padding:2px 0; }
+.br-ronda.final .br-card { border-color:color-mix(in srgb, var(--br-acc) 50%, transparent); }
 .br-card.us { border-color:color-mix(in srgb, var(--gold) 60%, transparent); background:color-mix(in srgb, var(--gold) 8%, transparent); }
 .br-tag { position:absolute; left:2px; right:2px; bottom:100%; margin-bottom:3px; font-size:.56rem; font-weight:600; letter-spacing:.04em; color:var(--mid); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.br-ronda.plata .br-tag { text-align:right; }
 .br-fila { display:grid; grid-template-columns:18px minmax(0,1fr) 20px 20px; align-items:center; gap:5px; padding:4px 6px; }
+.br-ronda.plata .br-fila { grid-template-columns:20px 20px minmax(0,1fr) 18px; }
+.br-ronda.plata .br-equipo { text-align:right; }
 .br-fila + .br-fila { border-top:1px solid var(--border); }
 .br-logo { width:18px; height:18px; object-fit:contain; border-radius:3px; }
 .br-logo-vacio { display:block; background:var(--border); }
@@ -253,7 +277,6 @@ td.left { text-align: left; }
 .br-fila.queda { opacity:.4; }
 .br-fila.pendiente .br-equipo { color:var(--mid); font-weight:500; }
 .br-fila.gana .br-equipo { font-weight:800; }
-@media(max-width:1180px){ .po-grid { grid-template-columns:1fr; } }
 
 #t4-pane-e11 .preseason { border-left-color:var(--e11); }
 #t4-pane-e11 .preseason-kicker { color:var(--e11); }
@@ -1034,7 +1057,7 @@ fetchT4EG();
 
 
 </script>
-<script src="posiciones-playoffs.js?v=2"></script>
+<script src="posiciones-playoffs.js?v=4"></script>
 <script src="layout.js?v=23"></script>
 </body>
 </html>
