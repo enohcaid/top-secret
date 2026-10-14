@@ -13,8 +13,9 @@ import { spawnSync } from 'child_process';
 import ffmpeg from 'ffmpeg-static';
 import { ROOT } from '../../lib/env.mjs';
 
-// Voz del club. rate/pitch: ritmo de TikTok (un poco acelerado). Muestras en pruebas/voces/ (2026-10-14).
-export const VOZ = { voz: 'es-AR-TomasNeural', rate: '+12%', pitch: '+0Hz' };
+// La voz del club, siempre (elección de Juan, 2026-10-14): Elena, argentina, a ritmo de TikTok (+12 %).
+// Solo en videos que cuentan una historia; los musicales (antes y después, transiciones) van sin voz.
+export const VOZ = { voz: 'es-AR-ElenaNeural', rate: '+12%', pitch: '+0Hz' };
 const PY = process.platform === 'win32' ? 'python' : 'python3';
 
 export function duracion(archivo) {
