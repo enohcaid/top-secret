@@ -117,6 +117,26 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-14",
+      "id": "2026-10-14-2",
+      "archivo": "2026-10-14-2 - Raíz.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_14_2.py",
+      "duracion": 80,
+      "nombre": "Raíz",
+      "concepto": "El pibe que empezó jugando en la calle — descalzo, sin táctica, jugando por jugar; ahora el juego pesa, pero en cada gambeta sigue ese pibe que nunca perdió la alegría.",
+      "bpm": 142,
+      "tonalidad": "si menor",
+      "rasgo": "marimba de calle: marimba sintetizada con rebote doble (pelota picando) que lleva la melodía en intro y final, desaparece en el verso adulto, y en el gancho C vuelve armonizada en octavas con el lead",
+      "recursos": [
+        "marimba con rebote doble (firma del tema)",
+        "lead triángulo con overdrive suave",
+        "pad de triángulos detuneados",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
