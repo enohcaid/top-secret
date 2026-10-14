@@ -73,6 +73,15 @@ textarea:focus{outline:2px solid var(--gold);outline-offset:-1px}
 .link{padding:10px 16px 0;font-size:14px}
 .link a{color:var(--gold2)}
 .error-txt{padding:10px 16px 0;color:var(--rival);font-size:13px}
+.prod{margin:10px 16px 0;padding:8px 12px;border-radius:8px;font-size:13px;background:var(--card2);color:var(--text2)}
+.prod.lista{color:var(--ok)}
+.prod.esperando,.prod.produciendo{color:var(--warn)}
+.prod.error{color:var(--rival)}
+.avisos{list-style:none;margin:6px 0 0;padding:0 16px;font-size:13px;line-height:1.35}
+.avisos:empty{display:none}
+.avisos li{padding:3px 0 3px 14px;position:relative;color:var(--warn)}
+.avisos li::before{content:'';position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:currentColor}
+.avisos li.error{color:var(--rival)}
 .botones{margin-top:auto;display:flex;gap:8px;padding:14px 16px 16px}
 
 button{font:700 14px Barlow,sans-serif;border-radius:10px;padding:10px 14px;cursor:pointer;border:1px solid var(--border);background:var(--card2);color:var(--text);transition:background-color .15s,border-color .15s,opacity .15s}
@@ -137,7 +146,7 @@ button:disabled{opacity:.4;cursor:default}
   <div id="lotes"></div>
 </div>
 <div class="aviso" id="aviso"></div>
-<script src="aprobar.js?v=6"></script>
+<script src="aprobar.js?v=7"></script>
 <script src="layout.js?v=23"></script>
 </body>
 </html>

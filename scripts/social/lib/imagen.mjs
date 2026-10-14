@@ -49,6 +49,10 @@ ${ids}
 SIN TEXTO en la imagen (ni títulos, ni marcadores, ni rótulos, ni watermarks).`;
 }
 
+// ChatGPT contestó texto en vez de imagen porque se agotó el cupo: el productor (producir.mjs) lo reconoce por el
+// prefijo LIMITE_CHATGPT y reintenta más tarde en vez de dar la pieza por fallida.
+const LIMITE = /l[ií]mite|limit|alcanzaste|reached|vuelve a intentar|try again|m[aá]s tarde|later/i;
+
 export async function generarImagen({ id, escena, jugadores = [], vertical = true, carpeta, kitId = 'titular' }) {
   const destino = path.join(carpeta, `${id}.png`);
   if (fs.existsSync(destino)) return destino;
@@ -58,7 +62,8 @@ export async function generarImagen({ id, escena, jugadores = [], vertical = tru
   const adjuntos = [CREST_PATH, ...jugadores.map(j => renderForKit(j, kit)).filter(Boolean)];
   const page = await pagina();
   const draft = { id: `social-${id}`, date: new Date().toISOString().slice(0, 10) };
-  let r = await generateImage(page, draft, 'social', prompt({ escena, jugadores, vertical, kit }), { freshChat: true, excludeSrcs: [], attachments: adjuntos });
+  let r = await generateImage(page, draft, 'social', prompt({ escena, jugadores, vertical, kit }), { freshChat: true, excludeSrcs: [], attachments: adjuntos })
+    .catch(e => { throw LIMITE.test(e.message) ? new Error('LIMITE_CHATGPT: ' + e.message) : e; });
   let archivo = path.resolve('Renders/Daily News', r.filename);
   // Proporción: si pedimos vertical y no vino 9:16, se le pide el reencuadre nativo en el mismo chat.
   const m = await sharp(archivo).metadata();

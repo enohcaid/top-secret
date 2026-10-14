@@ -13,6 +13,7 @@ import { ROOT } from '../lib/env.mjs';
 import { asegurarVentana, enfocar } from '../lib/ventana.mjs';
 import { leer, actualizarPieza, leerKV, guardarKV } from './lib/aprobaciones.mjs';
 import { asegurarChrome } from './lib/chrome.mjs';
+import { revisarPieza } from '../../revisar-textos.js';
 
 const espera = ms => new Promise(r => setTimeout(r, ms));
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [publicar] ${m}`);
@@ -165,6 +166,7 @@ if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'x-texto', 'tiktok', 'youtube
 
 for (const { l, p } of cola) {
   log(`${l.id} · ${p.id}: publicando…`);
+  for (const r of revisarPieza(p, l)) log(`${l.id} · ${p.id}: [${r.nivel}] ${r.msg}`);   // no frena: queda en el log
   await actualizarPieza(l.id, p.id, { estado: 'publicando', desde: new Date().toISOString(), error: null });
   try {
     const url = await publicar(p);

@@ -98,6 +98,7 @@
         <textarea ${cerrada ? 'disabled' : ''} data-lim="${lim}">${esc(p.texto || '')}</textarea>
         <div class="cuenta"></div>
       </div>
+      <ul class="avisos"></ul>
       ${p.url ? `<div class="link"><a href="${esc(p.url)}" target="_blank" rel="noopener">Ver publicación</a></div>` : ''}
       ${p.error ? `<div class="error-txt">${esc(p.error)}</div>` : ''}
       <div class="botones">
@@ -105,6 +106,20 @@
         <button class="si" data-accion="aprobada" ${cerrada || p.decision === 'aprobada' ? 'disabled' : ''}>${p.decision === 'aprobada' ? 'Aprobada' : 'Aprobar'}</button>
       </div>
     </article>`;
+  }
+
+  // Estado de la producción automática de una idea aprobada (scripts/social/producir.mjs).
+  const hora = iso => new Date(iso).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  function produccion(p) {
+    const pr = p.produccion;
+    if (p.decision !== 'aprobada') return '';
+    const txt = !pr ? 'En cola para producirse'
+      : pr.estado === 'produciendo' ? `Produciéndose desde ${hora(pr.desde)}`
+      : pr.estado === 'esperando' ? `ChatGPT sin cupo: reintenta ${hora(pr.reintentarDesde)}`
+      : pr.estado === 'lista' ? 'Producida: está en "Visto bueno final"'
+      : pr.estado === 'manual' ? 'Se produce a mano'
+      : pr.estado === 'error' ? `No se pudo producir${(pr.reintentos || 0) < 2 ? ` (reintenta ${hora(pr.reintentarDesde)})` : ''}: ${pr.motivo || ''}` : pr.estado;
+    return `<div class="prod ${esc(pr?.estado || 'cola')}">${esc(txt)}</div>`;
   }
 
   // Guion de una pieza viral (etapa 1): se aprueba la IDEA antes de producirla. El texto editable son los
@@ -118,6 +133,7 @@
           <div class="redes-chips">${(g.redes || []).map(r => `<span>${esc(r)}</span>`).join('')}</div></div>
         <span class="chip ${estado}">${estado === 'aprobada' ? 'Idea aprobada' : ESTADO[estado] || estado}</span>
       </div>
+      ${produccion(p)}
       ${p.media?.length ? medio(p) : ''}
       <div class="g-gancho">${esc(g.gancho || '')}</div>
       ${g.escenas?.length ? `<ol class="g-escenas">${g.escenas.map(e => `<li>${esc(e)}</li>`).join('')}</ol>` : ''}
@@ -228,6 +244,19 @@
     $('#lotes').innerHTML = tabs + cuerpo;
     document.querySelectorAll('.lote').forEach(s => { const f = s.querySelector('.fila'); if (f && scroll[s.dataset.lote]) f.scrollLeft = scroll[s.dataset.lote]; });
     document.querySelectorAll('textarea').forEach(contar);
+    document.querySelectorAll('.pieza:not(.guion)').forEach(revisar);
+  }
+
+  // Revisor de descripciones (revisar-textos.js, el mismo que usa la PC): avisos en vivo bajo el texto.
+  let revisor = null;
+  import('./revisar-textos.js?v=1').then(m => { revisor = m; document.querySelectorAll('.pieza:not(.guion)').forEach(revisar); }).catch(() => {});
+  function revisar(art) {
+    const ul = art.querySelector('.avisos');
+    const l = lotes.find(x => x.id === art.dataset.lote), p = l?.piezas.find(x => x.id === art.dataset.pieza);
+    if (!revisor || !ul || !p || p.estado === 'publicado') return;
+    const ti = art.querySelector('input.titulo');
+    const r = revisor.revisarPieza({ ...p, texto: art.querySelector('textarea')?.value ?? p.texto, ...(ti ? { titulo: ti.value } : {}) }, l);
+    ul.innerHTML = r.map(x => `<li class="${x.nivel}">${esc(x.msg)}</li>`).join('');
   }
   document.addEventListener('click', e => {
     const t = e.target.closest('button[data-tab]');
@@ -275,7 +304,11 @@
       if (ids.length) decidir(l.id, ids, { decision: 'aprobada' });
     }
   });
-  document.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') contar(e.target); });
+  document.addEventListener('input', e => {
+    if (e.target.tagName === 'TEXTAREA') contar(e.target);
+    const art = e.target.closest('.pieza:not(.guion)');
+    if (art) revisar(art);
+  });
   // El texto y el título corregidos se guardan al salir del cuadro.
   document.addEventListener('change', e => {
     const art = e.target.closest('.pieza');

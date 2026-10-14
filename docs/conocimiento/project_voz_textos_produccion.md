@@ -1,0 +1,14 @@
+---
+name: project_voz_textos_produccion
+description: Reglas de Juan del 2026-10-14 para el contenido de redes — voz en off en todo video que lo permita, revisor de descripciones (revisar-textos.js) y producción automática de ideas aprobadas (producir.mjs)
+metadata:
+  type: project
+---
+
+Pedido de Juan (2026-10-14), después de "Cabeza fría": "siempre que se pueda en un video, una voz viral" + "estar atento a las descripciones" + "que luego de una aprobación se genere la publicación aprobada".
+
+**Voz en off** — `scripts/social/lib/voz.mjs` (+ `voz.py`): edge-tts (voces neuronales de Microsoft, gratis, sin clave; `pip install edge-tts`). Voces rioplatenses: `es-AR-TomasNeural`, `es-AR-ElenaNeural` (y `es-UY-MateoNeural`/`ValentinaNeural`). `VOZ` en voz.mjs = la del club (ritmo +12 %). `narracion([{en, texto}], carpeta)` → pistas con duración y tiempo de cada palabra (para subtítulos); `agregarVoz(mp4, pistas, salida)` mezcla sobre el video ya renderizado: voz normalizada a -13 LUFS, música abajo con sidechain mientras habla. Si la voz no entra en el video, tira error: **la duración de cada escena sale de su frase**, no al revés (un guion de 30 s entra en ~60 palabras). Los gamertags se pronuncian mal: en la voz, rol o posición; el gamertag va en pantalla. Demos sobre "Cabeza fría" con las 4 voces en `pruebas/voces/`.
+
+**Descripciones** — `revisar-textos.js` (raíz, módulo ES; lo usan aprobar.js, publicar.mjs y la producción): límites por red, hashtags, emojis, "👇" en video, "deslizá" fuera de carrusel, liga con artículo/sufijo/sujeto, 11x11 → Espacio Gamer desde la T4, "T1…T4" para el público, gamertags mal escritos, protagonista sin nombrar (`pieza.protagonistas` o gamertags del título del lote), "Youtube", "en vivo por" sin las tres plataformas. No frena nada: en aprobar.html se ve bajo cada texto y se actualiza mientras se edita; publicar.mjs lo deja en el log. Reglas también en `scripts/social/textos-encargo.md`.
+
+**Producción automática** — `scripts/social/producir.mjs` + `producir-encargo.md`: idea aprobada en aprobar.html → Claude Code (`claude -p`, sin supervisión) la produce entera (imágenes, video con voz, carrusel, textos, revisor) y carga el lote `viral-<idea>-<fecha>` para el visto bueno final, sin hora (publicar.mjs la agenda sola). Estado en `pieza.produccion` (en cola / produciendo / esperando ChatGPT, reintenta a las 3 h / lista / error, 1 reintento / manual), visible en la tarjeta de la idea. ChatGPT sin cupo: `lib/imagen.mjs` tira `LIMITE_CHATGPT: …`. Pausa: `--pausar`/`--reanudar`; `--manual`, `--reintentar`, `--trabajar` (ver cabecera del script). **Al 2026-10-14 NO está conectado a watch-regen.ps1**: lanzar un agente autónomo requiere la autorización explícita de Juan. Las ideas aprobadas hasta ese día quedaron en `manual` (Juan da la indicación para hacerlas a mano).
