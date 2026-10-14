@@ -648,6 +648,59 @@ export default {
         return jsonResp(teams);
       }
 
+      // ── VPUG PLAYOFFS T4 (/vpug-playoffs-t4) ────
+      // Cuadros de la Liga Pretemporada: fases (`fs`) con show_eli = PLAYOFF FASE ORO / PLATA.
+      // Cada ronda (`m_set`) trae partidos "Octavos de final #7 - ..." y su "(Vuelta)" enlazados
+      // por `return`. El que avanza = el equipo que aparece en la ronda siguiente (vale también
+      // si la serie se definió con un tercer partido fuera de CopáFácil).
+      if (url.pathname === '/vpug-playoffs-t4' && request.method === 'GET') {
+        const FB = 'https://copafacil-web.firebaseio.com/events';
+        const EVT = '-fthh5@b7we';
+        const [fases, rondas, teams, matchs] = await Promise.all([
+          fetch(`${FB}/${EVT}/fs.json`).then(r => r.json()),
+          fetch(`${FB}/${EVT}/m_set.json`).then(r => r.json()),
+          fetch(`${FB}/${EVT}/teams.json`).then(r => r.json()),
+          fetch(`${FB}/-fthh5/matchs.json`).then(r => r.json()),
+        ]);
+        const limpiar = s => (s || '').replace(/\s*\p{RI}\p{RI}\s*$/u, '').trim();
+        const equipo = k => k && teams?.[k] ? { key: k, name: limpiar(teams[k].name), logo: teams[k].url || null } : null;
+        const partidos = Object.entries(matchs || {}).filter(([, m]) => m.evt === EVT && m.title).map(([id, m]) => ({ id, ...m }));
+        const goles = m => (m.finished && m.dt && m.dt.qt_g1 !== undefined) ? [Number(m.dt.qt_g1), Number(m.dt.qt_g2)] : null;
+        const out = Object.entries(fases || {}).filter(([, f]) => f.show_eli).sort(([a], [b]) => a.localeCompare(b)).map(([fsId, f], fi) => {
+          const rs = Object.entries(rondas || {}).filter(([, r]) => r.fs === fsId).sort(([a], [b]) => a.localeCompare(b));
+          const enRonda = rs.map(([rid]) => partidos.filter(m => m.m_set === rid));
+          return {
+            id: fsId, titulo: (f.title || '').replace(/\s*[\u{1F947}\u{1F948}\u{1F949}]\s*/u, '').trim(),
+            rondas: rs.map(([rid, r], ri) => {
+              const idas = enRonda[ri].filter(m => !/\(Vuelta\)/.test(m.title)).sort((a, b) => a.id.localeCompare(b.id));
+              const siguientes = new Set((enRonda[ri + 1] || []).flatMap(m => [m.team1, m.team2]).filter(Boolean));
+              return {
+                titulo: r.title,
+                series: idas.map(ida => {
+                  const vta = enRonda[ri].find(m => m.id === ida.return) || null;
+                  const a = equipo(ida.team1), b = equipo(ida.team2);
+                  const gi = goles(ida), gv = vta ? goles(vta) : null;
+                  // Global desde el lado de A (local en la ida): en la vuelta A es team2
+                  const global = gi && gv ? [gi[0] + gv[1], gi[1] + gv[0]] : null;
+                  const ganador = a && siguientes.has(a.key) ? 'a' : b && siguientes.has(b.key) ? 'b' : null;
+                  return {
+                    nombre: (ida.title.split(' - ')[0] || '').trim(),
+                    a: a || { name: ida.name1 ? `Ganador ${ida.name1}` : 'A definir', logo: null },
+                    b: b || { name: ida.name2 ? `Ganador ${ida.name2}` : 'A definir', logo: null },
+                    // CopáFácil rotula todos los cuadros con "1° GrupoA x 2° GrupoB"; el 2° cuadro
+                    // (Plata) en realidad es 3°/4° de cada grupo → se corre 2 puestos por cuadro previo
+                    cupo: (ida.title.split(' - ')[1] || '').trim()
+                      .replace(/(\d+)° Grupo\s*([A-Z])/g, (_, n, g) => `${Number(n) + 2 * fi}° Grupo ${g}`).replace(' x ', ' vs '),
+                    ida: gi, vuelta: gv, global, ganador,
+                  };
+                }),
+              };
+            }),
+          };
+        });
+        return new Response(JSON.stringify(out), { headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, 'Cache-Control': 'public, max-age=60' } });
+      }
+
       // ── ESPACIO GAMER (/eg-table) ─────────────────────────────────────
       // Desde la T4 la ex-liga 11x11 es "Espacio Gamer": CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA,
       // https://espaciogamer.cl/division/challengers-2-espacio-gamer-argentina/ (WordPress).

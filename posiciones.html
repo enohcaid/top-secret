@@ -32,6 +32,7 @@
   --vpn:    #F5C518;
   --vpug:   #3ECF8E;
   --e11:    #4A9EFF;
+  --plata:  #B9C0CA;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -222,6 +223,33 @@ td.left { text-align: left; }
 .preseason-sub { font-size:.88rem; line-height:1.5; color:var(--mid); max-width:640px; }
 .preseason-sub strong { color:var(--text); font-weight:600; }
 .preseason-sub a { color:var(--text); text-decoration:underline; text-underline-offset:3px; }
+/* ── PLAYOFFS T4 (posiciones-playoffs.js): Oro izquierda, Plata derecha ── */
+.po-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; margin-bottom:8px; }
+.po-fase { --po-acc:var(--gold); border:1px solid var(--border); border-top:3px solid var(--po-acc); border-radius:14px; background:var(--card); padding:18px 16px 20px; min-width:0; }
+.po-fase.po-plata { --po-acc:var(--plata); }
+.po-fase-head { display:flex; flex-direction:column; gap:4px; margin-bottom:6px; }
+.po-fase-kicker { font-size:.62rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--po-acc); }
+.po-fase-titulo { font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; font-weight:900; text-transform:uppercase; line-height:1; color:var(--text); }
+.po-ronda-titulo { font-family:'Barlow Condensed',sans-serif; font-size:.72rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--mid); padding:16px 0 8px; }
+.po-series { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+.po-serie { border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:color-mix(in srgb, var(--text, #fff) 2%, transparent); }
+.po-serie.us { border-color:color-mix(in srgb, var(--gold) 55%, transparent); background:color-mix(in srgb, var(--gold) 6%, transparent); }
+.po-serie-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px; }
+.po-llave { font-size:.62rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--po-acc); white-space:nowrap; }
+.po-cupo { font-size:.66rem; color:var(--mid); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.po-cols, .po-fila { display:grid; grid-template-columns:22px 1fr 26px 26px 30px; align-items:center; gap:4px; }
+.po-cols span { font-size:.56rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--mid); text-align:center; }
+.po-fila { padding:4px 0; }
+.po-logo { width:22px; height:22px; object-fit:contain; border-radius:4px; }
+.po-logo-vacio { display:block; background:var(--border); }
+.po-equipo { font-size:.84rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-left:4px; }
+.po-fila.us .po-equipo { color:var(--gold); }
+.po-gol { font-family:'Barlow Condensed',sans-serif; font-size:.95rem; font-weight:700; text-align:center; color:var(--text); }
+.po-glob { color:var(--po-acc); }
+.po-fila.queda { opacity:.45; }
+.po-fila.gana .po-equipo { font-weight:800; }
+@media(max-width:860px){ .po-grid { grid-template-columns:1fr; } }
+
 #t4-pane-e11 .preseason { border-left-color:var(--e11); }
 #t4-pane-e11 .preseason-kicker { color:var(--e11); }
 
@@ -430,10 +458,14 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
         <div>
           <div class="preseason-kicker">Temporada 4 · Pretemporada</div>
           <div class="preseason-title">Copa de Pretemporada VPUG</div>
-          <p class="preseason-sub">La <strong>Temporada 4 oficial todavía no arrancó</strong>: esta copa es la preparación del plantel antes del comienzo. Jugamos en el Grupo D, los lunes y miércoles.</p>
+          <p class="preseason-sub">La <strong>Temporada 4 oficial todavía no arrancó</strong>: esta copa es la preparación del plantel antes del comienzo. Terminamos segundos en el Grupo D y pasamos a los playoffs de la Fase Oro.</p>
         </div>
       </div>
-      <div class="group-header">Copa de Pretemporada · Grupo D</div>
+      <div id="t4-vpug-playoffs-wrap" hidden>
+        <div class="group-header">Copa de Pretemporada · Playoffs</div>
+        <div class="po-grid" id="t4-vpug-playoffs"></div>
+      </div>
+      <div class="group-header">Copa de Pretemporada · Así quedó el Grupo D</div>
       <div class="table-wrap"><table class="standings-table" id="t4-vpug-table"></table></div>
     </div>
 
@@ -997,6 +1029,7 @@ fetchT4EG();
 
 
 </script>
+<script src="posiciones-playoffs.js?v=1"></script>
 <script src="layout.js?v=23"></script>
 </body>
 </html>
