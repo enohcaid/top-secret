@@ -366,6 +366,10 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
 .today-matches-panel{background:rgba(201,168,76,.06);border:1.5px solid rgba(201,168,76,.35);border-radius:10px;padding:12px 16px;margin-bottom:20px;}
 .tmp-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.2);}
 .tmp-title{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+/* Botón "Convocar" (convocatoria-convocar.js): mensaje al portapapeles + placa de los partidos de hoy */
+.tmp-convocar{margin-left:auto;display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border:0;border-radius:999px;background:var(--gold);color:#0B0A07;font-family:'Barlow',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:opacity .15s;}
+.tmp-convocar:hover{opacity:.88;}
+.tmp-convocar:disabled{opacity:.6;cursor:default;}
 .tmp-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);}
 .tmp-row:last-child{border-bottom:none;}
 .tmp-time{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:var(--gold);min-width:50px;}
@@ -418,7 +422,8 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
 
     <!-- HOY: partidos o entrenamiento -->
     <div id="todayMatchesPanel" class="today-matches-panel">
-      <div class="tmp-head"><span class="tmp-title" id="tmpTitle">Hoy</span></div>
+      <div class="tmp-head"><span class="tmp-title" id="tmpTitle">Hoy</span>
+        <button type="button" class="tmp-convocar" id="convocarBtn" onclick="convocar()" title="Copia el mensaje para el grupo y comparte los partidos de hoy"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Convocar</button></div>
       <div class="tmp-list"></div>
     </div>
     </div>
@@ -2635,6 +2640,8 @@ if (!EDIT_MODE) {
 }
 </script>
 <script src="video-equipo.js?v=2"></script>
+<script src="calendario-share.js?v=4"></script>
+<script src="convocatoria-convocar.js?v=1"></script>
 <script src="layout.js?v=23"></script>
 </body>
 </html>
