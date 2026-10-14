@@ -97,6 +97,26 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · verso 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-14",
+      "id": "2026-10-14-1",
+      "archivo": "2026-10-14-1 - Pared.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_14_1.py",
+      "duracion": 83,
+      "nombre": "Pared",
+      "concepto": "El rival de los entrenamientos — no se eligen, se chocan todos los días en el reducido; se putean, se empujan, pero después de la pared perfecta se miran y se entienden sin hablar.",
+      "bpm": 136,
+      "tonalidad": "do# menor",
+      "rasgo": "dos leads que chocan y convergen: FM staccato vs saw legato, arrancan independientes, pasan a llamada y respuesta, y terminan trabados en terceras paralelas",
+      "recursos": [
+        "lead FM metálico staccato (firma agresiva)",
+        "lead saw cálido legato con portamento (firma suave)",
+        "convergencia en terceras diatónicas (clímax)",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
