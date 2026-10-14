@@ -223,7 +223,7 @@ td.left { text-align: left; }
 .preseason-sub { font-size:.88rem; line-height:1.5; color:var(--mid); max-width:640px; }
 .preseason-sub strong { color:var(--text); font-weight:600; }
 .preseason-sub a { color:var(--text); text-decoration:underline; text-underline-offset:3px; }
-/* ── PLAYOFFS T4 (posiciones-playoffs.js): cuadro enfrentado — Oro izquierda, Plata espejada a la derecha, finales en el medio ── */
+/* ── PLAYOFFS T4 (posiciones-playoffs.js): cuadro de la Fase Oro (rondas en columnas con líneas) ── */
 .po-grid { border:1px solid var(--border); border-radius:14px; background:var(--card); padding:18px 14px 16px; margin-bottom:8px; }
 .br-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .br-hint { display:none; }
@@ -231,12 +231,12 @@ td.left { text-align: left; }
   /* Celular: ventana deslizable en las dos direcciones, centrada en nuestra llave al cargar */
   .po-grid { padding:12px 8px; }
   .br-scroll { max-height:70vh; overflow:auto; border-radius:10px; }
-  .po-grid .br-cuadro { min-width:1300px; }
+  .po-grid .br-cuadro { min-width:760px; }
   .br-hint { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 4px 10px; font-size:.72rem; color:var(--mid); }
   .br-ir { flex-shrink:0; padding:6px 12px; border-radius:999px; border:1px solid color-mix(in srgb, var(--gold) 55%, transparent); background:color-mix(in srgb, var(--gold) 10%, transparent); color:var(--gold); font-family:inherit; font-size:.7rem; font-weight:700; letter-spacing:.06em; cursor:pointer; }
   .br-ir[hidden] { display:none; }
 }
-.br-cuadro { display:grid; min-width:1150px; }
+.br-cuadro { display:grid; min-width:640px; }
 .oro   { --br-acc:var(--gold); }
 .plata { --br-acc:var(--plata); }
 .br-ronda, .br-ronda-titulo, .br-fase-head { --br-linea:color-mix(in srgb, var(--br-acc) 45%, transparent); }
@@ -256,10 +256,6 @@ td.left { text-align: left; }
 .br-ronda:not(.primera) .br-match::before { content:''; position:absolute; top:calc(50% + 7px); width:10px; border-top:1px solid var(--br-linea); }
 .br-ronda.oro:not(.primera) .br-match::before { left:0; }
 .br-ronda.plata:not(.primera) .br-match::before { right:0; }
-/* Las dos finales, juntas en el medio, unidas por una línea */
-.br-ronda.final.oro .br-match::after, .br-ronda.final.plata .br-match::after { content:''; position:absolute; top:calc(50% + 7px); width:10px; border-top:1px solid var(--br-linea); }
-.br-ronda.final.oro .br-match::after { right:0; }
-.br-ronda.final.plata .br-match::after { left:0; }
 .br-card { position:relative; width:100%; border:1px solid var(--border); border-radius:8px; background:color-mix(in srgb, var(--text, #fff) 3%, transparent); padding:2px 0; }
 .br-ronda.final .br-card { border-color:color-mix(in srgb, var(--br-acc) 50%, transparent); }
 .br-card.us { border-color:color-mix(in srgb, var(--gold) 60%, transparent); background:color-mix(in srgb, var(--gold) 8%, transparent); }
@@ -490,7 +486,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
         </div>
       </div>
       <div id="t4-vpug-playoffs-wrap" hidden>
-        <div class="group-header">Copa de Pretemporada · Playoffs</div>
+        <div class="group-header">Copa de Pretemporada · Playoff Fase Oro</div>
         <div class="po-grid" id="t4-vpug-playoffs"></div>
       </div>
       <div class="group-header">Copa de Pretemporada · Así quedó el Grupo D</div>
@@ -562,7 +558,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="posiciones-share.js?v=3"></script>
+<script src="posiciones-share.js?v=4"></script>
 <script>
 /* page load */
 window.addEventListener('DOMContentLoaded', () => {
@@ -1057,7 +1053,7 @@ fetchT4EG();
 
 
 </script>
-<script src="posiciones-playoffs.js?v=5"></script>
+<script src="posiciones-playoffs.js?v=6"></script>
 <script src="layout.js?v=23"></script>
 </body>
 </html>

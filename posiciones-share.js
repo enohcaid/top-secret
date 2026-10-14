@@ -284,10 +284,10 @@
     return cv;
   }
 
-  // ── Cuadro de playoffs (placa apaisada 1920px) ────────────────────────────
-  // Mismo cuadro enfrentado del sitio: Oro de izquierda a derecha, Plata espejada,
-  // las dos finales juntas en el medio unidas por una línea. Datos = los de
-  // posiciones-playoffs.js (/vpug-playoffs-t4), que llama TSPos.registerBracket().
+  // ── Cuadro de playoffs ─────────────────────────────────────────────────────
+  // El mismo cuadro del sitio. Hoy solo la Fase Oro (1080px de ancho, como las tablas); si se le
+  // pasan dos fases, las dibuja enfrentadas en 1920px. Datos = los de posiciones-playoffs.js
+  // (/vpug-playoffs-t4), que llama TSPos.registerBracket().
   const PLATA = '#B9C0CA';
   let bracket = null;   // { fases, season }
   const cortoBr = s => String(s ?? '')
@@ -436,7 +436,7 @@
 
   async function makeBracket() {
     const prevW = W;
-    W = 1920;
+    W = bracket.fases.length > 1 ? 1920 : 1080;   // un solo cuadro (Fase Oro) entra en el ancho de las placas
     try {
       const cv = await drawBracket();
       return { cv, name: 'top-secret-playoffs-copa-de-pretemporada-vpug.png', text: `Playoffs · Copa de Pretemporada VPUG — Top Secret FC\n${PAGE_URL}` };

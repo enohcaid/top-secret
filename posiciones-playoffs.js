@@ -1,7 +1,7 @@
 // ─── Posiciones · Playoffs de la Copa de Pretemporada VPUG (T4) ──────────────
 // Cuadro de eliminación enfrentado (rondas en columnas, líneas que unen cada par de
-// llaves con la siguiente): Fase Oro a la izquierda, Fase Plata espejada a la derecha y
-// las dos finales juntas en el medio.
+// llaves con la siguiente). Solo la Fase Oro, la nuestra (Juan, 2026-10-14): la Plata es otro torneo
+// que nunca se cruza con la Oro, así que no se muestra. cuadro() igual sabe dibujar los dos lados.
 // En vivo desde CopáFácil vía el Worker /vpug-playoffs-t4. Se carga después del script
 // inline de posiciones.html (usa WORKER_BASE y OUR_LOGO). Si el Worker falla, se oculta.
 (function () {
@@ -94,10 +94,12 @@
       if (!r.ok) throw new Error(r.status);
       const fases = await r.json();
       if (!Array.isArray(fases) || !fases.length) throw new Error('vacío');
-      cont.innerHTML = cuadro(fases.find(f => !/plata/i.test(f.titulo)), fases.find(f => /plata/i.test(f.titulo)));
+      const oro = fases.find(f => !/plata/i.test(f.titulo));
+      if (!oro) throw new Error('sin Fase Oro');
+      cont.innerHTML = cuadro(oro, null);
       wrap.hidden = false;
       // Botón "Compartir cuadro" (placa en posiciones-share.js)
-      if (window.TSPos && TSPos.registerBracket) TSPos.registerBracket(fases, wrap, 't4');
+      if (window.TSPos && TSPos.registerBracket) TSPos.registerBracket([oro], wrap, 't4');
       // Celular: el cuadro es más ancho que la pantalla → arranca centrado en nuestra llave
       const sc = cont.querySelector('.br-scroll');
       const centrar = suave => {
