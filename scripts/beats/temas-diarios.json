@@ -157,6 +157,27 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-14",
+      "id": "2026-10-14-4",
+      "archivo": "2026-10-14-4 - Vestuario.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_14_4.py",
+      "duracion": 103,
+      "nombre": "Vestuario",
+      "concepto": "El vestuario después de perder un partido que tenían ganado — nadie habla, el silencio pesa más que cualquier grito, hasta que alguien dice 'va de nuevo' y el silencio se rompe en convicción.",
+      "bpm": 110,
+      "tonalidad": "re# menor",
+      "rasgo": "gota que llena: pluck cristalino que cae a intervalos irregulares como gotas en un vestuario silencioso; se densifica sección a sección y en el gancho C explota en arpeggio rápido",
+      "recursos": [
+        "gota cristalina con armónicos de guitarra (firma del tema)",
+        "pad oscuro con PWM lento (pulso grave y denso)",
+        "cello sintetizado con ataque de arco y vibrato (verso)",
+        "lead saw cálido con vibrato amplio (ganchos B y C)",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
