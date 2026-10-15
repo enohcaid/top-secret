@@ -233,4 +233,10 @@ while (Date.now() < limite) {
   } else await espera(30000);
 }
 log('Fin del horario. Retransmisor apagado.');
+// Partidos de la noche a seed_matches.js desde EA (los guarda el Worker): así los números del sitio y del modo pausa
+// se actualizan solos. Los que no cierran (cortados) quedan avisados en el log para revisar a mano.
+if (!PRUEBA) {
+  try { log('Carga desde EA:', (await node('scripts/cargar-partidos-ea.mjs', '--aplicar', '--commit')).trim().replace(/\s*\n\s*/g, ' · ').slice(0, 600)); }
+  catch (e) { log('No pude cargar los partidos desde EA:', e.message.slice(0, 200)); }
+}
 process.exit(0);

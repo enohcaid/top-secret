@@ -155,7 +155,7 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 ## Common Tasks — Checklists
 
 **New match played**
-1. Read the report (image in `reportes/` or user-provided) → append the match object to `SEED_MATCHES`.
+1. Read the report (image in `reportes/` or user-provided) → append the match object to `SEED_MATCHES`. **Since 2026-10-15 official matches may already be there**, loaded automatically from EA at the end of each live night (`scripts/cargar-partidos-ea.mjs`, run by `retransmitir.mjs`) with `origen:'ea-auto'`: in that case complete THAT entry with the video report (possession, xG, corners, goal minutes, exact positions, names as shown in the report; the video wins on any difference) and remove `origen`, instead of adding a duplicate. Matches EA recorded inconsistently (e.g. a cut match logged as 3-0 with no goals) are skipped and reported as "REVISAR A MANO" in `fuentes/redes/retransmitir.log`.
 2. Verify rival name matches existing fixture entries.
 3. Run `node scripts/ea-completar.mjs` (then `--aplicar`) to fill the per-player stats the video lacks from EA (stored by the Worker, see `docs/conocimiento/reference_ea_proclubs_api.md`). EA only keeps 5 matches per type in its API, but the Worker cron saves every official calendar match. If a knockout series (ida/vuelta) ended won-one-lost-one by the same goal difference, the Worker auto-adds the 3rd match to the calendar; load its report as a separate entry with `notes` containing "Desempate (3er partido)". Commit.
 

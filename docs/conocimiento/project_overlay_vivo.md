@@ -46,6 +46,10 @@ Pedido de Juan (2026-10-15): contenido entretenido en los menús, el lobby y la 
 - **Guion** en `charlas.json`: marcadores {A} {B} {rival} {hora} {pj}… y `requiere`/`despues` (solo después de una victoria, derrota o empate). Respetar las reglas de nombres de ligas y los gamertags tal cual.
 - **Música:** temas propios del club (`fuentes/musica/propios`, R2; lista en `fuentes/stream/musica.json` que arma `datos-vivo.mjs`). Suena solo en la página horizontal (fuente de navegador con `reroute_audio`: el audio de OBS es uno solo para las dos versiones). Volumen 0,10, porque los temas vienen a -14 LUFS: así quedan en ~-34 dB, al nivel del partido. En pausa, `retransmitir.mjs` baja la fuente "Partido" a -22 dB por obs-websocket.
 - **Probar:** `demo-vivo.mjs … --modo pausa@25 --modo juego@95`.
+- **Datos que se actualizan solos (pedido de Juan, 2026-10-15):**
+  - convocados de hoy (`datos-vivo.mjs` → `convocados()`, misma regla que `getStatus()` de convocatoria.html: verde o amarillo), cada 5 min en `estado.jugadores`: solo ellos en el palco y las charlas (si ninguno tiene clips, todos);
+  - partidos de la noche a `seed_matches.js` desde EA al terminar el horario del vivo (`scripts/cargar-partidos-ea.mjs --aplicar --commit`), así la temporada del modo pausa y el sitio quedan al día. Quedan con `origen:'ea-auto'` para completarlos con el reporte del video. No carga los `sospechoso` ni los que no cierran (goles de los jugadores ≠ resultado: el 14/10 EA registró un 3-0 de un partido cortado que el Worker no marcó). Esos quedan como "REVISAR A MANO" en el log;
+  - en T5: cambiar "TEMPORADA 4" (`overlay-pausa.js`) y `T4_CUTOFF` (`datos-vivo.mjs`).
 
 ## Clips de jugadores
 - `node scripts/stream/clip-jugador.mjs <gt> <emoción>` → `fuentes/stream/clips/<gt>/<emoción>.webm` (VP9 con alfa). Se genera **de cuerpo entero** (render `Frente4.png` sobre gris, con aire arriba) en Canva "Imagen a video" y después se recorta del pecho para arriba, con un encuadre fijo relativo al cuerpo (ver abajo). Corrección de Juan: con el busto recortado de entrada, el modelo inventaba los brazos y le sacaba los guantes.
