@@ -137,6 +137,26 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-14",
+      "id": "2026-10-14-3",
+      "archivo": "2026-10-14-3 - Tribuna.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_14_3.py",
+      "duracion": 86,
+      "nombre": "Tribuna",
+      "concepto": "El jugador que no tiene a nadie en la tribuna — juega igual, pero en cada gol mira hacia arriba y no encuentra a nadie; el día que deja de mirar, juega libre.",
+      "bpm": 132,
+      "tonalidad": "la menor",
+      "rasgo": "arpa fantasma: arpa sintetizada grave con segundo parcial detuneado y caída de pitch que lleva la melodía sola; en el gancho C suena armonizada con el lead — ya no está sola",
+      "recursos": [
+        "arpa fantasma grave (firma del tema)",
+        "pad etéreo de triángulos detuneados",
+        "lead cálido con overdrive y portamento",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
