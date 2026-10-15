@@ -19,10 +19,11 @@ export async function guardarKV(clave, valor) {
 
 export const leer = () => leerKV('aprobaciones', { lotes: [] });
 
-// Agrega (o reemplaza, si ya existe con ese id) un lote. Se guardan como mucho los últimos 15.
+// Agrega (o reemplaza, si ya existe con ese id) un lote. Se guardan como mucho los últimos 40 (con 15 se caían
+// lotes programados todavía sin publicar cuando entraban varias piezas juntas, 2026-10-15).
 export async function agregarLote(lote) {
   const data = await leer();
-  data.lotes = [lote, ...data.lotes.filter(l => l.id !== lote.id)].slice(0, 15);
+  data.lotes = [lote, ...data.lotes.filter(l => l.id !== lote.id)].slice(0, 40);
   await guardarKV('aprobaciones', data);
 }
 
