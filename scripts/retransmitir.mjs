@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Vivo de los partidos. Desde 2026-10-15 la PS5 transmite a twitch.tv/enohcaid (señal fuente, sin gráficos) y esta PC
 // arma las 3 transmisiones oficiales con el overlay (scripts/stream/): Twitch topsecretfc, Kick y YouTube.
-//   enohcaid ──streamlink (http://127.0.0.1:8787)──▶ OBS (escena "Vivo": partido + overlay.html, NVENC 1080p60)
-//            ──▶ MediaMTX (rtmp://127.0.0.1:1935/live/ts) ──ffmpeg -c copy, tee──▶ topsecretfc + Kick + YouTube
+//   enohcaid ──streamlink (http://127.0.0.1:8787)──▶ OBS (lienzo 3000×1920: versión horizontal + vertical, ver
+//            scripts/stream/obs-config.mjs) ──▶ MediaMTX (rtmp://127.0.0.1:1935/live/mix, local)
+//            ──ffmpeg (scripts/stream/salidas.mjs: recorta y codifica 720p30)──▶ topsecretfc + Kick + YouTube (+ Instagram vertical)
 // Si la cadena con overlay no levanta (OBS, MediaMTX), reenvía enohcaid directo sin gráficos para no dejar los canales
 // en negro. Con --sin-overlay va siempre directo. Al detectar el vivo publica (una vez por noche) la historia
 // "EN VIVO" en Instagram (placa-envivo.mjs) y mantiene en fuentes/stream/estado.json el partido actual para la placa
@@ -18,11 +19,12 @@ import { spawn, execFile, execFileSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
+import { argsSalidas } from './stream/salidas.mjs';
 
 loadEnv();
 const E = process.env;
 const LOGIN = 'enohcaid', FUENTE = `twitch.tv/${LOGIN}`;
-const LOCAL = 'rtmp://127.0.0.1:1935/live/ts';
+const LOCAL = 'rtmp://127.0.0.1:1935/live/mix';
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
 const MTX = path.resolve('fuentes/stream/bin/mediamtx/mediamtx.exe');
 const ESTADO = path.resolve('fuentes/stream/estado.json');
@@ -94,16 +96,19 @@ async function enVivo() {
   } catch { return null; }                                     // sin respuesta: no se sabe
 }
 
-// Reenvía una entrada (la PS5 directo por streamlink, o la señal con overlay de MediaMTX) a todos los destinos, sin recodificar.
+// Reenvía a todos los destinos: 'directo' = la PS5 por streamlink sin recodificar; 'overlay' = el lienzo de OBS desde
+// MediaMTX, recortado y codificado por salidas.mjs.
 function retransmitir(entrada) {
   return new Promise(res => {
     const directo = entrada === 'directo';
     const sl = directo ? spawn('python', ['-m', 'streamlink', '--twitch-disable-ads', '--retry-open', '3', '-O', FUENTE, 'best'], { stdio: ['ignore', 'pipe', 'pipe'] }) : null;
     const salidas = destinos.map(d => `[f=flv:onfail=ignore]${d.url}`).join('|');
-    const ff = spawn(ffmpegPath, ['-hide_banner', '-loglevel', 'warning', ...(directo ? ['-i', 'pipe:0'] : ['-rw_timeout', '15000000', '-i', LOCAL]),
-      '-map', '0:v', '-map', '0:a?', '-c', 'copy',
-      '-tag:v', '7', '-tag:a', '10',                         // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
-      '-f', 'tee', salidas], { stdio: [directo ? 'pipe' : 'ignore', 'ignore', 'pipe'] });
+    const args = directo
+      ? ['-hide_banner', '-loglevel', 'warning', '-i', 'pipe:0', '-map', '0:v', '-map', '0:a?', '-c', 'copy',
+        '-tag:v', '7', '-tag:a', '10',                       // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
+        '-f', 'tee', salidas]
+      : argsSalidas({ entrada: LOCAL, horizontales: destinos.map(d => d.url), vertical: null, entradaArgs: ['-rw_timeout', '15000000'] });
+    const ff = spawn(ffmpegPath, args, { stdio: [directo ? 'pipe' : 'ignore', 'ignore', 'pipe'] });
     if (sl) {
       sl.stdout.pipe(ff.stdin); ff.stdin.on('error', () => {});
       sl.stderr.on('data', d => { const t = String(d).trim(); if (/error|fail/i.test(t)) log('streamlink:', t.slice(0, 200)); });
