@@ -193,12 +193,14 @@ async function armarClips(OUT, clave) {
 }
 
 // Avisa al overlay del vivo (scripts/stream/overlay.html lee fuentes/stream/estado.json cada 1,5 s):
-// tipo 'gol' | 'golRival' agrega un evento; tipo 'lado' con valor 'izq' | 'der' dice de qué lado está nuestra barra.
+// tipo 'gol' | 'golRival' agrega un evento; 'finPartido' agrega uno con resultado ('victoria'|'empate'|'derrota');
+// 'lado' ('izq'|'der') dice de qué lado está nuestra barra; 'modo' ('juego'|'reporte'|'pausa') qué hay en pantalla.
 function avisarOverlay(tipo, valor) {
   const f = path.join(ROOT, 'fuentes/stream/estado.json');
   let e = {}; try { e = JSON.parse(readFileSync(f, 'utf8')); } catch {}
   if (tipo === 'lado') e.lado = valor;
-  else e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo }].slice(-20);
+  else if (tipo === 'modo') e.modo = valor;
+  else e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo, ...(valor ? { resultado: valor } : {}) }].slice(-20);
   mkdirSync(path.dirname(f), { recursive: true });
   writeFileSync(f + '.tmp', JSON.stringify(e, null, 1)); renameSync(f + '.tmp', f);
 }
@@ -246,6 +248,11 @@ async function main() {
   };
   let ultimoReporte = '';
   let reportes = 0, goles = 0;
+  // Modo de la pantalla para el overlay: juego (marcador), reporte (pantallas de estadísticas, hace ≤ 12 s) o pausa
+  // (menús, lobby, espera: 25 s sin marcador; menos sería pausa en cada festejo o repetición). Y el resultado de cada
+  // partido, con los goles contados, al aparecer su primer reporte.
+  let modo = null, ultimoReporteSeg = -1e9, golesF = 0, golesC = 0, huboPartido = false;
+  const ponerModo = (m, seg) => { if (m !== modo && !vodId) { modo = m; avisarOverlay('modo', m); console.log(`[${hms(seg)}] modo: ${m}`); } };
   let trabajando = Promise.resolve();
 
   const procesar = async raw => {
@@ -257,7 +264,7 @@ async function main() {
       const img = () => sharp(raw, { raw: { width: W, height: H, channels: 3 } });
       if (seg - ultimoMarcador > AUSENCIA_PARTIDO) {
         // vuelve el marcador tras un rato largo: arranca (o sigue tras el entretiempo) un partido
-        det.reiniciar(); partidos++; inicioMarcador = seg; recortePartido = false;
+        det.reiniciar(); partidos++; inicioMarcador = seg; recortePartido = false; huboPartido = true;
         const nombre = `partido-${String(partidos).padStart(2, '0')}-${hms(seg).replace(/:/g, '')}`;
         filaTop = null;
         archivoPartido = path.join(OUT, 'goles', `${nombre}-marcador.png`);
@@ -293,6 +300,7 @@ async function main() {
         const aFavor = filaTop === null ? null : ev.fila === filaTop;
         await img().jpeg({ quality: 88 }).toFile(path.join(OUT, 'goles', `${nombre}.jpg`));
         log('gol', { n: goles, seg: ts, hora: hms(ts), fila: ev.fila, aFavor, rival });
+        if (aFavor === true) golesF++; else if (aFavor === false) golesC++;
         if (!vodId && aFavor !== null) avisarOverlay(aFavor ? 'gol' : 'golRival');
         console.log(`[${hms(ts)}] cambio de marcador #${goles}${aFavor === null ? '' : aFavor ? ' — GOL DE TOP' : ' — gol en contra'}`);
       }
@@ -307,6 +315,13 @@ async function main() {
       const bajo = textos.join(' ').toLowerCase();
       const tabs = PESTANAS.filter(p => bajo.includes(p)).length;
       if (tabs >= 3) {
+        ultimoReporteSeg = seg;
+        if (huboPartido) {                                   // primer reporte después de un partido: terminó
+          const resultado = golesF > golesC ? 'victoria' : golesF < golesC ? 'derrota' : 'empate';
+          if (!vodId) avisarOverlay('finPartido', resultado);
+          console.log(`[${hms(seg)}] fin de partido (${golesF}-${golesC} según los goles contados): ${resultado}`);
+          huboPartido = false; golesF = golesC = 0;
+        }
         const firma = textos.slice().sort().join('|');
         const previo = new Set(ultimoReporte.split('|'));
         const comunes = textos.filter(x => previo.has(x)).length;
@@ -320,6 +335,7 @@ async function main() {
         }
       }
     }
+    ponerModo(enJuego ? 'juego' : seg - ultimoReporteSeg <= 12 ? 'reporte' : seg - ultimoMarcador >= 25 ? 'pausa' : (modo || 'pausa'), seg);
   };
 
   // ffmpeg: 1 cuadro/s crudo por stdout (+ grabación copiada en segmentos)

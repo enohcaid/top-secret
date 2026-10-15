@@ -40,9 +40,10 @@ fs.writeFileSync(path.join(PERFIL, 'basic.ini'), ini({
 fs.writeFileSync(path.join(PERFIL, 'streamEncoder.json'), JSON.stringify({ rate_control: 'CBR', bitrate: 20000, keyint_sec: 2, preset: 'p5', tune: 'hq', profile: 'high', bf: 2 }));
 fs.writeFileSync(path.join(PERFIL, 'service.json'), JSON.stringify({ type: 'rtmp_custom', settings: { server: 'rtmp://127.0.0.1:1935/live', key: 'mix', use_auth: false } }));
 
-const navegador = (name, archivo, w, h) => ({ id: 'browser_source', versioned_id: 'browser_source', name, uuid: uuid(name), settings: {
+// reroute_audio: el audio de la página (música del modo pausa, solo la horizontal) entra a la mezcla de OBS
+const navegador = (name, archivo, w, h, audio = false) => ({ id: 'browser_source', versioned_id: 'browser_source', name, uuid: uuid(name), settings: {
   is_local_file: true, local_file: path.join(ROOT, 'scripts', 'stream', archivo).replaceAll('\\', '/'),
-  width: w, height: h, fps: 30, fps_custom: true, reroute_audio: false, shutdown: false, restart_when_active: false } });
+  width: w, height: h, fps: 30, fps_custom: true, reroute_audio: audio, shutdown: false, restart_when_active: false } });
 let nItem = 0;
 const item = (name, pos, caja) => ({ name, source_uuid: uuid(name), id: ++nItem, visible: true, locked: true, pos: { x: pos[0], y: pos[1] }, rot: 0,
   scale: { x: 1, y: 1 }, align: 5, bounds_type: 2, bounds_align: 0, bounds: { x: caja[0], y: caja[1] }, crop_left: 0, crop_top: 0, crop_right: 0, crop_bottom: 0 });
@@ -57,7 +58,7 @@ fs.writeFileSync(path.join(ESCENAS, 'TopSecret.json'), JSON.stringify({
     { id: 'ffmpeg_source', versioned_id: 'ffmpeg_source', name: 'Partido', uuid: uuid('Partido'), settings: {
       is_local_file: false, input: 'http://127.0.0.1:8787/', input_format: '', reconnect_delay_sec: 2, restart_on_activate: true,
       buffering_mb: 4, hw_decode: true, close_when_inactive: false, clear_on_media_end: false } },
-    navegador('Overlay', 'overlay.html', 1920, 1080),
+    navegador('Overlay', 'overlay.html', 1920, 1080, true),
     navegador('Overlay vertical', 'overlay-vertical.html', 1080, 1920),
     { id: 'scene', versioned_id: 'scene', name: 'Vivo', uuid: uuid('Vivo'), settings: { id_counter: nItem + 1, custom_size: false, items } },
   ],

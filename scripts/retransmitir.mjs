@@ -23,6 +23,8 @@ import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
 import { argsSalidas } from './stream/salidas.mjs';
 import { crearVivoIg } from './stream/ig-vivo.mjs';
+import { temporada, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
+const listaMusica = () => prepararMusica(log);
 
 loadEnv();
 const E = process.env;
@@ -90,9 +92,24 @@ async function actualizarPartido() {
     Object.assign(e, p
       ? { torneo: [p.liga, p.torneo !== p.liga && p.torneo, p.etapa].filter(Boolean).join(' · ').toUpperCase(), rival: p.rival, escudo: p.escudo || '' }
       : { torneo: '', rival: '', escudo: '' });
+    // Para el modo pausa (overlay-pausa.js): partidos que faltan esta noche y números de la temporada
+    const ahoraHM = new Date().toLocaleTimeString('en-GB', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
+    e.proximos = partidos.filter(x => x.hora >= ahoraHM);
+    e.temporada = await temporada();
     fs.mkdirSync(path.dirname(ESTADO), { recursive: true });
     fs.writeFileSync(ESTADO + '.tmp', JSON.stringify(e, null, 1)); fs.renameSync(ESTADO + '.tmp', ESTADO);
   } catch (err) { log('No pude actualizar el partido del overlay:', err.message); }
+}
+
+// En el modo pausa baja el audio del juego (menús de FC27) para que se escuche la música propia
+let modoAudio = null;
+async function audioSegunModo() {
+  let modo = null; try { modo = JSON.parse(fs.readFileSync(ESTADO, 'utf8')).modo; } catch {}
+  const pausa = modo === 'pausa';
+  if (pausa === modoAudio) return;
+  modoAudio = pausa;
+  try { const o = await conectarObs({ timeout: 3000 }); try { await o.pedir('SetInputVolume', { inputName: 'Partido', inputVolumeDb: pausa ? -22 : 0 }); } finally { o.cerrar(); } }
+  catch { modoAudio = null; }                                  // reintenta en la próxima vuelta
 }
 
 // ¿Está en vivo la PS5? GQL de Twitch con el Client-ID público (sin bloquear el proceso).
@@ -167,6 +184,8 @@ async function sesion() {
   try { fs.rmSync(ESTADO, { force: true }); } catch {}
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
+  if (conOverlay) await listaMusica();
+  const audio = setInterval(audioSegunModo, 3000);
   try {
     if (conOverlay) {
       await levantarCadena();
@@ -198,7 +217,7 @@ async function sesion() {
       log(`Retransmisión directa terminada (ffmpeg ${code}).`);
       await espera(10000);
     }
-  } finally { clearInterval(partido); }
+  } finally { clearInterval(partido); clearInterval(audio); modoAudio = null; }
 }
 
 log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}${conOverlay ? ' con overlay' : ' sin overlay'}. Esperando que ${FUENTE} esté en vivo (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);

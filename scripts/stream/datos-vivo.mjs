@@ -1,0 +1,32 @@
+// Datos para el overlay del vivo (los usan retransmitir.mjs y demo-vivo.mjs; rutas relativas a la raíz del repo).
+import fs from 'fs';
+import path from 'path';
+import { execFileSync } from 'child_process';
+import { pathToFileURL } from 'url';
+
+// Números de la temporada (T4: partidos después de T4_CUTOFF) desde seed_matches.js
+const T4_CUTOFF = '2026-09-28';
+export async function temporada() {
+  try {
+    const { SEED_MATCHES } = await import(pathToFileURL(path.resolve('seed_matches.js')).href + '?' + Date.now());
+    const t = { pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0 }, goles = {};
+    for (const m of SEED_MATCHES.filter(m => m.date > T4_CUTOFF)) {
+      const [a, b] = String(m.match_result || '').split('-').map(Number); if (Number.isNaN(a) || Number.isNaN(b)) continue;
+      t.pj++; t.gf += a; t.gc += b; if (a > b) t.g++; else if (a < b) t.p++; else t.e++;
+      for (const j of m.players || []) { const gt = j.matched || j.name; if (j.goals) goles[gt] = (goles[gt] || 0) + j.goals; }
+    }
+    const [goleador, golesGoleador] = Object.entries(goles).sort((x, y) => y[1] - x[1])[0] || [];
+    return { ...t, goleador, golesGoleador };
+  } catch { return null; }
+}
+
+// Música de fondo del modo pausa: los temas propios del club (fuentes/musica/propios, de R2), lista para el overlay
+export async function listaMusica(log = console.log) {
+  try {
+    execFileSync(process.execPath, ['scripts/r2.mjs', 'sync-down', '_fuentes/musica/propios', 'fuentes/musica/propios'], { stdio: 'ignore', timeout: 300000 });
+    const temas = fs.readdirSync('fuentes/musica/propios').filter(a => /[.]mp3$/i.test(a)).map(a => '../../fuentes/musica/propios/' + encodeURIComponent(a));
+    fs.writeFileSync(path.resolve('fuentes/stream/musica.json'), JSON.stringify(temas));
+    log(`Música del modo pausa: ${temas.length} temas propios.`);
+  } catch (e) { log('No pude preparar la música del modo pausa:', e.message.slice(0, 150)); }
+}
+

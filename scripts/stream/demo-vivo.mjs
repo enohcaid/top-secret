@@ -3,7 +3,7 @@
 // Enohcaid, dispara eventos de gol en los segundos indicados y graba lo que saldría para las redes (las mismas salidas
 // que usa retransmitir.mjs: salidas.mjs) en demo-horizontal.mp4 y demo-vertical.mp4.
 //   node scripts/stream/demo-vivo.mjs <video.mp4> --dur 110 --gol 34 --golRival 94 [--lado der@63 …] [--fecha 2026-10-14] [--out carpeta]
-// (--lado simula lo que en vivo detecta vigia-vivo.mjs: de qué lado está nuestra barra de FC27)
+// (--lado izq|der@N y --modo pausa|juego@N simulan lo que en vivo detecta vigia-vivo.mjs)
 // Con DEMO_IG_URL en el entorno (URL+clave rtmps de un vivo de Instagram en modo "Practicar") la vertical va ahí.
 // Al terminar cierra todo y deja la configuración de OBS como estaba (obs-config.mjs).
 import fs from 'fs';
@@ -11,6 +11,8 @@ import path from 'path';
 import { spawn, execFileSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { argsSalidas } from './salidas.mjs';
+import { temporada, listaMusica } from './datos-vivo.mjs';
+import { conectarObs } from './obs-ws.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
@@ -18,6 +20,7 @@ const VIDEO = path.resolve(process.argv[2]);
 const DUR = +arg('--dur', 110), FECHA = arg('--fecha', '2026-10-14');
 const OUT = path.resolve(arg('--out', path.join(ROOT, 'fuentes', 'stream', 'preview')));
 const eventos = [...['gol', 'golRival'].flatMap(t => process.argv.flatMap((a, i) => a === '--' + t ? [{ tipo: t, seg: +process.argv[i + 1] }] : [])),
+  ...process.argv.flatMap((a, i) => a === '--modo' ? [{ tipo: 'modo', valor: process.argv[i + 1].split('@')[0], seg: +process.argv[i + 1].split('@')[1] }] : []),
   ...process.argv.flatMap((a, i) => a === '--lado' ? [{ tipo: 'lado', valor: process.argv[i + 1].split('@')[0], seg: +process.argv[i + 1].split('@')[1] }] : [])];
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
 const ESCENAS = path.join(process.env.APPDATA, 'obs-studio', 'basic', 'scenes');
@@ -25,13 +28,16 @@ const ESTADO = path.join(ROOT, 'fuentes', 'stream', 'estado.json');
 const espera = ms => new Promise(r => setTimeout(r, ms));
 const log = m => console.log(`[${new Date().toLocaleTimeString('es-AR')}] ${m}`);
 
-// Partido de la fecha para la placa (como hace retransmitir.mjs)
-let p = {};
-try { p = JSON.parse(execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'placa-envivo.mjs'), '--json', '--fecha', FECHA], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().split('\n').pop())[0] || {}; }
-catch (e) { try { p = JSON.parse(String(e.stdout).trim().split('\n').pop())[0] || {}; } catch {} }
+// Partidos de la fecha para la placa y el modo pausa (como hace retransmitir.mjs)
+let todos = [];
+try { todos = JSON.parse(execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'placa-envivo.mjs'), '--json', '--fecha', FECHA], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().split('\n').pop()); }
+catch (e) { try { todos = JSON.parse(String(e.stdout).trim().split('\n').pop()); } catch {} }
+const p = todos[0] || {};
 const estadoPrevio = fs.existsSync(ESTADO) ? fs.readFileSync(ESTADO, 'utf8') : null;
 const escribir = e => { fs.writeFileSync(ESTADO + '.tmp', JSON.stringify(e, null, 1)); fs.renameSync(ESTADO + '.tmp', ESTADO); };
-const estado = { torneo: [p.liga, p.torneo !== p.liga && p.torneo, p.etapa].filter(Boolean).join(' · ').toUpperCase(), rival: p.rival || '', escudo: p.escudo || '', eventos: [] };
+const estado = { torneo: [p.liga, p.torneo !== p.liga && p.torneo, p.etapa].filter(Boolean).join(' · ').toUpperCase(), rival: p.rival || '', escudo: p.escudo || '', eventos: [],
+  proximos: todos.slice(1), temporada: await temporada() };
+await listaMusica();
 escribir(estado);
 
 // La fuente "Partido" pasa a leer el video grabado
@@ -73,7 +79,10 @@ const grabaciones = (async () => {
 // Eventos de gol, contados desde que se lanzó OBS (la fuente arranca al cargar la colección)
 for (const ev of eventos.sort((a, b) => a.seg - b.seg)) {
   await espera(Math.max(0, t0 + ev.seg * 1000 - Date.now()));
-  if (ev.tipo === 'lado') estado.lado = ev.valor; else estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo });
+  if (ev.tipo === 'lado') estado.lado = ev.valor; else if (ev.tipo === 'modo') {
+    estado.modo = ev.valor;                                  // como retransmitir.mjs: en pausa baja el audio del juego
+    try { const o = await conectarObs(); await o.pedir('SetInputVolume', { inputName: 'Partido', inputVolumeDb: ev.valor === 'pausa' ? -22 : 0 }); o.cerrar(); } catch {}
+  } else estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo });
   escribir(estado);
   log(`evento ${ev.tipo}${ev.valor ? ' ' + ev.valor : ''} (seg ${ev.seg})`);
 }

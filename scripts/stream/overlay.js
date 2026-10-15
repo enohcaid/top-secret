@@ -5,9 +5,10 @@ const q = new URLSearchParams(location.search);
 const CLIPS = q.get('clips') || '../../fuentes/stream/clips/';
 const ESTADO = q.get('estado') || '../../fuentes/stream/estado.json';
 const ESPERA = ['aliento', 'indicaciones', 'agitado', 'sudor', 'aplaude', 'pide', 'calma'];
-const EVENTO = { gol: ['gol', 'festejo'], golRival: ['frustrado', 'reclama'] };
+// Reacciones: goles (vigia-vivo.mjs) y fin de partido según el resultado
+const EVENTO = { gol: ['gol', 'festejo'], golRival: ['frustrado', 'reclama'], victoria: ['festejo', 'gol'], derrota: ['triste', 'frustrado'], empate: ['aplaude', 'aliento'] };
 const DICE = { aliento: 'ALIENTA', indicaciones: 'DA INDICACIONES', agitado: 'RECUPERA AIRE', sudor: 'CONCENTRADO', aplaude: 'APLAUDE',
-  pide: 'PIDE LA PELOTA', calma: 'PIDE CALMA', gol: 'GRITO DE GOL', festejo: 'FESTEJA', frustrado: 'SE LAMENTA', reclama: 'RECLAMA', triste: 'SE LAMENTA' };
+  pide: 'PIDE LA PELOTA', calma: 'PIDE CALMA', habla: 'HABLA', escucha: 'ESCUCHA', gol: 'GRITO DE GOL', festejo: 'FESTEJA', frustrado: 'SE LAMENTA', reclama: 'RECLAMA', triste: 'SE LAMENTA' };
 const $ = id => document.getElementById(id);
 const azar = a => a[Math.floor(Math.random() * a.length)];
 const leer = async url => { try { const r = await fetch(url + '?' + Date.now(), { cache: 'no-store' }); return r.ok ? r.json() : null; } catch { return null; } };
@@ -88,13 +89,16 @@ async function actualizar() {
   if (e) {
     estado = e;
     ponerLado(e.lado);
+    window.pausa?.poner(e.modo === 'pausa');           // menús/lobby/espera: overlay-pausa.js
     const t = $('torneo'); t.hidden = !e.torneo;
     $('torneoTxt').textContent = e.torneo || ''; $('rivalTxt').textContent = e.rival ? 'vs ' + e.rival : '';
     if (e.escudo) { $('escudo').src = e.escudo; $('escudo').hidden = false; } else $('escudo').hidden = true;
     for (const ev of e.eventos || []) {
       if (visto.has(ev.id)) continue; visto.add(ev.id);
       if (!arranco) continue;                                  // los eventos viejos (de antes de abrir el overlay) no se reproducen
-      evento = ev.tipo; if (ev.tipo === 'gol') gol();
+      if (ev.tipo === 'finPartido') { window.ultimoResultado = ev.resultado; evento = ev.resultado; }
+      else evento = ev.tipo;
+      if (ev.tipo === 'gol') gol();
       vids[activo].pause(); siguiente();                       // el evento corta el clip de espera
     }
   }

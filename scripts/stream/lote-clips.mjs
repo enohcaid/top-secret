@@ -13,7 +13,8 @@ import { pathToFileURL } from 'url';
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const HABITUALES = ['Juan_Martinez4', 'nikileo527', 'NicoBJ_96', 'pepolemmo2710', 'Guiidow', 'RS32-DaniStone',
   'endiabladorojo66', 'Ivan_Cabj_La12', 'Cabers14', 'Lautavester7', 'Huber236'];
-const RONDAS = [['aliento', 'indicaciones', 'gol', 'frustrado'], ['agitado', 'sudor', 'pide', 'reclama'], ['aplaude', 'calma', 'festejo', 'triste']];
+// habla/escucha temprano: son las de las charlas del modo pausa (overlay)
+const RONDAS = [['aliento', 'indicaciones', 'gol', 'frustrado'], ['habla', 'escucha', 'agitado', 'reclama'], ['sudor', 'pide', 'aplaude', 'calma'], ['festejo', 'triste']];
 const args = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const jugadores = args.length ? args : HABITUALES;
 const LOG = path.join(ROOT, 'fuentes', 'stream', 'lote-clips.log');

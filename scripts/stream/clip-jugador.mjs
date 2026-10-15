@@ -27,6 +27,9 @@ export const EMOCIONES = {
   aplaude: `El jugador aplaude a un compañero por una buena jugada, asiente con la cabeza y levanta el pulgar. ${VUELVE} ${PLANO}`,
   pide: `El jugador pide la pelota: levanta una mano bien alta, la agita y grita mirando a un costado. ${VUELVE} ${PLANO}`,
   calma: `El jugador pide calma a sus compañeros: baja las dos manos abiertas despacio, con cara tranquila y segura. ${VUELVE} ${PLANO}`,
+  // charlas del modo pausa (overlay): uno habla, el otro escucha
+  habla: `El jugador charla con un compañero que está a su lado: mueve la boca al hablar, sonríe, gesticula con las dos manos explicando una jugada y mira a un costado. ${VUELVE} ${PLANO}`,
+  escucha: `El jugador escucha a un compañero que le habla desde un costado: lo mira, asiente con la cabeza, se ríe y se cruza de brazos. ${VUELVE} ${PLANO}`,
   gol: `El jugador grita un gol con euforia: abre bien la boca, aprieta los dos puños y los sacude a la altura del pecho, mirando a cámara con los ojos encendidos. ${PLANO}`,
   festejo: `El jugador festeja feliz: sonríe de oreja a oreja, levanta los brazos y aplaude, mirando a cámara. ${PLANO}`,
   frustrado: `El jugador se lamenta por un gol en contra: se lleva las dos manos a la cabeza, cierra los ojos y niega con la cabeza. ${PLANO}`,
