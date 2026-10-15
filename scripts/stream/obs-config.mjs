@@ -2,7 +2,7 @@
 // Escribe la configuración de OBS para el vivo con overlay (perfil y colección "TopSecret") en %APPDATA%\obs-studio.
 //   node scripts/stream/obs-config.mjs
 // Escena "Vivo": la señal de la PS5 (twitch.tv/enohcaid, servida en http://127.0.0.1:8787 por streamlink) escalada a
-// 1920×1080 + scripts/stream/overlay.html encima. Salida: NVENC 720p60 CBR (--kbps, default 2200), fotogramas clave
+// 1920×1080 + scripts/stream/overlay.html encima. Salida: NVENC 720p60 CBR (--kbps, default 2000), fotogramas clave
 // cada 2 s (lo que pide Kick), a rtmp://127.0.0.1:1935/live/ts (MediaMTX); retransmitir.mjs lo reparte a los canales.
 // Por qué 720p y poco bitrate: la PS5 manda 720p60 a ~2 Mbps (más resolución no suma) y la subida de la PC mide
 // ~10 Mbps (2026-10-15): van 3 copias (topsecretfc, Kick, YouTube) más la señal de la PS5 si comparte la conexión.
@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import { loadEnv } from '../lib/env.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
-const ki = process.argv.indexOf('--kbps'), KBPS = ki > 0 ? +process.argv[ki + 1] : 2200;
+const ki = process.argv.indexOf('--kbps'), KBPS = ki > 0 ? +process.argv[ki + 1] : 2000;
 loadEnv();
 let clave = process.env.OBS_WS_PASSWORD;
 if (!clave) {
