@@ -9,7 +9,9 @@
 // "EN VIVO" en Instagram (placa-envivo.mjs) y mantiene en fuentes/stream/estado.json el partido actual para la placa
 // del overlay (los goles los agrega vigia-vivo.mjs).
 //
-//   node scripts/retransmitir.mjs [--hasta HH:MM] [--sin-historia] [--sin-overlay]     (corta a esa hora ART; default 00:30)
+//   node scripts/retransmitir.mjs [--hasta HH:MM] [--sin-historia] [--sin-overlay] [--sin-instagram] [--ig-practica]
+//   (corta a esa hora ART; default 00:30). Instagram (versión vertical) va solo con overlay: ig-vivo.mjs crea el vivo en
+//   la web (Chrome CDP con la sesión de @fctopsecret), toma la clave y toca "Transmitir" cuando llega la señal.
 // Destinos en .env: TWITCH_STREAM_KEY (topsecretfc; TWITCH_RTMP_URL opcional), KICK_RTMP_URL + KICK_STREAM_KEY,
 // YT_RTMP_URL + YT_STREAM_KEY. Requisitos: streamlink (python -m pip install --user streamlink); para el overlay, OBS
 // (node scripts/stream/obs-config.mjs) y MediaMTX en fuentes/stream/bin/mediamtx/. Log: fuentes/redes/retransmitir.log
@@ -20,10 +22,15 @@ import ffmpegPath from 'ffmpeg-static';
 import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
 import { argsSalidas } from './stream/salidas.mjs';
+import { crearVivoIg } from './stream/ig-vivo.mjs';
 
 loadEnv();
 const E = process.env;
-const LOGIN = 'enohcaid', FUENTE = `twitch.tv/${LOGIN}`;
+// --prueba: las salidas horizontales van a MediaMTX local (rtmp://127.0.0.1:1935/prueba/h, no salen a ninguna red) e
+// Instagram en modo práctica; --fuente <canal> toma otro canal de Twitch en vez de enohcaid (para probar sin la PS5).
+const PRUEBA = process.argv.includes('--prueba');
+const fi = process.argv.indexOf('--fuente');
+const LOGIN = fi > 0 ? process.argv[fi + 1] : 'enohcaid', FUENTE = `twitch.tv/${LOGIN}`;
 const LOCAL = 'rtmp://127.0.0.1:1935/live/mix';
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
 const MTX = path.resolve('fuentes/stream/bin/mediamtx/mediamtx.exe');
@@ -35,12 +42,13 @@ const log = (...a) => { const l = `[${ahora()}] ${a.join(' ')}`; console.log(l);
 const espera = ms => new Promise(r => setTimeout(r, ms));
 
 const destinos = [];
-if (E.TWITCH_STREAM_KEY) destinos.push({ nombre: 'Twitch', url: (E.TWITCH_RTMP_URL || 'rtmp://live.twitch.tv/app').replace(/\/?$/, '/') + E.TWITCH_STREAM_KEY });
-if (E.KICK_RTMP_URL && E.KICK_STREAM_KEY) destinos.push({ nombre: 'Kick', url: E.KICK_RTMP_URL.replace(/\/?$/, '/') + E.KICK_STREAM_KEY });
-if (E.YT_RTMP_URL && E.YT_STREAM_KEY) destinos.push({ nombre: 'YouTube', url: E.YT_RTMP_URL.replace(/\/?$/, '/') + E.YT_STREAM_KEY });
+if (PRUEBA) destinos.push({ nombre: 'Prueba local', url: 'rtmp://127.0.0.1:1935/prueba/h' });
+else if (E.TWITCH_STREAM_KEY) destinos.push({ nombre: 'Twitch', url: (E.TWITCH_RTMP_URL || 'rtmp://live.twitch.tv/app').replace(/\/?$/, '/') + E.TWITCH_STREAM_KEY });
+if (!PRUEBA && E.KICK_RTMP_URL && E.KICK_STREAM_KEY) destinos.push({ nombre: 'Kick', url: E.KICK_RTMP_URL.replace(/\/?$/, '/') + E.KICK_STREAM_KEY });
+if (!PRUEBA && E.YT_RTMP_URL && E.YT_STREAM_KEY) destinos.push({ nombre: 'YouTube', url: E.YT_RTMP_URL.replace(/\/?$/, '/') + E.YT_STREAM_KEY });
 // Las claves nunca van al log
 const claves = [E.TWITCH_STREAM_KEY, E.KICK_STREAM_KEY, E.YT_STREAM_KEY].filter(Boolean);
-const ocultarClaves = t => claves.reduce((x, k) => x.split(k).join('***'), t);
+const ocultarClaves = t => claves.reduce((x, k) => x.split(k).join('***'), t).replace(/(\/rtmp\/)[^\s|'"]+/g, '$1***');   // + clave de Instagram
 if (!destinos.length) { log('No hay destinos en .env (TWITCH_STREAM_KEY, KICK_RTMP_URL/KICK_STREAM_KEY, YT_RTMP_URL/YT_STREAM_KEY).'); process.exit(1); }
 const conOverlay = !process.argv.includes('--sin-overlay') && fs.existsSync(path.join(OBS_DIR, 'obs64.exe')) && fs.existsSync(MTX);
 
@@ -58,7 +66,7 @@ const node = (...a) => new Promise((ok, mal) => execFile(process.execPath, a, { 
 const NOCHE = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });   // fecha de la noche (al arrancar)
 const MARCA = path.resolve(`fuentes/redes/envivo-publicada-${NOCHE}.txt`);
 async function publicarHistoria() {
-  if (process.argv.includes('--sin-historia') || fs.existsSync(MARCA)) return;
+  if (PRUEBA || process.argv.includes('--sin-historia') || fs.existsSync(MARCA)) return;
   fs.writeFileSync(MARCA, ahora());
   try {
     const jpg = `fuentes/placas/envivo-${NOCHE}.jpg`, clave = `logos/placas/envivo-${NOCHE}.jpg`;
@@ -98,7 +106,7 @@ async function enVivo() {
 
 // Reenvía a todos los destinos: 'directo' = la PS5 por streamlink sin recodificar; 'overlay' = el lienzo de OBS desde
 // MediaMTX, recortado y codificado por salidas.mjs.
-function retransmitir(entrada) {
+function retransmitir(entrada, igUrl = null) {
   return new Promise(res => {
     const directo = entrada === 'directo';
     const sl = directo ? spawn('python', ['-m', 'streamlink', '--twitch-disable-ads', '--retry-open', '3', '-O', FUENTE, 'best'], { stdio: ['ignore', 'pipe', 'pipe'] }) : null;
@@ -107,7 +115,7 @@ function retransmitir(entrada) {
       ? ['-hide_banner', '-loglevel', 'warning', '-i', 'pipe:0', '-map', '0:v', '-map', '0:a?', '-c', 'copy',
         '-tag:v', '7', '-tag:a', '10',                       // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
         '-f', 'tee', salidas]
-      : argsSalidas({ entrada: LOCAL, horizontales: destinos.map(d => d.url), vertical: null, entradaArgs: ['-rw_timeout', '15000000'] });
+      : argsSalidas({ entrada: LOCAL, horizontales: destinos.map(d => d.url), vertical: igUrl, entradaArgs: ['-rw_timeout', '15000000'] });
     const ff = spawn(ffmpegPath, args, { stdio: [directo ? 'pipe' : 'ignore', 'ignore', 'pipe'] });
     if (sl) {
       sl.stdout.pipe(ff.stdin); ff.stdin.on('error', () => {});
@@ -155,19 +163,33 @@ async function bajarCadena() {
 
 async function sesion() {
   publicarHistoria();
+  // Vivo nuevo: sin lado de barra ni eventos de una sesión anterior (los vuelve a escribir vigia-vivo.mjs)
+  try { fs.rmSync(ESTADO, { force: true }); } catch {}
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
   try {
     if (conOverlay) {
       await levantarCadena();
-      let fallas = 0;
+      // Instagram: vivo nuevo por sesión, con el partido de la noche como título; si falla, siguen las otras redes
+      let ig = null;
+      if (!process.argv.includes('--sin-instagram')) {
+        try {
+          const p = (partidos || [])[0];
+          const titulo = p ? `Top Secret FC en vivo · ${p.liga} vs ${p.rival}` : 'Top Secret FC en vivo';
+          ig = await crearVivoIg({ titulo, practica: PRUEBA || process.argv.includes('--ig-practica'), log });
+        } catch (e) { log('Instagram no disponible:', e.message.slice(0, 200)); }
+      }
+      let fallas = 0, igIntento = null;
       while (Date.now() < limite && (await enVivo()) !== false) {
         const t0 = Date.now();
-        const code = await retransmitir('overlay');
+        const corriendo = retransmitir('overlay', ig?.url);
+        if (ig && !igIntento) igIntento = ig.transmitir().catch(e => log('Instagram:', e.message.slice(0, 200)));   // una sola espera
+        const code = await corriendo;
         if (Date.now() - t0 > 60000) { fallas = 0; log(`Retransmisión con overlay cortada (ffmpeg ${code}).`); continue; }
         if (++fallas >= 12) { log('La señal con overlay no aparece en MediaMTX: sigo sin overlay.'); break; }   // ~2 min
         await espera(5000);
       }
+      if (ig) await ig.finalizar().catch(() => {});
       await bajarCadena();
       if (fallas < 12) return;
     }

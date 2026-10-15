@@ -18,6 +18,13 @@ metadata:
 - **TikTok:** sin LIVE habilitado (6 seguidores al 2026-10-15; suele pedir ~1000). **Facebook:** Juan no lo quiere.
 - El vigía (`vigia-vivo.mjs`) y su arranque en `watch-regen.ps1` miran Enohcaid. En cada gol con equipo conocido agrega `{id, tipo:'gol'|'golRival'}` a `fuentes/stream/estado.json`; `retransmitir.mjs` escribe ahí el partido actual (`placa-envivo.mjs --json`).
 
+## Instagram (scripts/stream/ig-vivo.mjs)
+Sin API: se usa el Live Producer de instagram.com en el Chrome CDP (sesión de @fctopsecret iniciada por Juan el 2026-10-15). En cada sesión, `retransmitir.mjs` abre una ventana propia, toca Crear (`svg[aria-label="Nueva publicación"]`) → "Vídeo en directo", pone el título ("Top Secret FC en vivo · VPUG vs <rival>"), elige audiencia (Público, o "Practicar" con `--prueba`/`--ig-practica`: solo lo ve la cuenta), pasa a "Siguiente" y lee la URL rtmps y la clave (de un solo uso) de los inputs del diálogo. Cuando la vista previa del diálogo avanza más de 3 s (ya llega nuestra señal), toca "Transmitir". Al terminar, "Finalizar vídeo en directo" (el video queda en el archivo de la cuenta; en práctica se descarta).
+- **Gotchas:** los botones del diálogo se clickean por JavaScript, porque un clic normal lo tapa una capa. **Instagram no corta el vivo cuando deja de llegar señal:** si queda uno abierto, al reabrir el diálogo aparece ese mismo vivo; `ig-vivo.mjs` lo detecta, lo finaliza y lo descarta. También existe "Administrar clave de streaming permanente" (no se usa: igual hay que tocar Transmitir en la web).
+- La salida vertical también va por tee con `onfail=ignore`: si Instagram falla, no se caen las otras redes.
+- **Prueba de punta a punta sin publicar:** `node scripts/retransmitir.mjs --prueba --fuente <canal de Twitch en vivo> --hasta HH:MM` (horizontales a `rtmp://127.0.0.1:1935/prueba/h`, Instagram en práctica, sin historia). Probado 2026-10-15: salió al aire en práctica 19 s después de crear el vivo.
+- Instagram dibuja encima de la vertical su propia interfaz (arriba perfil y EN VIVO, abajo comentarios): tenerlo en cuenta al mover cosas en `overlay-vertical.html`.
+
 ## Overlay (scripts/stream/overlay.html, 1920×1080)
 Mismo lenguaje que el compilado de goles. Pedido de Juan:
 - A la vista quedan solo **el marcador de FC27** (con la placa del torneo y el rival al lado) y **la barra de abajo a la derecha**.

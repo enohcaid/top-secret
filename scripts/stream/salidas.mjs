@@ -11,5 +11,6 @@ export function argsSalidas({ entrada, horizontales, vertical = null, kbps = 150
     : '[0:v]crop=1920:1080:0:0,scale=1280:720[h]';
   return ['-hide_banner', '-loglevel', 'warning', ...entradaArgs, '-i', entrada, '-filter_complex', filtro,
     '-map', '[h]', '-map', '0:a?', ...video, '-f', 'tee', horizontales.map(u => `[f=flv:onfail=ignore]${u}`).join('|'),
-    ...(vertical ? ['-map', '[v]', '-map', '0:a?', ...video, '-f', 'flv', vertical] : [])];
+    // la vertical también por tee con onfail=ignore: si Instagram corta, no se cae la salida horizontal
+    ...(vertical ? ['-map', '[v]', '-map', '0:a?', ...video, '-f', 'tee', `[f=flv:onfail=ignore]${vertical}`] : [])];
 }

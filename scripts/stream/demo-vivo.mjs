@@ -4,6 +4,7 @@
 // que usa retransmitir.mjs: salidas.mjs) en demo-horizontal.mp4 y demo-vertical.mp4.
 //   node scripts/stream/demo-vivo.mjs <video.mp4> --dur 110 --gol 34 --golRival 94 [--lado der@63 …] [--fecha 2026-10-14] [--out carpeta]
 // (--lado simula lo que en vivo detecta vigia-vivo.mjs: de qué lado está nuestra barra de FC27)
+// Con DEMO_IG_URL en el entorno (URL+clave rtmps de un vivo de Instagram en modo "Practicar") la vertical va ahí.
 // Al terminar cierra todo y deja la configuración de OBS como estaba (obs-config.mjs).
 import fs from 'fs';
 import path from 'path';
@@ -56,7 +57,7 @@ const grabaciones = (async () => {
   for (let i = 0; i < 40; i++) {
     // rutas relativas con / (el "D:" de una absoluta confunde al muxer tee)
     const rel = f => path.relative(process.cwd(), f).split(path.sep).join('/');
-    const r = spawn(ffmpegPath, ['-y', ...argsSalidas({ entrada: 'rtmp://127.0.0.1:1935/live/mix', horizontales: [rel(H)], vertical: rel(V),
+    const r = spawn(ffmpegPath, ['-y', ...argsSalidas({ entrada: 'rtmp://127.0.0.1:1935/live/mix', horizontales: [rel(H)], vertical: process.env.DEMO_IG_URL || rel(V),
       entradaArgs: ['-rw_timeout', '5000000', '-t', String(DUR)] })], { stdio: ['ignore', 'ignore', 'pipe'] });
     let err = ''; r.stderr.on('data', d => err += d);
     const code = await new Promise(res => r.on('close', res));
