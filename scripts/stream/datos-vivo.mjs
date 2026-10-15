@@ -30,3 +30,23 @@ export async function listaMusica(log = console.log) {
   } catch (e) { log('No pude preparar la música del modo pausa:', e.message.slice(0, 150)); }
 }
 
+
+// Convocados de hoy (convocatoria/state en Firestore) con la misma regla que getStatus() de convocatoria.html:
+// presentes = verde o amarillo (los fijos, salvo que tengan un cambio cargado para hoy; vacaciones = ausente).
+export async function convocados() {
+  try {
+    const r = await fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/convocatoria/state', { signal: AbortSignal.timeout(10000) });
+    const un = v => v.mapValue ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, un(x)]))
+      : v.arrayValue ? (v.arrayValue.values || []).map(un) : Object.values(v)[0];
+    const d = un({ mapValue: await r.json() });
+    const HOY = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const fijos = d.alwaysPresent || [], disp = d.availability || {}, cambios = d.dailyOverrides || {};
+    const estadoDe = n => {
+      const a = disp[n];
+      if (a?.status === 'black' && a.returnDate > HOY) return 'black';
+      if (fijos.includes(n)) return cambios[n]?.day === HOY ? cambios[n].status : 'green';
+      return a?.status || 'pending';
+    };
+    return [...new Set([...fijos, ...Object.keys(disp)])].filter(n => ['green', 'yellow'].includes(estadoDe(n)));
+  } catch { return null; }
+}

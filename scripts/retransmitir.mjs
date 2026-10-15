@@ -23,7 +23,7 @@ import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
 import { argsSalidas } from './stream/salidas.mjs';
 import { crearVivoIg } from './stream/ig-vivo.mjs';
-import { temporada, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
+import { temporada, convocados, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
 const listaMusica = () => prepararMusica(log);
 
 loadEnv();
@@ -96,6 +96,8 @@ async function actualizarPartido() {
     const ahoraHM = new Date().toLocaleTimeString('en-GB', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
     e.proximos = partidos.filter(x => x.hora >= ahoraHM);
     e.temporada = await temporada();
+    // Solo los convocados de hoy en el palco y las charlas (convocatoria.html); si no hay datos, todos
+    const conv = await convocados(); if (conv) e.jugadores = conv;
     fs.mkdirSync(path.dirname(ESTADO), { recursive: true });
     fs.writeFileSync(ESTADO + '.tmp', JSON.stringify(e, null, 1)); fs.renameSync(ESTADO + '.tmp', ESTADO);
   } catch (err) { log('No pude actualizar el partido del overlay:', err.message); }

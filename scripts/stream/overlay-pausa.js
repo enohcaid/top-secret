@@ -37,7 +37,9 @@
     const t = Math.min(...ok.map(x => usado.get(x) || 0)); const it = azar(ok.filter(x => (usado.get(x) || 0) === t)); usado.set(it, Date.now()); return it; };
 
   // Jugadores con clips; para hablar se prefiere "habla", para escuchar "escucha"
-  const jugadores = () => Object.keys(indice).filter(gt => indice[gt].emociones.length);
+  // Jugadores con clips; si estado.jugadores trae los convocados de hoy (y alguno tiene clips), solo esos
+  const jugadores = () => { const todos = Object.keys(indice).filter(gt => indice[gt].emociones.length);
+    const conv = todos.filter(gt => (estado.jugadores || []).includes(gt)); return conv.length >= 2 ? conv : todos; };
   const clipDe = (gt, prefs) => { const e = indice[gt].emociones; return prefs.find(x => e.includes(x)) || azar(e.filter(x => ESPERA.includes(x)).length ? e.filter(x => ESPERA.includes(x)) : e); };
   function pj(gt, emocion, lado) {
     const d = document.createElement('div'); d.className = 'pj ' + lado;
