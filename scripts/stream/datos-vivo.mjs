@@ -4,22 +4,29 @@ import path from 'path';
 import { execFileSync } from 'child_process';
 import { pathToFileURL } from 'url';
 
-// Números de la etapa actual (partidos después de T4_CUTOFF) desde seed_matches.js. ETAPA es lo que se muestra:
-// al 2026-10-15 el club está en PRETEMPORADA (la T4 todavía no arrancó, corrección de Juan). Cuando arranque la T4,
-// cambiar ETAPA a 'Temporada 4' y T4_CUTOFF a la fecha real de inicio (es la misma que usan las páginas del sitio).
-export const ETAPA = 'Pretemporada';
-const T4_CUTOFF = '2026-09-28';
+// Números de la etapa actual desde seed_matches.js, según la fecha (Juan, 2026-10-15): pretemporada desde el 28/9
+// (fin de la T3) y Temporada 4 desde el martes 20/10, que arranca con Espacio Gamer. La etiqueta sale en el overlay.
+const ETAPAS = [
+  { nombre: 'Temporada 4', desde: '2026-10-20' },
+  { nombre: 'Pretemporada', desde: '2026-09-29' },
+];
+const hoyArt = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+export const etapaActual = (hoy = hoyArt()) => {
+  const i = ETAPAS.findIndex(e => hoy >= e.desde);
+  return { nombre: ETAPAS[i].nombre, desde: ETAPAS[i].desde, hasta: i > 0 ? ETAPAS[i - 1].desde : '9999-12-31' };
+};
 export async function temporada() {
   try {
     const { SEED_MATCHES } = await import(pathToFileURL(path.resolve('seed_matches.js')).href + '?' + Date.now());
     const t = { pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0 }, goles = {};
-    for (const m of SEED_MATCHES.filter(m => m.date > T4_CUTOFF)) {
+    const et = etapaActual();
+    for (const m of SEED_MATCHES.filter(m => m.date >= et.desde && m.date < et.hasta)) {
       const [a, b] = String(m.match_result || '').split('-').map(Number); if (Number.isNaN(a) || Number.isNaN(b)) continue;
       t.pj++; t.gf += a; t.gc += b; if (a > b) t.g++; else if (a < b) t.p++; else t.e++;
       for (const j of m.players || []) { const gt = j.matched || j.name; if (j.goals) goles[gt] = (goles[gt] || 0) + j.goals; }
     }
     const [goleador, golesGoleador] = Object.entries(goles).sort((x, y) => y[1] - x[1])[0] || [];
-    return { ...t, goleador, golesGoleador, etapa: ETAPA };
+    return { ...t, goleador, golesGoleador, etapa: et.nombre };
   } catch { return null; }
 }
 
