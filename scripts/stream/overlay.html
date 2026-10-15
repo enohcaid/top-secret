@@ -6,7 +6,7 @@
      - a la vista quedan solo el marcador de FC27 (arriba a la izquierda, con el torneo al lado) y la barra de
        abajo a la derecha;
      - arriba a la derecha tapa el panel fijo de quien transmite (club + EN VIVO + canales);
-     - abajo a la izquierda tapa la barra de FC27 con el "palco": siempre hay un jugador, chico, encadenando
+     - abajo, del lado de NUESTRA barra de FC27 (izquierda o derecha, la detecta vigia-vivo.mjs), tapa esa barra con el "palco": siempre hay un jugador, chico, encadenando
        emociones de espera (aliento, indicaciones, agitado…); con un gol propio grita/festeja y con uno del
        rival se lamenta/reclama. Cada tanto cambia de jugador.
      Datos: fuentes/stream/clips/indice.json ({gt:{num, emociones:[…]}}, lo escribe lote-clips.mjs) y
@@ -36,8 +36,9 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;font
 @keyframes late{50%{opacity:.25}}
 
 /* Palco: placa abajo a la izquierda (tapa la barra de FC27, x 30-480 / y 950-1045) y el jugador asomando detrás */
-.palco{position:absolute;left:22px;top:638px;width:470px;height:424px}
-.palco .vid{position:absolute;left:50%;bottom:104px;width:380px;height:330px;transform:translateX(-50%)}
+/* Los clips salen todos con el mismo encuadre (720×586, clip-jugador.mjs): el recuadro tiene esa proporción */
+.palco{position:absolute;left:22px;top:409px;width:470px;height:653px}
+.palco .vid{position:absolute;left:50%;bottom:104px;width:674px;height:549px;transform:translateX(-50%)}
 .palco video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;opacity:0;transition:opacity .35s ease}
 .palco video.on{opacity:1}
 .palco .placa{left:0;right:0;bottom:0;height:116px;display:flex;align-items:center;gap:18px;padding:0 24px}
@@ -46,9 +47,13 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;font
 .palco .dice{font-size:14px;margin-top:6px}
 .palco .jug{display:flex;align-items:center;gap:16px;transition:opacity .25s ease}
 .palco .jug.cambia{opacity:0}
+/* Del lado de nuestra barra de FC27 (body.lado-der = derecha) */
+.palco{transition:opacity .35s ease}
+body.mudando .palco{opacity:0}
+body.lado-der .palco{left:1428px}
 
 /* Gol: franja que cruza la pantalla a media altura (más abajo le taparía la cara al jugador del palco) */
-.gol{position:absolute;left:0;right:0;top:400px;height:190px;display:flex;align-items:center;justify-content:center;gap:40px;
+.gol{position:absolute;left:0;right:0;top:330px;height:190px;display:flex;align-items:center;justify-content:center;gap:40px;
   background:linear-gradient(90deg,transparent,rgba(11,10,7,.92) 18%,rgba(11,10,7,.92) 82%,transparent);border-block:2px solid var(--oro);
   clip-path:inset(0 50% 0 50%);transition:clip-path .45s cubic-bezier(.7,0,.2,1)}
 .gol.on{clip-path:inset(0 0 0 0)}

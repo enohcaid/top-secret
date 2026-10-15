@@ -40,7 +40,7 @@ const DIR = path.join(ROOT, 'fuentes', 'stream', 'clips', GT);
 fs.mkdirSync(DIR, { recursive: true });
 // Base 1152×1536 (3:4): cuerpo de 1300 px apoyado abajo → 236 px de aire arriba. El pecho termina
 // cerca del 45 % del cuerpo, así que el recorte final es el 54 % superior del cuadro.
-const BASE_ALTO_CUERPO = 1300, RECORTE = 0.54;
+const BASE_ALTO_CUERPO = 1300, SALIDA = [720, 586];
 const BASE = path.join(DIR, 'base-entero.png'), MP4 = path.join(DIR, `${EMO}.mp4`), WEBM = path.join(DIR, `${EMO}.webm`);
 
 if (!process.argv.includes('--solo-alpha') && (process.argv.includes('--rehacer') || !fs.existsSync(MP4))) {
@@ -59,23 +59,22 @@ const T = path.join(DIR, `_${EMO}`); fs.rmSync(T, { recursive: true, force: true
 fs.mkdirSync(path.join(T, 'in'), { recursive: true }); fs.mkdirSync(path.join(T, 'out'));
 execFileSync(ffmpegPath, ['-loglevel', 'error', '-i', MP4, path.join(T, 'in', '%04d.png')]);
 execFileSync('python', [path.join(ROOT, 'scripts', 'stream', 'quitar-fondo.py'), path.join(T, 'in'), path.join(T, 'out')], { stdio: 'inherit' });
-// Zoom: caja que ocupa el jugador en todo el clip (unión de los cuadros, solo la parte de arriba del corte),
-// con un margen; el borde de abajo es siempre la línea del pecho, que en el overlay queda tapada por la placa.
+// Encuadre FIJO relativo al cuerpo del render (no a lo que ocupa en cada clip): así todos los clips y todos los
+// jugadores salen a la misma escala (pedido de Juan; con el zoom por clip, si estiraba los brazos se veía más chico).
+// Caja: ancho 0,8 × alto del cuerpo, centrada; desde 0,2 × alto por encima de la cabeza (brazos en alto) hasta
+// 0,45 × alto por debajo (el pecho, que en el overlay queda tapado por la placa). Salida fija 720×586.
 const cuadros = fs.readdirSync(path.join(T, 'out')).filter(n => n.endsWith('.png'));
 const { width: W, height: H } = await sharp(path.join(T, 'out', cuadros[0])).metadata();
-const corte = Math.round(H * RECORTE);
-let x0 = W, y0 = corte, x1 = 0;
-for (const n of cuadros) {
-  const arriba = await sharp(path.join(T, 'out', n)).extract({ left: 0, top: 0, width: W, height: corte }).png().toBuffer();
-  const { info } = await sharp(arriba).trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 40 }).toBuffer({ resolveWithObject: true });
-  const l = -(info.trimOffsetLeft || 0), t = -(info.trimOffsetTop || 0);
-  x0 = Math.min(x0, l); y0 = Math.min(y0, t); x1 = Math.max(x1, l + info.width);
-}
-const m = Math.round(W * 0.03);
-x0 = Math.max(0, x0 - m); x1 = Math.min(W, x1 + m); y0 = Math.max(0, y0 - m);
-const cw = (x1 - x0) & ~1, ch = (corte - y0) & ~1;
+const { info: cuerpo } = await sharp(path.join(ROOT, 'Renders', GT, 'Frente4.png')).trim({ threshold: 10 }).toBuffer({ resolveWithObject: true });
+// Canva escala la base por la altura y recorta los costados (1152×1536 → 768×1088: 816 de ancho, 24 px menos por lado)
+const esc = BASE_ALTO_CUERPO / 1536, k = H / 1536, corteLado = (1152 * k - W) / 2;   // render → base → cuadro del video
+const alto = cuerpo.height * esc * k;
+const cabeza = (1536 - BASE_ALTO_CUERPO + -cuerpo.trimOffsetTop * esc) * k;
+const cx = ((1152 - 1024 * esc) / 2 + (-cuerpo.trimOffsetLeft + cuerpo.width / 2) * esc) * k - corteLado;
+const P = Math.round(alto * 0.3);                                  // margen transparente por si la caja se sale del cuadro
+const caja = { x: Math.round(cx - alto * 0.4) + P, y: Math.round(cabeza - alto * 0.2) + P, w: Math.round(alto * 0.8), h: Math.round(alto * 0.65) };
 const fps = '30';                                            // Canva entrega 30 fps
 execFileSync(ffmpegPath, ['-y', '-loglevel', 'error', '-framerate', fps, '-i', path.join(T, 'out', '%04d.png'),
-  '-vf', `crop=${cw}:${ch}:${x0}:${y0}`, '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuva420p', '-b:v', '2M', '-auto-alt-ref', '0', WEBM]);
+  '-vf', `format=rgba,pad=iw+${2 * P}:ih+${2 * P}:${P}:${P}:color=0x00000000,crop=${caja.w}:${caja.h}:${caja.x}:${caja.y},scale=${SALIDA[0]}:${SALIDA[1]}`, '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuva420p', '-b:v', '2M', '-auto-alt-ref', '0', WEBM]);
 fs.rmSync(T, { recursive: true, force: true });
 console.log('clip:', WEBM);

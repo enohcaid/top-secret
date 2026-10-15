@@ -19,6 +19,7 @@ import readline from 'node:readline';
 import sharp from 'sharp';
 import ffmpeg from 'ffmpeg-static';
 import { SB_CAJA, SB_NUM, SB_RECORTE, hayMarcador, crearDetector } from './lib/marcador.mjs';
+import { crearLado, BARRA_IZQ, BARRA_DER, PANEL } from './lib/lado-barra.mjs';
 
 sharp.cache(false);
 
@@ -191,11 +192,13 @@ async function armarClips(OUT, clave) {
   return clips;
 }
 
-// Avisa al overlay del vivo (scripts/stream/overlay.html lee fuentes/stream/estado.json cada 1,5 s).
-function avisarOverlay(tipo) {
+// Avisa al overlay del vivo (scripts/stream/overlay.html lee fuentes/stream/estado.json cada 1,5 s):
+// tipo 'gol' | 'golRival' agrega un evento; tipo 'lado' con valor 'izq' | 'der' dice de qué lado está nuestra barra.
+function avisarOverlay(tipo, valor) {
   const f = path.join(ROOT, 'fuentes/stream/estado.json');
   let e = {}; try { e = JSON.parse(readFileSync(f, 'utf8')); } catch {}
-  e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo }].slice(-20);
+  if (tipo === 'lado') e.lado = valor;
+  else e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo }].slice(-20);
   mkdirSync(path.dirname(f), { recursive: true });
   writeFileSync(f + '.tmp', JSON.stringify(e, null, 1)); renameSync(f + '.tmp', f);
 }
@@ -233,6 +236,14 @@ async function main() {
     rival = lineas.find(l => l !== top)?.text.slice(0, 3) || rival;
     return true;
   };
+  // Lado de nuestra barra de abajo (lib/lado-barra.mjs): OCR de los nombres cada 2 s mientras hay partido
+  const lado = crearLado();
+  const leerZona = async (raw, reg, nombre) => {
+    const f = path.join(OUT, 'tmp', `${nombre}.png`);
+    await sharp(raw, { raw: { width: W, height: H, channels: 3 } }).extract(reg).resize({ width: reg.width * 3 }).greyscale().normalise().toFile(f);
+    const r = await ocr.leer(f); try { unlinkSync(f); } catch {}
+    return (r.lines || []).map(l => l.text).join(' ');
+  };
   let ultimoReporte = '';
   let reportes = 0, goles = 0;
   let trabajando = Promise.resolve();
@@ -254,6 +265,11 @@ async function main() {
         console.log(`[${hms(seg)}] marcador en pantalla (partido/tiempo #${partidos})`);
       }
       ultimoMarcador = seg;
+      if (!vodId && seg % 2 === 1) {
+        if (!lado.nuestros.length) { const a = lado.apellido(await leerZona(raw, PANEL, `panel-${seg}`)); if (a) console.log(`[${hms(seg)}] transmite ${a}`); }
+        const nuevo = lado.paso(await leerZona(raw, BARRA_IZQ, `bi-${seg}`), await leerZona(raw, BARRA_DER, `bd-${seg}`));
+        if (nuevo) { avisarOverlay('lado', nuevo); console.log(`[${hms(seg)}] nuestra barra: ${nuevo === 'izq' ? 'izquierda' : 'derecha'}`); }
+      }
       // el detector descarta cuadros borrosos/rotos y exige que cambie una sola fila, sostenido (lib/marcador.mjs)
       const ev = det.paso(await gris(raw, SB_NUM), caja, seg);
       // el marcador entra con animación: lo de los primeros 5 s queda como resultado y siglas de partida

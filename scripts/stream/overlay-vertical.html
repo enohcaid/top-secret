@@ -35,6 +35,9 @@ body::before{content:'';position:absolute;inset:0 0 auto 0;height:440px;backgrou
 .tapa{position:absolute;display:flex;align-items:center;gap:10px;padding:0 16px;border-radius:12px}
 .tapa.panel{left:772px;top:452px;width:296px;height:86px}
 .tapa.barra{left:8px;top:968px;width:276px;height:74px}
+.tapa.barra{transition:opacity .35s ease}
+body.mudando .tapa.barra{opacity:0}
+body.lado-der .tapa.barra{left:796px}   /* nuestra barra a la derecha (la detecta vigia-vivo.mjs) */
 .tapa img{height:50px}.tapa .a{font-weight:900;font-size:20px;letter-spacing:.04em}.tapa .b{font-size:13px}
 
 /* Gol: franja sobre el partido */
@@ -48,7 +51,7 @@ body::before{content:'';position:absolute;inset:0 0 auto 0;height:440px;backgrou
 
 /* Palco grande abajo */
 .palco{position:absolute;left:0;right:0;top:1060px;height:820px}
-.palco .vid{position:absolute;left:50%;bottom:150px;width:820px;height:640px;transform:translateX(-50%)}
+.palco .vid{position:absolute;left:50%;bottom:60px;width:934px;height:760px;transform:translateX(-50%)}   /* proporción de los clips (720×586); la placa tapa el pecho */
 .palco video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;opacity:0;transition:opacity .35s ease}
 .palco video.on{opacity:1}
 .palco .placa{left:60px;right:60px;bottom:0;height:170px;display:flex;align-items:center;padding:0 40px}

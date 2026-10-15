@@ -2,7 +2,8 @@
 // Prueba del vivo con overlay SIN transmitir: levanta MediaMTX y OBS con un video grabado en lugar de la señal de
 // Enohcaid, dispara eventos de gol en los segundos indicados y graba lo que saldría para las redes (las mismas salidas
 // que usa retransmitir.mjs: salidas.mjs) en demo-horizontal.mp4 y demo-vertical.mp4.
-//   node scripts/stream/demo-vivo.mjs <video.mp4> --dur 110 --gol 34 --golRival 94 [--fecha 2026-10-14] [--out carpeta]
+//   node scripts/stream/demo-vivo.mjs <video.mp4> --dur 110 --gol 34 --golRival 94 [--lado der@63 …] [--fecha 2026-10-14] [--out carpeta]
+// (--lado simula lo que en vivo detecta vigia-vivo.mjs: de qué lado está nuestra barra de FC27)
 // Al terminar cierra todo y deja la configuración de OBS como estaba (obs-config.mjs).
 import fs from 'fs';
 import path from 'path';
@@ -15,7 +16,8 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? proces
 const VIDEO = path.resolve(process.argv[2]);
 const DUR = +arg('--dur', 110), FECHA = arg('--fecha', '2026-10-14');
 const OUT = path.resolve(arg('--out', path.join(ROOT, 'fuentes', 'stream', 'preview')));
-const eventos = ['gol', 'golRival'].flatMap(t => process.argv.flatMap((a, i) => a === '--' + t ? [{ tipo: t, seg: +process.argv[i + 1] }] : []));
+const eventos = [...['gol', 'golRival'].flatMap(t => process.argv.flatMap((a, i) => a === '--' + t ? [{ tipo: t, seg: +process.argv[i + 1] }] : [])),
+  ...process.argv.flatMap((a, i) => a === '--lado' ? [{ tipo: 'lado', valor: process.argv[i + 1].split('@')[0], seg: +process.argv[i + 1].split('@')[1] }] : [])];
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
 const ESCENAS = path.join(process.env.APPDATA, 'obs-studio', 'basic', 'scenes');
 const ESTADO = path.join(ROOT, 'fuentes', 'stream', 'estado.json');
@@ -70,8 +72,9 @@ const grabaciones = (async () => {
 // Eventos de gol, contados desde que se lanzó OBS (la fuente arranca al cargar la colección)
 for (const ev of eventos.sort((a, b) => a.seg - b.seg)) {
   await espera(Math.max(0, t0 + ev.seg * 1000 - Date.now()));
-  estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo }); escribir(estado);
-  log(`evento ${ev.tipo} (seg ${ev.seg})`);
+  if (ev.tipo === 'lado') estado.lado = ev.valor; else estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo });
+  escribir(estado);
+  log(`evento ${ev.tipo}${ev.valor ? ' ' + ev.valor : ''} (seg ${ev.seg})`);
 }
 await grabaciones;
 
