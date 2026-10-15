@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Meme "Mi reacción a…": un número que crece y una cara que pasa de indiferente a desatada, un corte por golpe de
+     la música. datos = { titulo, quien, pasos: [{ img, num, sub }], final: { titulo, sub }, bpm, escudo }.
+     mostrar(0, t) posiciona la línea de tiempo (render cuadro por cuadro determinístico). Reutilizable con cualquier
+     dato que crezca (goles, asistencias, vallas invictas). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="../../../node_modules/gsap/dist/gsap.min.js"></script>
+<style>
+:root{--bg:#0A0907;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.7)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text)}
+#top{position:absolute;left:0;right:0;top:0;height:470px;background:var(--bg);z-index:5;display:flex;flex-direction:column;justify-content:flex-end;padding:0 70px 44px}
+#top .k{font:800 32px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+#top h1{font:800 76px/1.08 Barlow;margin-top:14px}
+#top h1 b{color:var(--gold2)}
+#foto{position:absolute;left:0;right:0;top:470px;bottom:0;overflow:hidden}
+#foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
+#foto::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(10,9,7,.92))}
+#num{position:absolute;right:56px;top:500px;z-index:6;font:400 360px/.8 'Bebas Neue';color:var(--gold);text-shadow:0 8px 50px rgba(0,0,0,.7)}
+#sub{position:absolute;left:70px;right:70px;bottom:250px;z-index:6;font:800 54px 'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase;text-shadow:0 4px 18px rgba(0,0,0,.9)}
+#flash{position:absolute;inset:0;background:#FFF5DA;opacity:0;z-index:20}
+#final{position:absolute;inset:0;z-index:10;visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(70% 45% at 50% 46%,rgba(201,168,76,.2),transparent 70%),rgba(10,9,7,.88)}
+#final h2{font:400 230px/.86 'Bebas Neue'}
+#final h2 span{color:var(--gold)}
+#final p{font:700 54px/1.3 Barlow;margin-top:36px;max-width:860px}
+#final img{height:120px;margin-top:70px}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="top"><div class="k" id="kicker"></div><h1 id="titulo"></h1></div>
+  <div id="foto"><img id="cara"></div>
+  <div id="num"></div><div id="sub"></div>
+  <div id="final"><h2 id="ftit"></h2><p id="fsub"></p><img id="escudo"></div>
+  <div id="flash"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let D, tl, cortes = [];
+async function pintar(datos) {
+  D = datos;
+  await document.fonts.ready;
+  $('#kicker').textContent = D.kicker || '';
+  $('#titulo').innerHTML = D.titulo;
+  $('#ftit').innerHTML = D.final.titulo; $('#fsub').innerHTML = D.final.sub;
+  if (D.escudo) $('#escudo').src = D.escudo; else $('#escudo').remove();
+  // Precarga de las caras (el render no puede esperar a la red en cada corte)
+  await Promise.all(D.pasos.map(p => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = p.img; })));
+  const B = 60 / D.bpm, inicio = D.inicio ?? 4 * B, paso = D.paso ?? 4 * B;
+  cortes = D.pasos.map((p, k) => ({ ...p, t: inicio + k * paso }));
+  D.finEn = inicio + D.pasos.length * paso;
+  tl = gsap.timeline({ paused: true });
+  tl.from('#top .k', { opacity: 0, x: -30, duration: 0.4 }, 0.1).from('#titulo', { opacity: 0, y: 40, duration: 0.6, ease: 'expo.out' }, 0.2);
+  cortes.forEach((c, k) => {
+    const fuerza = 1 + k * 0.5;   // cada gol pega más fuerte
+    tl.fromTo('#cara', { scale: 1.06 + 0.05 * fuerza }, { scale: 1.02, duration: paso, ease: 'expo.out', immediateRender: false }, c.t);
+    tl.fromTo('#num', { scale: 2.2, opacity: 0, rotate: -8 }, { scale: 1, opacity: 1, rotate: 0, duration: 0.45, ease: 'back.out(2.2)', immediateRender: false }, c.t);
+    tl.fromTo('#sub', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, immediateRender: false }, c.t + 0.15);
+    tl.fromTo('#flash', { opacity: 0.12 * fuerza }, { opacity: 0, duration: 0.3, immediateRender: false }, c.t);
+    tl.fromTo('#lienzo', { x: 0 }, { keyframes: { x: [9 * fuerza, -7 * fuerza, 4 * fuerza, 0] }, duration: 0.35, ease: 'none', immediateRender: false }, c.t);
+  });
+  tl.set('#final', { visibility: 'visible' }, D.finEn).from('#final', { opacity: 0, duration: 0.4 }, D.finEn)
+    .from('#final h2', { scale: 1.8, opacity: 0, duration: 0.6, ease: 'back.out(1.6)' }, D.finEn + 0.1)
+    .from('#final p', { opacity: 0, y: 30, duration: 0.5 }, D.finEn + 0.6)
+    .from('#escudo', { opacity: 0, scale: 0.5, duration: 0.6, ease: 'back.out(2)' }, D.finEn + 1);
+  return 1;
+}
+async function mostrar(n, t = 0) {
+  const c = [...cortes].reverse().find(x => t >= x.t) || null;
+  const img = $('#cara'), src = c ? c.img : D.pasos[0].img;
+  if (img.getAttribute('src') !== src) { img.setAttribute('src', src); await img.decode().catch(() => {}); }
+  img.style.filter = c ? 'none' : 'grayscale(1) brightness(.5)';
+  $('#num').textContent = c ? c.num : '';
+  $('#sub').innerHTML = c ? c.sub : '';
+  tl.seek(t, true);
+}
+</script>
+</body>
+</html>

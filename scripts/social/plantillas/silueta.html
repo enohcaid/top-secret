@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Juego "¿Quién es?": el render del jugador en silueta negra sobre fondo dorado, 3 pistas que entran una por una,
+     cuenta regresiva y revelación a color. Los tiempos vienen de la voz (lib/voz.mjs): datos = { img, nombre, sub,
+     pistas: [{ t, n, txt }], cuenta: [t3, t2, t1], revela, final, pregunta, escudo }. mostrar(0, t) → tl.seek(t). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="../../../node_modules/gsap/dist/gsap.min.js"></script>
+<style>
+:root{--bg:#0A0907;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.72)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;color:var(--text);background:radial-gradient(60% 42% at 50% 46%,#E9CB78 0%,#C9A84C 45%,#5E4A19 100%)}
+#rayos{position:absolute;left:50%;top:46%;width:2600px;height:2600px;margin:-1300px 0 0 -1300px;background:repeating-conic-gradient(rgba(255,255,255,.07) 0 6deg,transparent 6deg 18deg)}
+#top{position:absolute;left:0;right:0;top:150px;text-align:center;z-index:5}
+#top .k{font:800 34px 'Barlow Condensed';letter-spacing:.34em;text-transform:uppercase;color:#1B1405}
+#top h1{font:400 150px/.9 'Bebas Neue';color:#0A0907;margin-top:10px}
+#jug{position:absolute;left:50%;top:420px;height:1180px;transform:translateX(-50%);z-index:3;filter:brightness(0) drop-shadow(0 30px 40px rgba(0,0,0,.35))}
+#pistas{position:absolute;left:60px;right:60px;bottom:120px;z-index:6;display:flex;flex-direction:column;gap:18px}
+.pista{display:flex;align-items:center;gap:22px;background:rgba(10,9,7,.88);padding:20px 28px;border-left:8px solid var(--gold);opacity:0}
+.pista b{font:400 64px/1 'Bebas Neue';color:var(--gold);min-width:46px}
+.pista span{font:800 46px/1.15 Barlow}
+#cuenta{position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;font:400 760px/1 'Bebas Neue';color:#0A0907;opacity:0;text-shadow:0 0 80px rgba(241,220,151,.8)}
+#flash{position:absolute;inset:0;background:#FFF8E2;opacity:0;z-index:20}
+#nombre{position:absolute;left:0;right:0;top:150px;text-align:center;z-index:7;opacity:0}
+#nombre .k{font:800 34px 'Barlow Condensed';letter-spacing:.34em;text-transform:uppercase;color:#1B1405}
+#nombre h2{font:400 170px/.9 'Bebas Neue';color:#0A0907;margin-top:6px}
+#final{position:absolute;left:60px;right:60px;bottom:150px;z-index:9;text-align:center;opacity:0;background:rgba(10,9,7,.9);padding:40px 30px}
+#final p{font:800 62px/1.15 Barlow}
+#final img{height:96px;margin-top:26px}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="rayos"></div>
+  <div id="top"><div class="k">3 pistas · 1 jugador</div><h1>¿Quién es?</h1></div>
+  <img id="jug">
+  <div id="pistas"></div>
+  <div id="nombre"><div class="k"></div><h2></h2></div>
+  <div id="cuenta"></div>
+  <div id="final"><p></p><img id="escudo"></div>
+  <div id="flash"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let D, tl;
+async function pintar(datos) {
+  D = datos;
+  await document.fonts.ready;
+  $('#jug').src = D.img; await $('#jug').decode().catch(() => {});
+  $('#pistas').innerHTML = D.pistas.map(p => `<div class="pista"><b>${p.n}</b><span>${p.txt}</span></div>`).join('');
+  $('#nombre .k').textContent = D.sub; $('#nombre h2').textContent = D.nombre;
+  $('#final p').innerHTML = D.pregunta;
+  if (D.escudo) $('#escudo').src = D.escudo; else $('#escudo').remove();
+  tl = gsap.timeline({ paused: true });
+  tl.to('#rayos', { rotate: 40, duration: D.final + 4, ease: 'none' }, 0);
+  tl.from('#top h1', { scale: 1.8, opacity: 0, duration: 0.6, ease: 'back.out(1.8)' }, 0.1).from('#top .k', { opacity: 0, y: -20, duration: 0.4 }, 0.4);
+  tl.from('#jug', { y: 140, opacity: 0, duration: 0.8, ease: 'expo.out' }, 0.2);
+  D.pistas.forEach((p, k) => {
+    tl.fromTo(`.pista:nth-child(${k + 1})`, { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.45, ease: 'expo.out', immediateRender: false }, p.t);
+    tl.fromTo('#jug', { scale: 1.03 }, { scale: 1, duration: 0.4, immediateRender: false }, p.t);
+  });
+  // cuenta regresiva: las pistas se van y el número late
+  tl.to('#pistas', { opacity: 0, y: 40, duration: 0.3 }, D.cuenta[0] - 0.2);
+  D.cuenta.forEach((c, k) => {
+    tl.fromTo('#cuenta', { opacity: 1, scale: 1.5 }, { opacity: 0.85, scale: 1, duration: 0.35, ease: 'expo.out', immediateRender: false }, c);
+  });
+  tl.set('#cuenta', { opacity: 0 }, D.revela);
+  // revelación: destello, color y nombre
+  tl.fromTo('#flash', { opacity: 1 }, { opacity: 0, duration: 0.6, ease: 'power2.out', immediateRender: false }, D.revela);
+  tl.set('#jug', { filter: 'brightness(1) drop-shadow(0 30px 40px rgba(0,0,0,.35))' }, D.revela);
+  tl.fromTo('#jug', { scale: 1.12 }, { scale: 1, duration: 0.9, ease: 'expo.out', immediateRender: false }, D.revela);
+  tl.set('#top', { opacity: 0 }, D.revela);
+  tl.fromTo('#nombre', { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', immediateRender: false }, D.revela + 0.15);
+  tl.fromTo('#final', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', immediateRender: false }, D.final);
+  return 1;
+}
+async function mostrar(n, t = 0) {
+  const k = D.cuenta.filter(c => t >= c).length;
+  $('#cuenta').textContent = k ? String(4 - k) : '';
+  tl.seek(t, true);
+}
+</script>
+</body>
+</html>

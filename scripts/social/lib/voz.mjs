@@ -37,7 +37,24 @@ export function narrar(texto, carpeta, opts = {}) {
     fs.rmSync(txt, { force: true });
     if (r.status !== 0 || !fs.existsSync(mp3)) throw new Error('Voz (edge-tts) falló: ' + (r.stderr || r.stdout || '').trim().split('\n').pop());
   }
-  return { archivo: mp3, dur: duracion(mp3), palabras: JSON.parse(fs.readFileSync(js, 'utf8')) };
+  return { archivo: mp3, dur: duracion(mp3), palabras: conPuntuacion(JSON.parse(fs.readFileSync(js, 'utf8')), texto) };
+}
+
+// edge-tts devuelve las palabras sin puntuación ("F van Dijk", "fecha" sin el punto): para los subtítulos se toma
+// cada palabra tal como está escrita en el texto (con puntos, comas y signos), buscándola en orden.
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9ñ]/g, '');
+function conPuntuacion(palabras, texto) {
+  const toks = texto.split(/\s+/).filter(Boolean);
+  let j = 0;
+  return palabras.map(p => {
+    const n = norm(p.w);
+    if (!n) return p;
+    for (let k = j; k < Math.min(toks.length, j + 3); k++) {
+      const t = norm(toks[k]);
+      if (t && (t === n || t.startsWith(n) || n.startsWith(t))) { j = k + 1; return { ...p, w: toks[k] }; }
+    }
+    return p;
+  });
 }
 
 // Varias frases ubicadas en el tiempo → pistas con `en` final y palabras en tiempo absoluto del video.

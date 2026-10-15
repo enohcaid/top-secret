@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- POV en primera persona: clips de 5 s (Canva) en cuadros JPG, marcador tipo HUD del juego arriba con el reloj
+     corriendo, textos de pensamiento que golpean (uno por vez), latido en los bordes y sacudón en el momento clave.
+     datos = { hud: { local, visita, gl, gv, min }, escenas: [{ dur, clip, vel, textos: [{ t, txt, grito }], sacudon?, flash? }], escudo }
+     mostrar(0, t) → render cuadro por cuadro determinístico. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="../../../node_modules/gsap/dist/gsap.min.js"></script>
+<style>
+:root{--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;color:var(--text)}
+#cam{position:absolute;inset:-60px}
+#clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#latido{position:absolute;inset:0;background:radial-gradient(70% 55% at 50% 48%,transparent 45%,rgba(120,0,0,.55));opacity:0;z-index:2}
+#hud{position:absolute;left:50%;top:120px;transform:translateX(-50%);z-index:6;display:flex;align-items:stretch;font:800 40px 'Barlow Condensed';letter-spacing:.06em;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+#hud div{padding:12px 22px;background:rgba(10,9,7,.92)}
+#hud .eq{text-transform:uppercase}
+#hud .res{background:var(--gold);color:#0A0907;min-width:120px;text-align:center}
+#hud .min{background:#E5484D;color:#fff;min-width:130px;text-align:center}
+#txt{position:absolute;left:70px;right:70px;top:46%;transform:translateY(-50%);z-index:7;text-align:center;font:800 92px/1.08 Barlow;text-shadow:0 6px 30px rgba(0,0,0,.95),0 0 3px #000}
+#txt.grito{font:400 260px/.9 'Bebas Neue';color:var(--gold2)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:20}
+#fin{position:absolute;left:60px;right:60px;bottom:220px;z-index:8;text-align:center;opacity:0}
+#fin p{font:800 64px/1.15 Barlow;text-shadow:0 6px 30px rgba(0,0,0,.95)}
+#fin img{height:100px;margin-top:30px}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="cam"><img id="clip"></div>
+  <div id="latido"></div>
+  <div id="hud"><div class="eq" id="hl"></div><div class="res" id="hr"></div><div class="eq" id="hv"></div><div class="min" id="hm"></div></div>
+  <div id="txt"></div>
+  <div id="fin"><p id="finp"></p><img id="escudo"></div>
+  <div id="flash"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let D, E = [], tl, TX = [];
+async function pintar(datos) {
+  D = datos;
+  await document.fonts.ready;
+  $('#hl').textContent = D.hud.local; $('#hv').textContent = D.hud.visita; $('#hr').textContent = `${D.hud.gl} - ${D.hud.gv}`;
+  $('#finp').innerHTML = D.pregunta;
+  if (D.escudo) $('#escudo').src = D.escudo; else $('#escudo').remove();
+  let t = 0;
+  E = D.escenas.map(e => { const o = { ...e, t0: t, t1: t + e.dur }; t += e.dur; return o; });
+  TX = E.flatMap((e, i) => (e.textos || []).map(x => ({ ...x, esc: i, t: e.t0 + x.t })));
+  tl = gsap.timeline({ paused: true });
+  tl.from('#hud', { y: -120, opacity: 0, duration: 0.5, ease: 'expo.out' }, 0.1);
+  // latido: cada vez más rápido hasta el momento clave
+  const clave = E.find(e => e.sacudon)?.t0 ?? t;
+  for (let b = 0.4, p = 0.9; b < clave; b += p, p = Math.max(0.42, p * 0.92))
+    tl.fromTo('#latido', { opacity: 0.85 }, { opacity: 0.15, duration: p * 0.8, ease: 'power2.out', immediateRender: false }, b);
+  tl.set('#latido', { opacity: 0 }, clave);
+  TX.forEach(x => tl.fromTo('#txt', { scale: x.grito ? 2.2 : 1.35, opacity: 0, filter: 'blur(8px)' }, { scale: 1, opacity: 1, filter: 'blur(0px)', duration: x.grito ? 0.35 : 0.25, ease: x.grito ? 'back.out(2)' : 'expo.out', immediateRender: false }, x.t));
+  E.forEach(e => {
+    if (e.sacudon) tl.fromTo('#cam', { x: 0, y: 0 }, { keyframes: { x: [40, -32, 22, -12, 0], y: [-24, 18, -10, 4, 0] }, duration: 0.5, ease: 'none', immediateRender: false }, e.t0 + e.sacudon);
+    if (e.flash !== undefined) tl.fromTo('#flash', { opacity: 0.8 }, { opacity: 0, duration: 0.4, immediateRender: false }, e.t0 + e.flash);
+  });
+  if (D.finEn) tl.fromTo('#fin', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', immediateRender: false }, D.finEn);
+  return 1;
+}
+const cuadro = (e, lt) => e.clip ? `${e.clip.dir}/${String(Math.min(e.clip.n, 1 + (e.desde ?? 9) + Math.floor(lt * 30 * (e.vel || 1)))).padStart(4, '0')}.jpg` : '';
+async function mostrar(n, t = 0) {
+  const e = E.find(x => t >= x.t0 && t < x.t1) || E[E.length - 1], lt = t - e.t0;
+  const clip = $('#clip'), src = cuadro(e, lt);
+  if (src && clip.getAttribute('src') !== src) { clip.setAttribute('src', src); await clip.decode().catch(() => {}); }
+  clip.style.transform = `scale(${1.04 + lt * 0.01})`;
+  // reloj del HUD: corre de verdad (90:00 en adelante, en segundos de juego acelerados x6)
+  const s = Math.floor(D.hud.min * 60 + t * 6);
+  $('#hm').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  // solo los textos de la escena actual (antes uno viejo, sin 'hasta', reaparecía en el cierre)
+  const i = E.indexOf(e), x = [...TX].reverse().find(x => x.esc === i && t >= x.t && t < (x.hasta ?? Infinity));
+  const el = $('#txt');
+  el.textContent = x ? x.txt : '';
+  el.className = x?.grito ? 'grito' : '';
+  tl.seek(t, true);
+}
+</script>
+</body>
+</html>

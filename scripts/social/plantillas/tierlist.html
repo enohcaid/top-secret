@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Tier list animada (S/A/B/C), reutilizable para cualquier ranking (camisetas, goles, festejos, rivales).
+     datos = { titulo, sub, filas: ['S','A','B','C'], kits: [{ id, nombre, fila, img, t }], suspensoEn, finEn, pregunta,
+     escudo, carrusel? }. Video (story): cada ítem aparece grande al centro con su nombre y cae a su fila con un golpe;
+     antes de la fila S, suspenso. Carrusel (post): slide 1 = tablero completo, después un slide por ítem (de S a C). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="../../../node_modules/gsap/dist/gsap.min.js"></script>
+<style>
+:root{--bg:#0A0907;--card:#16130B;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.66);
+  --S:#E5484D;--A:#F5A524;--B:#E8D44D;--C:#3ECF8E}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:100vw;height:100vh;overflow:hidden;background:radial-gradient(80% 40% at 50% 0%,rgba(201,168,76,.16),transparent 70%),var(--bg);color:var(--text)}
+#cab{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:26px;padding:0 60px}
+#cab img{height:120px}
+#cab h1{font:400 92px/.92 'Bebas Neue'}
+#cab p{font:800 30px 'Barlow Condensed';letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-top:6px}
+#tablero{position:absolute;left:40px;right:40px;display:flex;flex-direction:column;gap:12px}
+.fila{flex:1;display:flex;background:var(--card);border-radius:10px;overflow:hidden}
+.fila .letra{width:150px;display:flex;align-items:center;justify-content:center;font:400 130px 'Bebas Neue';color:#0A0907}
+.fila .slots{flex:1;display:flex;align-items:center;gap:14px;padding:0 18px}
+.slot{flex:0 0 auto;height:92%;aspect-ratio:4/5}
+.tile{position:absolute;z-index:5;border-radius:8px;overflow:hidden;background:#000;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+#nombre{position:absolute;left:0;right:0;z-index:9;text-align:center;font:800 54px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;text-shadow:0 4px 20px #000;opacity:0}
+#velo{position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:4;opacity:0}
+#susp{position:absolute;left:0;right:0;top:45%;z-index:8;text-align:center;font:400 170px/.9 'Bebas Neue';opacity:0}
+#susp span{color:var(--S)}
+#flash{position:absolute;inset:0;background:#FFF5DA;opacity:0;z-index:20}
+#fin{position:absolute;left:60px;right:60px;z-index:10;text-align:center;background:rgba(10,9,7,.92);padding:34px 20px;border-top:6px solid var(--gold);opacity:0}
+#fin p{font:800 56px/1.2 Barlow} #fin b{color:var(--gold2)}
+/* slide de un ítem (carrusel) */
+#solo{position:absolute;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--bg)}
+#solo img{height:72%;border-radius:12px}
+#solo .l{font:400 180px/.8 'Bebas Neue';position:absolute;left:60px;top:50px;color:#0A0907;width:170px;height:170px;display:flex;align-items:center;justify-content:center;border-radius:12px}
+#solo h2{font:800 58px 'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase;margin-top:34px}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="cab"><img id="escudo"><div><h1 id="titulo"></h1><p id="sub"></p></div></div>
+  <div id="tablero"></div>
+  <div id="tiles"></div>
+  <div id="velo"></div>
+  <div id="nombre"></div>
+  <div id="susp">Y en la <span>S</span>…</div>
+  <div id="fin"><p id="finp"></p></div>
+  <div id="solo"><div class="l"></div><img><h2></h2></div>
+  <div id="flash"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let D, tl, K = [], orden = [];
+async function pintar(datos) {
+  D = datos;
+  await document.fonts.ready;
+  const W = innerWidth, H = innerHeight, story = H > 1500;
+  $('#escudo').src = D.escudo; $('#titulo').textContent = D.titulo; $('#sub').textContent = D.sub; $('#finp').innerHTML = D.pregunta;
+  const cabH = story ? 360 : 230, pie = story ? 300 : 40;
+  if (!story) { $('#cab h1').style.fontSize = '70px'; $('#cab img').style.height = '96px'; }
+  $('#cab').style.height = cabH + 'px'; $('#cab').style.paddingTop = story ? '120px' : '30px';
+  Object.assign($('#tablero').style, { top: cabH + 'px', bottom: pie + 'px' });
+  $('#tablero').innerHTML = D.filas.map(f => `<div class="fila" data-f="${f}"><div class="letra" style="background:var(--${f})">${f}</div><div class="slots">${D.kits.filter(k => k.fila === f).map(k => `<div class="slot" data-k="${k.id}"></div>`).join('')}</div></div>`).join('');
+  $('#tiles').innerHTML = D.kits.map(k => `<div class="tile" data-k="${k.id}"><img src="${k.img}"></div>`).join('');
+  await Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })));
+  const L = $('#lienzo').getBoundingClientRect();
+  K = D.kits.map(k => {
+    const r = document.querySelector(`.slot[data-k="${k.id}"]`).getBoundingClientRect(), el = document.querySelector(`.tile[data-k="${k.id}"]`);
+    Object.assign(el.style, { left: r.left - L.left + 'px', top: r.top - L.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+    return { ...k, el, r };
+  });
+  $('#nombre').style.top = (story ? H * 0.78 : H * 0.86) + 'px';
+  $('#fin').style.bottom = (story ? 60 : 30) + 'px';
+  if (D.carrusel) { orden = [...D.filas].flatMap(f => K.filter(k => k.fila === f)); return 1 + orden.length; }
+
+  tl = gsap.timeline({ paused: true });
+  tl.from('#cab', { y: -60, opacity: 0, duration: 0.6, ease: 'expo.out' }, 0.1);
+  tl.from('.fila', { x: -W, duration: 0.6, ease: 'expo.out', stagger: 0.08 }, 0.3);
+  K.forEach(k => tl.set(k.el, { opacity: 0 }, 0));
+  const paso = 60 / D.bpm * 4;
+  K.forEach(k => {
+    const cx = W / 2 - (k.r.left + k.r.width / 2), cy = H * 0.47 - (k.r.top + k.r.height / 2), esc = Math.min(2.6, (H * 0.42) / k.r.height);
+    tl.set(k.el, { opacity: 1, zIndex: 7 }, k.t);
+    tl.fromTo('#velo', { opacity: 0 }, { opacity: 1, duration: 0.2, immediateRender: false }, k.t);
+    tl.fromTo(k.el, { x: cx, y: cy + 200, scale: esc * 0.8, rotate: -6, opacity: 0 }, { x: cx, y: cy, scale: esc, rotate: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.6)', immediateRender: false }, k.t);
+    tl.to(k.el, { x: 0, y: 0, scale: 1, duration: 0.32, ease: 'power3.in' }, k.t + paso * 0.6);
+    tl.to('#velo', { opacity: 0, duration: 0.25 }, k.t + paso * 0.6);
+    const cae = k.t + paso * 0.6 + 0.32;
+    tl.set(k.el, { zIndex: 5 }, cae);
+    tl.fromTo('#tablero, #tiles', { y: 0 }, { keyframes: { y: [14, -8, 3, 0] }, duration: 0.3, ease: 'none', immediateRender: false }, cae);
+    tl.fromTo('#flash', { opacity: k.fila === 'S' ? 0.45 : 0.15 }, { opacity: 0, duration: 0.3, immediateRender: false }, cae);
+  });
+  if (D.suspensoEn) {
+    tl.fromTo('#velo', { opacity: 0 }, { opacity: 1, duration: 0.3, immediateRender: false }, D.suspensoEn);
+    tl.fromTo('#susp', { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'expo.out', immediateRender: false }, D.suspensoEn + 0.2);
+    tl.to('#susp', { opacity: 0, duration: 0.25 }, D.suspensoEn + 60 / D.bpm * 6 - 0.3);
+  }
+  tl.fromTo('#fin', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', immediateRender: false }, D.finEn + 0.2);
+  return 1;
+}
+async function mostrar(n, t = 0) {
+  if (D.carrusel) {
+    const solo = $('#solo');
+    if (n === 0) { solo.style.display = 'none'; $('#nombre').style.opacity = 0; return; }
+    const k = orden[n - 1];
+    solo.style.display = 'flex';
+    solo.querySelector('.l').textContent = k.fila; solo.querySelector('.l').style.background = `var(--${k.fila})`;
+    solo.querySelector('img').src = k.img; await solo.querySelector('img').decode().catch(() => {});
+    solo.querySelector('h2').textContent = k.nombre;
+    return;
+  }
+  const paso = 60 / D.bpm * 4;
+  const k = K.find(k => t >= k.t && t < k.t + paso * 0.6);
+  $('#nombre').textContent = k ? k.nombre : '';
+  $('#nombre').style.opacity = k ? 1 : 0;
+  tl.seek(t, true);
+}
+</script>
+</body>
+</html>

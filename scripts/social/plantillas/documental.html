@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Mini-documental (estilo "documental de Netflix"): fondo = clips de 5 s animados con IA (Canva) en cuadros JPG,
+     look desaturado con grano, fundidos a negro entre escenas, placa de contexto a máquina arriba, ficha (lower third),
+     marcador y subtítulos sincronizados con la voz en off (palabras con tiempo, de lib/voz.mjs). Línea de tiempo GSAP
+     en pausa: mostrar(0, t) la posiciona en el segundo t → render cuadro por cuadro determinístico. Reutilizable para
+     cualquier historia: datos = { escenas: [{ dur, clip, vel, kicker, palabras, ficha?, marcador?, cierre? }], escudo }. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;700&family=Barlow+Condensed:wght@600;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="../../../node_modules/gsap/dist/gsap.min.js"></script>
+<script src="../../../node_modules/gsap/dist/ScrambleTextPlugin.min.js"></script>
+<script src="../../../node_modules/gsap/dist/DrawSVGPlugin.min.js"></script>
+<script src="../../../node_modules/gsap/dist/SplitText.min.js"></script>
+<style>
+:root{--bg:#050505;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.7);--dim:rgba(244,239,224,.38);--loss:#E5484D}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text)}
+#cam{position:absolute;inset:-40px}
+#clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.72) contrast(1.06) brightness(.92)}
+#tinte{position:absolute;inset:0;background:linear-gradient(rgba(20,60,80,.32),rgba(60,40,10,.18));mix-blend-mode:soft-light}
+#abajo{position:absolute;inset:0;background:linear-gradient(transparent 46%,rgba(5,5,5,.9))}
+#arriba{position:absolute;inset:0;background:linear-gradient(rgba(5,5,5,.7),transparent 26%)}
+#grano{position:absolute;inset:0;width:100%;height:100%;opacity:.14;mix-blend-mode:overlay}
+#vineta{position:absolute;inset:0;background:radial-gradient(78% 60% at 50% 45%,transparent 48%,rgba(0,0,0,.85))}
+#negro{position:absolute;inset:0;background:#000;opacity:0;z-index:30;pointer-events:none}
+.g{position:absolute;inset:0;z-index:6;visibility:hidden}
+.kicker{position:absolute;left:84px;top:200px;right:84px}
+.kicker span{font:800 34px 'Barlow Condensed';letter-spacing:.34em;text-transform:uppercase;color:var(--gold2);text-shadow:0 2px 14px rgba(0,0,0,.9)}
+.kicker svg{display:block;margin-top:18px}
+.ficha{position:absolute;left:84px;right:84px;top:1010px;padding-left:34px}
+.ficha .barra{position:absolute;left:0;top:6px;bottom:6px;width:9px;background:var(--gold);transform-origin:50% 0}
+.ficha .rol{font:800 32px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.ficha .nombre{font:400 170px/.92 'Bebas Neue';text-shadow:0 10px 40px rgba(0,0,0,.7)}
+.ficha .dato{font:600 38px 'Barlow Condensed';letter-spacing:.12em;text-transform:uppercase;color:var(--text2)}
+.marcador{position:absolute;left:60px;right:60px;top:880px;text-align:center}
+.marcador .eq{display:flex;justify-content:center;align-items:center;gap:34px}
+.marcador .nom{font:800 44px 'Barlow Condensed';letter-spacing:.16em;text-transform:uppercase;width:300px;text-shadow:0 4px 18px rgba(0,0,0,.9)}
+.marcador .nom.izq{text-align:right} .marcador .nom.der{text-align:left}
+.marcador .res{font:400 230px/.85 'Bebas Neue';color:var(--gold);text-shadow:0 0 60px rgba(201,168,76,.45);white-space:nowrap}
+.marcador.rojo .res{color:var(--loss);text-shadow:0 0 60px rgba(229,72,77,.45)}
+.marcador .goles{font:700 38px Barlow;color:var(--text);margin-top:26px;text-shadow:0 4px 18px rgba(0,0,0,.9)}
+.sub{position:absolute;left:90px;right:90px;bottom:300px;text-align:center;font:700 58px/1.28 Barlow;text-shadow:0 3px 16px rgba(0,0,0,.95),0 0 4px rgba(0,0,0,.8);z-index:8}
+.sub w{color:var(--dim);transition:none}
+.sub w.dicha{color:var(--text)}
+.sub w.ahora{color:var(--gold2)}
+.cierre{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(70% 45% at 50% 46%,rgba(201,168,76,.16),transparent 70%),rgba(5,5,5,.82);z-index:9}
+.cierre h1{font:400 150px/.92 'Bebas Neue';font-kerning:none;padding:0 40px}
+.cierre h1 span{white-space:nowrap}
+.cierre h1 .oro{color:var(--gold);display:block}
+.cierre h1 div{padding-top:.14em;margin-top:-.14em}
+.cierre img{height:130px;margin-top:80px}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="cam"><img id="clip"><div id="tinte"></div><div id="abajo"></div><div id="arriba"></div><canvas id="grano" width="540" height="1000"></canvas><div id="vineta"></div></div>
+  <div id="escenas"></div>
+  <div class="sub" id="sub"></div>
+  <div id="negro"></div>
+</div>
+<script>
+gsap.registerPlugin(ScrambleTextPlugin, DrawSVGPlugin, SplitText);
+const $ = s => document.querySelector(s);
+let D, E = [], tl;
+
+function html(e, i) {
+  let h = `<div class="g" id="g${i}">`;
+  if (e.kicker) h += `<div class="kicker"><span class="scr">${e.kicker}</span><svg width="420" height="8"><path d="M2 4 H418" stroke="#C9A84C" stroke-width="4" fill="none"/></svg></div>`;
+  if (e.ficha) h += `<div class="ficha"><div class="barra"></div><div class="rol">${e.ficha.rol || ''}</div><div class="nombre">${e.ficha.nombre}</div><div class="dato">${e.ficha.dato || ''}</div></div>`;
+  if (e.marcador) { const m = e.marcador;
+    h += `<div class="marcador${m.rojo ? ' rojo' : ''}"><div class="eq"><div class="nom izq">${m.izq}</div><div class="res">${m.a} - ${m.b}</div><div class="nom der">${m.der}</div></div>${m.goles ? `<div class="goles">${m.goles}</div>` : ''}</div>`; }
+  h += '</div>';
+  if (e.cierre) h += `<div class="g cierre" id="c${i}"><h1><span class="l1">${e.cierre[0]}</span><span class="oro l2">${e.cierre[1]}</span></h1>${D.escudo ? `<img class="escudo" src="${D.escudo}">` : ''}</div>`;
+  return h;
+}
+
+async function pintar(datos) {
+  D = datos;
+  await document.fonts.ready;
+  let t = 0;
+  E = D.escenas.map(e => { const o = { ...e, t0: t, t1: t + e.dur }; t += e.dur; return o; });
+  $('#escenas').innerHTML = E.map(html).join('');
+  tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  E.forEach((e, i) => {
+    const g = `#g${i}`, a = e.t0;
+    tl.set(g, { visibility: 'visible' }, a).set(g, { visibility: 'hidden' }, e.t1);
+    // fundido a negro entre escenas (corte de documental)
+    if (i > 0) tl.fromTo('#negro', { opacity: 1 }, { opacity: 0, duration: 0.45, ease: 'power1.out', immediateRender: false }, a);
+    if (e.kicker) {
+      tl.fromTo(`${g} .scr`, { scrambleText: { text: '' } }, { duration: 1.0, scrambleText: { text: e.kicker, chars: '0123456789', speed: 0.5 }, ease: 'none' }, a + 0.25);
+      tl.fromTo(`${g} .kicker path`, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.8, ease: 'expo.inOut' }, a + 0.35);
+    }
+    if (e.ficha) {
+      const f = a + (e.fichaEn ?? 1.2);
+      tl.from(`${g} .ficha .barra`, { scaleY: 0, duration: 0.5, ease: 'expo.out' }, f);
+      tl.fromTo(`${g} .ficha .nombre`, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.8, ease: 'expo.inOut' }, f + 0.15);
+      tl.from(`${g} .ficha .rol, ${g} .ficha .dato`, { opacity: 0, x: -24, duration: 0.5, stagger: 0.2 }, f + 0.5);
+    }
+    if (e.marcador) {
+      const m = a + (e.marcadorEn ?? 1.0);
+      tl.from(`${g} .res`, { scale: 2.4, opacity: 0, filter: 'blur(14px)', duration: 0.6, ease: 'back.out(1.6)' }, m);
+      tl.from(`${g} .nom.izq`, { x: -60, opacity: 0, duration: 0.5 }, m + 0.2);
+      tl.from(`${g} .nom.der`, { x: 60, opacity: 0, duration: 0.5 }, m + 0.2);
+      tl.fromTo('#cam', { x: 0 }, { keyframes: { x: [16, -11, 6, 0] }, duration: 0.45, ease: 'none', immediateRender: false }, m);
+      if (e.marcador.goles) tl.from(`${g} .goles`, { opacity: 0, y: 30, duration: 0.6 }, m + 0.6);
+    }
+    if (e.cierre) {
+      const c = `#c${i}`, ca = a + e.cierreEn;
+      tl.set(c, { visibility: 'visible' }, ca).set(c, { visibility: 'hidden' }, e.t1);
+      tl.from(c, { opacity: 0, duration: 0.6, ease: 'power1.inOut' }, ca);
+      const s1 = SplitText.create(`${c} .l1`, { type: 'chars', mask: 'chars' }), s2 = SplitText.create(`${c} .l2`, { type: 'chars', mask: 'chars' });
+      tl.from(s1.chars, { yPercent: 110, duration: 0.6, ease: 'expo.out', stagger: 0.03 }, ca + 0.2);
+      tl.from(s2.chars, { yPercent: 110, duration: 0.6, ease: 'expo.out', stagger: 0.03 }, ca + 0.9);
+      tl.from(`${c} .escudo`, { opacity: 0, scale: 0.6, duration: 0.8, ease: 'back.out(1.8)' }, ca + 1.5);
+    }
+  });
+  return 1;
+}
+
+function grano(t) {
+  const c = $('#grano'), g = c.getContext('2d'), img = g.createImageData(c.width, c.height);
+  let s = Math.floor(t * 24) * 7919 + 3;
+  for (let i = 0; i < img.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = s & 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  g.putImageData(img, 0, 0);
+}
+const cuadro = (e, lt) => e.clip ? `${e.clip.dir}/${String(Math.min(e.clip.n, 1 + (e.desde ?? 9) + Math.floor(lt * 30 * (e.vel || 1)))).padStart(4, '0')}.jpg` : '';
+
+// Subtítulos: la frase de la escena entera, cada palabra se enciende cuando la voz la dice (la actual en dorado).
+let subEsc = -1;
+function subtitulos(e, i, lt) {
+  const sub = $('#sub');
+  if (subEsc !== i) { sub.innerHTML = (e.palabras || []).map(p => `<w>${p.w}</w>`).join(' '); subEsc = i; }
+  const ws = sub.children, P = e.palabras || [];
+  const visible = P.length && lt >= P[0].t - 0.25 && !(e.cierre && lt >= e.cierreEn);
+  sub.style.opacity = visible ? 1 : 0;
+  for (let k = 0; k < P.length; k++) ws[k].className = lt >= P[k].t + P[k].d ? 'dicha' : lt >= P[k].t ? 'ahora' : '';
+}
+
+async function mostrar(n, t = 0) {
+  grano(t);
+  const e = E.find(x => t >= x.t0 && t < x.t1) || E[E.length - 1], lt = t - e.t0, i = E.indexOf(e);
+  const clip = $('#clip'), src = cuadro(e, lt);
+  if (src && clip.getAttribute('src') !== src) { clip.setAttribute('src', src); await clip.decode().catch(() => {}); }
+  clip.style.transform = `scale(${1.03 + lt * 0.012})`;
+  subtitulos(e, i, lt);
+  tl.seek(t, true);
+  const fin = E[E.length - 1].t1;
+  if (t > fin - 0.5) $('#negro').style.opacity = Math.min(1, (t - (fin - 0.5)) / 0.5);
+}
+</script>
+</body>
+</html>
