@@ -289,7 +289,6 @@ const PLAYER_TRAITS = {
   'CipriMancini':     { dorsal: 14, desc: 'piel trigueña, pelo castaño con rulos por encima de los hombros, anteojos deportivos rojos, manga térmica azul con estampado rojo en el brazo derecho y manga azul en el izquierdo' },
   'Lil_Dekuroko':     { dorsal: 22, desc: 'piel morena, pelo corto rizado rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca' },
   'Lautavester7':     { dorsal: 7,  desc: 'piel oscura, pelo muy corto teñido azul claro, barba negra tupida, anteojos deportivos rojos espejados' },
-  'Juanchyroman08':   { dorsal: 18, desc: 'piel clara, gorra gris puesta al revés, pelo azul largo, dos franjas azules pintadas bajo los ojos, tatuaje en el brazo' },
   'NicoBJ_96':        { dorsal: 9,  desc: 'piel oscura, pelo corto rubio platinado, barba negra larga y tupida' },
 };
 

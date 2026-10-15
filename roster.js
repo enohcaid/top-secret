@@ -45,7 +45,6 @@ const ROSTER_T4 = [
   {key:'CipriMancini',     pos:'MED', posn:'Mediocampista',   num:'14', nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
   {key:'Lil_Dekuroko',     pos:'MED', posn:'Mediocampista',   num:'22', nvl:'—', arq:'—', build:'—', stats:[], total:0, nat:'co', plataforma:'ps'},
   {key:'Lautavester7',     pos:'DEL', posn:'Extremo',         num:'7',  nvl:'—', arq:'—', build:'—', stats:[], total:0, photo:true, plataforma:'pc'},
-  {key:'Juanchyroman08',   pos:'DEL', posn:'Extremo',         num:'18', nvl:'—', arq:'—', build:'—', stats:[], total:0},
   {key:'NicoBJ_96',        pos:'DEL', posn:'Delantero',       num:'9',  nvl:'—', arq:'—', build:'—', stats:[], total:0, plataforma:'ps'},
 ];
 

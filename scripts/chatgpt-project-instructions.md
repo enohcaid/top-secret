@@ -34,7 +34,6 @@ Cada render del proyecto se llama exactamente igual que el gamertag del jugador.
 | 20 | Guiidow | MCI | Guiidow.png |
 | 7 | Lautavester7 | EI | Lautavester7.png |
 | 11 | BlackPanther-CG | ED | BlackPanther-CG.png |
-| 18 | Juanchyroman08 | ED | Juanchyroman08.png |
 | 22 | Lil_Dekuroko | MCI | Lil_Dekuroko.png |
 
 Si el dorsal es visible en la imagen, tiene que ser el número de esta tabla.

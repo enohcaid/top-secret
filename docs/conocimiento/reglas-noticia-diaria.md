@@ -17,4 +17,4 @@ La nota del 14/10 presentó a Lautavester7 como "lateral izquierdo": leyó `play
 
 ## Bajas del plantel (2026-10-15)
 
-- **kee_viin03 se fue del club** (baja del 2026-10-15). No mencionarlo ni elegirlo como protagonista en notas nuevas: el plantel vigente es `ROSTER_T4` de `roster.js`. Puede aparecer solo como dato histórico de la T3 (sus partidos y goles de esa temporada).
+- **kee_viin03 y Juanchyroman08 se fueron del club** (bajas del 2026-10-15). No mencionarlos ni elegirlos como protagonistas en notas nuevas: el plantel vigente es `ROSTER_T4` de `roster.js`. Pueden aparecer solo como dato histórico de la T3 (sus partidos y goles de esa temporada).
