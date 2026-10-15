@@ -198,6 +198,26 @@
         "puente con batería tresillo y coro pulsante"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-15",
+      "id": "2026-10-15-2",
+      "archivo": "2026-10-15-2 - Mudo.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_15_2.py",
+      "duracion": 89,
+      "nombre": "Mudo",
+      "concepto": "El gol más importante de tu vida y no te sale el grito — te quedás quieto con los ojos cerrados mientras el mundo explota alrededor, hasta que la emoción te rompe y finalmente gritás.",
+      "bpm": 128,
+      "tonalidad": "do menor",
+      "rasgo": "nota partida: cada nota del lead arranca dividida en dos voces micro-tonalmente separadas (±20 cents) que convergen sección a sección hasta el unísono perfecto en el gancho C — el momento en que encontrás la voz",
+      "recursos": [
+        "lead de nota partida con convergencia micro-tonal (firma del tema)",
+        "cuerdas cálidas con arco y brillo variable por sección",
+        "piano oscuro percusivo (intro, verso, final)",
+        "808 melódico con saltos de octava y glide",
+        "swell invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
