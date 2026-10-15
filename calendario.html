@@ -1789,8 +1789,10 @@ function findSeedMatch(id){
     // Exact rival name wins over fuzzy matches (avoids e.g. "CAI Esports" vs "San Lorenzo Esports" sharing suffix "orts")
     const rivalNorm = m.rival ? m.rival.trim().toLowerCase() : '';
     if(rivalNorm){
-      const exact = candidates.find(s => s.rival && s.rival.trim().toLowerCase() === rivalNorm);
-      if(exact) return exact;
+      const exact = candidates.filter(s => s.rival && s.rival.trim().toLowerCase() === rivalNorm);
+      // Ida y vuelta el mismo día ante el mismo rival (14/10): el nombre empata, decide local/visitante.
+      if(exact.length > 1 && m.isHome !== undefined) candidates = exact;
+      else if(exact.length) return exact[0];
     }
     if(m.isHome !== undefined){
       const match = candidates.find(s => s.isHome === m.isHome);
