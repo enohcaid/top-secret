@@ -14,3 +14,7 @@ La nota del 14/10 presentó a Lautavester7 como "lateral izquierdo": leyó `play
 
 - Una nota centrada en un jugador (perfil, entrevista, figura) solo puede elegir a alguien que haya **jugado en el último día con partidos** de `seed_matches.js` y que tenga algo **objetivamente destacado** en los datos (goles, asistencias, mejor nota, racha).
 - Nunca elegir a un jugador que lleva una semana o más sin jugar (la del 14/10 eligió a Lautavester7, que no jugaba desde el 7/10, y hubo que reemplazarla por NicoBJ_96, goleador del grupo).
+
+## Bajas del plantel (2026-10-15)
+
+- **kee_viin03 se fue del club** (baja del 2026-10-15). No mencionarlo ni elegirlo como protagonista en notas nuevas: el plantel vigente es `ROSTER_T4` de `roster.js`. Puede aparecer solo como dato histórico de la T3 (sus partidos y goles de esa temporada).

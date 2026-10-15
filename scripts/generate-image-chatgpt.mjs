@@ -290,7 +290,6 @@ const PLAYER_TRAITS = {
   'Lil_Dekuroko':     { dorsal: 22, desc: 'piel morena, pelo corto rizado rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca' },
   'Lautavester7':     { dorsal: 7,  desc: 'piel oscura, pelo muy corto teñido azul claro, barba negra tupida, anteojos deportivos rojos espejados' },
   'Juanchyroman08':   { dorsal: 18, desc: 'piel clara, gorra gris puesta al revés, pelo azul largo, dos franjas azules pintadas bajo los ojos, tatuaje en el brazo' },
-  'kee_viin03':       { dorsal: 21, desc: 'piel oscura, afro grande y voluminoso rojo/rosa intenso, sin barba' },
   'NicoBJ_96':        { dorsal: 9,  desc: 'piel oscura, pelo corto rubio platinado, barba negra larga y tupida' },
 };
 

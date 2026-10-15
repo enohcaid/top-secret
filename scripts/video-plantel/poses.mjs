@@ -33,7 +33,6 @@ export const GESTOS = {
   Lil_Dekuroko:     'una mano en el mentón en pose pensativa y la otra en la cintura (T3).',
   Lautavester7:     'levanta el puño cerrado bien alto por encima de la cabeza, brazo estirado, el otro brazo firme al costado (T3).',
   Juanchyroman08:   'una mano detrás de la nuca como acomodándose el pelo, el otro brazo relajado, peso en una pierna (T3).',
-  kee_viin03:       'de ESPALDAS a la cámara mostrando el nombre "KEE_VIIN03" y el dorsal 21 en la espalda de la camiseta, gira la cabeza para mirar a la cámara por encima del hombro y se señala el nombre con los dos pulgares (T3).',
   NicoBJ_96:        'señala directo a la cámara con el dedo índice de la mano derecha, brazo extendido hacia adelante, el otro en la cintura.',
 };
 

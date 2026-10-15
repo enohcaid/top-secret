@@ -14,7 +14,7 @@ const W = 3200, H = 1700;
 const ROWS = [
   { scale: 0.56, floor: 1060, spread: 0.84, light: 0.7, players: [
     ['Huber236', 30, 1], ['rivarola90', 0, 1], ['Elianja20', -40, 1.03], ['pepolemmo2710', -70, 1.05],
-    ['kee_viin03', -30, 1.04], ['Juanchyroman08', 10, 1], ['adri_cai', 20, 1] ] },
+    ['Juanchyroman08', 10, 1], ['adri_cai', 20, 1] ] },
   { scale: 0.66, floor: 1330, spread: 0.8, light: 0.86, players: [
     ['Guiidow', 20, 1], ['Alexisraies23', 0, 1], ['Cabers14', -10, 1.02], ['Juan_Martinez4', -30, 1.06],
     ['Lil_Dekuroko', -10, 1.02], ['NicoBJ_96', 0, 1.02], ['RS32-DaniStone', 20, 1] ] },

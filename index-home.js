@@ -269,7 +269,6 @@ if (!reduced && typeof gsap !== 'undefined') {
     ['logos/duos/duo-defensa-k1.webp',  'Alexisraies23 · Cabers14'],
     ['logos/duos/duo-laterales-k2-v3.webp','nikileo527 · pepolemmo2710 · Kit 2'],
     ['logos/duos/duo-arqueros-v2.webp',    'Ivan_Cabj_La12 · adri_cai · Arqueros'],
-    ['logos/duos/duo-ataque-k1.webp',   'NicoBJ_96 · kee_viin03'],
     ['logos/duos/duo-capitanes-k2-v3.webp','Juan_Martinez4 · Lautavester7 · Kit 2'],
     ['logos/duos/duo-guiidow-lil-k1.webp','Guiidow · Lil_Dekuroko'],
     ['logos/duos/duo-rivarola-huber-k2-v3.webp','rivarola90 · Huber236 · Kit 2'],
