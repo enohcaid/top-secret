@@ -26,8 +26,7 @@
   const proximo = () => (estado.proximos || [])[0] || null;
   const datos = (A, B) => {
     const p = proximo(), t = estado.temporada || {};
-    const etapa = (t.etapa || 'Pretemporada').toLowerCase();
-    return { A, B, etapa: `la ${etapa}`, rival: p?.rival, liga: p?.liga, hora: p?.hora, pj: t.pj, g: t.g, e: t.e, p: t.p, gf: t.gf, gc: t.gc, goleador: t.goleador, golesGoleador: t.golesGoleador };
+    return { A, B, etapa: t.frase || 'la temporada', rival: p?.rival, liga: p?.liga, hora: p?.hora, pj: t.pj, g: t.g, e: t.e, p: t.p, gf: t.gf, gc: t.gc, goleador: t.goleador, golesGoleador: t.golesGoleador };
   };
   const llenar = (txt, d) => txt.replace(/\{(\w+)\}/g, (_, k) => d[k] ?? '');
   const sirve = it => (!it.despues || it.despues === window.ultimoResultado) &&
@@ -89,7 +88,7 @@
         <div class="t">vs ${p.rival}</div><div class="s">${p.torneo && p.torneo !== p.liga ? p.torneo : ''}</div><div class="hora">${p.hora} HS</div>`;
     } else {
       if (!t?.pj) return false;
-      c.innerHTML = `<div class="k">${(t.etapa || 'Pretemporada').toUpperCase()} · NÚMEROS</div><div class="nums">
+      c.innerHTML = `<div class="k">${(t.etapa || 'Temporada').toUpperCase()} · NÚMEROS</div><div class="nums">
         ${[['pj', 'JUGADOS'], ['g', 'GANADOS'], ['e', 'EMPATADOS'], ['p', 'PERDIDOS'], ['gf', 'GOLES A FAVOR'], ['gc', 'EN CONTRA']].map(([k, n]) => `<div><b>${t[k] ?? 0}</b><span>${n}</span></div>`).join('')}</div>
         ${t.goleador ? `<div class="goleador">Goleador: <b>${t.goleador}</b> · ${t.golesGoleador} goles</div>` : ''}`;
     }

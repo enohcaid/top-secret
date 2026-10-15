@@ -4,29 +4,32 @@ import path from 'path';
 import { execFileSync } from 'child_process';
 import { pathToFileURL } from 'url';
 
-// Números de la etapa actual desde seed_matches.js, según la fecha (Juan, 2026-10-15): pretemporada desde el 28/9
-// (fin de la T3) y Temporada 4 desde el martes 20/10, que arranca con Espacio Gamer. La etiqueta sale en el overlay.
+// Números de la temporada desde seed_matches.js (Juan, 2026-10-15): la T4 empieza después del 28/9 (fin de la T3,
+// mismo corte que T4_CUTOFF del sitio) y la PRETEMPORADA es parte de la T4. Los números son siempre de toda la
+// temporada; la etapa solo cambia el nombre: pretemporada hasta el 19/10 y competencia oficial desde el martes 20/10,
+// que arranca con Espacio Gamer.
+const TEMPORADA = { nombre: 'Temporada 4', desde: '2026-09-29' };
 const ETAPAS = [
   { nombre: 'Temporada 4', desde: '2026-10-20' },
-  { nombre: 'Pretemporada', desde: '2026-09-29' },
+  { nombre: 'Temporada 4 · Pretemporada', desde: '2026-09-29', frase: 'la pretemporada' },
 ];
 const hoyArt = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
 export const etapaActual = (hoy = hoyArt()) => {
   const i = ETAPAS.findIndex(e => hoy >= e.desde);
-  return { nombre: ETAPAS[i].nombre, desde: ETAPAS[i].desde, hasta: i > 0 ? ETAPAS[i - 1].desde : '9999-12-31' };
+  return { nombre: ETAPAS[i].nombre, frase: ETAPAS[i].frase || 'la temporada' };
 };
 export async function temporada() {
   try {
     const { SEED_MATCHES } = await import(pathToFileURL(path.resolve('seed_matches.js')).href + '?' + Date.now());
     const t = { pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0 }, goles = {};
     const et = etapaActual();
-    for (const m of SEED_MATCHES.filter(m => m.date >= et.desde && m.date < et.hasta)) {
+    for (const m of SEED_MATCHES.filter(m => m.date >= TEMPORADA.desde)) {
       const [a, b] = String(m.match_result || '').split('-').map(Number); if (Number.isNaN(a) || Number.isNaN(b)) continue;
       t.pj++; t.gf += a; t.gc += b; if (a > b) t.g++; else if (a < b) t.p++; else t.e++;
       for (const j of m.players || []) { const gt = j.matched || j.name; if (j.goals) goles[gt] = (goles[gt] || 0) + j.goals; }
     }
     const [goleador, golesGoleador] = Object.entries(goles).sort((x, y) => y[1] - x[1])[0] || [];
-    return { ...t, goleador, golesGoleador, etapa: et.nombre };
+    return { ...t, goleador, golesGoleador, etapa: et.nombre, frase: et.frase };
   } catch { return null; }
 }
 
