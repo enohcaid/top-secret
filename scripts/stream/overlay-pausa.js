@@ -1,6 +1,6 @@
 // Modo pausa del overlay (pedido de Juan, 2026-10-15): en los menús, el lobby y la espera entre partidos
 // (estado.modo === 'pausa', lo detecta vigia-vivo.mjs) tapa la pantalla con contenido propio que va rotando:
-//   charla (dos jugadores con globos de diálogo), entrevista de "TS TV", próximo partido y números de la temporada.
+//   charla (dos jugadores con globos de diálogo), entrevista de "TS TV", próximo partido y números de la etapa (hoy, la pretemporada).
 // Guion en charlas.json (marcadores {rival}, {hora}, {pj}…, ver _ayuda). Música propia del club bajita de fondo
 // (solo la horizontal: el audio de OBS es uno solo para las dos versiones). Usa lo de overlay.js (indice, estado, CLIPS…).
 (() => {
@@ -26,7 +26,8 @@
   const proximo = () => (estado.proximos || [])[0] || null;
   const datos = (A, B) => {
     const p = proximo(), t = estado.temporada || {};
-    return { A, B, rival: p?.rival, liga: p?.liga, hora: p?.hora, pj: t.pj, g: t.g, e: t.e, p: t.p, gf: t.gf, gc: t.gc, goleador: t.goleador, golesGoleador: t.golesGoleador };
+    const etapa = (t.etapa || 'Pretemporada').toLowerCase();
+    return { A, B, etapa: `la ${etapa}`, rival: p?.rival, liga: p?.liga, hora: p?.hora, pj: t.pj, g: t.g, e: t.e, p: t.p, gf: t.gf, gc: t.gc, goleador: t.goleador, golesGoleador: t.golesGoleador };
   };
   const llenar = (txt, d) => txt.replace(/\{(\w+)\}/g, (_, k) => d[k] ?? '');
   const sirve = it => (!it.despues || it.despues === window.ultimoResultado) &&
@@ -88,7 +89,7 @@
         <div class="t">vs ${p.rival}</div><div class="s">${p.torneo && p.torneo !== p.liga ? p.torneo : ''}</div><div class="hora">${p.hora} HS</div>`;
     } else {
       if (!t?.pj) return false;
-      c.innerHTML = `<div class="k">TEMPORADA 4 · NÚMEROS</div><div class="nums">
+      c.innerHTML = `<div class="k">${(t.etapa || 'Pretemporada').toUpperCase()} · NÚMEROS</div><div class="nums">
         ${[['pj', 'JUGADOS'], ['g', 'GANADOS'], ['e', 'EMPATADOS'], ['p', 'PERDIDOS'], ['gf', 'GOLES A FAVOR'], ['gc', 'EN CONTRA']].map(([k, n]) => `<div><b>${t[k] ?? 0}</b><span>${n}</span></div>`).join('')}</div>
         ${t.goleador ? `<div class="goleador">Goleador: <b>${t.goleador}</b> · ${t.golesGoleador} goles</div>` : ''}`;
     }
