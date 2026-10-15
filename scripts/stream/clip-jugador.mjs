@@ -6,7 +6,7 @@
 //    para que pueda levantar los brazos sin salirse del cuadro
 // 2) Canva "Imagen a video" (scripts/canva-imagen-a-video.mjs) con el prompt de la emoción
 // 3) rembg cuadro por cuadro, recorte del pecho para arriba → WebM VP9 con alfa en fuentes/stream/clips/<gt>/<emocion>.webm
-// --solo-alpha rehace solo el paso 3 con el mp4 ya generado.
+// --solo-alpha rehace solo el paso 3 con el mp4 ya generado (si el mp4 existe se saltea Canva igual; --rehacer lo pide de nuevo).
 import fs from 'fs';
 import path from 'path';
 import { execFileSync } from 'child_process';
@@ -15,14 +15,25 @@ import ffmpegPath from 'ffmpeg-static';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const [GT, EMO] = process.argv.slice(2);
+const PLANO = 'Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.';
+const VUELVE = 'Empieza y termina en la misma postura: parado, quieto, con los brazos al costado.';
+// espera: rotan todo el partido (empiezan y terminan en la pose del render, así se encadenan sin salto).
+// evento: gol nuestro / gol del rival.
 export const EMOCIONES = {
-  gol: 'El jugador grita un gol con euforia: abre bien la boca, aprieta los dos puños y los sacude a la altura del pecho, mirando a cámara con los ojos encendidos. Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.',
-  festejo: 'El jugador festeja feliz: sonríe de oreja a oreja, levanta los brazos y aplaude, mirando a cámara. Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.',
-  frustrado: 'El jugador se lamenta por una ocasión fallada: se lleva las dos manos a la cabeza, cierra los ojos y niega con la cabeza. Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.',
-  triste: 'El jugador está triste tras una derrota: baja la mirada, suspira con los hombros caídos y se pasa una mano por la cara. Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.',
-  habla: 'El jugador habla a cámara con confianza, como en una entrevista: mueve la boca al hablar, asiente y gesticula con una mano a la altura del pecho. Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.',
-  aliento: 'El jugador arenga a sus compañeros: grita con energía mirando a un costado, golpea el escudo de la camiseta con el puño y señala hacia adelante. Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.',
+  aliento: `El jugador arenga a sus compañeros: les grita con energía mirando a un costado, golpea el escudo de la camiseta con el puño y aplaude dos veces. ${VUELVE} ${PLANO}`,
+  indicaciones: `El jugador da indicaciones tácticas: señala con el brazo hacia un costado y después hacia adelante, mueve la boca dando órdenes, con cara seria y concentrada. ${VUELVE} ${PLANO}`,
+  agitado: `El jugador está cansado después de un pique largo: apoya las manos en las rodillas, sube y baja los hombros con fuerza, se incorpora. ${VUELVE} ${PLANO}`,
+  sudor: `El jugador se seca la frente con el antebrazo, se acomoda el pelo con una mano y mira el partido con atención. ${VUELVE} ${PLANO}`,
+  aplaude: `El jugador aplaude a un compañero por una buena jugada, asiente con la cabeza y levanta el pulgar. ${VUELVE} ${PLANO}`,
+  pide: `El jugador pide la pelota: levanta una mano bien alta, la agita y grita mirando a un costado. ${VUELVE} ${PLANO}`,
+  calma: `El jugador pide calma a sus compañeros: baja las dos manos abiertas despacio, con cara tranquila y segura. ${VUELVE} ${PLANO}`,
+  gol: `El jugador grita un gol con euforia: abre bien la boca, aprieta los dos puños y los sacude a la altura del pecho, mirando a cámara con los ojos encendidos. ${PLANO}`,
+  festejo: `El jugador festeja feliz: sonríe de oreja a oreja, levanta los brazos y aplaude, mirando a cámara. ${PLANO}`,
+  frustrado: `El jugador se lamenta por un gol en contra: se lleva las dos manos a la cabeza, cierra los ojos y niega con la cabeza. ${PLANO}`,
+  reclama: `El jugador reclama indignado: abre los brazos con las palmas hacia arriba, mueve la boca protestando y niega con la cabeza. ${PLANO}`,
+  triste: `El jugador está triste tras una derrota: baja la mirada, deja caer los hombros y se pasa una mano por la cara. ${PLANO}`,
 };
+export const ESPERA = ['aliento', 'indicaciones', 'agitado', 'sudor', 'aplaude', 'pide', 'calma'];
 if (!GT || !EMOCIONES[EMO]) { console.error(`Uso: clip-jugador.mjs <gamertag> <${Object.keys(EMOCIONES).join('|')}>`); process.exit(1); }
 
 const DIR = path.join(ROOT, 'fuentes', 'stream', 'clips', GT);
@@ -32,7 +43,7 @@ fs.mkdirSync(DIR, { recursive: true });
 const BASE_ALTO_CUERPO = 1300, RECORTE = 0.54;
 const BASE = path.join(DIR, 'base-entero.png'), MP4 = path.join(DIR, `${EMO}.mp4`), WEBM = path.join(DIR, `${EMO}.webm`);
 
-if (!process.argv.includes('--solo-alpha')) {
+if (!process.argv.includes('--solo-alpha') && (process.argv.includes('--rehacer') || !fs.existsSync(MP4))) {
   if (!fs.existsSync(BASE)) {
     const src = path.join(ROOT, 'Renders', GT, 'Frente4.png');
     const cuerpo = await sharp(src).resize({ height: BASE_ALTO_CUERPO }).toBuffer();

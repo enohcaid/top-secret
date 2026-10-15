@@ -5,6 +5,8 @@ metadata:
   type: reference
 ---
 
+> **Desde 2026-10-15 la PS5 transmite a Enohcaid** y `retransmitir.mjs` arma las 3 transmisiones oficiales (topsecretfc, Kick, YouTube) con overlay vía OBS + MediaMTX: ver [[project_overlay_vivo]]. Lo de abajo (streamlink → ffmpeg -c copy) sigue siendo el modo directo, que se usa como respaldo o con `--sin-overlay`.
+
 Juan transmite **directo desde la PS5 a Twitch** (twitch.tv/topsecretfc). La PS5 no puede transmitir a dos plataformas ni a Kick, así que la PC toma el vivo de Twitch y lo reenvía:
 
 - `node scripts/retransmitir.mjs [--hasta HH:MM]`: espera a que Twitch esté en vivo, `streamlink` (Python, `python -m pip install --user streamlink`) → `ffmpeg -c copy` con salida `tee` a cada destino. Sin recodificar; ~10–20 s de retraso. Reintenta si se corta. Log en `fuentes/redes/retransmitir.log` (la clave se enmascara).

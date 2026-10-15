@@ -85,7 +85,7 @@ try {
 }
 
 # ── PASO V: vigía del vivo de Twitch (goles + pantallas del reporte) ──────────
-# Si topsecretfc está en vivo y no hay vigía corriendo (lock con PID vivo), lo lanza en segundo plano.
+# Si enohcaid (señal de la PS5) está en vivo y no hay vigía corriendo (lock con PID vivo), lo lanza en segundo plano.
 # Solo en la ventana de partidos que pidió Juan: lunes a jueves 22:30-00:30 (misma que retransmitir).
 $ahora = Get-Date
 $min = $ahora.Hour * 60 + $ahora.Minute
@@ -94,13 +94,13 @@ $ventanaVigia = (($dia -ge 1 -and $dia -le 4) -and $min -ge 1350) -or (($dia -ge
 if ($ventanaVigia) { try {
     $gql = Invoke-RestMethod 'https://gql.twitch.tv/gql' -Method POST -TimeoutSec 10 `
         -Headers @{ 'Client-ID' = 'kimne78kx3ncx6brgo4mv6wki5h1ko' } `
-        -Body '{"query":"query{user(login:\"topsecretfc\"){stream{id}}}"}'
+        -Body '{"query":"query{user(login:\"enohcaid\"){stream{id}}}"}'
     if ($gql.data.user.stream) {
         $lock = "$repoRoot\fuentes\vivo\.vigia.lock"
         $corriendo = $false
         if (Test-Path $lock) { $corriendo = [bool](Get-Process -Id ([int](Get-Content $lock)) -ErrorAction SilentlyContinue) }
         if (-not $corriendo) {
-            Log "topsecretfc en vivo: lanzando vigia-vivo.mjs"
+            Log "enohcaid en vivo: lanzando vigia-vivo.mjs"
             Start-Process -FilePath 'cmd.exe' -WorkingDirectory $repoRoot -WindowStyle Hidden `
                 -ArgumentList '/c', 'node scripts\vigia-vivo.mjs >> scripts\vigia-vivo.log 2>&1'
         }

@@ -7,6 +7,7 @@
 // La publica retransmitir.mjs al detectar el vivo.
 //
 //   node scripts/placa-envivo.mjs [--fecha YYYY-MM-DD] [--fondo foto] [--out archivo.png|.jpg]
+//   --json: solo imprime los partidos del día en JSON (lo usa retransmitir.mjs para la placa del overlay)
 import fs from 'fs';
 import path from 'path';
 import { chromium } from 'playwright';
@@ -62,6 +63,7 @@ const partidos = [
     .map(c => ({ ...c, torneo: c.league === 'Amistoso' ? 'Amistoso' : c.instancia ? `${c.league} · ${c.instancia}` : c.league })),
 ].filter(m => m.date === FECHA).sort((x, y) => x.time.localeCompare(y.time))
   .map(m => ({ hora: m.time, rival: m.rival, liga: m.league, torneo: m.torneo, etapa: m.etapa || '', escudo: BADGES[m.rival] || m.badge || null }));
+if (process.argv.includes('--json')) { console.log(JSON.stringify(partidos)); process.exit(0); }
 const ligas = [...new Set(partidos.map(p => p.liga).filter(l => CFG.ligas[l]))];
 const torneos = [...new Set(partidos.map(p => p.torneo))];
 const L0 = { color: ligas.length === 1 ? CFG.ligas[ligas[0]].color : '#c9a84c', copa: torneos.join(' · ') || 'Top Secret FC' };

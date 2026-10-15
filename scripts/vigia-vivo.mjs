@@ -1,11 +1,11 @@
-// Vigía del vivo de Twitch (topsecretfc): mira la transmisión a 1 cuadro/segundo y deja
+// Vigía del vivo de Twitch (enohcaid, la señal de la PS5): mira la transmisión a 1 cuadro/segundo y deja
 //   - goles: cada cambio en los números del marcador de FC27 (recorte + cuadro completo + hora del stream)
 //   - reporte: cada pantalla de estadísticas post-partido (Resumen/Eventos/Rendimiento...) en 720p + su OCR
 //   - grabación del vivo y, al terminar, un clip por cada gol nuestro + datos.json borrador para
 //     scripts/goles/compilado.cjs (la grabación queda como fuentes/goles/v<clave>/source.mp4)
 // Salida: fuentes/vivo/<fecha>-<id>/ (gitignored). Al terminar escribe resumen.md.
 //
-//   node scripts/vigia-vivo.mjs                 -> si topsecretfc está en vivo, lo vigila hasta que corte
+//   node scripts/vigia-vivo.mjs                 -> si enohcaid (PS5) está en vivo, lo vigila hasta que corte
 //   node scripts/vigia-vivo.mjs --vod <id>      -> corre lo mismo sobre un VOD (prueba/calibración)
 //   node scripts/vigia-vivo.mjs --solo-clips <carpeta>  -> rehace los clips de una sesión ya vigilada
 //   opciones: --sin-grabar (sin clips), --hasta HH:MM (corte en vivo, default 00:30)
@@ -13,7 +13,7 @@
 // watch-regen.ps1 lo lanza solo lunes a jueves 22:30-00:30 si el canal está en vivo; un lock evita
 // dos vigías a la vez. A la hora de --hasta se corta aunque la transmisión siga.
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, unlinkSync, readdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, unlinkSync, readdirSync, renameSync } from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import sharp from 'sharp';
@@ -24,7 +24,7 @@ sharp.cache(false);
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), '..');
 const YTDLP = path.join(ROOT, 'node_modules/yt-dlp-exec/bin/yt-dlp.exe');
-const CANAL = 'topsecretfc';
+const CANAL = 'enohcaid';                 // desde 2026-10-15 la PS5 transmite acá; topsecretfc sale con overlay desde la PC
 const W = 1280, H = 720, FRAME = W * H * 3;
 const LOCK = path.join(ROOT, 'fuentes/vivo/.vigia.lock');
 
@@ -191,6 +191,15 @@ async function armarClips(OUT, clave) {
   return clips;
 }
 
+// Avisa al overlay del vivo (scripts/stream/overlay.html lee fuentes/stream/estado.json cada 1,5 s).
+function avisarOverlay(tipo) {
+  const f = path.join(ROOT, 'fuentes/stream/estado.json');
+  let e = {}; try { e = JSON.parse(readFileSync(f, 'utf8')); } catch {}
+  e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo }].slice(-20);
+  mkdirSync(path.dirname(f), { recursive: true });
+  writeFileSync(f + '.tmp', JSON.stringify(e, null, 1)); renameSync(f + '.tmp', f);
+}
+
 async function main() {
   if (soloClips) {
     const clave = path.basename(soloClips).replace(/^vod-/, '').replace(/^(\d{4}-\d{2}-\d{2})-.*/, 'vivo-$1');
@@ -200,7 +209,7 @@ async function main() {
   let stream = null;
   if (!vodId) {
     stream = await enVivo();
-    if (!stream) { console.log('topsecretfc no está en vivo.'); return; }
+    if (!stream) { console.log(`${CANAL} no está en vivo.`); return; }
   }
   if (!lockOk()) { console.log('Ya hay un vigía corriendo.'); return; }
 
@@ -268,6 +277,7 @@ async function main() {
         const aFavor = filaTop === null ? null : ev.fila === filaTop;
         await img().jpeg({ quality: 88 }).toFile(path.join(OUT, 'goles', `${nombre}.jpg`));
         log('gol', { n: goles, seg: ts, hora: hms(ts), fila: ev.fila, aFavor, rival });
+        if (!vodId && aFavor !== null) avisarOverlay(aFavor ? 'gol' : 'golRival');
         console.log(`[${hms(ts)}] cambio de marcador #${goles}${aFavor === null ? '' : aFavor ? ' — GOL DE TOP' : ' — gol en contra'}`);
       }
     }

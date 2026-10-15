@@ -2,17 +2,21 @@
 <html lang="es"><head><meta charset="utf-8">
 <title>Overlay vivo</title>
 <!-- Overlay del vivo (fuente de navegador de OBS, 1920×1080, fondo transparente).
-     Mismo lenguaje que el compilado de goles (scripts/goles/compilado.cjs), pero en vivo:
-     - arriba a la izquierda queda el marcador de FC27 a la vista, con el torneo al lado;
-     - arriba a la derecha tapa el panel fijo de quien transmite (club + canales);
-     - abajo NO se tapa nada: las dos barras de FC27 dicen qué jugador de cada equipo tiene la pelota
-       (la nuestra va a la izquierda o a la derecha según quién es local y el tiempo);
-     - el "palco" (clip de un jugador + placa) aparece a la derecha, justo encima de la barra, solo mientras dura el clip.
-     Parámetros: ?torneo=…&rival=…&escudo=<url>  ·  ?demo=clip|gol (vistas fijas para revisar) -->
+     Mismo lenguaje que el compilado de goles (scripts/goles/compilado.cjs). Pedido de Juan (2026-10-15):
+     - a la vista quedan solo el marcador de FC27 (arriba a la izquierda, con el torneo al lado) y la barra de
+       abajo a la derecha;
+     - arriba a la derecha tapa el panel fijo de quien transmite (club + EN VIVO + canales);
+     - abajo a la izquierda tapa la barra de FC27 con el "palco": siempre hay un jugador, chico, encadenando
+       emociones de espera (aliento, indicaciones, agitado…); con un gol propio grita/festeja y con uno del
+       rival se lamenta/reclama. Cada tanto cambia de jugador.
+     Datos: fuentes/stream/clips/indice.json ({gt:{num, emociones:[…]}}, lo escribe lote-clips.mjs) y
+     fuentes/stream/estado.json ({torneo, rival, escudo, jugadores:[gt…], eventos:[{id, tipo:'gol'|'golRival'}]}),
+     que se lee cada 1,5 s. Para revisar: ?demo=clip|gol (&gt=…&emocion=…&t=…&sinvideo) -->
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;500;700;800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--oro:#C8A84B;--fondo:#0B0A07;--fondo2:#17140d;--texto:#F2EEE0;--texto2:rgba(242,238,224,.62);--borde:rgba(200,168,75,.35);--rojo:#E5484D}
 *{margin:0;box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;font-family:Barlow,sans-serif;color:var(--texto)}
 .p{position:absolute;background:linear-gradient(180deg,var(--fondo2),var(--fondo));border:1px solid var(--borde);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .mono{font-family:'JetBrains Mono';font-weight:700;letter-spacing:.18em;color:var(--oro)}
@@ -31,21 +35,19 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;font
 .club .canales{font-family:'JetBrains Mono';font-size:13px;letter-spacing:.12em;color:var(--texto2);margin-top:6px}
 @keyframes late{50%{opacity:.25}}
 
-/* Palco: clip del jugador que asoma por detrás de una placa, encima de la barra derecha de FC27 (y≈960) */
-.palco{position:absolute;left:1400px;top:500px;width:490px;height:428px}
-.palco .vid{position:absolute;left:50%;bottom:70px;width:560px;height:560px;transform:translate(-50%,0);opacity:0;transition:opacity .35s ease,transform .5s cubic-bezier(.2,.8,.2,1);transform-origin:50% 100%}
-.palco.on .vid{opacity:1}
-.palco:not(.on) .vid{transform:translate(-50%,40px)}
-.palco video{width:100%;height:100%;object-fit:contain;object-position:50% 100%}
-.palco .placa{left:0;right:0;bottom:0;height:110px;display:flex;align-items:center;gap:18px;padding:0 26px;opacity:0;transform:translateY(16px);transition:opacity .3s ease,transform .4s cubic-bezier(.2,.8,.2,1)}
-.palco.on .placa{opacity:1;transform:none}
-.palco .placa img{height:74px}
-.palco .num{font-family:'Bebas Neue';font-size:76px;line-height:.85;color:var(--oro)}
-.palco .gt{font-weight:900;font-size:34px;letter-spacing:-.02em;line-height:1}
-.palco .dice{font-size:15px;margin-top:6px}
-.palco .jug{display:flex;align-items:center;gap:18px}
+/* Palco: placa abajo a la izquierda (tapa la barra de FC27, x 30-480 / y 950-1045) y el jugador asomando detrás */
+.palco{position:absolute;left:22px;top:638px;width:470px;height:424px}
+.palco .vid{position:absolute;left:50%;bottom:104px;width:380px;height:330px;transform:translateX(-50%)}
+.palco video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;opacity:0;transition:opacity .35s ease}
+.palco video.on{opacity:1}
+.palco .placa{left:0;right:0;bottom:0;height:116px;display:flex;align-items:center;gap:18px;padding:0 24px}
+.palco .num{font-family:'Bebas Neue';font-size:66px;line-height:.85;color:var(--oro);min-width:40px;text-align:center}
+.palco .gt{font-weight:900;font-size:30px;letter-spacing:-.02em;line-height:1}
+.palco .dice{font-size:14px;margin-top:6px}
+.palco .jug{display:flex;align-items:center;gap:16px;transition:opacity .25s ease}
+.palco .jug.cambia{opacity:0}
 
-/* Gol: franja que cruza la pantalla en el tercio de abajo (sin tapar la barra de posesión) */
+/* Gol: franja que cruza la pantalla en el tercio de abajo */
 .gol{position:absolute;left:0;right:0;top:700px;height:190px;display:flex;align-items:center;justify-content:center;gap:40px;
   background:linear-gradient(90deg,transparent,rgba(11,10,7,.92) 18%,rgba(11,10,7,.92) 82%,transparent);border-block:2px solid var(--oro);
   clip-path:inset(0 50% 0 50%);transition:clip-path .45s cubic-bezier(.7,0,.2,1)}
@@ -66,10 +68,8 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;font
 </div>
 
 <div class="palco" id="palco">
-  <div class="vid"><video id="video" muted playsinline></video></div>
-  <div class="p placa">
-    <div class="jug"><span class="num" id="num"></span><div><div class="gt" id="gt"></div><div class="mono dice" id="dice"></div></div></div>
-  </div>
+  <div class="vid"><video id="v0" muted playsinline preload="auto"></video><video id="v1" muted playsinline preload="auto"></video></div>
+  <div class="p placa"><div class="jug" id="jug"><span class="num" id="num"></span><div><div class="gt" id="gt"></div><div class="mono dice" id="dice"></div></div></div></div>
 </div>
 
 <div class="gol" id="gol">
@@ -80,30 +80,97 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;font
 <script>
 const q = new URLSearchParams(location.search);
 const CLIPS = q.get('clips') || '../../fuentes/stream/clips/';
-const DICE = { gol: 'GRITO DE GOL', festejo: 'FESTEJA', frustrado: 'SE LAMENTA', triste: 'SE LAMENTA', habla: 'HABLA', aliento: 'ALIENTA' };
+const ESTADO = q.get('estado') || '../../fuentes/stream/estado.json';
+const ESPERA = ['aliento', 'indicaciones', 'agitado', 'sudor', 'aplaude', 'pide', 'calma'];
+const EVENTO = { gol: ['gol', 'festejo'], golRival: ['frustrado', 'reclama'] };
+const DICE = { aliento: 'ALIENTA', indicaciones: 'DA INDICACIONES', agitado: 'RECUPERA AIRE', sudor: 'CONCENTRADO', aplaude: 'APLAUDE',
+  pide: 'PIDE LA PELOTA', calma: 'PIDE CALMA', gol: 'GRITO DE GOL', festejo: 'FESTEJA', frustrado: 'SE LAMENTA', reclama: 'RECLAMA', triste: 'SE LAMENTA' };
+const $ = id => document.getElementById(id);
+const azar = a => a[Math.floor(Math.random() * a.length)];
+const leer = async url => { try { const r = await fetch(url + '?' + Date.now(), { cache: 'no-store' }); return r.ok ? r.json() : null; } catch { return null; } };
 
-if (q.get('torneo')) {
-  torneo.hidden = false; torneoTxt.textContent = q.get('torneo'); rivalTxt.textContent = q.get('rival') ? 'vs ' + q.get('rival') : '';
-  if (q.get('escudo')) escudo.src = q.get('escudo'); else escudo.remove();
+let indice = {}, estado = {}, actual = null, enCola = 0, evento = null, visto = new Set(), arranco = false;
+const vids = [$('v0'), $('v1')]; let activo = 0;
+
+function placa(gt, emocion, cambiaJugador) {
+  const set = () => { $('gt').textContent = gt; $('num').textContent = indice[gt]?.num || ''; $('dice').textContent = DICE[emocion] || ''; };
+  if (!cambiaJugador) return set();
+  $('jug').classList.add('cambia'); setTimeout(() => { set(); $('jug').classList.remove('cambia'); }, 250);
 }
 
-// Muestra un clip en el palco: {gt, num, emocion}
-function clip({ gt, num, emocion }) {
-  return new Promise(ok => {
-    document.getElementById('gt').textContent = gt; document.getElementById('num').textContent = num || '';
-    dice.textContent = DICE[emocion] || '';
-    video.src = `${CLIPS}${gt}/${emocion}.webm`;
-    video.onended = () => { palco.classList.remove('on'); setTimeout(ok, 500); };
-    video.onerror = () => ok();
-    video.play().then(() => palco.classList.add('on')).catch(() => ok());
-  });
+// Elige el próximo clip: un evento pendiente manda; si no, una emoción de espera del jugador actual
+// (cada 3 clips cambia de jugador, entre los convocados si estado.json los trae).
+function proximo() {
+  // Mientras la tanda no generó clips de espera, cualquier clip sirve.
+  const hayEspera = Object.values(indice).some(j => j.emociones.some(e => ESPERA.includes(e)));
+  const deEspera = e => !hayEspera || ESPERA.includes(e);
+  let pool = Object.keys(indice).filter(gt => indice[gt].emociones.some(deEspera));
+  if (estado.jugadores?.length) { const c = pool.filter(gt => estado.jugadores.includes(gt)); if (c.length) pool = c; }
+  if (!pool.length) return null;
+  let cambia = false;
+  if (evento) {
+    const tipo = evento; evento = null;
+    const con = gt => indice[gt].emociones.some(e => EVENTO[tipo].includes(e));
+    const gt = con(actual) ? actual : azar(pool.filter(con).length ? pool.filter(con) : pool);
+    cambia = gt !== actual; actual = gt; enCola = 0;
+    const emos = indice[gt].emociones.filter(e => EVENTO[tipo].includes(e));
+    if (emos.length) return { gt, emocion: azar(emos), cambia };
+  }
+  if (!actual || !pool.includes(actual) || ++enCola >= 3) {
+    const otros = pool.filter(gt => gt !== actual); const nuevo = azar(otros.length ? otros : pool);
+    cambia = nuevo !== actual; actual = nuevo; enCola = 0;
+  }
+  return { gt: actual, emocion: azar(indice[actual].emociones.filter(deEspera)), cambia };
 }
-function gol(ms = 6000) { document.getElementById('gol').classList.add('on'); setTimeout(() => document.getElementById('gol').classList.remove('on'), ms); }
-window.overlay = { clip, gol };
 
-// Vistas fijas para revisar el diseño
-if (q.get('demo') === 'clip') { palco.classList.add('on'); document.getElementById('gt').textContent = q.get('gt') || 'Juan_Martinez4'; num.textContent = q.get('num') || '6'; dice.textContent = DICE[q.get('emocion') || 'gol'];
-  video.src = `${CLIPS}${document.getElementById('gt').textContent}/${q.get('emocion') || 'gol'}.webm`; video.currentTime = +(q.get('t') || 2.5); if (q.has('sinvideo')) video.style.visibility = 'hidden'; }
-if (q.get('demo') === 'gol') document.getElementById('gol').classList.add('on');
+// Dos <video> alternados: el siguiente se carga oculto y entra recién cuando puede reproducirse (sin parpadeo).
+function siguiente() {
+  const c = proximo(); if (!c) { setTimeout(siguiente, 3000); return; }
+  const v = vids[1 - activo], viejo = vids[activo];
+  v.src = `${CLIPS}${encodeURIComponent(c.gt)}/${c.emocion}.webm`;
+  v.onerror = () => setTimeout(siguiente, 500);
+  v.oncanplay = () => {
+    v.oncanplay = null;
+    v.play().then(() => {
+      v.classList.add('on'); viejo.classList.remove('on'); viejo.pause(); activo = 1 - activo;
+      placa(c.gt, c.emocion, c.cambia);
+    }).catch(() => setTimeout(siguiente, 1000));
+  };
+  v.onended = siguiente;
+  v.load();
+}
+
+function gol(ms = 6000) { $('gol').classList.add('on'); setTimeout(() => $('gol').classList.remove('on'), ms); }
+
+async function actualizar() {
+  const [i, e] = await Promise.all([leer(CLIPS + 'indice.json'), leer(ESTADO)]);
+  if (i) indice = i;
+  if (e) {
+    estado = e;
+    const t = $('torneo'); t.hidden = !e.torneo;
+    $('torneoTxt').textContent = e.torneo || ''; $('rivalTxt').textContent = e.rival ? 'vs ' + e.rival : '';
+    if (e.escudo) { $('escudo').src = e.escudo; $('escudo').hidden = false; } else $('escudo').hidden = true;
+    for (const ev of e.eventos || []) {
+      if (visto.has(ev.id)) continue; visto.add(ev.id);
+      if (!arranco) continue;                                  // los eventos viejos (de antes de abrir el overlay) no se reproducen
+      evento = ev.tipo; if (ev.tipo === 'gol') gol();
+      vids[activo].pause(); siguiente();                       // el evento corta el clip de espera
+    }
+  }
+  if (!arranco && Object.keys(indice).length) { arranco = true; siguiente(); }
+}
+window.overlay = { gol, evento: tipo => { evento = tipo; if (tipo === 'gol') gol(); siguiente(); } };
+
+if (q.get('demo')) {
+  // Vistas fijas para revisar el diseño (scripts/stream/preview.mjs)
+  const gt = q.get('gt') || 'Juan_Martinez4', emocion = q.get('emocion') || 'aliento';
+  $('gt').textContent = gt; $('num').textContent = q.get('num') || '6'; $('dice').textContent = DICE[emocion];
+  if (q.get('torneo')) { $('torneo').hidden = false; $('torneoTxt').textContent = q.get('torneo'); $('rivalTxt').textContent = q.get('rival') ? 'vs ' + q.get('rival') : ''; $('escudo').hidden = true; }
+  if (q.get('demo') === 'gol') $('gol').classList.add('on');
+  const v = vids[0]; v.src = `${CLIPS}${gt}/${emocion}.webm`; v.currentTime = +(q.get('t') || 2.5); v.classList.add('on');
+  if (q.has('sinvideo')) v.style.visibility = 'hidden';
+} else {
+  actualizar(); setInterval(actualizar, 1500);
+}
 </script>
 </body></html>
