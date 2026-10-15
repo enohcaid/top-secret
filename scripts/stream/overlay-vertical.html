@@ -3,7 +3,7 @@
 <title>Overlay vertical</title>
 <!-- Overlay vertical del vivo para Instagram (y TikTok cuando habilite LIVE): 1080×1920, fuente de navegador de la
      segunda instancia de OBS (colección "TopSecretV"). Arriba el club y el torneo; en el medio el partido a lo ancho
-     (fuente "Partido" en y=440, 1080×608, que se ve DEBAJO de este overlay); abajo el palco con el jugador grande.
+     (fuente "Partido" en y=330, 1080×608, que se ve DEBAJO de este overlay); abajo el palco con el jugador grande.
      Dentro del partido tapa lo mismo que el horizontal: el panel de quien transmite (arriba a la derecha) y la barra
      de abajo a la izquierda. Lógica compartida en overlay.js (mismos ids que overlay.html). -->
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;500;700;800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -12,36 +12,37 @@
 *{margin:0;box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{width:1080px;height:1920px;overflow:hidden;font-family:Barlow,sans-serif;color:var(--texto)}
-/* Fondo con un hueco transparente donde va el partido (y 440–1048) */
+/* Fondo con un hueco transparente donde va el partido (y 330–938). Instagram dibuja encima su interfaz (arriba perfil
+   y EN VIVO, abajo los comentarios): por eso la placa del jugador va alta (termina en y=1650) y la cabecera compacta. */
 body{background:
-  linear-gradient(180deg,#0B0A07 0,#16130c 440px,transparent 440px,transparent 1048px,#16130c 1048px,#0B0A07 1920px)}
-body::before{content:'';position:absolute;inset:0 0 auto 0;height:440px;background:radial-gradient(ellipse at 50% 0,rgba(200,168,75,.16),transparent 70%)}
+  linear-gradient(180deg,#0B0A07 0,#16130c 330px,transparent 330px,transparent 938px,#16130c 938px,#0B0A07 1920px)}
+body::before{content:'';position:absolute;inset:0 0 auto 0;height:330px;background:radial-gradient(ellipse at 50% 0,rgba(200,168,75,.16),transparent 70%)}
 .p{position:absolute;background:linear-gradient(180deg,var(--fondo2),var(--fondo));border:1px solid var(--borde);border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .mono{font-family:'JetBrains Mono';font-weight:700;letter-spacing:.18em;color:var(--oro)}
 
 /* Cabecera */
-.club{position:absolute;left:60px;right:60px;top:70px;display:flex;align-items:center;gap:28px}
-.club img{height:150px}
-.club .a{font-weight:900;font-size:64px;letter-spacing:.03em;line-height:.95}
-.club .vivo{display:inline-flex;align-items:center;gap:12px;font-family:'JetBrains Mono';font-weight:700;font-size:24px;letter-spacing:.22em;margin-top:14px}
+.club{position:absolute;left:60px;right:60px;top:50px;display:flex;align-items:center;gap:24px}
+.club img{height:120px}
+.club .a{font-weight:900;font-size:54px;letter-spacing:.03em;line-height:.95}
+.club .vivo{display:inline-flex;align-items:center;gap:12px;font-family:'JetBrains Mono';font-weight:700;font-size:22px;letter-spacing:.22em;margin-top:10px}
 .club .vivo i{width:16px;height:16px;border-radius:50%;background:var(--rojo);animation:late 1.6s ease-in-out infinite}
-.club .canales{font-family:'JetBrains Mono';font-size:18px;letter-spacing:.14em;color:var(--texto2);margin-top:10px}
+.club .canales{font-family:'JetBrains Mono';font-size:17px;letter-spacing:.14em;color:var(--texto2);margin-top:8px}
 @keyframes late{50%{opacity:.25}}
-.torneo{left:60px;right:60px;top:268px;height:120px;display:flex;align-items:center;gap:22px;padding:0 28px}
-.torneo img{height:76px;width:76px;object-fit:contain}
-.torneo .k{font-size:19px}.torneo .r{font-weight:800;font-size:40px;line-height:1.05;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.torneo{left:60px;right:60px;top:198px;height:104px;display:flex;align-items:center;gap:22px;padding:0 28px}
+.torneo img{height:66px;width:66px;object-fit:contain}
+.torneo .k{font-size:17px}.torneo .r{font-weight:800;font-size:36px;line-height:1.05;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* Tapas dentro del partido (FC27 escalado a 1080 de ancho: ×0,5625, desde y=440) */
+/* Tapas dentro del partido (FC27 escalado a 1080 de ancho: ×0,5625, desde y=330) */
 .tapa{position:absolute;display:flex;align-items:center;gap:10px;padding:0 16px;border-radius:12px}
-.tapa.panel{left:772px;top:452px;width:296px;height:86px}
-.tapa.barra{left:8px;top:968px;width:276px;height:74px}
+.tapa.panel{left:772px;top:342px;width:296px;height:86px}
+.tapa.barra{left:8px;top:858px;width:276px;height:74px}
 .tapa.barra{transition:opacity .35s ease}
 body.mudando .tapa.barra{opacity:0}
 body.lado-der .tapa.barra{left:796px}   /* nuestra barra a la derecha (la detecta vigia-vivo.mjs) */
 .tapa img{height:50px}.tapa .a{font-weight:900;font-size:20px;letter-spacing:.04em}.tapa .b{font-size:13px}
 
 /* Gol: franja sobre el partido */
-.gol{position:absolute;left:0;right:0;top:640px;height:210px;display:flex;align-items:center;justify-content:center;gap:28px;
+.gol{position:absolute;left:0;right:0;top:530px;height:210px;display:flex;align-items:center;justify-content:center;gap:28px;
   background:linear-gradient(90deg,transparent,rgba(11,10,7,.92) 12%,rgba(11,10,7,.92) 88%,transparent);border-block:2px solid var(--oro);
   clip-path:inset(0 50% 0 50%);transition:clip-path .45s cubic-bezier(.7,0,.2,1)}
 .gol.on{clip-path:inset(0 0 0 0)}
@@ -49,12 +50,13 @@ body.lado-der .tapa.barra{left:796px}   /* nuestra barra a la derecha (la detect
 .gol .t{font-family:'Bebas Neue';font-size:150px;line-height:.8;color:var(--oro)}
 .gol .s{font-family:'JetBrains Mono';font-weight:700;font-size:20px;letter-spacing:.3em;margin-top:8px}
 
-/* Palco grande abajo */
-.palco{position:absolute;left:0;right:0;top:1060px;height:820px}
-.palco .vid{position:absolute;left:50%;bottom:60px;width:934px;height:760px;transform:translateX(-50%)}   /* proporción de los clips (720×586); la placa tapa el pecho */
+/* Palco grande abajo: placa en y 1490–1650; el jugador (proporción de los clips, 720×586) asoma detrás y con los
+   brazos en alto puede pasar sobre el borde de abajo del partido */
+.palco{position:absolute;left:0;right:0;top:754px;height:896px}
+.palco .vid{position:absolute;left:50%;bottom:50px;width:1040px;height:846px;transform:translateX(-50%)}
 .palco video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;opacity:0;transition:opacity .35s ease}
 .palco video.on{opacity:1}
-.palco .placa{left:60px;right:60px;bottom:0;height:170px;display:flex;align-items:center;padding:0 40px}
+.palco .placa{left:60px;right:60px;bottom:0;height:160px;display:flex;align-items:center;padding:0 40px}
 .palco .jug{display:flex;align-items:center;gap:28px;transition:opacity .25s ease}
 .palco .jug.cambia{opacity:0}
 .palco .num{font-family:'Bebas Neue';font-size:116px;line-height:.85;color:var(--oro);min-width:70px;text-align:center}

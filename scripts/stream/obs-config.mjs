@@ -4,7 +4,7 @@
 // Una sola instancia y un lienzo de 3000×1920 con las dos versiones lado a lado (dos instancias de OBS no pueden: el
 // navegador interno no arranca en la segunda y su overlay sale vacío, probado 2026-10-15):
 //   x 0–1920,    y 0–1080: horizontal — partido a pantalla completa + overlay.html          (topsecretfc, Kick, YouTube)
-//   x 1920–3000, y 0–1920: vertical   — partido a lo ancho en y=440 + overlay-vertical.html (Instagram; TikTok más adelante)
+//   x 1920–3000, y 0–1920: vertical   — partido a lo ancho en y=330 + overlay-vertical.html (Instagram; TikTok más adelante)
 // El partido es una sola fuente (la PS5 vía streamlink en http://127.0.0.1:8787) puesta dos veces en la escena.
 // OBS manda el lienzo entero con NVENC a 20 Mbps a rtmp://127.0.0.1:1935/live/mix: es local, no gasta subida. Después
 // retransmitir.mjs (scripts/stream/salidas.mjs) recorta cada versión y la codifica para las redes.
@@ -46,10 +46,10 @@ const navegador = (name, archivo, w, h) => ({ id: 'browser_source', versioned_id
 let nItem = 0;
 const item = (name, pos, caja) => ({ name, source_uuid: uuid(name), id: ++nItem, visible: true, locked: true, pos: { x: pos[0], y: pos[1] }, rot: 0,
   scale: { x: 1, y: 1 }, align: 5, bounds_type: 2, bounds_align: 0, bounds: { x: caja[0], y: caja[1] }, crop_left: 0, crop_top: 0, crop_right: 0, crop_bottom: 0 });
-// De abajo hacia arriba. El fondo del overlay vertical deja transparente el hueco del partido (y 440–1048).
+// De abajo hacia arriba. El fondo del overlay vertical deja transparente el hueco del partido (y 330–938).
 const items = [
   item('Partido', [0, 0], [1920, 1080]), item('Overlay', [0, 0], [1920, 1080]),
-  item('Partido', [1920, 440], [1080, 608]), item('Overlay vertical', [1920, 0], [1080, 1920]),
+  item('Partido', [1920, 330], [1080, 608]), item('Overlay vertical', [1920, 0], [1080, 1920]),
 ];
 fs.writeFileSync(path.join(ESCENAS, 'TopSecret.json'), JSON.stringify({
   name: 'TopSecret', current_scene: 'Vivo', current_program_scene: 'Vivo', scene_order: [{ name: 'Vivo' }],
