@@ -178,6 +178,26 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-15",
+      "id": "2026-10-15-1",
+      "archivo": "2026-10-15-1 - Banco.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_15_1.py",
+      "duracion": 95,
+      "nombre": "Banco",
+      "concepto": "Sentado en el banco mirando jugar a tus compañeros — la frustración de estar tan cerca sin poder tocar la pelota, hasta que el DT te señala y entrás con un fuego que ningún titular tiene.",
+      "bpm": 120,
+      "tonalidad": "lab menor",
+      "rasgo": "coro sumergido: voces sintetizadas bajo un pasa-bajos pesado que sube sección a sección (600 → 900 → 1400 → 3500 Hz); en el gancho C suena limpio por primera vez",
+      "recursos": [
+        "coro sumergido con formantes vocales (firma del tema)",
+        "lead emocional con sub-octava triángulo y portamento",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones",
+        "puente con batería tresillo y coro pulsante"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
