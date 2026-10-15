@@ -7,7 +7,7 @@
 // Para sumar jugadores o emociones alcanza con agregarlos acá o en clip-jugador.mjs.
 import fs from 'fs';
 import path from 'path';
-import { spawnSync } from 'child_process';
+import { spawnSync, execFileSync } from 'child_process';
 import { pathToFileURL } from 'url';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
@@ -42,6 +42,10 @@ const log = m => { const l = `[${new Date().toLocaleString('sv-SE', { timeZone: 
 let fallas = 0;
 for (const ronda of RONDAS) for (const gt of jugadores) for (const emo of ronda) {
   if (fs.existsSync(path.join(ROOT, 'fuentes', 'stream', 'clips', gt, `${emo}.webm`))) continue;
+  // Durante el vivo (MediaMTX corriendo = retransmitir.mjs con overlay) no se generan clips: rembg carga mucho la CPU
+  // y la PC está componiendo y codificando las transmisiones. Se espera a que termine.
+  const enVivo = () => { try { return /mediamtx\.exe/i.test(execFileSync('tasklist', ['/FI', 'IMAGENAME eq mediamtx.exe'], { encoding: 'utf8' })); } catch { return false; } };
+  if (enVivo()) { log('Vivo en curso: pauso la tanda.'); while (enVivo()) await new Promise(r => setTimeout(r, 60000)); log('Terminó el vivo: sigo.'); }
   log(`${gt} · ${emo}`);
   const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'stream', 'clip-jugador.mjs'), gt, emo], { cwd: ROOT, encoding: 'utf8' });
   log(r.status === 0 ? `  listo` : `  falló: ${(r.stderr || '').trim().split('\n').slice(-3).join(' | ').slice(0, 300)}`);
