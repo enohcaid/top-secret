@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<title>Overlay vertical</title>
+<!-- Overlay vertical del vivo para Instagram (y TikTok cuando habilite LIVE): 1080×1920, fuente de navegador de la
+     segunda instancia de OBS (colección "TopSecretV"). Arriba el club y el torneo; en el medio el partido a lo ancho
+     (fuente "Partido" en y=440, 1080×608, que se ve DEBAJO de este overlay); abajo el palco con el jugador grande.
+     Dentro del partido tapa lo mismo que el horizontal: el panel de quien transmite (arriba a la derecha) y la barra
+     de abajo a la izquierda. Lógica compartida en overlay.js (mismos ids que overlay.html). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;500;700;800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--oro:#C8A84B;--fondo:#0B0A07;--fondo2:#17140d;--texto:#F2EEE0;--texto2:rgba(242,238,224,.62);--borde:rgba(200,168,75,.35);--rojo:#E5484D}
+*{margin:0;box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{width:1080px;height:1920px;overflow:hidden;font-family:Barlow,sans-serif;color:var(--texto)}
+/* Fondo con un hueco transparente donde va el partido (y 440–1048) */
+body{background:
+  linear-gradient(180deg,#0B0A07 0,#16130c 440px,transparent 440px,transparent 1048px,#16130c 1048px,#0B0A07 1920px)}
+body::before{content:'';position:absolute;inset:0 0 auto 0;height:440px;background:radial-gradient(ellipse at 50% 0,rgba(200,168,75,.16),transparent 70%)}
+.p{position:absolute;background:linear-gradient(180deg,var(--fondo2),var(--fondo));border:1px solid var(--borde);border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.mono{font-family:'JetBrains Mono';font-weight:700;letter-spacing:.18em;color:var(--oro)}
+
+/* Cabecera */
+.club{position:absolute;left:60px;right:60px;top:70px;display:flex;align-items:center;gap:28px}
+.club img{height:150px}
+.club .a{font-weight:900;font-size:64px;letter-spacing:.03em;line-height:.95}
+.club .vivo{display:inline-flex;align-items:center;gap:12px;font-family:'JetBrains Mono';font-weight:700;font-size:24px;letter-spacing:.22em;margin-top:14px}
+.club .vivo i{width:16px;height:16px;border-radius:50%;background:var(--rojo);animation:late 1.6s ease-in-out infinite}
+.club .canales{font-family:'JetBrains Mono';font-size:18px;letter-spacing:.14em;color:var(--texto2);margin-top:10px}
+@keyframes late{50%{opacity:.25}}
+.torneo{left:60px;right:60px;top:268px;height:120px;display:flex;align-items:center;gap:22px;padding:0 28px}
+.torneo img{height:76px;width:76px;object-fit:contain}
+.torneo .k{font-size:19px}.torneo .r{font-weight:800;font-size:40px;line-height:1.05;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Tapas dentro del partido (FC27 escalado a 1080 de ancho: ×0,5625, desde y=440) */
+.tapa{position:absolute;display:flex;align-items:center;gap:10px;padding:0 16px;border-radius:12px}
+.tapa.panel{left:772px;top:452px;width:296px;height:86px}
+.tapa.barra{left:8px;top:968px;width:276px;height:74px}
+.tapa img{height:50px}.tapa .a{font-weight:900;font-size:20px;letter-spacing:.04em}.tapa .b{font-size:13px}
+
+/* Gol: franja sobre el partido */
+.gol{position:absolute;left:0;right:0;top:640px;height:210px;display:flex;align-items:center;justify-content:center;gap:28px;
+  background:linear-gradient(90deg,transparent,rgba(11,10,7,.92) 12%,rgba(11,10,7,.92) 88%,transparent);border-block:2px solid var(--oro);
+  clip-path:inset(0 50% 0 50%);transition:clip-path .45s cubic-bezier(.7,0,.2,1)}
+.gol.on{clip-path:inset(0 0 0 0)}
+.gol img{height:120px}
+.gol .t{font-family:'Bebas Neue';font-size:150px;line-height:.8;color:var(--oro)}
+.gol .s{font-family:'JetBrains Mono';font-weight:700;font-size:20px;letter-spacing:.3em;margin-top:8px}
+
+/* Palco grande abajo */
+.palco{position:absolute;left:0;right:0;top:1060px;height:820px}
+.palco .vid{position:absolute;left:50%;bottom:150px;width:820px;height:640px;transform:translateX(-50%)}
+.palco video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;opacity:0;transition:opacity .35s ease}
+.palco video.on{opacity:1}
+.palco .placa{left:60px;right:60px;bottom:0;height:170px;display:flex;align-items:center;padding:0 40px}
+.palco .jug{display:flex;align-items:center;gap:28px;transition:opacity .25s ease}
+.palco .jug.cambia{opacity:0}
+.palco .num{font-family:'Bebas Neue';font-size:116px;line-height:.85;color:var(--oro);min-width:70px;text-align:center}
+.palco .gt{font-weight:900;font-size:54px;letter-spacing:-.02em;line-height:1}
+.palco .dice{font-size:22px;margin-top:10px}
+</style></head><body>
+
+<div class="club">
+  <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/badge-metal.webp" alt="">
+  <div><div class="a">TOP SECRET FC</div><div class="vivo"><i></i>EN VIVO</div><div class="canales">INSTAGRAM · TWITCH · KICK · YOUTUBE</div></div>
+</div>
+<div class="p torneo" id="torneo" hidden>
+  <img id="escudo" alt="">
+  <div style="min-width:0"><div class="mono k" id="torneoTxt"></div><div class="r" id="rivalTxt"></div></div>
+</div>
+
+<div class="p tapa panel"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp" alt=""><div><div class="a">TOP SECRET FC</div><div class="mono b">EN VIVO</div></div></div>
+<div class="p tapa barra"><div><div class="a">@fctopsecret</div><div class="mono b">SEGUINOS</div></div></div>
+
+<div class="palco" id="palco">
+  <div class="vid"><video id="v0" muted playsinline preload="auto"></video><video id="v1" muted playsinline preload="auto"></video></div>
+  <div class="p placa"><div class="jug" id="jug"><span class="num" id="num"></span><div><div class="gt" id="gt"></div><div class="mono dice" id="dice"></div></div></div></div>
+</div>
+
+<div class="gol" id="gol">
+  <img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-dorado.webp" alt="">
+  <div><div class="t">GOOOL</div><div class="s">DE TOP SECRET FC</div></div>
+</div>
+
+<script src="overlay.js"></script>
+</body></html>
