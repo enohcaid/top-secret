@@ -2740,6 +2740,39 @@ const SEED_MATCHES = [
     {name:'IvanCabjLa12', matched:'Ivan_Cabj_La12', played_pos:'PO', rating:4.0, goals:0, assists:0, passes:3, pass_accuracy:100, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:2, red_cards:0, minutes:94, mom:false, archetype_id:2, ea_pos:'goalkeeper'},
   ]},
 
+  // Playoff Fase Oro VPUG — Octavos, ida y vuelta (14 Oct 2026) · reporte del vigía del vivo de Twitch
+  { rival:'Argentino de Merlo', league:'VPUG', date:'2026-10-14', match_result:'1-1', isHome:false, uploadedAt:'2026-10-15T00:00:00.000Z',
+    notes:'Liga Pretemporada · Fase Oro · Octavos · Ida (Visita) · gol: NicoBJ_96 · reporte: vigía del vivo de Twitch (sin pantalla Eventos: minutos sin dato)', torneo:'Liga Pretemporada VPUG (FC27)',
+    team_stats:{posesion:47,tiros:4,tiros_arco:3,goles_esperados:1.52,pases:153,precision_pases:70,entradas:20,entradas_exito:10,intercepciones:null,paradas:2,faltas:0,fuera_juego:3,corneres:3,regates_exito:117,precision_tiro:75},
+  players:[
+    {name:'J. Martinez', matched:'Juan_Martinez4', played_pos:'MCD', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Lautavester7', matched:'Lautavester7', played_pos:'DI', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'NicoBJ 96', matched:'NicoBJ_96', played_pos:'DD', rating:7.3, goals:1, assists:0, passes:8, pass_accuracy:75, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'NIKILEO527', matched:'nikileo527', played_pos:'MI', rating:8.0, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Pepo', matched:'pepolemmo2710', played_pos:'MCI', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Guiidow', matched:'Guiidow', played_pos:'MD', rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'RS32DaniSton', matched:'RS32-DaniStone', played_pos:'MCD', rating:6.7, goals:0, assists:0, passes:16, pass_accuracy:81, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Charly', matched:'endiabladorojo66', played_pos:'DCI', rating:7.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Cabers14', matched:'Cabers14', played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'IvanCabjLa12', matched:'Ivan_Cabj_La12', played_pos:'DFC', rating:6.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+    {name:'Abuelo', matched:'adri_cai', played_pos:'PO', rating:5.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null},
+  ]},
+  { rival:'Argentino de Merlo', league:'VPUG', date:'2026-10-14', match_result:'0-2', isHome:true, uploadedAt:'2026-10-15T00:00:00.000Z', ea_match_id:'102956171390329',
+    notes:'Liga Pretemporada · Fase Oro · Octavos · Vuelta (Local) · goles: alonsoyatra 68\' y 90\' (ARG) · eliminados 1-3 en el global · reporte: vigía del vivo de Twitch', torneo:'Liga Pretemporada VPUG (FC27)',
+    team_stats:{posesion:52,tiros:6,tiros_arco:3,goles_esperados:0.90,pases:142,precision_pases:68,entradas:26,entradas_exito:15,intercepciones:null,paradas:1,faltas:1,fuera_juego:1,corneres:3,regates_exito:108,precision_tiro:50},
+  players:[
+    {name:'J. Martinez', matched:'Juan_Martinez4', played_pos:'MCD', rating:7.1, goals:0, assists:0, passes:17, pass_accuracy:65, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:3, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:8, ea_pos:'midfielder'},
+    {name:'Lautavester7', matched:'Lautavester7', played_pos:'DI', rating:5.9, goals:0, assists:0, passes:8, pass_accuracy:75, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:4, tackle_attempts:1, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:12, ea_pos:'forward'},
+    {name:'NicoBJ 96', matched:'NicoBJ_96', played_pos:'DD', rating:6.3, goals:0, assists:0, passes:10, pass_accuracy:100, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:2, tackle_attempts:0, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:12, ea_pos:'forward'},
+    {name:'NIKILEO527', matched:'nikileo527', played_pos:'MI', rating:6.7, goals:0, assists:0, passes:13, pass_accuracy:62, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:2, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:13, ea_pos:'midfielder'},
+    {name:'Pepo', matched:'pepolemmo2710', played_pos:'MCI', rating:6.6, goals:0, assists:0, passes:21, pass_accuracy:71, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:2, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:8, ea_pos:'midfielder'},
+    {name:'Guiidow', matched:'Guiidow', played_pos:'MD', rating:6.6, goals:0, assists:0, passes:20, pass_accuracy:55, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:2, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:13, ea_pos:'midfielder'},
+    {name:'RS32DaniSton', matched:'RS32-DaniStone', played_pos:'MCD', rating:7.7, goals:0, assists:0, passes:14, pass_accuracy:86, distance_km:null, sprints:null, tackles:4, interceptions:null, shots:0, tackle_attempts:4, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:7, ea_pos:'midfielder'},
+    {name:'Charly', matched:'endiabladorojo66', played_pos:'DCI', rating:6.7, goals:0, assists:0, passes:7, pass_accuracy:43, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:3, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:4, ea_pos:'defender'},
+    {name:'Cabers14', matched:'Cabers14', played_pos:'DFC', rating:7.4, goals:0, assists:0, passes:12, pass_accuracy:58, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:4, saves:0, red_cards:0, minutes:92, mom:false, archetype_id:4, ea_pos:'defender'},
+    {name:'IvanCabjLa12', matched:'Ivan_Cabj_La12', played_pos:'DFC', rating:8.8, goals:0, assists:0, passes:18, pass_accuracy:50, distance_km:null, sprints:null, tackles:4, interceptions:null, mom:true, shots:0, tackle_attempts:5, saves:0, red_cards:0, minutes:92, archetype_id:4, ea_pos:'defender'},
+    {name:'Abuelo', matched:'adri_cai', played_pos:'PO', rating:5.3, goals:0, assists:0, passes:6, pass_accuracy:83, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:5, red_cards:0, minutes:92, mom:false, archetype_id:2, ea_pos:'goalkeeper'},
+  ]},
 ];
 
 

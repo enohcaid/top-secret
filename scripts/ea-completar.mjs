@@ -62,8 +62,9 @@ for (const ea of hist.partidos) {
   if (ea.sospechoso) { informe.push(`⚠ ${titulo}: ${ea.sospechoso} → ignorado (en el sitio: ${etiqueta})`); continue; }
   if (seed.match_result !== `${ea.gf}-${ea.gc}`) { informe.push(`⚠ ${titulo}: el marcador no coincide con ${etiqueta} → ignorado`); continue; }
 
-  // Ubicar el bloque del partido en el texto: línea con rival + fecha, hasta el cierre de players
-  const re = new RegExp(`rival:'${seed.rival.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}',[^\\n]*date:'${seed.date}'`);
+  // Ubicar el bloque del partido en el texto: línea con rival + fecha + resultado, hasta el cierre de players.
+  // El resultado hace falta para las series de ida y vuelta (mismo rival y misma fecha: el 14/10 se escribió en el otro).
+  const re = new RegExp(`rival:'${seed.rival.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}',[^\\n]*date:'${seed.date}',[^\\n]*match_result:'${seed.match_result}'`);
   const ini = src.search(re);
   if (ini < 0) { informe.push(`⚠ ${titulo}: no encontré el bloque de ${etiqueta} en el archivo`); continue; }
   const fin = src.indexOf(']},', ini);
