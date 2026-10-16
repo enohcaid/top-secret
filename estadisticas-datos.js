@@ -2,7 +2,7 @@
 // Funciones puras sobre SEED_MATCHES + roster.js (sin DOM), para poder verificarlas desde Node.
 import { SEED_MATCHES } from './seed_matches.js';
 import { ROSTER_T3, ROSTER_T4 } from './roster.js';
-import { ESCUDOS } from './estadisticas-escudos.js';
+import { ESCUDOS } from './estadisticas-escudos.js?v=3';
 
 export const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: mismo valor que plantilla.html / convocatoria.html / index-home.js (R2 cachea un año).

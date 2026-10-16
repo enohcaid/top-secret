@@ -1,6 +1,6 @@
 // Gráficos SVG de estadisticas.html. Devuelven strings de markup; los colores son tokens CSS
 // (var(--gold) etc.) para que sigan el tema, y los atributos data-* son los que anima estadisticas-motion.js.
-import { esc } from './estadisticas-datos.js';
+import { esc } from './estadisticas-datos.js?v=3';
 
 const f1 = v => Math.round(v * 10) / 10;
 

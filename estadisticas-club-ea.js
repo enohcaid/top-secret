@@ -1,6 +1,6 @@
 // Sección "Club EA" de estadisticas.html: acumulado del club en EA Sports FC 27, en vivo vía Worker /ea.
 // Club 404340 en common-gen5 (PC devuelve lo mismo por crossplay; PS4 no existe en FC 27).
-import { esc } from './estadisticas-datos.js';
+import { esc } from './estadisticas-datos.js?v=3';
 
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const CLUB = '404340', PLAT = 'common-gen5';
