@@ -10,9 +10,6 @@ const esc = D.esc;
 const num = (v, dec = 0) => v == null ? '—' : (+v).toFixed(dec).replace('.', ',');
 const cnt = (v, dec = 0, pre = '', suf = '') => v == null ? '—' : `<span data-count="${v}" data-dec="${dec}" data-prefix="${pre}" data-suffix="${suf}">${pre}${num(v, dec)}${suf}</span>`;
 const ratingCls = r => r == null ? '' : r >= 8 ? 'r-hi' : r >= 6.5 ? 'r-mid' : 'r-lo';
-// Clips con alfa (VP9): Chrome/Edge/Firefox de escritorio. Safari no muestra la transparencia → render quieto.
-const CLIPS_OK = matchMedia('(min-width: 900px)').matches && !/^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-  && !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ── Estado (se refleja en la URL: ?t=3&c=l:VPN) ──
 const qs = new URLSearchParams(location.search);
@@ -71,38 +68,34 @@ function renderHero() {
 }
 
 // ════════ 2 · PROTAGONISTAS ════════
+// Los cuatro líderes a la vista: el número manda; foto chica y el top 5 de la categoría para comparar.
 function renderLeaders() {
   const L = D.leaders(C.players, C.ms.length);
   const el = $('#protagonistas');
   if (!L.length) { el.innerHTML = secHead('01', 'Protagonistas', '') + empty('Los protagonistas aparecen con el primer partido.'); return; }
-  el.innerHTML = `<div class="lead-stage">
-    <div class="lead-head">${secHead('01', 'Protagonistas', '')}<div class="lead-index">${L.map((l, i) => `<span class="lead-dot${i ? '' : ' on'}"><b>${String(i + 1).padStart(2, '0')}</b>${esc(l.kicker)}</span>`).join('')}</div></div>
-    ${L.map((l, i) => {
-      const p = l.player, clip = CLIPS_OK ? D.playerMedia(p, 'clip') : null;
-      return `<article class="lead-slide" data-i="${i}">
-        <div class="lead-copy">
-          <p class="lead-kicker">${esc(l.kicker)} de la temporada</p>
-          <h3 class="lead-name">${esc(p.name)}</h3>
-          <p class="lead-num">${cnt(D.round(l.value, l.dec), l.dec, l.prefix || '')}<small>${esc(l.unit)}</small></p>
-          <p class="lead-sub">${esc(l.sub)}</p>
-          ${p.ratings.length > 1 ? `<div class="lead-spark"><span>Rating por partido</span>${G.spark(p.ratings, { width: 220, height: 44 })}</div>` : ''}
-          <button class="pill ghost" data-player="${esc(p.name)}">Ver perfil</button>
+  el.innerHTML = `${secHead('01', 'Protagonistas', 'Los líderes de la temporada en cada rubro y quiénes los siguen.')}
+    <div class="leads">${L.map(l => {
+      const p = l.player;
+      const best = l.low ? Math.min(...l.list.map(x => x.value)) : Math.max(...l.list.map(x => x.value));
+      const pct = v => l.low ? (best / (v || 1)) * 100 : (v / (best || 1)) * 100;
+      return `<article class="lead" data-reveal>
+        <p class="lead-kicker">${esc(l.kicker)}${l.note ? `<span>${esc(l.note)}</span>` : ''}</p>
+        <div class="lead-top">
+          <div class="lead-data">
+            <p class="lead-num">${cnt(D.round(l.value, l.dec), l.dec, l.prefix)}<small>${esc(l.unit)}</small></p>
+            <button class="lead-name" data-player="${esc(p.name)}">${esc(p.name)}</button>
+            <p class="lead-sub">${esc(l.sub)}</p>
+          </div>
+          <button class="lead-photo" data-player="${esc(p.name)}" aria-label="Perfil de ${esc(p.name)}">${photo(p, 'busto', 'lead-ph')}</button>
         </div>
-        <div class="lead-media${clip ? ' has-clip' : ''}">
-          <span class="lead-glow"></span>
-          ${clip ? `<video class="lead-clip" muted playsinline loop preload="none" poster="${clip.replace('.webm', '.webp')}" data-src="${clip}"></video>` : photo(p, 'pose', 'lead-img')}
-        </div>
+        <ol class="lead-list">${l.list.map((x, i) => `<li${i ? '' : ' class="first"'}>
+          <span class="ll-pos">${i + 1}</span>
+          <button class="ll-name" data-player="${esc(x.player.name)}">${esc(x.player.name)}</button>
+          <span class="ll-bar"><i style="width:${Math.max(4, Math.round(pct(x.value)))}%" data-bar></i></span>
+          <span class="ll-val">${l.prefix}${num(x.value, l.dec)}</span>
+        </li>`).join('')}</ol>
       </article>`;
-    }).join('')}
-  </div>`;
-}
-function onLeader(i) {
-  document.querySelectorAll('#protagonistas .lead-clip').forEach((v, j) => {
-    if (j === i) {
-      if (!v.src) { v.src = v.dataset.src; v.preload = 'auto'; }
-      v.play().catch(() => {});
-    } else if (!v.paused) v.pause();
-  });
+    }).join('')}</div>`;
 }
 
 // ════════ 3 · CÓMO JUEGA ════════
@@ -379,7 +372,7 @@ function renderAll() {
   compute();
   renderBar(); renderHero(); renderLeaders(); renderJuego(); renderPartidos(); renderPlantel(); renderCompare();
   history.replaceState(null, '', urlFor());
-  M.initMotion($('#st'), { onLeader });
+  M.initMotion($('#st'));
 }
 function rerender(scrollToBar) {
   const run = () => { renderAll(); if (scrollToBar && window.scrollY > $('#stBar').offsetTop) $('#resumen').scrollIntoView({ block: 'start' }); };

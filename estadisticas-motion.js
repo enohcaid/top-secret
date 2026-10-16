@@ -10,7 +10,7 @@ const once = (trigger, start = 'top 88%') => ({ trigger, start, once: true });
 function fmt(v, dec, pre, suf) { return pre + v.toFixed(dec).replace('.', ',') + suf; }
 
 // (Re)arma todas las animaciones de `root`. Se llama después de cada render.
-export function initMotion(root, { onLeader } = {}) {
+export function initMotion(root) {
   ctxs.get(root)?.revert(); ctxs.delete(root);
   if (reduced()) { root.querySelectorAll('[data-count]').forEach(el => setCount(el, +el.dataset.count)); return; }
   const gsap = g();
@@ -22,10 +22,7 @@ export function initMotion(root, { onLeader } = {}) {
     gsap.utils.toArray(root.querySelectorAll('[data-stagger]')).forEach(box =>
       gsap.from(box.children, { y: 22, opacity: 0, duration: .7, ease: 'power3.out', stagger: .045, scrollTrigger: once(box, 'top 90%') }));
 
-    gsap.utils.toArray(root.querySelectorAll('[data-count]')).forEach(el => {
-      if (el.closest('.lead-slide')) return;   // los de líderes cuentan al entrar su lámina
-      countUp(el, once(el, 'top 92%'));
-    });
+    gsap.utils.toArray(root.querySelectorAll('[data-count]')).forEach(el => countUp(el, once(el, 'top 92%')));
 
     root.querySelectorAll('[data-arc]').forEach(el =>
       gsap.from(el, { attr: { 'stroke-dasharray': '0 100' }, duration: 1.6, ease: 'power3.out', scrollTrigger: once(el.ownerSVGElement, 'top 85%') }));
@@ -52,8 +49,6 @@ export function initMotion(root, { onLeader } = {}) {
     root.querySelectorAll('[data-parallax]').forEach(el =>
       gsap.to(el, { yPercent: 14, scale: 1.06, ease: 'none', scrollTrigger: { trigger: el.parentElement, start: 'top top', end: 'bottom top', scrub: true } }));
 
-    const lead = root.querySelector('#protagonistas');
-    if (lead) leadersPin(lead, onLeader);
   }, root);
   ctxs.set(root, ctx);
 }
@@ -65,59 +60,6 @@ function countUp(el, scrollTrigger) {
   const end = +el.dataset.count, o = { v: 0 };
   setCount(el, 0);
   return g().to(o, { v: end, duration: 1.5, ease: 'power2.out', scrollTrigger, onUpdate: () => setCount(el, o.v), onComplete: () => setCount(el, end) });
-}
-
-// Protagonistas: en pantallas anchas la sección queda fija y las láminas pasan con el scroll.
-// En celular (o sin animación) las láminas quedan una debajo de la otra (CSS por defecto).
-function leadersPin(section, onLeader) {
-  const gsap = g();
-  const slides = [...section.querySelectorAll('.lead-slide')];
-  const mm = gsap.matchMedia();
-  const enterSlide = s => s.querySelectorAll('[data-count]').forEach(el => countUp(el));
-  mm.add('(min-width: 900px)', () => {
-    if (slides.length < 2) { slides.forEach(enterSlide); onLeader?.(0); return; }
-    section.classList.add('lead-pinned');
-    const stage = section.querySelector('.lead-stage');
-    gsap.set(slides.slice(1), { autoAlpha: 0 });
-    let cur = -1;
-    const show = i => {
-      if (i === cur) return;
-      cur = i;
-      section.style.setProperty('--lead-i', i);
-      section.querySelectorAll('.lead-dot').forEach((d, j) => d.classList.toggle('on', j === i));
-      enterSlide(slides[i]);
-      onLeader?.(i);
-    };
-    const tl = gsap.timeline({ defaults: { ease: 'power2.inOut' } });
-    slides.forEach((s, i) => {
-      if (!i) return;
-      const prev = slides[i - 1];
-      tl.to(prev.querySelector('.lead-copy'), { y: -60, autoAlpha: 0, duration: .5 }, i)
-        .to(prev.querySelector('.lead-media'), { x: -120, autoAlpha: 0, duration: .5 }, i)
-        .set(prev, { autoAlpha: 0 }, i + .5)
-        .set(s, { autoAlpha: 1 }, i + .3)
-        .fromTo(s.querySelector('.lead-copy'), { y: 70, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .55 }, i + .3)
-        .fromTo(s.querySelector('.lead-media'), { x: 160, autoAlpha: 0, scale: .94 }, { x: 0, autoAlpha: 1, scale: 1, duration: .6 }, i + .3);
-    });
-    tl.to({}, { duration: .4 });   // aire al final antes de soltar la sección
-    const total = tl.duration();
-    // Cada lámina queda "quieta" desde que termina de entrar (i + .9) hasta que empieza la siguiente.
-    const rest = slides.map((_, i) => (i ? i + .9 : 0) / total);
-    window.ScrollTrigger.create({
-      trigger: section, start: 'top top', end: () => '+=' + window.innerHeight * (slides.length - .2),
-      pin: stage, scrub: .7, animation: tl,
-      snap: { snapTo: [...rest, 1], duration: { min: .2, max: .6 }, ease: 'power1.inOut', delay: .08 },
-      onUpdate: st => {
-        const t = st.progress * total;
-        show(slides.reduce((acc, _, i) => (i && t >= i + .35 ? i : acc), 0));
-      },
-      onEnter: () => show(0),
-    });
-    return () => section.classList.remove('lead-pinned');
-  });
-  mm.add('(max-width: 899px)', () => {
-    slides.forEach(s => window.ScrollTrigger.create({ trigger: s, start: 'top 80%', once: true, onEnter: () => { enterSlide(s); onLeader?.(slides.indexOf(s)); } }));
-  });
 }
 
 // Reordenar/filtrar el plantel con Flip: `mutate` cambia el orden del DOM o la clase is-hidden.

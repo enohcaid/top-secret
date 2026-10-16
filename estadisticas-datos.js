@@ -101,10 +101,9 @@ export function initials(name) {
 
 // ── Imágenes ────────────────────────────────────────────────
 export const media = p => `${MEDIA}/${p.split('/').map(encodeURIComponent).join('/')}${p.startsWith('Renders/') ? '?v=' + RENDER_V : ''}`;
-// kind: 'busto' (Frente4.webp, recorte de cara/pecho) | 'pose' (Unica4.webp de cuerpo entero) | 'clip' (festejo con alfa)
+// kind: 'busto' (Frente4.webp, recorte de cara/pecho) | 'pose' (Unica4.webp de cuerpo entero)
 export function playerMedia(p, kind) {
   const f = p.folder || p.name;
-  if (kind === 'clip') return T4_KEYS.has(p.name) ? media(`Renders/${f}/clip-gol.webm`) : null;
   if (kind === 'pose') return T4_KEYS.has(p.name) ? media(`Renders/${f}/Unica4.webp`) : media(`Renders/${f}/Frente4.webp`);
   return media(`Renders/${f}/Frente4.webp`);
 }
@@ -198,20 +197,28 @@ export function playerAgg(ms, roster) {
 }
 export const minRatingGames = n => Math.max(1, Math.min(3, Math.ceil(n * 0.25)));
 
+// Líderes por categoría: el primero va destacado y `list` trae el top 5 para comparar.
+// `low: true` = gana el valor más bajo (variación del rating).
 export function leaders(players, nMatches) {
   const played = players.filter(p => p.games > 0);
   const minG = minRatingGames(nMatches);
-  const top = (list, fn) => [...list].sort((a, b) => fn(b) - fn(a))[0];
-  const out = [];
-  const g = top(played.filter(p => p.goals > 0), p => p.goals * 100 - p.games);
-  if (g) out.push({ id: 'goles', kicker: 'Goleador', player: g, value: g.goals, dec: 0, unit: g.goals === 1 ? 'gol' : 'goles', sub: `${g.games} PJ · ${g.assists} asist.` });
-  const a = top(played.filter(p => p.assists > 0), p => p.assists * 100 - p.games);
-  if (a) out.push({ id: 'asist', kicker: 'Asistidor', player: a, value: a.assists, dec: 0, unit: a.assists === 1 ? 'asistencia' : 'asistencias', sub: `${a.games} PJ · ${a.goals} goles` });
-  const r = top(played.filter(p => p.ratings.length >= minG), p => p.rating);
-  if (r) out.push({ id: 'rating', kicker: 'Mejor rating', player: r, value: r.rating, dec: 1, unit: 'de promedio', sub: `${r.ratings.length} partidos con nota` });
-  const reg = [...played.filter(p => p.ratings.length >= Math.max(4, minG) && p.std != null)].sort((x, y) => x.std - y.std)[0];
-  if (reg) out.push({ id: 'regular', kicker: 'El más regular', player: reg, value: reg.std, dec: 2, unit: 'de variación', prefix: '±', sub: `promedio ${round(reg.rating)} en ${reg.ratings.length} partidos` });
-  return out;
+  const cats = [
+    { id: 'goles', kicker: 'Goleador', pool: played.filter(p => p.goals > 0), val: p => p.goals, tie: p => -p.games, dec: 0,
+      unit: v => v === 1 ? 'gol' : 'goles', sub: p => `${p.games} PJ · ${p.assists} asist.` },
+    { id: 'asist', kicker: 'Asistidor', pool: played.filter(p => p.assists > 0), val: p => p.assists, tie: p => -p.games, dec: 0,
+      unit: v => v === 1 ? 'asistencia' : 'asistencias', sub: p => `${p.games} PJ · ${p.goals} goles` },
+    { id: 'rating', kicker: 'Mejor rating', pool: played.filter(p => p.ratings.length >= minG), val: p => p.rating, tie: p => p.ratings.length, dec: 1,
+      unit: () => 'de promedio', sub: p => `${p.ratings.length} partidos con nota`, note: `mín. ${minG} PJ` },
+    { id: 'regular', kicker: 'El más regular', pool: played.filter(p => p.ratings.length >= Math.max(4, minG) && p.std != null), val: p => p.std, tie: p => p.ratings.length, dec: 2, low: true, prefix: '±',
+      unit: () => 'de variación', sub: p => `promedio ${String(round(p.rating)).replace('.', ',')} en ${p.ratings.length} partidos`, note: 'variación del rating' },
+  ];
+  return cats.map(c => {
+    const sorted = [...c.pool].sort((x, y) => (c.low ? c.val(x) - c.val(y) : c.val(y) - c.val(x)) || c.tie(y) - c.tie(x));
+    if (!sorted.length) return null;
+    const p = sorted[0], v = c.val(p);
+    return { id: c.id, kicker: c.kicker, player: p, value: v, dec: c.dec, prefix: c.prefix || '', unit: c.unit(v), sub: c.sub(p), note: c.note || '', low: !!c.low,
+      list: sorted.slice(0, 5).map(x => ({ player: x, value: c.val(x) })) };
+  }).filter(Boolean);
 }
 
 // Radar de un jugador contra el máximo del plantel en cada eje (0–100).
