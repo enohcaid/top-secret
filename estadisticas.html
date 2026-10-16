@@ -21,7 +21,7 @@
 <link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/grupales/grupal-t4-campana-babndv.webp">
+<link rel="preload" as="image" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/grupales/grupal-ia-tunel-bb6225.webp">
 <style>
 :root{
   --bg:#0B0A07;--card:#16130B;--card2:#1D1910;
@@ -94,7 +94,8 @@ b.r-hi{color:var(--win)}b.r-mid{color:var(--gold)}b.r-lo{color:var(--loss)}
 /* ── 1 · MARCADOR ── */
 .st-hero{position:relative;min-height:min(860px,calc(100svh - var(--bar-h)));display:flex;align-items:flex-end;overflow:hidden;padding-top:64px;isolation:isolate;}
 .st-hero-bg{position:absolute;inset:0;z-index:-1;}
-.st-hero-bg img{position:absolute;left:50%;bottom:-2%;width:max(1280px,118%);max-width:none;transform:translateX(-50%);opacity:.8;}
+/* foto 3:2 generada con ChatGPT: cubre el hero y se encuadra en las caras (tercio superior) */
+.st-hero-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%;opacity:.78;}
 .st-hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--bg) 0%,color-mix(in srgb,var(--bg) 18%,transparent) 22%,color-mix(in srgb,var(--bg) 30%,transparent) 50%,color-mix(in srgb,var(--bg) 82%,transparent) 74%,var(--bg) 97%),radial-gradient(ellipse at 50% 100%,transparent 30%,color-mix(in srgb,var(--bg) 70%,transparent) 80%);}
 .st-hero-in{width:100%;padding-bottom:clamp(28px,5vh,56px);}
 .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);}
@@ -392,7 +393,7 @@ footer span{color:var(--gold);}
 
 <main id="st">
   <section class="st-hero" id="resumen">
-    <div class="st-hero-bg" aria-hidden="true"><img data-parallax src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/grupales/grupal-t4-campana-babndv.webp" alt=""></div>
+    <div class="st-hero-bg" aria-hidden="true"><img data-parallax src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/grupales/grupal-ia-tunel-bb6225.webp" alt=""></div>
     <div class="wrap st-hero-in">
       <p class="eyebrow">Estadísticas · Top Secret FC</p>
       <h1 class="st-title">Informe de <em>rendimiento</em></h1>
@@ -431,7 +432,7 @@ footer span{color:var(--gold);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
-<script type="module" src="estadisticas-app.js?v=4"></script>
+<script type="module" src="estadisticas-app.js?v=5"></script>
 <script src="layout.js?v=25"></script>
 </body>
 </html>
