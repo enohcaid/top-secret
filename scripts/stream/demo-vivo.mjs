@@ -4,6 +4,9 @@
 // que usa retransmitir.mjs: salidas.mjs) en demo-horizontal.mp4 y demo-vertical.mp4.
 //   node scripts/stream/demo-vivo.mjs <video.mp4> --dur 110 --gol 34 --golRival 94 [--lado der@63 …] [--fecha 2026-10-14] [--out carpeta]
 // (--lado izq|der@N y --modo pausa|juego@N simulan lo que en vivo detecta vigia-vivo.mjs)
+// --eventos <archivo.json>: lista [{seg, tipo, valor}] (tipo gol|golRival|finPartido|modo|lado; valor = resultado,
+// modo o lado) con seg = SEGUNDO DEL VIDEO: se disparan según la posición real de la fuente "Partido" en OBS (exacto),
+// no según el reloj desde que se lanzó OBS (que tiene 2-3 s de error).
 // Con DEMO_IG_URL en el entorno (URL+clave rtmps de un vivo de Instagram en modo "Practicar") la vertical va ahí.
 // Al terminar cierra todo y deja la configuración de OBS como estaba (obs-config.mjs).
 import fs from 'fs';
@@ -20,6 +23,7 @@ const VIDEO = path.resolve(process.argv[2]);
 const DUR = +arg('--dur', 110), FECHA = arg('--fecha', '2026-10-14');
 const OUT = path.resolve(arg('--out', path.join(ROOT, 'fuentes', 'stream', 'preview')));
 const eventos = [...['gol', 'golRival'].flatMap(t => process.argv.flatMap((a, i) => a === '--' + t ? [{ tipo: t, seg: +process.argv[i + 1] }] : [])),
+  ...(arg('--eventos') ? JSON.parse(fs.readFileSync(arg('--eventos'), 'utf8')) : []),
   ...process.argv.flatMap((a, i) => a === '--modo' ? [{ tipo: 'modo', valor: process.argv[i + 1].split('@')[0], seg: +process.argv[i + 1].split('@')[1] }] : []),
   ...process.argv.flatMap((a, i) => a === '--lado' ? [{ tipo: 'lado', valor: process.argv[i + 1].split('@')[0], seg: +process.argv[i + 1].split('@')[1] }] : [])];
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
@@ -77,16 +81,25 @@ const grabaciones = (async () => {
 })();
 
 // Eventos de gol, contados desde que se lanzó OBS (la fuente arranca al cargar la colección)
+// Con --eventos, el tiempo es el del video que reproduce OBS (GetMediaInputStatus de "Partido")
+const EN_VIDEO = !!arg('--eventos');
+let obsCtl = null;
+async function cursorVideo() {
+  try { obsCtl ||= await conectarObs(); const r = await obsCtl.pedir('GetMediaInputStatus', { inputName: 'Partido' }); return (r.mediaCursor ?? -1000) / 1000; }
+  catch { obsCtl = null; return -1; }
+}
 for (const ev of eventos.sort((a, b) => a.seg - b.seg)) {
-  await espera(Math.max(0, t0 + ev.seg * 1000 - Date.now()));
+  if (EN_VIDEO) { while (await cursorVideo() < ev.seg) await espera(120); }
+  else await espera(Math.max(0, t0 + ev.seg * 1000 - Date.now()));
   if (ev.tipo === 'lado') estado.lado = ev.valor; else if (ev.tipo === 'modo') {
     estado.modo = ev.valor;                                  // como retransmitir.mjs: en pausa baja el audio del juego
     try { const o = await conectarObs(); await o.pedir('SetInputVolume', { inputName: 'Partido', inputVolumeDb: ev.valor === 'pausa' ? -22 : 0 }); o.cerrar(); } catch {}
-  } else estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo });
+  } else estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo, ...(ev.tipo === 'finPartido' ? { resultado: ev.valor } : {}) });
   escribir(estado);
   log(`evento ${ev.tipo}${ev.valor ? ' ' + ev.valor : ''} (seg ${ev.seg})`);
 }
 await grabaciones;
+try { obsCtl?.cerrar(); } catch {}
 
 try { execFileSync('taskkill', ['/IM', 'obs64.exe'], { stdio: 'ignore' }); } catch {}
 await espera(8000);
