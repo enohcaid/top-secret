@@ -147,6 +147,7 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 - **GitHub Pages is case-sensitive**: file references must match the git-tracked filename case (local Windows FS won't catch this).
 - ART timezone (`America/Argentina/Buenos_Aires`) for all date/time logic.
 - CSS: use the design tokens, never hard-code colors; no `transition: all`; no emojis in UI text unless requested.
+- **`layout.js` owns the `.ts-hero*` class names** (page hero card: min-height 420px, centered with transform). Never reuse them inside a page — estadisticas.html did (`.ts-hero` for the team-stats header) and it opened a 400px gap until 2026-10-16 (renamed `.tsx-head`).
 - Keep inline `<script>` blocks under ~500 lines in new code; extract to `.js` files. (Legacy pages exceed this — don't grow them further.)
 - Each page is self-contained — no cross-page dependencies beyond `layout.js`, `roster.js`, `seed_matches.js`, `noticias-data.js`, `auto-noticias.js`.
 - Never delete or overwrite code unless explicitly instructed; ask when context is missing.
