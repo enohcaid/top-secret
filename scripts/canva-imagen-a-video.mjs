@@ -51,6 +51,16 @@ if (!IMG || !fs.existsSync(IMG)) { console.error('Uso: node scripts/canva-imagen
 const DESIGN_FILE = path.resolve('scripts/.canva-design.json');
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a);
 
+// Pestañas del diseño de trabajo que quedaron abiertas de una corrida cortada a la mitad: con varias acumuladas
+// connectOverCDP se cuelga (2026-10-15, 4 pestañas = lote de clips parado). Se cierran por HTTP, antes de conectar.
+try {
+  const tabs = await (await fetch('http://localhost:9222/json/list')).json();
+  for (const t of tabs.filter(t => t.type === 'page' && /canva\.com\/design\//.test(t.url))) {
+    await fetch('http://localhost:9222/json/close/' + t.id).catch(() => {});
+    log('cerré una pestaña de Canva que había quedado abierta');
+  }
+} catch {}
+
 const browser = await chromium.connectOverCDP('http://localhost:9222', { timeout: 30000 });
 const ctx = browser.contexts()[0];
 const page = await ctx.newPage();
