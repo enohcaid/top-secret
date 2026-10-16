@@ -2,12 +2,16 @@
 // Funciones puras sobre SEED_MATCHES + roster.js (sin DOM), para poder verificarlas desde Node.
 import { SEED_MATCHES } from './seed_matches.js';
 import { ROSTER_T3, ROSTER_T4 } from './roster.js';
-import { ESCUDOS } from './estadisticas-escudos.js?v=3';
+import { ESCUDOS } from './estadisticas-escudos.js?v=4';
 
 export const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: mismo valor que plantilla.html / convocatoria.html / index-home.js (R2 cachea un año).
 export const RENDER_V = '2026-09-30';
-export const STAGE_IMG = 'logos/plantel-t4-mva70vd6.webp';   // foto grupal T4 (plantel-t4-stage.js)
+// Fotos grupales T4 (scripts/fotos-grupales-t4.mjs, en R2 logos/grupales/). El hero de estadisticas.html usa "campana".
+export const GRUPALES_T4 = {
+  campana: 'logos/grupales/grupal-t4-campana-babndv.webp', piramide: 'logos/grupales/grupal-t4-piramide-babndv.webp',
+  bloque: 'logos/grupales/grupal-t4-bloque-babndv.webp', noche: 'logos/grupales/grupal-t4-noche-babndv.webp',
+};
 
 // ── Temporadas ──────────────────────────────────────────────
 const T2_CUTOFF = '2026-04-30';
