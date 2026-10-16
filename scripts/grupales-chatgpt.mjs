@@ -7,7 +7,7 @@
  *   3) escudo Clean dorado
  * y en el texto, el rasgo de cada número (el generador no ve los nombres de archivo).
  * Salida: fuentes/grupales-ia/grupal-ia-<escena>.png. Cada chat se borra después de bajar la imagen.
- * Uso: node scripts/grupales-chatgpt.mjs [escena ...] [--solo-referencias]   (escenas: estudio estadio tunel vestuario)
+ * Uso: node scripts/grupales-chatgpt.mjs [escena ...] [--solo-referencias]   (escenas: estudio estadio tunel vestuario estudio-suelto estadio-suelto)
  * Requiere el Chrome con CDP (scripts/abrir-chrome-chatgpt.ps1) logueado en ChatGPT.
  */
 import { chromium } from 'playwright';
@@ -29,6 +29,9 @@ const ESCENAS = {
   estadio: 'En el césped del estadio de noche: los reflectores detrás del grupo recortan las siluetas a contraluz, tribunas oscuras y desenfocadas al fondo, una leve bruma natural en el aire, cámara un poco baja que los hace ver imponentes.',
   tunel: 'En la boca del túnel de salida a la cancha: hormigón en penumbra a los costados, la luz blanca y cálida del campo entrando por detrás del grupo, sensación de "salimos a jugar"; perspectiva profunda del túnel.',
   vestuario: 'En el vestuario del club: casilleros de madera oscura y metal, bancos, luz cálida puntual desde arriba; algunos jugadores sentados en el banco o apoyados en los casilleros, otros de pie, actitud de equipo unido y canchero.',
+  // Versiones "sueltas" (2026-10-16): mismo estudio/estadio pero sin filas, grupos naturales y actitud.
+  'estudio-suelto': 'Estudio de campaña totalmente negro con luz DORADA cálida desde arriba y recortes de luz en los bordes; piso negro satinado. NADA de filas: el plantel repartido en grupos sueltos a distintas profundidades y alturas, como una editorial de moda deportiva — unos de pie, otros apoyados en el hombro de un compañero, uno sentado en el piso, el capitán adelante sentado sobre la pelota. Actitud relajada, segura y canchera.',
+  'estadio-suelto': 'En el césped del estadio de noche, con los reflectores detrás a contraluz y una leve bruma: el plantel CAMINANDO hacia la cámara desde el centro de la cancha, en una V abierta con el capitán en la punta, todos a paso firme, algunos hablando entre ellos o con la mirada fija en cámara. Cámara baja con teleobjetivo, los de atrás un poco desenfocados por la distancia. Nada de filas ni de pose de foto oficial.',
 };
 
 // Ubicación obligatoria de cada letra por escena: sin esto ChatGPT a veces repetía a dos jugadores
@@ -40,6 +43,8 @@ const PLANES = {
   estadio: [['Atrás, de pie', 'A, C, D, E, F, G, H, B'], ['Adelante, agachados o con una rodilla en el piso', 'I, J, K, L, M, N, O, P, Q']],
   tunel: [['Atrás, de pie contra la luz del túnel', 'A, C, G, D, E, H, B'], ['Al medio, de pie, el capitán al centro con la pelota', 'F, J, L, K, I'], ['Adelante, agachados', 'M, N, O, P, Q']],
   vestuario: [['Atrás, de pie o apoyados en los casilleros', 'A, B, C, D, E, F, G, H'], ['Adelante, sentados en el banco o agachados', 'I, J, K, L, M, N, O, P, Q']],
+  'estudio-suelto': [['A la izquierda, un grupo de cinco a distintas alturas (dos de pie atrás, uno con el brazo sobre el hombro de otro, uno agachado)', 'A, C, D, G, H'], ['Al centro, el capitán L adelante sentado sobre la pelota; detrás de él, de pie y cerca, tres más', 'L, E, F, M'], ['A la derecha, otro grupo de cinco (uno sentado en el piso, uno de costado mirando a cámara, uno con el brazo sobre un compañero)', 'I, J, K, N, B'], ['En primer plano, cerca de cámara, agachados o con una rodilla en el piso', 'O, P, Q']],
+  'estadio-suelto': [['En la punta de la V, el más adelantado', 'L'], ['Primera línea detrás del capitán, a los costados', 'N, Q, P, J'], ['Segunda línea', 'F, K, M, I, O'], ['Más atrás, más lejos de cámara', 'A, C, D, E, G, H, B']],
 };
 const planTexto = escena => PLANES[escena].map(([donde, letras]) => `- ${donde} (de izquierda a derecha): ${letras}  → ${letras.split(',').length} jugadores`).join('\n');
 

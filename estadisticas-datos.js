@@ -2,16 +2,17 @@
 // Funciones puras sobre SEED_MATCHES + roster.js (sin DOM), para poder verificarlas desde Node.
 import { SEED_MATCHES } from './seed_matches.js';
 import { ROSTER_T3, ROSTER_T4 } from './roster.js';
-import { ESCUDOS } from './estadisticas-escudos.js?v=6';
+import { ESCUDOS } from './estadisticas-escudos.js?v=7';
 
 export const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: mismo valor que plantilla.html / convocatoria.html / index-home.js (R2 cachea un año).
 export const RENDER_V = '2026-09-30';
 // Fotos grupales T4 en R2 logos/grupales/. Generadas con ChatGPT (scripts/grupales-chatgpt.mjs): el hero de
-// estadisticas.html usa "tunel". Las compuestas con los renders (scripts/fotos-grupales-t4.mjs) quedan de respaldo.
+// estadisticas.html usa "estudio-suelto"; las demás quedan para otros usos (noticias, redes, inicio). Las compuestas con los renders (scripts/fotos-grupales-t4.mjs) quedan de respaldo.
 export const GRUPALES_IA_T4 = {
   estudio: 'logos/grupales/grupal-ia-estudio-bkfysi.webp', estadio: 'logos/grupales/grupal-ia-estadio-bkfysi.webp',
   tunel: 'logos/grupales/grupal-ia-tunel-bkfysi.webp', vestuario: 'logos/grupales/grupal-ia-vestuario-bkfysi.webp',
+  'estudio-suelto': 'logos/grupales/grupal-ia-estudio-suelto-blfap0.webp', 'estadio-suelto': 'logos/grupales/grupal-ia-estadio-suelto-blfap0.webp',
 };
 export const GRUPALES_T4 = {
   campana: 'logos/grupales/grupal-t4-campana-babndv.webp', piramide: 'logos/grupales/grupal-t4-piramide-babndv.webp',

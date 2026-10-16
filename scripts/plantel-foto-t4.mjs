@@ -9,6 +9,13 @@
 import sharp from 'sharp';
 import fs from 'fs';
 
+// Desde 2026-10-16 el escenario de plantilla.html usa una foto generada con ChatGPT con cajas medidas a mano
+// (plantel-t4-stage.js). Este script lo reemplazaría por el collage de renders: solo con --reemplazar-escenario.
+if (!process.argv.includes('--reemplazar-escenario')) {
+  console.error('plantel-t4-stage.js ahora usa la foto grupal generada con ChatGPT. Para volver al collage de renders: --reemplazar-escenario');
+  process.exit(1);
+}
+
 const W = 3200, H = 1700;
 // Planos de atrás hacia adelante (se dibujan en ese orden). Por jugador: [gamertag, desfase vertical px, escala extra]
 const ROWS = [

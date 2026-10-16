@@ -2,10 +2,10 @@
 // Versión de los módulos (?v=N en cada import y en estadisticas.html): subirla en TODOS al cambiar cualquiera,
 // porque GitHub Pages cachea cada archivo ~10 min y un módulo nuevo con otro viejo rompe la página.
 // Datos: estadisticas-datos.js · gráficos SVG: estadisticas-graficos.js · animación: estadisticas-motion.js
-import * as D from './estadisticas-datos.js?v=6';
-import * as G from './estadisticas-graficos.js?v=6';
-import * as M from './estadisticas-motion.js?v=6';
-import { mountClubEA } from './estadisticas-club-ea.js?v=6';
+import * as D from './estadisticas-datos.js?v=7';
+import * as G from './estadisticas-graficos.js?v=7';
+import * as M from './estadisticas-motion.js?v=7';
+import { mountClubEA } from './estadisticas-club-ea.js?v=7';
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = D.esc;
