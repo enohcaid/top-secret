@@ -28,19 +28,19 @@ body.en-pausa #pausa{opacity:1}
   box-shadow:0 14px 40px rgba(0,0,0,.5);opacity:0;transform:translateY(12px) scale(.96);transition:opacity .25s ease,transform .3s cubic-bezier(.2,.8,.2,1)}
 #pausa .globo.on{opacity:1;transform:none}
 #pausa .globo::after{content:'';position:absolute;bottom:-18px;width:0;height:0;border:18px solid transparent;border-top-color:#F2EEE0;border-bottom:0}
-#pausa .globo.de-izq{left:200px;top:150px}#pausa .globo.de-izq::after{left:200px}
-#pausa .globo.de-der{right:200px;top:150px}#pausa .globo.de-der::after{right:200px}
+#pausa .globo.de-izq{left:200px;top:250px}#pausa .globo.de-izq::after{left:200px}
+#pausa .globo.de-der{right:200px;top:250px}#pausa .globo.de-der::after{right:200px}
 #pausa .globo .quien{display:block;font-family:'JetBrains Mono';font-size:15px;letter-spacing:.18em;color:#8a7330;margin-bottom:6px}
 /* Entrevista: placa de TS TV con micrófono */
-#pausa .tv{position:absolute;left:140px;top:300px;width:520px;padding:34px;border:1px solid var(--borde);border-radius:24px;background:rgba(11,10,7,.7)}
+#pausa .tv{position:absolute;left:140px;top:330px;width:520px;padding:34px;border:1px solid var(--borde);border-radius:24px;background:rgba(11,10,7,.7)}
 #pausa .tv .logo{display:flex;align-items:center;gap:16px}
 #pausa .tv .logo svg{width:64px;height:64px}
 #pausa .tv .logo b{font-family:'Bebas Neue';font-size:72px;line-height:.8;color:var(--oro)}
 #pausa .tv .k{font-family:'JetBrains Mono';font-weight:700;font-size:16px;letter-spacing:.24em;margin-top:18px}
-#pausa .globo.pregunta{left:140px;top:560px;background:#C8A84B}
+#pausa .globo.pregunta{left:140px;top:590px;background:#C8A84B}
 #pausa .globo.pregunta::after{left:80px;top:-18px;bottom:auto;border:18px solid transparent;border-bottom-color:#C8A84B;border-top:0}
 /* Tarjetas: próximo partido y números de la temporada */
-#pausa .tarjeta{position:absolute;left:140px;top:250px;width:860px;padding:44px 50px;border:1px solid var(--borde);border-radius:28px;background:rgba(11,10,7,.72)}
+#pausa .tarjeta{position:absolute;left:140px;top:300px;width:860px;padding:44px 50px;border:1px solid var(--borde);border-radius:28px;background:rgba(11,10,7,.72)}
 #pausa .tarjeta .k{font-family:'JetBrains Mono';font-weight:700;font-size:18px;letter-spacing:.24em;color:var(--oro)}
 #pausa .tarjeta .t{font-weight:900;font-size:76px;letter-spacing:-.03em;line-height:1;margin-top:16px}
 #pausa .tarjeta .s{font-size:30px;color:var(--texto2);margin-top:14px}
@@ -55,23 +55,81 @@ body.en-pausa #pausa{opacity:1}
 /* ── Vertical: lo mismo apilado, dentro de y 230–1650 (arriba y abajo Instagram dibuja su interfaz) ── */
 body.vertical #pausa .barra{top:240px;left:50px;right:50px}
 body.vertical #pausa .barra img{height:70px}body.vertical #pausa .barra .a{font-size:34px}
-body.vertical #pausa .chip{position:absolute;left:0;right:0;top:110px;margin:0;text-align:left;padding:26px 30px}   /* relativo a .barra (y≈240) */
+body.vertical #pausa .chip{position:absolute;left:0;right:0;top:220px;margin:0;text-align:left;padding:26px 30px}   /* relativo a .barra (y≈240) */
 body.vertical #pausa .chip .k{font-size:17px}body.vertical #pausa .chip .v{font-size:44px}
 body.vertical #pausa.con-tarjeta .chip{display:none}   /* entrevista y tarjetas ocupan ese lugar */
 /* dos jugadores que se pisan un poco en el centro, para que entren grandes */
-body.vertical #pausa .pj{bottom:270px;width:640px;height:620px}
-body.vertical #pausa .pj video{height:526px}
-body.vertical #pausa .pj .nombre{left:90px;right:90px;height:84px}
+body.vertical #pausa .pj{bottom:270px;width:700px;height:760px}
+body.vertical #pausa .pj video{height:666px}
+body.vertical #pausa .pj .nombre{left:120px;right:120px;height:84px}
 body.vertical #pausa .pj .gt{font-size:26px}
-body.vertical #pausa .izq{left:-90px}body.vertical #pausa .der{right:-90px}
+body.vertical #pausa .izq{left:-70px}body.vertical #pausa .der{right:-70px}   /* las placas quedan dentro de la pantalla (50 px de margen) */
 body.vertical #pausa .globo{max-width:820px;font-size:38px}
 body.vertical #pausa .globo.de-izq{left:50px;top:860px}body.vertical #pausa .globo.de-der{right:50px;top:860px}
 body.vertical #pausa .globo.de-izq::after{left:160px}body.vertical #pausa .globo.de-der::after{right:160px}
-body.vertical #pausa .tv{left:50px;right:50px;width:auto;top:380px;padding:26px}
+body.vertical #pausa .tv{left:50px;right:50px;width:auto;top:500px;padding:26px}
 body.vertical #pausa .tv .logo b{font-size:58px}
-body.vertical #pausa .globo.pregunta{left:50px;top:600px}
-body.vertical #pausa .tarjeta{left:50px;right:50px;width:auto;top:380px;padding:34px 38px}
+body.vertical #pausa .globo.pregunta{left:50px;top:720px}
+body.vertical #pausa .tarjeta{left:50px;right:50px;width:auto;top:500px;padding:34px 38px}
 body.vertical #pausa .tarjeta .t{font-size:60px}body.vertical #pausa .tarjeta .hora{font-size:120px}
 body.vertical #pausa .marca{width:620px;right:-160px;bottom:200px}
-body.vertical #pausa .globo.respuesta{top:860px;right:50px;left:auto}
-body.vertical #pausa .centro{width:760px}
+body.vertical #pausa .globo.respuesta{top:900px;right:50px;left:auto}
+body.vertical #pausa .centro{width:960px}
+body.vertical #pausa .centro video{height:760px}
+
+/* ── Franja de espera: deja claro que es una pausa y que esperamos el próximo partido ── */
+#pEspera{position:absolute;left:50%;top:150px;transform:translateX(-50%);display:flex;align-items:center;gap:22px;padding:16px 30px 20px;
+  border:1px solid var(--borde);border-radius:18px;background:rgba(11,10,7,.82);white-space:nowrap;overflow:hidden}
+#pEspera .pill{display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;background:#C8A84B;color:#0B0A07;
+  font-family:'JetBrains Mono';font-weight:700;font-size:18px;letter-spacing:.2em}
+#pEspera .pill i{width:12px;height:12px;border-radius:3px;background:#0B0A07;box-shadow:16px 0 0 #0B0A07;margin-right:16px}   /* ícono de pausa ⏸ */
+#pEspera .msg{font-weight:900;font-size:34px;letter-spacing:.03em}
+#pEspera .dots{display:inline-flex;gap:8px}
+#pEspera .dots b{width:12px;height:12px;border-radius:50%;background:var(--oro);animation:espera 1.2s ease-in-out infinite}
+#pEspera .dots b:nth-child(2){animation-delay:.2s}#pEspera .dots b:nth-child(3){animation-delay:.4s}
+@keyframes espera{0%,100%{opacity:.2;transform:translateY(0)}40%{opacity:1;transform:translateY(-6px)}}
+#pEspera .carga{position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,transparent,#C8A84B,transparent);background-size:40% 100%;
+  background-repeat:no-repeat;animation:carga 2.4s linear infinite}
+@keyframes carga{from{background-position:-40% 0}to{background-position:140% 0}}
+body.vertical #pEspera{top:340px;left:50px;right:50px;transform:none;flex-wrap:wrap;justify-content:center;gap:14px 18px;white-space:normal;text-align:center;padding:18px 24px 24px}
+body.vertical #pEspera .msg{font-size:36px}
+
+/* ── Pantalla de VICTORIA (tapa el reporte al terminar un partido ganado) ── */
+#victoria{position:absolute;inset:0;z-index:80;opacity:0;pointer-events:none;overflow:hidden;transition:opacity .6s ease;
+  background:radial-gradient(ellipse at 50% 38%,rgba(200,168,75,.32),transparent 62%),linear-gradient(180deg,#17130b,#070605 75%)}
+#victoria.on{opacity:1}
+#victoria .rayos{position:absolute;left:50%;top:36%;width:3200px;height:3200px;margin:-1600px 0 0 -1600px;opacity:.55;
+  background:repeating-conic-gradient(from 0deg,rgba(241,220,151,.13) 0deg 5deg,transparent 5deg 15deg);-webkit-mask:radial-gradient(closest-side,#000 12%,transparent 66%);animation:giro 40s linear infinite}
+@keyframes giro{to{transform:rotate(360deg)}}
+#victoria .confeti{position:absolute;inset:0;width:100%;height:100%}
+#victoria .k{position:absolute;left:0;right:0;top:110px;text-align:center;font-family:'JetBrains Mono';font-weight:700;font-size:22px;letter-spacing:.3em;color:var(--oro)}
+#victoria .titulo{position:absolute;left:0;right:0;top:150px;text-align:center;font-family:'Bebas Neue';font-size:250px;line-height:.9;letter-spacing:.02em;
+  background:linear-gradient(100deg,#C8A84B 0%,#C8A84B 40%,#FFF6D8 50%,#C8A84B 60%,#C8A84B 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 10px 40px rgba(200,168,75,.35))}
+#victoria.on .titulo{animation:entra .7s cubic-bezier(.2,1.4,.3,1) both,brillo 3s linear .7s infinite}
+@keyframes entra{from{transform:scale(2.2);opacity:0;filter:blur(18px)}to{transform:none;opacity:1}}
+@keyframes brillo{from{background-position:100% 0}to{background-position:-200% 0}}
+#victoria .marcador{position:absolute;left:0;right:0;top:420px;display:flex;align-items:center;justify-content:center;gap:56px}
+#victoria.on .marcador{animation:sube .6s cubic-bezier(.2,.9,.3,1.2) .35s both}
+@keyframes sube{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+#victoria .eq{display:flex;flex-direction:column;align-items:center;gap:12px;width:360px}
+#victoria .eq img{height:120px;width:120px;object-fit:contain}
+#victoria .eq span{font-weight:900;font-size:30px;letter-spacing:.04em;text-align:center}
+#victoria .goles{display:flex;align-items:center;gap:26px;font-family:'Bebas Neue';font-size:170px;line-height:.8}
+#victoria .goles i{font-style:normal;color:var(--texto2);font-size:110px}
+#victoria .goles b:first-child{color:var(--oro)}
+#victoria .jugador{position:absolute;left:50%;bottom:0;width:760px;height:620px;transform:translateX(-50%)}
+#victoria .jugador video{position:absolute;left:0;right:0;bottom:70px;width:100%;height:540px;object-fit:contain;object-position:50% 100%}
+#victoria .jugador .nombre{position:absolute;left:170px;right:170px;bottom:14px;height:76px;display:flex;align-items:center;justify-content:center;gap:14px;
+  background:linear-gradient(180deg,var(--fondo2),var(--fondo));border:1px solid var(--borde);border-radius:16px}
+#victoria .jugador .num{font-family:'Bebas Neue';font-size:50px;color:var(--oro)}
+#victoria .jugador .gt{font-weight:900;font-size:26px}
+body.vertical #victoria .k{top:300px;font-size:17px;letter-spacing:.16em;padding:0 30px;line-height:1.5}
+body.vertical #victoria .titulo{top:360px;font-size:200px}
+body.vertical #victoria .marcador{top:600px;gap:20px}
+body.vertical #victoria .eq{width:300px}
+body.vertical #victoria .eq img{height:130px;width:130px}
+body.vertical #victoria .eq span{font-size:28px}
+body.vertical #victoria .goles{font-size:150px;gap:16px}
+body.vertical #victoria .jugador{bottom:270px;width:1000px;height:900px}
+body.vertical #victoria .jugador video{height:820px}

@@ -3,6 +3,9 @@
 //   charla (dos jugadores con globos de diálogo), entrevista de "TS TV", próximo partido y números de la etapa (hoy, la pretemporada).
 // Guion en charlas.json (marcadores {rival}, {hora}, {pj}…, ver _ayuda). Música propia del club bajita de fondo
 // (solo la horizontal: el audio de OBS es uno solo para las dos versiones). Usa lo de overlay.js (indice, estado, CLIPS…).
+// Franja "EN PAUSA · esperando el próximo partido" siempre visible en la pausa (pedido de Juan: que quede claro que esperamos).
+// window.victoria.mostrar({ marcador, rival, escudo, torneo }): pantalla completa de VICTORIA con el resultado que tapa
+// el reporte al terminar un partido ganado (~15 s, antes de la pausa; pedido de Juan 2026-10-15).
 (() => {
   const VERTICAL = document.body.classList.contains('vertical');
   const MUSICA = q.get('musica') || '../../fuentes/stream/musica.json';
@@ -12,8 +15,9 @@
 
   const raiz = document.createElement('div'); raiz.id = 'pausa';
   raiz.innerHTML = `<img class="marca" src="${MEDIA}clean-dorado.webp" alt="">
-    <div class="barra"><img src="${MEDIA}badge-metal.webp" alt=""><div><div class="a">TOP SECRET FC</div><div class="b"><i></i>EN VIVO · YA VOLVEMOS</div></div>
+    <div class="barra"><img src="${MEDIA}badge-metal.webp" alt=""><div><div class="a">TOP SECRET FC</div><div class="b"><i></i>EN VIVO</div></div>
       <div class="chip" id="pChip" hidden><div class="k">PRÓXIMO PARTIDO</div><div class="v" id="pChipV"></div></div></div>
+    <div id="pEspera"><span class="pill"><i></i>EN PAUSA</span><span class="msg" id="pEsperaMsg">ESPERANDO EL PRÓXIMO PARTIDO</span><span class="dots"><b></b><b></b><b></b></span><div class="carga"></div></div>
     <div class="escena" id="pEscena"></div>`;
   document.body.appendChild(raiz);
   const escena = raiz.querySelector('#pEscena');
@@ -125,12 +129,54 @@
       if (Math.abs(objetivo - audio.volume) <= 0.02) { audio.volume = objetivo; clearInterval(fundido); fin?.(); } else audio.volume = Math.min(1, Math.max(0, v)); }, 60);
   }
 
+  // ── Pantalla de VICTORIA ──
+  const vic = document.createElement('div'); vic.id = 'victoria';
+  vic.innerHTML = `<div class="rayos"></div><canvas class="confeti"></canvas>
+    <div class="k" id="vK"></div><div class="titulo">VICTORIA</div>
+    <div class="marcador"><div class="eq"><img src="${MEDIA}badge-metal.webp" alt=""><span>TOP SECRET</span></div>
+      <div class="goles"><b id="vGF"></b><i>–</i><b id="vGC"></b></div>
+      <div class="eq"><img id="vEsc" alt=""><span id="vRival"></span></div></div>
+    <div class="jugador"><video muted playsinline loop></video><div class="nombre"><span class="num" id="vNum"></span><span class="gt" id="vGt"></span></div></div>`;
+  document.body.appendChild(vic);
+  const lienzo = vic.querySelector('.confeti'); let confeti = null, finVic = null;
+  function lluvia() {                                         // papelitos dorados que caen mientras dura la pantalla
+    const W = lienzo.width = innerWidth, H = lienzo.height = innerHeight, g = lienzo.getContext('2d');
+    const ps = Array.from({ length: 140 }, () => ({ x: Math.random() * W, y: -Math.random() * H, v: 120 + Math.random() * 220, r: Math.random() * 6.28, w: 8 + Math.random() * 10, f: Math.random() * 6 }));
+    let t0 = performance.now();
+    const paso = now => { const dt = (now - t0) / 1000; t0 = now; g.clearRect(0, 0, W, H);
+      for (const p of ps) { p.y += p.v * dt; p.r += dt * 4; if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+        g.save(); g.translate(p.x + Math.sin(p.y / 60 + p.f) * 18, p.y); g.rotate(p.r); g.fillStyle = p.f > 3 ? '#F1DC97' : '#C8A84B';
+        g.fillRect(-p.w / 2, -p.w / 4, p.w, p.w / 2 * Math.abs(Math.cos(p.r))); g.restore(); }
+      confeti = requestAnimationFrame(paso); };
+    cancelAnimationFrame(confeti); confeti = requestAnimationFrame(paso);
+  }
+  window.victoria = {
+    mostrar({ marcador = '', rival = '', escudo = '', torneo = '' } = {}, ms = 15000) {
+      const [gf, gc] = String(marcador).split('-');
+      vic.querySelector('#vGF').textContent = gf ?? ''; vic.querySelector('#vGC').textContent = gc ?? '';
+      vic.querySelector('.goles').hidden = !marcador;
+      vic.querySelector('#vRival').textContent = (rival || 'RIVAL').toUpperCase();
+      const esc = vic.querySelector('#vEsc'); esc.hidden = !escudo; if (escudo) esc.src = escudo;
+      vic.querySelector('#vK').textContent = ['FINAL DEL PARTIDO', torneo].filter(Boolean).join(' · ');
+      // un convocado festejando (festejo si hay, si no el grito de gol)
+      const js = jugadores().filter(gt => indice[gt].emociones.some(e => ['festejo', 'gol'].includes(e)));
+      const jb = vic.querySelector('.jugador'); jb.hidden = !js.length;
+      if (js.length) { const gt = azar(js); const e = indice[gt].emociones.includes('festejo') ? 'festejo' : 'gol';
+        const v = jb.querySelector('video'); v.src = `${CLIPS}${encodeURIComponent(gt)}/${e}.webm`; v.play().catch(() => {});
+        vic.querySelector('#vGt').textContent = gt; vic.querySelector('#vNum').textContent = indice[gt].num || ''; }
+      vic.classList.remove('on'); void vic.offsetWidth; vic.classList.add('on'); lluvia();
+      clearTimeout(finVic); finVic = setTimeout(() => this.ocultar(), ms);
+    },
+    ocultar() { vic.classList.remove('on'); setTimeout(() => cancelAnimationFrame(confeti), 800); },
+  };
+
   window.pausa = {
     poner(on) {
       if (on === activo) return;
       activo = on; document.body.classList.toggle('en-pausa', on);
       const p = proximo(); const chip = raiz.querySelector('#pChip'); chip.hidden = !p;
       if (p) raiz.querySelector('#pChipV').textContent = `${p.hora} · vs ${p.rival}`;
+      raiz.querySelector('#pEsperaMsg').textContent = p ? 'ESPERANDO EL PRÓXIMO PARTIDO' : 'YA VOLVEMOS · ESPERANDO QUE ARRANQUE';
       if (on) { bucle(); if (!VERTICAL) { if (audio.src && audio.paused) audio.play().then(() => fundir(VOL)).catch(() => {}); else if (!audio.src) tocar(); } }
       else if (!VERTICAL) fundir(0, () => audio.pause());
     },

@@ -94,7 +94,7 @@ for (const ev of eventos.sort((a, b) => a.seg - b.seg)) {
   if (ev.tipo === 'lado') estado.lado = ev.valor; else if (ev.tipo === 'modo') {
     estado.modo = ev.valor;                                  // como retransmitir.mjs: en pausa baja el audio del juego
     try { const o = await conectarObs(); await o.pedir('SetInputVolume', { inputName: 'Partido', inputVolumeDb: ev.valor === 'pausa' ? -22 : 0 }); o.cerrar(); } catch {}
-  } else estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo, ...(ev.tipo === 'finPartido' ? { resultado: ev.valor } : {}) });
+  } else estado.eventos.push({ id: String(Date.now()), tipo: ev.tipo, ...(ev.tipo === 'finPartido' ? { resultado: ev.valor, marcador: ev.marcador } : {}) });
   escribir(estado);
   log(`evento ${ev.tipo}${ev.valor ? ' ' + ev.valor : ''} (seg ${ev.seg})`);
 }

@@ -31,10 +31,10 @@ html,body{background:var(--bg);overflow:hidden}
 .franjas div{position:absolute;left:0;right:0;overflow:hidden}
 .franjas img{position:absolute;left:0;width:100%}
 /* metraje vertical: marco alto y celular */
-#alto{position:absolute;left:50%;top:1080px;width:720px;height:1280px;margin:-640px 0 0 -360px;border-radius:30px;overflow:hidden;display:none;
+#alto{position:absolute;left:50%;top:1160px;width:680px;height:1209px;margin:-604px 0 0 -340px;border-radius:30px;overflow:hidden;display:none;
   box-shadow:0 40px 120px rgba(0,0,0,.85),0 0 0 2px rgba(201,168,76,.55)}
 #alto img{position:absolute;inset:0;width:100%;height:100%}
-#celu{position:absolute;left:50%;top:1100px;width:600px;height:1200px;margin:-600px 0 0 -300px;border-radius:78px;padding:20px;display:none;
+#celu{position:absolute;left:50%;top:1160px;width:600px;height:1180px;margin:-590px 0 0 -300px;border-radius:78px;padding:20px;display:none;
   background:linear-gradient(160deg,#2a2620,#0d0b08);box-shadow:0 0 0 3px #3a342a,0 50px 140px rgba(0,0,0,.9)}
 #celu .pant{position:relative;width:100%;height:100%;border-radius:60px;overflow:hidden;background:#000}
 #celu .pant img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -63,12 +63,12 @@ html,body{background:var(--bg);overflow:hidden}
 #escudo{position:absolute;left:50%;top:560px;width:520px;margin-left:-260px;display:none;z-index:6;filter:drop-shadow(0 0 60px rgba(201,168,76,.45)) drop-shadow(0 40px 60px rgba(0,0,0,.8))}
 #barrido{position:absolute;left:50%;top:560px;width:520px;height:520px;margin-left:-260px;display:none;z-index:7;-webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mix-blend-mode:screen}
 #t4{top:1110px}
-#t4 b{display:block;font:400 230px/.85 'Bebas Neue'}
+#t4 b{display:block;font:400 196px/.85 'Bebas Neue'}
 #fecha{top:1360px}
 #fecha div{display:inline-block;padding:20px 40px;border:2px solid var(--gold);font:800 50px 'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase;background:rgba(7,6,5,.6)}
-#canales{top:1530px;display:flex;justify-content:center;gap:34px}
-#canales div{display:flex;flex-direction:column;align-items:center;gap:10px;font:700 22px 'JetBrains Mono';letter-spacing:.06em;color:var(--text2)}
-#canales svg{width:64px;height:64px}
+#canales{top:1500px;left:90px;right:90px;display:grid;grid-template-columns:1fr 1fr;gap:22px 30px}
+#canales div{display:flex;align-items:center;justify-content:center;gap:16px;font:700 27px 'JetBrains Mono';letter-spacing:.02em;color:var(--text)}
+#canales svg{width:52px;height:52px;flex:none}
 /* subtítulos */
 #subs{position:absolute;left:70px;right:70px;top:1700px;text-align:center;z-index:8;font:800 54px/1.12 'Barlow Condensed';text-transform:uppercase;letter-spacing:.01em;
   text-shadow:0 4px 18px rgba(0,0,0,.95),0 0 4px rgba(0,0,0,.9)}
@@ -92,7 +92,7 @@ html,body{background:var(--bg);overflow:hidden}
     <div id="plat"></div>
     <div id="pantalla"><div class="vid"><img class="cuadro"><div class="franjas"></div></div></div>
     <div id="alto"><img></div>
-    <div id="celu"><div class="anillo"></div><div class="pant"><img></div><div class="isla"></div></div>
+    <div id="celu"><div class="anillo"></div><div class="pant"><img></div></div>
     <div id="onda"></div>
     <img id="escudo"><div id="barrido"></div>
     <canvas id="particulas" width="1200" height="2040"></canvas>
@@ -132,8 +132,9 @@ function pintar(datos) {
   // Línea de tiempo (segundos del video), anclada a los dos drops del tema
   T = { titulo: d1 - 2 * BAR + 0.0, build: d1 - 1.05 * BAR, plat: d1, gol: d1 + 3 * BAR, contra: d1 + 6 * BAR, final: d1 + 9 * BAR,
     pausa: d1 + 12 * BAR, ig: d2 - 2 * BAR, cierre: d2, fin: D.fin };
-  $('#plat').innerHTML = ORDEN.map((k, i) => `<div class="pl" data-k="${k}" style="left:${i % 2 ? 560 : 100}px;top:${i < 2 ? 0 : 340}px"><svg viewBox="0 0 24 24">${ICON[k].p}</svg><b>${ICON[k].n}</b></div>`).join('');
-  $('#canales').innerHTML = ORDEN.map(k => `<div><svg viewBox="0 0 24 24">${ICON[k].p}</svg>${ICON[k].h}</div>`).join('');
+  $('#plat').innerHTML = ORDEN.map((k, i) => `<div class="pl" data-k="${k}" style="left:${i % 2 ? 620 : 160}px;top:${i < 2 ? 0 : 340}px"><svg viewBox="0 0 24 24">${ICON[k].p}</svg><b>${ICON[k].n}</b></div>`).join('');
+  // en los canales el degradado de Instagram necesita otro id (el de la grilla de plataformas queda oculto en el cierre)
+  $('#canales').innerHTML = ORDEN.map(k => `<div><svg viewBox="0 0 24 24">${ICON[k].p.replaceAll('id="ig"', 'id="ig2"').replaceAll('url(#ig)', 'url(#ig2)')}</svg>${ICON[k].h}</div>`).join('');
   $('#pantalla .franjas').innerHTML = Array.from({ length: N_FR }, (_, k) => `<div style="top:${k * 100 / N_FR}%;height:${100 / N_FR + .3}%"><img></div>`).join('');
   $('#escudo').src = D.escudo;
   $('#barrido').style.webkitMaskImage = `url("${D.escudo}")`;
@@ -202,7 +203,8 @@ function subtitulos(t) {
   const lt = t - f.en;
   const html = f.palabras.map((p, i) => `<span class="${lt >= p.t + p.d ? 'ya' : lt >= p.t ? 'on' : ''}">${p.w}</span>`).join(' ');
   if (el.innerHTML !== html) el.innerHTML = html;
-  el.style.top = (t >= T.pausa && t < T.ig) ? '1748px' : t >= T.cierre ? '1790px' : '1700px';
+  el.style.fontSize = f.palabras.length > 14 ? '45px' : '';      // las frases largas no pasan de dos renglones
+  el.style.top = (t >= T.pausa && t < T.cierre) ? '1745px' : t >= T.cierre ? '1760px' : '1700px';
 }
 
 function mostrar(n, t = 0) {
@@ -267,7 +269,7 @@ function mostrar(n, t = 0) {
     const o = $('#onda'); o.style.opacity = clamp(1 - dt / 0.7); o.style.transform = `scale(${1 + eOut(dt / 0.7) * 9})`;
     est.push([T.plat, 600, 920, 'rgba(241,215,140,A)', 150]);
     $('#rayos').style.opacity = 0.7; $('#rayos').style.transform = `rotate(${dt * 10}deg)`;
-    const cab = $('#cab'); cabecera(t, T.plat + 0.05, '● EN VIVO · EN TODAS', ['CUATRO', 'PLATAFORMAS'], 0); cab.style.top = '150px'; cab.style.opacity = 1;
+    const cab = $('#cab'); cabecera(t, T.plat + 0.05, '● EN VIVO · EN TODAS', ['CUATRO', 'PLATAFORMAS'], 0); cab.style.top = '130px'; cab.style.opacity = 1;
     $('#plat').style.display = 'block';
     [...document.querySelectorAll('.pl')].forEach((el, i) => {
       const q = (dt - (0.35 + i * 2 * B)) / 0.3, k = el.dataset.k;
@@ -289,13 +291,13 @@ function mostrar(n, t = 0) {
   const MOM = [
     { t0: T.gol, k: 'gol', kicker: '01 · GOL NUESTRO', l: ['CADA GOL', 'SE GRITA'], oro: 1, ev: D.eventoEn.gol, color: 'rgba(241,215,140,A)', tinte: 'rgba(201,168,76,.10)' },
     { t0: T.contra, k: 'contra', kicker: '02 · GOL EN CONTRA', l: ['SE SUFRE', 'EN EQUIPO'], oro: 1, ev: D.eventoEn.contra, color: null, tinte: 'rgba(160,20,30,.16)' },
-    { t0: T.final, k: 'final', kicker: '03 · FINAL DEL PARTIDO', l: ['EL VESTUARIO', 'REACCIONA'], oro: 1, ev: D.eventoEn.final, color: 'rgba(241,215,140,A)', tinte: 'rgba(201,168,76,.08)' },
+    { t0: T.final, k: 'final', kicker: '03 · FINAL DEL PARTIDO', l: ['LA VICTORIA', 'EN GRANDE'], oro: 1, ev: D.eventoEn.final, color: 'rgba(241,215,140,A)', tinte: 'rgba(201,168,76,.08)' },
   ];
   for (const [i, m] of MOM.entries()) {
     const t1 = i < 2 ? MOM[i + 1].t0 : T.pausa;
     if (t < m.t0 || t >= t1) continue;
     const lt = t - m.t0, cab = $('#cab');
-    cabecera(t, m.t0, m.kicker, m.l, m.oro); cab.style.top = '150px'; cab.style.opacity = 1;
+    cabecera(t, m.t0, m.kicker, m.l, m.oro); cab.style.top = '130px'; cab.style.opacity = 1;
     const p = $('#pantalla'); p.style.display = 'block'; p.style.opacity = 1;
     const img = $('#pantalla img.cuadro'); img.src = cuadroDe(D.clips[m.k], lt);
     // entrada 3D + glitch; después acercamiento lento al palco (abajo a la izquierda o a la derecha según el tramo)
@@ -320,11 +322,11 @@ function mostrar(n, t = 0) {
   // ── LAS ESPERAS (modo pausa, metraje vertical)
   if (t >= T.pausa && t < T.ig) {
     const lt = t - T.pausa, cab = $('#cab');
-    cabecera(t, T.pausa, '04 · LAS ESPERAS', ['LA PANTALLA', 'ES NUESTRA'], 1); cab.style.top = '90px'; cab.style.opacity = 1;
+    cabecera(t, T.pausa, '04 · LAS ESPERAS', ['MIENTRAS', 'ESPERAMOS'], 1); cab.style.top = '130px'; cab.style.opacity = 1;
     cab.querySelector('.t').style.fontSize = '';
     const a = $('#alto'); a.style.display = 'block';
     a.querySelector('img').src = cuadroDe(D.clips.pausa, lt);
-    a.style.transform = `perspective(1600px) translateY(${(1 - eOut(lt / 0.5)) * 300 + 70}px) rotateY(${(1 - eOut(lt / 0.7)) * -18}deg) scale(${0.88 + 0.12 * eOutBack(lt / 0.5) + lt * 0.004})`;
+    a.style.transform = `perspective(1600px) translateY(${(1 - eOut(lt / 0.5)) * 300}px) rotateY(${(1 - eOut(lt / 0.7)) * -18}deg) scale(${0.88 + 0.12 * eOutBack(lt / 0.5) + lt * 0.004})`;
     cromatico(a, Math.max(0, 8 - lt * 30));
     numero = '04'; tinte = 'rgba(201,168,76,.06)';
     if (lt < 0.06) flash = Math.max(flash, 0.3);
@@ -334,10 +336,10 @@ function mostrar(n, t = 0) {
   // ── INSTAGRAM (build hacia el drop 2): celular con la vertical + aceleración
   if (t >= T.ig && t < T.cierre) {
     const lt = t - T.ig, dur = T.cierre - T.ig, p = lt / dur, cab = $('#cab');
-    cabecera(t, T.ig, '05 · INSTAGRAM', ['EN VERTICAL'], 0); cab.style.top = '110px'; cab.style.opacity = 1 - clamp((p - 0.9) / 0.08);
+    cabecera(t, T.ig, '05 · INSTAGRAM', ['EN VERTICAL'], 0); cab.style.top = '130px'; cab.style.opacity = 1 - clamp((p - 0.9) / 0.08);
     const c = $('#celu'); c.style.display = p < 0.95 ? 'block' : 'none';
     c.querySelector('.pant img').src = cuadroDe(D.clips.ig, lt);
-    c.style.transform = `perspective(1800px) translateY(${(1 - eOut(lt / 0.5)) * 320 + 120}px) rotateY(${(1 - eOut(lt / 0.8)) * 24 - 6 + p * 6}deg) rotateZ(${-3 + p * 3}deg) scale(${0.92 + p * 0.16})`;
+    c.style.transform = `perspective(1800px) translateY(${(1 - eOut(lt / 0.5)) * 320}px) rotateY(${(1 - eOut(lt / 0.8)) * 24 - 6 + p * 6}deg) rotateZ(${-3 + p * 3}deg) scale(${0.92 + p * 0.16})`;
     c.querySelector('.anillo').style.opacity = 0.5 + 0.3 * Math.sin(lt * 6);
     cam.s *= 1 + p * 0.1; if (p > 0.6) temblor((p - 0.6) * 40, 80);
     $('#rayos').style.opacity = p * 0.45; numero = '05';
@@ -367,7 +369,7 @@ function mostrar(n, t = 0) {
     f.style.display = qf > 0 ? 'block' : 'none'; f.querySelector('div').textContent = 'Martes 20/10 · Espacio Gamer';
     f.style.transform = `translateY(${(1 - eOutBack(qf)) * 120}px)`; f.style.opacity = eOut(qf);
     const ca = $('#canales'), qc = (dt - 7 * B);
-    ca.style.display = qc > 0 ? 'flex' : 'none';
+    ca.style.display = qc > 0 ? 'grid' : 'none';
     [...ca.children].forEach((c, i) => { const q = (qc - i * B * 0.5) / 0.3; c.style.opacity = eOut(q); c.style.transform = `translateY(${(1 - eOutBack(q)) * 60}px)`; });
     polvo = clamp(dt / 1.2);
     const fin = clamp((t - (T.fin - 0.9)) / 0.9); if (fin > 0) negro = Math.max(negro, fin);
@@ -375,7 +377,7 @@ function mostrar(n, t = 0) {
 
   particulas(t, est, polvo);
   subtitulos(t);
-  const nu = $('#numero'); nu.textContent = numero; nu.style.transform = `translate(calc(-50% + ${Math.sin(t * 0.7) * 40}px), -50%)`;
+  $('#numero').textContent = '';
   $('#tinte').style.background = tinte;
   $('#flash').style.opacity = clamp(flash);
   $('#negro').style.opacity = clamp(negro);

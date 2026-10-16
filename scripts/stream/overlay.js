@@ -90,13 +90,17 @@ async function actualizar() {
     estado = e;
     ponerLado(e.lado);
     window.pausa?.poner(e.modo === 'pausa');           // menús/lobby/espera: overlay-pausa.js
+    if (e.modo === 'juego') window.victoria?.ocultar();     // arrancó otro partido: fuera la pantalla de victoria
     const t = $('torneo'); t.hidden = !e.torneo;
     $('torneoTxt').textContent = e.torneo || ''; $('rivalTxt').textContent = e.rival ? 'vs ' + e.rival : '';
     if (e.escudo) { $('escudo').src = e.escudo; $('escudo').hidden = false; } else $('escudo').hidden = true;
     for (const ev of e.eventos || []) {
       if (visto.has(ev.id)) continue; visto.add(ev.id);
       if (!arranco) continue;                                  // los eventos viejos (de antes de abrir el overlay) no se reproducen
-      if (ev.tipo === 'finPartido') { window.ultimoResultado = ev.resultado; evento = ev.resultado; }
+      if (ev.tipo === 'finPartido') {
+        window.ultimoResultado = ev.resultado; evento = ev.resultado;
+        if (ev.resultado === 'victoria') window.victoria?.mostrar({ marcador: ev.marcador, rival: e.rival, escudo: e.escudo, torneo: e.torneo });
+      }
       else evento = ev.tipo;
       if (ev.tipo === 'gol') gol();
       vids[activo].pause(); siguiente();                       // el evento corta el clip de espera

@@ -20,7 +20,7 @@ import { elegirMusica } from '../../lib/musica.mjs';
 const DIR = path.join(ROOT, 'fuentes/redes/anuncio-vivo');
 const MOM = path.join(ROOT, 'fuentes/stream/momentos');
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
-const DESFASE = +arg('--desfase', 3.68);
+const DESFASE = +arg('--desfase', 2.81);
 const log = m => console.log(`${new Date().toLocaleTimeString('es-AR')} [anuncio] ${m}`);
 fs.mkdirSync(DIR, { recursive: true });
 
@@ -31,9 +31,9 @@ const BPM = 110, BAR = 4 * 60 / BPM, DROP1 = 4 * BAR, DROP2 = 22 * BAR, FIN = DR
 // Tramos del metraje en segundos del VIDEO DE LOS MOMENTOS (media); la grabación va DESFASE segundos atrás.
 // ev = segundo dentro del tramo en que pasa el evento (golpe sincronizado en la plantilla).
 const TRAMOS = {
-  gol:    { archivo: 'demo-horizontal', desde: 19.5, dur: 3 * BAR, ancho: 1280, ev: 2.1, lado: 'izq' },   // ev medido en los cuadros (el overlay lee eventos cada 1,5 s)
+  gol:    { archivo: 'demo-horizontal', desde: 19.5, dur: 3 * BAR, ancho: 1280, ev: 1.75, lado: 'izq' },   // ev medido en los cuadros (el overlay lee eventos cada 1,5 s)
   contra: { archivo: 'demo-horizontal', desde: 52.2, dur: 3 * BAR, ancho: 1280, ev: 2.2, lado: 'der' },
-  final:  { archivo: 'demo-horizontal', desde: 89.4, dur: 3 * BAR, ancho: 1280, ev: 1.5, lado: 'izq' },
+  final:  { archivo: 'demo-horizontal', desde: 89.4, dur: 3 * BAR, ancho: 1280, ev: 1.2, lado: 'izq' },
   pausa:  { archivo: 'demo-vertical',   desde: 142.0, dur: 4 * BAR, ancho: 720 },
   ig:     { archivo: 'demo-vertical',   desde: 19.5, dur: 2 * BAR, ancho: 720 },
 };
@@ -57,8 +57,8 @@ const pistas = narracion([
   { en: T.plat + 0.35, texto: 'En vivo en Twitch, Kick, YouTube e Instagram. Todo al mismo tiempo.' },
   { en: T.gol + 0.3, texto: 'Cada gol nuestro se grita en pantalla.' },
   { en: T.contra + 0.3, texto: 'Y cuando toca sufrir, se sufre en equipo.' },
-  { en: T.final + 0.25, texto: 'Al final de cada partido, el vestuario reacciona.' },
-  { en: T.pausa + 0.3, texto: 'En las esperas, la pantalla es nuestra: charlas, entrevistas y los números del club.' },
+  { en: T.final + 0.25, texto: 'Y cuando ganamos, la victoria se canta en grande.' },
+  { en: T.pausa + 0.2, texto: 'Y mientras esperamos el próximo partido, la pantalla es nuestra: charlas, entrevistas y los números del club.' },
   { en: T.ig + 0.1, texto: 'Y en Instagram, en vertical, pensado para tu celular.' },
   { en: T.cierre + 0.7, texto: 'El martes arranca la Temporada 4 en Espacio Gamer. Te esperamos en vivo.' },
 ], path.join(DIR, 'voz'));

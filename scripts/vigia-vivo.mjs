@@ -200,7 +200,7 @@ function avisarOverlay(tipo, valor) {
   let e = {}; try { e = JSON.parse(readFileSync(f, 'utf8')); } catch {}
   if (tipo === 'lado') e.lado = valor;
   else if (tipo === 'modo') e.modo = valor;
-  else e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo, ...(valor ? { resultado: valor } : {}) }].slice(-20);
+  else e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo, ...(valor ? (typeof valor === 'object' ? valor : { resultado: valor }) : {}) }].slice(-20);
   mkdirSync(path.dirname(f), { recursive: true });
   writeFileSync(f + '.tmp', JSON.stringify(e, null, 1)); renameSync(f + '.tmp', f);
 }
@@ -318,7 +318,7 @@ async function main() {
         ultimoReporteSeg = seg;
         if (huboPartido) {                                   // primer reporte después de un partido: terminó
           const resultado = golesF > golesC ? 'victoria' : golesF < golesC ? 'derrota' : 'empate';
-          if (!vodId) avisarOverlay('finPartido', resultado);
+          if (!vodId) avisarOverlay('finPartido', { resultado, marcador: `${golesF}-${golesC}` });   // marcador: nuestros goles primero
           console.log(`[${hms(seg)}] fin de partido (${golesF}-${golesC} según los goles contados): ${resultado}`);
           huboPartido = false; golesF = golesC = 0;
         }
