@@ -238,6 +238,26 @@
         "rebote invertido en las transiciones"
       ],
       "estructura": "intro 4 · verso A 8 · gancho A 8 · build 2 · verso B 4 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-16",
+      "id": "2026-10-16-2",
+      "archivo": "2026-10-16-2 - Vuelta.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_16_2.py",
+      "duracion": 92,
+      "nombre": "Vuelta",
+      "concepto": "Volver después de una lesión — meses mirando desde afuera, el cuerpo que no responde, el timing perdido; cuando la pelota vuelve a sentirse bien en el pie, estás en casa.",
+      "bpm": 134,
+      "tonalidad": "mi menor",
+      "rasgo": "latido desincronizado: pulso grave de corazón (doble golpe lub-dub) que arranca fuera de la grilla rítmica y se alinea sección a sección hasta trabar con el kick en el gancho C",
+      "recursos": [
+        "latido desincronizado con convergencia rítmica (firma del tema)",
+        "lead renacido que muta de pluck rígido a lead sostenido con vibrato",
+        "pad cuerpo de triángulos con ensanchamiento progresivo",
+        "808 melódico con saltos de octava",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · verso A 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · verso B 4 · gancho C 8 · final 4"
     }
   ]
 }
