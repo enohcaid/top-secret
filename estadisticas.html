@@ -125,8 +125,6 @@ canvas.chart{width:100%;display:block;}
 .history-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
 .history-table tr:last-child td{border-bottom:none;}
 .history-table tr:hover td{background:var(--card2);}
-.delete-btn{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:4px;transition:color .15s, background-color .15s;}
-.delete-btn:hover{color:var(--loss);background:rgba(232,80,46,.1);}
 .expand-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 8px;border-radius:4px;transition:color .15s, background-color .15s;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
 .expand-btn:hover{color:var(--gold);}
 .detail-row{display:none;}
@@ -142,71 +140,11 @@ canvas.chart{width:100%;display:block;}
 .rating-pill.mid{background:var(--gold-dim);color:var(--gold);}
 .rating-pill.low{background:rgba(232,80,46,.15);color:var(--loss);}
 
-/* ── SUBIR PARTIDO ── */
-.match-meta{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
-.meta-group label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);display:block;margin-bottom:6px;}
-.meta-group select,.meta-group input{width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .18s;}
-.meta-group select:focus,.meta-group input:focus{border-color:var(--gold);}
-.meta-group select option{background:var(--bg);}
-.upload-area{border:2px dashed var(--border2);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s, background-color .2s;position:relative;background:var(--card);margin-bottom:20px;}
-.upload-area:hover,.upload-area.drag{border-color:var(--gold);background:var(--gold-dim);}
-.upload-icon{font-size:2.8rem;margin-bottom:12px;display:block;}
-.upload-title{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:6px;}
-.upload-sub{font-size:.82rem;color:var(--muted);}
-.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.img-queue{display:none;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
-.img-queue.show{display:flex;}
-.img-thumb{position:relative;width:120px;height:90px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);flex-shrink:0;}
-.img-thumb img{width:100%;height:100%;object-fit:cover;}
-.img-thumb .thumb-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:rgba(0,0,0,.5);}
-.img-thumb .thumb-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.img-thumb .thumb-remove:hover{background:var(--loss);}
-.img-thumb.analyzing .thumb-status{background:rgba(10,11,14,.7);}
-.img-thumb.done .thumb-status{background:rgba(62,207,142,.2);}
-.img-thumb.error .thumb-status{background:rgba(232,80,46,.2);}
-.add-more-btn{width:120px;height:90px;border-radius:10px;border:2px dashed var(--border2);background:transparent;color:var(--muted);font-size:1.6rem;cursor:pointer;transition:border-color .18s, color .18s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.add-more-btn:hover{border-color:var(--gold);color:var(--gold);}
-.btn-analyze{width:100%;padding:14px;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.08em;border:none;border-radius:12px;cursor:pointer;transition:background-color .2s, transform .2s, box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:10px;}
-.btn-analyze:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 24px color-mix(in srgb,var(--gold) 30%,transparent);}
-.btn-analyze:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
-.analyzing-state{display:none;text-align:center;padding:40px;border:1px solid var(--border);border-radius:16px;background:var(--card);margin-top:20px;}
-.analyzing-state.show{display:block;}
-.spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--gold);animation:spin .8s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.analyzing-text{font-size:.9rem;color:var(--muted);}
-.analyzing-text b{color:var(--gold);}
-.result-card{display:none;border:1px solid var(--border2);border-radius:16px;background:var(--card);margin-top:20px;overflow:hidden;}
-.result-card.show{display:block;}
-.result-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.result-header h3{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;}
-.result-header h3 span{color:var(--gold);}
-.btn-save{padding:8px 20px;background:var(--win);color:#000;font-family:'Barlow',sans-serif;font-size:.82rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
-.btn-save:hover{opacity:.85;}
-.btn-discard{padding:8px 16px;background:transparent;color:var(--loss);font-size:.82rem;font-weight:600;border:1px solid rgba(232,80,46,.3);border-radius:8px;cursor:pointer;margin-right:8px;}
-.btn-discard:hover{background:rgba(232,80,46,.1);}
-.stats-table-wrap{overflow-x:auto;}
-.stats-table{width:100%;border-collapse:collapse;font-size:.83rem;}
-.stats-table th{padding:10px 12px;text-align:left;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;}
-.stats-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
-.stats-table tr:last-child td{border-bottom:none;}
-.stats-table tr:hover td{background:var(--card2);}
-.player-cell{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;}
-
-/* CLOUD STATUS */
-.cloud-status{display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--muted2);margin-bottom:16px;}
-.cloud-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);}
-.cloud-dot.ok{background:var(--win);}
-.cloud-dot.err{background:var(--loss);}
-
 /* MISC */
 .empty-state{text-align:center;padding:60px 24px;grid-column:1/-1;}
 .empty-icon{font-size:3rem;margin-bottom:12px;opacity:.4;}
 .empty-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;color:var(--muted);margin-bottom:6px;}
 .empty-sub{font-size:.82rem;color:var(--muted2);}
-.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:.85rem;font-weight:600;transform:translateY(80px);opacity:0;transition:transform .3s, opacity .3s;pointer-events:none;}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.success{border-color:rgba(62,207,142,.4);color:var(--win);}
-.toast.error{border-color:rgba(232,80,46,.4);color:var(--loss);}
 footer{background:var(--bg);color:var(--muted2);border-top:1px solid var(--border2);padding:28px 24px;text-align:center;font-size:.78rem;}
 footer span{color:var(--gold);}
 
@@ -231,10 +169,6 @@ footer span{color:var(--gold);}
 .cea-badge{width:56px;height:56px;border-radius:12px;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;}
 .cea-club-name{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:.04em;}
 .cea-club-sub{font-size:.72rem;color:var(--muted2);margin-top:2px;}
-.cea-platform-btns{display:flex;gap:6px;margin-left:auto;}
-.cea-pbtn{padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:.75rem;font-weight:700;cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
-.cea-pbtn:hover{border-color:var(--gold);color:var(--gold);}
-.cea-pbtn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
 .cea-kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px;}
 @media(max-width:900px){.cea-kpi-row{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:500px){.cea-kpi-row{grid-template-columns:repeat(2,1fr);}}
@@ -297,7 +231,6 @@ footer span{color:var(--gold);}
 @media(max-width:700px){
   .kpi-row{grid-template-columns:1fr 1fr;}
   .season-grid{grid-template-columns:1fr;}
-  .match-meta{grid-template-columns:1fr 1fr;}
   nav{padding:0 14px;}
   .nav-links a{padding:7px 9px;font-size:.74rem;}
   .tabs{overflow-x:auto;}
@@ -459,7 +392,6 @@ footer span{color:var(--gold);}
   .rank-row{grid-template-columns:24px 1fr 80px 40px;padding:6px 12px;}
   .rank-extra{display:none;}
   .player-cards-grid{grid-template-columns:1fr;}
-  .match-meta{grid-template-columns:1fr 1fr;}
   .section-wrap{padding:0 12px;}
   .sec-head{padding:20px 12px 12px;}
   .history-wrap{overflow-x:auto;}
@@ -492,9 +424,8 @@ footer span{color:var(--gold);}
 .pcard:nth-child(8){animation-delay:.32s}
 
 /* ── ACTIVE PRESS STATES ── */
-.fbtn:active, .tab:active, .btn-analyze:not(:disabled):active,
-.cea-pbtn:active, .pos-fbtn:active, .btn-more:active,
-.delete-btn:active, .expand-btn:active { transform: scale(0.97); }
+.fbtn:active, .tab:active,
+.pos-fbtn:active, .btn-more:active, .expand-btn:active { transform: scale(0.97); }
 
 /* ── REVISIÓN 2026-10-16 ── */
 /* selector de temporada */
@@ -632,75 +563,6 @@ footer span{color:var(--gold);}
     </div>
   </div>
 
-  <!-- ── TAB SUBIR ── -->
-  <div class="tab-content" id="tab-upload">
-    <div class="cloud-status">
-      <div class="cloud-dot" id="cloudDot"></div>
-      <span id="cloudLabel">Verificando conexión a la nube...</span>
-    </div>
-    <div class="match-meta">
-      <div class="meta-group">
-        <label>Rival</label>
-        <input type="text" id="metaRival" placeholder="Nombre del rival">
-      </div>
-      <div class="meta-group">
-        <label>Liga</label>
-        <select id="metaLeague">
-          <option value="">— Seleccionar —</option>
-          <option value="VPN">VPN</option>
-          <option value="VPUG">VPUG</option>
-          <option value="11x11">11x11</option>
-        </select>
-      </div>
-      <div class="meta-group">
-        <label>Resultado</label>
-        <input type="text" id="metaResult" placeholder="Ej: 3-1">
-      </div>
-      <div class="meta-group">
-        <label>Fecha</label>
-        <input type="date" id="metaDate">
-      </div>
-    </div>
-
-    <div class="upload-area" id="uploadArea">
-      <span class="upload-icon">📸</span>
-      <div class="upload-title">Arrastrá o hacé clic para subir capturas</div>
-      <div class="upload-sub">Podés subir múltiples imágenes · PNG, JPG, WEBP</div>
-      <input type="file" id="fileInput" accept="image/*" multiple>
-    </div>
-    <div class="img-queue" id="imgQueue"></div>
-    <input type="file" id="addMoreInput" style="display:none" accept="image/*" multiple>
-
-    <button class="btn-analyze" id="btnAnalyze" onclick="analyzeAll()" disabled>
-      <span>🤖</span> <span id="btnAnalyzeLabel">Analizar con IA</span>
-    </button>
-
-    <div class="analyzing-state" id="analyzingState">
-      <div class="spinner"></div>
-      <div class="analyzing-text" id="analyzingText">La IA está leyendo las capturas...<br><b>Extrayendo estadísticas de EA FC</b></div>
-    </div>
-
-    <div class="result-card" id="resultCard">
-      <div class="result-header">
-        <h3>Extraído — <span id="resultTitle"></span></h3>
-        <div>
-          <button class="btn-discard" onclick="discardResult()">✕ Descartar</button>
-          <button class="btn-save" onclick="saveResult()">☁ Guardar en la nube</button>
-        </div>
-      </div>
-      <div class="stats-table-wrap">
-        <table class="stats-table">
-          <thead>
-            <tr><th>Jugador</th><th>Rating</th><th>Goles</th><th>Asist.</th>
-            <th>Pases</th><th>Prec.%</th><th>Dist. km</th><th>Sprints</th>
-            <th>Tackles</th><th>Interc.</th></tr>
-          </thead>
-          <tbody id="resultBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
   <!-- ── TAB CLUB EA ── -->
   <!-- ── TAB TORNEOS ── -->
   <div class="tab-content" id="tab-torneos">
@@ -717,12 +579,7 @@ footer span{color:var(--gold);}
         <div class="cea-club-sub">Club ID 404340 · datos en tiempo real de EA Sports</div>
       </div>
       <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
-        <div class="cea-platform-btns">
-          <button class="cea-pbtn active" onclick="ceaSetPlatform('common-gen5',this)">Current Gen</button>
-          <button class="cea-pbtn" onclick="ceaSetPlatform('ps4',this)">PS4/XO</button>
-          <button class="cea-pbtn" onclick="ceaSetPlatform('pc',this)">PC</button>
-        </div>
-        <a href="https://proclubs.io/club/404340" target="_blank" rel="noopener" class="cea-link-badge">↗ Ver en PROCLUBS.IO</a>
+        <a href="https://proclubshead.com/27/club/gen5/404340/" target="_blank" rel="noopener" class="cea-link-badge">↗ Ver en Pro Clubs Head</a>
       </div>
     </div>
 
@@ -750,7 +607,6 @@ footer span{color:var(--gold);}
 </div>
 
 <footer><p>Top Secret <span>Football Club</span> · Estadísticas · Temporada 4 · 2026</p></footer>
-<div class="toast" id="toast"></div>
 
 <script type="module">
 import { SEED_MATCHES } from './seed_matches.js';
@@ -769,51 +625,8 @@ const toRoster = r => r.map(p => ({name: p.key, pos: p.pos, folder: p.folderOver
 let ROSTER = toRoster(ROSTER_T4);
 
 
-// ════════════════════════════════════════════
-// CLOUD STORAGE (Cloudflare KV via Worker)
-// ════════════════════════════════════════════
-let cloudMatches = [];   // solo partidos subidos por UI
-
-async function cloudLoad(){
-  try {
-    const r = await fetch(`${WORKER_URL}/kv?key=${KV_KEY}`);
-    if(!r.ok) throw new Error(r.status);
-    const data = await r.json();
-    cloudMatches = Array.isArray(data) ? data : [];
-    const total = SEED_MATCHES.length + cloudMatches.length;
-    setCloudStatus(true, `Nube sincronizada · ${total} partidos (${SEED_MATCHES.length} base + ${cloudMatches.length} subidos)`);
-    return cloudMatches;
-  } catch(e) {
-    setCloudStatus(false, 'Sin conexión a la nube — mostrando datos base');
-    cloudMatches = [];
-    return cloudMatches;
-  }
-}
-
-async function cloudSave(matches){
-  try {
-    const r = await fetch(`${WORKER_URL}/kv`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({key: KV_KEY, value: matches})
-    });
-    if(!r.ok) throw new Error(r.status);
-    const total = SEED_MATCHES.length + matches.length;
-    setCloudStatus(true, `Nube sincronizada · ${total} partidos (${SEED_MATCHES.length} base + ${matches.length} subidos)`);
-    return true;
-  } catch(e){
-    setCloudStatus(false, 'Error al guardar en la nube');
-    return false;
-  }
-}
-
-function setCloudStatus(ok, msg){
-  document.getElementById('cloudDot').className = 'cloud-dot ' + (ok?'ok':'err');
-  document.getElementById('cloudLabel').textContent = msg;
-}
-
 function loadMatches(){
-  return [...SEED_MATCHES, ...cloudMatches];
+  return SEED_MATCHES;
 }
 // ════════════════════════════════════════════
 // SEASON FILTER
@@ -2003,249 +1816,6 @@ function toggleDetail(id, btn){
   btn.textContent=open?'▼':'▶';
 }
 
-async function deleteMatch(idx){
-  const seedLen = SEED_MATCHES.length;
-  if(idx < seedLen){
-    showToast('Los partidos base no se pueden eliminar','error');
-    return;
-  }
-  if(!confirm('¿Eliminar este partido y sus estadísticas?')) return;
-  const cloudIdx = idx - seedLen;
-  cloudMatches.splice(cloudIdx, 1);
-  await cloudSave(cloudMatches);
-  renderHistory();
-  showToast('Partido eliminado','error');
-}
-
-// ════════════════════════════════════════════
-// TAB UPLOAD + IA
-// ════════════════════════════════════════════
-let imageQueue=[];
-let pendingResult=null;
-
-document.getElementById('metaDate').value=new Date().toISOString().split('T')[0];
-
-const uploadArea=document.getElementById('uploadArea');
-const fileInput=document.getElementById('fileInput');
-const addMoreInput=document.getElementById('addMoreInput');
-
-['dragover','dragenter'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.add('drag');}));
-['dragleave','drop'].forEach(ev=>uploadArea.addEventListener(ev,e=>{e.preventDefault();uploadArea.classList.remove('drag');}));
-uploadArea.addEventListener('drop',e=>{if(e.dataTransfer.files.length) addFiles(e.dataTransfer.files);});
-fileInput.addEventListener('change',()=>{if(fileInput.files.length) addFiles(fileInput.files);});
-addMoreInput.addEventListener('change',()=>{if(addMoreInput.files.length) addFiles(addMoreInput.files);});
-
-function addFiles(files){
-  Array.from(files).forEach(file=>{
-    if(!file.type.startsWith('image/')){ showToast('Solo imágenes (PNG, JPG, WEBP)','error'); return; }
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const dataUrl=e.target.result;
-      const mediaType=dataUrl.split(';')[0].split(':')[1]||'image/jpeg';
-      imageQueue.push({base64:dataUrl.split(',')[1],dataUrl,mediaType,status:'pending',result:null});
-      renderQueue();
-    };
-    reader.readAsDataURL(file);
-  });
-  fileInput.value=''; addMoreInput.value='';
-}
-
-function removeFromQueue(idx){ imageQueue.splice(idx,1); renderQueue(); }
-
-function renderQueue(){
-  const queue=document.getElementById('imgQueue');
-  if(!imageQueue.length){
-    queue.classList.remove('show'); uploadArea.style.display='';
-    document.getElementById('btnAnalyze').disabled=true;
-    document.getElementById('btnAnalyzeLabel').textContent='Analizar con IA';
-    return;
-  }
-  uploadArea.style.display='none'; queue.classList.add('show');
-  const si=s=>s==='pending'?'':s==='analyzing'?'⏳':s==='done'?'✅':'❌';
-  queue.innerHTML=imageQueue.map((img,i)=>`
-    <div class="img-thumb ${img.status!=='pending'?img.status:''}">
-      <img src="${img.dataUrl}" alt="img ${i+1}">
-      ${img.status!=='pending'?`<div class="thumb-status">${si(img.status)}</div>`:''}
-      ${img.status==='pending'?`<button class="thumb-remove" onclick="removeFromQueue(${i})">✕</button>`:''}
-    </div>`).join('')+`<button class="add-more-btn" onclick="addMoreInput.click()">+</button>`;
-  const pending=imageQueue.filter(i=>i.status==='pending').length;
-  const btn=document.getElementById('btnAnalyze');
-  btn.disabled=pending===0;
-  document.getElementById('btnAnalyzeLabel').textContent=pending===1?'Analizar 1 imagen':`Analizar ${pending} imágenes`;
-}
-
-function resetUpload(){
-  imageQueue=[]; pendingResult=null;
-  document.getElementById('imgQueue').classList.remove('show');
-  uploadArea.style.display='';
-  document.getElementById('btnAnalyze').disabled=true;
-  document.getElementById('btnAnalyzeLabel').textContent='Analizar con IA';
-  document.getElementById('resultCard').classList.remove('show');
-  document.getElementById('analyzingState').classList.remove('show');
-  fileInput.value='';
-}
-
-async function analyzeAll(){
-  const pending=imageQueue.filter(i=>i.status==='pending');
-  if(!pending.length) return;
-  const rival=document.getElementById('metaRival').value.trim()||'Desconocido';
-  const league=document.getElementById('metaLeague').value||'?';
-  const date=document.getElementById('metaDate').value||new Date().toISOString().split('T')[0];
-  const result=document.getElementById('metaResult').value.trim()||null;
-
-  document.getElementById('btnAnalyze').disabled=true;
-  document.getElementById('analyzingState').classList.add('show');
-  document.getElementById('resultCard').classList.remove('show');
-
-  const rosterList=ROSTER.map(p=>`- ${p.name} (${p.pos})`).join('\n');
-  const prompt=`Sos un analista de datos de EA FC / FIFA. Se te envía una captura de estadísticas post-partido del equipo "Top Secret FC".
-
-PLANTEL OFICIAL (nombre exacto · posición):
-${rosterList}
-
-REGLAS DE IDENTIFICACIÓN DE JUGADORES:
-- "Lautavester7" → Lautavester7
-- "T. cansitrGD22" o "cansitr" → cansitrGd22_
-- "BlackPanther" o "Black" → BlackPanther-CG
-- "ciprimancini" o "Cipri" → CipriMancini
-- "J. Martinez" o "Martinez" → Juan_Martinez4
-- "O. Pibu" o "Pibu" → zPibu__
-- "Agubostero7" → Agubostero7
-- "Alexisraies2" o "Alexis" → Alexisraies23
-- "ZurdoCABJ" o "Zurdo" → Zurdo-_CABJ12
-- "Woolfyboyzx2" → Woolfyboyzx2
-- "Buraa" o "Bura" → Buraa07
-- "DaniStone" o "RS32" → RS32-DaniStone
-- "Huber" → Huber236
-- "Lucasmati" o "Lucas" → Lucasmati_akd
-
-TIPOS DE CAPTURA:
-1. Pantalla de JUGADORES (stats individuales): extraé el array "players".
-2. Pantalla de RESUMEN / EQUIPO (posesión, tiros, pases del partido): extraé "team_stats".
-3. Pantalla mixta: extraé ambos.
-
-Para team_stats extraé estos campos si están visibles (usá null si no aparecen):
-- posesion: % de posesión del balón de Top Secret (número entero, ej: 62)
-- tiros: total de tiros
-- tiros_arco: tiros al arco
-- goles_esperados: xG (puede aparecer como "Expected Goals" o "xG")
-- pases: total de pases
-- precision_pases: % precisión de pases
-- entradas: total de entradas/tackles del equipo
-- entradas_exito: CANTIDAD de entradas exitosas (no %) — si la imagen muestra "Entradas: 26" y "Tasa de éxito: 38%", calculá entradas_exito = round(26 * 0.38)
-- intercepciones: total de intercepciones del equipo
-- paradas: paradas del arquero
-- faltas: faltas cometidas
-- corneres: córneres a favor
-- regates_exito: CANTIDAD de regates exitosos (NO el porcentaje) — si la imagen muestra "Regates: 134" y "Tasa de éxito: 88%", calculá regates_exito = round(134 * 0.88). Nunca pongas el número de la tasa de éxito directamente en este campo.
-- precision_tiro: % de precisión de tiro
-
-El campo "matched" SIEMPRE debe ser el nombre exacto del plantel. Si un valor no es legible usá null.
-Devolvé ÚNICAMENTE JSON válido sin markdown, con esta estructura completa:
-{"players":[{"name":"apodo","matched":"nombre exacto","played_pos":"MCD","rating":7.5,"goals":1,"assists":0,"passes":34,"pass_accuracy":87,"distance_km":9.2,"sprints":18,"tackles":3,"interceptions":2}],"team_stats":{"posesion":62,"tiros":13,"tiros_arco":9,"goles_esperados":6.1,"pases":208,"precision_pases":88,"entradas":24,"entradas_exito":9,"intercepciones":18,"paradas":null,"faltas":null,"corneres":null,"regates_exito":118,"precision_tiro":69},"match_result":"6-0","notes":""}
-El campo "played_pos" es la posición en la que jugó (columna POS de la tabla), exactamente como aparece (ej: MCD, EI, DC, DFI, PO, etc).
-Si no hay datos de equipo en la imagen, omití el campo team_stats.
-Si no hay jugadores en la imagen, devolvé "players":[].
-`;
-
-  let mergedPlayers=[]; let matchResult=result; let mergedTeamStats=null;
-
-  for(let i=0;i<imageQueue.length;i++){
-    const img=imageQueue[i];
-    if(img.status!=='pending') continue;
-    img.status='analyzing'; renderQueue();
-    document.getElementById('analyzingText').innerHTML=`Analizando imagen ${i+1} de ${imageQueue.length}...<br><b>Extrayendo estadísticas de EA FC</b>`;
-    try{
-      const resp=await fetch(WORKER_URL,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[
-          {inline_data:{mime_type:img.mediaType||'image/jpeg',data:img.base64}},
-          {text:prompt}
-        ]}],generationConfig:{temperature:0.1,maxOutputTokens:1500}})
-      });
-      const data=await resp.json();
-      if(data.error) throw new Error(data.error.message||'API error');
-      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      if(!text) throw new Error('Respuesta vacía');
-      const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-      img.status='done'; img.result=parsed;
-      (parsed.players||[]).forEach(p=>{
-        const key=(p.matched||p.name||'').toLowerCase();
-        const ex=mergedPlayers.find(ep=>(ep.matched||ep.name||'').toLowerCase()===key);
-        if(ex){
-          ['rating','goals','assists','passes','pass_accuracy','distance_km','sprints','tackles','interceptions','played_pos'].forEach(f=>{
-            if(ex[f]===null&&p[f]!=null) ex[f]=p[f];
-          });
-        } else { mergedPlayers.push({...p}); }
-      });
-      if(!matchResult&&parsed.match_result) matchResult=parsed.match_result;
-      if(parsed.team_stats){
-        if(!mergedTeamStats) mergedTeamStats=parsed.team_stats;
-        else Object.keys(parsed.team_stats).forEach(k=>{if(mergedTeamStats[k]==null&&parsed.team_stats[k]!=null) mergedTeamStats[k]=parsed.team_stats[k];});
-      }
-    }catch(err){
-      img.status='error';
-      showToast(`Error imagen ${i+1}: ${err.message}`,'error');
-    }
-    renderQueue();
-  }
-
-  document.getElementById('analyzingState').classList.remove('show');
-  document.getElementById('btnAnalyze').disabled=false;
-
-  if(mergedPlayers.length){
-    pendingResult={rival,league,date,uploadedAt:new Date().toISOString(),players:mergedPlayers,match_result:matchResult,notes:'',...(mergedTeamStats?{team_stats:mergedTeamStats}:{})};
-    renderResultPreview(pendingResult);
-  } else { showToast('No se pudo extraer ninguna estadística.','error'); }
-}
-
-function renderResultPreview(data){
-  document.getElementById('resultTitle').textContent=`vs ${data.rival} · ${data.league} · ${formatDate(data.date)}${data.match_result?' · '+data.match_result:''}`;
-  document.getElementById('resultBody').innerHTML=(data.players||[]).map(p=>{
-    const r=p.rating;
-    const rc=r===null?'':r>=8?'high':r>=6.5?'mid':'low';
-    const v=x=>x!=null?`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${x}</span>`:'—';
-    return `<tr>
-      <td class="player-cell">${p.matched||p.name}${p.matched&&p.matched!==p.name?'<br><small style="color:var(--muted2);font-size:.7rem">'+p.name+'</small>':''}</td>
-      <td>${r!==null?`<span class="rating-pill ${rc}">${r}</span>`:'—'}</td>
-      <td>${v(p.goals)}</td><td>${v(p.assists)}</td><td>${v(p.passes)}</td>
-      <td>${p.pass_accuracy!=null?v(p.pass_accuracy+'%'):'—'}</td>
-      <td>${v(p.distance_km)}</td><td>${v(p.sprints)}</td>
-      <td>${v(p.tackles)}</td><td>${v(p.interceptions)}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('resultCard').classList.add('show');
-}
-
-async function saveResult(){
-  if(!pendingResult) return;
-  cloudMatches.push(pendingResult);
-  const ok=await cloudSave(cloudMatches);
-  if(ok){
-    showToast('✓ Partido guardado en la nube','success');
-  } else {
-    showToast('Guardado localmente (sin conexión)','error');
-  }
-  imageQueue=[]; resetUpload(); pendingResult=null;
-}
-
-function discardResult(){
-  document.getElementById('resultCard').classList.remove('show');
-  pendingResult=null;
-}
-
-// ════════════════════════════════════════════
-// TOAST + INIT
-// ════════════════════════════════════════════
-let toastTimeout;
-function showToast(msg,type='success'){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className=`toast show ${type}`;
-  clearTimeout(toastTimeout);
-  toastTimeout=setTimeout(()=>t.classList.remove('show'),3200);
-}
-
-
 // ════════════════════════════════════════════
 // MODAL ESTADÍSTICAS COMPLETAS
 // ════════════════════════════════════════════
@@ -2381,66 +1951,23 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
 
 // Init: mostrar datos SEED de inmediato, luego sincronizar con nube
-renderSeason();
-cloudLoad().then(()=>renderSeason());
 
 // ════════════════════════════════════════════
 // CLUB EA — Stats desde EA Sports API
 // ════════════════════════════════════════════
 const CEA_CLUB_ID = '404340';   // club en FC 27 (ver docs/conocimiento/reference_ea_proclubs_api.md)
-let ceaPlatform = 'common-gen5';
+const CEA_PLATFORM = 'common-gen5';
 let ceaLoaded = false;
 
-const CEA_PLATFORMS = {
-  'common-gen5': 'Current Gen (PS5/XSX)',
-  'ps4':         'PS4 / Xbox One',
-  'pc':          'PC'
-};
-
-function ceaSetPlatform(p, btn) {
-  document.querySelectorAll('.cea-pbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  ceaPlatform = p;
-  ceaLoaded = false;
-  ceaLoad();
-}
-
-// ── Diagnóstico del Worker ──────────────────────────────────────
-// Retorna: 'ok' | 'no-ea-route' | 'unreachable'
-async function ceaDiagnoseWorker() {
-  try {
-    const r = await fetch(`${WORKER_URL}/ea?path=ping`, {signal: AbortSignal.timeout(5000)});
-    // Si el Worker responde (cualquier código), la ruta /ea existe
-    // Si recibe 403 (path no permitido) también confirma que la ruta existe
-    if (r.status === 404 || r.status === 0) return 'no-ea-route';
-    return 'ok';
-  } catch(_) {
-    return 'unreachable';
-  }
-}
-
-// ── Fetch con proxy Worker + fallback directo ───────────────────
 async function ceaFetch(path) {
-  const proxyUrl = `${WORKER_URL}/ea?path=${encodeURIComponent(path)}`;
-  try {
-    const r = await fetch(proxyUrl, {
-      headers:{'Accept':'application/json'},
-      signal: AbortSignal.timeout(8000)
-    });
-    if (r.ok) {
-      const txt = await r.text();
-      if (txt && txt.trim().startsWith('[') || txt.trim().startsWith('{')) return JSON.parse(txt);
-    }
-    throw new Error(`Worker proxy status: ${r.status}`);
-  } catch(err) {
-    console.warn('[ceaFetch proxy failed]', path, err.message);
-    throw err; // no intentamos directo — EA bloquea requests de servidor sin el proxy correcto
-  }
+  const r = await fetch(`${WORKER_URL}/ea?path=${encodeURIComponent(path)}`, {
+    headers:{'Accept':'application/json'}, signal: AbortSignal.timeout(10000)
+  });
+  if (!r.ok) throw new Error(`Worker ${r.status}`);
+  const data = await r.json();
+  if (data && data.error) throw new Error(data.preview || data.error);
+  return data;
 }
-
-// Plataformas a probar en orden
-const CEA_PLATFORMS_ORDER = ['common-gen5', 'pc', 'ps4'];
-const CEA_CLUB_NAME = 'Top Secret';   // nombre de búsqueda
 
 function ceaSetStatus(msg) {
   const el = document.getElementById('ceaMain');
@@ -2449,260 +1976,34 @@ function ceaSetStatus(msg) {
 
 async function ceaLoad() {
   const el = document.getElementById('ceaMain');
-  ceaSetStatus('Conectando con EA Sports…');
-
-  // 1 — verificar que el Worker tiene la ruta /ea
-  const diagnosis = await ceaDiagnoseWorker();
-  if (diagnosis !== 'ok') { el.innerHTML = ceaErrorHTML(diagnosis); return; }
-
-  ceaSetStatus('Buscando el club en EA Sports…');
-
-  // 2 — buscar el club por nombre para confirmar el ID real de EA
-  let resolvedId   = CEA_CLUB_ID;
-  let resolvedPlat = ceaPlatform;
-  let foundViaSearch = false;
-
-  const platforms = [ceaPlatform, ...CEA_PLATFORMS_ORDER.filter(p => p !== ceaPlatform)];
-
-  for (const plat of platforms) {
-    try {
-      const searchPath = `allTimeLeaderboard/search?platform=${plat}&clubName=${encodeURIComponent(CEA_CLUB_NAME)}`;
-      const results = await ceaFetch(searchPath);
-      if (results && results.error) continue;
-      const list = Array.isArray(results) ? results : (results?.clubs || []);
-      // Buscar coincidencia exacta o la que contenga nuestro ID
-      const match = list.find(c =>
-        String(c.clubId) === String(CEA_CLUB_ID) ||
-        (c.name || '').toLowerCase().includes('top secret')
-      );
-      if (match) {
-        resolvedId   = String(match.clubId);
-        resolvedPlat = plat;
-        foundViaSearch = true;
-        console.log(`[ClubEA] Club encontrado: ID=${resolvedId} plat=${resolvedPlat}`, match);
-        break;
-      }
-    } catch(e) {
-      console.warn('[ClubEA] search failed on', plat, e.message);
-    }
+  ceaSetStatus('Cargando estadísticas del club desde EA Sports…');
+  const [overallRes, matchesRes] = await Promise.allSettled([
+    ceaFetch(`clubs/overallStats?platform=${CEA_PLATFORM}&clubIds=${CEA_CLUB_ID}`),
+    ceaFetch(`clubs/matches?platform=${CEA_PLATFORM}&clubIds=${CEA_CLUB_ID}&matchType=friendlyMatch`)
+  ]);
+  if (overallRes.status !== 'fulfilled') {
+    el.innerHTML = ceaErrorHTML(overallRes.reason?.message || '');
+    return;
   }
-
-  if (!foundViaSearch) {
-    // No encontramos via búsqueda — igual intentamos con el ID hardcodeado en cada plataforma
-    console.warn('[ClubEA] Club no encontrado por nombre, usando ID hardcodeado:', resolvedId);
-  }
-
-  ceaSetStatus('Cargando estadísticas del club…');
-
-  // 3 — solo los endpoints que realmente existen en la API pública de EA
-  try {
-    const [overallRes, matchesRes] = await Promise.allSettled([
-      ceaFetch(`clubs/overallStats?platform=${resolvedPlat}&clubIds=${resolvedId}`),
-      ceaFetch(`clubs/matches?platform=${resolvedPlat}&clubIds=${resolvedId}&matchType=friendlyMatch`)
-    ]);
-
-    const overall = overallRes.status === 'fulfilled' && !overallRes.value?.error ? overallRes.value : null;
-    const matches = matchesRes.status === 'fulfilled' && !matchesRes.value?.error ? matchesRes.value : null;
-
-    console.log('[ClubEA] overall:', overall, '| matches:', matches);
-
-    if (!overall) {
-      const preview = overallRes.status === 'fulfilled'
-        ? (overallRes.value?.preview || overallRes.value?.error || 'Sin datos')
-        : 'Fetch fallido';
-      el.innerHTML = ceaErrorHTML('ea-blocked', preview, resolvedId, resolvedPlat);
-      return;
-    }
-    ceaRenderInto(el, overall, null, matches, resolvedId, resolvedPlat);
-  } catch(e) {
-    console.warn('[ClubEA] load error:', e);
-    el.innerHTML = ceaErrorHTML('ea-blocked', e.message, resolvedId, resolvedPlat);
-  }
+  ceaRenderInto(el, overallRes.value, matchesRes.status === 'fulfilled' ? matchesRes.value : null);
 }
 
-function ceaErrorHTML(type, eaPreview='', resolvedId='', resolvedPlat='') {
-  const debugBlock = eaPreview ? `
-    <details style="margin-top:16px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto;">
-      <summary style="cursor:pointer;font-size:.75rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;">🔍 Detalle técnico del error</summary>
-      <pre style="margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:.68rem;color:var(--muted);overflow-x:auto;white-space:pre-wrap;word-break:break-all;">${eaPreview}</pre>
-    </details>` : '';
-
-  const msgs = {
-    'no-ea-route': {
-      icon:'🔧',
-      title:'Worker sin ruta <code>/ea</code>',
-      body:`Tu Worker está en línea pero todavía no tiene la ruta <code>/ea</code> deployada.
-        Reemplazá el archivo del Worker con el <strong>worker.js</strong> que te generé y hacé deploy desde el panel de Cloudflare.`,
-    },
-    'unreachable': {
-      icon:'📡',
-      title:'Worker no responde',
-      body:`No se pudo conectar con <code>${WORKER_URL}</code>. Verificá que el Worker esté activo en Cloudflare.`,
-    },
-    'ea-blocked': {
-      icon:'🛡️',
-      title:'EA Sports rechazó la solicitud',
-      body:`El Worker está bien, pero EA devolvió un error.
-        <br><br>
-        <strong>Club ID probado:</strong> <code>${resolvedId||CEA_CLUB_ID}</code> &nbsp;·&nbsp;
-        <strong>Plataforma:</strong> <code>${resolvedPlat||ceaPlatform}</code>
-        <br><br>
-        Esto suele pasar porque EA bloquea IPs de datacenter (incluso Cloudflare) o el club no existe en esa plataforma.
-        <br>Podés intentar cambiar de plataforma arriba o abrir PROCLUBS.IO para verificar el ID real.`,
-    },
-  };
-  const m = msgs[type] || msgs['ea-blocked'];
+function ceaErrorHTML(detail='') {
   return `
     <div class="cea-error">
-      <div class="cea-err-icon">${m.icon}</div>
-      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:10px;">${m.title}</h3>
-      <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto;">${m.body}</p>
-      ${debugBlock}
+      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:10px;">EA Sports no respondió</h3>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:460px;margin-left:auto;margin-right:auto;">Los datos del club vienen en vivo de EA y a veces su servicio se cae un rato. Probá de nuevo en unos minutos.</p>
+      ${detail ? `<details style="margin-top:8px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto;"><summary style="cursor:pointer;font-size:.72rem;color:var(--muted2);">Detalle técnico</summary><pre style="margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:.68rem;color:var(--muted);white-space:pre-wrap;word-break:break-all;">${esc(String(detail).slice(0,400))}</pre></details>` : ''}
       <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">
-          ↗ Ver Top Secret FC en PROCLUBS.IO
-        </a>
-        <button onclick="ceaLoaded=false;ceaLoad()" class="cea-link-badge" style="background:none;cursor:pointer;border:1px solid var(--gold);">
-          🔄 Reintentar
-        </button>
+        <a href="https://proclubshead.com/27/club/gen5/404340/" target="_blank" rel="noopener" class="cea-link-badge">↗ Ver en Pro Clubs Head</a>
+        <button onclick="ceaLoaded=false;ceaLoad()" class="cea-link-badge" style="background:none;cursor:pointer;">Reintentar</button>
       </div>
     </div>`;
 }
 
-// ── Helpers de parseo ──────────────────────────────────────────
-function ceaInt(v)   { return parseInt(v)   || 0; }
-function ceaFloat(v) { return parseFloat(v) || 0; }
-function ceaPct(v,d=1){ const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(d)+'%'; }
-
-// EA devuelve los miembros como objeto { "nombre": {...stats} } o array
-function ceaNormalizeMembers(raw) {
-  if (!raw) return [];
-
-  // Si viene como { members: [...] } o { clubMembers: [...] }
-  const src = raw.members || raw.clubMembers || raw;
-  let list;
-
-  if (Array.isArray(src)) {
-    list = src;
-  } else if (src && typeof src === 'object') {
-    // Objeto clave=nombre → array de valores; cada valor puede ser objeto o array de stats
-    list = Object.entries(src).map(([key, val]) => {
-      if (Array.isArray(val)) return { ...val[0], _key: key };
-      if (val && typeof val === 'object') return { ...val, _key: key };
-      return null;
-    }).filter(Boolean);
-  } else {
-    return [];
-  }
-
-  return list
-    .filter(m => m && typeof m === 'object')
-    .map(m => {
-      const pj      = ceaInt(m.gamesPlayed ?? m.games ?? m.matchesPlayed);
-      const goals   = ceaInt(m.goals);
-      const assists = ceaInt(m.assists);
-      // passAcc: si vienen passesMade y passesAttempted los calculamos, sino usamos el campo directo
-      const passMade = ceaFloat(m.passesMade ?? 0);
-      const passAtt  = ceaFloat(m.passesAttempted ?? 0);
-      const passAcc  = passAtt > 0
-        ? parseFloat((passMade / passAtt * 100).toFixed(1))
-        : ceaFloat(m.passAccuracy ?? m.passAcc ?? 0) || null;
-      return {
-        name:         (m.name || m.proName || m.clubMemberLevel || m._key || '—').trim(),
-        goals,
-        assists,
-        gamesPlayed:  pj,
-        goalsPerGame: pj > 0 ? parseFloat((goals   / pj).toFixed(2)) : 0,
-        assistsPerGame: pj > 0 ? parseFloat((assists / pj).toFixed(2)) : 0,
-        motm:         ceaInt(m.manOfTheMatch ?? m.motm),
-        rating:       ceaFloat(m.ratingAve ?? m.rating ?? m.avgRating ?? m.averageRating),
-        cleanSheets:  ceaInt(m.cleanSheetsDef ?? m.cleanSheetsGk ?? m.cs ?? m.cleanSheets),
-        tackles:      ceaInt(m.tacklesMade ?? m.tackles ?? m.tacklesAttempted),
-        interceptions:ceaInt(m.interceptionsMade ?? m.interceptions),
-        saves:        ceaInt(m.savedGoals ?? m.saves ?? m.goalsSaved),
-        passAcc,
-        pos:          m.favoritePosition ?? m.pos ?? m.position ?? '',
-      };
-    })
-    .filter(m => m.gamesPlayed > 0 || m.goals > 0);
-}
-
-// ── Sort state para tabla de jugadores ────────────────────────
-let ceaSortCol = 'goals', ceaSortDir = -1;
-let _ceaMembers = [];
-
-function ceaSortBy(col) {
-  if (ceaSortCol === col) ceaSortDir *= -1;
-  else { ceaSortCol = col; ceaSortDir = -1; }
-  ceaRenderPlayerTable();
-}
-
-function ceaRenderPlayerTable() {
-  const arr = [..._ceaMembers].sort((a, b) => {
-    const av = a[ceaSortCol] ?? 0, bv = b[ceaSortCol] ?? 0;
-    return (typeof av === 'string' ? av.localeCompare(bv) : av - bv) * ceaSortDir;
-  });
-
-  const th = (col, lbl, align='center') => {
-    const active = ceaSortCol === col;
-    const arrow  = active ? (ceaSortDir === -1 ? ' ↓' : ' ↑') : '';
-    return `<th onclick="ceaSortBy('${col}')" style="padding:8px 10px;text-align:${align};font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap;color:${active?'var(--gold)':'var(--muted2)'};border-bottom:1px solid var(--border);background:var(--card)">${lbl}${arrow}</th>`;
-  };
-
-  const rc = r => r >= 8 ? 'var(--win)' : r >= 6.5 ? 'var(--gold)' : r > 0 ? 'var(--loss)' : 'var(--muted2)';
-
-  // Determinar qué columnas opcionales tienen datos
-  const hasCS      = arr.some(p => p.cleanSheets > 0);
-  const hasTackles = arr.some(p => p.tackles > 0);
-  const hasInterc  = arr.some(p => p.interceptions > 0);
-  const hasSaves   = arr.some(p => p.saves > 0);
-  const hasPassAcc = arr.some(p => p.passAcc != null && p.passAcc > 0);
-
-  const rows = arr.map((p, i) => {
-    const ratingColor = rc(p.rating);
-    const ratingCell  = p.rating > 0
-      ? `<span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;color:${ratingColor}">${p.rating.toFixed(1)}</span>`
-      : '<span style="color:var(--muted2)">—</span>';
-    return `<tr>
-      <td style="padding:9px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.92rem;white-space:nowrap;color:var(--text)">${p.name}</td>
-      <td style="padding:9px 10px;text-align:center;color:var(--muted)">${p.gamesPlayed}</td>
-      <td style="padding:9px 10px;text-align:center;font-weight:700;color:var(--win)">${p.goals}</td>
-      <td style="padding:9px 10px;text-align:center;font-weight:700;color:var(--vpug)">${p.assists}</td>
-      <td style="padding:9px 10px;text-align:center;color:var(--muted);font-size:.8rem">${p.gamesPlayed > 0 ? p.goalsPerGame.toFixed(2) : '—'}</td>
-      <td style="padding:9px 10px;text-align:center;color:var(--muted);font-size:.8rem">${p.gamesPlayed > 0 ? p.assistsPerGame.toFixed(2) : '—'}</td>
-      <td style="padding:9px 10px;text-align:center">${ratingCell}</td>
-      <td style="padding:9px 10px;text-align:center;color:var(--gold);font-weight:700">${p.motm || '—'}</td>
-      ${hasCS      ? `<td style="padding:9px 10px;text-align:center;color:var(--muted)">${p.cleanSheets || '—'}</td>` : ''}
-      ${hasTackles ? `<td style="padding:9px 10px;text-align:center;color:var(--muted)">${p.tackles || '—'}</td>` : ''}
-      ${hasInterc  ? `<td style="padding:9px 10px;text-align:center;color:var(--muted)">${p.interceptions || '—'}</td>` : ''}
-      ${hasSaves   ? `<td style="padding:9px 10px;text-align:center;color:var(--muted)">${p.saves || '—'}</td>` : ''}
-      ${hasPassAcc ? `<td style="padding:9px 10px;text-align:center;color:var(--muted);font-size:.8rem">${p.passAcc != null ? p.passAcc+'%' : '—'}</td>` : ''}
-    </tr>`;
-  }).join('');
-
-  document.getElementById('ceaPlayerTableHead').innerHTML = `<tr>
-    ${th('name',          'Jugador',    'left')}
-    ${th('gamesPlayed',   'PJ')}
-    ${th('goals',         '⚽ Goles')}
-    ${th('assists',       '🅰️ Asist.')}
-    ${th('goalsPerGame',  'G/PJ')}
-    ${th('assistsPerGame','A/PJ')}
-    ${th('rating',        '⭐ Rating')}
-    ${th('motm',          '🏅 MOTM')}
-    ${hasCS      ? th('cleanSheets',   'CS')       : ''}
-    ${hasTackles ? th('tackles',       'Tackles')  : ''}
-    ${hasInterc  ? th('interceptions', 'Interc.')  : ''}
-    ${hasSaves   ? th('saves',         'Ataj.')    : ''}
-    ${hasPassAcc ? th('passAcc',       'Prec.%')   : ''}
-  </tr>`;
-
-  document.getElementById('ceaPlayerTableBody').innerHTML =
-    rows || `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted2)">Sin datos de jugadores</td></tr>`;
-}
-
-function ceaRenderInto(container, overall, members, matches, resolvedId, resolvedPlat) {
+function ceaRenderInto(container, overall, matches) {
   const el  = container;
-  const myId = String(resolvedId || CEA_CLUB_ID);
+  const myId = String(CEA_CLUB_ID);
 
   // ── Parsear overall (todos los campos vienen como strings) ─────
   const d     = overall ? (Array.isArray(overall) ? overall[0] : overall) : {};
@@ -2772,7 +2073,7 @@ function ceaRenderInto(container, overall, members, matches, resolvedId, resolve
       <div class="cea-block-head">
         <h3>Rendimiento general</h3>
         ${bestDiv ? `<span style="font-size:.63rem;padding:2px 8px;border-radius:4px;background:rgba(200,168,75,.12);color:var(--gold);font-weight:700">Mejor div: ${bestDiv}</span>` : ''}
-        <span class="cea-src" style="margin-left:auto">${CEA_PLATFORMS[resolvedPlat] || resolvedPlat} · EA Sports</span>
+        <span class="cea-src" style="margin-left:auto">EA Sports</span>
       </div>
       <div style="padding:14px 18px">
         <div style="display:flex;gap:3px;height:12px;border-radius:6px;overflow:hidden;margin-bottom:8px">
@@ -2868,8 +2169,8 @@ function ceaRenderInto(container, overall, members, matches, resolvedId, resolve
           Las estadísticas de cada jugador, partido por partido, están en la pestaña
           <strong style="color:var(--text)">Por Jugador</strong>.
         </div>
-        <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">
-          ↗ Ver jugadores en PROCLUBS.IO
+        <a href="https://proclubshead.com/27/club/gen5/404340/" target="_blank" class="cea-link-badge">
+          ↗ Ver en Pro Clubs Head
         </a>
       </div>
     </div>`;
@@ -2881,7 +2182,7 @@ function ceaRenderInto(container, overall, members, matches, resolvedId, resolve
     <div class="cea-grid" style="grid-template-columns:1fr">${matchesBlock}</div>
     <div class="cea-grid" style="grid-template-columns:1fr">${infoBlock}</div>
     <div style="text-align:center;padding:20px 0 4px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
-      <a href="https://proclubs.io/club/${CEA_CLUB_ID}" target="_blank" class="cea-link-badge">↗ Ver en PROCLUBS.IO</a>
+      <a href="https://proclubshead.com/27/club/gen5/404340/" target="_blank" class="cea-link-badge">↗ Ver en Pro Clubs Head</a>
       <button onclick="ceaLoaded=false;ceaLoad()" style="background:none;border:1px solid var(--border2);color:var(--muted);font-size:.78rem;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;transition:color .15s,border-color .15s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">↺ Actualizar datos</button>
     </div>`;
 }
@@ -2917,13 +2218,6 @@ window.setPlayerView    = setPlayerView;
 window.openPlayerModal  = openPlayerModal;
 window.closeModal       = closeModal;
 window.toggleDetail     = toggleDetail;
-window.deleteMatch      = deleteMatch;
-window.analyzeAll       = analyzeAll;
-window.discardResult    = discardResult;
-window.saveResult       = saveResult;
-window.removeFromQueue  = removeFromQueue;
-window.ceaSetPlatform   = ceaSetPlatform;
-window.ceaSortBy        = ceaSortBy;
 
 // Deep link: estadisticas.html?player=NAME
 (function(){
