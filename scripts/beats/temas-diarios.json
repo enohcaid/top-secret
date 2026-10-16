@@ -218,6 +218,26 @@
         "swell invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-16",
+      "id": "2026-10-16-1",
+      "archivo": "2026-10-16-1 - Solo.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_16_1.py",
+      "duracion": 86,
+      "nombre": "Solo",
+      "concepto": "El jugador que se queda a entrenar solo cuando todos se fueron — la cancha vacía, la pelota que pica sin respuesta, hasta que en esa soledad encuentra lo que no encontraba con el grupo.",
+      "bpm": 144,
+      "tonalidad": "fa# menor",
+      "rasgo": "rebote solitario: pluck resonante con reverb que simula el eco de una cancha vacía; la reverb disminuye sección a sección y en el gancho C suena seco por primera vez",
+      "recursos": [
+        "rebote solitario con reverb decreciente (firma del tema)",
+        "lead saw+sine con ataque variable (tentativo a seguro)",
+        "pad de sines con chorus (vacío)",
+        "808 melódico con saltos de octava y espacio",
+        "rebote invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · verso A 8 · gancho A 8 · build 2 · verso B 4 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
