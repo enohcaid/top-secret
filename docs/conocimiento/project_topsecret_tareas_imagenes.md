@@ -56,3 +56,5 @@ Las dos tareas de Task Scheduler del pipeline de imágenes diarias de Top Secret
 ## Log tomado por un `tail -F` colgado (2026-10-13)
 
 En Windows, un `tail -F scripts/daily-images.log` que quedó vivo de una sesión anterior de Claude Code (un Monitor) bloquea el archivo: `Add-Content` falla y, con `ErrorActionPreference=Stop`, `run-daily-images.ps1` moría en la primera línea de log, sin dejar rastro (la tarea figura "0" porque wscript sí arrancó). Resultado: draft sin imágenes ni lote, y la nota no aparece en `aprobar.html`. Fix: `Log()` ahora ignora el error. **Para seguir un log, polear con `grep`/`until`, nunca dejar `tail -F` abierto.** Diagnóstico rápido: `Get-CimInstance Win32_Process | ? CommandLine -match 'daily-images'`.
+
+**Generar a mano (2026-10-19):** si se corre `node scripts/generate-image-chatgpt.mjs` suelto (sin `run-daily-images.ps1`), después hay que correr `node scripts/social/noticia-lote.mjs --no-abrir` o la noticia no aparece en `aprobar.html`.
