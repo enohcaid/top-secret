@@ -141,7 +141,7 @@ async function leerOcupadosDelSitio() {
     const { chromium } = await import('playwright');
     const b = await chromium.launch({ executablePath: CHROME });
     const pg = await b.newPage();
-    await pg.goto('https://enohcaid.github.io/top-secret/convocatoria.html?vista&t=' + Date.now(), { waitUntil: 'load', timeout: 60000 });
+    await pg.goto('https://topsecret.ar/convocatoria.html?vista&t=' + Date.now(), { waitUntil: 'load', timeout: 60000 });
     await pg.waitForTimeout(8000);
     partidos = await pg.evaluate(() => typeof getTodayMatches === 'function' ? getTodayMatches().map(m => ({ rival: m.rival, time: m.time, league: m.league })) : null);
     await b.close();

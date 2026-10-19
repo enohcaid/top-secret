@@ -4,7 +4,7 @@
 // dibujada por calendario-share.js → TSMatchdayCard). Sin partidos: el mensaje es para el
 // entrenamiento y no hay placa. Usa getTodayMatches(), TODAY y showToast() del script de la página.
 (function () {
-  const URL_EDITABLE = 'https://enohcaid.github.io/top-secret/convocatoria.html';
+  const URL_EDITABLE = 'https://topsecret.ar/convocatoria.html';
   const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const MESES_C = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 

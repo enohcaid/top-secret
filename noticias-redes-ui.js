@@ -90,7 +90,7 @@
     grid.innerHTML = '';
     for (const d of DESTINOS) {
       const prev = d.pieza === 'link'
-        ? `<div class="rd-link"><img src="${esc(n.imagePost || n.image)}" alt=""><div><small>enohcaid.github.io</small>${esc(n.title)}</div></div>`
+        ? `<div class="rd-link"><img src="${esc(n.imagePost || n.image)}" alt=""><div><small>topsecret.ar</small>${esc(n.title)}</div></div>`
         : `<div class="rd-prev ${d.pieza}"><img data-pieza="${d.pieza}" alt=""></div>`;
       const card = el(`<div class="rd-card" data-red="${d.red}">
         <h3><input type="checkbox" checked> ${d.nombre}</h3>${prev}

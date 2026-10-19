@@ -4,7 +4,7 @@ import { need } from '../../lib/env.mjs';
 
 const KV = k => `https://api.cloudflare.com/client/v4/accounts/${need('CF_ACCOUNT_ID')}/storage/kv/namespaces/${need('KV_NAMESPACE_ID')}/values/${k}`;
 const AUTH = () => ({ 'X-Auth-Email': need('CF_EMAIL'), 'X-Auth-Key': need('CF_API_KEY') });
-export const PAGINA = 'https://enohcaid.github.io/top-secret/aprobar.html';
+export const PAGINA = 'https://topsecret.ar/aprobar.html';
 
 export async function leerKV(clave, porDefecto) {
   const r = await fetch(KV(clave), { headers: AUTH() });

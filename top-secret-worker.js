@@ -5,7 +5,7 @@
 
 // ── NOTICIAS — OG meta map ───────────────────────────────────────
 // Add an entry here whenever a new article is added to noticias-data.js
-const SITE = 'https://enohcaid.github.io/top-secret/';
+const SITE = 'https://topsecret.ar/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
   'nuevos-fichajes-t4': {
@@ -1464,7 +1464,7 @@ function eaCompactar(m, tipo) {
 // HTML publicado) con edits/suspended de Firestore aplicados por índice + los custom.
 // Solo ligas oficiales (VPN, VPUG, 11x11 = Espacio Gamer); amistosos y demás afuera.
 const EA_LIGAS_OFICIALES = new Set(['VPN', 'VPUG', '11x11']);
-const CALENDARIO_HTML_URL = 'https://enohcaid.github.io/top-secret/calendario.html';
+const CALENDARIO_HTML_URL = 'https://topsecret.ar/calendario.html';
 
 function parseObjLiteral(linea) {
   const o = {};

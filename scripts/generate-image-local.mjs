@@ -343,7 +343,7 @@ async function main() {
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory);
     await saveKitHistory(chosenKit.id, dateStr, kitHistory);
     if (hasPlayer) await saveFeaturedHistory([featuredPlayer], dateStr, featuredHistory);
-    uploadImagesToR2(postFile, storyFile);
+    await uploadImagesToR2(postFile, storyFile);
 
     console.log('\n✓ Listo.');
     console.log('  Post: ', postFile);

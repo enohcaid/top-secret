@@ -1176,18 +1176,28 @@ async function stampCrest(file, opts = {}) {
   return { ...best, color };
 }
 
-function uploadImagesToR2(postFile, storyFile) {
+async function uploadImagesToR2(postFile, storyFile) {
   // Además de las publicadas (con escudo), las copias limpias en raw/: las usan las piezas
   // con título para redes (noticia-redes.js), que ponen el escudo junto al título.
+  // Y un .webp liviano de cada publicada (~170 KB contra ~3,5 MB): es lo que muestra el sitio.
+  const webps = [];
+  for (const f of [postFile, storyFile].filter(Boolean)) {
+    const src = path.join(OUTPUT_DIR, f), dst = src.replace(/\.(png|jpe?g)$/i, '.webp');
+    if (!fs.existsSync(src) || dst === src) continue;
+    try {
+      await sharp(src).resize({ width: 1080, withoutEnlargement: true }).webp({ quality: 80 }).toFile(dst);
+      webps.push({ f: path.basename(dst), localPath: dst, rel: `Renders/Daily News/${path.basename(dst)}`, type: 'image/webp' });
+    } catch (e) { console.warn(`  No se pudo armar el .webp de ${f}:`, e.message); }
+  }
   const items = [postFile, storyFile].filter(Boolean).flatMap(f => [
     { f, localPath: path.join(OUTPUT_DIR, f), rel: `Renders/Daily News/${f}` },
     { f: `raw/${f}`, localPath: path.join(RAW_DIR, f), rel: `Renders/Daily News/raw/${f}` },
-  ]).filter(x => fs.existsSync(x.localPath));
-  for (const { f, localPath, rel } of items) {
+  ]).filter(x => fs.existsSync(x.localPath)).concat(webps);
+  for (const { f, localPath, rel, type = 'image/png' } of items) {
     const key = rel.split('/').map(encodeURIComponent).join('/');
     try {
       execSync(
-        `curl -s -o NUL -w "%{http_code}" -X PUT --aws-sigv4 "aws:amz:auto:s3" --user "${R2_ACCESS_KEY}:${R2_SECRET_KEY}" -H "content-type: image/png" --data-binary @"${localPath}" "${R2_ENDPOINT}/${R2_BUCKET}/${key}"`,
+        `curl -s -o NUL -w "%{http_code}" -X PUT --aws-sigv4 "aws:amz:auto:s3" --user "${R2_ACCESS_KEY}:${R2_SECRET_KEY}" -H "content-type: ${type}" --data-binary @"${localPath}" "${R2_ENDPOINT}/${R2_BUCKET}/${key}"`,
         { stdio: 'pipe' }
       );
       console.log(`  R2: ${f} subida.`);
@@ -1568,7 +1578,7 @@ async function main() {
     await saveStyleHistory(chosenStyle.id, dateStr, styleHistory, chosenGesto?.id, typeof draft.toma === 'string' ? draft.toma : null);
     await saveKitHistory(chosenKit.id, dateStr, kitHistory);
     if (mentioned.length > 0) await saveFeaturedHistory([...mentioned, ...teammates], dateStr, featuredHistory);
-    uploadImagesToR2(lastPostFile, storyFile);
+    await uploadImagesToR2(lastPostFile, storyFile);
 
     console.log('\n✓ Listo.');
     console.log('  Post: ', lastPostFile);

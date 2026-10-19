@@ -117,7 +117,7 @@ async function noticiaSitio(p) {
   n.publishedAt = new Date().toISOString();
   const lista = await leerKV('published_noticias', []);
   await guardarKV('published_noticias', [n, ...lista.filter(a => a.id !== n.id)]);
-  return `https://enohcaid.github.io/top-secret/noticias.html?id=${n.id}`;
+  return `https://topsecret.ar/noticias.html?id=${n.id}`;
 }
 
 // Noticia del día (lote "noticia", aprobar.html): toma el borrador de Firestore, le aplica el título y el cuerpo
@@ -134,7 +134,7 @@ async function noticiaBorrador(p) {
   if (lista.some(a => a.id === n.id)) throw new Error(`La noticia ${n.id} ya estaba publicada.`);
   await guardarKV('published_noticias', [n, ...lista]);
   await fetch(FS_DRAFT, { method: 'DELETE' });
-  return `https://enohcaid.github.io/top-secret/noticias.html?id=${n.id}`;
+  return `https://topsecret.ar/noticias.html?id=${n.id}`;
 }
 
 async function publicar(p) {

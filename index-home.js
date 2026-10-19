@@ -33,7 +33,8 @@ const ROSTER_POSN = {
 
 function renderChain(key, kind) {
   const f = FOLDER_OVERRIDE[key] || key;
-  return ['4', '3', '2', ''].map(s => mediaUrl(`Renders/${f}/${kind}${s}.png`));
+  // T4 tiene un .webp liviano (~40 KB contra ~900 KB del PNG); las temporadas viejas, solo PNG.
+  return [mediaUrl(`Renders/${f}/${kind}4.webp`), ...['4', '3', '2', ''].map(s => mediaUrl(`Renders/${f}/${kind}${s}.png`))];
 }
 function tryImages(paths, idx, onSuccess, onFail) {
   if (idx >= paths.length) { onFail(); return; }
@@ -43,8 +44,14 @@ function tryImages(paths, idx, onSuccess, onFail) {
   img.src = paths[idx];
 }
 const SILUETA = mediaUrl('Renders/silueta-prueba.png');
+// Prueba la cadena sobre el mismo <img> (no con new Image()) para que loading="lazy" siga valiendo.
 function fillRender(imgEl, key, kind) {
-  tryImages(renderChain(key, kind), 0, src => { imgEl.src = src; }, () => { imgEl.src = SILUETA; imgEl.style.opacity = '.4'; });
+  const chain = renderChain(key, kind); let i = 0;
+  imgEl.onerror = () => {
+    if (++i < chain.length) { imgEl.src = chain[i]; return; }
+    imgEl.onerror = null; imgEl.src = SILUETA; imgEl.style.opacity = '.4';
+  };
+  imgEl.src = chain[0];
 }
 document.querySelectorAll('img[data-render]').forEach(img => fillRender(img, img.dataset.render, 'Brazos'));
 
@@ -142,7 +149,8 @@ const manualNews = typeof NOTICIAS !== 'undefined' ? NOTICIAS : [];
 const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
 
 // Las imágenes de R2 tienen un .webp liviano al lado del PNG; si falta, cae al original.
-const webp = url => /\/media\/.+\.(png|jpe?g)$/i.test(url || '') ? url.replace(/\.(png|jpe?g)$/i, '.webp') : url;
+// Acepta ?v=… al final (las del pipeline diario lo traen siempre).
+const webp = url => /\/media\/.+\.(png|jpe?g)(\?.*)?$/i.test(url || '') ? url.replace(/\.(png|jpe?g)(\?|$)/i, '.webp$2') : url;
 
 function newsMedia(n) {
   if (n.image) return `<img src="${webp(n.image)}" alt="" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${n.image}'}">`;

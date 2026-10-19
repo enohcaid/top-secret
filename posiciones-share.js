@@ -10,7 +10,7 @@
   const MEDIA = WORKER + '/media/';
   const CREST = MEDIA + 'logos/rebrand/clean-dorado.webp';
   const OUR_LOGO = MEDIA + 'logos/rebrand/clean-metal-96.webp';
-  const PAGE_URL = 'https://enohcaid.github.io/top-secret/posiciones.html';
+  const PAGE_URL = 'https://topsecret.ar/posiciones.html';
   const C = { bg: '#0B0A07', ink: '#F2EEE0', dim: 'rgba(242,238,224,.5)', faint: 'rgba(242,238,224,.32)', gold: '#C8A84B', line: 'rgba(242,238,224,.12)', win: '#3ECF8E', loss: '#E0645A' };
   const LEAGUE = {
     vpn:  { name: 'VPN',   color: '#F5C518' },

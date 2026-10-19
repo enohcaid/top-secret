@@ -99,7 +99,7 @@ if (MODO === 'equipo' && FECHA === HOY && !argv.includes('--sin-partidos')) {
   const b0 = await chromium.launch({ channel: 'chrome' }).catch(() => chromium.launch());
   try {
     const pg = await b0.newPage();
-    await pg.goto('https://enohcaid.github.io/top-secret/convocatoria.html?vista&t=' + Date.now(), { waitUntil: 'load', timeout: 60000 });
+    await pg.goto('https://topsecret.ar/convocatoria.html?vista&t=' + Date.now(), { waitUntil: 'load', timeout: 60000 });
     await pg.waitForTimeout(8000);
     partidos = await pg.evaluate(() => typeof getTodayMatches === 'function'
       ? getTodayMatches().map(m => ({ time: m.time, rival: m.rival, league: m.league, isHome: !!m.isHome, badge: m.badge || m.rivalLogo || null })) : []);
