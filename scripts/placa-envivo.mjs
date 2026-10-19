@@ -18,6 +18,7 @@ const CFG = {
     VPUG: { logo: 'logos/VPUG logo.png', color: '#3ecf8e' },
     VPN: { logo: 'logos/VPN logo.png', color: '#f5c518' },
     '11x11': { logo: 'logos/11x11 logo.png', color: '#4a9eff' },
+    'Espacio Gamer': { logo: 'logos/Espacio Gamer logo.png', color: '#4a9eff' },   // ex 11x11 desde la T4
   },
   bio: 'LINK EN LA BIO',                                      // linktree en la bio de @fctopsecret (null para sacarlo)
   canales: [
@@ -37,7 +38,9 @@ const literal = (src, desde) => { const k = src.indexOf(desde); const ini = src.
   const fin = src.indexOf(desde.endsWith('[') ? '\n];' : '\n};', ini); return new Function('return ' + src.slice(ini, fin + 2))(); };
 const cal = fs.readFileSync('calendario.html', 'utf8');
 const RAW = literal(cal, 'const RAW = [');
-const BADGES = literal(cal, 'const VPUG_T4_BADGES = {');
+const BADGES = { ...literal(cal, 'const VPUG_T4_BADGES = {'), ...literal(cal, 'const E11_T4_BADGES = {') };
+// Desde la T4 la clave interna '11x11' es la liga Espacio Gamer (mismo criterio que lgLabel() de calendario.html)
+const ligaVisible = m => m.league === '11x11' && m.date > '2026-09-28' ? 'Espacio Gamer' : m.league;
 // Torneo de cada partido de RAW: el bloque "// ══ <LIGA> T? — <torneo> ══" bajo el que está anotado en calendario.html
 // ("VPUG T4 — Liga Pretemporada VPUG (FC-27) (T7 CopáFácil), Grupo D" → "Liga Pretemporada"). Sin nombre → la liga sola.
 const torneoDe = (h, liga) => {
@@ -60,9 +63,11 @@ const partidos = [
     if (x.playoff) return { ...x, torneo: x.playoff.replace(/\s*·\s*(Ida|Vuelta)$/i, ''), etapa: (x.playoff.match(/(Ida|Vuelta)$/i) || [])[1] || '' };
     return { ...x, torneo: TORNEOS[k] ? torneoDe(TORNEOS[k], x.league) : x.league }; }),
   ...(est.custom || []).filter(c => c.tipo === 'partido')
-    .map(c => ({ ...c, torneo: c.league === 'Amistoso' ? 'Amistoso' : c.instancia ? `${c.league} · ${c.instancia}` : c.league })),
+    // "Fecha N" (fase regular) va como etiqueta de cada fila, igual que IDA/VUELTA en los playoffs
+    .map(c => /^Fecha \d+$/i.test(c.instancia || '') ? { ...c, torneo: ligaVisible(c), etapa: c.instancia }
+      : ({ ...c, torneo: c.league === 'Amistoso' ? 'Amistoso' : c.instancia ? `${ligaVisible(c)} · ${c.instancia}` : ligaVisible(c) })),
 ].filter(m => m.date === FECHA).sort((x, y) => x.time.localeCompare(y.time))
-  .map(m => ({ hora: m.time, rival: m.rival, liga: m.league, torneo: m.torneo, etapa: m.etapa || '', escudo: BADGES[m.rival] || m.badge || null }));
+  .map(m => ({ hora: m.time, rival: m.rival, liga: ligaVisible(m), torneo: m.torneo, etapa: m.etapa || '', escudo: BADGES[m.rival] || m.badge || null }));
 if (process.argv.includes('--json')) { console.log(JSON.stringify(partidos)); process.exit(0); }
 const ligas = [...new Set(partidos.map(p => p.liga).filter(l => CFG.ligas[l]))];
 const torneos = [...new Set(partidos.map(p => p.torneo))];
