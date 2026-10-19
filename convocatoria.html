@@ -785,6 +785,31 @@ let inviernoMatches = [];
 
 // 11x11 team badges — T2/CHALLENGERS#3 (historico) + T3/CHALLENGERS#4 (temporada actual)
 const _CVPG = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
+// Espacio Gamer (ex 11x11) — T4: CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA, escudos de espaciogamer.cl
+// (nombres exactos de su fixture). Va antes que T3: algunos clubes repiten con escudo nuevo.
+const E11_T4_BADGES = {
+  'Al Hueso':               'https://espaciogamer.cl/wp-content/uploads/2026/10/logo-20261013-202926-r4ry7akmsa.png',
+  'ALL BOYS':               'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183944-2htxzpqg3r.png',
+  'Argentinos Jrs Esp':     'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184005-ocv092dose.png',
+  'Cambaceres':             'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183948-j9beahxkmy.png',
+  'Comunicaciones eSports': 'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-chmnf1o33c.png',
+  'Fco Kannabiense':        'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184026-lfizbcrewy.png',
+  'IACC Reserva':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183945-p2scwultg9.png',
+  'InfinitX':               'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-vrqhkmuma0.png',
+  'Instituto Cantera':      'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-16lzbul3pg.png',
+  'La Carreta FC':          'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184025-jnoqea0x5f.png',
+  'Los Picantes':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184002-fyufpthupl.png',
+  'MISKYMAYU FC':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-203644-qvzim2y5gm.png',
+  'MONOTRIBUTISTAS':        'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-ho7fm29apl.png',
+  'Nuvo FC':                'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183944-2htxzpqg3r.png',
+  'Parke Avellane':         'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183948-d4ddpbb8lw.png',
+  'Sarmiento eSports':      'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-015205-zh9dt80nct.png',
+  'Sub 21':                 'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-ml2ubyzw5d.png',
+  'Suda eSports':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184005-xhuncl2klc.png',
+  'WAP eSports':            'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-162806-ikyvnqcvqk.png',
+};
+// Etiqueta visible de la liga: acá solo hay partidos de hoy (T4 en adelante), así que '11x11' = "Espacio Gamer".
+const lgLabel = m => m.league === '11x11' ? 'Espacio Gamer' : m.league;
 const E11_T3_BADGES = {
   'Los Waxiturros':         _CVPG+'admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/public',
   'Argentino de Merlo':     _CVPG+'admin_4b75c893-290e-4735-a5a9-8ec09a84c088/public',
@@ -1014,7 +1039,7 @@ function getTodayMatches() {
     .map(m => {
       if (m.badge) return m;
       if (m.league === 'VPUG')  return {...m, badge: VPUG_T4_BADGES[m.rival]||VPUG_T2_BADGES[m.rival]||VPUG_T3_BADGES[m.rival]||null};
-      if (m.league === '11x11') return {...m, badge: E11_T3_BADGES[m.rival]||null};
+      if (m.league === '11x11') return {...m, badge: E11_T4_BADGES[m.rival]||E11_T3_BADGES[m.rival]||null};
       if (m.league === 'VPN') {
         const live = vpnFixtures.find(v => (v.rival||'').toLowerCase().trim() === (m.rival||'').toLowerCase().trim());
         return {...m, badge: (live && live.badge) || null};
@@ -1043,7 +1068,7 @@ function getTodayMatches() {
   const from11x11 = E11_T3_SCHEDULE
     .filter(m => m.date === TODAY)
     .filter(m => !fromCustom.some(c => c.league === '11x11' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({...m, badge: E11_T3_BADGES[m.rival]||null}));
+    .map(m => ({...m, badge: E11_T4_BADGES[m.rival]||E11_T3_BADGES[m.rival]||null}));
   // Deduplicate VPN: skip if calCustom already has same rival
   const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase().trim() === (v.rival||'').toLowerCase().trim())
@@ -1072,7 +1097,7 @@ function renderTodayMatchesPanel() {
       <span class="tmp-time">${m.time||'—'}</span>
       ${m.badge?`<img class="tmp-rival-badge" src="${m.badge}" alt="" onerror="this.style.display='none'">`:''}
       <span class="tmp-rival">${m.rival||'—'}</span>
-      ${m.league ? `<span class="tmp-badge" style="background:${lc[m.league]||'#888'}22;color:${lc[m.league]||'#888'};border:1px solid ${lc[m.league]||'#888'}55">${m.league}</span>` : ''}
+      ${m.league ? `<span class="tmp-badge" style="background:${lc[m.league]||'#888'}22;color:${lc[m.league]||'#888'};border:1px solid ${lc[m.league]||'#888'}55">${lgLabel(m)}</span>` : ''}
       <span class="tmp-loc">${m.isHome?'Local':'Visitante'}</span>
     </div>`).join('');
 }
@@ -2474,7 +2499,7 @@ async function buildMatchPanel(H) {
     const ph = 21 * u * fs, blockH = lines.length * nSize * 1.02 + 8 * u + ph;
     let ty = mid - blockH / 2 + nSize * 0.86;
     lines.forEach(l => { text(l, fName, '#F2EEE0', tx, ty, 'left'); ty += nSize * 1.02; });
-    const liga = String(m.league || 'Partido').toUpperCase();
+    const liga = String(lgLabel(m) || 'Partido').toUpperCase();
     const fLiga = `800 ${Math.round(13 * u * fs)}px Barlow`;
     ctx.font = fLiga;
     const lw = ctx.measureText(liga).width + 16 * u, py = ty - nSize * 0.86 + 8 * u;
@@ -2676,7 +2701,7 @@ if (!EDIT_MODE) {
 }
 </script>
 <script src="video-equipo.js?v=2"></script>
-<script src="calendario-share.js?v=4"></script>
+<script src="calendario-share.js?v=5"></script>
 <script src="convocatoria-convocar.js?v=2"></script>
 <script src="layout.js?v=25"></script>
 </body>

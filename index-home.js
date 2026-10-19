@@ -136,7 +136,7 @@ $('results-list').innerHTML = [...SEASON_MATCHES].filter(m => m.match_result)
     const [gf, gc] = parseScore(m.match_result);
     return `<div class="result-row">
       <span class="result-pill ${cls}">${lbl}</span>
-      <span class="result-league ${LG_CLASS[m.league] || ''}">${m.league || ''}</span>
+      <span class="result-league ${LG_CLASS[m.league] || ''}">${m.league === '11x11' && m.date > T4_CUTOFF ? 'Espacio Gamer' : (m.league || '')}</span>
       <span class="result-rival">${m.rival || '—'}</span>
       <span class="result-score">${gf} – ${gc}</span>
       <span class="result-date">${dt.getDate()} ${M_NAMES[dt.getMonth()]}</span>

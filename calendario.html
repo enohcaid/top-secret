@@ -7,14 +7,14 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Top Secret FC">
 <meta property="og:title" content="Calendario · Top Secret FC">
-<meta property="og:description" content="Fixture y resultados de Top Secret FC en VPN, VPUG y 11x11.">
+<meta property="og:description" content="Fixture y resultados de Top Secret FC en VPN, VPUG y Espacio Gamer.">
 <meta property="og:url" content="https://topsecret.ar/calendario.html">
 <meta property="og:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og/og-competencias-v2.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Calendario · Top Secret FC">
-<meta name="twitter:description" content="Fixture y resultados de Top Secret FC en VPN, VPUG y 11x11.">
+<meta name="twitter:description" content="Fixture y resultados de Top Secret FC en VPN, VPUG y Espacio Gamer.">
 <meta name="twitter:image" content="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/og/og-competencias-v2.jpg">
 <link rel="icon" type="image/png" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png">
 <link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
@@ -803,7 +803,7 @@ body{padding-top:64px;}
 <div class="page-header">
   <div class="ph-eyebrow">2026</div>
   <h1 class="ph-title">Calen<span>dario</span></h1>
-  <p class="ph-sub">Calendario unificado · VPN · VPUG · 11x11</p>
+  <p class="ph-sub">Calendario unificado · VPN · VPUG · Espacio Gamer</p>
 </div>
 
 <!-- CAL CONTROLS -->
@@ -811,7 +811,7 @@ body{padding-top:64px;}
   <div class="cal-legend-new">
     <span class="cln-item"><span class="cln-dot vpn"></span>VPN · L/X</span>
     <span class="cln-item"><span class="cln-dot vpug"></span>VPUG · L–J</span>
-    <span class="cln-item"><span class="cln-dot e11"></span>11x11 · M/J</span>
+    <span class="cln-item"><span class="cln-dot e11"></span>Espacio Gamer · M/J</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <div class="season-btns">
@@ -846,7 +846,7 @@ body{padding-top:64px;}
     <div class="lsc-streak" id="lscst-vpug"></div>
   </div>
   <div class="lsc" id="lsc-e11">
-    <div class="lsc-head"><span class="lsc-badge e11">11x11</span><span class="lsc-wdl" id="lscw-e11">— — —</span></div>
+    <div class="lsc-head"><span class="lsc-badge e11">Espacio Gamer</span><span class="lsc-wdl" id="lscw-e11">— — —</span></div>
     <div class="lsc-l5" id="lscl5-e11"></div>
     <div class="lsc-streak" id="lscst-e11"></div>
   </div>
@@ -903,7 +903,7 @@ body{padding-top:64px;}
       <select id="addLeague">
         <option value="VPN">VPN</option>
         <option value="VPUG">VPUG</option>
-        <option value="11x11">11x11</option>
+        <option value="11x11">Espacio Gamer</option>
       </select>
     </div>
     <div class="field" id="addRivalField">
@@ -960,7 +960,7 @@ body{padding-top:64px;}
       <select id="eLeague">
         <option value="VPN">VPN</option>
         <option value="VPUG">VPUG</option>
-        <option value="11x11">11x11</option>
+        <option value="11x11">Espacio Gamer</option>
       </select>
     </div>
     <div class="field"><label>Condición</label>
@@ -1410,7 +1410,33 @@ const E11_T3_BADGES = {
   'Olimpo Esports':         _VPG+'admin_b993e784-2fac-4459-bc68-db298ab57240/public',
   'Cambaceres':             _VPG+'admin_0418078a-b62c-4e2e-9656-6ace007d73f7/public',
 };
-function e11Badge(rival){ return E11_T3_BADGES[rival] || null; }
+// Espacio Gamer (ex 11x11) — T4: CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA, escudos de espaciogamer.cl
+// (nombres exactos de su fixture). Va antes que T3: algunos clubes repiten con escudo nuevo.
+const E11_T4_BADGES = {
+  'Al Hueso':               'https://espaciogamer.cl/wp-content/uploads/2026/10/logo-20261013-202926-r4ry7akmsa.png',
+  'ALL BOYS':               'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183944-2htxzpqg3r.png',
+  'Argentinos Jrs Esp':     'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184005-ocv092dose.png',
+  'Cambaceres':             'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183948-j9beahxkmy.png',
+  'Comunicaciones eSports': 'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-chmnf1o33c.png',
+  'Fco Kannabiense':        'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184026-lfizbcrewy.png',
+  'IACC Reserva':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183945-p2scwultg9.png',
+  'InfinitX':               'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-vrqhkmuma0.png',
+  'Instituto Cantera':      'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-16lzbul3pg.png',
+  'La Carreta FC':          'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184025-jnoqea0x5f.png',
+  'Los Picantes':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184002-fyufpthupl.png',
+  'MISKYMAYU FC':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-203644-qvzim2y5gm.png',
+  'MONOTRIBUTISTAS':        'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-ho7fm29apl.png',
+  'Nuvo FC':                'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183944-2htxzpqg3r.png',
+  'Parke Avellane':         'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183948-d4ddpbb8lw.png',
+  'Sarmiento eSports':      'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-015205-zh9dt80nct.png',
+  'Sub 21':                 'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-ml2ubyzw5d.png',
+  'Suda eSports':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184005-xhuncl2klc.png',
+  'WAP eSports':            'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-162806-ikyvnqcvqk.png',
+};
+function e11Badge(rival){ return E11_T4_BADGES[rival] || E11_T3_BADGES[rival] || null; }
+// Etiqueta visible de la liga: desde la T4 la clave '11x11' se muestra como "Espacio Gamer".
+const lgLabel = m => (m.league === '11x11' && (m.date || '') > '2026-09-28') ? 'Espacio Gamer' : m.league;
+
 
 // VPN T2 badges — populated async from the proxy (same source as posiciones.html)
 let _vpnBadgeCache = {};  // key: team name from API
@@ -1747,7 +1773,7 @@ function renderNextMatch(){
   document.getElementById('nmMeta').textContent =
     `${fmtDate(m.date)} · ${m.isHome ? '🏠 Local' : '✈️ Visita'}`;
   document.getElementById('nmBadge').innerHTML =
-    `<span class="league-badge badge-${leagueKey}">${m.league}</span>`;
+    `<span class="league-badge badge-${leagueKey}">${lgLabel(m)}</span>`;
 }
 
 // ── STATS PANEL ───────────────────────────────────────────────────────────────
@@ -1830,7 +1856,7 @@ function openStatsPanel(id){
 
   document.getElementById('spTitle').textContent = m.rival;
   document.getElementById('spMeta').textContent  =
-    `${fmtDate(m.date)} · ${m.time} · ${m.league} · ${m.isHome?'Local':'Visita'}`;
+    `${fmtDate(m.date)} · ${m.time} · ${lgLabel(m)} · ${m.isHome?'Local':'Visita'}`;
   const scoreEl = document.getElementById('spScore');
   scoreEl.textContent = score || '— – —';
   scoreEl.className = 'sp-score' + (out ? ' '+out : '');
@@ -1995,7 +2021,7 @@ function renderTodayCard() {
       ${tmrBadge}
       <span class="tmr-rival">${m.rival||'—'}</span>
       ${addedBadge}
-      ${m.league ? `<span class="league-badge badge-${leagueCls[m.league]||''}" style="font-size:.6rem">${m.league}</span>` : ''}
+      ${m.league ? `<span class="league-badge badge-${leagueCls[m.league]||''}" style="font-size:.6rem">${lgLabel(m)}</span>` : ''}
       <span class="loc" style="font-size:.68rem">${loc}</span>
     </div>`;
   }).join('');
@@ -2047,7 +2073,7 @@ function renderNextHero() {
         <span class="nh-bwrap">${badge}</span>
         <div class="nh-rinfo">
           <div class="nh-rival-name">${m.rival}</div>
-          <div class="nh-rmeta"><span class="nh-lbadge ${lgKey}">${m.league || 'Amistoso'}</span><span class="nh-meta-txt">${meta}</span></div>
+          <div class="nh-rmeta"><span class="nh-lbadge ${lgKey}">${lgLabel(m) || 'Amistoso'}</span><span class="nh-meta-txt">${meta}</span></div>
         </div>
       </div>`;
     }).join('') + `</div>`;
@@ -2426,7 +2452,7 @@ function render_legacy_unused(){
                 <div class="rival">${m.rival||'—'}</div>
                 <div class="meta">
                   <span class="jornada-badge" style="background:rgba(201,168,76,.12);color:var(--gold);border-color:rgba(201,168,76,.3)">+ Agregado</span>
-                  ${m.league?`<span class="league-badge badge-${leagueClass}">${m.league}</span>`:''}
+                  ${m.league?`<span class="league-badge badge-${leagueClass}">${lgLabel(m)}</span>`:''}
                   <span class="loc">${locLabel}</span>
                   ${m.instancia?`<span class="loc" style="color:var(--muted2)">${m.instancia}</span>`:''}
                 </div>
@@ -2481,7 +2507,7 @@ function render_legacy_unused(){
             <div class="match-body">
               <div class="rival"><span class="free-icon">🗓️</span>Fecha libre</div>
               <div class="meta">
-                <span class="league-badge badge-${leagueClass}">${m.league}</span>
+                <span class="league-badge badge-${leagueClass}">${lgLabel(m)}</span>
               </div>
             </div>
             <div class="match-time">${m.time}</div>
@@ -2499,7 +2525,7 @@ function render_legacy_unused(){
               <div class="rival">${m.rival}</div>
               <div class="meta">
                 <span class="jornada-badge">J${getJornada(i)}</span>
-                <span class="league-badge badge-${leagueClass}">${m.league}</span>
+                <span class="league-badge badge-${leagueClass}">${lgLabel(m)}</span>
                 <span class="loc">${locLabel}</span>
                 ${suspBadge}
               </div>
@@ -2625,7 +2651,7 @@ function openModal(id){
   const m = getAnyMatch(typeof id === 'string' ? id : parseInt(id));
   const r = getResult(id);
   document.getElementById('mTitle').textContent = m.rival;
-  document.getElementById('mSub').textContent = `${fmtDate(m.date)} · ${m.time} · ${m.league}`;
+  document.getElementById('mSub').textContent = `${fmtDate(m.date)} · ${m.time} · ${lgLabel(m)}`;
   if(r){
     const [h,a] = r;
     document.getElementById('mHome').value = m.isHome ? h : a;
@@ -3087,7 +3113,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
-<script src="calendario-share.js?v=4"></script>
+<script src="calendario-share.js?v=5"></script>
 <script src="layout.js?v=25"></script>
 </body>
 </html>

@@ -139,12 +139,13 @@
       ctx.fillStyle = C.white; ctx.font = `800 ${rs}px ${COND}`;
       ctx.fillText(m.rival, tx, cy + 4);
       const lg = m.league || 'Amistoso';
+      const lgTxt = lg === '11x11' ? 'Espacio Gamer' : lg; // la tarjeta es de partidos de hoy (T4 en adelante)
       ctx.font = `700 21px ${COND}`; ctx.letterSpacing = '3px';
-      const lw = ctx.measureText(lg.toUpperCase()).width + 22;
+      const lw = ctx.measureText(lgTxt.toUpperCase()).width + 22;
       roundRect(ctx, tx, cy + 16, lw, 32, 6);
       ctx.fillStyle = (C.league[lg] || C.league.Amistoso) + '26'; ctx.fill();
       ctx.fillStyle = C.league[lg] || C.league.Amistoso; ctx.textBaseline = 'middle';
-      ctx.fillText(lg.toUpperCase(), tx + 11, cy + 33);
+      ctx.fillText(lgTxt.toUpperCase(), tx + 11, cy + 33);
       ctx.letterSpacing = '0px';
       const meta = [m.round != null ? 'Fecha ' + m.round : null, m.isHome ? 'Local' : 'Visita'].filter(Boolean).join('  ·  ');
       ctx.fillStyle = C.mid; ctx.font = `600 24px 'Barlow', sans-serif`;
