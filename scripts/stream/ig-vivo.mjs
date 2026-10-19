@@ -27,7 +27,20 @@ async function cerrarVivo(pagina, descartar) {
   return true;
 }
 
+// Si el Chrome con CDP (perfil scripts/.chrome-profile, con la sesión de @fctopsecret) no está abierto, lo abre
+// con scripts/abrir-chrome-chatgpt.ps1 y espera hasta 40 s a que responda.
+async function asegurarChrome(log) {
+  const vivo = () => fetch('http://localhost:9222/json/version', { signal: AbortSignal.timeout(3000) }).then(r => r.ok, () => false);
+  if (await vivo()) return;
+  log('Chrome CDP cerrado: lo abro.');
+  const { execFileSync } = await import('child_process');
+  execFileSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/abrir-chrome-chatgpt.ps1'], { stdio: 'ignore', timeout: 30000 });
+  for (let k = 0; k < 20; k++) { if (await vivo()) return; await new Promise(r => setTimeout(r, 2000)); }
+  throw new Error('Chrome CDP no levantó en localhost:9222');
+}
+
 export async function crearVivoIg({ titulo = 'Top Secret FC en vivo', practica = false, log = console.log } = {}) {
+  await asegurarChrome(log);
   const b = await chromium.connectOverCDP('http://localhost:9222');
   // Ventana propia: no toca las pestañas de Canva/ChatGPT
   const s = await b.newBrowserCDPSession();
