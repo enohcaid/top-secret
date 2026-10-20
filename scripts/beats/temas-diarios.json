@@ -279,6 +279,26 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-20",
+      "id": "2026-10-20-2",
+      "archivo": "2026-10-20-2 - Debut.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_20_2.py",
+      "duracion": 81,
+      "nombre": "Debut",
+      "concepto": "La primera vez que salís a la cancha en un partido oficial — todo va más rápido, la camiseta pesa, la tribuna es ruido; cada toque te asienta un poco más hasta que en el último gancho jugás como si siempre hubieras estado ahí.",
+      "bpm": 140,
+      "tonalidad": "mib menor",
+      "rasgo": "cuerda que estira: lead de cuerda sintetizada donde cada nota arranca semitonos por debajo y sube hasta la nota real; sección a sección el bend se acorta hasta que en el gancho C las notas arrancan afinadas",
+      "recursos": [
+        "cuerda que estira con bend ascendente variable (firma del tema)",
+        "pad tenso con filtro que abre sección a sección",
+        "piano nervioso percusivo con ghost notes",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
