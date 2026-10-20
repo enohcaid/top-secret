@@ -8,7 +8,7 @@ import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
-const JUG = ['RS32-DaniStone', 'Juan_Martinez4', 'Lautavester7', 'NicoBJ_96', 'CipriMancini'];   // el del medio adelante
+const JUG = ['RS32-DaniStone', 'Juan_Martinez4', 'Lautavester7', 'NicoBJ_96', 'Ciprimancini32'];   // el del medio adelante
 const i = process.argv.indexOf('--out');
 const OUT = path.resolve(i > 0 ? process.argv[i + 1] : 'fuentes/redes/perfiles/out/kick-offline.jpg');
 fs.mkdirSync(path.dirname(OUT), { recursive: true });

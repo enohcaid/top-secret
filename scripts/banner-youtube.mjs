@@ -12,7 +12,7 @@ import path from 'path';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
-const IZQ = ['Juan_Martinez4', 'CipriMancini', 'RS32-DaniStone'];
+const IZQ = ['Juan_Martinez4', 'Ciprimancini32', 'RS32-DaniStone'];
 const DER = ['Lautavester7', 'NicoBJ_96', 'Cabers14'];
 const KICK = process.argv.includes('--kick');
 const [W, H, FT, FB] = KICK ? [2560, 283, 0, 283] : [2560, 1440, 508, 931];   // lienzo y franja visible en PC

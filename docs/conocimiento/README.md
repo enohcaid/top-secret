@@ -89,5 +89,6 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_renders_folder](reference_renders_folder.md) — Estructura y propósito de las carpetas en Renders/ — qué borrar y qué conservar
 - [reference_topsecret_daily_news_routine](reference_topsecret_daily_news_routine.md) — How to find and edit the cloud routine that writes Top Secret FC's daily news draft
 - [reglas-noticia-diaria](reglas-noticia-diaria.md) — Reglas extra que la rutina de la noticia diaria lee en cada corrida (posiciones DI/DD = delanteros, sin laterales; protagonista con partidos recientes). Correcciones nuevas de Juan van acá
+- [project_cambio_gamertag](project_cambio_gamertag.md) — Jugador que cambia de gamertag (CipriMancini → Ciprimancini32): una identidad, qué archivos, R2 (copiar, no mover) y Firestore actualizar
 - [reference_wa_enviar_reporte_angel](reference_wa_enviar_reporte_angel.md) — Mandar fotos desde el WhatsApp personal (scripts/wa-enviar.mjs); reporte de VPUG a Angel; MessageMedia roto y el input de sticker
 - [project_overlay_vivo](project_overlay_vivo.md) — Vivo con overlay en las 3 transmisiones: PS5 → Enohcaid → OBS (overlay + clips de jugadores) → MediaMTX → topsecretfc/Kick/YouTube; tanda automática de clips; subida ~10 Mbps

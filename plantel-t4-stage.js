@@ -20,7 +20,7 @@ export const STAGE_T4 = [
   {"key":"Guiidow","row":1,"x":74,"y":22,"w":12,"h":30},
   // adelante, agachados
   {"key":"RS32-DaniStone","row":2,"x":4,"y":48,"w":17,"h":34},
-  {"key":"CipriMancini","row":2,"x":24,"y":48,"w":17,"h":34},
+  {"key":"Ciprimancini32","row":2,"x":24,"y":48,"w":17,"h":34},
   {"key":"Lil_Dekuroko","row":2,"x":48,"y":52,"w":17,"h":34},
   {"key":"Lautavester7","row":2,"x":67,"y":51,"w":15,"h":34},
   {"key":"NicoBJ_96","row":2,"x":83,"y":49,"w":16,"h":34}];

@@ -286,7 +286,7 @@ const PLAYER_TRAITS = {
   'pepolemmo2710':    { dorsal: 15, desc: 'piel trigueña, vincha roja en la frente, anteojos deportivos naranja/rojos espejados, barba negra' },
   'Juan_Martinez4':   { dorsal: 6,  desc: 'piel clara, pelo rubio con raya al costado, barba castaña prolija, cinta de capitán en el brazo' },
   'RS32-DaniStone':   { dorsal: 13, desc: 'piel clara, pelo violeta/azul tipo mullet, sin barba' },
-  'CipriMancini':     { dorsal: 14, desc: 'piel trigueña, pelo castaño con rulos por encima de los hombros, anteojos deportivos rojos, manga térmica azul con estampado rojo en el brazo derecho y manga azul en el izquierdo' },
+  'Ciprimancini32':     { dorsal: 14, desc: 'piel trigueña, pelo castaño con rulos por encima de los hombros, anteojos deportivos rojos, manga térmica azul con estampado rojo en el brazo derecho y manga azul en el izquierdo' },
   'Lil_Dekuroko':     { dorsal: 22, desc: 'piel morena, pelo corto rizado rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca' },
   'Lautavester7':     { dorsal: 7,  desc: 'piel oscura, pelo muy corto teñido azul claro, barba negra tupida, anteojos deportivos rojos espejados' },
   'NicoBJ_96':        { dorsal: 9,  desc: 'piel oscura, pelo corto rubio platinado, barba negra larga y tupida' },

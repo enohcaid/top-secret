@@ -87,7 +87,7 @@ await compose({ id: 'campana', bg: 'oro', rows: [
   { scale: .66, floor: 1330, spread: .78, light: .84, blur: .5, players: [
     ['Guiidow', 'Unica4', 20], ['Cabers14', 'Brazos4', 0], ['Lil_Dekuroko', 'Unica4', -20], ['Juan_Martinez4', 'Brazos4', -40, 1.05], ['RS32-DaniStone', 'Unica4', -20], ['endiabladorojo66', 'Brazos4', 0]] },
   { scale: .79, floor: 1665, spread: .7, light: 1, players: [
-    ['Ivan_Cabj_La12', 'Gesto4', 50], ['nikileo527', 'Gesto4', 10], ['NicoBJ_96', 'Gesto4', -10, 1.06], ['CipriMancini', 'Gesto4', 10], ['Lautavester7', 'Gesto4', 50]] },
+    ['Ivan_Cabj_La12', 'Gesto4', 50], ['nikileo527', 'Gesto4', 10], ['NicoBJ_96', 'Gesto4', -10, 1.06], ['Ciprimancini32', 'Gesto4', 10], ['Lautavester7', 'Gesto4', 50]] },
 ] });
 
 // ── B · Pirámide: el capitán adelante, el resto se abre en V hacia atrás ──
@@ -97,7 +97,7 @@ await compose({ id: 'piramide', bg: 'foco', bgExtra: `<ellipse cx="${W / 2}" cy=
   { scale: .62, floor: 1270, spread: .6, light: .82, blur: .6, players: [
     ['Guiidow', 'Brazos4', 0], ['Cabers14', 'Brazos4', -10], ['RS32-DaniStone', 'Brazos4', -10], ['pepolemmo2710', 'Brazos4', 0]] },
   { scale: .76, floor: 1560, spread: .66, light: .95, players: [
-    ['Lautavester7', 'Gesto4', 30], ['nikileo527', 'Unica4', 0], [null], ['NicoBJ_96', 'Unica4', 0], ['CipriMancini', 'Gesto4', 30]] },
+    ['Lautavester7', 'Gesto4', 30], ['nikileo527', 'Unica4', 0], [null], ['NicoBJ_96', 'Unica4', 0], ['Ciprimancini32', 'Gesto4', 30]] },
   { scale: .9, floor: 1700, spread: .2, light: 1.04, players: [['Juan_Martinez4', 'Gesto4', 0, 1.02]] },
 ] });
 
@@ -108,7 +108,7 @@ await compose({ id: 'bloque', bg: 'acero', tint: `<rect width="100%" height="100
   { scale: .72, floor: 1470, spread: .6, light: .9, blur: .4, players: [
     ['Guiidow', 'Gesto4', 10, 1, 30], ['Lil_Dekuroko', 'Brazos4', -10], ['Juan_Martinez4', 'Unica4', -30, 1.03], ['pepolemmo2710', 'Gesto4', -10], ['endiabladorojo66', 'Unica4', 10, 1, -30]] },
   { scale: .84, floor: 1720, spread: .5, light: 1, players: [
-    ['nikileo527', 'Brazos4', 30, 1, 40], ['NicoBJ_96', 'Brazos4', 0, 1.04], ['Lautavester7', 'Brazos4', 0], ['CipriMancini', 'Brazos4', 0], ['RS32-DaniStone', 'Brazos4', 30, 1, -40]] },
+    ['nikileo527', 'Brazos4', 30, 1, 40], ['NicoBJ_96', 'Brazos4', 0, 1.04], ['Lautavester7', 'Brazos4', 0], ['Ciprimancini32', 'Brazos4', 0], ['RS32-DaniStone', 'Brazos4', 30, 1, -40]] },
 ] });
 
 // ── D · Noche: dos filas en zigzag, luz cenital fría con borde dorado ──
@@ -117,5 +117,5 @@ await compose({ id: 'noche', bg: 'noche', bgExtra: `<g fill="#9fc0ff" fill-opaci
   { scale: .6, floor: 1220, spread: .9, light: .78, blur: .8, players: [
     ['Ivan_Cabj_La12', 'Brazos4', 0], ['Huber236', 'Gesto4', -30], ['rivarola90', 'Brazos4', 10], ['Elianja20', 'Gesto4', -30], ['Cabers14', 'Brazos4', 10], ['Juan_Martinez4', 'Gesto4', -40, 1.02], ['Lil_Dekuroko', 'Brazos4', 10], ['pepolemmo2710', 'Gesto4', -30], ['adri_cai', 'Brazos4', 0]] },
   { scale: .76, floor: 1640, spread: .8, light: 1, players: [
-    ['Guiidow', 'Unica4', 40], ['Alexisraies23', 'Brazos4', 0], ['nikileo527', 'Unica4', -20], ['NicoBJ_96', 'Gesto4', -30, 1.04], ['Lautavester7', 'Unica4', -20], ['CipriMancini', 'Unica4', 0], ['RS32-DaniStone', 'Gesto4', 30], ['endiabladorojo66', 'Brazos4', 40]] },
+    ['Guiidow', 'Unica4', 40], ['Alexisraies23', 'Brazos4', 0], ['nikileo527', 'Unica4', -20], ['NicoBJ_96', 'Gesto4', -30, 1.04], ['Lautavester7', 'Unica4', -20], ['Ciprimancini32', 'Unica4', 0], ['RS32-DaniStone', 'Gesto4', 30], ['endiabladorojo66', 'Brazos4', 40]] },
 ] });

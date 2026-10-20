@@ -26,7 +26,7 @@ const ROWS = [
     ['Guiidow', 20, 1], ['Alexisraies23', 0, 1], ['Cabers14', -10, 1.02], ['Juan_Martinez4', -30, 1.06],
     ['Lil_Dekuroko', -10, 1.02], ['NicoBJ_96', 0, 1.02], ['RS32-DaniStone', 20, 1] ] },
   { scale: 0.77, floor: 1660, spread: 0.72, light: 1, players: [
-    ['Ivan_Cabj_La12', 40, 1], ['nikileo527', 0, 1], ['Lautavester7', 70, 1.04], ['CipriMancini', 10, 1], ['endiabladorojo66', 60, 1] ] },
+    ['Ivan_Cabj_La12', 40, 1], ['nikileo527', 0, 1], ['Lautavester7', 70, 1.04], ['Ciprimancini32', 10, 1], ['endiabladorojo66', 60, 1] ] },
 ];
 
 async function cutout(key) {

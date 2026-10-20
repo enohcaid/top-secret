@@ -272,7 +272,7 @@ if (!reduced && typeof gsap !== 'undefined') {
 (function () {
   const SLIDES = [
     ['logos/hero-t4.webp',              'Juan_Martinez4 · Lautavester7'],
-    ['logos/duos/duo-mediocampo-k1.webp','CipriMancini · RS32-DaniStone'],
+    ['logos/duos/duo-mediocampo-k1.webp','Ciprimancini32 · RS32-DaniStone'],
     ['logos/duos/duo-defensa-k2-v3.webp',  'Elianja20 · endiabladorojo66 · Kit 2'],
     ['logos/duos/duo-defensa-k1.webp',  'Alexisraies23 · Cabers14'],
     ['logos/duos/duo-laterales-k2-v3.webp','nikileo527 · pepolemmo2710 · Kit 2'],

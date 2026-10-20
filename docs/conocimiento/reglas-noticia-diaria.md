@@ -18,3 +18,7 @@ La nota del 14/10 presentó a Lautavester7 como "lateral izquierdo": leyó `play
 ## Bajas del plantel (2026-10-15)
 
 - **kee_viin03 y Juanchyroman08 se fueron del club** (bajas del 2026-10-15). No mencionarlos ni elegirlos como protagonistas en notas nuevas: el plantel vigente es `ROSTER_T4` de `roster.js`. Pueden aparecer solo como dato histórico de la T3 (sus partidos y goles de esa temporada).
+
+## Cambio de gamertag (2026-10-20)
+
+- **CipriMancini ahora se llama `Ciprimancini32`** (y juega en PS5). En notas nuevas usar siempre `Ciprimancini32`, también al hablar de sus partidos o goles de temporadas anteriores (es el mismo jugador). Las notas viejas ya publicadas no se tocan.
