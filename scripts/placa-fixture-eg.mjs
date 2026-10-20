@@ -27,14 +27,47 @@ const bloque = cal.match(/const E11_T4_BADGES = \{([\s\S]*?)\};/)[1];
 const BADGES = Object.fromEntries([...bloque.matchAll(/'([^']+)':\s*'(https?:[^']+)'/g)].map(m => [m[1], m[2]]));
 
 // Escudos embebidos (data URI) para que el screenshot no dependa de la carga remota.
-async function dataUri(src) {
-  const buf = /^https?:/.test(src) ? Buffer.from(await (await fetch(src, { headers: { 'User-Agent': 'Mozilla/5.0' } })).arrayBuffer()) : fs.readFileSync(src);
-  const png = await sharp(buf).resize(220, 220, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
+async function dataUri(src, { sinFondo = false } = {}) {
+  let buf = /^https?:/.test(src) ? Buffer.from(await (await fetch(src, { headers: { 'User-Agent': 'Mozilla/5.0' } })).arrayBuffer()) : fs.readFileSync(src);
+  if (sinFondo) buf = await quitarFondoClaro(buf);
+  const png = await sharp(buf).trim({ threshold: 1 }).resize(220, 220, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
   return 'data:image/png;base64,' + png.toString('base64');
 }
+
+// Escudos subidos a EG con fondo blanco (o casi): se vacía el fondo claro que toca el borde (relleno desde
+// los bordes), así el blanco de adentro del escudo queda. El borde de transición se suaviza con alfa parcial.
+async function quitarFondoClaro(buf) {
+  const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  // Pasa por lo transparente: varios vienen con margen transparente y el recuadro blanco adentro.
+  const claro = i => data[i + 3] < 20 || Math.min(data[i], data[i + 1], data[i + 2]) > 220;
+  const visto = new Uint8Array(w * h), pila = [];
+  for (let x = 0; x < w; x++) pila.push(x, x + (h - 1) * w);
+  for (let y = 0; y < h; y++) pila.push(y * w, y * w + w - 1);
+  while (pila.length) {
+    const p = pila.pop();
+    if (visto[p] || !claro(p * 4)) continue;
+    visto[p] = 1; data[p * 4 + 3] = 0;
+    const x = p % w, y = (p / w) | 0;
+    if (x > 0) pila.push(p - 1); if (x < w - 1) pila.push(p + 1);
+    if (y > 0) pila.push(p - w); if (y < h - 1) pila.push(p + w);
+  }
+  // Halo: píxeles opacos pegados al fondo borrado y todavía claritos → alfa según cuán claros son.
+  for (let p = 0; p < w * h; p++) {
+    if (visto[p]) continue;
+    const x = p % w, y = (p / w) | 0;
+    const vecino = (x > 0 && visto[p - 1]) || (x < w - 1 && visto[p + 1]) || (y > 0 && visto[p - w]) || (y < h - 1 && visto[p + w]);
+    if (!vecino) continue;
+    const m = Math.min(data[p * 4], data[p * 4 + 1], data[p * 4 + 2]);
+    if (m > 170) data[p * 4 + 3] = Math.round(data[p * 4 + 3] * (255 - m) / 85);
+  }
+  return sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
+}
+// Fondo blanco/claro que se borra (los nombres son los de EG).
+const FONDO_CLARO = new Set(['Suda eSports', 'MONOTRIBUTISTAS', 'IACC Reserva']);
 for (const p of partidos) {
   if (!BADGES[p.rival]) throw new Error(`Sin escudo para ${p.rival} en E11_T4_BADGES`);
-  p.badge = await dataUri(BADGES[p.rival]);
+  p.badge = await dataUri(BADGES[p.rival], { sinFondo: FONDO_CLARO.has(p.rival) });
 }
 const crest = await dataUri('logos/rebrand/badge-dorado.webp');
 const egLogo = await dataUri('logos/Espacio Gamer logo.png');
