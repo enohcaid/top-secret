@@ -725,13 +725,25 @@ export default {
         })).json();
         if (!aj || !aj.success || !aj.data || !aj.data.html) return jsonResp({ error: 'bad ajax response', fallback: true }, 200);
         const decode = s => s.replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').trim();
-        const teams = aj.data.html.split('<tbody class="eg-tp-club">').slice(1).map(chunk => {
+        // Escudos que EG sube con fondo (cuadrado negro/blanco/crema): versión sin fondo en R2
+        // (scripts/escudos-sin-fondo.mjs). Nuvo FC no tiene escudo en EG: el suyo de VPUG.
+        const ESC = url.origin + '/media/logos/escudos-eg/';
+        const LOGO_LIMPIO = {
+          'ALL BOYS': ESC + 'all-boys.webp', 'IACC Reserva': ESC + 'iacc-reserva.webp',
+          'MISKYMAYU FC': ESC + 'miskymayu-fc.webp', 'MONOTRIBUTISTAS': ESC + 'monotributistas.webp',
+          'Suda eSports': ESC + 'suda-esports.webp', 'Argentinos Jrs Esp': ESC + 'argentinos-jrs-esp.webp',
+          'Nuvo FC': 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvBXyushQcOcLYfub.png?alt=media&token=1',
+        };
+        // Los equipos en zona (playoffs/promo/descenso) vienen como class="eg-tp-club eg-tp-en-zona" style=…:
+        // cortar solo por class="eg-tp-club" exacto dejaba afuera a 18 de 20.
+        const teams = aj.data.html.split(/<tbody class="eg-tp-club[^"]*"[^>]*>/).slice(1).map(chunk => {
           const nums = [...chunk.matchAll(/<td class="eg-tp-c-(?:pts|num)[^"]*">\s*(-?\d+)\s*<\/td>/g)].map(m => +m[1]);
           const det = n => +((chunk.match(new RegExp('<dt>' + n + '<\\/dt><dd>(-?\\d+)<\\/dd>')) || [])[1] || 0);
           const [pts = 0, gp = 0, w = 0, d = 0, l = 0, gd = 0] = nums;
+          const name = decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || '');
           return {
-            name: decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || ''),
-            logo: (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
+            name,
+            logo: LOGO_LIMPIO[name] || (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
             gp, w, d, l, gf: det('Goles a favor'), gc: det('Goles en contra'), gd, pts
           };
         }).filter(t => t.name);
