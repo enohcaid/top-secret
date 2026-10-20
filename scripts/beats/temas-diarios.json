@@ -258,6 +258,27 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · verso A 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · verso B 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-20",
+      "id": "2026-10-20-1",
+      "archivo": "2026-10-20-1 - Penal.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_20_1.py",
+      "duracion": 90,
+      "nombre": "Penal",
+      "concepto": "La caminata del mediocampo al punto del penal — 10 metros de aislamiento total en medio de la multitud, donde el mundo se achica a pelota, punto y red hasta que apoyás la pelota, enfrentás al arquero y tirás.",
+      "bpm": 126,
+      "tonalidad": "sib menor",
+      "rasgo": "pasos que cuentan: golpe percusivo de pisada (thud grave + click de tapones) a intervalos que se frenan sección a sección; se detienen en el gancho B (llegaste al punto); en el gancho C, un solo paso marca la carrera",
+      "recursos": [
+        "pasos que desaceleran (firma del tema)",
+        "pad con banda estrecha que abre (visión de túnel)",
+        "piano reverberado y aislado",
+        "lead con confianza variable (dubitativo a decidido)",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
