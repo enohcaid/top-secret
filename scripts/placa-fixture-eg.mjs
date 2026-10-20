@@ -94,15 +94,16 @@ const primera = partidos[0].date, ultima = partidos.at(-1).date;
 const rango = `${+primera.slice(8)}/${+primera.slice(5, 7)} — ${+ultima.slice(8)}/${+ultima.slice(5, 7)}`;
 
 const W = 1080, H = 1620;
-// PW = ancho del lienzo: 1080 para la placa 2:3; 1296 para la versión 4:5 (misma placa centrada, fondo completo).
-const html = PW => `<!doctype html><html><head><meta charset="utf-8">
+// PW×PH = lienzo: 1080×1620 la placa 2:3; 1296 de ancho la 4:5; 1400×2489 la historia 9:16 (misma placa, fondo completo).
+// TOP = margen arriba de la placa (historia: 15%, fuera de la zona que tapa Instagram; abajo queda ~20%).
+const html = (PW, PH = H, TOP = 0) => `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root { --bg:#0B0A07; --card:#13110B; --line:rgba(200,168,75,.28); --gold:#C8A84B; --ink:#F2EEE0; --mute:#9C9682; --win:#3ecf8e; --away:#4a9eff; }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { width:${PW}px; height:${H}px; background:var(--bg); color:var(--ink); font-family:'Barlow Condensed',sans-serif; overflow:hidden; position:relative; }
+  body { width:${PW}px; height:${PH}px; padding-top:${TOP}px; background:var(--bg); color:var(--ink); font-family:'Barlow Condensed',sans-serif; overflow:hidden; position:relative; }
   body::before { content:''; position:absolute; inset:0; background:
-      radial-gradient(900px 520px at 50% -8%, rgba(200,168,75,.16), transparent 70%),
+      radial-gradient(900px 520px at 50% ${TOP - Math.round(H * 0.08)}px, rgba(200,168,75,.16), transparent 70%),
       radial-gradient(600px 400px at 100% 100%, rgba(200,168,75,.07), transparent 70%); }
   .frame { position:relative; width:${W}px; height:${H}px; margin:0 auto; }
   .wrap { position:relative; padding:56px 52px 0; }
@@ -146,24 +147,28 @@ const html = PW => `<!doctype html><html><head><meta charset="utf-8">
 </div></body></html>`;
 
 const browser = await chromium.launch();
-async function render(PW, file) {
-  const page = await browser.newPage({ viewport: { width: PW, height: H }, deviceScaleFactor: 1 });
-  await page.setContent(html(PW), { waitUntil: 'networkidle' });
+async function render(PW, file, PH = H, TOP = 0) {
+  const page = await browser.newPage({ viewport: { width: PW, height: PH }, deviceScaleFactor: 1 });
+  await page.setContent(html(PW, PH, TOP), { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: file });
   await page.close();
 }
 await render(W, OUT + '.png');
 await render(Math.round(H * 4 / 5), OUT + ' 4x5.png');
+const SW = 1400, SH = Math.round(SW * 16 / 9);
+await render(SW, OUT + ' historia.png', SH, Math.round(SH * 0.15));
 await browser.close();
 await sharp(OUT + '.png').webp({ quality: 88 }).toFile(OUT + '.webp');
 // Versión 4:5 en JPEG para redes (carrusel de Instagram: misma proporción que el post y solo JPEG).
 await sharp(OUT + ' 4x5.png').resize(1080, 1350).jpeg({ quality: 92 }).toFile(OUT + ' 4x5.jpg');
 fs.unlinkSync(OUT + ' 4x5.png');
-console.log('Placa:', OUT + '.png', '+ .webp + 4x5.jpg');
+await sharp(OUT + ' historia.png').resize(1080, 1920).jpeg({ quality: 92 }).toFile(OUT + ' historia.jpg');
+fs.unlinkSync(OUT + ' historia.png');
+console.log('Placa:', OUT + '.png', '+ .webp + 4x5.jpg + historia.jpg');
 
 if (SUBIR) {
   const { execFileSync } = await import('node:child_process');
-  for (const ext of ['.png', '.webp', ' 4x5.jpg'])
+  for (const ext of ['.png', '.webp', ' 4x5.jpg', ' historia.jpg'])
     execFileSync('node', ['scripts/r2.mjs', 'put', OUT + ext, 'logos/Fixture Espacio Gamer T4' + ext], { stdio: 'inherit' });
 }
