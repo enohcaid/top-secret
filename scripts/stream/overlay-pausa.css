@@ -141,3 +141,4 @@ body.vertical #pausa .izq{left:-10px}body.vertical #pausa .der{right:-10px}
 body.vertical #pausa .globo{max-width:760px}
 body.vertical #pausa .globo.de-izq,body.vertical #pausa .globo.pregunta{left:110px}body.vertical #pausa .globo.de-der{right:110px}
 body.vertical #pausa .tv,body.vertical #pausa .tarjeta{left:110px;right:110px}
+body.vertical #pEspera{left:110px;right:110px}body.vertical #pEspera .msg{font-size:31px}
