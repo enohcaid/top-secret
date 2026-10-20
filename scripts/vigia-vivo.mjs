@@ -92,6 +92,7 @@ async function gris(raw, reg) {
   return sharp(raw, { raw: { width: W, height: H, channels: 3 } }).extract(reg).greyscale().raw().toBuffer();
 }
 const AUSENCIA_PARTIDO = 90; // s sin marcador = el próximo que aparezca es otro partido
+const INICIO_PARTIDO = 180;  // s sin marcador = partido nuevo de la noche (el entretiempo dura menos)
 
 // ── Clips de goles ───────────────────────────────────────────────────────────
 // En FC27 online no hay repetición: gol → festejo (cortes de cámara, ~5 s) → saque del medio. El marcador
@@ -271,6 +272,10 @@ async function main() {
     const enJuego = hayMarcador(caja);
     if (enJuego) {
       const img = () => sharp(raw, { raw: { width: W, height: H, channels: 3 } });
+      // Partido nuevo (no entretiempo: ese dura menos): el marcador vuelve tras ≥ 3 min sin verse. retransmitir.mjs
+      // cuenta estos avisos para saber qué partido de la noche se juega (la hora no sirve: siempre hay atrasos).
+      // Con el vigía recién arrancado (< 3 min mirando) no se avisa: podría ser un partido ya empezado.
+      if (!vodId && seg - ultimoMarcador >= INICIO_PARTIDO && seg >= INICIO_PARTIDO) { avisarOverlay('inicioPartido'); console.log(`[${hms(seg)}] empieza un partido nuevo`); }
       if (seg - ultimoMarcador > AUSENCIA_PARTIDO) {
         // vuelve el marcador tras un rato largo: arranca (o sigue tras el entretiempo) un partido
         det.reiniciar(); partidos++; inicioMarcador = seg; recortePartido = false; huboPartido = true;

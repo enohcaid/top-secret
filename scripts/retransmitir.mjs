@@ -21,7 +21,7 @@ import { spawn, execFile, execFileSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
-import { argsSalidas } from './stream/salidas.mjs';
+import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V } from './stream/salidas.mjs';
 import { crearVivoIg } from './stream/ig-vivo.mjs';
 import { temporada, convocados, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
 const listaMusica = () => prepararMusica(log);
@@ -31,9 +31,10 @@ const E = process.env;
 // --prueba: las salidas horizontales van a MediaMTX local (rtmp://127.0.0.1:1935/prueba/h, no salen a ninguna red) e
 // Instagram en modo práctica; --fuente <canal> toma otro canal de Twitch en vez de enohcaid (para probar sin la PS5).
 const PRUEBA = process.argv.includes('--prueba');
-// --kbps N: bitrate de cada salida con overlay (default 1500). Con la subida justa (Wi-Fi, PS5 en la misma conexión)
-// las salidas se traban y MediaMTX corta a ffmpeg: bajar a 1000 (2026-10-19).
-const KBPS = +(process.argv[process.argv.indexOf('--kbps') + 1] || 0) || 1500;
+// --kbps N: bitrate de video de cada salida con overlay (default 1000). La subida de la casa es ~9,5 Mbps y la comparte
+// la PS5 (~3,4 Mbps, por cable): 4 copias a 1500 la llenaban y la PS5 perdía su conexión con Twitch (2026-10-19).
+// A 1000 + 96 de audio son ~4,4 Mbps entre las 4 redes.
+const KBPS = +(process.argv[process.argv.indexOf('--kbps') + 1] || 0) || 1000;
 const fi = process.argv.indexOf('--fuente');
 const LOGIN = fi > 0 ? process.argv[fi + 1] : 'enohcaid', FUENTE = `twitch.tv/${LOGIN}`;
 const LOCAL = 'rtmp://127.0.0.1:1935/live/mix';
@@ -84,20 +85,35 @@ async function publicarHistoria() {
   } catch (e) { log('No se pudo publicar la historia EN VIVO:', e.message); fs.rmSync(MARCA, { force: true }); }
 }
 
+// Partidos que empezaron esta noche: avisos 'inicioPartido' de vigia-vivo.mjs en estado.json. Se guardan en un archivo
+// por noche porque estado.json se borra al empezar cada sesión (cortes de la PS5, reinicios).
+const INICIOS = path.resolve(`fuentes/stream/inicios-${NOCHE}.json`);
+let inicios = []; try { inicios = JSON.parse(fs.readFileSync(INICIOS, 'utf8')); } catch {}
+function contarInicios() {
+  let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
+  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id)).map(x => x.id);
+  if (!nuevos.length) return false;
+  inicios.push(...nuevos); fs.writeFileSync(INICIOS, JSON.stringify(inicios));
+  log(`Empieza el partido ${inicios.length} de la noche${partidos?.[inicios.length - 1] ? ` (vs ${partidos[inicios.length - 1].rival})` : ''}.`);
+  return true;
+}
+
 // Placa del torneo en el overlay: el partido de la noche que ya empezó (o el próximo), desde placa-envivo.mjs --json.
 let partidos = null;
 async function actualizarPartido() {
   try {
     if (!partidos) partidos = JSON.parse((await node('scripts/placa-envivo.mjs', '--json', '--fecha', NOCHE)).trim().split('\n').pop());
-    const hora = new Date(Date.now() + 10 * 60000).toLocaleTimeString('en-GB', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
-    const p = partidos.filter(x => x.hora <= hora).pop() || partidos[0];
+    // Partido actual: según cuántos partidos vio empezar el vigía esta noche (no por la hora: el 2026-10-19, con atrasos,
+    // la hora salteaba la vuelta contra Kannabiense). Sin avisos todavía, el primero de la noche.
+    contarInicios();
+    const n = inicios.length;
+    const p = partidos[Math.min(Math.max(n - 1, 0), partidos.length - 1)];
     let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
     Object.assign(e, p
       ? { torneo: [p.liga, p.torneo !== p.liga && p.torneo, p.etapa].filter(Boolean).join(' · ').toUpperCase(), rival: p.rival, escudo: p.escudo || '' }
       : { torneo: '', rival: '', escudo: '' });
     // Para el modo pausa (overlay-pausa.js): partidos que faltan esta noche y números de la temporada
-    const ahoraHM = new Date().toLocaleTimeString('en-GB', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
-    e.proximos = partidos.filter(x => x.hora >= ahoraHM);
+    e.proximos = partidos.slice(n);
     e.temporada = await temporada();
     // Solo los convocados de hoy en el palco y las charlas (convocatoria.html); si no hay datos, todos
     const conv = await convocados(); if (conv) e.jugadores = conv;
@@ -128,7 +144,7 @@ async function enVivo() {
 
 // Reenvía a todos los destinos: 'directo' = la PS5 por streamlink sin recodificar; 'overlay' = el lienzo de OBS desde
 // MediaMTX, recortado y codificado por salidas.mjs.
-function retransmitir(entrada, igUrl = null) {
+function retransmitir(entrada) {
   return new Promise(res => {
     const directo = entrada === 'directo';
     const sl = directo ? spawn('python', ['-m', 'streamlink', '--twitch-disable-ads', '--retry-open', '3', '-O', FUENTE, 'best'], { stdio: ['ignore', 'pipe', 'pipe'] }) : null;
@@ -137,7 +153,7 @@ function retransmitir(entrada, igUrl = null) {
       ? ['-hide_banner', '-loglevel', 'warning', '-i', 'pipe:0', '-map', '0:v', '-map', '0:a?', '-c', 'copy',
         '-tag:v', '7', '-tag:a', '10',                       // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
         '-f', 'tee', salidas]
-      : argsSalidas({ entrada: LOCAL, horizontales: destinos.map(d => d.url), vertical: igUrl, kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
+      : argsCodificador({ entrada: LOCAL, vertical: !process.argv.includes('--sin-instagram'), kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
     const ff = spawn(ffmpegPath, args, { stdio: [directo ? 'pipe' : 'ignore', 'ignore', 'pipe'] });
     if (sl) {
       sl.stdout.pipe(ff.stdin); ff.stdin.on('error', () => {});
@@ -153,6 +169,28 @@ function retransmitir(entrada, igUrl = null) {
     }, 30000);
     ff.on('close', code => { clearInterval(reloj); sl?.kill(); res(code); });
   });
+}
+
+// Un relevo por red: copia sin recodificar de MediaMTX local al destino. Si se corta (la red se trabó, MediaMTX lo
+// soltó, el destino cerró), se reinicia solo ese, con espera creciente; las demás redes no se enteran. Los intentos
+// fallidos mientras el codificador todavía no publicó no se anotan.
+function relevos(lista) {
+  let parado = false; const vivos = new Set();
+  const lanzar = d => {
+    if (parado) return;
+    const t0 = Date.now(); let ultimo = '';
+    const p = spawn(ffmpegPath, argsRelevo(d.entrada, d.url), { stdio: ['ignore', 'ignore', 'pipe'] }); vivos.add(p);
+    p.stderr.on('data', x => { const t = String(x).trim(); if (t) ultimo = ocultarClaves(t).replace(/s+/g, ' ').slice(0, 160); });
+    p.on('close', code => {
+      vivos.delete(p); if (parado) return;
+      const duro = Date.now() - t0;
+      if (duro > 30000) { d.fallas = 0; log(`${d.nombre}: relevo cortado tras ${Math.round(duro / 1000)} s (ffmpeg ${code}), lo reconecto. ${ultimo}`); }
+      else if (++d.fallas % 10 === 0) log(`${d.nombre}: el relevo no logra conectar (${d.fallas} intentos). ${ultimo}`);
+      setTimeout(() => lanzar(d), Math.min(20000, 1000 * 2 ** Math.min(d.fallas, 4)));
+    });
+  };
+  lista.forEach(d => { d.fallas = 0; lanzar(d); });
+  return { parar() { parado = true; for (const p of vivos) p.kill(); } };
 }
 
 // ── Cadena con overlay: MediaMTX + streamlink como servidor http + OBS ──
@@ -186,9 +224,10 @@ async function bajarCadena() {
 async function sesion() {
   publicarHistoria();
   // Vivo nuevo: sin lado de barra ni eventos de una sesión anterior (los vuelve a escribir vigia-vivo.mjs)
-  try { fs.rmSync(ESTADO, { force: true }); } catch {}
+  try { contarInicios(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
+  const inicio = setInterval(() => { if (contarInicios()) actualizarPartido(); }, 15000);   // partido nuevo: placa al toque
   if (conOverlay) await listaMusica();
   const audio = setInterval(audioSegunModo, 3000);
   try {
@@ -203,23 +242,22 @@ async function sesion() {
           ig = await crearVivoIg({ titulo, practica: PRUEBA || process.argv.includes('--ig-practica'), log });
         } catch (e) { log('Instagram no disponible:', e.message.slice(0, 200)); }
       }
+      // Un relevo por red desde MediaMTX local; el codificador (retransmitir('overlay')) solo escribe ahí
+      const rel = relevos([...destinos.map(d => ({ ...d, entrada: LOCAL_H })), ...(ig ? [{ nombre: 'Instagram', url: ig.url, entrada: LOCAL_V }] : [])]);
       let fallas = 0, igIntento = null;
       while (Date.now() < limite && (await enVivo()) !== false) {
         const t0 = Date.now();
-        const corriendo = retransmitir('overlay', ig?.url);
+        const corriendo = retransmitir('overlay');
         if (ig && !igIntento) igIntento = ig.transmitir().catch(e => log('Instagram:', e.message.slice(0, 200)));   // una sola espera
         const code = await corriendo;
         if (Date.now() - t0 > 60000) {
-          fallas = 0; log(`Retransmisión con overlay cortada (ffmpeg ${code}).`);
-          // La clave de Instagram es de un solo uso: al reconectar con la misma, Instagram no la acepta ni la rechaza,
-          // ffmpeg queda esperando, se traba toda la salida y MediaMTX lo corta cada ~25 s (2026-10-19). Se sigue sin
-          // Instagram en esta sesión, para no tirar abajo Twitch, Kick y YouTube.
-          if (ig) { log('Instagram: la clave era de un solo uso, sigo sin Instagram en esta sesión.'); ig.finalizar().catch(() => {}); ig = null; }
+          fallas = 0; log(`Codificador con overlay cortado (ffmpeg ${code}): lo vuelvo a levantar.`);
           continue;
         }
         if (++fallas >= 12) { log('La señal con overlay no aparece en MediaMTX: sigo sin overlay.'); break; }   // ~2 min
         await espera(5000);
       }
+      rel.parar();
       if (ig) await ig.finalizar().catch(() => {});
       await bajarCadena();
       if (fallas < 12) return;
@@ -229,7 +267,7 @@ async function sesion() {
       log(`Retransmisión directa terminada (ffmpeg ${code}).`);
       await espera(10000);
     }
-  } finally { clearInterval(partido); clearInterval(audio); modoAudio = null; }
+  } finally { clearInterval(partido); clearInterval(inicio); clearInterval(audio); modoAudio = null; }
 }
 
 log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}${conOverlay ? ' con overlay' : ' sin overlay'}. Esperando que ${FUENTE} esté en vivo (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);

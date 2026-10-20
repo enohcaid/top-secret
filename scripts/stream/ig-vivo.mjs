@@ -42,6 +42,12 @@ async function asegurarChrome(log) {
 export async function crearVivoIg({ titulo = 'Top Secret FC en vivo', practica = false, log = console.log } = {}) {
   await asegurarChrome(log);
   const b = await chromium.connectOverCDP('http://localhost:9222');
+  // Ventanas de Instagram de sesiones anteriores cortadas a la fuerza (sin finalizar()): se acumulaban una por corte
+  // (4 el 2026-10-19) y muchas pestañas abiertas cuelgan connectOverCDP. Un vivo que haya quedado abierto lo detecta
+  // y lo cierra la ventana nueva (más abajo).
+  const viejas = b.contexts().flatMap(c => c.pages()).filter(p => /instagram\.com/.test(p.url()));
+  for (const p of viejas) await p.close().catch(() => {});
+  if (viejas.length) log(`Instagram: cerré ${viejas.length} ventana(s) de sesiones anteriores.`);
   // Ventana propia: no toca las pestañas de Canva/ChatGPT
   const s = await b.newBrowserCDPSession();
   const nueva = b.contexts()[0].waitForEvent('page');
