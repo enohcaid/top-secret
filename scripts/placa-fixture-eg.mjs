@@ -61,15 +61,17 @@ const primera = partidos[0].date, ultima = partidos.at(-1).date;
 const rango = `${+primera.slice(8)}/${+primera.slice(5, 7)} — ${+ultima.slice(8)}/${+ultima.slice(5, 7)}`;
 
 const W = 1080, H = 1620;
-const html = `<!doctype html><html><head><meta charset="utf-8">
+// PW = ancho del lienzo: 1080 para la placa 2:3; 1296 para la versión 4:5 (misma placa centrada, fondo completo).
+const html = PW => `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root { --bg:#0B0A07; --card:#13110B; --line:rgba(200,168,75,.28); --gold:#C8A84B; --ink:#F2EEE0; --mute:#9C9682; --win:#3ecf8e; --away:#4a9eff; }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { width:${W}px; height:${H}px; background:var(--bg); color:var(--ink); font-family:'Barlow Condensed',sans-serif; overflow:hidden; position:relative; }
+  body { width:${PW}px; height:${H}px; background:var(--bg); color:var(--ink); font-family:'Barlow Condensed',sans-serif; overflow:hidden; position:relative; }
   body::before { content:''; position:absolute; inset:0; background:
       radial-gradient(900px 520px at 50% -8%, rgba(200,168,75,.16), transparent 70%),
       radial-gradient(600px 400px at 100% 100%, rgba(200,168,75,.07), transparent 70%); }
+  .frame { position:relative; width:${W}px; height:${H}px; margin:0 auto; }
   .wrap { position:relative; padding:56px 52px 0; }
   header { display:grid; grid-template-columns:150px 1fr 150px; align-items:center; gap:18px; }
   header img { width:150px; height:150px; object-fit:contain; }
@@ -96,7 +98,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   .hr { font-family:'Bebas Neue'; font-size:31px; letter-spacing:1px; }
   footer { position:absolute; left:52px; right:52px; bottom:40px; display:flex; justify-content:space-between; font-size:22px; letter-spacing:3px; color:var(--mute); font-weight:600; text-transform:uppercase; }
   footer span:last-child { color:var(--gold); }
-</style></head><body><div class="wrap">
+</style></head><body><div class="frame"><div class="wrap">
   <header>
     <img src="${crest}">
     <div class="tt"><h1>TOP SECRET FC</h1><div class="sub">Fixture · Temporada 4</div></div>
@@ -108,18 +110,27 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
   ${sola.length ? `<div class="sola">${sola.map(fila).join('')}</div>` : ''}
 </div>
 <footer><span>topsecret.ar</span><span>Top Secret FC · 2026</span></footer>
-</body></html>`;
+</div></body></html>`;
 
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
-await page.setContent(html, { waitUntil: 'networkidle' });
-await page.evaluate(() => document.fonts.ready);
-await page.screenshot({ path: OUT + '.png' });
+async function render(PW, file) {
+  const page = await browser.newPage({ viewport: { width: PW, height: H }, deviceScaleFactor: 1 });
+  await page.setContent(html(PW), { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: file });
+  await page.close();
+}
+await render(W, OUT + '.png');
+await render(Math.round(H * 4 / 5), OUT + ' 4x5.png');
 await browser.close();
 await sharp(OUT + '.png').webp({ quality: 88 }).toFile(OUT + '.webp');
-console.log('Placa:', OUT + '.png', '+ .webp');
+// Versión 4:5 en JPEG para redes (carrusel de Instagram: misma proporción que el post y solo JPEG).
+await sharp(OUT + ' 4x5.png').resize(1080, 1350).jpeg({ quality: 92 }).toFile(OUT + ' 4x5.jpg');
+fs.unlinkSync(OUT + ' 4x5.png');
+console.log('Placa:', OUT + '.png', '+ .webp + 4x5.jpg');
 
 if (SUBIR) {
   const { execFileSync } = await import('node:child_process');
-  execFileSync('node', ['scripts/r2.mjs', 'put', OUT + '.webp', 'logos/Fixture Espacio Gamer T4.webp'], { stdio: 'inherit' });
+  for (const ext of ['.png', '.webp', ' 4x5.jpg'])
+    execFileSync('node', ['scripts/r2.mjs', 'put', OUT + ext, 'logos/Fixture Espacio Gamer T4' + ext], { stdio: 'inherit' });
 }

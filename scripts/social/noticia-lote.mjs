@@ -6,6 +6,8 @@
 // Sale apenas se aprueba (publicarA = ahora); publicar.mjs publica primero la nota y después las redes.
 //   node scripts/social/noticia-lote.mjs [--no-abrir]
 import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 import { putFile } from '../lib/r2.mjs';
 import { cargarNoticia, generarPiezas } from '../noticia-redes.mjs';
 import { leer, agregarLote, PAGINA } from './lib/aprobaciones.mjs';
@@ -28,6 +30,18 @@ else {
   }
   const link = `${WORKER}/og/${n.id}`;
   const sc = n.shareCaptions || {};
+  // Imágenes extra (n.imagenesExtra: URLs públicas JPEG 4:5, p. ej. la placa del fixture): Instagram pasa a carrusel,
+  // Facebook a álbum (el link va en el texto) y X sube las imágenes (necesita copias locales). n.pieRedes pone en la
+  // foto principal el aviso de que hay más ("Deslizá para ver…", lo dibuja noticia-redes.js).
+  const extra = (n.imagenesExtra || []).slice(0, 3);
+  const extraLocal = [];
+  for (const [i, u] of extra.entries()) {
+    const file = path.resolve('fuentes/redes/noticias', `${n.id}-extra${i + 1}.jpg`);
+    fs.writeFileSync(file, Buffer.from(await (await fetch(u)).arrayBuffer()));
+    extraLocal.push(file);
+  }
+  const imgs = us => us.map(u => ({ tipo: 'imagen', url: u }));
+  const textoX = `${sc.x || n.shareCaption || n.title}\n${link}`;
   // Cuerpo editable: un párrafo o bloque por línea (los bloques {h}, {specs}, {quote}, {pair}, {img} como JSON),
   // igual que el editor viejo del borrador.
   const cuerpo = (n.body || []).map(b => typeof b === 'string' ? b : JSON.stringify(b)).join('\n');
@@ -37,11 +51,17 @@ else {
     titulo: `Noticia del día · ${n.dateLabel || n.date}`,
     piezas: [
       P({ id: 'sitio', red: 'sitio', formato: 'Noticia en el sitio', descripcion: `${n.category || ''} · sale apenas la aprobás`, media: [{ tipo: 'imagen', url: n.imagePost }], titulo: n.title, texto: cuerpo, noticia: n, metodo: 'sitio-borrador', etiquetaTexto: 'Cuerpo (un párrafo o bloque por línea)' }),
-      P({ id: 'ig-post', red: 'instagram', formato: 'Post con título', descripcion: 'La foto con el título encima', media: [{ tipo: 'imagen', url: url.ig }], texto: sc.ig || n.excerpt || '', metodo: 'ig-imagen' }),
+      extra.length
+        ? P({ id: 'ig-post', red: 'instagram', formato: 'Carrusel', descripcion: `La foto con el título + ${extra.length} imagen(es) más`, media: imgs([url.ig, ...extra]), texto: sc.ig || n.excerpt || '', metodo: 'ig-carrusel' })
+        : P({ id: 'ig-post', red: 'instagram', formato: 'Post con título', descripcion: 'La foto con el título encima', media: [{ tipo: 'imagen', url: url.ig }], texto: sc.ig || n.excerpt || '', metodo: 'ig-imagen' }),
       P({ id: 'ig-historia', red: 'instagram', formato: 'Historia', descripcion: '24 h', media: [{ tipo: 'imagen', url: url.historia, vertical: true }], texto: '', metodo: 'ig-historia' }),
-      P({ id: 'fb-post', red: 'facebook', formato: 'Post con link', descripcion: 'La vista previa del link trae la foto y el título', media: [{ tipo: 'imagen', url: n.imagePost }], texto: sc.fb || n.excerpt || '', metodo: 'fb-link', link }),
+      extra.length
+        ? P({ id: 'fb-post', red: 'facebook', formato: 'Álbum', descripcion: 'Las mismas imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: `${sc.fb || n.excerpt || ''}\n${link}`, metodo: 'fb-album' })
+        : P({ id: 'fb-post', red: 'facebook', formato: 'Post con link', descripcion: 'La vista previa del link trae la foto y el título', media: [{ tipo: 'imagen', url: n.imagePost }], texto: sc.fb || n.excerpt || '', metodo: 'fb-link', link }),
       P({ id: 'fb-historia', red: 'facebook', formato: 'Historia', descripcion: '24 h', media: [{ tipo: 'imagen', url: url.historia, vertical: true }], texto: '', metodo: 'fb-historia' }),
-      P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: `${sc.x || n.shareCaption || n.title}\n${link}`, metodo: 'x-texto' }),
+      extra.length
+        ? P({ id: 'x', red: 'x', formato: 'Post con imágenes', descripcion: 'Las imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: textoX, metodo: 'x-imagenes', local: { slides: [piezas.ig, ...extraLocal] } })
+        : P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: textoX, metodo: 'x-texto' }),
     ],
   });
   log(`Lote noticia-${n.id} listo para aprobar.`);

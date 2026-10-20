@@ -112,9 +112,12 @@
     // Se arma de abajo hacia arriba.
     let y = H - (historia ? Math.round(H * 0.20) + 40 : 84);
     ctx.textBaseline = 'alphabetic';
-    if (historia) {
-      ctx.font = `600 30px ${FONT}`; ctx.letterSpacing = '6px'; ctx.fillStyle = 'rgba(244,241,234,.8)';
-      ctx.fillText('NOTA COMPLETA · LINK EN LA BIO', X, y);
+    // Pie del post: n.pieRedes (opcional) avisa que hay más imágenes en el carrusel ("DESLIZÁ PARA VER…").
+    const pie = historia ? 'NOTA COMPLETA · LINK EN LA BIO' : (opts.pie || n.pieRedes || '').toUpperCase();
+    if (pie) {
+      ctx.font = `${historia ? 600 : 700} 30px ${FONT}`; ctx.letterSpacing = '6px';
+      ctx.fillStyle = historia ? 'rgba(244,241,234,.8)' : GOLD;
+      ctx.fillText(historia ? pie : pie + '  →', X, y);
       y -= 30 + 34;
     }
     ctx.font = `900 ${size}px ${FONT}`; ctx.letterSpacing = '0.5px';
