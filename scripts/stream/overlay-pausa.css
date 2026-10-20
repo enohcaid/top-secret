@@ -133,3 +133,11 @@ body.vertical #victoria .eq span{font-size:28px}
 body.vertical #victoria .goles{font-size:150px;gap:16px}
 body.vertical #victoria .jugador{bottom:270px;width:1000px;height:900px}
 body.vertical #victoria .jugador video{height:820px}
+
+/* Vertical con margen seguro a los costados (2026-10-19): Instagram en pantalla completa recorta ~95 px de cada lado;
+   todo dentro de x 110–970 (antes 50 px de margen). */
+body.vertical #pausa .barra{left:110px;right:110px}
+body.vertical #pausa .izq{left:-10px}body.vertical #pausa .der{right:-10px}
+body.vertical #pausa .globo{max-width:760px}
+body.vertical #pausa .globo.de-izq,body.vertical #pausa .globo.pregunta{left:110px}body.vertical #pausa .globo.de-der{right:110px}
+body.vertical #pausa .tv,body.vertical #pausa .tarjeta{left:110px;right:110px}

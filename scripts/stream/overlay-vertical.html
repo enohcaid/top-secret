@@ -62,6 +62,19 @@ body.lado-der .tapa.barra{left:796px}   /* nuestra barra a la derecha (la detect
 .palco .num{font-family:'Bebas Neue';font-size:116px;line-height:.85;color:var(--oro);min-width:70px;text-align:center}
 .palco .gt{font-weight:900;font-size:54px;letter-spacing:-.02em;line-height:1}
 .palco .dice{font-size:22px;margin-top:10px}
+/* Margen seguro a los costados (2026-10-19): en pantalla completa Instagram llena celulares más altos que 9:16 y
+   recorta ~95 px de cada lado. Todo queda dentro de x 110–970: el partido va a 860×484 en (110, 392) (obs-config.mjs),
+   el hueco del fondo es ese rectángulo y las tapas se escalan con el partido (0,7963 = 860/1080). */
+body{background:
+  linear-gradient(90deg,#16130c 110px,transparent 110px,transparent 970px,#16130c 970px) 0 392px/1080px 484px no-repeat,
+  linear-gradient(180deg,#0B0A07 0,#16130c 392px,transparent 392px,transparent 876px,#16130c 876px,#0B0A07 1920px)}
+.club,.torneo,.palco .placa{left:110px;right:110px}
+.tapa{transform:scale(.7963);transform-origin:0 0}
+.tapa.panel{left:725px;top:402px}
+.tapa.barra{left:116px;top:812px}
+body.lado-der .tapa.barra{left:744px}
+.gol{top:500px}
+.palco .vid{width:860px}
 </style>
 <link rel="stylesheet" href="overlay-pausa.css"></head><body class="vertical">
 

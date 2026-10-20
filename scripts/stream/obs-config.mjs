@@ -47,10 +47,11 @@ const navegador = (name, archivo, w, h, audio = false) => ({ id: 'browser_source
 let nItem = 0;
 const item = (name, pos, caja) => ({ name, source_uuid: uuid(name), id: ++nItem, visible: true, locked: true, pos: { x: pos[0], y: pos[1] }, rot: 0,
   scale: { x: 1, y: 1 }, align: 5, bounds_type: 2, bounds_align: 0, bounds: { x: caja[0], y: caja[1] }, crop_left: 0, crop_top: 0, crop_right: 0, crop_bottom: 0 });
-// De abajo hacia arriba. El fondo del overlay vertical deja transparente el hueco del partido (y 330–938).
+// De abajo hacia arriba. Vertical: el partido a 860×484 en (110, 392) — margen seguro de 110 px a los costados porque
+// Instagram en pantalla completa recorta ~95 px de cada lado (2026-10-19); el fondo del overlay deja transparente ese hueco.
 const items = [
   item('Partido', [0, 0], [1920, 1080]), item('Overlay', [0, 0], [1920, 1080]),
-  item('Partido', [1920, 330], [1080, 608]), item('Overlay vertical', [1920, 0], [1080, 1920]),
+  item('Partido', [2030, 392], [860, 484]), item('Overlay vertical', [1920, 0], [1080, 1920]),
 ];
 fs.writeFileSync(path.join(ESCENAS, 'TopSecret.json'), JSON.stringify({
   name: 'TopSecret', current_scene: 'Vivo', current_program_scene: 'Vivo', scene_order: [{ name: 'Vivo' }],
