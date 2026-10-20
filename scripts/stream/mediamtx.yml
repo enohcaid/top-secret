@@ -1,6 +1,9 @@
 # Servidor RTMP local para el vivo con overlay: OBS publica en rtmp://127.0.0.1:1935/live/ts y
 # retransmitir.mjs lo toma de ahí y lo reparte (Twitch topsecretfc, Kick, YouTube). Solo escucha en la PC.
 logLevel: warn
+# Cola por lector: si la subida se traba unos segundos, ffmpeg (lector) se atrasa; con la default (512) MediaMTX
+# lo cortaba cada 20-40 s (2026-10-19). Potencia de 2.
+writeQueueSize: 8192
 rtsp: no
 rtmp: yes
 rtmpAddress: 127.0.0.1:1935

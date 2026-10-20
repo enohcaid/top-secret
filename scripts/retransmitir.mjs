@@ -31,6 +31,9 @@ const E = process.env;
 // --prueba: las salidas horizontales van a MediaMTX local (rtmp://127.0.0.1:1935/prueba/h, no salen a ninguna red) e
 // Instagram en modo práctica; --fuente <canal> toma otro canal de Twitch en vez de enohcaid (para probar sin la PS5).
 const PRUEBA = process.argv.includes('--prueba');
+// --kbps N: bitrate de cada salida con overlay (default 1500). Con la subida justa (Wi-Fi, PS5 en la misma conexión)
+// las salidas se traban y MediaMTX corta a ffmpeg: bajar a 1000 (2026-10-19).
+const KBPS = +(process.argv[process.argv.indexOf('--kbps') + 1] || 0) || 1500;
 const fi = process.argv.indexOf('--fuente');
 const LOGIN = fi > 0 ? process.argv[fi + 1] : 'enohcaid', FUENTE = `twitch.tv/${LOGIN}`;
 const LOCAL = 'rtmp://127.0.0.1:1935/live/mix';
@@ -134,7 +137,7 @@ function retransmitir(entrada, igUrl = null) {
       ? ['-hide_banner', '-loglevel', 'warning', '-i', 'pipe:0', '-map', '0:v', '-map', '0:a?', '-c', 'copy',
         '-tag:v', '7', '-tag:a', '10',                       // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
         '-f', 'tee', salidas]
-      : argsSalidas({ entrada: LOCAL, horizontales: destinos.map(d => d.url), vertical: igUrl, entradaArgs: ['-rw_timeout', '15000000'] });
+      : argsSalidas({ entrada: LOCAL, horizontales: destinos.map(d => d.url), vertical: igUrl, kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
     const ff = spawn(ffmpegPath, args, { stdio: [directo ? 'pipe' : 'ignore', 'ignore', 'pipe'] });
     if (sl) {
       sl.stdout.pipe(ff.stdin); ff.stdin.on('error', () => {});
