@@ -108,7 +108,8 @@ function crearEscena(cv, cfg) {
       if (p._img) { const k = Math.min((bs - 6) / p._img.width, (bs - 6) / p._img.height); ctx.drawImage(p._img, bx + (bs - p._img.width * k) / 2, cy - p._img.height * k / 2, p._img.width * k, p._img.height * k); }
       const lg = p.league || 'Amistoso', col = LIGA[lg] || '#b8b2a6';
       ctx.font = `700 22px ${COND}`; ctx.letterSpacing = '3px';
-      const meta = lg.toUpperCase() + '  ·  ' + (p.isHome ? 'LOCAL' : 'VISITA');
+      // desde la T4 la liga 11x11 se llama Espacio Gamer (la clave interna sigue siendo '11x11')
+      const meta = (lg === '11x11' ? 'Espacio Gamer' : lg).toUpperCase() + '  ·  ' + (p.isHome ? 'LOCAL' : 'VISITA');
       const mw = ctx.measureText(meta).width;
       ctx.fillStyle = col; ctx.fillText(meta, W - M - mw, cy);
       ctx.letterSpacing = '0px';
