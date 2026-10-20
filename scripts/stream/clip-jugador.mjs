@@ -16,7 +16,8 @@ import ffmpegPath from 'ffmpeg-static';
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const [GT, EMO] = process.argv.slice(2);
 const PLANO = 'Cámara fija, plano entero: se lo ve de pies a cabeza todo el tiempo. El fondo gris liso no cambia.';
-const VUELVE = 'Empieza y termina en la misma postura: parado, quieto, con los brazos al costado.';
+const SOLO = 'Está solo en el cuadro todo el tiempo: no aparece ninguna otra persona, mano ni brazo. No se ríe.';
+const VUELVE ='Empieza y termina en la misma postura: parado, quieto, con los brazos al costado.';
 // espera: rotan todo el partido (empiezan y terminan en la pose del render, así se encadenan sin salto).
 // evento: gol nuestro / gol del rival.
 export const EMOCIONES = {
@@ -27,9 +28,11 @@ export const EMOCIONES = {
   aplaude: `El jugador aplaude a un compañero por una buena jugada, asiente con la cabeza y levanta el pulgar. ${VUELVE} ${PLANO}`,
   pide: `El jugador pide la pelota: levanta una mano bien alta, la agita y grita mirando a un costado. ${VUELVE} ${PLANO}`,
   calma: `El jugador pide calma a sus compañeros: baja las dos manos abiertas despacio, con cara tranquila y segura. ${VUELVE} ${PLANO}`,
-  // charlas del modo pausa (overlay): uno habla, el otro escucha
-  habla: `El jugador charla con un compañero que está a su lado: mueve la boca al hablar, sonríe, gesticula con las dos manos explicando una jugada y mira a un costado. ${VUELVE} ${PLANO}`,
-  escucha: `El jugador escucha a un compañero que le habla desde un costado: lo mira, asiente con la cabeza, se ríe y se cruza de brazos. ${VUELVE} ${PLANO}`,
+  // charlas del modo pausa (overlay): uno habla, el otro escucha.
+  // Nunca nombrar a otra persona ("un compañero"): Canva la dibuja entrando al cuadro. Ni "sonríe"/"se ríe": se ríen
+  // en vez de hablar (Juan, 2026-10-20). SOLO cierra los dos prompts.
+  habla: `El jugador habla mirando hacia un costado, fuera de cuadro: mueve la boca con naturalidad como si explicara una jugada, con cara seria y concentrada, y acompaña con una mano a la altura del pecho. ${SOLO} ${VUELVE} ${PLANO}`,
+  escucha: `El jugador escucha con atención mirando hacia un costado, fuera de cuadro: boca cerrada, cara seria y concentrada, asiente despacio con la cabeza dos veces. ${SOLO} ${VUELVE} ${PLANO}`,
   gol: `El jugador grita un gol con euforia: abre bien la boca, aprieta los dos puños y los sacude a la altura del pecho, mirando a cámara con los ojos encendidos. ${PLANO}`,
   festejo: `El jugador festeja feliz: sonríe de oreja a oreja, levanta los brazos y aplaude, mirando a cámara. ${PLANO}`,
   frustrado: `El jugador se lamenta por un gol en contra: se lleva las dos manos a la cabeza, cierra los ojos y niega con la cabeza. ${PLANO}`,

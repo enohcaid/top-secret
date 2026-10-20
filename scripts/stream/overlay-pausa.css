@@ -18,6 +18,7 @@ body.en-pausa #pausa{opacity:1}
 /* Jugadores: el clip (720×586) con su placa abajo */
 #pausa .pj{position:absolute;bottom:40px;width:1000px;height:910px}
 #pausa .pj video{position:absolute;left:0;right:0;bottom:90px;width:100%;height:814px;object-fit:contain;object-position:50% 100%}
+#pausa .pj.espejo video{transform:scaleX(-1)}
 #pausa .pj .nombre{position:absolute;left:230px;right:230px;bottom:0;height:96px;display:flex;align-items:center;gap:16px;padding:0 24px;
   background:linear-gradient(180deg,var(--fondo2),var(--fondo));border:1px solid var(--borde);border-radius:18px}
 #pausa .pj .num{font-family:'Bebas Neue';font-size:60px;line-height:.85;color:var(--oro)}
