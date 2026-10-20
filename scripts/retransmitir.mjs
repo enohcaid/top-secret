@@ -209,7 +209,14 @@ async function sesion() {
         const corriendo = retransmitir('overlay', ig?.url);
         if (ig && !igIntento) igIntento = ig.transmitir().catch(e => log('Instagram:', e.message.slice(0, 200)));   // una sola espera
         const code = await corriendo;
-        if (Date.now() - t0 > 60000) { fallas = 0; log(`Retransmisión con overlay cortada (ffmpeg ${code}).`); continue; }
+        if (Date.now() - t0 > 60000) {
+          fallas = 0; log(`Retransmisión con overlay cortada (ffmpeg ${code}).`);
+          // La clave de Instagram es de un solo uso: al reconectar con la misma, Instagram no la acepta ni la rechaza,
+          // ffmpeg queda esperando, se traba toda la salida y MediaMTX lo corta cada ~25 s (2026-10-19). Se sigue sin
+          // Instagram en esta sesión, para no tirar abajo Twitch, Kick y YouTube.
+          if (ig) { log('Instagram: la clave era de un solo uso, sigo sin Instagram en esta sesión.'); ig.finalizar().catch(() => {}); ig = null; }
+          continue;
+        }
         if (++fallas >= 12) { log('La señal con overlay no aparece en MediaMTX: sigo sin overlay.'); break; }   // ~2 min
         await espera(5000);
       }
