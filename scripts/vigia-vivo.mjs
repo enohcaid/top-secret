@@ -253,10 +253,19 @@ async function main() {
   // partido, con los goles contados, al aparecer su primer reporte.
   let modo = null, ultimoReporteSeg = -1e9, golesF = 0, golesC = 0, huboPartido = false;
   const ponerModo = (m, seg) => { if (m !== modo && !vodId) { modo = m; avisarOverlay('modo', m); console.log(`[${hms(seg)}] modo: ${m}`); } };
+  // Cada 10 s vuelve a escribir modo y lado si no están en estado.json: retransmitir.mjs lo borra al empezar su
+  // sesión, y si el vigía arrancó antes el overlay se quedaba sin modo pausa (2026-10-19).
+  let ladoActual = null;
+  const reafirmar = () => {
+    let e = {}; try { e = JSON.parse(readFileSync(path.join(ROOT, 'fuentes/stream/estado.json'), 'utf8')); } catch {}
+    if (modo && e.modo !== modo) avisarOverlay('modo', modo);
+    if (ladoActual && e.lado !== ladoActual) avisarOverlay('lado', ladoActual);
+  };
   let trabajando = Promise.resolve();
 
   const procesar = async raw => {
     const seg = t++;
+    if (!vodId && seg % 10 === 5) reafirmar();
     // 1) Marcador
     const caja = await gris(raw, SB_CAJA);
     const enJuego = hayMarcador(caja);
@@ -275,7 +284,7 @@ async function main() {
       if (!vodId && seg % 2 === 1) {
         if (!lado.nuestros.length) { const a = lado.apellido(await leerZona(raw, PANEL, `panel-${seg}`)); if (a) console.log(`[${hms(seg)}] transmite ${a}`); }
         const nuevo = lado.paso(await leerZona(raw, BARRA_IZQ, `bi-${seg}`), await leerZona(raw, BARRA_DER, `bd-${seg}`));
-        if (nuevo) { avisarOverlay('lado', nuevo); console.log(`[${hms(seg)}] nuestra barra: ${nuevo === 'izq' ? 'izquierda' : 'derecha'}`); }
+        if (nuevo) { ladoActual = nuevo; avisarOverlay('lado', nuevo); console.log(`[${hms(seg)}] nuestra barra: ${nuevo === 'izq' ? 'izquierda' : 'derecha'}`); }
       }
       // el detector descarta cuadros borrosos/rotos y exige que cambie una sola fila, sostenido (lib/marcador.mjs)
       const ev = det.paso(await gris(raw, SB_NUM), caja, seg);
