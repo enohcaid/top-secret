@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Portada de una publicación de video (regla de Juan 2026-10-21: "la imagen que se ve apenas entrás a la red").
+     1080x1920 (9:16). pintar(d): d.imagen (fondo), d.kicker (rótulo chico), d.titulo (con *palabras* en dorado),
+     d.dato (número grande opcional, ej. "91'"), d.foco ('50% 30%': qué parte de la imagen queda centrada).
+     Zona segura: el texto va en el centro-abajo, lejos de la interfaz de Instagram/TikTok (arriba y la franja inferior)
+     y del recorte 4:5 / 1:1 del perfil (el título queda dentro del cuadrado central). La genera lib/portada.mjs. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070605;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg)}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+#img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#tono{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,6,5,.35) 0%,rgba(7,6,5,0) 22%,rgba(7,6,5,0) 40%,rgba(7,6,5,.82) 62%,rgba(7,6,5,.96) 100%)}
+#bloque{position:absolute;left:70px;right:70px;top:1010px}
+#escudo{height:92px;margin-bottom:26px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))}
+#kicker{display:inline-block;padding:10px 20px;border-radius:999px;background:var(--gold);color:#0B0A07;font:700 26px 'JetBrains Mono';letter-spacing:.2em}
+#dato{font:400 300px/.82 'Bebas Neue';margin-top:22px;
+  background:linear-gradient(100deg,var(--gold) 0%,var(--gold) 38%,#FFF6D8 50%,var(--gold) 62%,var(--gold) 100%);background-size:300% 100%;background-position:40% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 14px 40px rgba(0,0,0,.6))}
+#titulo{font:900 112px/.96 Barlow;letter-spacing:-.025em;margin-top:18px;text-shadow:0 8px 40px rgba(0,0,0,.65)}
+#titulo b{color:var(--gold)}
+#marco{position:absolute;inset:24px;border:2px solid rgba(241,220,151,.4);border-radius:32px}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <img id="img" alt="">
+  <div id="tono"></div><div id="marco"></div>
+  <div id="bloque"><img id="escudo" alt=""><br><span id="kicker"></span><div id="dato"></div><div id="titulo"></div></div>
+</div>
+<script>
+function pintar(d) {
+  const $ = s => document.querySelector(s);
+  $('#img').src = d.imagen; $('#img').style.objectPosition = d.foco || '50% 35%';
+  $('#escudo').src = d.escudo;
+  $('#kicker').textContent = d.kicker || ''; $('#kicker').style.display = d.kicker ? 'inline-block' : 'none';
+  $('#dato').textContent = d.dato || ''; $('#dato').style.display = d.dato ? 'block' : 'none';
+  $('#titulo').innerHTML = (d.titulo || '').replace(/\*([^*]+)\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+  // títulos largos: achica hasta 3 líneas
+  let tam = 112; $('#titulo').style.fontSize = tam + 'px';
+  while ($('#titulo').offsetHeight > tam * .96 * 3.2 && tam > 70) { tam -= 6; $('#titulo').style.fontSize = tam + 'px'; }
+  // si el bloque se pasa del borde, lo sube
+  const b = $('#bloque'), sobra = b.offsetTop + b.offsetHeight - 1800; if (sobra > 0) b.style.top = (1010 - sobra) + 'px';
+  return 1;
+}
+</script>
+</body>
+</html>

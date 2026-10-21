@@ -56,6 +56,11 @@ button.plegar{background:none}
 .medio img,.medio video{display:block;width:100%;height:auto}
 .medio.vertical{display:flex;justify-content:center}
 .medio.vertical video,.medio.vertical img{width:auto;max-width:100%;max-height:560px}
+.medio.con-portada{display:flex;justify-content:center;align-items:flex-start;gap:10px;padding:10px}
+.medio.con-portada > video{max-width:62%}
+.portada{margin:0;flex:0 0 32%;position:relative}
+.portada img{width:100%!important;height:auto;max-height:none!important;border-radius:8px;border:2px solid var(--gold)}
+.portada figcaption{position:absolute;left:6px;top:6px;padding:3px 8px;border-radius:999px;background:var(--gold);color:#0B0A07;font:700 11px 'JetBrains Mono',monospace;letter-spacing:.15em;text-transform:uppercase}
 .carrusel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin}
 .carrusel>*{flex:0 0 100%;scroll-snap-align:start}
 .contador{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px}
@@ -146,7 +151,7 @@ button:disabled{opacity:.4;cursor:default}
   <div id="lotes"></div>
 </div>
 <div class="aviso" id="aviso"></div>
-<script src="aprobar.js?v=7"></script>
+<script src="aprobar.js?v=8"></script>
 <script src="layout.js?v=25"></script>
 </body>
 </html>

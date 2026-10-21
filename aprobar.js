@@ -59,10 +59,12 @@
     const m = p.media || [];
     if (!m.length) return '';
     const uno = x => x.tipo === 'video'
-      ? `<video src="${esc(x.url)}" controls playsinline preload="metadata" ${x.poster ? `poster="${esc(x.poster)}"` : ''}></video>`
+      ? `<video src="${esc(x.url)}" controls playsinline preload="metadata" ${(x.poster || p.portada?.url) ? `poster="${esc(x.poster || p.portada.url)}"` : ''}></video>`
       : `<img src="${esc(x.url)}" alt="" loading="lazy">`;
     const vertical = m.some(x => x.vertical);
-    if (m.length === 1) return `<div class="medio${vertical ? ' vertical' : ''}">${uno(m[0])}</div>`;
+    // Portada (regla de Juan 2026-10-21): lo que se ve en la red antes de reproducir; se muestra al lado para aprobarla
+    const port = p.portada?.url ? `<figure class="portada"><img src="${esc(p.portada.url)}" alt=""><figcaption>Portada</figcaption></figure>` : '';
+    if (m.length === 1) return `<div class="medio${vertical ? ' vertical' : ''}${port ? ' con-portada' : ''}">${uno(m[0])}${port}</div>`;
     return `<div class="medio"><div class="carrusel">${m.map(uno).join('')}</div><span class="contador">${m.length} imágenes · deslizá</span></div>`;
   }
 

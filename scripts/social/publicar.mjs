@@ -161,9 +161,11 @@ async function publicar(p) {
     case 'fb-historia': correr('scripts/meta.mjs', ['fb-historia', urls(p)[0]]); return null;
     case 'x-texto':     return xConImagenes(p.texto, []);
     case 'ig-carrusel': return link(correr('scripts/meta.mjs', ['ig-carrusel', p.texto, ...urls(p)]));
-    case 'ig-reel':     return link(correr('scripts/meta.mjs', ['ig-reel', urls(p)[0], p.texto]));
+    // portada (regla de Juan 2026-10-21): p.portada = { url, local }; IG la usa como portada del reel y FB como miniatura.
+    // TikTok, YouTube y X toman un cuadro del video: por eso el video de la pieza ya trae la portada como primeros cuadros.
+    case 'ig-reel':     return link(correr('scripts/meta.mjs', ['ig-reel', urls(p)[0], p.texto, ...(p.portada?.url ? ['--portada', p.portada.url] : [])]));
     case 'fb-album':    return link(correr('scripts/meta.mjs', ['fb-album', p.texto, ...urls(p)]));
-    case 'fb-video':    return link(correr('scripts/meta.mjs', ['fb-video', urls(p)[0], p.texto]));
+    case 'fb-video':    return link(correr('scripts/meta.mjs', ['fb-video', urls(p)[0], p.texto, ...(p.portada?.url ? ['--portada', p.portada.url] : [])]));
     case 'x-imagenes':  return xConImagenes(p.texto, p.local.slides.slice(0, 4));
     case 'x-video':     return link(correr('scripts/publicar-video.mjs', ['x', video, '--texto', p.texto]));
     case 'tiktok':      return link(correr('scripts/publicar-video.mjs', ['tiktok', video, '--texto', p.texto])) || 'https://www.tiktok.com/@topsecretfc';

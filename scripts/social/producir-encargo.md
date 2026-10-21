@@ -21,11 +21,12 @@ Lote: {{LOTE}} · Idea: {{IDEA}}
    - Para el público no hay "T1…T4": se dice "temporada 1". La ex 11x11 es "Espacio Gamer".
    - Cada red con su texto propio (no copiar el mismo en todas).
    - Pasá cada pieza por `revisarPieza(pieza, lote)` de `revisar-textos.js` (raíz del repo) y corregí todo aviso hasta que no quede ninguno (o dejá anotado en la `descripcion` por qué uno no aplica).
-6. **Subí** los archivos finales a R2 (`putFile` de `scripts/lib/r2.mjs`, claves `social/viral/<archivo>`; URL pública `https://top-secret-proxy.juan-c-m-1985.workers.dev/media/<clave>?v=<algo único>`).
-7. **Cargá el lote para el visto bueno final** con `agregarLote()` de `scripts/social/lib/aprobaciones.mjs`:
+6. **Portada (regla de Juan, 2026-10-21): todo video lleva una portada diseñada** — lo que se ve en la red antes de reproducirlo. Con `scripts/social/lib/portada.mjs`: `portada({ imagen, kicker, titulo, dato, foco }, jpg)` (la mejor imagen de la pieza + un título corto que dé ganas de abrirlo; `*palabra*` en dorado; `dato` = un número grande opcional, ej. `"91'"`), revisala con Read, después `conPortada(mp4, jpg, mp4ConPortada)` (la portada como 2 primeros cuadros: TikTok, YouTube Shorts y X toman de ahí la miniatura) y `subirPortada(jpg, 'social/viral/<archivo>-portada.jpg')`. Las piezas usan el video con portada (`media` y `local.video`) y llevan `portada: { url, local: jpg }` (Instagram la usa como portada del reel y Facebook como miniatura; aprobar.html la muestra para aprobarla).
+7. **Subí** los archivos finales a R2 (`putFile` de `scripts/lib/r2.mjs`, claves `social/viral/<archivo>`; URL pública `https://top-secret-proxy.juan-c-m-1985.workers.dev/media/<clave>?v=<algo único>`).
+8. **Cargá el lote para el visto bueno final** con `agregarLote()` de `scripts/social/lib/aprobaciones.mjs`:
    - `id: '{{LOTE_FINAL}}'`, `tipo: 'viral'`, `creado`, `titulo` (nombre de la pieza), `idea: { lote: '{{LOTE}}', pieza: '{{IDEA}}' }`, **sin `publicarA`** (publicar.mjs la agenda sola en el próximo turno libre cuando Juan la apruebe).
    - Una pieza por red de `guion.redes` que tenga sentido, todas con `decision: 'pendiente'`, `red`, `formato`, `descripcion` (duración, música, voz), `media`, `metodo` (`ig-reel`, `ig-carrusel`, `tiktok`, `youtube` [+ `titulo`], `fb-video`, `fb-album`, `x-video`, `x-imagenes`), `local: { video }` o `local: { slides }` para las que publica el Chrome (TikTok, YouTube, X), `protagonistas` (gamertags) y `texto`.
-8. **Commiteá y pusheá** el script de la pieza y cualquier plantilla nueva (`feat: pieza <nombre> producida`). No commitees `fuentes/` (pesado; ya va a R2).
+9. **Commiteá y pusheá** el script de la pieza y cualquier plantilla nueva (`feat: pieza <nombre> producida`). No commitees `fuentes/` (pesado; ya va a R2).
 
 ## Lo que NO hacés
 - No publicás nada ni tocás `publicarA`, ni otros lotes, ni las decisiones de Juan.

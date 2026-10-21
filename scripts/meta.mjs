@@ -11,7 +11,8 @@
  *   node scripts/meta.mjs ig-historia <url-publica.mp4|jpg>        historia (24 h), sin stickers ni música de la biblioteca
  *   node scripts/meta.mjs fb-foto   <url-publica> "<texto>"
  *   node scripts/meta.mjs fb-album  "<texto>" <url1> <url2> …    post de Facebook con varias fotos
- *   node scripts/meta.mjs fb-video  <url-publica.mp4> "<texto>"
+ *   node scripts/meta.mjs fb-video  <url-publica.mp4> "<texto>"   (--portada <jpg> en ig-reel y fb-video: portada/miniatura)
+ *   node scripts/meta.mjs fb-portada <video_id> <url|archivo.jpg>  miniatura de un video de Facebook ya publicado
  *   node scripts/meta.mjs fb-link   <link> "<texto>"              post con link (la vista previa sale del og:image/og:title)
  *   node scripts/meta.mjs fb-historia <url-publica.jpg>             historia de la página (24 h)
  *   Agregar --prueba para crear el contenedor/validar sin publicar.
@@ -27,7 +28,10 @@ const PRUEBA = process.argv.includes('--prueba');
 // --etiquetar usuario1,usuario2 → etiqueta cuentas en ig-imagen / ig-historia (la API no deja hacerlo después de publicar)
 const _ai = process.argv.indexOf('--etiquetar');
 const ETIQUETAS = _ai > 0 ? process.argv[_ai + 1].split(',').map(u => u.trim().replace(/^@/, '')).filter(Boolean) : [];
-const [cmd, ...args] = process.argv.slice(2).filter((a, k, all) => a !== '--prueba' && a !== '--etiquetar' && all[k - 1] !== '--etiquetar');
+// --portada <url|archivo.jpg> → portada del reel de Instagram (cover_url) y miniatura del video de Facebook
+const _pi = process.argv.indexOf('--portada');
+const PORTADA = _pi > 0 ? process.argv[_pi + 1] : null;
+const [cmd, ...args] = process.argv.slice(2).filter((a, k, all) => a !== '--prueba' && a !== '--etiquetar' && all[k - 1] !== '--etiquetar' && a !== '--portada' && all[k - 1] !== '--portada');
 const userTags = (conPos) => ETIQUETAS.length ? { user_tags: JSON.stringify(ETIQUETAS.map((username, k) => conPos ? { username, x: 0.5, y: Math.min(0.9, 0.12 + k * 0.08) } : { username })) } : {};
 
 async function api(path, params = {}, method = 'POST') {
@@ -39,6 +43,17 @@ async function api(path, params = {}, method = 'POST') {
   return j;
 }
 const igTok = () => ({ access_token: E.META_PAGE_TOKEN });
+
+// Miniatura de un video de Facebook (también para videos ya publicados): POST /{video}/thumbnails con el archivo
+async function miniaturaFB(videoId, img) {
+  const buf = /^https?:/.test(img) ? Buffer.from(await (await fetch(img)).arrayBuffer()) : (await import('fs')).readFileSync(img);
+  const fd = new FormData();
+  fd.append('source', new Blob([buf], { type: 'image/jpeg' }), 'portada.jpg');
+  fd.append('is_preferred', 'true'); fd.append('access_token', E.META_PAGE_TOKEN);
+  const j = await (await fetch(`${G}/${videoId}/thumbnails`, { method: 'POST', body: fd })).json();
+  if (j.error) throw new Error('miniatura: ' + j.error.message);
+  return j;
+}
 
 async function esperarContenedor(id) {
   for (let i = 0; i < 60; i++) {
@@ -76,7 +91,7 @@ if (cmd === 'estado') {
   const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'CAROUSEL', children: hijos.join(','), caption, ...igTok() });
   await esperarContenedor(c.id); await publicarIG(c.id);
 } else if (cmd === 'ig-reel') {
-  const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'REELS', video_url: args[0], caption: args[1] || '', share_to_feed: 'true', ...igTok() });
+  const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'REELS', video_url: args[0], caption: args[1] || '', share_to_feed: 'true', ...(PORTADA ? { cover_url: PORTADA } : {}), ...igTok() });
   await esperarContenedor(c.id); await publicarIG(c.id);
 } else if (cmd === 'ig-historia') {
   // Historia (24 h) con un video o una imagen. La API no permite stickers ni música de la biblioteca: sale tal cual el archivo.
@@ -103,11 +118,16 @@ if (cmd === 'estado') {
 } else if (cmd === 'fb-video') {
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
   const r = await api(`/${E.META_PAGE_ID}/videos`, { file_url: args[0], description: args[1] || '', ...igTok() });
+  if (PORTADA) { try { await miniaturaFB(r.id, PORTADA); console.log('miniatura puesta'); } catch (e) { console.log('no pude poner la miniatura:', e.message); } }
   console.log('publicado en Facebook (video):', `https://www.facebook.com/${r.id}`);
 } else if (cmd === 'fb-link') {
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
   const r = await api(`/${E.META_PAGE_ID}/feed`, { link: args[0], message: args[1] || '', ...igTok() });
   console.log('publicado en Facebook:', `https://www.facebook.com/${r.id}`);
+} else if (cmd === 'fb-portada') {
+  // Miniatura de un video de Facebook ya publicado: node scripts/meta.mjs fb-portada <video_id> <url|archivo.jpg>
+  await miniaturaFB(args[0], args[1]);
+  console.log('miniatura puesta en el video', args[0]);
 } else if (cmd === 'fb-historia') {
   // Historia de foto de la página: la foto se sube sin publicar y se usa como historia.
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }

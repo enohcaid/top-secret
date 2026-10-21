@@ -119,7 +119,12 @@ if (cuadrosArg) {
 log(`Render (${T.fin} s; música desde ${musicaDesde.toFixed(2)} s → drop en el gol, ${T.gol} s)…`);
 const mudo = path.join(DIR, 'gol-sub21-sin-voz.mp4'), final = path.join(DIR, 'gol-sub21.mp4');
 await video('gol-sub21.html', datos, mudo, { escenas: [{ n: 0, dur: T.fin }], musica, fps: 60, desenfoque: true, musicaDesde });
-agregarVoz(mudo, pistas, final, { volumenMusica: 0.6 });
+const conVoz = path.join(DIR, 'gol-sub21-con-voz.mp4');
+agregarVoz(mudo, pistas, conVoz, { volumenMusica: 0.6 });
+// Portada (regla de Juan 2026-10-21): el festejo + "91'" — como primeros cuadros del video y aparte para IG/FB
+const { portada, conPortada, subirPortada } = await import('../lib/portada.mjs');
+const jpgPortada = await portada({ imagen: path.join(DIR, 'gol-sub21-festejo.png'), kicker: 'ESPACIO GAMER · DEBUT OFICIAL', dato: "91'", titulo: 'Gol agónico.\n*Debut con victoria.*', foco: '50% 20%' }, path.join(DIR, 'portada.jpg'));
+conPortada(conVoz, jpgPortada, final);
 log('Listo: ' + final);
 
 // ── A aprobar.html: reel e historia (Instagram y Facebook). Sin hora: publicar.mjs la agenda al aprobarla. ──
@@ -130,7 +135,8 @@ const key = 'social/gol-sub21/gol-agonico-sub21.mp4';
 await putFile(final, key);
 const url = `https://top-secret-proxy.juan-c-m-1985.workers.dev/media/${key}?v=${Date.now().toString(36)}`;
 const desc = `${T.fin} s · transmisión oficial (VOD de Twitch con el overlay) + repetición + recreación del festejo (IA, rotulada) · voz del club · música: Debut`;
-const P = o => ({ decision: 'pendiente', media: [{ tipo: 'video', url, vertical: true }], descripcion: desc, protagonistas: ['pepolemmo2710', 'Elianja20'], local: { video: final }, ...o });
+const portadaUrl = await subirPortada(jpgPortada, 'social/gol-sub21/portada.jpg');
+const P = o => ({ decision: 'pendiente', media: [{ tipo: 'video', url, vertical: true }], descripcion: desc, protagonistas: ['pepolemmo2710', 'Elianja20'], local: { video: final }, portada: { url: portadaUrl, local: jpgPortada }, ...o });
 const lote = {
   id: 'video-gol-sub21-2026-10-21', tipo: 'viral', creado: new Date().toISOString(),
   titulo: 'El gol del 91\' vs Sub 21 · debut oficial (reel + historias)', piezas: [
