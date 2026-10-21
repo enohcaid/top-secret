@@ -319,6 +319,26 @@
         "palo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 4 · gancho B 8 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-21",
+      "id": "2026-10-21-2",
+      "archivo": "2026-10-21-2 - Lluvia.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_21_2.py",
+      "duracion": 92,
+      "nombre": "Lluvia",
+      "concepto": "Jugar bajo la lluvia — la cancha inundada, las camisetas pesadas, la pelota que no pica; pero cuando hacés el gol y te tirás de rodillas sobre el pasto mojado, todo ese sufrimiento se convierte en la celebración más pura que existe.",
+      "bpm": 118,
+      "tonalidad": "fa menor",
+      "rasgo": "gota percusiva: gotas sintetizadas (sine con barrido de pitch alto→bajo, reverb) con altura aleatoria; empiezan como llovizna fuera de grilla, se densifican sección a sección, y en el gancho C caen afinadas al acorde en subdivisiones del ritmo — la lluvia se convierte en música",
+      "recursos": [
+        "gota percusiva con pitch aleatorio (firma del tema)",
+        "pad con ruido filtrado (atmósfera de lluvia)",
+        "lead con overshoot de pitch (resbalón)",
+        "808 melódico con saltos de octava y glide",
+        "gota invertida en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 4 · gancho B 8 · gancho C 8 · final 4"
     }
   ]
 }
