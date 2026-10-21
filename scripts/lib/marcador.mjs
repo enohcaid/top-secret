@@ -14,6 +14,7 @@
 export const SB_CAJA = { left: 103, top: 38, width: 60, height: 36 };   // letras sobre blanco: presencia del marcador
 export const SB_NUM  = { left: 166, top: 40, width: 26, height: 32 };   // las dos cifras (local arriba, visita abajo)
 export const SB_RECORTE = { left: 60, top: 30, width: 150, height: 66 }; // lo que se guarda como evidencia
+export const SB_RELOJ  = { left: 100, top: 74, width: 64, height: 18 };  // minuto del partido ("29:45"), blanco sobre negro debajo del marcador
 
 const frac = (buf, f) => { let n = 0; for (const v of buf) n += f(v); return n / buf.length; };
 // Marcador presente: caja mayormente blanca pero con letras oscuras (descarta pantallas blancas)

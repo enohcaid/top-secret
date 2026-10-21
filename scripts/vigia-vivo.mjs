@@ -18,7 +18,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import sharp from 'sharp';
 import ffmpeg from 'ffmpeg-static';
-import { SB_CAJA, SB_NUM, SB_RECORTE, hayMarcador, crearDetector } from './lib/marcador.mjs';
+import { SB_CAJA, SB_NUM, SB_RECORTE, SB_RELOJ, hayMarcador, crearDetector } from './lib/marcador.mjs';
 import { crearLado, BARRA_IZQ, BARRA_DER, PANEL } from './lib/lado-barra.mjs';
 
 sharp.cache(false);
@@ -253,6 +253,24 @@ async function main() {
   // (menús, lobby, espera: 25 s sin marcador; menos sería pausa en cada festejo o repetición). Y el resultado de cada
   // partido, con los goles contados, al aparecer su primer reporte.
   let modo = null, ultimoReporteSeg = -1e9, golesF = 0, golesC = 0, huboPartido = false;
+  // Minuto del partido (reloj debajo del marcador, blanco sobre negro): si el marcador se va después del 89' y no
+  // aparece el reporte, el partido terminó igual (2026-10-20: el juego se trabó, no hubo reporte y no salió la placa
+  // de VICTORIA). Un entretiempo corta en el 45', no se confunde.
+  let ultimoMinuto = -1;
+  const finDePartido = (seg, por) => {
+    const resultado = golesF > golesC ? 'victoria' : golesF < golesC ? 'derrota' : 'empate';
+    if (!vodId) avisarOverlay('finPartido', { resultado, marcador: `${golesF}-${golesC}` });   // marcador: nuestros goles primero
+    console.log(`[${hms(seg)}] fin de partido (${golesF}-${golesC} según los goles contados, ${por}): ${resultado}`);
+    log('fin', { seg, hora: hms(seg), resultado, marcador: `${golesF}-${golesC}`, por });
+    huboPartido = false; golesF = golesC = 0; ultimoMinuto = -1;
+  };
+  const leerMinuto = async raw => {
+    const f = path.join(OUT, 'tmp', `reloj-${t}.png`);
+    await sharp(raw, { raw: { width: W, height: H, channels: 3 } }).extract(SB_RELOJ).resize({ width: SB_RELOJ.width * 4 }).greyscale().negate().normalise().toFile(f);
+    const r = await ocr.leer(f); try { unlinkSync(f); } catch {}
+    const m = (r.lines || []).map(l => l.text).join(' ').replace(/[Oo]/g, '0').match(/(\d{1,3})\s*[:.]\s*(\d{2})/);
+    return m ? +m[1] : null;
+  };
   const ponerModo = (m, seg) => { if (m !== modo && !vodId) { modo = m; avisarOverlay('modo', m); console.log(`[${hms(seg)}] modo: ${m}`); } };
   // Cada 10 s vuelve a escribir modo y lado si no están en estado.json: retransmitir.mjs lo borra al empezar su
   // sesión, y si el vigía arrancó antes el overlay se quedaba sin modo pausa (2026-10-19).
@@ -276,6 +294,9 @@ async function main() {
       // cuenta estos avisos para saber qué partido de la noche se juega (la hora no sirve: siempre hay atrasos).
       // Con el vigía recién arrancado (< 3 min mirando) no se avisa: podría ser un partido ya empezado.
       if (!vodId && seg - ultimoMarcador >= INICIO_PARTIDO && seg >= INICIO_PARTIDO) { avisarOverlay('inicioPartido'); console.log(`[${hms(seg)}] empieza un partido nuevo`); }
+      // Vigía recién arrancado con un partido ya en juego (el vivo empezó tarde, 2026-10-20): se avisa como "en curso";
+      // retransmitir.mjs lo cuenta solo si esa noche todavía no contó ninguno (un reinicio del vigía no lo duplica).
+      else if (!vodId && ultimoMarcador < 0 && seg < INICIO_PARTIDO) { avisarOverlay('inicioPartido', { enCurso: true }); console.log(`[${hms(seg)}] partido ya en curso al arrancar`); }
       if (seg - ultimoMarcador > AUSENCIA_PARTIDO) {
         // vuelve el marcador tras un rato largo: arranca (o sigue tras el entretiempo) un partido
         det.reiniciar(); partidos++; inicioMarcador = seg; recortePartido = false; huboPartido = true;
@@ -286,6 +307,7 @@ async function main() {
         console.log(`[${hms(seg)}] marcador en pantalla (partido/tiempo #${partidos})`);
       }
       ultimoMarcador = seg;
+      if (seg % 5 === 3 && seg - inicioMarcador >= 5) { const mi = await leerMinuto(raw); if (mi !== null && mi <= 130) ultimoMinuto = mi; }
       if (!vodId && seg % 2 === 1) {
         if (!lado.nuestros.length) { const a = lado.apellido(await leerZona(raw, PANEL, `panel-${seg}`)); if (a) console.log(`[${hms(seg)}] transmite ${a}`); }
         const nuevo = lado.paso(await leerZona(raw, BARRA_IZQ, `bi-${seg}`), await leerZona(raw, BARRA_DER, `bd-${seg}`));
@@ -330,12 +352,8 @@ async function main() {
       const tabs = PESTANAS.filter(p => bajo.includes(p)).length;
       if (tabs >= 3) {
         ultimoReporteSeg = seg;
-        if (huboPartido) {                                   // primer reporte después de un partido: terminó
-          const resultado = golesF > golesC ? 'victoria' : golesF < golesC ? 'derrota' : 'empate';
-          if (!vodId) avisarOverlay('finPartido', { resultado, marcador: `${golesF}-${golesC}` });   // marcador: nuestros goles primero
-          console.log(`[${hms(seg)}] fin de partido (${golesF}-${golesC} según los goles contados): ${resultado}`);
-          huboPartido = false; golesF = golesC = 0;
-        }
+        if (huboPartido) finDePartido(seg, 'reporte');       // primer reporte después de un partido: terminó
+
         const firma = textos.slice().sort().join('|');
         const previo = new Set(ultimoReporte.split('|'));
         const comunes = textos.filter(x => previo.has(x)).length;
@@ -349,6 +367,8 @@ async function main() {
         }
       }
     }
+    // Sin reporte: el marcador se fue después del 89' y pasaron 15 s → terminó (el reporte, si llega después, ya no repite)
+    if (!enJuego && huboPartido && ultimoMinuto >= 89 && seg - ultimoMarcador >= 15) finDePartido(seg, `sin reporte, último minuto ${ultimoMinuto}'`);
     ponerModo(enJuego ? 'juego' : seg - ultimoReporteSeg <= 12 ? 'reporte' : seg - ultimoMarcador >= 25 ? 'pausa' : (modo || 'pausa'), seg);
   };
 

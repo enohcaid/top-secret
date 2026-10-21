@@ -92,7 +92,10 @@ const INICIOS = path.resolve(`fuentes/stream/inicios-${NOCHE}.json`);
 let inicios = []; try { inicios = JSON.parse(fs.readFileSync(INICIOS, 'utf8')); } catch {}
 function contarInicios() {
   let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
-  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id)).map(x => x.id);
+  // "enCurso": el vigía arrancó con un partido ya en juego; cuenta solo si esta noche todavía no se contó ninguno
+  // (si no, es un reinicio del vigía a mitad de un partido ya contado). Sin esto, con el vivo empezado tarde, el modo
+  // pausa mostraba como "próximo" al rival que ya se había jugado (2026-10-20, Sub 21).
+  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id) && (!x.enCurso || !inicios.length)).map(x => x.id);
   if (!nuevos.length) return false;
   inicios.push(...nuevos); fs.writeFileSync(INICIOS, JSON.stringify(inicios));
   log(`Empieza el partido ${inicios.length} de la noche${partidos?.[inicios.length - 1] ? ` (vs ${partidos[inicios.length - 1].rival})` : ''}.`);
