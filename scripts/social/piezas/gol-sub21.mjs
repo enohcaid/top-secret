@@ -22,7 +22,9 @@ const log = m => console.log(`${new Date().toLocaleTimeString('es-AR')} [gol-sub
 fs.mkdirSync(DIR, { recursive: true });
 
 export const ESCENAS = [
-  { id: 'gol-sub21-jugada', jugadores: ['pepolemmo2710', 'Elianja20'],
+  // quieta: el clip de Canva de la jugada salió mal (Juan: "se enreda con la red, pasa cualquier cosa"): va la imagen fija
+  // con un acercamiento hacia la pelota hecho en la plantilla
+  { id: 'gol-sub21-jugada', jugadores: ['pepolemmo2710', 'Elianja20'], quieta: true, origen: '78% 72%',
     escena: 'Último minuto de un partido de noche, estadio lleno e iluminado. pepolemmo2710 (dorsal 15, camiseta negra titular de Top Secret) remata de derecha dentro del área y la pelota entra junto al palo, mientras el arquero rival (camiseta naranja) vuela estirado sin llegar. Elianja20 (dorsal 24), que acaba de dar el pase, mira la jugada desde atrás. Momento congelado, dramático, cámara baja a ras del pasto, luces del estadio y gotas de pasto en el aire.',
     movimiento: 'La cámara se acerca lentamente hacia la pelota que entra al arco; las luces del estadio titilan suave.' },
   { id: 'gol-sub21-festejo', jugadores: ['pepolemmo2710', 'Elianja20'],
@@ -45,10 +47,10 @@ for (const e of ESCENAS) {
   if (!fs.existsSync(png) && process.argv.includes('--quietas')) png = ESCENAS.map(x => path.join(DIR, `${x.id}.png`)).find(f => fs.existsSync(f)) || png;
   if (!fs.existsSync(png)) throw new Error(`Falta ${png}: correr primero --imagenes`);
   // --quietas: para revisar el diseño antes de que Canva anime, la imagen fija como un solo cuadro
-  if (process.argv.includes('--quietas')) {
+  if (e.quieta || process.argv.includes('--quietas')) {
     const d = path.join(DIR, `${e.id}-quieta`); fs.mkdirSync(d, { recursive: true });
     spawnSync(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-y', '-i', png, '-vf', 'scale=1080:-2', '-q:v', '2', path.join(d, '0001.jpg')]);
-    ai[e.id] = { dir: archivo(d), n: 1 }; continue;
+    ai[e.id] = { dir: archivo(d), n: 1, quieta: true, origen: e.origen || '50% 50%' }; continue;
   }
   const mp4 = animar(png, e.movimiento);
   const c = aCuadros(mp4); ai[e.id] = { dir: archivo(c.dir), n: c.n };
@@ -77,9 +79,9 @@ const pistas = narracion([
   { en: 0.25, texto: 'Minuto noventa y uno. Cero a cero.' },
   { en: T.oficial + 0.2, texto: 'Debut oficial en Espacio Gamer. Así lo vivimos en la transmisión.' },
   { en: T.repe + 0.3, texto: 'Mirala otra vez.' },
-  { en: T.logro + 0.3, texto: 'El lateral la pone. El extremo la manda adentro.' },
+  { en: T.logro + 0.3, texto: 'Asistencia del lateral. Gol del extremo.' },
   { en: T.logro + 4.3, texto: 'Y el debut termina en victoria.' },
-  { en: T.cierre + 0.4, texto: 'Todos los partidos, en vivo, por Twitch, Kick y YouTube.' },
+  { en: T.cierre + 0.4, texto: 'Todos los partidos, en vivo, por Twitch, Kick, YouTube e Instagram.' },
 ], path.join(DIR, 'voz'));
 
 const datos = {
@@ -123,10 +125,10 @@ const lote = {
   id: 'video-gol-sub21-2026-10-21', tipo: 'viral', creado: new Date().toISOString(),
   titulo: 'El gol del 91\' vs Sub 21 · debut oficial (reel + historias)', piezas: [
     P({ id: 'ig-reel', red: 'instagram', formato: 'Reel', metodo: 'ig-reel',
-      texto: 'Minuto 91 y 0-0 en el debut oficial. Elianja20 la puso y pepolemmo2710 la mandó adentro: primera victoria en Espacio Gamer.\n\nAsí se vivió en nuestra transmisión. ¿Lo viste en vivo?\n\n#TopSecretFC #EspacioGamer #ProClubs' }),
+      texto: 'Minuto 91 y 0-0 en el debut oficial. Asistencia de Elianja20, gol de pepolemmo2710 y primera victoria en Espacio Gamer.\n\nAsí se vivió en nuestra transmisión. ¿Lo viste en vivo?\n\n#TopSecretFC #EspacioGamer #ProClubs' }),
     P({ id: 'ig-historia', red: 'instagram', formato: 'Historia', descripcion: '24 h · ' + desc, metodo: 'ig-historia', texto: '' }),
     P({ id: 'fb-video', red: 'facebook', formato: 'Reel / video', metodo: 'fb-video',
-      texto: 'Martes 20 de octubre, debut oficial en Espacio Gamer. Con 0-0 en el minuto 91, Elianja20 asistió y pepolemmo2710 marcó el 1-0 ante Sub 21.\n\nEn el video: el gol tal como salió en nuestra transmisión oficial, la repetición y una recreación del festejo.\n\nTodos los partidos van en vivo por Twitch, Kick y YouTube. El próximo: jueves a las 22:30 vs Suda eSports.' }),
+      texto: 'Martes 20 de octubre, debut oficial en Espacio Gamer. Con 0-0 en el minuto 91, Elianja20 asistió y pepolemmo2710 marcó el 1-0 ante Sub 21.\n\nEn el video: el gol tal como salió en nuestra transmisión oficial, la repetición y una recreación del festejo.\n\nTodos los partidos van en vivo por Twitch, Kick, YouTube e Instagram. El próximo: jueves a las 22:30 vs Suda eSports.' }),
     P({ id: 'fb-historia', red: 'facebook', formato: 'Historia', descripcion: '24 h · ' + desc, metodo: 'fb-historia', texto: '' }),
   ],
 };

@@ -192,7 +192,7 @@ function rotulo(clase, texto, sub = '') {
 function pintar(datos) {
   D = datos;
   $('#escTS').src = D.escudoTS; $('#escSub').src = D.escudoSub;
-  $('#plats').innerHTML = ['twitch', 'kick', 'youtube'].map(k => `<div><svg viewBox="0 0 24 24">${ICON[k].p}</svg>${ICON[k].n}</div>`).join('');
+  $('#plats').innerHTML = ['twitch', 'kick', 'youtube', 'instagram'].map(k => `<div><svg viewBox="0 0 24 24">${ICON[k].p}</svg>${ICON[k].n}</div>`).join('');
   $('#proxTxt').textContent = D.proximo;
   // grano fijo (determinístico)
   const g = $('#grano').getContext('2d'), im = g.createImageData(540, 960); let s = 7;
@@ -238,7 +238,7 @@ async function mostrar(n, t = 0) {
     const tt = $('#gancho .t'); tt.style.opacity = eo((p - .5) * 4);
   } else if (t < T.goool) {                                 // ── TRANSMISIÓN OFICIAL: el ataque y el gol ──
     const lt = t - T.oficial;
-    mostrarCapa('oficial'); rotulo('oficial', 'TRANSMISIÓN OFICIAL · EN VIVO', 'TWITCH · KICK · YOUTUBE · 20/10');
+    mostrarCapa('oficial'); rotulo('oficial', 'TRANSMISIÓN OFICIAL · EN VIVO', 'TWITCH · KICK · YOUTUBE · INSTAGRAM · 20/10');
     const src = cuadroDe(D.clips.vod, lt);
     await Promise.all([poner($('#vod'), src), poner($('#fondoBlur'), src)]);
     const golEn = T.gol - T.oficial, dg = lt - golEn;
@@ -283,9 +283,11 @@ async function mostrar(n, t = 0) {
     $('#fondoBlur').style.display = 'none';
     const clip = D.clips[i ? 'festejo' : 'jugada'];
     await poner($('#logroImg'), cuadroDe(clip, l2 * (clip.n / 30) / mitad));
-    $('#logroImg').style.transform = `scale(${1.04 + .05 * l2 / mitad})`;
+    // imagen fija (sin clip de Canva): acercamiento marcado hacia el punto clave (la pelota); clip animado: apenas
+    if (clip.quieta) { $('#logroImg').style.transformOrigin = clip.origen; $('#logroImg').style.transform = `scale(${1.02 + .2 * eio(l2 / mitad)})`; }
+    else { $('#logroImg').style.transformOrigin = '50% 50%'; $('#logroImg').style.transform = `scale(${1.04 + .05 * l2 / mitad})`; }
     $('#logroK').textContent = i ? 'EL FESTEJO' : 'LA JUGADA';
-    $('#logroT').innerHTML = i ? 'Debut oficial<br><b>con victoria.</b>' : '<b>Elianja20</b> la pone.<br><b>pepolemmo2710</b> la manda adentro.';
+    $('#logroT').innerHTML = i ? 'Debut oficial<br><b>con victoria.</b>' : 'Pase de <b>Elianja20</b>.<br>Gol de <b>pepolemmo2710</b>.';
     $('#logroT').style.fontSize = i ? '110px' : '76px';
     const ap = eo(l2 * 2.5); $('#logroT').style.opacity = ap; $('#logroT').style.transform = `translateY(${(1 - ap) * 40}px)`;
     if (l2 < .3) { $('#flash').style.opacity = .7 * (1 - l2 / .3); }

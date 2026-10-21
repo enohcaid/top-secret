@@ -22,3 +22,8 @@ La nota del 14/10 presentó a Lautavester7 como "lateral izquierdo": leyó `play
 ## Cambio de gamertag (2026-10-20)
 
 - **CipriMancini ahora se llama `Ciprimancini32`** (y juega en PS5). En notas nuevas usar siempre `Ciprimancini32`, también al hablar de sus partidos o goles de temporadas anteriores (es el mismo jugador). Las notas viejas ya publicadas no se tocan.
+
+## Sin doble sentido (2026-10-21)
+
+- Nada de frases que puedan leerse como contenido sexual, aunque sean jerga de fútbol: "la pone", "la mete", "la mandó adentro", "se la dio", "la empujó", "la clavó". Decirlo con pase, asistencia, gol, definición, remate ("asistencia de Elianja20, gol de pepolemmo2710").
+- El vivo sale por Twitch, Kick, YouTube e Instagram: si se lo menciona, las cuatro.

@@ -59,7 +59,11 @@ export function revisarTexto({ red, metodo, texto = '', titulo, protagonistas = 
   // Forma
   if (/^[a-záéíóúñ]/.test(t) && !GAMERTAGS.some(g => t.startsWith(g))) a('Arranca en minúscula.');
   if (/\bYoutube\b/.test(todo)) a('"Youtube" → "YouTube".');
-  if (/en vivo por/i.test(t) && !(/twitch/i.test(t) && /kick/i.test(t) && /youtube/i.test(t))) a('"En vivo por…" sin las tres (Twitch, Kick y YouTube).');
+  // desde el 2026-10-15 el vivo sale también por Instagram (Juan, 2026-10-21: "falta Instagram")
+  if (/en vivo por/i.test(t) && !(/twitch/i.test(t) && /kick/i.test(t) && /youtube/i.test(t) && /instagram/i.test(t))) a('"En vivo por…" sin las cuatro (Twitch, Kick, YouTube e Instagram).');
+  // Doble sentido (Juan, 2026-10-21, por "el lateral la pone"): frases del fútbol que se leen como contenido sexual
+  if (/\b(la (pone|puso|mete|metió|metio|manda adentro|mandó adentro|mando adentro|empuja|empujó|clava|clavó|entierra|enterró|chupa)|se la (dio|da|dejó|deja|puso|pone)|se la (comió|come)|la tiene adentro|por atrás|le entró por)\b/i.test(t))
+    a('Frase con posible doble sentido sexual ("la pone", "la mete", "se la dio"…): decirlo de otra forma (pase, asistencia, gol, definición).');
   return out;
 }
 
