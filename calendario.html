@@ -377,6 +377,52 @@ footer span{color:var(--gold);}
 
 /* ─── SEASON SELECTOR ─── */
 .season-btns{display:flex;gap:6px;flex-wrap:wrap;}
+/* ─── Vista por competencia (calendario-competencias.js, 2026-10-21) ─── */
+.year-grid[hidden],.comp-grid[hidden]{display:none}   /* el display de .year-grid le ganaba al atributo hidden */
+.vista-btns{display:inline-flex;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.vista-btn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border:0;background:transparent;color:var(--mid);cursor:pointer;transition:color .15s,background-color .15s}
+.vista-btn.active{background:var(--gray);color:var(--text)}
+.comp-grid{max-width:1440px;margin:24px auto 0;padding:0 var(--ts-g) 80px}
+.comp-temp{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:28px 0 4px}
+.comp-grupo{margin-top:18px}
+.comp-grupo-tit{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mid);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.comp-grupo-tit span{background:var(--gray);border-radius:10px;padding:1px 8px;color:var(--text);letter-spacing:.05em}
+.comp-lista{display:grid;gap:14px}
+.comp-lista.fins{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));align-items:start}
+.comp-card{background:var(--gray);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.comp-card.en-curso{border-color:color-mix(in srgb,var(--gold) 45%,var(--border))}
+.comp-head{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px 6px;background:transparent;border:0;color:var(--text);cursor:pointer;text-align:left}
+.comp-head .nh-lbadge{min-width:42px;text-align:center}
+.comp-tit{flex:1;min-width:0;display:flex;flex-direction:column}
+.comp-tit b{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;line-height:1.1}
+.comp-tit span{font-size:.78rem;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-estado{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.14em;color:var(--mid);white-space:nowrap}
+.comp-card.en-curso .comp-estado{color:var(--gold)}
+.comp-estado i{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:compPulso 1.6s ease-in-out infinite}
+@keyframes compPulso{0%,100%{opacity:.35}50%{opacity:1}}
+.comp-chev{color:var(--mid);transition:transform .2s;font-size:.9rem}
+.comp-card.abierta .comp-chev{transform:rotate(180deg)}
+.comp-resumen{display:flex;flex-wrap:wrap;gap:6px 14px;padding:0 16px 12px 70px;font-size:.78rem;color:var(--mid)}
+.comp-resumen .comp-rec{color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem}
+.comp-avance{display:flex;align-items:center;gap:12px;padding:0 16px 10px 70px;font-size:.75rem;color:var(--mid)}
+.comp-avance .barra{flex:1;max-width:340px;height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+.comp-avance .barra i{display:block;height:100%;background:var(--gold);border-radius:3px}
+.comp-prox{margin:0 16px 12px 70px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--gold) 14%,transparent);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem}
+.comp-prox span{font-size:.68rem;letter-spacing:.18em;color:var(--gold);margin-right:10px}
+.comp-body{display:none;border-top:1px solid var(--border);padding:4px 8px 8px}
+.comp-card.abierta .comp-body{display:block}
+.comp-vacio{padding:30px 0;color:var(--mid);font-style:italic}
+@media(min-width:1100px){
+  /* torneo en curso con muchas fechas: dos columnas que se leen de arriba hacia abajo */
+  .comp-lista.vivos .month-match-list{display:block;columns:2;column-gap:28px}
+  .comp-lista.vivos .month-match-item{break-inside:avoid}
+}
+@media(max-width:560px){
+  .comp-grid{padding:0 16px 60px}
+  .comp-resumen,.comp-avance{padding-left:16px}
+  .comp-prox{margin-left:16px}
+  .comp-lista.fins{grid-template-columns:1fr}
+}
 .sbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .sbtn:hover{border-color:var(--mid);color:var(--text);}
 .sbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
@@ -835,6 +881,7 @@ body{padding-top:64px;}
     <span class="cln-item"><span class="cln-dot e11"></span>Espacio Gamer · M/J</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="vista-btns" role="group" aria-label="Vista"><button class="vista-btn active" data-vista="comp" onclick="setVistaCal('comp')">Por competencia</button><button class="vista-btn" data-vista="mes" onclick="setVistaCal('mes')">Por mes</button></div>
     <div class="season-btns">
       <button class="sbtn" id="sbtn-pre" onclick="setGridSeason('pre',this)" style="border-color:rgba(62,207,142,.35);color:var(--vpug);">PRE</button>
       <button class="sbtn active" id="sbtn-t4" onclick="setGridSeason('t4',this)">T4</button>
@@ -880,6 +927,8 @@ body{padding-top:64px;}
 </div>
 </div>
 
+<!-- Por competencia (calendario-competencias.js) o por mes (la grilla de siempre) -->
+<div id="compGrid" class="comp-grid"></div>
 <!-- YEAR GRID -->
 <div id="yearGrid" class="year-grid"></div>
 
@@ -1639,6 +1688,7 @@ function applyGridSeason() {
   document.querySelectorAll('.season-section').forEach(sec => {
     sec.style.display = (currentGridSeason === 'all' || sec.classList.contains(currentGridSeason)) ? '' : 'none';
   });
+  window.TSComp?.render();
 }
 async function fetchPretemporada() {
   if (_preData) { insertPreSection(); return; }
@@ -2367,6 +2417,7 @@ function buildMonthCard(year, month, mbd, today) {
 function render(){
   renderNextHero();
   renderYearGrid();
+  window.TSComp?.render();   // vista por competencia (calendario-competencias.js)
   updateStats();
   // (legacy functions kept below for admin compat — not called from here)
 }
@@ -3106,6 +3157,17 @@ window.shareMatchday  = shareMatchday;
 window.toggleAdmin    = toggleAdmin;
 window.handleResultClick = handleResultClick;
 window.openStatsPanel = openStatsPanel;
+// Datos para la vista por competencia (calendario-competencias.js): partidos con resultado y temporada
+window.TSCal = {
+  partidos() {
+    const out = RAW.map((_, i) => ({ id: i, m: getMatch(i) }));
+    custom.forEach((m, ci) => { if (!customIsInRaw(m)) out.push({ id: 'c' + ci, m: getAnyMatch('c' + ci) }); });
+    return out.filter(x => x.m && x.m.date).map(x => ({ ...x, outcome: outcomeFor(x.id), score: scoreDisplay(x.id), season: matchSeason(x.m.date) }));
+  },
+  cantidadRAW: () => RAW.length,
+  hoy: getToday, temporada: () => currentGridSeason, lgLabel, vpnBadge,
+};
+window.TSComp?.render();
 window.closeStatsPanel= closeStatsPanel;
 window.openModal      = openModal;
 window.closeModal     = closeModal;
@@ -3149,6 +3211,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
+<script src="calendario-competencias.js?v=1"></script>
 <script src="calendario-share.js?v=5"></script>
 <script src="layout.js?v=25"></script>
 </body>
