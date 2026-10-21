@@ -346,7 +346,7 @@ client.on('message_create', async msg => {
     if (!yo) return;
     // 1) Comandos de Juan en su chat consigo mismo.
     // El chat consigo mismo puede venir como @c.us o como @lid (yoLid).
-    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉|⏱️|⚡)/u.test(msg.body)) {
+    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉|⏱️|⚡|📅|🔁)/u.test(msg.body)) {
       // Varios comandos en un mismo mensaje, uno por línea ("B\nC no\nD no").
       for (const linea of msg.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
       return;
