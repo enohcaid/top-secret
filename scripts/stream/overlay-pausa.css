@@ -143,3 +143,53 @@ body.vertical #pausa .globo{max-width:760px}
 body.vertical #pausa .globo.de-izq,body.vertical #pausa .globo.pregunta{left:110px}body.vertical #pausa .globo.de-der{right:110px}
 body.vertical #pausa .tv,body.vertical #pausa .tarjeta{left:110px;right:110px}
 body.vertical #pEspera{left:110px;right:110px}body.vertical #pEspera .msg{font-size:31px}
+
+/* ── Repetición de un gol nuestro (2026-10-21): video grande + minuto, marcador y contexto ── */
+#pausa .repe{position:absolute;left:100px;right:100px;top:250px;display:flex;gap:44px;align-items:center}
+#pausa .repe .video{position:relative;flex:0 0 1120px;height:630px;border-radius:22px;overflow:hidden;border:1px solid var(--borde);background:#000;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+#pausa .repe video{width:100%;height:100%;object-fit:cover}
+#pausa .repe .sello{position:absolute;left:22px;top:20px;padding:8px 16px;border-radius:999px;background:#C8A84B;color:#0B0A07;font-family:'JetBrains Mono';font-weight:700;font-size:17px;letter-spacing:.2em}
+#pausa .repe .info{flex:1;min-width:0}
+#pausa .repe .k{font-family:'JetBrains Mono';font-weight:700;font-size:17px;letter-spacing:.22em;color:var(--oro)}
+#pausa .repe .t{font-weight:900;font-size:58px;line-height:1.02;letter-spacing:-.02em;margin-top:16px}
+#pausa .repe .m{display:flex;align-items:baseline;gap:18px;margin-top:26px;flex-wrap:wrap}
+#pausa .repe .m b{font-family:'Bebas Neue';font-size:120px;line-height:.8;color:var(--oro)}
+#pausa .repe .m span{font-weight:800;font-size:30px}
+#pausa .repe .g{margin-top:22px;font-size:30px;color:var(--texto2)}#pausa .repe .g b{color:var(--texto)}
+body.vertical #pausa .repe{left:110px;right:110px;top:500px;flex-direction:column;align-items:stretch;gap:30px}
+body.vertical #pausa .repe .video{flex:none;width:100%;height:484px}
+body.vertical #pausa .repe .t{font-size:52px}body.vertical #pausa .repe .m b{font-size:100px}
+
+/* ── Tabla de Espacio Gamer ── */
+#pausa .tabla-eg{top:250px;width:980px}
+#pausa .tabla-eg table{width:100%;border-collapse:collapse;margin-top:20px;font-size:28px}
+#pausa .tabla-eg th{font-family:'JetBrains Mono';font-weight:700;font-size:14px;letter-spacing:.18em;color:var(--texto2);text-align:right;padding:0 10px 8px}
+#pausa .tabla-eg th:nth-child(3){text-align:left}
+#pausa .tabla-eg td{padding:7px 10px;border-top:1px solid var(--borde);text-align:right;font-weight:700}
+#pausa .tabla-eg td:first-child{width:46px;color:var(--texto2);font-family:'Bebas Neue';font-size:34px}
+#pausa .tabla-eg td:nth-child(2){width:50px}#pausa .tabla-eg td img{height:38px;width:38px;object-fit:contain;display:block}
+#pausa .tabla-eg td:nth-child(3){text-align:left;font-weight:800;white-space:nowrap;max-width:520px;overflow:hidden;text-overflow:ellipsis}
+#pausa .tabla-eg td b{font-family:'Bebas Neue';font-size:38px;color:var(--oro);font-weight:400}
+#pausa .tabla-eg tr.nos td{background:rgba(200,168,75,.16);color:var(--texto)}
+#pausa .tabla-eg tr.nos td:first-child{box-shadow:inset 5px 0 0 #C8A84B;color:var(--oro)}
+#pausa .tabla-eg .pie{margin-top:20px;font-size:24px;color:var(--texto2)}#pausa .tabla-eg .pie b{color:var(--texto)}
+body.vertical #pausa .tabla-eg{top:470px;width:auto}
+body.vertical #pausa .tabla-eg table{font-size:26px}
+body.vertical #pausa .tabla-eg td:nth-child(3){max-width:420px}
+
+/* ── Cierre de la noche ── */
+#pausa .cierre .t{font-size:66px}
+#pausa .cierre .res{margin-top:28px;display:flex;flex-direction:column;gap:12px}
+#pausa .cierre .r{display:flex;align-items:center;gap:20px;padding:14px 20px;border:1px solid var(--borde);border-radius:16px;background:rgba(0,0,0,.25)}
+#pausa .cierre .r img,#pausa .cierre .r i{height:56px;width:56px;object-fit:contain;float:none;margin:0}
+#pausa .cierre .r span{flex:1;font-weight:800;font-size:32px}
+#pausa .cierre .r b{font-family:'Bebas Neue';font-size:64px;line-height:.8;font-weight:400}
+#pausa .cierre .r em{font-style:normal;font-family:'JetBrains Mono';font-weight:700;font-size:15px;letter-spacing:.2em;width:130px;text-align:right}
+#pausa .cierre .r.victoria b,#pausa .cierre .r.victoria em{color:#4ade80}
+#pausa .cierre .r.empate b,#pausa .cierre .r.empate em{color:var(--oro)}
+#pausa .cierre .r.derrota b,#pausa .cierre .r.derrota em{color:var(--rojo)}
+#pausa .cierre .sig{margin-top:30px;font-weight:800;font-size:30px}
+#pausa .cierre .sig span{display:block;font-family:'JetBrains Mono';font-weight:700;font-size:15px;letter-spacing:.22em;color:var(--oro);margin-bottom:8px}
+body.vertical #pausa .cierre .t{font-size:56px}
+#pausa.cerrando #pEspera .pill{background:var(--texto);}
+body.vertical #pausa .cierre ~ .pj{height:640px}body.vertical #pausa .cierre ~ .pj video{height:546px}   /* que el festejo no tape la tarjeta */

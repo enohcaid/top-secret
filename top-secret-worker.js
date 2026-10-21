@@ -737,7 +737,8 @@ export default {
         // Los equipos en zona (playoffs/promo/descenso) vienen como class="eg-tp-club eg-tp-en-zona" style=…:
         // cortar solo por class="eg-tp-club" exacto dejaba afuera a 18 de 20.
         const teams = aj.data.html.split(/<tbody class="eg-tp-club[^"]*"[^>]*>/).slice(1).map(chunk => {
-          const nums = [...chunk.matchAll(/<td class="eg-tp-c-(?:pts|num)[^"]*">\s*(-?\d+)\s*<\/td>/g)].map(m => +m[1]);
+          // la diferencia de gol positiva viene con signo ("+3"): sin [+-] esa celda no se leía y quedaba en 0
+          const nums = [...chunk.matchAll(/<td class="eg-tp-c-(?:pts|num)[^"]*">\s*([+-]?\d+)\s*<\/td>/g)].map(m => +m[1]);
           const det = n => +((chunk.match(new RegExp('<dt>' + n + '<\\/dt><dd>(-?\\d+)<\\/dd>')) || [])[1] || 0);
           const [pts = 0, gp = 0, w = 0, d = 0, l = 0, gd = 0] = nums;
           const name = decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || '');

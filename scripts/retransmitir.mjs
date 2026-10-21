@@ -24,7 +24,7 @@ import { conectarObs } from './stream/obs-ws.mjs';
 import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V } from './stream/salidas.mjs';
 import { crearVivoIg } from './stream/ig-vivo.mjs';
 import { tituloDeNoche, partidosDe, ponerTitulos } from './stream/titulos-vivo.mjs';
-import { temporada, convocados, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
+import { temporada, convocados, espacioGamer, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
 const listaMusica = () => prepararMusica(log);
 
 loadEnv();
@@ -102,6 +102,32 @@ function contarInicios() {
   return true;
 }
 
+// Resultados de la noche (avisos 'finPartido' del vigía, que traen rival y marcador) para la pantalla de cierre.
+// Mismo criterio que los inicios: un archivo por noche, sobrevive a los cortes.
+const FINALES = path.resolve(`fuentes/stream/finales-${NOCHE}.json`);
+let finales = []; try { finales = JSON.parse(fs.readFileSync(FINALES, 'utf8')); } catch {}
+function contarFinales() {
+  let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
+  const nuevos = (e.eventos || []).filter(x => x.tipo === 'finPartido' && !finales.some(f => f.id === x.id));
+  if (!nuevos.length) return false;
+  finales.push(...nuevos.map(x => ({ id: x.id, rival: x.rival || '', escudo: x.escudo || '', marcador: x.marcador || '', resultado: x.resultado })));
+  fs.writeFileSync(FINALES, JSON.stringify(finales));
+  for (const x of nuevos) log(`Termina el partido vs ${x.rival || '?'}: ${x.marcador} (${x.resultado}).`);
+  return true;
+}
+
+// Próximo partido después de esta noche (para el cierre): el primer día con partidos en los próximos 14.
+let siguiente;
+async function buscarSiguiente() {
+  if (siguiente !== undefined) return siguiente;
+  siguiente = null;
+  for (let d = 1; d <= 14 && !siguiente; d++) {
+    const f = new Date(new Date(NOCHE + 'T12:00:00Z').getTime() + d * 864e5).toISOString().slice(0, 10);
+    try { const ps = JSON.parse((await node('scripts/placa-envivo.mjs', '--json', '--fecha', f)).trim().split('\n').pop()); if (ps.length) siguiente = { fecha: f, ...ps[0], cantidad: ps.length }; } catch {}
+  }
+  return siguiente;
+}
+
 // Placa del torneo en el overlay: el partido de la noche que ya empezó (o el próximo), desde placa-envivo.mjs --json.
 let partidos = null;
 async function actualizarPartido() {
@@ -109,7 +135,7 @@ async function actualizarPartido() {
     if (!partidos) partidos = JSON.parse((await node('scripts/placa-envivo.mjs', '--json', '--fecha', NOCHE)).trim().split('\n').pop());
     // Partido actual: según cuántos partidos vio empezar el vigía esta noche (no por la hora: el 2026-10-19, con atrasos,
     // la hora salteaba la vuelta contra Kannabiense). Sin avisos todavía, el primero de la noche.
-    contarInicios();
+    contarInicios(); contarFinales();
     const n = inicios.length;
     const p = partidos[Math.min(Math.max(n - 1, 0), partidos.length - 1)];
     let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
@@ -119,6 +145,11 @@ async function actualizarPartido() {
     // Para el modo pausa (overlay-pausa.js): partidos que faltan esta noche y números de la temporada
     e.proximos = partidos.slice(n);
     e.temporada = await temporada();
+    // Espacio Gamer (tabla + nuestros números), resultados de la noche y el próximo partido: tarjetas de la pausa y cierre
+    const eg = await espacioGamer(); if (eg) e.eg = eg;
+    e.noche = finales.map(({ id, ...f }) => f);
+    e.cierre = !e.proximos.length && finales.length > 0 && finales.length >= n;   // terminó el último partido de la noche
+    e.siguiente = await buscarSiguiente();
     // Solo los convocados de hoy en el palco y las charlas (convocatoria.html); si no hay datos, todos
     const conv = await convocados(); if (conv) e.jugadores = conv;
     fs.mkdirSync(path.dirname(ESTADO), { recursive: true });
@@ -228,10 +259,10 @@ async function bajarCadena() {
 async function sesion() {
   publicarHistoria();
   // Vivo nuevo: sin lado de barra ni eventos de una sesión anterior (los vuelve a escribir vigia-vivo.mjs)
-  try { contarInicios(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
+  try { contarInicios(); contarFinales(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
-  const inicio = setInterval(() => { if (contarInicios()) actualizarPartido(); }, 15000);   // partido nuevo: placa al toque
+  const inicio = setInterval(() => { { const a = contarInicios(), b = contarFinales(); if (a || b) actualizarPartido(); } }, 15000);   // partido nuevo o terminado: placa y cierre al toque
   if (conOverlay) await listaMusica();
   const audio = setInterval(audioSegunModo, 3000);
   try {

@@ -33,6 +33,26 @@ export async function temporada() {
   } catch { return null; }
 }
 
+// Espacio Gamer en el modo pausa (Juan, 2026-10-21): la tabla de la liga (Worker /eg-table, en el orden de EG) y
+// nuestros números en la competencia oficial (11x11 en seed_matches.js desde el debut del 20/10).
+const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+const EG_DESDE = '2026-10-20';
+export async function espacioGamer() {
+  try {
+    const raw = await fetch(WORKER + '/eg-table', { signal: AbortSignal.timeout(10000) }).then(r => r.json());
+    const tabla = (Array.isArray(raw) ? raw : []).map((t, i) => ({ pos: i + 1, nombre: t.name, escudo: t.logo, pj: t.gp, pts: t.pts, dg: t.gd, nos: /top secret/i.test(t.name) }));
+    const { SEED_MATCHES } = await import(pathToFileURL(path.resolve('seed_matches.js')).href + '?' + Date.now());
+    const n = { pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0 }, goles = {};
+    for (const m of SEED_MATCHES.filter(m => m.league === '11x11' && m.date >= EG_DESDE)) {
+      const [a, b] = String(m.match_result || '').split('-').map(Number); if (Number.isNaN(a) || Number.isNaN(b)) continue;
+      n.pj++; n.gf += a; n.gc += b; if (a > b) n.g++; else if (a < b) n.p++; else n.e++;
+      for (const j of m.players || []) { const gt = j.matched || j.name; if (j.goals) goles[gt] = (goles[gt] || 0) + j.goals; }
+    }
+    const [goleador, golesGoleador] = Object.entries(goles).sort((x, y) => y[1] - x[1])[0] || [];
+    return tabla.length || n.pj ? { tabla, ...n, goleador, golesGoleador } : null;
+  } catch { return null; }
+}
+
 // Música de fondo del modo pausa: los temas propios del club (fuentes/musica/propios, de R2), lista para el overlay
 export async function listaMusica(log = console.log) {
   try {

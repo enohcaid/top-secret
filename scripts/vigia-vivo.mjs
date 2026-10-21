@@ -13,7 +13,7 @@
 // watch-regen.ps1 lo lanza solo lunes a jueves 22:30-00:30 si el canal está en vivo; un lock evita
 // dos vigías a la vez. A la hora de --hasta se corta aunque la transmisión siga.
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, unlinkSync, readdirSync, renameSync } from 'node:fs';
+import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, unlinkSync, readdirSync, renameSync, statSync } from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import sharp from 'sharp';
@@ -196,14 +196,59 @@ async function armarClips(OUT, clave) {
 // Avisa al overlay del vivo (scripts/stream/overlay.html lee fuentes/stream/estado.json cada 1,5 s):
 // tipo 'gol' | 'golRival' agrega un evento; 'finPartido' agrega uno con resultado ('victoria'|'empate'|'derrota');
 // 'lado' ('izq'|'der') dice de qué lado está nuestra barra; 'modo' ('juego'|'reporte'|'pausa') qué hay en pantalla.
-function avisarOverlay(tipo, valor) {
+function editarEstado(fn) {
   const f = path.join(ROOT, 'fuentes/stream/estado.json');
   let e = {}; try { e = JSON.parse(readFileSync(f, 'utf8')); } catch {}
-  if (tipo === 'lado') e.lado = valor;
-  else if (tipo === 'modo') e.modo = valor;
-  else e.eventos = [...(e.eventos || []), { id: `${Date.now()}`, tipo, ...(valor ? (typeof valor === 'object' ? valor : { resultado: valor }) : {}) }].slice(-20);
+  fn(e);
   mkdirSync(path.dirname(f), { recursive: true });
   writeFileSync(f + '.tmp', JSON.stringify(e, null, 1)); renameSync(f + '.tmp', f);
+}
+function avisarOverlay(tipo, valor) {
+  editarEstado(e => {
+    if (tipo === 'lado') e.lado = valor;
+    else if (tipo === 'modo') e.modo = valor;
+    else {
+      const ev = { id: `${Date.now()}`, tipo, ...(valor ? (typeof valor === 'object' ? valor : { resultado: valor }) : {}) };
+      // el fin de partido lleva el rival que retransmitir.mjs puso en estado.json (para el cierre de la noche)
+      if (tipo === 'finPartido') Object.assign(ev, { rival: e.rival || '', escudo: e.escudo || '' });
+      e.eventos = [...(e.eventos || []), ev].slice(-20);
+    }
+  });
+}
+
+// Repeticiones de nuestros goles para el modo pausa (Juan, 2026-10-21): 20 s de la grabación alrededor del gol
+// (16 s antes, 4 s después del cambio de marcador; el contador del vigía puede ir unos segundos corrido) en
+// fuentes/stream/repeticiones/, y la lista en estado.json (repeticiones: minuto, marcador, rival, contexto).
+const REPE = path.join(ROOT, 'fuentes/stream/repeticiones');
+async function cortarRepeticion(recDir, tramo, seg, meta) {
+  const files = readdirSync(recDir).filter(f => f.startsWith(tramo.pref + '-') && f.endsWith('.ts')).sort().map(f => path.join(recDir, f));
+  if (!files.length) return;
+  mkdirSync(REPE, { recursive: true });
+  // Se busca el segmento donde cae el gol (los .ts conservan la hora continua: "start" de cada uno) y se corta de ese
+  // solo: concatenar todo y buscar adentro decodificaba desde el principio (46 s de CPU en pleno vivo).
+  const inicioDe = f => new Promise(res => {
+    const p = spawn(ffmpeg, ['-hide_banner', '-i', f], { stdio: ['ignore', 'ignore', 'pipe'] });
+    let err = ''; p.stderr.on('data', d => { err += d; });
+    p.on('exit', () => res(+((err.match(/start: ([\d.]+)/) || [])[1] || 0)));
+  });
+  const t0 = await inicioDe(files[0]), off = Math.max(0, seg - tramo.seg0 - 16);
+  let k = 0, base = 0;
+  for (let i = files.length - 1; i > 0; i--) { const s = await inicioDe(files[i]) - t0; if (s <= off) { k = i; base = s; break; } }
+  await ff(['-loglevel', 'error', '-ss', String(+(off - base).toFixed(2)), '-i', files[k], '-t', '20', '-an',
+    '-vf', 'scale=1280:-2', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-movflags', '+faststart', '-y', path.join(REPE, `${meta.id}.mp4`)]);
+  editarEstado(e => { e.repeticiones = [...(e.repeticiones || []).filter(r => r.id !== meta.id), { ...meta, archivo: `${meta.id}.mp4` }].slice(-12); });
+  console.log(`repetición lista: ${meta.id}.mp4`);
+}
+// Contexto de cada gol nuestro, ya con el partido terminado ("Gol agónico en el 89': la victoria en el final")
+function contextoGol(g, lista, resultado) {
+  const min = g.minuto > 0 ? `${g.minuto}'` : '';
+  const ultimo = g === lista[lista.length - 1], dif = g.gf - g.gc;
+  if (dif === 1 && ultimo && resultado === 'victoria') return g.minuto >= 85 ? `Gol agónico en el ${min}: la victoria en el final` : 'El gol del triunfo';
+  if (g.gf === 1 && g.gc === 0) return 'Abre el marcador';
+  if (dif === 0) return g.minuto >= 85 ? `Empate agónico en el ${min}` : 'Empata el partido';
+  if (dif === 1) return 'Pone a Top Secret arriba';
+  if (dif >= 2) return 'Amplía la ventaja';
+  return 'Descuento';
 }
 
 async function main() {
@@ -224,6 +269,8 @@ async function main() {
   for (const d of ['goles', 'reporte', 'rec', 'tmp']) mkdirSync(path.join(OUT, d), { recursive: true });
   const log = (tipo, datos) => appendFileSync(path.join(OUT, 'eventos.jsonl'), JSON.stringify({ tipo, ...datos }) + '\n');
   console.log(`Vigía → ${OUT}`);
+  // Repeticiones de noches anteriores: fuera (cada noche arranca con las suyas)
+  if (!vodId && existsSync(REPE)) for (const f of readdirSync(REPE)) { try { const p = path.join(REPE, f); if (Date.now() - statSync(p).mtimeMs > 20 * 3600e3) unlinkSync(p); } catch {} }
 
   const ocr = ocrServer();
   let t = 0;                 // segundos de stream analizados en esta sesión
@@ -257,12 +304,17 @@ async function main() {
   // aparece el reporte, el partido terminó igual (2026-10-20: el juego se trabó, no hubo reporte y no salió la placa
   // de VICTORIA). Un entretiempo corta en el 45', no se confunde.
   let ultimoMinuto = -1;
+  // Goles del partido en curso (nuestros y del rival) con minuto y marcador, para el contexto de las repeticiones
+  let golesPartido = [];
+  let tramo = null;   // grabación actual: prefijo de sus segmentos y en qué segundo del vigía empezó (cambia al reconectar)
   const finDePartido = (seg, por) => {
     const resultado = golesF > golesC ? 'victoria' : golesF < golesC ? 'derrota' : 'empate';
     if (!vodId) avisarOverlay('finPartido', { resultado, marcador: `${golesF}-${golesC}` });   // marcador: nuestros goles primero
     console.log(`[${hms(seg)}] fin de partido (${golesF}-${golesC} según los goles contados, ${por}): ${resultado}`);
     log('fin', { seg, hora: hms(seg), resultado, marcador: `${golesF}-${golesC}`, por });
-    huboPartido = false; golesF = golesC = 0; ultimoMinuto = -1;
+    for (const g of golesPartido.filter(g => g.aFavor)) g.meta.contexto = contextoGol(g, golesPartido, resultado);
+    if (!vodId && golesPartido.some(g => g.aFavor)) editarEstado(e => { for (const r of e.repeticiones || []) { const g = golesPartido.find(x => x.meta.id === r.id); if (g) r.contexto = g.meta.contexto; } });
+    huboPartido = false; golesF = golesC = 0; ultimoMinuto = -1; golesPartido = [];
   };
   const leerMinuto = async raw => {
     const f = path.join(OUT, 'tmp', `reloj-${t}.png`);
@@ -338,6 +390,14 @@ async function main() {
         log('gol', { n: goles, seg: ts, hora: hms(ts), fila: ev.fila, aFavor, rival });
         if (aFavor === true) golesF++; else if (aFavor === false) golesC++;
         if (!vodId && aFavor !== null) avisarOverlay(aFavor ? 'gol' : 'golRival');
+        if (aFavor !== null) {
+          let est = {}; try { est = JSON.parse(readFileSync(path.join(ROOT, 'fuentes/stream/estado.json'), 'utf8')); } catch {}
+          const meta = { id: `${id}-gol${String(goles).padStart(2, '0')}`, minuto: ultimoMinuto, gf: golesF, gc: golesC,
+            rival: est.rival || '', escudo: est.escudo || '', torneo: est.torneo || '', contexto: null };
+          golesPartido.push({ aFavor, minuto: ultimoMinuto, gf: golesF, gc: golesC, meta });
+          // la grabación va adelantada respecto del análisis; 10 s de margen para que estén los 4 s posteriores al gol
+          if (aFavor && grabar && !vodId && tramo) { const tr = tramo; setTimeout(() => cortarRepeticion(path.join(OUT, 'rec'), tr, ts, meta).catch(e => console.error('repetición:', e.message)), 10000); }
+        }
         console.log(`[${hms(ts)}] cambio de marcador #${goles}${aFavor === null ? '' : aFavor ? ' — GOL DE TOP' : ' — gol en contra'}`);
       }
     }
@@ -384,8 +444,9 @@ async function main() {
 
   const correr = url => new Promise(res => {
     const a = ['-hide_banner', '-loglevel', 'error', '-i', url];
+    const pref = Date.now(); tramo = { pref, seg0: t };
     if (grabar) a.push('-map', '0', '-c', 'copy', '-f', 'segment', '-segment_time', '900',
-      path.join(OUT, 'rec', `${Date.now()}-%03d.ts`));
+      path.join(OUT, 'rec', `${pref}-%03d.ts`));
     a.push('-map', '0:v', '-vf', `fps=1,scale=${W}:${H}`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1');
     const p = spawn(ffmpeg, a, { stdio: ['ignore', 'pipe', 'inherit'] });
     ffmpegActual = p;

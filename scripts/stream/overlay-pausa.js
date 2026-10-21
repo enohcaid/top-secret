@@ -106,15 +106,88 @@
     return true;
   }
 
-  // Rotación de escenas mientras dure la pausa
-  const ORDEN = ['charla', 'entrevista', 'charla', 'proximo', 'charla', 'numeros'];
+  // ── Repeticiones de nuestros goles de la noche (vigia-vivo.mjs las corta de la grabación; Juan, 2026-10-21) ──
+  // Video de 20 s + minuto, marcador y contexto ("Gol agónico en el 91': la victoria en el final"). El goleador sale
+  // de EA (Worker /ea-historial, llega ~10 min después del partido) solo si un único jugador hizo nuestros goles.
+  const REPES = q.get('repes') || CLIPS.replace(/clips\/?$/, 'repeticiones/');
+  const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
+  const hoy = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+  let ea = { t: 0, partidos: [] };
+  async function goleadorDe(r) {
+    if (Date.now() - ea.t > 120000) { ea.t = Date.now(); try { const j = await (await fetch(WORKER + '/ea-historial')).json(); ea.partidos = j.partidos || j || []; } catch {} }
+    const m = (Array.isArray(ea.partidos) ? ea.partidos : []).find(p => p.calendario?.fecha === hoy() && p.calendario?.rival === r.rival);
+    const goleadores = (m?.jugadores || []).filter(j => j.goles > 0);
+    return goleadores.length === 1 ? goleadores[0].gamertag : null;
+  }
+  const vistas = new Map();
+  async function repeticion() {
+    const lista = (estado.repeticiones || []).filter(r => r.archivo); if (!lista.length) return false;
+    const r = lista.slice().sort((a, b) => (vistas.get(a.id) || 0) - (vistas.get(b.id) || 0))[0]; vistas.set(r.id, Date.now());
+    const gol = await goleadorDe(r);
+    const c = document.createElement('div'); c.className = 'repe';
+    c.innerHTML = `<div class="video"><video muted playsinline src="${REPES}${encodeURIComponent(r.archivo)}"></video><span class="sello">REPETICIÓN</span></div>
+      <div class="info"><div class="k">${['GOL DE TOP SECRET', r.torneo].filter(Boolean).join(' · ')}</div>
+        <div class="t">${r.contexto || 'Gol de Top Secret'}</div>
+        <div class="m">${r.minuto > 0 ? `<b>${r.minuto}'</b>` : ''}<span>TOP SECRET ${r.gf}-${r.gc} ${(r.rival || '').toUpperCase()}</span></div>
+        ${gol ? `<div class="g">Gol de <b>${gol}</b></div>` : ''}</div>`;
+    escena.replaceChildren(c); escena.classList.add('on');
+    const v = c.querySelector('video');
+    await new Promise(res => { v.onended = res; v.onerror = res; v.play().catch(res); setTimeout(res, 24000); });
+    return true;
+  }
+
+  // ── Espacio Gamer: tabla de la liga (nosotros resaltados) + nuestros números en la competencia oficial ──
+  async function tabla() {
+    const eg = estado.eg; if (!eg?.tabla?.length) return false;
+    const nos = eg.tabla.find(t => t.nos), N = 10;
+    const desde = !nos || nos.pos <= N - 2 ? 0 : Math.min(eg.tabla.length - N, nos.pos - 6);
+    const filas = eg.tabla.slice(Math.max(0, desde), Math.max(0, desde) + N);
+    const c = document.createElement('div'); c.className = 'tarjeta tabla-eg';
+    c.innerHTML = `<div class="k">ESPACIO GAMER · TABLA DE POSICIONES</div>
+      <table><tr><th></th><th></th><th>EQUIPO</th><th>PJ</th><th>DG</th><th>PTS</th></tr>
+      ${filas.map(t => `<tr${t.nos ? ' class="nos"' : ''}><td>${t.pos}</td><td>${t.nos ? `<img src="${MEDIA}badge-metal.webp" alt="">` : t.escudo ? `<img src="${t.escudo}" alt="">` : ''}</td>
+        <td>${t.nombre}</td><td>${t.pj}</td><td>${t.dg > 0 ? '+' + t.dg : t.dg}</td><td><b>${t.pts}</b></td></tr>`).join('')}</table>
+      ${eg.pj ? `<div class="pie">Top Secret en Espacio Gamer: <b>${eg.pj} PJ · ${eg.g}G ${eg.e}E ${eg.p}P · ${eg.gf}-${eg.gc}</b>${eg.goleador ? ` · goleador <b>${eg.goleador}</b> (${eg.golesGoleador})` : ''}</div>` : ''}`;
+    const js = jugadores(), gt = js.length && !VERTICAL ? azar(js) : null;   // en la vertical la tabla ocupa todo
+    escena.replaceChildren(c, ...(gt ? [pj(gt, clipDe(gt, ['aliento', 'aplaude', 'indicaciones']), 'der')] : []));
+    escena.classList.add('on');
+    await espera(14000);
+    return true;
+  }
+
+  // ── Cierre de la noche: terminó el último partido (retransmitir.mjs pone estado.cierre) ──
+  const DIAS = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+  async function cierre() {
+    if (!estado.cierre) return false;
+    const noche = estado.noche || [], s = estado.siguiente;
+    const RES = { victoria: 'VICTORIA', empate: 'EMPATE', derrota: 'DERROTA' };
+    const c = document.createElement('div'); c.className = 'tarjeta cierre';
+    c.innerHTML = `<div class="k">FIN DE LA NOCHE</div><div class="t">¡Gracias por acompañarnos!</div>
+      <div class="res">${noche.map(r => `<div class="r ${r.resultado}">${r.escudo ? `<img src="${r.escudo}" alt="">` : '<i></i>'}<span>vs ${r.rival || 'rival'}</span><b>${r.marcador}</b><em>${RES[r.resultado] || ''}</em></div>`).join('')}</div>
+      ${s ? `<div class="sig"><span>PRÓXIMO PARTIDO</span>${DIAS[new Date(s.fecha + 'T12:00:00').getDay()]} ${s.fecha.slice(8)}/${s.fecha.slice(5, 7)} · ${s.hora} HS · vs ${s.rival}${s.cantidad > 1 ? ` (+${s.cantidad - 1})` : ''}</div>` : ''}`;
+    const js = jugadores(), gano = noche.some(r => r.resultado === 'victoria');
+    const gt = js.length ? azar(js) : null;
+    escena.replaceChildren(c, ...(gt ? [pj(gt, clipDe(gt, gano ? ['festejo', 'aplaude'] : ['aplaude', 'aliento']), VERTICAL ? 'centro' : 'der')] : []));
+    escena.classList.add('on');
+    await espera(16000);
+    return true;
+  }
+
+  // Rotación de escenas mientras dure la pausa (escenas sin datos se saltean: sin repeticiones, sin tabla…).
+  // Terminada la noche, el cierre manda: resultados + gracias + próximo partido, intercalado con repeticiones y la tabla.
+  const ORDEN = ['charla', 'repeticion', 'entrevista', 'tabla', 'charla', 'proximo', 'repeticion', 'numeros'];
+  const ORDEN_CIERRE = ['cierre', 'repeticion', 'tabla', 'cierre', 'repeticion', 'charla'];
   let activo = false, paso = 0, corriendo = false;
   async function bucle() {
     if (corriendo) return; corriendo = true;
     while (activo) {
-      const tipo = ORDEN[paso++ % ORDEN.length];
+      actualizarFranja();
+      const orden = estado.cierre ? ORDEN_CIERRE : ORDEN;
+      const tipo = orden[paso++ % orden.length];
       raiz.classList.toggle('con-tarjeta', tipo !== 'charla');
-      const hizo = tipo === 'charla' ? await charla() : tipo === 'entrevista' ? await entrevista() : await tarjeta(tipo);
+      raiz.classList.toggle('con-repe', tipo === 'repeticion');
+      const hizo = tipo === 'charla' ? await charla() : tipo === 'entrevista' ? await entrevista() : tipo === 'repeticion' ? await repeticion()
+        : tipo === 'tabla' ? await tabla() : tipo === 'cierre' ? await cierre() : await tarjeta(tipo);
       if (hizo) { escena.classList.remove('on'); await espera(600); } else await espera(300);
       if (!jugadores().length) await espera(3000);
     }
@@ -173,13 +246,27 @@
     ocultar() { vic.classList.remove('on'); setTimeout(() => cancelAnimationFrame(confeti), 800); },
   };
 
+  // Franja y chip de arriba: esperando el próximo partido, o fin de la transmisión cuando ya no quedan
+  function actualizarFranja() {
+    const p = proximo(), s = estado.siguiente, chip = raiz.querySelector('#pChip');
+    if (estado.cierre) {
+      chip.hidden = !s;
+      if (s) { chip.querySelector('.k').textContent = 'PRÓXIMO PARTIDO'; raiz.querySelector('#pChipV').textContent = `${DIAS[new Date(s.fecha + 'T12:00:00').getDay()]} ${s.hora} · vs ${s.rival}`; }
+      raiz.querySelector('#pEsperaMsg').textContent = 'FIN DE LA TRANSMISIÓN · GRACIAS POR VER';
+      raiz.classList.add('cerrando');
+      return;
+    }
+    raiz.classList.remove('cerrando');
+    chip.hidden = !p;
+    if (p) { chip.querySelector('.k').textContent = 'PRÓXIMO PARTIDO'; raiz.querySelector('#pChipV').textContent = `${p.hora} · vs ${p.rival}`; }
+    raiz.querySelector('#pEsperaMsg').textContent = p ? 'ESPERANDO EL PRÓXIMO PARTIDO' : 'YA VOLVEMOS · ESPERANDO QUE ARRANQUE';
+  }
+
   window.pausa = {
     poner(on) {
       if (on === activo) return;
       activo = on; document.body.classList.toggle('en-pausa', on);
-      const p = proximo(); const chip = raiz.querySelector('#pChip'); chip.hidden = !p;
-      if (p) raiz.querySelector('#pChipV').textContent = `${p.hora} · vs ${p.rival}`;
-      raiz.querySelector('#pEsperaMsg').textContent = p ? 'ESPERANDO EL PRÓXIMO PARTIDO' : 'YA VOLVEMOS · ESPERANDO QUE ARRANQUE';
+      actualizarFranja();
       if (on) { bucle(); if (!VERTICAL) { if (audio.src && audio.paused) audio.play().then(() => fundir(VOL)).catch(() => {}); else if (!audio.src) tocar(); } }
       else if (!VERTICAL) fundir(0, () => audio.pause());
     },
