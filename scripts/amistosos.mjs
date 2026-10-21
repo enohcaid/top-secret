@@ -523,6 +523,56 @@ async function respuestaPrivada(msg) {
 }
 const juntando = {};
 
+// Horarios que nombra una respuesta ("23:40", "11.40", "23hs", "a las 23"), en formato de SLOTS.
+// Un número suelto solo cuenta si es 21–23 ("somos 11" no es un horario).
+function horasEn(txt) {
+  const out = [];
+  for (const m of txt.matchAll(/(?<![\d:.])(\d{1,2})(?:[:.](\d{2}))?\s*(hs|hrs|h)?(?![\d:.])/gi)) {
+    let h = +m[1];
+    if (!m[2] && !m[3] && !(h >= 21 && h <= 23)) continue;
+    if (h < 12) h += 12;
+    const hora = `${String(h).padStart(2, '0')}:${m[2] || '00'}`;
+    if (!out.includes(hora)) out.push(hora);
+  }
+  return out;
+}
+// Horarios que este pedido puede tomar: ni confirmados, ni pasados, ni ofrecidos/propuestos a otro pedido.
+function libresPara(id) {
+  const otros = new Set([...Object.keys(st.confirmados), ...SLOTS.filter(tarde), ...Object.entries(st.pedidos).filter(([k]) => k !== id)
+    .map(([, q]) => q.estado === 'ofrecido' ? q.slot : q.estado === 'nuevo' ? q.propuesto : null).filter(Boolean)]);
+  return SLOTS.filter(h => !otros.has(h));
+}
+// "No" al amistoso entero (ya consiguieron, otro día): no se repregunta. Cualquier otro "no" puede ser
+// solo al horario: se le pregunta una vez por el siguiente libre (Juan, 2026-10-21).
+const NO_DEFINITIVO = /ya (tengo|tenemos|tienen|consegu\p{L}*|cerr\p{L}*|arregl\p{L}*|estamos|est[aá] (cubierto|completo|lleno))|consegu[ií]\p{L}* (rival|equipo|otro)|completos?|cubiertos?|otro d[ií]a|mañana|hoy no|no (jugamos|vamos a jugar|hay equipo|llegamos|juntamos|somos)/iu;
+const NO_HORA = /(esa|ese|a esa) (hora|horario)|m[aá]s (tarde|temprano)|antes|otro horario|otra hora/iu;
+function horaComando(txt) {
+  for (const m of txt.matchAll(/(?<![\d:.])(\d{1,2})(?:[:.](\d{2}))?\s*(hs|hrs|h)?(?![\d:.\p{L}])/giu)) {
+    let h = +m[1]; if (h < 12) h += 12;
+    const hora = `${String(h).padStart(2, '0')}:${m[2] || '00'}`;
+    if (!m[2] && !m[3] && !SLOTS.includes(hora)) continue;   // "sub 21" es un equipo, no un horario
+    return { hora, sinHora: (txt.slice(0, m.index) + ' ' + txt.slice(m.index + m[0].length)).replace(/\s+/g, ' ').trim() };
+  }
+  return { hora: null, sinHora: txt };
+}
+// Juan: "B preguntale qué tiene libre" (o "preguntale…" sin letra, con una sola oferta abierta)
+async function preguntarLibre(id) {
+  const p = st.pedidos[id];
+  if (!p || !['ofrecido', 'vencido', 'nuevo'].includes(p.estado)) return avisar(`⚠️ ${id}: no hay oferta abierta.`);
+  const libres = libresPara(id);
+  if (!libres.length) return avisar('⚠️ No nos queda ningún horario libre.');
+  const texto = `Qué horario tienen libre? Nosotros tenemos ${libres.join(', ')}`;
+  await mandarAlRival(p, texto);
+  Object.assign(p, { estado: 'ofrecido', slot: libres.includes(p.slot) ? p.slot : libres[0], repregunta: true, ofrecidoTs: Date.now() });
+  save();
+  await avisar(`✅ ${id}: le pregunté a ${p.equipo?.nombre || p.contacto} → “${texto}”${PRUEBA ? ' _(prueba: no enviado)_' : ''}`);
+  return reacomodar();
+}
+async function mandarAlRival(p, texto) {
+  if (PRUEBA) return log(`[prueba] no se envía a ${p.contacto}: ${texto}`);
+  await client.sendMessage(p.autor, texto);
+}
+
 async function evaluarRespuesta(id, txt) {
   const p = st.pedidos[id];
   if (!p || !['ofrecido', 'vencido'].includes(p.estado)) return;
@@ -543,6 +593,35 @@ async function evaluarRespuesta(id, txt) {
   if (p.estado === 'vencido') {
     const libreAun = !reservados(id).has(p.slot);
     return avisar(`💬 ${id} ${quien} respondió tarde (ya había liberado ${p.slot}): “${txt.slice(0, 200)}”\n${libreAun ? `${p.slot} sigue libre: si confirma, *${id} ok${p.equipo ? '' : ' <equipo>'}*.` : `${p.slot} ya está tomado: si querés otro, *${id} ok 23:40${p.equipo ? '' : ' <equipo>'}*.`} Si no, *${id} no*.`);
+  }
+  // Negociación de horario (en automático y con el equipo conocido; si no, decide Juan como siempre)
+  if (auto && p.equipo && !NO_DEFINITIVO.test(txt)) {
+    const libres = libresPara(id);
+    const propuesta = horasEn(txt).find(h => h !== p.slot);
+    const dijoNo = NO.test(txt) || NO_HORA.test(txt);
+    // Propone otro horario ("23:40?", "dale pero 23:20") y lo tenemos libre → se confirma ese
+    if (propuesta && !dijoNo && libres.includes(propuesta)) {
+      log(`${id}: ${p.equipo.nombre} propone ${propuesta} (libre): confirmo`);
+      return confirmar(id, propuesta, true);
+    }
+    // Propone uno que no tenemos, o rechaza el horario: una sola repregunta con lo que nos queda
+    if ((propuesta || (dijoNo && !SI.test(txt))) && !p.repregunta) {
+      const otros = libres.filter(h => h !== p.slot && h !== propuesta);
+      if (otros.length) {
+        const sig = (propuesta ? null : otros.find(h => minutos(h) > minutos(p.slot))) || otros[0];
+        const texto = propuesta && !dijoNo
+          ? `A las ${propuesta} no tenemos, nos queda ${otros.join(', ')}. Les sirve alguno?`
+          : `Y a las ${sig}? Si no, qué horario tienen libre? (tenemos ${otros.join(', ')})`;
+        await mandarAlRival(p, texto);
+        const antes = p.slot;
+        Object.assign(p, { slot: propuesta && !dijoNo ? null : sig, repregunta: true, ofrecidoTs: Date.now() });
+        if (!p.slot) p.slot = otros[0];   // se reserva uno mientras contesta
+        save();
+        log(`${id}: no le sirve ${propuesta ? `(propone ${propuesta})` : antes}, repregunto: ${texto}`);
+        await avisar(`🔁 ${id} *${p.equipo.nombre}*: “${txt.slice(0, 150)}” → le pregunté “${texto}”${PRUEBA ? ' _(prueba: no enviado)_' : ''}. Si querés cortarlo: *${id} no*.`);
+        return reacomodar();
+      }
+    }
   }
   const otraHora = (txt.match(/\b(\d{1,2})[:.](\d{2})(?!\d)/) || [])[0];
   if (SI.test(txt) && !NO.test(txt) && !DUDA.test(txt) && (!otraHora || otraHora.replace('.', ':') === p.slot)) {
@@ -620,14 +699,22 @@ async function comando(body) {
     const lista = Object.entries(st.pedidos).filter(([, p]) => p.estado !== 'descartado').map(([id, p]) => `${id} ${p.equipo ? p.equipo.nombre : '?'} — ${p.estado}${p.slot ? ' ' + p.slot : ''}`);
     return avisar(`📋 Horarios: ${SLOTS.map(s => `${s} ${st.confirmados[s] ? '✅ ' + st.confirmados[s] : (ocupados().has(s) ? '⏳' : 'libre')}`).join(' · ')}\n${lista.join('\n') || 'Sin pedidos.'}`);
   }
+  if (/^pregunt/i.test(body)) {
+    const abiertos = Object.entries(st.pedidos).filter(([, p]) => ['ofrecido', 'vencido'].includes(p.estado)).sort((a, b) => b[1].ofrecidoTs - a[1].ofrecidoTs);
+    if (abiertos.length !== 1) return avisar(abiertos.length ? `⚠️ ¿A cuál? ${abiertos.map(([k, p]) => `*${k} preguntale* (${p.equipo?.nombre || p.contacto})`).join(', ')}` : '⚠️ No hay ofertas abiertas.');
+    return preguntarLibre(abiertos[0][0]);
+  }
   if (!m || !st.pedidos[m[1].toUpperCase()]) return;
   const id = m[1].toUpperCase(), resto = m[2].trim();
-  const hora = (resto.match(/\b(\d{1,2})[:.](\d{2})\b/) || [])[0]?.replace('.', ':');
+  // horario en cualquier forma ("23:40", "11.40", "23hs"); un número suelto ("b 23") solo si es uno de los horarios
+  const { hora, sinHora } = horaComando(resto);
   if (hora && !SLOTS.includes(hora)) return avisar(`⚠️ ${hora} no es uno de los horarios (${SLOTS.join(', ')}).`);
+  // "B preguntale qué tiene libre": le pregunta al rival qué horario tiene, con los que nos quedan
+  if (/^pregunt/i.test(resto)) return preguntarLibre(id);
   if (/^no\b/i.test(resto)) { st.pedidos[id].estado = 'descartado'; save(); await avisar(`🗑️ ${id} descartado.`); return reacomodar(); }
   if (/^ok\b/i.test(resto)) {
     // "F ok Los Pibes" / "F ok 23:40 Los Pibes": define el equipo y confirma.
-    const eqTxt = resto.replace(/^ok\b/i, '').replace(/\b\d{1,2}[:.]\d{2}\b/, '').trim();
+    const eqTxt = sinHora.replace(/^ok\b/i, '').trim();
     if (eqTxt) {
       const p = st.pedidos[id], eq = equipoEscrito(eqTxt);
       if (eq.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *${id} ok <equipo>*.`);
@@ -637,7 +724,7 @@ async function comando(body) {
     }
     return confirmar(id, hora);
   }
-  const equipoTxt = resto.replace(/\b\d{1,2}[:.]\d{2}\b/, '').trim();
+  const equipoTxt = sinHora.trim();
   return ofrecer(id, hora, equipoTxt || null);
 }
 
