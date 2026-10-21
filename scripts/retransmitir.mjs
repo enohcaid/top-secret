@@ -23,6 +23,7 @@ import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
 import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V } from './stream/salidas.mjs';
 import { crearVivoIg } from './stream/ig-vivo.mjs';
+import { tituloDeNoche, partidosDe, ponerTitulos } from './stream/titulos-vivo.mjs';
 import { temporada, convocados, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
 const listaMusica = () => prepararMusica(log);
 
@@ -237,8 +238,7 @@ async function sesion() {
       let ig = null;
       if (!process.argv.includes('--sin-instagram')) {
         try {
-          const p = (partidos || [])[0];
-          const titulo = p ? `Top Secret FC en vivo · ${p.liga} vs ${p.rival}` : 'Top Secret FC en vivo';
+          const titulo = tituloDeNoche(partidos || []);   // el mismo título que Twitch/Kick/YouTube
           ig = await crearVivoIg({ titulo, practica: PRUEBA || process.argv.includes('--ig-practica'), log });
         } catch (e) { log('Instagram no disponible:', e.message.slice(0, 200)); }
       }
@@ -272,6 +272,15 @@ async function sesion() {
 
 log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}${conOverlay ? ' con overlay' : ' sin overlay'}. Esperando que ${FUENTE} esté en vivo (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);
 process.on('SIGINT', async () => { await bajarCadena(); process.exit(0); });
+// Títulos de la noche en Twitch/Kick/YouTube antes de que arranque el vivo (titulos-vivo.mjs; Instagram lo pone al crear
+// su vivo). En segundo plano: si una red falla queda en el log y el vivo sigue igual.
+if (!PRUEBA && !process.argv.includes('--sin-titulos')) {
+  const redes = destinos.map(d => ({ Twitch: 'twitch', Kick: 'kick', YouTube: 'youtube' })[d.nombre]).filter(Boolean);
+  (async () => {
+    try { const t = tituloDeNoche(partidosDe(NOCHE)); log(`Títulos de la noche: ${t}`); await ponerTitulos(t, { redes, log }); }
+    catch (e) { log('Títulos: no pude ponerlos:', e.message.slice(0, 200)); }
+  })();
+}
 while (Date.now() < limite) {
   if (await enVivo()) {
     log(`${FUENTE} en vivo: empiezo a retransmitir.`);
