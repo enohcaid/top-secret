@@ -299,6 +299,26 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-21",
+      "id": "2026-10-21-1",
+      "archivo": "2026-10-21-1 - Palo.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_21_1.py",
+      "duracion": 89,
+      "nombre": "Palo",
+      "concepto": "Errar el gol decisivo — el palo, la repetición en la cabeza, los 'no pasa nada' que no alcanzan; cada noche repetís ese tiro hasta que vuelve la misma jugada y esta vez entra, pero el eco del palo nunca se va del todo.",
+      "bpm": 122,
+      "tonalidad": "do menor",
+      "rasgo": "palo que resuena: golpe metálico con armónicos inarmónicos de barra percutida (ratios 1:2.76:5.40:8.93) y cola larga; cortante al principio, se ahoga sección a sección, lejano en el gancho C",
+      "recursos": [
+        "palo resonante con armónicos inarmónicos (firma del tema)",
+        "lead con arrastre y pitch drop en la cola",
+        "pad de sines con segundo armónico (oscuro, denso)",
+        "808 melódico con saltos de octava y glide",
+        "palo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 8 · build 4 · gancho B 8 · gancho C 8 · final 4"
     }
   ]
 }
