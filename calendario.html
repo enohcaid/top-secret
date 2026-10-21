@@ -1728,7 +1728,7 @@ function insertPreSection() {
   secDiv.className = 'season-section pre';
   secDiv.innerHTML = `<div class="season-section-header">
     <span class="season-section-label">Pretemporada</span>
-    <span class="season-section-sub">Campeonato de Invierno VPUG · En curso</span>
+    <span class="season-section-sub">Campeonato de Invierno VPUG · ${_preData.matches.some(m => !m.finished && m.date >= today) ? 'En curso' : 'Finalizado'}</span>
     <span class="season-section-line"></span>
   </div>`;
   secDiv.appendChild(inner);
