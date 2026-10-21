@@ -88,7 +88,12 @@ async function kick(p, titulo) {
 
 async function youtube(p, titulo) {
   await p.goto(`https://studio.youtube.com/channel/${YT_CANAL}/livestreaming/manage`, { waitUntil: 'domcontentloaded' });
-  await p.locator('#feature-item-0').click({ timeout: 30000 });
+  // El clic en "Stream" a veces llega antes de que la página responda y no navega: se reintenta hasta 3 veces
+  for (let i = 0; i < 3 && !/\/video\/[^/]+\/livestreaming/.test(p.url()); i++) {
+    await p.locator('#feature-item-0').waitFor({ timeout: 30000 }); await p.waitForTimeout(3000);
+    await p.locator('#feature-item-0').click();
+    await p.waitForURL(/\/video\/[^/]+\/livestreaming/, { timeout: 15000 }).catch(() => {});
+  }
   // Hay dos ytls-broadcast-metadata (uno oculto). El Edit del visible queda en un contenedor con scroll horizontal,
   // debajo del panel del chat: un clic de Playwright le pega a otro botón ("Edit" del stream vertical). Clic por JS.
   await p.waitForFunction(() => [...document.querySelectorAll('ytls-broadcast-metadata')].some(m => m.offsetParent && m.querySelector('#edit-button')), null, { timeout: 30000 })

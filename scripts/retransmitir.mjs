@@ -116,6 +116,17 @@ function contarFinales() {
   return true;
 }
 
+// ¿YouTube está realmente al aire? Entre el 8/10 y el 21/10 ninguna noche salió en YouTube y nadie se enteró: el envío
+// corría sin errores (y en modo directo el tee ignora los destinos caídos). Se mira la página pública /live del canal.
+const YT_CANAL = 'UCEKzzKDMMPri12Q3E9S7IVw';
+async function verificarYouTube() {
+  try {
+    const html = await (await fetch(`https://www.youtube.com/channel/${YT_CANAL}/live`, { headers: { 'Accept-Language': 'es' }, signal: AbortSignal.timeout(20000) })).text();
+    if (/"isLiveNow":true|"isLive":true/.test(html)) log('YouTube: al aire (verificado en la página del canal).');
+    else log('⚠ YouTube NO está al aire aunque se le está enviando señal: revisar Studio (visibilidad, clave, avisos de la cuenta).');
+  } catch (e) { log('YouTube: no pude verificar si está al aire:', e.message.slice(0, 120)); }
+}
+
 // Próximo partido después de esta noche (para el cierre): el primer día con partidos en los próximos 14.
 let siguiente;
 async function buscarSiguiente() {
@@ -278,6 +289,7 @@ async function sesion() {
       }
       // Un relevo por red desde MediaMTX local; el codificador (retransmitir('overlay')) solo escribe ahí
       const rel = relevos([...destinos.map(d => ({ ...d, entrada: LOCAL_H })), ...(ig ? [{ nombre: 'Instagram', url: ig.url, entrada: LOCAL_V }] : [])]);
+      if (destinos.some(d => d.nombre === 'YouTube')) setTimeout(verificarYouTube, 90000);
       let fallas = 0, igIntento = null;
       while (Date.now() < limite && (await enVivo()) !== false) {
         const t0 = Date.now();
