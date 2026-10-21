@@ -82,7 +82,6 @@ footer{
   background:var(--black);color:#555;
   text-align:center;padding:28px 24px;
   font-size:.75rem;letter-spacing:.1em;
-  margin-left:-64px;margin-right:-48px;
 }
 footer span{color:var(--gold);}
 
@@ -473,22 +472,33 @@ body.locked .result-box.pending{cursor:default;}
 .month-body{padding:0 12px 12px;}
 
 /* ─── MATCH LIST ─── */
-.month-match-list{display:flex;flex-direction:column;gap:4px;}
-.month-match-item{display:grid;grid-template-columns:106px 58px 1fr auto auto;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:background .12s;}
+/* Fila: fecha (número grande + día) · escudo · rival con liga/condición debajo · resultado u hora.
+   Sin caja por partido: separadores finos; la misma grilla sirve en PC y en celular (2026-10-21). */
+.month-match-list{display:flex;flex-direction:column;}
+.month-match-item{display:grid;grid-template-columns:40px 34px minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background-color .12s;}
+.month-match-item:last-child{border-bottom:0;}
 .month-match-item:hover{background:var(--gray);}
 .month-match-item.no-click{cursor:default;}
-.mmi-date{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;color:var(--mid);white-space:nowrap;}
-.mmi-rival{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;color:var(--text);}
-.mmi-loc{font-size:.7rem;color:var(--mid);text-align:right;white-space:nowrap;}
-.mmi-score{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;text-align:right;min-width:44px;white-space:nowrap;}
-.mmi-pending{font-size:.7rem;color:var(--mid);font-style:italic;text-align:right;white-space:nowrap;}
+.month-match-item.mmi-today{box-shadow:inset 3px 0 0 var(--gold);}
+.mmi-date{display:flex;flex-direction:column;align-items:center;line-height:1;font-family:'Barlow Condensed',sans-serif;color:var(--mid);}
+.mmi-date b{font-size:1.35rem;font-weight:800;color:var(--text);}
+.mmi-date small{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:3px;}
+.mmi-crest{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:800;color:var(--mid);}
+.mmi-crest img{width:28px;height:28px;object-fit:contain;}
+.mmi-main{min-width:0;display:flex;flex-direction:column;gap:4px;}
+.mmi-rival{font-family:'Barlow Condensed',sans-serif;font-size:1.08rem;font-weight:800;color:var(--text);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mmi-meta{display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--mid);white-space:nowrap;}
+.month-match-item .nh-lbadge{min-width:38px;padding:2px 6px;font-size:.6rem;text-align:center;line-height:1.3;}
+.mmi-score{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;text-align:right;min-width:44px;white-space:nowrap;}
+.mmi-pending{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;color:var(--mid);text-align:right;min-width:44px;white-space:nowrap;}
 .mmi-win .mmi-score{color:var(--win);}
 .mmi-loss .mmi-score{color:var(--loss);}
 .mmi-draw .mmi-score{color:var(--draw);}
 .month-no-matches-body{padding:4px 4px 0;font-size:.78rem;color:var(--mid);font-style:italic;}
 @media(max-width:560px){
   .year-grid{padding:0 16px 60px;}
-  .month-match-item{grid-template-columns:88px 50px 1fr auto;}.month-match-item .mmi-loc{display:none;}
+  .month-body{padding:0 4px 8px;}
+  .month-match-item{gap:10px;padding:10px 8px;}
   .next-hero-wrap,.cal-header-row{padding:0 16px;}
   .nh-card,.nh-waiting{padding:20px 24px;gap:18px;}
   .nh-rival-name{font-size:2rem;}
@@ -514,7 +524,8 @@ body.locked .result-box.pending{cursor:default;}
 /* ─── PER-LEAGUE STATS ─── */
 .stats-perleague{max-width:1440px;margin:0 auto 20px;padding: 0 var(--ts-g);display:flex;gap:10px;flex-wrap:wrap;}
 .lsc{flex:1;min-width:140px;background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
-.lsc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.lsc-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 8px;margin-bottom:7px;}
+.lsc-badge{white-space:nowrap;}
 .lsc-badge{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.1em;padding:2px 8px;border-radius:4px;}
 .lsc-badge.vpn{background:var(--vpn-bg);color:var(--vpn);}
 .lsc-badge.vpug{background:var(--vpug-bg);color:var(--vpug);}
@@ -2219,7 +2230,7 @@ function renderYearGrid() {
     }
   });
   const sections = [
-    { id:'t4', label:'Temporada 4', sub:'Próximamente', months:[...t4Base].sort(), forceShow:true },
+    { id:'t4', label:'Temporada 4', sub:'En curso', months:[...t4Base].sort(), forceShow:true },
     { id:'t3', label:'Temporada 3', sub:'Finalizada',   months:[...t3Base].sort(), forceShow:false },
     { id:'t2', label:'Temporada 2', sub:'Finalizada',   months:[...t2Base].sort(), forceShow:false },
     { id:'t1', label:'Temporada 1', sub:'Finalizada',   months:[...t1Base].sort(), forceShow:false },
@@ -2285,22 +2296,31 @@ function buildMonthCard(year, month, mbd, today) {
     const rows = monthMatchIds.map(({id, ds}) => {
       const m = getAnyMatch(id);
       const dt = new Date(ds+'T12:00:00');
-      const dayLabel = `${DIAS_S[dt.getDay()]} ${dt.getDate()} ${MESES_C[dt.getMonth()]}`;
-      const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league]||'';
+      const lgKey = {VPN:'vpn',VPUG:'vpug','11x11':'e11'}[m.league]||'amis';
+      const lgTxt = m.league === '11x11' && ds > '2026-09-28' ? 'EG' : (m.league || 'Amistoso');
+      const crestUrl = m.badge || (m.league === 'VPN' ? vpnBadge(m.rival) : null);
+      const ini = (m.rival || '').split(/\s+/).filter(w => /^[A-Za-zÁÉÍÓÚÑ0-9]/.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+      const crest = crestUrl
+        ? `<img src="${crestUrl}" alt="" loading="lazy" onerror="this.replaceWith('${ini}')">`
+        : ini;
       const outcome = outcomeFor(id);
       const score = scoreDisplay(id);
       const outCls = outcome ? ` mmi-${outcome}` : '';
       const loc = m.isHome ? 'Local' : 'Visita';
+      // jugado → resultado; pendiente → hora (más útil que "Pendiente")
       const scoreHtml = score
         ? `<span class="mmi-score">${score}</span>`
-        : `<span class="mmi-pending">Pendiente</span>`;
+        : `<span class="mmi-pending">${m.time || '—'}</span>`;
       const idJs = typeof id === 'string' ? `'${id}'` : String(id);
-      const clickAttr = m.free ? 'class="month-match-item no-click"' : `class="month-match-item${outCls}" onclick="openStatsPanel(${idJs})"`;
+      const todayCls = ds === today ? ' mmi-today' : '';
+      const clickAttr = m.free ? `class="month-match-item no-click${todayCls}"` : `class="month-match-item${outCls}${todayCls}" onclick="openStatsPanel(${idJs})"`;
       return `<div ${clickAttr}>
-        <span class="mmi-date">${dayLabel}</span>
-        <span class="nh-lbadge ${lgKey}">${m.league === '11x11' && ds > '2026-09-28' ? 'EG' : (m.league||'—')}</span>
-        <span class="mmi-rival">vs ${m.rival||'?'}</span>
-        <span class="mmi-loc">${loc}</span>
+        <span class="mmi-date"><b>${dt.getDate()}</b><small>${DIAS_S[dt.getDay()]}</small></span>
+        <span class="mmi-crest">${crest}</span>
+        <div class="mmi-main">
+          <span class="mmi-rival">${m.rival||'?'}</span>
+          <span class="mmi-meta"><span class="nh-lbadge ${lgKey}">${lgTxt}</span>${loc}</span>
+        </div>
         ${scoreHtml}
       </div>`;
     }).join('');
