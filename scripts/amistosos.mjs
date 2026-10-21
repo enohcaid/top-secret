@@ -285,7 +285,8 @@ async function buscarGrupo() {
 async function revisarAtrasados() {
   if (!grupoId) return;
   try {
-    const desde = Math.floor(new Date(`${hoy()}T12:00:00-03:00`).getTime() / 1000);
+    // Con "busca amistosos": solo lo que llegó desde el comando (Juan, 2026-10-21: leía pedidos viejos del mediodía)
+    const desde = Math.max(Math.floor(new Date(`${hoy()}T12:00:00-03:00`).getTime() / 1000), st.buscaDesde || 0);
     const msgs = await client.pupPage.evaluate((id, desde) => {
       const chat = window.require('WAWebCollections').Chat.get(id);
       return (chat?.msgs.getModelsArray() || []).filter(m => m.t >= desde && !m.id.fromMe && m.body)
@@ -350,6 +351,7 @@ async function pedidoGrupo(msg) {
   const mid = msg.id?._serialized;
   if (mid && vistos.has(mid)) return;
   if (mid) vistos.add(mid);
+  if (st.buscaDesde && msg.timestamp && msg.timestamp < st.buscaDesde) return;   // anterior a "busca amistosos"
   if (!PIDE.test(msg.body)) { log('mensaje del grupo sin pedido:', msg.body.slice(0, 60).replace(/\n/g, ' ')); return; }
   if (!libre() && !PRUEBA) return;
   let contacto = {};
@@ -531,11 +533,11 @@ async function comando(body) {
       log('busca amistosos: hoy hay liga, no busco');
       return avisar(`📅 Hoy hay partidos de liga, no busco amistosos:\n${liga.join('\n')}`);
     }
-    auto = true; st.auto = true; save();
-    log('busca amistosos: modo automático por hoy');
+    auto = true; st.auto = true; if (!st.buscaDesde) st.buscaDesde = Math.floor(Date.now() / 1000); save();
+    log('busca amistosos: modo automático por hoy, con los pedidos que lleguen desde ahora');
     if (dormido) { dormido = false; return arrancarBusqueda(); }       // el aviso de arranque ya dice "(automático)"
     await avisar('⚡ *Modo automático por hoy.* Ofrezco solo a los equipos reconocidos, cargo los que confirman y te consulto solo lo dudoso. Para frenarlo: *apagar*.');
-    for (const [id, p] of Object.entries(st.pedidos).filter(([, p]) => p.estado === 'nuevo' && !p.manual && p.propuesto && (p.preguntar || (p.equipo && p.equipo.div !== '?'))))
+    for (const [id, p] of Object.entries(st.pedidos).filter(([, p]) => p.estado === 'nuevo' && !p.manual && p.propuesto && p.ts >= st.buscaDesde * 1000 && (p.preguntar || (p.equipo && p.equipo.div !== '?'))))
       await ofrecer(id, null, null);
     return;
   }
