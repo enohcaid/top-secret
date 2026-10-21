@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Bot de amistosos (semi-automático) sobre el WhatsApp PERSONAL de Juan, vinculado como un
+ * Bot de amistosos sobre el WhatsApp PERSONAL de Juan, vinculado como un
  * dispositivo más (whatsapp-web.js, sesión en scripts/.wa-personal/, gitignored). No tiene nada
  * que ver con el bot de Losinno (otro número, otra sesión).
  *
@@ -10,6 +10,10 @@
  *   --auto                                le escribe solo a los equipos reconocidos (sin esperar la aprobación de Juan)
  * Nombres mal escritos: scripts/lib/equipos-match.mjs + scripts/amistosos-alias.json. Cuando Juan corrige
  * un equipo ("A Chacarita"), el bot recuerda ese número de teléfono → equipo en fuentes/amistosos/aprendidos.json.
+ *
+ * Arranque (2026-10-21): la tarea lo lanza lun–jue a las 17:00. Si el calendario de hoy NO tiene partidos de liga
+ * (VPN/VPUG/Espacio Gamer), busca solo en automático; si tiene, queda dormido hasta "busca amistosos".
+ * desactivado.json ("desactivar") = no arranca solo nunca, hasta "activar".
  *
  * Flujo:
  * 1. Lee el grupo "Amistosos 🤝 VPN 🇦🇷". Cuando un equipo de 1ra o 2da División VPN busca amistoso,
@@ -82,7 +86,11 @@ process.on('exit', () => { try { if (fs.readFileSync(LOCK, 'utf8') === String(pr
 // Pausa por WhatsApp: "apagar" duerme el bot hasta las 22:00; "desactivar" además deja este archivo,
 // y mientras exista el bot arranca a las 17:00 dormido (conectado, sin buscar ni avisar) hasta "activar".
 const OFF_FILE = path.join(DIR, 'desactivado.json');
-let dormido = fs.existsSync(OFF_FILE);
+// Arranca dormido y decide al conectar (Juan, 2026-10-21): días SIN partidos de liga en el calendario → busca solo, en
+// automático (desde las 17:00); días con liga → sigue dormido hasta "busca amistosos". desactivado.json = apagado del todo.
+let dormido = true;
+let partidosHoy = [];
+const hayLiga = () => partidosHoy.some(p => p.league && p.league !== 'Amistoso');
 const letra = n => String.fromCharCode(65 + (n % 26)) + (n >= 26 ? Math.floor(n / 26) : '');
 // Un horario al que le faltan menos de 5 min ya no se ofrece (a las 23:00 no tiene sentido ofrecer 22:40).
 const minutos = t => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
@@ -171,6 +179,7 @@ async function leerOcupadosDelSitio() {
     if (choca) st.confirmados[slot] = choca.rival + (choca.league && choca.league !== 'Amistoso' ? ' (' + choca.league + ')' : '');
   }
   save();
+  partidosHoy = partidos;
   log('partidos del día:', partidos.map(p => p.time + ' ' + p.rival + ' ' + (p.league || '')).join(' | ') || 'ninguno');
 }
 
@@ -233,11 +242,19 @@ client.on('ready', async () => {
   yo = client.info.wid._serialized;
   try { yoLid = await client.pupPage.evaluate(() => window.require('WAWebUserPrefsMeUser').getMaybeMeLidUser()?._serialized || null); } catch (e) {}
   log('conectado como', client.info.pushname, yo, yoLid || '(sin lid)', PRUEBA ? '(MODO PRUEBA)' : '');
-  if (dormido) { log('desactivado por WhatsApp: espero "activar"'); return; }
-  await arrancarBusqueda();
+  if (fs.existsSync(OFF_FILE)) { log('desactivado por WhatsApp: espero "activar" o "busca amistosos"'); return; }
+  if (PRUEBA || AUTO) { dormido = false; return arrancarBusqueda(); }
+  // la búsqueda es de 17 a 22: si arrancó antes, espera (un "busca amistosos" lo despierta igual)
+  while (horaArt() < '17:00' && dormido) await new Promise(r => setTimeout(r, 60000));
+  if (!dormido) return;                                     // ya lo despertó un comando
+  await leerOcupadosDelSitio();
+  if (hayLiga()) { log('hoy hay partidos de liga: no busco solo (mandá "busca amistosos" para buscar igual)'); return; }
+  auto = true; st.auto = true; save(); dormido = false;
+  log('sin partidos de liga hoy: busco amistosos solo, en automático');
+  await arrancarBusqueda('📅 Hoy no hay partidos de liga en el calendario: busco amistosos solo.');
 });
 
-async function arrancarBusqueda() {
+async function arrancarBusqueda(motivo = '') {
   // No se usa getChats()/msg.getChat(): fallan con contactos @lid en whatsapp-web.js. El grupo se
   // busca directo en las colecciones internas de WhatsApp Web (ver buscarGrupo).
   await buscarGrupo();
@@ -250,7 +267,7 @@ async function arrancarBusqueda() {
       setTimeout(() => process.exit(0), 3000); return;
     }
   }
-  await avisar(`🕵️ *Bot de amistosos ${+process.env.AMISTOSOS_REINICIO ? 'reiniciado' : 'activo'}*${PRUEBA ? ' (prueba)' : ''}${auto ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.\nPara pararlo: *apagar* (por hoy) o *desactivar* (hasta que mandes *activar*).`);
+  await avisar(`${motivo ? motivo + '\n' : ''}🕵️ *Bot de amistosos ${+process.env.AMISTOSOS_REINICIO ? 'reiniciado' : 'activo'}*${PRUEBA ? ' (prueba)' : ''}${auto ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.\nPara pararlo: *apagar* (por hoy) o *desactivar* (hasta que mandes *activar*).`);
   if (!grupoId) await avisar('⚠️ No encontré el grupo de amistosos en tus chats: lo voy a reconocer cuando llegue un mensaje.');
   await revisarAtrasados();
   await revisarRespuestas();
@@ -508,7 +525,7 @@ async function comando(body) {
     dormido = true;
     log(siempre ? 'desactivado por WhatsApp' : 'apagado por hoy por WhatsApp');
     return avisar(siempre
-      ? '🕵️ *Bot de amistosos desactivado.* No busca más hasta que mandes *activar* (lunes a jueves de 17:00 a 22:00, que es cuando está conectado).'
+      ? '🕵️ *Bot de amistosos desactivado.* No arranca solo hasta que mandes *activar* (o *busca amistosos* para un día puntual; escucha lunes a jueves de 17:00 a 22:00).'
       : '🕵️ *Bot de amistosos apagado por hoy.* Mañana arranca solo a las 17:00. Si querés que vuelva hoy, mandá *activar*.');
   }
   // "busca amistosos": arranca YA en automático por el resto del día (pedido de Juan, 2026-10-21)
@@ -524,7 +541,7 @@ async function comando(body) {
   if (/^(activar|prender)$/i.test(body)) {
     const estaba = dormido || fs.existsSync(OFF_FILE);
     fs.rmSync(OFF_FILE, { force: true });
-    if (!dormido) return avisar(estaba ? '🕵️ Listo: vuelve a arrancar solo de lunes a jueves a las 17:00 (hoy ya estaba buscando).' : '🕵️ El bot ya está activo.');
+    if (!dormido) return avisar(estaba ? '🕵️ Listo: vuelve a arrancar solo (lunes a jueves desde las 17:00, los días sin partidos de liga). Hoy ya estaba buscando.' : '🕵️ El bot ya está activo.');
     dormido = false;
     log('activado por WhatsApp');
     return arrancarBusqueda();
