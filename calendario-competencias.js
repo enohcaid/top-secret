@@ -76,27 +76,35 @@
   }
 
   // ── Dibujar ──
+  const chipDe = (m, C) => {
+    const amis = !m.league || m.league === 'Amistoso', lg = amis ? '' : C.lgLabel(m);
+    return `<span class="nh-lbadge ${amis ? 'amis' : (LGKEY[m.league] || 'amis')}">${amis ? 'AMI' : lg === 'Espacio Gamer' ? 'EG' : esc(lg)}</span>`;
+  };
   const abiertas = (() => { try { return JSON.parse(localStorage.getItem('ts_cal_abiertas') || '{}'); } catch { return {}; } })();
   const guardar = () => { try { localStorage.setItem('ts_cal_abiertas', JSON.stringify(abiertas)); } catch {} };
 
-  function fila(p, hoy, C) {
+  // conLiga: en la agenda cada fila lleva su etiqueta de competencia (en la tarjeta no hace falta)
+  function fila(p, hoy, C, conLiga = false) {
     const m = p.m, d = new Date(m.date + 'T12:00:00');
     const crest = m.badge || C.vpnBadge?.(m.rival) || null;
     const ini = (m.rival || '').split(/\s+/).filter(w => /^[A-Za-zÁÉÍÓÚÑ0-9]/.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase();
     const etapa = m.playoff ? (m.playoff.match(/(Ida|Vuelta)$/i) || [])[1] : (m.instancia || (m.round ? `Fecha ${m.round}` : ''));
-    const der = p.outcome ? `<span class="mmi-score">${esc(p.score.replace('–', '-'))}</span>` : `<span class="mmi-pending">${esc(m.time || '—')}</span>`;
+    // en la agenda el día ya está en el título del grupo: a la izquierda va la hora (y a la derecha solo el resultado)
+    const der = p.outcome ? `<span class="mmi-score">${esc(p.score.replace('–', '-'))}</span>` : conLiga ? '<span></span>' : `<span class="mmi-pending">${esc(m.time || '—')}</span>`;
+    const izq = conLiga ? `<span class="mmi-date ag-hora"><b>${esc(m.time || '--:--')}</b></span>` : `<span class="mmi-date"><b>${d.getDate()}</b><small>${MES[d.getMonth()]}</small></span>`;
     const cls = `month-match-item${p.outcome ? ' mmi-' + p.outcome : ''}${m.date === hoy ? ' mmi-today' : ''}`;
     const idJs = typeof p.id === 'string' ? `'${p.id}'` : p.id;
     return `<div class="${cls}" onclick="openStatsPanel(${idJs})">
-      <span class="mmi-date"><b>${d.getDate()}</b><small>${MES[d.getMonth()]}</small></span>
+      ${izq}
       <span class="mmi-crest">${crest ? `<img src="${esc(crest)}" alt="" loading="lazy" onerror="this.replaceWith('${ini}')">` : ini}</span>
       <div class="mmi-main"><span class="mmi-rival">${esc(m.rival || '?')}</span>
-        <span class="mmi-meta">${DIA[d.getDay()]} · ${m.isHome ? 'Local' : 'Visita'}${etapa ? ' · ' + esc(etapa) : ''}</span></div>
+        <span class="mmi-meta">${conLiga ? chipDe(m, C) : DIA[d.getDay()] + ' · '}${m.isHome ? 'Local' : 'Visita'}${etapa ? ' · ' + esc(etapa) : ''}</span></div>
       ${der}</div>`;
   }
 
   function tarjeta(c, hoy, C) {
-    const abierta = c.clave in abiertas ? abiertas[c.clave] : c.enCurso;
+    // todas arrancan plegadas: lo que se viene ya está en la agenda unificada de arriba
+    const abierta = c.clave in abiertas ? abiertas[c.clave] : false;
     const total = c.partidos.length, jug = c.r.pj;
     const rec = jug ? `${c.r.g}G ${c.r.e}E ${c.r.p}P · ${c.r.gf}-${c.r.gc}` : 'Sin jugar';
     const prox = c.proximo ? (() => { const d = new Date(c.proximo.m.date + 'T12:00:00'); return `${c.proximo.m.date === hoy ? 'HOY' : DIA[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1)} · ${c.proximo.m.time || ''} · vs ${c.proximo.m.rival}`; })() : '';
@@ -119,6 +127,18 @@
     </section>`;
   }
 
+  // Agenda unificada (Juan, 2026-10-21: "¿con competencias simultáneas tendré 3 calendarios?"): los próximos partidos
+  // de TODAS las competencias juntos, por día, y los últimos resultados. Las competencias quedan como tarjetas plegadas.
+  function agenda(ps, hoy, C) {
+    const prox = ps.filter(p => !p.outcome && p.m.date >= hoy).sort((a, b) => a.m.date.localeCompare(b.m.date) || (a.m.time || '').localeCompare(b.m.time || '')).slice(0, 12);
+    const ult = ps.filter(p => p.outcome).sort((a, b) => b.m.date.localeCompare(a.m.date) || (b.m.time || '').localeCompare(a.m.time || '')).slice(0, 6);
+    if (!prox.length && !ult.length) return '';
+    const porDia = lista => { const g = []; for (const p of lista) { const u = g[g.length - 1]; if (u && u.d === p.m.date) u.ps.push(p); else g.push({ d: p.m.date, ps: [p] }); } return g; };
+    const dia = d => { const x = new Date(d + 'T12:00:00'); return d === hoy ? 'HOY' : `${['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][x.getDay()]} ${x.getDate()} ${MES[x.getMonth()].toLowerCase()}`; };
+    const bloque = (tit, lista) => !lista.length ? '' : `<div class="ag-col"><div class="comp-grupo-tit">${tit}</div>${porDia(lista).map(g => `<div class="ag-dia"><div class="ag-fecha">${dia(g.d)}</div><div class="month-match-list">${g.ps.map(p => fila(p, hoy, C, true)).join('')}</div></div>`).join('')}</div>`;
+    return `<div class="agenda">${bloque('Próximos partidos', prox)}${bloque('Últimos resultados', ult)}</div>`;
+  }
+
   function render() {
     const raiz = $('#compGrid'), C = window.TSCal; if (!raiz || !C) return;
     const vista = vistaActual(), temp = C.temporada();
@@ -130,12 +150,15 @@
     const todas = competencias().filter(c => temp === 'all' || c.season === temp);
     const temporadas = temp === 'all' ? ['t4', 't3', 't2', 't1'] : [temp];
     let html = '';
+    // agenda unificada de la temporada actual (la que tiene partidos por jugar)
+    const enJuego = C.partidos().filter(p => (temp === 'all' || p.season === temp) && (!p.m.tipo || p.m.tipo === 'partido'));
+    if (enJuego.some(p => !p.outcome && p.m.date >= hoy)) html += agenda(enJuego.filter(p => p.season === (temp === 'all' ? 't4' : temp)), hoy, C);
     for (const t of temporadas) {
       const cs = todas.filter(c => c.season === t); if (!cs.length) continue;
       const vivos = cs.filter(c => c.enCurso).sort((a, b) => a.proximo.m.date.localeCompare(b.proximo.m.date));
       const fin = cs.filter(c => !c.enCurso).sort((a, b) => b.hasta.localeCompare(a.hasta));
       if (temp === 'all') html += `<div class="comp-temp">${TEMP[t] || t}</div>`;
-      if (vivos.length) html += `<div class="comp-grupo"><div class="comp-grupo-tit">En curso</div><div class="comp-lista vivos">${vivos.map(c => tarjeta(c, hoy, C)).join('')}</div></div>`;
+      if (vivos.length) html += `<div class="comp-grupo"><div class="comp-grupo-tit">Competencias en curso <span>${vivos.length}</span></div><div class="comp-lista vivos">${vivos.map(c => tarjeta(c, hoy, C)).join('')}</div></div>`;
       if (fin.length) html += `<div class="comp-grupo"><div class="comp-grupo-tit">Finalizados <span>${fin.length}</span></div><div class="comp-lista fins">${fin.map(c => tarjeta(c, hoy, C)).join('')}</div></div>`;
     }
     raiz.innerHTML = html || '<div class="comp-vacio">Sin partidos en esta temporada.</div>';

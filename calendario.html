@@ -388,7 +388,14 @@ footer span{color:var(--gold);}
 .comp-grupo-tit{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mid);margin:0 0 10px;display:flex;align-items:center;gap:8px}
 .comp-grupo-tit span{background:var(--gray);border-radius:10px;padding:1px 8px;color:var(--text);letter-spacing:.05em}
 .comp-lista{display:grid;gap:14px}
-.comp-lista.fins{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));align-items:start}
+.comp-lista{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));align-items:start}
+.comp-card.abierta{grid-column:1/-1}   /* la que se abre ocupa todo el ancho: su fixture se lee cómodo */
+/* agenda unificada: próximos partidos de todas las competencias + últimos resultados */
+.agenda{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;margin-top:8px}
+.ag-dia{margin-bottom:10px}
+.ag-fecha{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:6px 4px 4px;border-bottom:1px solid var(--border)}
+.agenda .mmi-meta .nh-lbadge{margin-right:2px}
+.agenda .ag-hora b{font-size:1rem;color:var(--gold)}
 .comp-card{background:var(--gray);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .comp-card.en-curso{border-color:color-mix(in srgb,var(--gold) 45%,var(--border))}
 .comp-head{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px 6px;background:transparent;border:0;color:var(--text);cursor:pointer;text-align:left}
@@ -414,14 +421,15 @@ footer span{color:var(--gold);}
 .comp-vacio{padding:30px 0;color:var(--mid);font-style:italic}
 @media(min-width:1100px){
   /* torneo en curso con muchas fechas: dos columnas que se leen de arriba hacia abajo */
-  .comp-lista.vivos .month-match-list{display:block;columns:2;column-gap:28px}
-  .comp-lista.vivos .month-match-item{break-inside:avoid}
+  .comp-card.abierta .month-match-list{display:block;columns:2;column-gap:28px}
+  .comp-card.abierta .month-match-item{break-inside:avoid}
 }
 @media(max-width:560px){
   .comp-grid{padding:0 16px 60px}
   .comp-resumen,.comp-avance{padding-left:16px}
   .comp-prox{margin-left:16px}
-  .comp-lista.fins{grid-template-columns:1fr}
+  .comp-lista{grid-template-columns:1fr}
+  .agenda{grid-template-columns:1fr;gap:12px}
 }
 .sbtn{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:color .15s, border-color .15s, background-color .15s;}
 .sbtn:hover{border-color:var(--mid);color:var(--text);}
@@ -3211,7 +3219,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
-<script src="calendario-competencias.js?v=1"></script>
+<script src="calendario-competencias.js?v=3"></script>
 <script src="calendario-share.js?v=5"></script>
 <script src="layout.js?v=25"></script>
 </body>
