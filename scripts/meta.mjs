@@ -111,9 +111,19 @@ if (cmd === 'estado') {
 } else if (cmd === 'fb-historia') {
   // Historia de foto de la página: la foto se sube sin publicar y se usa como historia.
   if (PRUEBA) { console.log('[prueba] no se publica en Facebook'); process.exit(0); }
-  const foto = await api(`/${E.META_PAGE_ID}/photos`, { url: args[0], published: 'false', ...igTok() });
-  const r = await api(`/${E.META_PAGE_ID}/photo_stories`, { photo_id: foto.id, ...igTok() });
-  console.log('historia publicada en Facebook, id:', r.post_id || r.id, '(dura 24 h)');
+  if (/\.mp4(\?|$)/i.test(args[0])) {
+    // Historia de video (2026-10-21; antes solo fotos y fallaba con el video del gol): video_stories en 3 pasos —
+    // iniciar, subir el archivo desde la URL pública (rupload, con el token en el encabezado) y terminar.
+    const ini = await api(`/${E.META_PAGE_ID}/video_stories`, { upload_phase: 'start', ...igTok() });
+    const up = await fetch(ini.upload_url, { method: 'POST', headers: { Authorization: `OAuth ${igTok().access_token}`, file_url: args[0] } }).then(r => r.json());
+    if (!up.success) throw new Error('video_stories (subida): ' + JSON.stringify(up).slice(0, 200));
+    const fin = await api(`/${E.META_PAGE_ID}/video_stories`, { upload_phase: 'finish', video_id: ini.video_id, ...igTok() });
+    console.log('historia publicada en Facebook (video), id:', fin.post_id || ini.video_id, '(dura 24 h)');
+  } else {
+    const foto = await api(`/${E.META_PAGE_ID}/photos`, { url: args[0], published: 'false', ...igTok() });
+    const r = await api(`/${E.META_PAGE_ID}/photo_stories`, { photo_id: foto.id, ...igTok() });
+    console.log('historia publicada en Facebook, id:', r.post_id || r.id, '(dura 24 h)');
+  }
 } else {
   console.log('Ver la cabecera de scripts/meta.mjs para el uso.');
 }

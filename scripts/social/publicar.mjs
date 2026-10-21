@@ -20,8 +20,19 @@ const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: '
 
 // Sin process.exit(): en Windows, salir así con conexiones de fetch abiertas tira
 // "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)" (código 9). Se deja terminar solo.
-const data = await leer();
 const ESTADO = process.argv.includes('--estado');
+// Candado (2026-10-21): una corrida a mano coincidió con la de watch-regen y el video del gol vs Sub 21 salió dos
+// veces en Facebook y en YouTube. Si hay otra corrida viva, esta no hace nada (el PID del candado tiene que existir).
+const LOCK = path.join(ROOT, 'scripts', '.publicar.lock');
+let conCandado = false;
+if (!ESTADO) {
+  try { process.kill(+fs.readFileSync(LOCK, 'utf8'), 0); log('Otra publicación en curso: salgo.'); } catch { conCandado = true; }
+  if (conCandado) {
+    fs.writeFileSync(LOCK, String(process.pid));
+    process.on('exit', () => { try { if (fs.readFileSync(LOCK, 'utf8') === String(process.pid)) fs.rmSync(LOCK); } catch {} });
+  }
+}
+const data = conCandado || ESTADO ? await leer() : { lotes: [] };
 if (ESTADO) {
   for (const l of data.lotes) { console.log(`${l.id} (${l.publicarA})`); for (const p of l.piezas) console.log(`  ${p.id.padEnd(12)} ${(p.decision || '').padEnd(10)} ${p.estado || ''} ${p.url || p.error || ''}`); }
 }
@@ -165,6 +176,11 @@ async function publicar(p) {
 if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'x-texto', 'tiktok', 'youtube'].includes(p.metodo))) await asegurarChrome().catch(e => log(e.message));
 
 for (const { l, p } of cola) {
+  // Releer justo antes: si otra corrida ya la tomó o la publicó (o Juan la sacó), no se repite.
+  const fresca = (await leer()).lotes.find(x => x.id === l.id)?.piezas.find(x => x.id === p.id);
+  if (!fresca || fresca.decision !== 'aprobada' || fresca.estado === 'publicado' || (fresca.estado === 'publicando' && Date.now() - Date.parse(fresca.desde || 0) < 15 * 60000)) {
+    log(`${l.id} · ${p.id}: ya la tomó otra corrida (${fresca?.estado || 'sin pieza'}), sigo.`); continue;
+  }
   log(`${l.id} · ${p.id}: publicando…`);
   for (const r of revisarPieza(p, l)) log(`${l.id} · ${p.id}: [${r.nivel}] ${r.msg}`);   // no frena: queda en el log
   await actualizarPieza(l.id, p.id, { estado: 'publicando', desde: new Date().toISOString(), error: null });
