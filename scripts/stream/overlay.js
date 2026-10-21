@@ -22,14 +22,19 @@ function placa(gt, emocion, cambiaJugador) {
   $('jug').classList.add('cambia'); setTimeout(() => { set(); $('jug').classList.remove('cambia'); }, 250);
 }
 
-// Contra las repeticiones (pedido de Juan): se recuerda cuándo pasó cada clip y cada jugador, y siempre se elige lo
-// que hace más tiempo que no sale (con empate, al azar). Así un clip no vuelve hasta que pasaron todos los demás
-// del jugador, y al cambiar entra el jugador que hace más que no aparece.
+// Al azar pero sin repetirse (Juan, 2026-10-21: "masViejo" armaba una rueda fija — mismo orden de jugadores y de
+// clips en cada vuelta, previsible). Ahora: el próximo jugador sale al azar entre la mitad que hace más que no
+// aparece; el clip, al azar entre los que no pasó en sus últimos 3; y cada turno dura 2 a 4 clips (no siempre 3).
 const ultimoClip = {}, ultimoJugador = {};
 const masViejo = (lista, cuando) => { const t = Math.min(...lista.map(x => cuando[x] || 0)); return azar(lista.filter(x => (cuando[x] || 0) === t)); };
+const azarViejos = (lista, cuando, fraccion) => {   // al azar entre los que hace más que no salen (la fracción más vieja)
+  const orden = lista.slice().sort((a, b) => (cuando[a] || 0) - (cuando[b] || 0));
+  return azar(orden.slice(0, Math.max(1, Math.ceil(orden.length * fraccion))));
+};
+let turno = 3;
 
 // Elige el próximo clip: un evento pendiente manda; si no, una emoción de espera del jugador actual
-// (cada 3 clips cambia de jugador, entre los convocados si estado.json los trae).
+// (cada 2-4 clips cambia de jugador, entre los que juegan si estado.json los trae).
 function proximo() {
   // Mientras la tanda no generó clips de espera, cualquier clip sirve.
   const hayEspera = Object.values(indice).some(j => j.emociones.some(e => ESPERA.includes(e)));
@@ -37,7 +42,10 @@ function proximo() {
   let pool = Object.keys(indice).filter(gt => indice[gt].emociones.some(deEspera));
   if (estado.jugadores?.length) { const c = pool.filter(gt => estado.jugadores.includes(gt)); if (c.length) pool = c; }
   if (!pool.length) return null;
-  const elegir = (gt, emos) => { const e = masViejo(emos, Object.fromEntries(emos.map(x => [x, ultimoClip[gt + '/' + x]])));
+  const elegir = (gt, emos) => {
+    const cuando = Object.fromEntries(emos.map(x => [x, ultimoClip[gt + '/' + x]]));
+    // fuera los 3 últimos que pasó (si tiene pocos clips, al menos deja uno)
+    const e = azarViejos(emos, cuando, emos.length > 4 ? (emos.length - 3) / emos.length : 0.5);
     ultimoClip[gt + '/' + e] = ultimoJugador[gt] = Date.now(); return e; };
   let cambia = false;
   if (evento) {
@@ -48,27 +56,33 @@ function proximo() {
     const emos = indice[gt].emociones.filter(e => EVENTO[tipo].includes(e));
     if (emos.length) return { gt, emocion: elegir(gt, emos), cambia };
   }
-  if (!actual || !pool.includes(actual) || ++enCola >= 3) {
-    const otros = pool.filter(gt => gt !== actual); const nuevo = masViejo(otros.length ? otros : pool, ultimoJugador);
-    cambia = nuevo !== actual; actual = nuevo; enCola = 0;
+  if (!actual || !pool.includes(actual) || ++enCola >= turno) {
+    const otros = pool.filter(gt => gt !== actual); const nuevo = azarViejos(otros.length ? otros : pool, ultimoJugador, 0.5);
+    cambia = nuevo !== actual; actual = nuevo; enCola = 0; turno = 2 + Math.floor(Math.random() * 3);
   }
   return { gt: actual, emocion: elegir(actual, indice[actual].emociones.filter(deEspera)), cambia };
 }
 
 // Dos <video> alternados: el siguiente se carga oculto y entra recién cuando puede reproducirse (sin parpadeo).
+// Los clips duran 5 s: van al 85 % y al terminar el jugador queda quieto en su pose 0,8-2,2 s antes del siguiente
+// (terminan en la postura de reposo). Repetir el mismo clip dos veces se notaba como un loop (charlado con Juan).
+const VELOCIDAD = 0.85;
+let pausaClip = null;
 function siguiente() {
+  clearTimeout(pausaClip); pausaClip = null;
   const c = proximo(); if (!c) { setTimeout(siguiente, 3000); return; }
   const v = vids[1 - activo], viejo = vids[activo];
   v.src = `${CLIPS}${encodeURIComponent(c.gt)}/${c.emocion}.webm`;
   v.onerror = () => setTimeout(siguiente, 500);
   v.oncanplay = () => {
     v.oncanplay = null;
+    v.playbackRate = VELOCIDAD;
     v.play().then(() => {
       v.classList.add('on'); viejo.classList.remove('on'); viejo.pause(); activo = 1 - activo;
       placa(c.gt, c.emocion, c.cambia);
     }).catch(() => setTimeout(siguiente, 1000));
   };
-  v.onended = siguiente;
+  v.onended = () => { pausaClip = setTimeout(siguiente, 800 + Math.random() * 1400); };
   v.load();
 }
 
@@ -101,7 +115,8 @@ async function actualizar() {
         window.ultimoResultado = ev.resultado; evento = ev.resultado;
         if (ev.resultado === 'victoria') window.victoria?.mostrar({ marcador: ev.marcador, rival: e.rival, escudo: e.escudo, torneo: e.torneo });
       }
-      else evento = ev.tipo;
+      else if (EVENTO[ev.tipo]) evento = ev.tipo;
+      else continue;                                           // avisos sin reacción (inicioPartido): antes rompían proximo()
       if (ev.tipo === 'gol') gol();
       vids[activo].pause(); siguiente();                       // el evento corta el clip de espera
     }
