@@ -21,6 +21,16 @@ const DIR = path.join(ROOT, 'fuentes/redes/gol-sub21');
 const log = m => console.log(`${new Date().toLocaleTimeString('es-AR')} [gol-sub21] ${m}`);
 fs.mkdirSync(DIR, { recursive: true });
 
+// El resto de las redes (Juan, 2026-10-21: "publiquemos en todas las redes"): TikTok, YouTube Shorts y X
+export const PIEZAS_EXTRA = P => [
+  P({ id: 'tiktok', red: 'tiktok', formato: 'Video', metodo: 'tiktok',
+    texto: 'Minuto 91, 0-0 y debut oficial. Asistencia de Elianja20, gol de pepolemmo2710 🔥 Así se vivió en nuestra transmisión. #TopSecretFC #ProClubs #EAFC #EspacioGamer' }),
+  P({ id: 'yt-short', red: 'youtube', formato: 'Short', metodo: 'youtube', titulo: 'Gol en el minuto 91 para ganar el debut oficial | Pro Clubs EA FC',
+    texto: "Debut oficial en Espacio Gamer: asistencia de Elianja20 y gol de pepolemmo2710 en el 91' ante Sub 21.\n\n#Shorts #TopSecretFC #ProClubs" }),
+  P({ id: 'x', red: 'x', formato: 'Post con video', metodo: 'x-video',
+    texto: 'Minuto 91, 0-0 en el debut oficial y apareció pepolemmo2710 tras el pase de Elianja20. Así se vivió en nuestra transmisión. ¿Lo viste en vivo? #TopSecretFC' }),
+];
+
 export const ESCENAS = [
   // quieta: el clip de Canva de la jugada salió mal (Juan: "se enreda con la red, pasa cualquier cosa"): va la imagen fija
   // con un acercamiento hacia la pelota hecho en la plantilla
@@ -130,6 +140,7 @@ const lote = {
     P({ id: 'fb-video', red: 'facebook', formato: 'Reel / video', metodo: 'fb-video',
       texto: 'Martes 20 de octubre, debut oficial en Espacio Gamer. Con 0-0 en el minuto 91, Elianja20 asistió y pepolemmo2710 marcó el 1-0 ante Sub 21.\n\nEn el video: el gol tal como salió en nuestra transmisión oficial, la repetición y una recreación del festejo.\n\nTodos los partidos van en vivo por Twitch, Kick, YouTube e Instagram. El próximo: jueves a las 22:30 vs Suda eSports.' }),
     P({ id: 'fb-historia', red: 'facebook', formato: 'Historia', descripcion: '24 h · ' + desc, metodo: 'fb-historia', texto: '' }),
+    ...PIEZAS_EXTRA(P),
   ],
 };
 for (const p of lote.piezas) for (const r of revisarPieza(p, lote)) log(`  aviso ${p.id}: ${r.msg}`);
