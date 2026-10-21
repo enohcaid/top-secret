@@ -36,9 +36,9 @@
   // Título corto: el que escribió la rutina (tituloImagen) o la primera parte del título de la nota.
   function tituloCorto(n) {
     if (n.tituloImagen) return n.tituloImagen.trim();
-    const t = (n.title || '').split(/[:—|]/)[0].trim();
-    const pal = t.split(/\s+/);
-    return pal.length <= 7 ? t : pal.slice(0, 6).join(' ');
+    // Título entero (sin el subtítulo después de ":", "—" o "|"). Antes se quedaba con las primeras 6 palabras si
+    // tenía más de 7 y cortaba la frase ("TOP SECRET ARRANCA ESPACIO GAMER CON", 2026-10-21): ahora achica la letra.
+    return (n.title || '').split(/[:—|]/)[0].trim();
   }
 
   // Palabras del título: en mayúsculas, salvo los gamertags (van tal cual y en dorado).
@@ -105,9 +105,16 @@
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
     const X = 68, maxW = W - 2 * X;
-    const size = historia ? 124 : 112, lh = size * 0.9;
-    ctx.font = `900 ${size}px ${FONT}`;
-    const lines = wrap(ctx, tokens(opts.titulo || tituloCorto(n), opts.gamertags), maxW);
+    // Letra lo más grande posible que entre en 3 líneas (post) o 4 (historia); títulos largos bajan hasta 72 px.
+    const toks = tokens(opts.titulo || tituloCorto(n), opts.gamertags), maxLineas = historia ? 4 : 3;
+    let size = historia ? 124 : 112, lines;
+    for (;;) {
+      ctx.font = `900 ${size}px ${FONT}`;
+      lines = wrap(ctx, toks, maxW);
+      if (lines.length <= maxLineas || size <= 72) break;
+      size -= 4;
+    }
+    const lh = size * 0.9;
 
     // Se arma de abajo hacia arriba.
     let y = H - (historia ? Math.round(H * 0.20) + 40 : 84);

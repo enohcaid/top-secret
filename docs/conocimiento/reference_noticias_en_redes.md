@@ -31,3 +31,4 @@ metadata:
 **Escudo en la foto limpia** (`stampCrest` en generate-image-chatgpt.mjs): solo esquinas reales (corrido hacia adentro quedaba al lado de un jugador del fondo), elige la de menos luces/bordes, halo oscuro difuso detrás para el contraste; en historias respeta 14% arriba / 20% abajo. Estampa siempre sobre la copia limpia de `fuentes/daily-news-raw/` (re-estampar no acumula escudos).
 
 **Caché:** `/media` es immutable por URL — las imágenes de la noticia llevan `?v=` (si no, una regenerada con el mismo nombre seguía saliendo vieja, también para Instagram).
+- **Títulos largos (2026-10-21):** `tituloCorto()` ya no corta a 6 palabras (cortaba la frase: "…ESPACIO GAMER CON"); va el título entero y la letra baja de a 4 px hasta entrar en 3 líneas (post) o 4 (historia), mínimo 72 px. `tituloImagen` sigue pisándolo si hace falta uno más corto.
