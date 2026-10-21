@@ -24,6 +24,8 @@
  *                                apagar       → deja de buscar por hoy (sigue conectado hasta 22:00 esperando "activar")
  *                                desactivar   → idem y no vuelve a buscar los días siguientes (arranca dormido)
  *                                activar      → vuelve a buscar ya y los días siguientes
+ *                                busca amistosos → busca YA y en automático por el resto del día (aunque esté
+ *                                               desactivado): ofrece solo, confirma y carga; te consulta solo lo dudoso
  *                                + 23:00 Chacarita → carga un amistoso que Juan coordinó por su cuenta
  * 3. Si el rival contesta que sí ("dale", "de una", 👍…), carga el amistoso solo en el calendario
  *    (Firestore calendario/estado.custom, league 'Amistoso', con escudo) → sale en la convocatoria
@@ -70,6 +72,13 @@ const STATE_FILE = path.join(DIR, `${hoy()}.json`);
 const st = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))
   : { fecha: hoy(), confirmados: {}, pedidos: {}, siguiente: 0 };   // confirmados: slot → equipo
 const save = () => fs.writeFileSync(STATE_FILE, JSON.stringify(st, null, 2));
+// Automático: por --auto o porque Juan mandó "busca amistosos" hoy (queda en el estado del día: sobrevive a reinicios)
+let auto = AUTO || st.auto === true;
+// Una sola instancia (2026-10-21): dos bots con la misma sesión de WhatsApp se pisan. Si hay otro vivo, salgo.
+const LOCK = path.join(DIR, '.bot.lock');
+try { process.kill(+fs.readFileSync(LOCK, 'utf8'), 0); console.log(horaArt(), 'ya hay un bot de amistosos corriendo: salgo'); process.exit(0); } catch {}
+fs.writeFileSync(LOCK, String(process.pid));
+process.on('exit', () => { try { if (fs.readFileSync(LOCK, 'utf8') === String(process.pid)) fs.rmSync(LOCK); } catch {} });
 // Pausa por WhatsApp: "apagar" duerme el bot hasta las 22:00; "desactivar" además deja este archivo,
 // y mientras exista el bot arranca a las 17:00 dormido (conectado, sin buscar ni avisar) hasta "activar".
 const OFF_FILE = path.join(DIR, 'desactivado.json');
@@ -241,7 +250,7 @@ async function arrancarBusqueda() {
       setTimeout(() => process.exit(0), 3000); return;
     }
   }
-  await avisar(`🕵️ *Bot de amistosos ${+process.env.AMISTOSOS_REINICIO ? 'reiniciado' : 'activo'}*${PRUEBA ? ' (prueba)' : ''}${AUTO ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.\nPara pararlo: *apagar* (por hoy) o *desactivar* (hasta que mandes *activar*).`);
+  await avisar(`🕵️ *Bot de amistosos ${+process.env.AMISTOSOS_REINICIO ? 'reiniciado' : 'activo'}*${PRUEBA ? ' (prueba)' : ''}${auto ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.\nPara pararlo: *apagar* (por hoy) o *desactivar* (hasta que mandes *activar*).`);
   if (!grupoId) await avisar('⚠️ No encontré el grupo de amistosos en tus chats: lo voy a reconocer cuando llegue un mensaje.');
   await revisarAtrasados();
   await revisarRespuestas();
@@ -295,7 +304,7 @@ client.on('message_create', async msg => {
     if (!yo) return;
     // 1) Comandos de Juan en su chat consigo mismo.
     // El chat consigo mismo puede venir como @c.us o como @lid (yoLid).
-    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉|⏱️)/u.test(msg.body)) {
+    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉|⏱️|⚡)/u.test(msg.body)) {
       // Varios comandos en un mismo mensaje, uno por línea ("B\nC no\nD no").
       for (const linea of msg.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
       return;
@@ -364,8 +373,12 @@ async function pedidoGrupo(msg) {
   const corrida = p.propuesto && (p.horas || SLOTS.filter(s => !ocupados().has(s)))[0] !== p.propuesto ? `; ${(p.horas || SLOTS.filter(s => !ocupados().has(s)))[0]} ya se la propuse a otro pedido` : '';
   const oferta = p.propuesto ? `Le ofrezco *${p.propuesto}*${susHoras || corrida ? ` (${[susHoras, corrida.slice(2)].filter(Boolean).join('; ')})` : ''}.`
     : `_En espera_: ${p.horas ? `sus horarios (${p.horas.join(', ')})` : 'los horarios libres'} ya están propuestos a otros pedidos. Si se libera alguno, se lo ofrezco.`;
-  await avisar(`📣 *Pedido ${id}* — ${preguntar ? '_no dice qué equipo es: se lo pregunto al ofrecerle_' : eq.dudoso ? `¿${eq.dudoso.join(' o ')}?` : `*${eq.nombre}* (${eq.div})`}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${oferta} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq?.dudoso ? `, *${id} <equipo>* para definir el equipo` : ''}, o *${id} no*.`);
-  if (AUTO && p.propuesto && (preguntar || (!eq.dudoso && eq.div !== '?'))) await ofrecer(id, null, null);
+  const vaSolo = auto && p.propuesto && (preguntar || (eq && !eq.dudoso && eq.div !== '?'));
+  if (vaSolo) await avisar(`📣 *Pedido ${id}* — ${preguntar ? 'equipo sin nombre (se lo pregunto)' : `*${eq.nombre}* (${eq.div})`}
+“${msg.body.slice(0, 160)}”
+⚡ Le ofrezco *${p.propuesto}* automáticamente. Si querés frenarlo: *${id} no*.`);
+  else await avisar(`📣 *Pedido ${id}* — ${preguntar ? '_no dice qué equipo es: se lo pregunto al ofrecerle_' : eq.dudoso ? `¿${eq.dudoso.join(' o ')}?` : `*${eq.nombre}* (${eq.div})`}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${oferta} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq?.dudoso ? `, *${id} <equipo>* para definir el equipo` : ''}, o *${id} no*.`);
+  if (auto && p.propuesto && (preguntar || (!eq.dudoso && eq.div !== '?'))) await ofrecer(id, null, null);
 }
 
 // Cuando cambian los horarios (se ofrece, confirma, rechaza o descarta algo), revisa los pedidos que
@@ -378,7 +391,7 @@ async function reacomodar() {
     if (nueva === antes) continue;
     p.propuesto = nueva; save();
     log(`${id}: propuesta ${antes || 'en espera'} → ${nueva || 'en espera'}`);
-    if (AUTO && nueva && (p.preguntar || (p.equipo && p.equipo.div !== '?'))) { await ofrecer(id, null, null); continue; }
+    if (auto && nueva && (p.preguntar || (p.equipo && p.equipo.div !== '?'))) { await ofrecer(id, null, null); continue; }
     await avisar(nueva ? `📣 *${id}* ${p.equipo?.nombre || ''}: ${antes ? `${antes} ya no está libre` : 'se liberó un horario'}, ahora le ofrezco *${nueva}*. Respondé *${id}* para mandar o *${id} no*.`
       : `📣 *${id}* ${p.equipo?.nombre || ''}: ${antes} ya no está libre y no le queda otro de sus horarios. Queda en espera.`);
   }
@@ -498,6 +511,16 @@ async function comando(body) {
       ? '🕵️ *Bot de amistosos desactivado.* No busca más hasta que mandes *activar* (lunes a jueves de 17:00 a 22:00, que es cuando está conectado).'
       : '🕵️ *Bot de amistosos apagado por hoy.* Mañana arranca solo a las 17:00. Si querés que vuelva hoy, mandá *activar*.');
   }
+  // "busca amistosos": arranca YA en automático por el resto del día (pedido de Juan, 2026-10-21)
+  if (/^(busc[aá](r|me|nos)?|conseguime|conseguinos)s+(amistosos?|rivales?)/i.test(body)) {
+    auto = true; st.auto = true; save();
+    log('busca amistosos: modo automático por hoy');
+    if (dormido) { dormido = false; return arrancarBusqueda(); }       // el aviso de arranque ya dice "(automático)"
+    await avisar('⚡ *Modo automático por hoy.* Ofrezco solo a los equipos reconocidos, cargo los que confirman y te consulto solo lo dudoso. Para frenarlo: *apagar*.');
+    for (const [id, p] of Object.entries(st.pedidos).filter(([, p]) => p.estado === 'nuevo' && !p.manual && p.propuesto && (p.preguntar || (p.equipo && p.equipo.div !== '?'))))
+      await ofrecer(id, null, null);
+    return;
+  }
   if (/^(activar|prender)$/i.test(body)) {
     const estaba = dormido || fs.existsSync(OFF_FILE);
     fs.rmSync(OFF_FILE, { force: true });
@@ -507,7 +530,7 @@ async function comando(body) {
     return arrancarBusqueda();
   }
   if (dormido) {
-    if (/^estado$/i.test(body)) return avisar(`🕵️ Bot ${fs.existsSync(OFF_FILE) ? 'desactivado' : 'apagado por hoy'}. Mandá *activar* para que busque.`);
+    if (/^estado$/i.test(body)) return avisar(`🕵️ Bot ${fs.existsSync(OFF_FILE) ? 'desactivado' : 'apagado por hoy'}. Mandá *busca amistosos* para que busque en automático (o *activar* para el modo con tu aprobación).`);
     return;
   }
   const m = body.match(/^([A-Z]{1,2}\d?)\b\s*(.*)$/i);
