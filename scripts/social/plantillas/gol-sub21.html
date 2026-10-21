@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Reel + historia del gol agónico vs Sub 21 (scripts/social/piezas/gol-sub21.mjs). Vertical 1080x1920, línea de tiempo
+     continua: mostrar(0, t) dibuja el segundo t (determinístico; async: espera a que el cuadro de video esté decodificado).
+     Tramos (segundos, en D.T): gancho · oficial (VOD de Twitch con el overlay real) · goool (el cartel del overlay) ·
+     repe (grabación limpia en cámara lenta) · logro (imágenes de ChatGPT animadas, rotuladas como recreación) · cierre.
+     La parte oficial lleva marco de pantalla + "TRANSMISIÓN OFICIAL · EN VIVO"; el logro, otra estética y "RECREACIÓN". -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070605;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.66);--rojo:#E5484D}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+.capa{position:absolute;inset:0;display:none}
+.full{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#fondoBlur{filter:blur(46px) brightness(.38) saturate(1.2);transform:scale(1.25)}
+#vignette{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,transparent 40%,rgba(0,0,0,.75) 100%);pointer-events:none}
+#grano{position:absolute;inset:0;width:100%;height:100%;opacity:.10;mix-blend-mode:overlay;pointer-events:none}
+
+/* rótulo de sección (qué es cada parte) */
+#rotulo{position:absolute;left:60px;top:150px;display:flex;align-items:center;gap:16px;padding:16px 26px;border-radius:999px;
+  font:700 26px 'JetBrains Mono';letter-spacing:.2em;z-index:20;white-space:nowrap}
+#rotulo i{width:20px;height:20px;border-radius:50%}
+#rotulo.oficial{background:rgba(11,10,7,.82);border:2px solid rgba(229,72,77,.7);color:var(--text)}
+#rotulo.oficial i{background:var(--rojo);box-shadow:0 0 22px var(--rojo)}
+#rotulo.repe{background:var(--gold);color:#0B0A07}
+#rotulo.repe i{border-radius:4px;background:#0B0A07;width:16px;height:16px;transform:rotate(45deg)}
+#rotulo.logro{background:rgba(255,246,216,.92);color:#0B0A07}
+#rotulo.logro i{background:var(--gold);border-radius:3px}
+#subrotulo{position:absolute;left:62px;top:230px;font:700 22px 'JetBrains Mono';letter-spacing:.18em;color:var(--text2);z-index:20}
+
+/* gancho */
+#gancho .min{position:absolute;left:0;right:0;top:560px;text-align:center;font:400 520px/.8 'Bebas Neue';
+  background:linear-gradient(100deg,var(--gold) 0%,var(--gold) 40%,#FFF6D8 50%,var(--gold) 60%,var(--gold) 100%);background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 20px 60px rgba(201,168,76,.35))}
+#gancho .k{position:absolute;left:0;right:0;top:470px;text-align:center;font:700 30px 'JetBrains Mono';letter-spacing:.32em;color:var(--gold)}
+#marcador{position:absolute;left:50%;top:1060px;transform:translateX(-50%);display:flex;align-items:center;gap:0;border-radius:18px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);font:400 84px/1 'Bebas Neue'}
+#marcador .eq{background:#F2EEE0;color:#0B0A07;padding:16px 30px}
+#marcador .gl{background:#0B0A07;color:var(--text);padding:16px 26px;min-width:84px;text-align:center}
+#marcador .reloj{background:#17140d;color:var(--gold);padding:16px 26px;font-size:70px}
+#gancho .t{position:absolute;left:0;right:0;top:1250px;text-align:center;font:900 78px/1.05 Barlow;letter-spacing:-.01em}
+#gancho .t b{color:var(--gold)}
+
+/* pantalla de la transmisión (16:9 enmarcada) */
+#pantalla{position:absolute;left:40px;width:1000px;height:563px;border-radius:22px;overflow:hidden;
+  box-shadow:0 50px 140px rgba(0,0,0,.9),0 0 0 3px rgba(229,72,77,.55);transform-origin:50% 50%}
+#pantalla img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#pantalla .vivo{position:absolute;right:18px;bottom:16px;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:10px;background:rgba(0,0,0,.6);
+  font:700 18px 'JetBrains Mono';letter-spacing:.2em}
+#pantalla .vivo i{width:12px;height:12px;border-radius:50%;background:var(--rojo)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:15;pointer-events:none}
+#rayos{position:absolute;left:50%;top:50%;width:3000px;height:3000px;margin:-1500px 0 0 -1500px;opacity:0;
+  background:repeating-conic-gradient(from 0deg,rgba(241,220,151,.16) 0deg 5deg,transparent 5deg 15deg);
+  -webkit-mask:radial-gradient(closest-side,#000 10%,transparent 68%)}
+#titOficial{position:absolute;left:60px;right:60px;top:300px;font:900 92px/.98 Barlow;letter-spacing:-.02em}
+/* lo que trae la transmisión (vende el producto): etiquetas que aparecen de a una debajo de la pantalla */
+#feats{position:absolute;left:60px;right:60px;top:1370px;display:flex;flex-direction:column;gap:18px}
+#feats div{display:flex;align-items:center;gap:20px;padding:20px 26px;border-radius:20px;background:rgba(11,10,7,.78);border:2px solid rgba(201,168,76,.28);
+  font:800 40px Barlow;opacity:0}
+#feats div i{flex:none;width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px var(--gold)}
+#feats div.hot{border-color:var(--gold);background:rgba(201,168,76,.18)}
+#titOficial b{color:var(--gold)}
+
+/* repetición: banda con zoom y barras de cine */
+#repeBanda{position:absolute;left:0;right:0;top:470px;height:1000px;overflow:hidden;box-shadow:0 0 0 3px rgba(201,168,76,.5)}
+#repeBanda img{position:absolute;top:0;height:100%;width:auto}
+#repeBanda .lento{position:absolute;right:28px;top:24px;font:700 22px 'JetBrains Mono';letter-spacing:.25em;color:var(--gold);
+  padding:8px 14px;border:2px solid var(--gold);border-radius:10px;background:rgba(0,0,0,.45)}
+#ficha{position:absolute;left:60px;right:60px;top:1520px;display:flex;align-items:center;gap:28px;opacity:0}
+#ficha .min{font:400 170px/.8 'Bebas Neue';color:var(--gold)}
+#ficha .datos{font:800 42px/1.15 Barlow}
+#ficha .datos span{display:block;font:700 22px 'JetBrains Mono';letter-spacing:.2em;color:var(--text2);margin-bottom:8px}
+#ficha .datos b{color:var(--gold2)}
+
+/* el logro: clips de Canva a pantalla completa, otra estética */
+#logro .full{filter:contrast(1.06) saturate(1.08)}
+#logro .tono{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,6,5,.55) 0%,transparent 26%,transparent 58%,rgba(7,6,5,.92) 100%)}
+#logro .marco{position:absolute;inset:26px;border:2px solid rgba(241,220,151,.45);border-radius:30px;pointer-events:none}
+#logro .recre{position:absolute;right:56px;top:160px;font:700 20px 'JetBrains Mono';letter-spacing:.24em;color:var(--text2);padding:8px 14px;border-radius:8px;background:rgba(0,0,0,.4)}
+#logro .k{position:absolute;left:66px;top:1440px;font:700 28px 'JetBrains Mono';letter-spacing:.3em;color:var(--gold)}
+#logro .t{position:absolute;left:62px;right:62px;top:1490px;font:900 96px/1 Barlow;letter-spacing:-.02em}
+#logro .t b{color:var(--gold)}
+
+/* cierre */
+#cierre .res{position:absolute;left:60px;right:60px;top:260px;padding:46px 40px;border-radius:32px;background:rgba(11,10,7,.78);border:2px solid rgba(201,168,76,.45)}
+#cierre .res .k{font:700 24px 'JetBrains Mono';letter-spacing:.24em;color:var(--gold);text-align:center}
+#cierre .fila{display:flex;align-items:center;justify-content:space-between;margin-top:34px}
+#cierre .eq{display:flex;flex-direction:column;align-items:center;gap:14px;width:300px;font:800 34px Barlow;text-align:center}
+#cierre .eq img{width:170px;height:170px;object-fit:contain}
+#cierre .goles{font:400 210px/.8 'Bebas Neue'}
+#cierre .goles .g{color:var(--gold)}
+#cierre .goles .s{color:var(--text2);font-size:150px;margin:0 18px}
+#cierre .vict{text-align:center;margin-top:30px;font:900 56px Barlow;letter-spacing:.02em}
+#cierre .vict b{color:var(--gold)}
+#cierre .cta{position:absolute;left:60px;right:60px;top:1050px;text-align:center}
+#cierre .cta .t{font:900 74px/1 Barlow;letter-spacing:-.01em}
+#cierre .cta .s{margin-top:16px;font:600 32px/1.3 Barlow;color:var(--text2)}
+#plats{display:flex;justify-content:center;gap:22px;margin-top:34px}
+#plats div{width:200px;padding:22px 0;border-radius:24px;background:rgba(20,18,13,.9);border:2px solid rgba(201,168,76,.3);display:flex;flex-direction:column;align-items:center;gap:12px;
+  font:400 34px/1 'Bebas Neue';letter-spacing:.06em}
+#plats svg{width:70px;height:70px}
+#cierre .prox{position:absolute;left:60px;right:60px;top:1600px;display:flex;align-items:center;justify-content:center;gap:22px;padding:24px;border-radius:22px;
+  background:var(--gold);color:#0B0A07;font:800 38px Barlow}
+#cierre .prox span{font:700 22px 'JetBrains Mono';letter-spacing:.2em}
+#cierre .marca{position:absolute;left:0;right:0;top:1740px;text-align:center;font:700 26px 'JetBrains Mono';letter-spacing:.3em;color:var(--gold)}
+
+/* subtítulos de la voz */
+#subs{position:absolute;left:70px;right:70px;top:1760px;text-align:center;font:800 44px/1.15 Barlow;z-index:22;text-shadow:0 4px 18px rgba(0,0,0,.9)}
+#subs .w{opacity:.35}#subs .w.on{opacity:1}#subs .w.oro{color:var(--gold2)}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <img id="fondoBlur" class="full" alt="">
+  <div id="rayos"></div>
+
+  <div id="gancho" class="capa">
+    <div class="k">DEBUT OFICIAL · ESPACIO GAMER</div>
+    <div class="min">91'</div>
+    <div id="marcador"><div class="eq">S21</div><div class="gl">0</div><div class="eq">TOP</div><div class="gl" id="mTop">0</div><div class="reloj" id="mReloj">91:40</div></div>
+    <div class="t">Todo igual.<br><b>Hasta que…</b></div>
+  </div>
+
+  <div id="oficial" class="capa">
+    <div id="titOficial"></div>
+    <div id="pantalla"><img id="vod" alt=""><div class="vivo"><i></i>EN VIVO</div></div>
+    <div id="feats"><div><i></i>Placa del torneo y el rival</div><div><i></i>El palco: el plantel reacciona en vivo</div><div><i></i>Marcador y reloj del partido</div><div class="hot"><i></i>Cada gol nuestro, gritado en pantalla</div></div>
+  </div>
+
+  <div id="repe" class="capa">
+    <div id="repeBanda"><img id="repeImg" alt=""><div class="lento">0.5x</div></div>
+    <div id="ficha"><div class="min">91'</div><div class="datos"><span>GOL · SUB 21 0-1 TOP SECRET</span><b>pepolemmo2710</b><br>asistencia de <b>Elianja20</b></div></div>
+  </div>
+
+  <div id="logro" class="capa">
+    <img id="logroImg" class="full" alt="">
+    <div class="tono"></div><div class="marco"></div>
+    <div class="recre">RECREACIÓN</div>
+    <div class="k" id="logroK"></div>
+    <div class="t" id="logroT"></div>
+  </div>
+
+  <div id="cierre" class="capa">
+    <div class="res">
+      <div class="k">ESPACIO GAMER · FECHA 2 · DEBUT OFICIAL</div>
+      <div class="fila">
+        <div class="eq"><img id="escTS" alt=""><span>TOP SECRET</span></div>
+        <div class="goles"><span class="g">1</span><span class="s">-</span><span>0</span></div>
+        <div class="eq"><img id="escSub" alt=""><span>SUB 21</span></div>
+      </div>
+      <div class="vict">Victoria en el <b>91'</b></div>
+    </div>
+    <div class="cta">
+      <div class="t">Todos los partidos, <b style="color:var(--gold)">en vivo</b></div>
+      <div class="s">Con nuestra transmisión: goles en pantalla, repeticiones, la tabla y los números del club.</div>
+      <div id="plats"></div>
+    </div>
+    <div class="prox"><span>PRÓXIMO</span><div id="proxTxt"></div></div>
+    <div class="marca">#TOPSECRETFC</div>
+  </div>
+
+  <div id="vignette"></div>
+  <canvas id="grano" width="540" height="960"></canvas>
+  <div id="flash"></div>
+  <div id="rotulo"><i></i><span></span></div>
+  <div id="subrotulo"></div>
+  <div id="subs"></div>
+</div>
+<script>
+const ICON = {
+  twitch: { c: '#9146FF', n: 'TWITCH', p: '<path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>', h: 'twitch.tv/topsecretfc' },
+  kick: { c: '#53FC18', n: 'KICK', p: '<path fill="#53FC18" d="M1.333 0h8v5.333H12V2.667h2.667V0h8v8H20v2.667h-2.667v2.666H20V16h2.667v8h-8v-2.667H12v-2.666H9.333V24h-8Z"/>', h: 'kick.com/topsecretfc' },
+  youtube: { c: '#FF0033', n: 'YOUTUBE', p: '<path fill="#FF0033" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>', h: '@TOPSecretFC' },
+  instagram: { c: '#E1306C', n: 'INSTAGRAM', p: '<defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".5" stop-color="#dd2a7b"/><stop offset="1" stop-color="#515bd4"/></linearGradient></defs><path fill="url(#ig)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>', h: '@fctopsecret' },
+};
+const $ = s => document.querySelector(s);
+let D;
+const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const eo = x => 1 - Math.pow(1 - cl(x), 3);              // easeOutCubic
+const eio = x => (x = cl(x)) < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const cuadroDe = (clip, lt, fps = 30) => `${clip.dir}/${String(cl(Math.floor(lt * fps) + 1, 1, clip.n)).padStart(4, '0')}.jpg`;
+async function poner(img, src) { if (img.getAttribute('src') !== src) { img.src = src; try { await img.decode(); } catch {} } }
+function mostrarCapa(id) { for (const c of document.querySelectorAll('.capa')) c.style.display = c.id === id ? 'block' : 'none'; }
+function rotulo(clase, texto, sub = '') {
+  const r = $('#rotulo'); r.style.display = clase ? 'flex' : 'none'; r.className = clase || '';
+  r.querySelector('span').textContent = texto || ''; $('#subrotulo').textContent = sub; $('#subrotulo').style.display = sub ? 'block' : 'none';
+}
+
+function pintar(datos) {
+  D = datos;
+  $('#escTS').src = D.escudoTS; $('#escSub').src = D.escudoSub;
+  $('#plats').innerHTML = ['twitch', 'kick', 'youtube'].map(k => `<div><svg viewBox="0 0 24 24">${ICON[k].p}</svg>${ICON[k].n}</div>`).join('');
+  $('#proxTxt').textContent = D.proximo;
+  // grano fijo (determinístico)
+  const g = $('#grano').getContext('2d'), im = g.createImageData(540, 960); let s = 7;
+  for (let i = 0; i < im.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = s % 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+  g.putImageData(im, 0, 0);
+  return 1;
+}
+
+// subtítulos: la frase de la voz que suena, palabra por palabra
+function subs(t) {
+  const f = (D.voz || []).find(v => t >= v.en - 0.05 && t <= v.en + v.dur + 0.4);
+  const el = $('#subs');
+  if (!f) { el.innerHTML = ''; return; }
+  el.innerHTML = f.palabras.map(w => `<span class="w${t - f.en >= w.t ? ' on' : ''}${/91|victoria|vivo|debut/i.test(w.w) ? ' oro' : ''}">${w.w}</span>`).join(' ');
+}
+
+// etiquetas de la transmisión: las primeras 'cuantas' entran de a una (desde el segundo 1,2 de la parte oficial, cada
+// 1,6 s); la cuarta ("cada gol…") entra con el cartel GOOOL (lt4 = segundos desde que empezó ese tramo)
+function feats(lt, cuantas, lt4 = -1) {
+  [...document.querySelectorAll('#feats div')].forEach((d, k) => {
+    const q = k < 3 ? (k < cuantas ? eo((lt - 1.2 - k * 1.6) * 3) : 0) : (cuantas > 3 ? eo(lt4 * 3) : 0);
+    d.style.opacity = q; d.style.transform = `translateX(${(1 - q) * -60}px)`;
+  });
+}
+
+async function mostrar(n, t = 0) {
+  const T = D.T, B = 60 / D.bpm;
+  const pulso = Math.pow(1 - ((t - D.fase) / B % 1 + 1) % 1, 3);   // golpe en cada tiempo
+  $('#lienzo').style.transform = '';
+  $('#flash').style.opacity = 0; $('#rayos').style.opacity = 0;
+  $('#fondoBlur').style.display = 'block';
+  const lienzo = $('#lienzo');
+
+  if (t < T.oficial) {                                      // ── GANCHO ──
+    mostrarCapa('gancho'); rotulo(null);
+    await poner($('#fondoBlur'), cuadroDe(D.clips.vod, 0));
+    const p = t / T.oficial;
+    const m = $('#gancho .min'); m.style.transform = `scale(${1.5 - .5 * eo(p * 2.2)})`; m.style.opacity = eo(p * 3);
+    m.style.backgroundPosition = `${100 - p * 300}% 0`;
+    $('#gancho .k').style.opacity = eo((p - .15) * 4);
+    const mk = $('#marcador'); mk.style.opacity = eo((p - .25) * 4); mk.style.transform = `translateX(-50%) translateY(${(1 - eo((p - .25) * 4)) * 40}px)`;
+    const seg = 40 + Math.floor(t); $('#mReloj').textContent = `91:${seg}`; $('#mTop').textContent = '0';
+    const tt = $('#gancho .t'); tt.style.opacity = eo((p - .5) * 4);
+  } else if (t < T.goool) {                                 // ── TRANSMISIÓN OFICIAL: el ataque y el gol ──
+    const lt = t - T.oficial;
+    mostrarCapa('oficial'); rotulo('oficial', 'TRANSMISIÓN OFICIAL · EN VIVO', 'TWITCH · KICK · YOUTUBE · 20/10');
+    const src = cuadroDe(D.clips.vod, lt);
+    await Promise.all([poner($('#vod'), src), poner($('#fondoBlur'), src)]);
+    const golEn = T.gol - T.oficial, dg = lt - golEn;
+    $('#titOficial').innerHTML = dg < 0 ? 'Minuto 91.<br><b>Último ataque.</b>' : '<b>¡GOOOL!</b><br>Lo grita la pantalla.';
+    $('#titOficial').style.opacity = eo(lt * 2);
+    const pan = $('#pantalla');
+    const zoom = dg < 0 ? 1 + .06 * eio(lt / golEn) : 1.06 + .14 * Math.exp(-dg * 2.2);
+    const sacude = dg >= 0 && dg < .6 ? Math.sin(dg * 70) * 18 * (1 - dg / .6) : 0;
+    pan.style.top = `${720 + (dg >= 0 ? 0 : 0)}px`;
+    pan.style.transform = `translate(${sacude}px, ${sacude * .6}px) scale(${zoom})`;
+    pan.style.boxShadow = `0 50px 140px rgba(0,0,0,.9),0 0 0 3px rgba(229,72,77,.55)${dg >= 0 ? `,0 0 ${120 * Math.exp(-dg)}px rgba(241,220,151,${.7 * Math.exp(-dg)})` : ''}`;
+    if (dg >= 0) { $('#flash').style.opacity = .85 * Math.exp(-dg * 6); $('#rayos').style.opacity = .9 * Math.exp(-dg * 1.2); $('#rayos').style.transform = `rotate(${dg * 20}deg)`; }
+    feats(lt, 3);
+  } else if (t < T.repe) {                                  // ── TRANSMISIÓN OFICIAL: el cartel GOOOL del overlay ──
+    const lt = t - T.goool;
+    mostrarCapa('oficial'); rotulo('oficial', 'TRANSMISIÓN OFICIAL · EN VIVO', 'ASÍ SE GRITA EN NUESTRA TRANSMISIÓN');
+    const src = cuadroDe(D.clips.goool, lt);
+    await Promise.all([poner($('#vod'), src), poner($('#fondoBlur'), src)]);
+    $('#titOficial').innerHTML = 'Así se grita<br><b>en nuestra transmisión.</b>'; $('#titOficial').style.opacity = 1;
+    const pan = $('#pantalla'); pan.style.top = '720px';
+    pan.style.transform = `scale(${1.06 + .08 * eio(lt / (T.repe - T.goool))})`;
+    $('#rayos').style.opacity = .35 + .25 * pulso; $('#rayos').style.transform = `rotate(${t * 6}deg)`;
+    feats(99, 4, lt);
+  } else if (t < T.logro) {                                 // ── REPETICIÓN (grabación limpia, cámara lenta) ──
+    const lt = t - T.repe, dur = T.logro - T.repe;
+    mostrarCapa('repe'); rotulo('repe', 'REPETICIÓN', 'EL GOL EN CÁMARA LENTA');
+    const src = cuadroDe(D.clips.repe, lt, 30);              // cuadros a 60 fps mostrados a 30 → 0,5x
+    await Promise.all([poner($('#repeImg'), src), poner($('#fondoBlur'), src)]);
+    // banda de 1000 px de alto: el video (16:9) a 1778 px de ancho, paneo hacia el arco
+    const img = $('#repeImg'), anchoV = 1000 * 16 / 9, desde = .30, hasta = .74;
+    const c = desde + (hasta - desde) * eio(lt / (D.golRepe + .8));
+    const zoomR = 1 + .18 * eio((lt - D.golRepe + 1.5) / 2.5);
+    img.style.left = `${540 - anchoV * c}px`; img.style.transform = `scale(${zoomR})`; img.style.transformOrigin = `${c * 100}% 45%`;
+    const dg = lt - D.golRepe;
+    if (dg >= 0) { $('#flash').style.opacity = .55 * Math.exp(-dg * 5); }
+    const fi = $('#ficha'); fi.style.opacity = eo((dg + .2) * 2); fi.style.transform = `translateY(${(1 - eo((dg + .2) * 2)) * 50}px)`;
+    // entrada tipo cortina dorada
+    if (lt < .35) { $('#flash').style.background = '#C9A84C'; $('#flash').style.opacity = 1 - lt / .35; } else $('#flash').style.background = '#fff';
+  } else if (t < T.cierre) {                                // ── EL LOGRO (recreación, otra estética) ──
+    const lt = t - T.logro, mitad = (T.cierre - T.logro) / 2, i = lt < mitad ? 0 : 1, l2 = lt - i * mitad;
+    mostrarCapa('logro'); rotulo('logro', 'EL LOGRO', '');
+    $('#fondoBlur').style.display = 'none';
+    const clip = D.clips[i ? 'festejo' : 'jugada'];
+    await poner($('#logroImg'), cuadroDe(clip, l2 * (clip.n / 30) / mitad));
+    $('#logroImg').style.transform = `scale(${1.04 + .05 * l2 / mitad})`;
+    $('#logroK').textContent = i ? 'EL FESTEJO' : 'LA JUGADA';
+    $('#logroT').innerHTML = i ? 'Debut oficial<br><b>con victoria.</b>' : '<b>Elianja20</b> la pone.<br><b>pepolemmo2710</b> la manda adentro.';
+    $('#logroT').style.fontSize = i ? '110px' : '76px';
+    const ap = eo(l2 * 2.5); $('#logroT').style.opacity = ap; $('#logroT').style.transform = `translateY(${(1 - ap) * 40}px)`;
+    if (l2 < .3) { $('#flash').style.opacity = .7 * (1 - l2 / .3); }
+  } else {                                                  // ── CIERRE: resultado + el producto ──
+    const lt = t - T.cierre;
+    mostrarCapa('cierre'); rotulo(null);
+    await poner($('#fondoBlur'), cuadroDe(D.clips.festejo, 4));
+    const r = $('#cierre .res'); r.style.opacity = eo(lt * 3); r.style.transform = `scale(${1.08 - .08 * eo(lt * 3)})`;
+    const c = $('#cierre .cta'); c.style.opacity = eo((lt - .8) * 2.5); c.style.transform = `translateY(${(1 - eo((lt - .8) * 2.5)) * 40}px)`;
+    [...document.querySelectorAll('#plats div')].forEach((d, k) => { const q = eo((lt - 1.3 - k * .2) * 3); d.style.opacity = q; d.style.transform = `translateY(${(1 - q) * 30}px) scale(${1 + .04 * pulso})`; });
+    const pr = $('#cierre .prox'); pr.style.opacity = eo((lt - 2.4) * 3);
+    $('#cierre .marca').style.opacity = eo((lt - 3) * 3);
+    $('#rayos').style.opacity = .25; $('#rayos').style.transform = `rotate(${t * 5}deg)`;
+  }
+  subs(t);
+}
+</script>
+</body>
+</html>
