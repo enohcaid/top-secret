@@ -86,8 +86,8 @@ process.on('exit', () => { try { if (fs.readFileSync(LOCK, 'utf8') === String(pr
 // Pausa por WhatsApp: "apagar" duerme el bot hasta las 22:00; "desactivar" además deja este archivo,
 // y mientras exista el bot arranca a las 17:00 dormido (conectado, sin buscar ni avisar) hasta "activar".
 const OFF_FILE = path.join(DIR, 'desactivado.json');
-// Arranca dormido y decide al conectar (Juan, 2026-10-21): días SIN partidos de liga en el calendario → busca solo, en
-// automático (desde las 17:00); días con liga → sigue dormido hasta "busca amistosos". desactivado.json = apagado del todo.
+// Arranca SIEMPRE dormido (Juan, 2026-10-21: "solo puede arrancar bajo mi comando"): busca únicamente cuando Juan manda
+// "busca amistosos", y solo si hoy NO hay partidos de liga en el calendario (si hay, no busca y le dice cuáles).
 let dormido = true;
 let partidosHoy = [];
 const hayLiga = () => partidosHoy.some(p => p.league && p.league !== 'Amistoso');
@@ -242,16 +242,10 @@ client.on('ready', async () => {
   yo = client.info.wid._serialized;
   try { yoLid = await client.pupPage.evaluate(() => window.require('WAWebUserPrefsMeUser').getMaybeMeLidUser()?._serialized || null); } catch (e) {}
   log('conectado como', client.info.pushname, yo, yoLid || '(sin lid)', PRUEBA ? '(MODO PRUEBA)' : '');
-  if (fs.existsSync(OFF_FILE)) { log('desactivado por WhatsApp: espero "activar" o "busca amistosos"'); return; }
-  if (PRUEBA || AUTO) { dormido = false; return arrancarBusqueda(); }
-  // la búsqueda es de 17 a 22: si arrancó antes, espera (un "busca amistosos" lo despierta igual)
-  while (horaArt() < '17:00' && dormido) await new Promise(r => setTimeout(r, 60000));
-  if (!dormido) return;                                     // ya lo despertó un comando
-  await leerOcupadosDelSitio();
-  if (hayLiga()) { log('hoy hay partidos de liga: no busco solo (mandá "busca amistosos" para buscar igual)'); return; }
-  auto = true; st.auto = true; save(); dormido = false;
-  log('sin partidos de liga hoy: busco amistosos solo, en automático');
-  await arrancarBusqueda('📅 Hoy no hay partidos de liga en el calendario: busco amistosos solo.');
+  if (PRUEBA || AUTO) { dormido = false; return arrancarBusqueda(); }   // corridas a mano con --prueba / --auto
+  // Reinicio en un día en que Juan ya lo había mandado a buscar: sigue buscando
+  if (st.auto) { dormido = false; return arrancarBusqueda(); }
+  log('esperando "busca amistosos"');
 });
 
 async function arrancarBusqueda(motivo = '') {
@@ -529,7 +523,14 @@ async function comando(body) {
       : '🕵️ *Bot de amistosos apagado por hoy.* Mañana arranca solo a las 17:00. Si querés que vuelva hoy, mandá *activar*.');
   }
   // "busca amistosos": arranca YA en automático por el resto del día (pedido de Juan, 2026-10-21)
-  if (/^(busc[aá](r|me|nos)?|conseguime|conseguinos)s+(amistosos?|rivales?)/i.test(body)) {
+  if (/^(busc[aá](r|me|nos)?|conseguime|conseguinos)\s+(amistosos?|rivales?)\b/i.test(body)) {
+    // solo los días sin partidos de liga en el calendario
+    await leerOcupadosDelSitio();
+    if (hayLiga()) {
+      const liga = partidosHoy.filter(p => p.league && p.league !== 'Amistoso').map(p => `${p.time} ${p.rival} (${p.league === '11x11' ? 'Espacio Gamer' : p.league})`);
+      log('busca amistosos: hoy hay liga, no busco');
+      return avisar(`📅 Hoy hay partidos de liga, no busco amistosos:\n${liga.join('\n')}`);
+    }
     auto = true; st.auto = true; save();
     log('busca amistosos: modo automático por hoy');
     if (dormido) { dormido = false; return arrancarBusqueda(); }       // el aviso de arranque ya dice "(automático)"
