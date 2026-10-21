@@ -10,12 +10,18 @@
     "infinix": "InfinitX",
     "chaca": "Chacarita Esports",
     "cuervo": "San Lorenzo Esports",
-    "olimpo": "Olimpo Esports"
+    "olimpo": "Olimpo Esports",
+    "dep moron esp": "Deportivo Moron eSports",
+    "dep moron": "Deportivo Moron eSports"
   },
   "nombre_sitio": {
     "Instituto Cantera": "IACC Cantera"
   },
   "extras": [
-    { "nombre": "Olimpo Esports", "div": "otra", "logo": null }
+    {
+      "nombre": "Olimpo Esports",
+      "div": "otra",
+      "logo": null
+    }
   ]
 }
