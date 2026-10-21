@@ -2194,6 +2194,8 @@ function renderNextHero() {
   }
   upcoming.sort((a,b) => a.m.date.localeCompare(b.m.date) || (a.m.time||'').localeCompare(b.m.time||'') || lgOrder(a.m.league) - lgOrder(b.m.league));
 
+  // el día que muestra esta tarjeta: la agenda de la vista por competencia arranca después (no lo repite)
+  window._fechaHero = !upcoming.length ? null : upcoming.some(x => x.m.date === today) ? today : upcoming[0].m.date;
   if (!upcoming.length) {
     hero.innerHTML = `<div class="nh-waiting">
       <span class="nh-w-icon">⏳</span>
@@ -3219,7 +3221,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
-<script src="calendario-competencias.js?v=3"></script>
+<script src="calendario-competencias.js?v=4"></script>
 <script src="calendario-share.js?v=5"></script>
 <script src="layout.js?v=25"></script>
 </body>

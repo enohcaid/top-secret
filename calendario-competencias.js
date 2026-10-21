@@ -130,13 +130,14 @@
   // Agenda unificada (Juan, 2026-10-21: "¿con competencias simultáneas tendré 3 calendarios?"): los próximos partidos
   // de TODAS las competencias juntos, por día, y los últimos resultados. Las competencias quedan como tarjetas plegadas.
   function agenda(ps, hoy, C) {
-    const prox = ps.filter(p => !p.outcome && p.m.date >= hoy).sort((a, b) => a.m.date.localeCompare(b.m.date) || (a.m.time || '').localeCompare(b.m.time || '')).slice(0, 12);
+    // sin el día que ya muestra la tarjeta de arriba (renderNextHero → window._fechaHero): la agenda sigue desde ahí
+    const prox = ps.filter(p => !p.outcome && p.m.date >= hoy && p.m.date !== window._fechaHero).sort((a, b) => a.m.date.localeCompare(b.m.date) || (a.m.time || '').localeCompare(b.m.time || '')).slice(0, 12);
     const ult = ps.filter(p => p.outcome).sort((a, b) => b.m.date.localeCompare(a.m.date) || (b.m.time || '').localeCompare(a.m.time || '')).slice(0, 6);
     if (!prox.length && !ult.length) return '';
     const porDia = lista => { const g = []; for (const p of lista) { const u = g[g.length - 1]; if (u && u.d === p.m.date) u.ps.push(p); else g.push({ d: p.m.date, ps: [p] }); } return g; };
     const dia = d => { const x = new Date(d + 'T12:00:00'); return d === hoy ? 'HOY' : `${['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][x.getDay()]} ${x.getDate()} ${MES[x.getMonth()].toLowerCase()}`; };
     const bloque = (tit, lista) => !lista.length ? '' : `<div class="ag-col"><div class="comp-grupo-tit">${tit}</div>${porDia(lista).map(g => `<div class="ag-dia"><div class="ag-fecha">${dia(g.d)}</div><div class="month-match-list">${g.ps.map(p => fila(p, hoy, C, true)).join('')}</div></div>`).join('')}</div>`;
-    return `<div class="agenda">${bloque('Próximos partidos', prox)}${bloque('Últimos resultados', ult)}</div>`;
+    return `<div class="agenda">${bloque('Más adelante', prox)}${bloque('Últimos resultados', ult)}</div>`;
   }
 
   function render() {
