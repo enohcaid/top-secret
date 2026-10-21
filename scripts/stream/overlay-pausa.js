@@ -46,8 +46,10 @@
     const conv = todos.filter(gt => (estado.jugadores || []).includes(gt)); return conv.length >= 2 ? conv : todos; };
   const clipDe = (gt, prefs) => { const e = indice[gt].emociones; return prefs.find(x => e.includes(x)) || azar(e.filter(x => ESPERA.includes(x)).length ? e.filter(x => ESPERA.includes(x)) : e); };
   function pj(gt, emocion, lado) {
-    // habla/escucha se generan mirando hacia la derecha de la pantalla: el de la derecha se espeja para que mire al centro
-    const d = document.createElement('div'); d.className = 'pj ' + lado + (lado === 'der' && /^(habla|escucha)$/.test(emocion) ? ' espejo' : '');
+    // habla/escucha se generan mirando hacia la derecha de la pantalla: el de la derecha (charla) y el del centro
+    // (entrevista vertical, la pregunta sale a la izquierda) se espejan para mirar hacia el otro / hacia la pregunta.
+    // En la charla el que escucha va siempre a la derecha: nunca queda mirando a un costado vacío.
+    const d = document.createElement('div'); d.className = 'pj ' + lado + (lado !== 'izq' && /^(habla|escucha)$/.test(emocion) ? ' espejo' : '');
     d.innerHTML = `<video muted playsinline autoplay loop src="${CLIPS}${encodeURIComponent(gt)}/${emocion}.webm"></video>
       <div class="nombre"><span class="num">${indice[gt].num || ''}</span><span class="gt">${gt}</span></div>`;
     return d;
