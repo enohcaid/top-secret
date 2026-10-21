@@ -44,6 +44,7 @@ import { ROOT } from './lib/env.mjs';
 import { buscarEquipo as matchEquipo, buscarEquipoExacto } from './lib/equipos-match.mjs';
 import { buscarEscudo } from './lib/escudos.mjs';
 import { leerPedido } from './lib/pedido-amistoso.mjs';
+import { equiposEG } from './lib/espacio-gamer.mjs';
 
 const { Client, LocalAuth } = wweb;
 const PRUEBA = process.argv.includes('--prueba');
@@ -123,8 +124,14 @@ async function cargarEquipos() {
       out.push({ nombre, div, logo: team.logoUrl || team.logoSmallUrl || null });
     }
   }
-  EQUIPOS = [...out, ...(ALIAS.extras || [])];
-  log(`equipos cargados: ${out.filter(e => e.div === 'Primera').length} de Primera, ${out.filter(e => e.div === 'Segunda').length} de Segunda`);
+  // Espacio Gamer (las 4 divisiones argentinas, Juan 2026-10-21). Un equipo que está en VPN y en EG
+  // con el mismo nombre queda una sola vez, con la división de VPN.
+  const clave = n => n.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const yaEsta = new Set(out.map(e => clave(e.nombre)));
+  const eg = (await equiposEG().catch(e => { log('Espacio Gamer no disponible:', e.message); return []; }))
+    .filter(e => !/top secret/i.test(e.nombre) && !yaEsta.has(clave(e.nombre)));
+  EQUIPOS = [...out, ...eg, ...(ALIAS.extras || [])];
+  log(`equipos cargados: ${out.filter(e => e.div === 'Primera').length} de Primera, ${out.filter(e => e.div === 'Segunda').length} de Segunda, ${eg.length} de Espacio Gamer`);
 }
 function buscarEquipo(texto, autor) {
   if (autor && APR.autores[autor]) { const n = APR.autores[autor]; return { ...(EQUIPOS.find(e => e.nombre === n) || { nombre: n, div: '?', logo: null }), score: 1, via: 'conocido' }; }
@@ -152,6 +159,28 @@ function entradaAmistoso(p) {
 // Horarios ya ocupados hoy: se leen TODOS los partidos del día con la misma lógica que la
 // convocatoria (getTodayMatches: oficiales VPN/VPUG/11x11 + amistosos cargados), abriendo la
 // página publicada. Un horario está ocupado si hay un partido que empieza a menos de 20 min.
+// Rivales de los próximos 2 días en el calendario (Juan, 2026-10-21: no ofrecerle amistoso a quien enfrentamos mañana o
+// pasado; caso InfinitX, que jugamos el jueves por Espacio Gamer). Misma fuente que la placa del vivo: placa-envivo --json.
+let proximos = [];
+const normEquipo = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/\b(e-?sports?|esp|fc|cf|club|dep|deportivo|atl|atletico)\b/g, '').replace(/[^a-z0-9]/g, '');
+function rivalProximo(nombre) {
+  const a = normEquipo(nombre);
+  if (a.length < 3) return null;
+  return proximos.find(p => { const b = normEquipo(p.rival); return b.length >= 3 && (a === b || (Math.min(a.length, b.length) >= 4 && (a.includes(b) || b.includes(a)))); }) || null;
+}
+async function cargarProximos() {
+  proximos = [];
+  for (const d of [1, 2]) {
+    const fecha = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(Date.now() + d * 864e5));
+    // placa-envivo a veces sale con código ≠ 0 en Windows después de imprimir bien el JSON: se usa la salida igual
+    const out = await new Promise(res => execFile(process.execPath, [path.join(ROOT, 'scripts', 'placa-envivo.mjs'), '--json', '--fecha', fecha], { cwd: ROOT, timeout: 60000 }, (e, so) => res(String(so || ''))));
+    try { for (const p of JSON.parse(out.trim().split('\n').pop() || '[]')) if (p.liga !== 'Amistoso') proximos.push({ ...p, fecha }); } catch {}
+  }
+  log('rivales de los próximos 2 días:', proximos.map(p => `${p.fecha.slice(5)} ${p.rival} (${p.liga})`).join(' | ') || 'ninguno');
+}
+const diaDe = f => { const d = new Date(f + 'T12:00:00'); return `${['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'][d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`; };
+
 async function leerOcupadosDelSitio() {
   let partidos = null;
   try {
@@ -254,6 +283,7 @@ async function arrancarBusqueda(motivo = '') {
   await buscarGrupo();
   await cargarEquipos();
   await leerOcupadosDelSitio();
+  await cargarProximos();
   if (!libre()) {
     log('todos los horarios de hoy ya están ocupados' + (PRUEBA ? ' — en prueba igual aviso los pedidos para ver la detección' : ''));
     if (!PRUEBA) {
@@ -367,9 +397,21 @@ async function pedidoGrupo(msg) {
   // Si el encabezado nombra un equipo, manda ese nombre: nunca se cambia por el del contacto ni por
   // el equipo aprendido de ese número ("Cuervo" ofreciendo a CADU no es San Lorenzo).
   const nombraEquipo = equipoTxt.replace(RELLENO, ' ').replace(/[^\p{L}]/gu, '').length >= 3;
-  const eq = nombraEquipo ? buscarEquipo(equipoTxt) : buscarEquipo(nombreContacto, autor);
-  // Nombra un equipo que no es de 1ra/2da → se ignora. No dice equipo pero sí horarios ("23 / 23.40") → se le pregunta cuál es.
-  if (!eq && (equipoTxt || !horas.length)) { log('pedido ignorado (equipo fuera de 1ra/2da o sin identificar):', equipoTxt || nombreContacto, '|', breve); return; }
+  let eq = nombraEquipo ? buscarEquipo(equipoTxt) : buscarEquipo(nombreContacto, autor);
+  // Nombra un equipo que no está en VPN 1ra/2da ni en Espacio Gamer, o no dice equipo ni horarios → no se
+  // ignora: se le consulta a Juan (división sin identificar = nunca va solo). No dice equipo pero sí
+  // horarios ("23 / 23.40") → se le pregunta al rival cuál es.
+  if (!eq && (equipoTxt || !horas.length)) {
+    log('pedido sin división identificada, consulto a Juan:', equipoTxt || nombreContacto, '|', breve);
+    eq = equipoTxt ? equipoEscrito(equipoTxt) : { nombre: nombreContacto || 'sin nombre', div: '?', logo: null };
+    if (eq.dudoso) eq = { nombre: equipoTxt.trim(), div: '?', logo: null };
+  }
+  // Rival de los próximos 2 días en el calendario: no se le ofrece amistoso
+  const prox = eq && !eq.dudoso ? rivalProximo(eq.nombre) : null;
+  if (prox) {
+    log(`pedido ignorado (rival del ${prox.fecha}):`, eq.nombre, '|', breve);
+    return avisar(`📅 Pedido de *${eq.nombre}*: jugamos contra ellos el *${diaDe(prox.fecha)}* a las ${prox.hora} (${prox.liga}), no le ofrezco amistoso.`);
+  }
   const preguntar = !eq;
   // Si el pedido lista horarios, solo sirven los que tiene libres y nosotros también.
   const susLibres = horas.length ? horas.filter(h => h.libre).map(h => h.hora).filter(h => SLOTS.includes(h) && !ocupados().has(h)) : null;
@@ -390,7 +432,7 @@ async function pedidoGrupo(msg) {
   if (vaSolo) await avisar(`📣 *Pedido ${id}* — ${preguntar ? 'equipo sin nombre (se lo pregunto)' : `*${eq.nombre}* (${eq.div})`}
 “${msg.body.slice(0, 160)}”
 ⚡ Le ofrezco *${p.propuesto}* automáticamente. Si querés frenarlo: *${id} no*.`);
-  else await avisar(`📣 *Pedido ${id}* — ${preguntar ? '_no dice qué equipo es: se lo pregunto al ofrecerle_' : eq.dudoso ? `¿${eq.dudoso.join(' o ')}?` : `*${eq.nombre}* (${eq.div})`}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${oferta} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq?.dudoso ? `, *${id} <equipo>* para definir el equipo` : ''}, o *${id} no*.`);
+  else await avisar(`📣 *Pedido ${id}* — ${preguntar ? '_no dice qué equipo es: se lo pregunto al ofrecerle_' : eq.dudoso ? `¿${eq.dudoso.join(' o ')}?` : eq.div === '?' ? `*${eq.nombre}* _(no lo encuentro en VPN ni en Espacio Gamer: ¿le ofrezco?)_` : `*${eq.nombre}* (${eq.div})`}\n${nombreContacto ? `De: ${nombreContacto}\n` : ''}“${msg.body.slice(0, 200)}”\n\n${oferta} Respondé *${id}* para mandar, *${id} 23:20* para otro horario${eq?.dudoso ? `, *${id} <equipo>* para definir el equipo` : ''}, o *${id} no*.`);
   if (auto && p.propuesto && (preguntar || (!eq.dudoso && eq.div !== '?'))) await ofrecer(id, null, null);
 }
 
@@ -492,6 +534,9 @@ async function evaluarRespuesta(id, txt) {
       p.equipo = { nombre: eq.nombre, div: eq.div, logo: eq.logo }; save();
       APR.autores[p.autor] = eq.nombre; guardarAprendido();
       log(`${id}: el contacto es de ${eq.nombre} (${eq.div})`);
+      // resultó ser un rival de los próximos 2 días: no se confirma solo, decide Juan
+      const prox = rivalProximo(eq.nombre);
+      if (prox) return avisar(`📅 ${id} resultó ser *${eq.nombre}*, que jugamos el *${diaDe(prox.fecha)}* (${prox.liga}). No lo confirmo solo: *${id} ok* si igual querés jugar, *${id} no* si no.`);
     }
   }
   const quien = p.equipo ? `*${p.equipo.nombre}*` : `${p.contacto || 'el contacto'} _(equipo sin reconocer)_`;
