@@ -523,6 +523,16 @@ body.locked .result-box.pending{cursor:default;}
 
 /* ─── PER-LEAGUE STATS ─── */
 .stats-perleague{max-width:1440px;margin:0 auto 20px;padding: 0 var(--ts-g);display:flex;gap:10px;flex-wrap:wrap;}
+#statsBar{margin-top:20px;}
+/* PC (2026-10-21, "desperdiciamos mucho espacio"): próximo partido | resumen por liga, y los meses de a dos */
+@media(min-width:1100px){
+  .cal-top{max-width:1440px;margin:20px auto 0;padding:0 var(--ts-g);display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr);gap:28px;align-items:start;}
+  .cal-top .next-hero-wrap,.cal-top #statsBar{max-width:none;margin:0;padding:0;}
+  .cal-top #statsBar{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .season-section .year-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;}
+  /* #yearGrid ya tiene el margen lateral: sin esto las secciones lo sumaban dos veces y quedaban 40px más adentro */
+  .season-section .year-grid,.season-section-header{padding-left:0;padding-right:0;}
+}
 .lsc{flex:1;min-width:140px;background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
 .lsc-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 8px;margin-bottom:7px;}
 .lsc-badge{white-space:nowrap;}
@@ -841,11 +851,13 @@ body{padding-top:64px;}
   </div>
 </div>
 
+<!-- Arriba: próximo partido + resumen por liga (dos columnas en PC, una en celular) -->
+<div class="cal-top">
 <!-- PRÓXIMO PARTIDO HERO -->
 <div class="next-hero-wrap"><div id="nextHero"></div></div>
 
 <!-- STATS POR LIGA (compacto) -->
-<div class="stats-perleague" id="statsBar" style="max-width:1100px;margin:20px auto 0;padding:0 32px;">
+<div class="stats-perleague" id="statsBar">
   <div class="lsc" id="lsc-vpn">
     <div class="lsc-head"><span class="lsc-badge vpn">VPN</span><span class="lsc-wdl" id="lscw-vpn">— — —</span></div>
     <div class="lsc-l5" id="lscl5-vpn"></div>
@@ -865,6 +877,7 @@ body{padding-top:64px;}
     <div class="lscg-item"><div class="lscg-val" id="lscg-played">0</div><div class="lscg-lbl">Jugados</div></div>
     <div class="lscg-item"><div class="lscg-val" id="lscg-pending">0</div><div class="lscg-lbl">Pendientes</div></div>
   </div>
+</div>
 </div>
 
 <!-- YEAR GRID -->
@@ -1676,17 +1689,19 @@ function insertPreSection() {
 
     const rows = matches.map(m => {
       const outCls = m.result ? ` mmi-${m.result}` : '';
-      const logoHtml = m.rivalLogo
-        ? `<img src="${m.rivalLogo}" alt="" style="width:32px;height:32px;object-fit:contain;border-radius:4px;background:var(--gray);flex-shrink:0;" onerror="this.style.display='none'">`
-        : `<span class="nh-lbadge vpug" style="font-size:.62rem;">VPUG</span>`;
+      // misma fila que la lista por mes (jornada + hora en la columna de fecha: la tarjeta ya es de un día)
+      const ini = (m.rival || '').split(/\s+/).filter(w => /^[A-Za-zÁÉÍÓÚÑ0-9]/.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+      const crest = m.rivalLogo ? `<img src="${m.rivalLogo}" alt="" loading="lazy" onerror="this.replaceWith('${ini}')">` : ini;
       const scoreHtml = m.finished
-        ? `<span class="mmi-score">${m.tsGoals} – ${m.rivGoals}</span>`
-        : `<span class="mmi-pending">Pendiente</span>`;
+        ? `<span class="mmi-score">${m.tsGoals} - ${m.rivGoals}</span>`
+        : `<span class="mmi-pending">—</span>`;
       return `<div class="month-match-item no-click${outCls}">
-        <span class="mmi-date">J${m.round} · ${m.time}</span>
-        ${logoHtml}
-        <span class="mmi-rival">vs ${m.rival||'?'}</span>
-        <span class="mmi-loc">${m.isHome?'Local':'Visita'}</span>
+        <span class="mmi-date"><b>J${m.round}</b><small>${m.time}</small></span>
+        <span class="mmi-crest">${crest}</span>
+        <div class="mmi-main">
+          <span class="mmi-rival">${m.rival||'?'}</span>
+          <span class="mmi-meta"><span class="nh-lbadge vpug">VPUG</span>${m.isHome?'Local':'Visita'}</span>
+        </div>
         ${scoreHtml}
       </div>`;
     }).join('');
