@@ -9,10 +9,12 @@ const OCUPADA = /❌|✖|🚫|⛔|\bocupad|\bconfirmad|\bcerrad|^\s*x\s*$/iu;
 
 export function leerPedido(texto) {
   const horas = [], cabecera = [];
-  for (const linea of String(texto || '').split('\n')) {
-    // La hora sola en una línea ("23", "22hs") es en punto.
-    const sola = linea.match(/^[\s*•·-]*(2[0-3])\s*(?:hs?\.?)?\s*$/i);
-    const m = sola ? [linea, sola[1], '00', ''] : linea.match(HORA);
+  for (let linea of String(texto || '').split('\n')) {
+    // "2240" / "2320" sin separador = 22:40 / 23:20
+    linea = linea.replace(/^([\s*•·▫️◽◾▪️-]*)(2[0-3])([0-5]\d)(?!\d)/u, '$1$2:$3');
+    // La hora sola en una línea ("23", "22hs", "23 ❌") es en punto; lo que sigue sin letras ni números son marcas.
+    const sola = linea.match(/^[\s*•·-]*(2[0-3])\s*(?:hs?\.?)?(?![\d:.;])([^\p{L}\p{N}]*)$/iu);
+    const m = sola ? [linea, sola[1], '00', sola[2]] : linea.match(HORA);
     if (m && +m[1] <= 23) {
       const hora = `${m[1].padStart(2, '0')}:${m[2]}`;
       const resto = m[3] || '';
@@ -25,7 +27,9 @@ export function leerPedido(texto) {
     .filter(l => !/privad|escrib|\bmd\b|\bdm\b|contact/i.test(l))
     .join(' ')
     .replace(/\b\d{1,2}(?:\s*hs?\b|[:.;]\d{2})/gi, ' ')                 // horas sueltas en el encabezado ("buscamos 22hs")
-    .replace(/\bamistos[oa]s?\b|\bbusca(n|mos)?\b|\bvs\.?\b|🆚|\(?\s*1ra\s*\/\s*2da\s*\)?|\bhoy\b|\bpara\b|\bquien\b|\balguien\b|\bjugar\b/gi, ' ')
+    // divisiones entre paréntesis o sueltas: "(1ra/2da)", "(2da/3ra/4ta)", "3°"
+    .replace(/\(?\s*\d\s*(?:ra|da|ta|ro|do|to|°|º)(?:\s*[\/-]\s*\d\s*(?:ra|da|ta|ro|do|to|°|º))*\s*\)?/gi, ' ')
+    .replace(/\bamistos[oa]s?\b|\bbusca(n|mos)?\b|\bvs\.?\b|🆚|\bhoy\b|\bpara\b|\bquien\b|\balguien\b|\bjugar\b/gi, ' ')
     .replace(/[^\p{L}\p{N}\s/-]/gu, ' ').replace(/\s+/g, ' ').trim();
   return { equipoTxt, horas };
 }
