@@ -2298,7 +2298,7 @@ function buildMonthCard(year, month, mbd, today) {
       const clickAttr = m.free ? 'class="month-match-item no-click"' : `class="month-match-item${outCls}" onclick="openStatsPanel(${idJs})"`;
       return `<div ${clickAttr}>
         <span class="mmi-date">${dayLabel}</span>
-        <span class="nh-lbadge ${lgKey}">${m.league||'—'}</span>
+        <span class="nh-lbadge ${lgKey}">${m.league === '11x11' && ds > '2026-09-28' ? 'EG' : (m.league||'—')}</span>
         <span class="mmi-rival">vs ${m.rival||'?'}</span>
         <span class="mmi-loc">${loc}</span>
         ${scoreHtml}
