@@ -60,6 +60,12 @@ export async function convocados() {
       if (fijos.includes(n)) return cambios[n]?.day === HOY ? cambios[n].status : 'green';
       return a?.status || 'pending';
     };
-    return [...new Set([...fijos, ...Object.keys(disp)])].filter(n => ['green', 'yellow'].includes(estadoDe(n)));
+    const conf = [...new Set([...fijos, ...Object.keys(disp)])].filter(n => ['green', 'yellow'].includes(estadoDe(n)));
+    // Los que juegan: la formación de la convocatoria (lineup.slots) cruzada con los confirmados de hoy. Antes salían
+    // todos los confirmados y aparecía gente que no jugó (Lil_Dekuroko, 2026-10-20). Si la formación es de otro día
+    // y casi nadie coincide, quedan los confirmados.
+    const once = Object.values(d.lineup?.slots || {}).filter(Boolean);
+    const juegan = conf.filter(n => once.includes(n));
+    return juegan.length >= 5 ? juegan : conf;
   } catch { return null; }
 }
