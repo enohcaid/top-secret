@@ -18,6 +18,14 @@ export const ESCUDOS_FALTANTES = {
   'City Torque eSp': ESC + 'city-torque-esp.webp',
   'Nuvo FC': 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvBXyushQcOcLYfub.png?alt=media&token=1',
 };
+// Escudos que EG sube con un fondo liso: versión transparente (scripts/escudos-sin-fondo.mjs), gana sobre la de EG.
+// LT Gaming y NOTTINGAM MIEDO quedan como están: el fondo es parte de la ilustración (ni el relleno ni Canva lo separan).
+export const ESCUDOS_SIN_FONDO = Object.fromEntries(Object.entries({
+  'ALL BOYS': 'all-boys', 'IACC Reserva': 'iacc-reserva', 'MISKYMAYU FC': 'miskymayu-fc', 'MONOTRIBUTISTAS': 'monotributistas',
+  'Suda eSports': 'suda-esports', 'Argentinos Jrs Esp': 'argentinos-jrs-esp', 'Lizzard CF': 'lizzard-cf',
+  'Almagro eSports': 'almagro-esports', 'COMUNICACIÓNC': 'comunicacionc', 'Deportivo Murra': 'deportivo-murra',
+  'LMJ eSports': 'lmj-esports', 'LosPamba1891': 'lospamba1891',
+}).map(([n, s]) => [n, `${ESC}${s}.webp`]));
 const decode = s => s.replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').trim();
 
 export async function equiposDivisionEG(slug) {
@@ -32,7 +40,7 @@ export async function equiposDivisionEG(slug) {
   return aj.data.html.split(/<tbody class="eg-tp-club[^"]*"[^>]*>/).slice(1).map(chunk => ({
     nombre: decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || ''),
     logo: (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
-  })).filter(t => t.nombre).map(t => ({ ...t, logo: t.logo || ESCUDOS_FALTANTES[t.nombre] || null }));
+  })).filter(t => t.nombre).map(t => ({ ...t, logo: ESCUDOS_SIN_FONDO[t.nombre] || t.logo || ESCUDOS_FALTANTES[t.nombre] || null }));
 }
 
 // [{nombre, div, logo}] de las 4 divisiones; una división que falla no tumba a las otras
