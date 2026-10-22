@@ -411,9 +411,9 @@ async function pedidoGrupo(msg) {
   // Nombra un equipo que no está en VPN 1ra/2da ni en Espacio Gamer, o no dice equipo ni horarios → no se
   // ignora: se le consulta a Juan (división sin identificar = nunca va solo). No dice equipo pero sí
   // horarios ("23 / 23.40") → se le pregunta al rival cuál es.
-  if (!eq && (equipoTxt || !horas.length)) {
-    log('pedido sin división identificada, consulto a Juan:', equipoTxt || nombreContacto, '|', breve);
-    eq = equipoTxt ? equipoEscrito(equipoTxt) : { nombre: nombreContacto || 'sin nombre', div: '?', logo: null };
+  if (!eq && (nombraEquipo || !horas.length)) {
+    log('pedido sin división identificada, consulto a Juan:', nombraEquipo ? equipoTxt : nombreContacto, '|', breve);
+    eq = nombraEquipo ? equipoEscrito(equipoTxt) : { nombre: nombreContacto || 'sin nombre', div: '?', logo: null };
     if (eq.dudoso) eq = { nombre: equipoTxt.trim(), div: '?', logo: null };
   }
   // Ya nos dijo que no hoy (ese equipo o ese contacto): ni se le ofrece ni se avisa de nuevo
