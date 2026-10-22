@@ -259,7 +259,8 @@
     raiz.classList.remove('cerrando');
     chip.hidden = !p;
     if (p) { chip.querySelector('.k').textContent = 'PRÓXIMO PARTIDO'; raiz.querySelector('#pChipV').textContent = `${p.hora} · vs ${p.rival}`; }
-    raiz.querySelector('#pEsperaMsg').textContent = p ? 'ESPERANDO EL PRÓXIMO PARTIDO' : 'YA VOLVEMOS · ESPERANDO QUE ARRANQUE';
+    raiz.querySelector('#pEsperaMsg').textContent = estado.sinSenal ? 'SE CORTÓ LA SEÑAL · YA VOLVEMOS'
+      : p ? 'ESPERANDO EL PRÓXIMO PARTIDO' : 'YA VOLVEMOS · ESPERANDO QUE ARRANQUE';
   }
 
   window.pausa = {

@@ -103,7 +103,8 @@ async function actualizar() {
   if (e) {
     estado = e;
     ponerLado(e.lado);
-    window.pausa?.poner(e.modo === 'pausa');           // menús/lobby/espera: overlay-pausa.js
+    // menús/lobby/espera: overlay-pausa.js. sinSenal = se cayó la PS5 (enohcaid): la pausa tapa la imagen congelada
+    window.pausa?.poner(e.modo === 'pausa' || !!e.sinSenal);
     if (e.modo === 'juego') window.victoria?.ocultar();     // arrancó otro partido: fuera la pantalla de victoria
     const t = $('torneo'); t.hidden = !e.torneo;
     $('torneoTxt').textContent = e.torneo || ''; $('rivalTxt').textContent = e.rival ? 'vs ' + e.rival : '';

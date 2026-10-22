@@ -171,11 +171,44 @@ async function actualizarPartido() {
   } catch (err) { log('No pude actualizar el partido del overlay:', err.message); }
 }
 
+// Se cayó la PS5 (enohcaid) en pleno vivo (Juan, 2026-10-21): las redes NO se cortan. El overlay pasa a la pausa
+// ("SE CORTÓ LA SEÑAL · YA VOLVEMOS", tapa la imagen congelada) y, cuando la fuente vuelve, se reconecta streamlink
+// y la fuente 'Partido' de OBS. La sesión termina recién si la fuente sigue caída GRACIA_SIN_SENAL seguidos.
+const GRACIA_SIN_SENAL = 15 * 60000;
+let caidaDesde = null;                                          // ms en que se vio caída la fuente (null = en el aire)
+function marcarSinSenal(v) {
+  try {
+    let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
+    if (!!e.sinSenal === v) return;
+    e.sinSenal = v;
+    fs.writeFileSync(ESTADO + '.tmp', JSON.stringify(e, null, 1)); fs.renameSync(ESTADO + '.tmp', ESTADO);
+  } catch {}
+}
+// true = seguir con la sesión (fuente en el aire, o caída hace menos de GRACIA_SIN_SENAL); false = terminarla
+async function seguirSesion() {
+  const vivo = await enVivo();
+  if (vivo === null) return true;                               // sin respuesta de Twitch: no se sabe, se sigue
+  if (vivo) {
+    if (caidaDesde) {
+      log(`${FUENTE} volvió tras ${Math.round((Date.now() - caidaDesde) / 1000)} s: reconecto la señal.`);
+      caidaDesde = null;
+      await reconectarFuente();
+      marcarSinSenal(false);
+    }
+    return true;
+  }
+  if (!caidaDesde) { caidaDesde = Date.now(); log(`${FUENTE} se cayó: pongo la pausa y las redes siguen al aire (espero hasta ${GRACIA_SIN_SENAL / 60000} min).`); }
+  marcarSinSenal(true);
+  if (Date.now() - caidaDesde < GRACIA_SIN_SENAL) return true;
+  log(`${FUENTE} lleva ${GRACIA_SIN_SENAL / 60000} min caído: termino la transmisión.`);
+  return false;
+}
+
 // En el modo pausa baja el audio del juego (menús de FC27) para que se escuche la música propia
 let modoAudio = null;
 async function audioSegunModo() {
-  let modo = null; try { modo = JSON.parse(fs.readFileSync(ESTADO, 'utf8')).modo; } catch {}
-  const pausa = modo === 'pausa';
+  let modo = null, sinSenal = false; try { ({ modo, sinSenal } = JSON.parse(fs.readFileSync(ESTADO, 'utf8'))); } catch {}
+  const pausa = modo === 'pausa' || !!sinSenal;
   if (pausa === modoAudio) return;
   modoAudio = pausa;
   try { const o = await conectarObs({ timeout: 3000 }); try { await o.pedir('SetInputVolume', { inputName: 'Partido', inputVolumeDb: pausa ? -22 : 0 }); } finally { o.cerrar(); } }
@@ -210,11 +243,10 @@ function retransmitir(entrada) {
     }
     ff.stderr.on('data', d => { const t = String(d).trim(); if (t) log('ffmpeg:', ocultarClaves(t).slice(0, 200)); });
     const fin = () => { sl?.kill(); ff.kill(); };
-    let apagado = 0;
     const reloj = setInterval(async () => {
       if (Date.now() > limite) { log('Hora límite: corto.'); return fin(); }
-      // con overlay OBS sigue mandando aunque la PS5 corte: el corte lo marca enohcaid (2 chequeos seguidos)
-      if (!directo) { apagado = (await enVivo()) === false ? apagado + 1 : 0; if (apagado >= 2) { log(`${FUENTE} dejó de transmitir.`); fin(); } }
+      // con overlay OBS sigue mandando aunque la PS5 corte (con la pausa encima): se corta recién pasada la gracia
+      if (!directo && !(await seguirSesion())) fin();
     }, 30000);
     ff.on('close', code => { clearInterval(reloj); sl?.kill(); res(code); });
   });
@@ -247,10 +279,7 @@ const procs = [];
 async function obs(pedido) { try { const o = await conectarObs({ timeout: 4000 }); try { return await o.pedir(pedido); } finally { o.cerrar(); } } catch (e) { return null; } }
 async function levantarCadena() {
   procs.push(spawn(MTX, [path.resolve('scripts/stream/mediamtx.yml')], { stdio: 'ignore', cwd: path.dirname(MTX) }));
-  const sl = spawn('python', ['-m', 'streamlink', '--player-external-http', '--player-external-http-interface', '127.0.0.1', '--player-external-http-port', '8787',
-    '--player-external-http-continuous', 'yes', '--twitch-disable-ads', '--retry-open', '3', FUENTE, 'best'], { stdio: ['ignore', 'ignore', 'pipe'] });
-  sl.stderr.on('data', d => { const t = String(d).trim(); if (/error|fail/i.test(t)) log('streamlink (overlay):', t.slice(0, 200)); });
-  procs.push(sl);
+  lanzarStreamlink();
   await espera(3000);
   if (await obs('GetVersion')) await obs('StartStream');          // OBS ya abierto
   else {
@@ -261,6 +290,29 @@ async function levantarCadena() {
     '--minimize-to-tray', '--disable-shutdown-check', '--disable-updater'], { cwd: OBS_DIR, detached: true, stdio: 'ignore' }).unref();
   }
   log('Cadena con overlay levantada (MediaMTX + streamlink + OBS).');
+}
+// streamlink sirve la PS5 por http://127.0.0.1:8787 a la fuente 'Partido' de OBS
+let slOverlay = null;
+function lanzarStreamlink() {
+  const sl = spawn('python', ['-m', 'streamlink', '--player-external-http', '--player-external-http-interface', '127.0.0.1', '--player-external-http-port', '8787',
+    '--player-external-http-continuous', 'yes', '--twitch-disable-ads', '--retry-open', '3', FUENTE, 'best'], { stdio: ['ignore', 'ignore', 'pipe'] });
+  sl.stderr.on('data', d => { const t = String(d).trim(); if (/error|fail/i.test(t)) log('streamlink (overlay):', t.slice(0, 200)); });
+  procs.push(sl); slOverlay = sl;
+}
+// La fuente volvió después de una caída: streamlink nuevo (el anterior puede haber quedado colgado del vivo viejo)
+// y OBS reinicia la fuente 'Partido' para engancharlo. El codificador y los relevos no se tocan.
+async function reconectarFuente() {
+  if (!conOverlay) return;
+  try { slOverlay?.kill(); } catch {}
+  const i = procs.indexOf(slOverlay); if (i >= 0) procs.splice(i, 1);
+  await espera(2000);
+  lanzarStreamlink();
+  await espera(6000);
+  try {
+    const o = await conectarObs({ timeout: 4000 });
+    try { await o.pedir('TriggerMediaInputAction', { inputName: 'Partido', mediaAction: 'OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART' }); }
+    finally { o.cerrar(); }
+  } catch (e) { log('No pude reiniciar la fuente Partido de OBS:', e.message?.slice(0, 120)); }
 }
 async function bajarCadena() {
   await obs('StopStream');
@@ -274,6 +326,7 @@ async function sesion() {
   publicarHistoria();
   // Vivo nuevo: sin lado de barra ni eventos de una sesión anterior (los vuelve a escribir vigia-vivo.mjs)
   try { contarInicios(); contarFinales(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
+  caidaDesde = null;
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
   const inicio = setInterval(() => { { const a = contarInicios(), b = contarFinales(); if (a || b) actualizarPartido(); } }, 15000);   // partido nuevo o terminado: placa y cierre al toque
@@ -294,7 +347,7 @@ async function sesion() {
       const rel = relevos([...destinos.map(d => ({ ...d, entrada: LOCAL_H })), ...(ig ? [{ nombre: 'Instagram', url: ig.url, entrada: LOCAL_V }] : [])]);
       if (destinos.some(d => d.nombre === 'YouTube')) setTimeout(verificarYouTube, 90000);
       let fallas = 0, igIntento = null;
-      while (Date.now() < limite && (await enVivo()) !== false) {
+      while (Date.now() < limite && await seguirSesion()) {
         const t0 = Date.now();
         const corriendo = retransmitir('overlay');
         if (ig && !igIntento) igIntento = ig.transmitir().catch(e => log('Instagram:', e.message.slice(0, 200)));   // una sola espera
