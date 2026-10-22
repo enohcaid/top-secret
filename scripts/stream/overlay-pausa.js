@@ -119,10 +119,18 @@
     const goleadores = (m?.jugadores || []).filter(j => j.goles > 0);
     return goleadores.length === 1 ? goleadores[0].gamertag : null;
   }
-  const vistas = new Map();
+  // Todos los goles de la noche seguidos, en orden (Juan, 2026-10-21: antes pasaba uno por vuelta de la pausa).
+  // Hasta 6 para que la escena no se haga eterna: si hay más, los últimos.
   async function repeticion() {
-    const lista = (estado.repeticiones || []).filter(r => r.archivo); if (!lista.length) return false;
-    const r = lista.slice().sort((a, b) => (vistas.get(a.id) || 0) - (vistas.get(b.id) || 0))[0]; vistas.set(r.id, Date.now());
+    const lista = (estado.repeticiones || []).filter(r => r.archivo).sort((a, b) => a.id.localeCompare(b.id)).slice(-6);
+    if (!lista.length) return false;
+    for (const r of lista) {
+      if (!activo) break;                                      // salió de la pausa (arrancó el partido): se corta
+      await unaRepeticion(r);
+    }
+    return true;
+  }
+  async function unaRepeticion(r) {
     const gol = await goleadorDe(r);
     const c = document.createElement('div'); c.className = 'repe';
     c.innerHTML = `<div class="video"><video muted playsinline src="${REPES}${encodeURIComponent(r.archivo)}"></video><span class="sello">REPETICIÓN</span></div>
