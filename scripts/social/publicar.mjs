@@ -150,7 +150,7 @@ async function noticiaBorrador(p) {
 
 async function publicar(p) {
   const video = p.local?.video && fs.existsSync(p.local.video) ? p.local.video : null;
-  const necesitaLocal = ['x-imagenes', 'tiktok', 'youtube', 'x-video'].includes(p.metodo);
+  const necesitaLocal = ['x-imagenes', 'tiktok-fotos', 'tiktok', 'youtube', 'x-video'].includes(p.metodo);
   if (necesitaLocal && !video && !(p.local?.slides || []).every(f => fs.existsSync(f))) throw new Error('No están los archivos locales de la pieza (fuentes/redes/ronda).');
   switch (p.metodo) {
     case 'sitio-noticia': return noticiaSitio(p);
@@ -169,13 +169,14 @@ async function publicar(p) {
     case 'x-imagenes':  return xConImagenes(p.texto, p.local.slides.slice(0, 4));
     case 'x-video':     return link(correr('scripts/publicar-video.mjs', ['x', video, '--texto', p.texto]));
     case 'tiktok':      return link(correr('scripts/publicar-video.mjs', ['tiktok', video, '--texto', p.texto])) || 'https://www.tiktok.com/@topsecretfc';
+    case 'tiktok-fotos': return link(correr('scripts/publicar-tiktok-fotos.mjs', [...p.local.slides, '--titulo', p.titulo || '', '--texto', p.texto])) || 'https://www.tiktok.com/@topsecretfc';
     case 'youtube':     return link(correr('scripts/publicar-video.mjs', ['youtube', video, '--titulo', p.titulo, '--texto', p.texto]));
     default: throw new Error('Método desconocido: ' + p.metodo);
   }
 }
 
 // X, TikTok y YouTube van por el Chrome con CDP: si está cerrado, se abre antes de empezar.
-if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'x-texto', 'tiktok', 'youtube'].includes(p.metodo))) await asegurarChrome().catch(e => log(e.message));
+if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'x-texto', 'tiktok', 'tiktok-fotos', 'youtube'].includes(p.metodo))) await asegurarChrome().catch(e => log(e.message));
 
 for (const { l, p } of cola) {
   // Releer justo antes: si otra corrida ya la tomó o la publicó (o Juan la sacó), no se repite.

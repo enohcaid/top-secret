@@ -42,12 +42,13 @@
   }
 
   // Palabras del título: en mayúsculas, salvo los gamertags (van tal cual y en dorado).
-  function tokens(titulo, gamertags) {
+  function tokens(titulo, gamertags, upper = true) {
     const gts = (gamertags || []).slice().sort((a, b) => b.length - a.length);
-    return titulo.split(/\s+/).filter(Boolean).map(w => {
-      const limpio = w.replace(/[.,;:!?¡¿"']/g, '');
+    // El "·" separador queda pegado a la palabra anterior (espacio duro): nunca arranca un renglón.
+    return titulo.replace(/ ·/g, ' ·').split(/[ \t\n]+/).filter(Boolean).map(w => {
+      const limpio = w.replace(/[.,;:!?¡¿"'()]/g, '');
       const gt = gts.find(g => g.toLowerCase() === limpio.toLowerCase());
-      return gt ? { txt: w.replace(limpio, gt), gold: true } : { txt: w.toUpperCase(), gold: false };
+      return gt ? { txt: w.replace(limpio, gt), gold: true } : { txt: upper ? w.toUpperCase() : w, gold: false };
     });
   }
 
@@ -81,6 +82,7 @@
   }
 
   async function render(n, tipo, opts = {}) {
+    if (tipo === 'tiktok') return portadaTikTok(n, opts);
     const historia = tipo === 'historia';
     const W = 1080, H = historia ? 1920 : 1350;
     await fonts();
@@ -234,5 +236,167 @@
     return c;
   }
 
-  window.TSRedes = { render, tituloCorto, limpia };
+  // ── TikTok, modo fotos (2026-10-22) ──────────────────────────────────────────
+  // Carrusel 1080x1920: portada con título → la ficha (bloque {specs}) → la frase ({quote}) → imágenes extra.
+  // Zona segura de TikTok: arriba las pestañas (~12%), abajo el texto y el sonido (~25%), a la derecha los botones.
+  const TT = { W: 1080, H: 1920, X: 72, top: 250, bottom: 1440, maxW: 1080 - 72 - 170 };
+
+  async function fotoVertical(n) {
+    return (await loadImg(n.imageStoryRaw)) || (await loadImg(n.imagePostRaw))
+      || (await loadImg(n.imageStory)) || (await loadImg(n.imagePost || n.image));
+  }
+  function lienzo() {
+    const c = document.createElement('canvas');
+    c.width = TT.W; c.height = TT.H;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, TT.W, TT.H);
+    return { c, ctx };
+  }
+  function fondoOscuro(ctx, foto) {
+    if (!foto) return;
+    ctx.filter = 'blur(30px) brightness(.32)';
+    cover(ctx, foto, TT.W, TT.H, 0.5);
+    ctx.filter = 'none';
+  }
+  // Líneas de texto con los gamertags en dorado; sin mayúsculas forzadas si upper es false.
+  function lineasTexto(ctx, texto, gamertags, font, maxW, upper) {
+    ctx.font = font;
+    return wrap(ctx, tokens(texto, gamertags, upper), maxW);
+  }
+  function pintarLineas(ctx, lines, x, y, lh, color) {
+    const sp = ctx.measureText(' ').width;
+    for (const l of lines) {
+      let xx = x;
+      for (const t of l) { ctx.fillStyle = t.gold ? GOLD : color; ctx.fillText(t.txt, xx, y); xx += ctx.measureText(t.txt).width + sp; }
+      y += lh;
+    }
+    return y;
+  }
+  // Encabezado de las placas interiores: escudo + rótulo dorado, arriba a la izquierda.
+  function encabezado(ctx, escudo, rotulo) {
+    let x = TT.X;
+    if (escudo) {
+      const eh = 64, ew = eh * escudo.width / escudo.height;
+      ctx.drawImage(escudo, x, TT.top - eh + 8, ew, eh);
+      x += ew + 22;
+    }
+    ctx.font = `800 30px ${FONT}`; ctx.letterSpacing = '8px'; ctx.fillStyle = GOLD;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(rotulo.toUpperCase(), x, TT.top - 12);
+    ctx.letterSpacing = '0px';
+  }
+  function pieLink(ctx) {
+    ctx.font = `700 30px ${FONT}`; ctx.letterSpacing = '6px'; ctx.fillStyle = 'rgba(244,241,234,.85)';
+    ctx.fillText('NOTA COMPLETA · LINK EN LA BIO', TT.X, TT.bottom);
+    ctx.letterSpacing = '0px';
+  }
+
+  async function portadaTikTok(n, opts) {
+    await fonts();
+    const foto = await fotoVertical(n), escudo = await loadImg(ESCUDO);
+    const { c, ctx } = lienzo();
+    if (foto) cover(ctx, foto, TT.W, TT.H, 0.5);
+    const g = ctx.createLinearGradient(0, TT.H, 0, TT.H * 0.3);
+    g.addColorStop(0, 'rgba(5,5,5,.96)'); g.addColorStop(0.45, 'rgba(5,5,5,.8)'); g.addColorStop(1, 'rgba(5,5,5,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, TT.W, TT.H);
+    const toks = tokens(opts.titulo || tituloCorto(n), opts.gamertags);
+    let size = 120, lines;
+    for (;;) { ctx.font = `900 ${size}px ${FONT}`; lines = wrap(ctx, toks, TT.maxW); if (lines.length <= 4 || size <= 72) break; size -= 4; }
+    const lh = size * 0.9;
+    let y = TT.bottom;
+    ctx.textBaseline = 'alphabetic';
+    if (opts.pie) {
+      ctx.font = `700 30px ${FONT}`; ctx.letterSpacing = '6px'; ctx.fillStyle = GOLD;
+      ctx.fillText(opts.pie.toUpperCase() + '  →', TT.X, y);
+      y -= 30 + 34;
+    }
+    ctx.font = `900 ${size}px ${FONT}`; ctx.letterSpacing = '0.5px';
+    pintarLineas(ctx, lines, TT.X, y - (lines.length - 1) * lh, lh, INK);
+    y -= (lines.length - 1) * lh + lh + size * 0.12;
+    const kicker = [n.category, (n.date || '').split('-').reverse().slice(0, 2).join('.')].filter(Boolean).join(' · ').toUpperCase();
+    ctx.font = `800 30px ${FONT}`; ctx.letterSpacing = '8px'; ctx.fillStyle = GOLD;
+    ctx.fillText(kicker, TT.X, y);
+    y -= 30 + 22;
+    ctx.fillRect(TT.X, y - 6, 72, 6);
+    y -= 6 + 26;
+    if (escudo) {
+      const eh = 84, ew = eh * escudo.width / escudo.height;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 2;
+      ctx.drawImage(escudo, TT.X, y - eh, ew, eh);
+      ctx.restore();
+    }
+    ctx.letterSpacing = '0px';
+    return c;
+  }
+
+  // La ficha: filas dato / valor, centradas en la zona segura (achica la letra si no entran).
+  function placaFicha(ctx, specs, gamertags) {
+    const filas = specs.slice(0, 5);
+    let size = 104, bloques, alto;
+    for (;;) {
+      bloques = filas.map(([k, v]) => ({ k, lines: lineasTexto(ctx, String(v), gamertags, `900 ${size}px ${FONT}`, TT.maxW, true) }));
+      alto = bloques.reduce((s, b) => s + 30 + 18 + b.lines.length * size * 0.92, 0) + (filas.length - 1) * 56;
+      if (alto <= TT.bottom - TT.top - 160 || size <= 48) break;
+      size -= 4;
+    }
+    let y = TT.top + 90 + Math.max(0, (TT.bottom - TT.top - 160 - alto) / 2);
+    bloques.forEach((b, i) => {
+      ctx.font = `800 30px ${FONT}`; ctx.letterSpacing = '8px'; ctx.fillStyle = GOLD;
+      ctx.fillText(String(b.k).toUpperCase(), TT.X, y + 30);
+      ctx.letterSpacing = '0.5px'; ctx.font = `900 ${size}px ${FONT}`;
+      y = pintarLineas(ctx, b.lines, TT.X, y + 30 + 18 + size * 0.85, size * 0.92, INK) - size * 0.85;
+      if (i < bloques.length - 1) { ctx.fillStyle = 'rgba(244,241,234,.18)'; ctx.fillRect(TT.X, y + 26, TT.maxW, 2); y += 56; }
+    });
+    ctx.letterSpacing = '0px';
+  }
+
+  function placaFrase(ctx, q, gamertags) {
+    let size = 88, lines;
+    for (;;) { lines = lineasTexto(ctx, q.quote, gamertags, `800 ${size}px ${FONT}`, TT.maxW, false); if (lines.length * size * 1.08 <= 860 || size <= 50) break; size -= 4; }
+    const lh = size * 1.08, alto = 130 + lines.length * lh + (q.by ? 80 : 0);
+    let y = TT.top + 60 + Math.max(0, (TT.bottom - TT.top - 160 - alto) / 2);
+    ctx.font = `900 200px ${FONT}`; ctx.fillStyle = GOLD;
+    ctx.fillText('“', TT.X - 8, y + 150);
+    y += 130 + size;
+    ctx.font = `800 ${size}px ${FONT}`;
+    y = pintarLineas(ctx, lines, TT.X, y, lh, INK);
+    if (q.by) {
+      ctx.font = `700 32px ${FONT}`; ctx.letterSpacing = '4px'; ctx.fillStyle = GOLD;
+      ctx.fillText('— ' + q.by, TT.X, y + 30, TT.maxW);
+      ctx.letterSpacing = '0px';
+    }
+  }
+
+  // Devuelve los lienzos del carrusel en orden. extras: URLs de imágenes que van enteras (la placa del fixture, etc.).
+  async function tiktok(n, opts = {}) {
+    await fonts();
+    const foto = await fotoVertical(n), escudo = await loadImg(ESCUDO);
+    const bloques = (n.body || []).filter(b => b && typeof b === 'object');
+    const specs = bloques.find(b => Array.isArray(b.specs) && b.specs.length)?.specs;
+    const quote = bloques.find(b => b.quote);
+    const extras = (await Promise.all((opts.extras || []).slice(0, 3).map(loadImg))).filter(Boolean);
+    const interiores = [];
+    if (specs) interiores.push(ctx => { encabezado(ctx, escudo, 'La ficha'); placaFicha(ctx, specs, opts.gamertags); });
+    else if (n.excerpt) interiores.push(ctx => { encabezado(ctx, escudo, n.category || 'La nota'); placaFrase(ctx, { quote: n.excerpt }, opts.gamertags); });
+    if (quote) interiores.push(ctx => { encabezado(ctx, escudo, 'La frase'); placaFrase(ctx, quote, opts.gamertags); });
+    for (const img of extras) interiores.push(ctx => {
+      // Entera, lo más grande posible sin meterse bajo los botones de la derecha ni el texto de abajo.
+      const w = Math.min(TT.maxW + 60, img.width * (TT.bottom - TT.top - 90) / img.height), h = w * img.height / img.width;
+      const x = Math.max(40, TT.X + (TT.maxW - w) / 2), y = TT.top + (TT.bottom - TT.top - 90 - h) / 2;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 40;
+      ctx.drawImage(img, x, y, w, h);
+      ctx.restore();
+    });
+    const out = [await portadaTikTok(n, { ...opts, pie: interiores.length ? 'Deslizá' : null })];
+    interiores.forEach((dibujar, i) => {
+      const { c, ctx } = lienzo();
+      fondoOscuro(ctx, foto);
+      dibujar(ctx);
+      if (i === interiores.length - 1) pieLink(ctx);
+      out.push(c);
+    });
+    return out;
+  }
+
+  window.TSRedes = { render, tituloCorto, limpia, tiktok };
 })();

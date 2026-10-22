@@ -63,6 +63,7 @@ button.plegar{background:none}
 .portada figcaption{position:absolute;left:6px;top:6px;padding:3px 8px;border-radius:999px;background:var(--gold);color:#0B0A07;font:700 11px 'JetBrains Mono',monospace;letter-spacing:.15em;text-transform:uppercase}
 .carrusel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin}
 .carrusel>*{flex:0 0 100%;scroll-snap-align:start}
+.carrusel.vertical img{max-height:560px;object-fit:contain}
 .contador{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px}
 
 .texto{padding:12px 16px 0}
@@ -151,7 +152,7 @@ button:disabled{opacity:.4;cursor:default}
   <div id="lotes"></div>
 </div>
 <div class="aviso" id="aviso"></div>
-<script src="aprobar.js?v=8"></script>
+<script src="aprobar.js?v=9"></script>
 <script src="layout.js?v=25"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@
 //   node scripts/noticia-redes.mjs --id <id>       # noticia ya publicada
 //   node scripts/noticia-redes.mjs --titulo "…"    # pisa el título de la imagen
 //
-// Salida: fuentes/redes/noticias/<id>-ig.jpg y <id>-historia.jpg.
+// Salida: fuentes/redes/noticias/<id>-ig.jpg, <id>-historia.jpg y <id>-tiktok1..N.jpg (carrusel de TikTok).
 import fs from 'fs';
 import path from 'path';
 import { chromium } from 'playwright';
@@ -47,6 +47,16 @@ export async function generarPiezas(n, { titulo } = {}) {
       out[tipo] = file;
       console.log(`  ${tipo}: ${path.relative(process.cwd(), file)}`);
     }
+    // Carrusel de TikTok (modo fotos): portada, ficha, frase e imágenes extra, 1080x1920.
+    const placas = await page.evaluate(async ({ n, titulo, gamertags }) =>
+      (await window.TSRedes.tiktok(n, { titulo, gamertags, extras: n.imagenesExtra || [] })).map(c => c.toDataURL('image/jpeg', 0.9)),
+      { n, titulo, gamertags: Object.keys(PLAYER_TRAITS) });
+    out.tiktok = placas.map((dataUrl, i) => {
+      const file = path.join(OUT_DIR, `${n.id}-tiktok${i + 1}.jpg`);
+      fs.writeFileSync(file, Buffer.from(dataUrl.split(',')[1], 'base64'));
+      console.log(`  tiktok ${i + 1}/${placas.length}: ${path.relative(process.cwd(), file)}`);
+      return file;
+    });
   } finally {
     await browser.close();
   }

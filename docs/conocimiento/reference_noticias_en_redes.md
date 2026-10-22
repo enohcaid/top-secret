@@ -18,6 +18,7 @@ metadata:
 | Facebook · post | link a `/og/<id>` (vista previa: foto limpia + título) | `shareCaptions.fb` |
 | Facebook · historia | la misma historia | — |
 | X | texto + link a `/og/<id>` (tarjeta con la foto) | `shareCaptions.x` (≤280, el link cuenta 23) |
+| TikTok · fotos (desde 2026-10-22) | carrusel 1080×1920: portada con título → "La ficha" (bloque `{specs}`; sin specs, el excerpt) → "La frase" (`{quote}`) → `imagenesExtra`; la última lleva "NOTA COMPLETA · LINK EN LA BIO" | título (≤90) + `shareCaptions.tiktok` o `.ig` |
 
 **Flujo:**
 1. noticias.html → "Publicar" en el borrador → se publica en el sitio y se abre el paso "Publicar en redes" (`noticias-redes-ui.js`). También desde el modal Compartir de cualquier noticia → "Publicar en redes" (pide el PIN).
@@ -32,3 +33,5 @@ metadata:
 
 **Caché:** `/media` es immutable por URL — las imágenes de la noticia llevan `?v=` (si no, una regenerada con el mismo nombre seguía saliendo vieja, también para Instagram).
 - **Títulos largos (2026-10-21):** `tituloCorto()` ya no corta a 6 palabras (cortaba la frase: "…ESPACIO GAMER CON"); va el título entero y la letra baja de a 4 px hasta entrar en 3 líneas (post) o 4 (historia), mínimo 72 px. `tituloImagen` sigue pisándolo si hace falta uno más corto.
+
+**TikTok modo fotos (2026-10-22, pedido de Juan: "si TikTok te deja, ponele una canción de trap de la plataforma de ellos"; YouTube no le interesa para noticias).** Placas: `TSRedes.tiktok(n, {extras})` en `noticia-redes.js` (zona segura de TikTok: texto entre y=250 y y=1440, 170 px libres a la derecha por los botones); las genera `generarPiezas` como `<id>-tiktok1..N.jpg`. Publica `scripts/publicar-tiktok-fotos.mjs <fotos…> --titulo --texto [--prueba]` (método `tiktok-fotos` de publicar.mjs): TikTok Studio → `upload?tab=photo` → `input[type=file][multiple]` (el de video NO acepta varias) → `/upload/post/photo` con título (`input[placeholder="Añade un título llamativo"]`, 90) + descripción (contenteditable) → "Añadir un sonido" → `input[placeholder="Buscar sonidos"]` → items `.MusicPanelMusicItem__container` con botón "Use" → aparece "Sustituir" = tomado. Elige el primer **beat instrumental** (sin letra: nada de dobles sentidos ni temas comerciales cantados; descarta "original sound", remix, lofi) que no esté entre los últimos 30 de `scripts/tiktok-sonidos-usados.json`, rotando búsquedas ("trap beat instrumental", "dark trap beat"…). `--prueba` hace todo y descarta ("Descartar" → "Descartar cambios"). Si TikTok Studio muestra "Un vídeo que estabas editando no se ha guardado", no tocarlo: es otro borrador.

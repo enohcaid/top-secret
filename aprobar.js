@@ -65,7 +65,7 @@
     // Portada (regla de Juan 2026-10-21): lo que se ve en la red antes de reproducir; se muestra al lado para aprobarla
     const port = p.portada?.url ? `<figure class="portada"><img src="${esc(p.portada.url)}" alt=""><figcaption>Portada</figcaption></figure>` : '';
     if (m.length === 1) return `<div class="medio${vertical ? ' vertical' : ''}${port ? ' con-portada' : ''}">${uno(m[0])}${port}</div>`;
-    return `<div class="medio"><div class="carrusel">${m.map(uno).join('')}</div><span class="contador">${m.length} imágenes · deslizá</span></div>`;
+    return `<div class="medio"><div class="carrusel${vertical ? ' vertical' : ''}">${m.map(uno).join('')}</div><span class="contador">${m.length} imágenes · deslizá</span></div>`;
   }
 
   // Vista previa de una nota del sitio: los mismos bloques que noticias.html (párrafos, {h}, {specs}, {quote}, {img}, {pair}).

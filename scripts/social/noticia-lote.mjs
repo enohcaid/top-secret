@@ -2,7 +2,8 @@
 // Noticia del día → aprobar.html (pedido de Juan, 2026-10-10: sacar el botón oculto de noticias.html y aprobar la
 // noticia desde la misma página que todo lo demás). Lo corre run-daily-images.ps1 apenas el borrador tiene imágenes.
 // Arma un lote "noticia" con la nota del sitio (vista previa completa, título y cuerpo editables) y sus piezas para
-// redes (las mismas que armaba el paso "Publicar en redes": post e historia con título, link con vista previa, X).
+// redes (las mismas que armaba el paso "Publicar en redes": post e historia con título, link con vista previa, X)
+// y, desde 2026-10-22, el carrusel de fotos de TikTok.
 // Sale apenas se aprueba (publicarA = ahora); publicar.mjs publica primero la nota y después las redes.
 //   node scripts/social/noticia-lote.mjs [--no-abrir]
 import { spawn } from 'child_process';
@@ -24,9 +25,17 @@ else {
   const v = Date.now().toString(36);
   const url = {};
   for (const [tipo, f] of Object.entries(piezas)) {
+    if (Array.isArray(f)) continue;
     const key = `logos/noticias/redes/${n.id}-${tipo}.jpg`;   // mismas claves que usaba el Worker (/og las encuentra)
     await putFile(f, key);
     url[tipo] = `${WORKER}/media/${key}?v=${v}`;
+  }
+  // Carrusel de TikTok (modo fotos, 2026-10-22): se publica desde los archivos locales; en R2 solo para la vista previa.
+  url.tiktok = [];
+  for (const [i, f] of piezas.tiktok.entries()) {
+    const key = `logos/noticias/redes/${n.id}-tiktok${i + 1}.jpg`;
+    await putFile(f, key);
+    url.tiktok.push(`${WORKER}/media/${key}?v=${v}`);
   }
   const link = `${WORKER}/og/${n.id}`;
   const sc = n.shareCaptions || {};
@@ -62,6 +71,7 @@ else {
       extra.length
         ? P({ id: 'x', red: 'x', formato: 'Post con imágenes', descripcion: 'Las imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: textoX, metodo: 'x-imagenes', local: { slides: [piezas.ig, ...extraLocal] } })
         : P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: textoX, metodo: 'x-texto' }),
+      P({ id: 'tiktok', red: 'tiktok', formato: 'Carrusel de fotos', descripcion: `${url.tiktok.length} placas · con un trap instrumental de TikTok (lo elige al publicar)`, media: url.tiktok.map(u => ({ tipo: 'imagen', url: u, vertical: true })), titulo: (n.tituloImagen || (n.title || '').split(/[:—|]/)[0]).trim().slice(0, 90), texto: sc.tiktok || sc.ig || n.excerpt || '', metodo: 'tiktok-fotos', local: { slides: piezas.tiktok } }),
     ],
   });
   log(`Lote noticia-${n.id} listo para aprobar.`);
