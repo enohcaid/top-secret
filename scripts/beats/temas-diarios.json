@@ -339,6 +339,27 @@
         "gota invertida en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 8 · build 4 · gancho B 8 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-22",
+      "id": "2026-10-22-1",
+      "archivo": "2026-10-22-1 - Barro.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_22_1.py",
+      "duracion": 100,
+      "nombre": "Barro",
+      "concepto": "El laburo invisible — los entrenamientos repetitivos, las mañanas heladas, los partidos donde nada sale; todos quieren la gloria pero la pelea real es en el barro, donde el cuerpo pide parar y vos seguís; sección a sección el peso se levanta hasta que lo que era sufrimiento se convierte en fuerza.",
+      "bpm": 108,
+      "tonalidad": "si menor",
+      "rasgo": "arrastre de barro: golpe de ruido con pitch descendente (bota hundiéndose); pesado y largo al principio, se acorta sección a sección, y en el gancho C es un chasquido seco — el barro se endureció",
+      "recursos": [
+        "arrastre de barro con pitch descendente (firma del tema)",
+        "pad oscuro de sines detuneadas",
+        "lead crudo con overdrive variable (pesado→limpio)",
+        "piano pesado en el verso",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 6 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
