@@ -11,7 +11,10 @@ const CARDS=[
  ['competencias','Competencias','Competencias','VPN · VPUG · 11x11','Posiciones, calendario y estadísticas','logos/duos/duo-ataque-k1.webp','50% 12%'],
  ['nosotros','Nosotros','Nosotros','El club por dentro','Proyecto, identidad y equipaciones','logos/nosotros/manada-k1.webp','50% 35%'],
  ['reclutamiento','Sumate','Sumate','Buscamos agentes','Postulate para Top Secret FC','logos/duos/solo-juanchyroman-k2-v3.webp','50% 10%'],
+ ['enlaces','Enlaces','Enlaces','Todo el club en un lugar','Vivos · redes · comunidad','logos/grupales/grupal-ia-tunel-bkfysi.webp','50% 30%'],
 ];
+// Con argumentos genera solo esas placas: node scripts/og-cards.cjs enlaces
+const SOLO=process.argv.slice(2);
 // Composición centrada: WhatsApp de escritorio recorta la placa a un CUADRADO del centro
 // (x 285-915), así que escudo + título tienen que entrar ahí; la foto va de fondo.
 const html=([id,kick,t1,t2,sub,img,pos,brand])=>`<!doctype html><html><head><meta charset="utf-8">
@@ -40,6 +43,6 @@ h2{font-weight:300;font-size:${brand?44:38}px;letter-spacing:-.02em;margin-top:1
 <div class="id">DESCLASIFICADO</div>
 <script>for(const el of document.querySelectorAll('.tx > *:not(img)')){let f=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>570&&f>12){f-=2;el.style.fontSize=f+'px';}}</script></body></html>`;
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1200,height:630}});
-for(const c of CARDS){await p.setContent(html(c),{waitUntil:'networkidle'});await p.evaluate(()=>document.fonts.ready);await p.evaluate(()=>{for(const el of document.querySelectorAll('.tx > *:not(img)')){let f=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>570&&f>12){f-=2;el.style.fontSize=f+'px';}}});await p.waitForTimeout(300);
+for(const c of CARDS){if(SOLO.length&&!SOLO.includes(c[0]))continue;await p.setContent(html(c),{waitUntil:'networkidle'});await p.evaluate(()=>document.fonts.ready);await p.evaluate(()=>{for(const el of document.querySelectorAll('.tx > *:not(img)')){let f=parseFloat(getComputedStyle(el).fontSize);while(el.scrollWidth>570&&f>12){f-=2;el.style.fontSize=f+'px';}}});await p.waitForTimeout(300);
 await p.screenshot({path:`scripts/.og-out/og-${c[0]}.jpg`,type:'jpeg',quality:88});}
 await b.close();console.log('ok');})();
