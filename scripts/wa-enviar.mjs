@@ -4,6 +4,7 @@
  * scripts/.wa-personal/). No correrlo mientras el bot de amistosos está prendido: comparten sesión.
  *
  *   node scripts/wa-enviar.mjs --a 59893798044 --texto "..." foto1.png foto2.png ...
+ *   node scripts/wa-enviar.mjs --grupo "Top Secret FC" video.mp4   a un grupo, por su nombre exacto
  *   --prueba      manda todo al chat "Mensaje a mí mismo" de Juan en vez de al destinatario
  *
  * Las fotos van todas juntas en un solo envío, después del texto.
@@ -21,11 +22,12 @@ const opt = n => { const i = args.indexOf(n); return i >= 0 ? args.splice(i, 2)[
 const flag = n => { const i = args.indexOf(n); if (i >= 0) args.splice(i, 1); return i >= 0; };
 const PRUEBA = flag('--prueba');
 const destino = opt('--a');
+const grupo = opt('--grupo');
 const texto = opt('--texto');
 const archivos = args.map(a => path.resolve(a));
 const faltan = archivos.filter(a => !fs.existsSync(a));
-if ((!destino && !PRUEBA) || (!texto && !archivos.length) || faltan.length) {
-  console.error(faltan.length ? `No existen: ${faltan.join(', ')}` : 'Uso: --a <teléfono> [--texto "..."] [--prueba] [--pie-archivo] archivos...');
+if ((!destino && !grupo && !PRUEBA) || (!texto && !archivos.length) || faltan.length) {
+  console.error(faltan.length ? `No existen: ${faltan.join(', ')}` : 'Uso: --a <teléfono> | --grupo "<nombre>" [--texto "..."] [--prueba] [--pie-archivo] archivos...');
   process.exit(1);
 }
 
@@ -43,12 +45,31 @@ client.on('ready', async () => {
   try {
     let chat;
     if (PRUEBA) chat = client.info.wid._serialized;
-    else {
+    else if (grupo) {
+      // La lista de chats tarda en cargar después de conectar: reintentar hasta 1 min.
+      // Nombre exacto; si no, el único grupo cuyo nombre (sin emojis ni mayúsculas) contiene el pedido.
+      // Ojo: c.isGroup no sirve en esta versión de WhatsApp Web (siempre falso); se mira id.server.
+      let r;
+      for (let i = 0; i < 12 && !chat; i++) {
+        r = await client.pupPage.evaluate(n => {
+          const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();
+          const gs = window.require('WAWebCollections').Chat.getModelsArray().filter(c => c.id.server === 'g.us')
+            .map(c => ({ id: c.id._serialized, t: (c.formattedTitle || c.name || c.groupMetadata?.subject || '').trim() }));
+          const exacto = gs.find(g => g.t === n);
+          const parecidos = gs.filter(g => norm(g.t).includes(norm(n)));
+          return { id: exacto?.id || (parecidos.length === 1 ? parecidos[0].id : null), parecidos: parecidos.map(g => g.t) };
+        }, grupo);
+        chat = r.id;
+        if (!chat && r.parecidos.length > 1) throw new Error(`varios grupos parecidos a "${grupo}": ${r.parecidos.join(' | ')}`);
+        if (!chat) await new Promise(res => setTimeout(res, 5000));
+      }
+      if (!chat) throw new Error(`no encontré el grupo "${grupo}"`);
+    } else {
       const id = await client.getNumberId(destino.replace(/\D/g, ''));
       if (!id) throw new Error(`${destino} no tiene WhatsApp`);
       chat = id._serialized;
     }
-    console.log('Enviando a', PRUEBA ? 'mí mismo (prueba)' : chat);
+    console.log('Enviando a', PRUEBA ? 'mí mismo (prueba)' : grupo ? `grupo "${grupo}" (${chat})` : chat);
     await new Promise(r => setTimeout(r, 15000));   // recién conectado, WhatsApp Web todavía sincroniza
     const desde = Math.floor(Date.now() / 1000) - 5;
     // whatsapp-web.js 1.34 a veces tira "Data passed to getter must include an id" al leer el mensaje
@@ -103,7 +124,7 @@ client.on('ready', async () => {
     let ok = 0;
     for (let i = 0; i < 36; i++) {
       ok = await client.pupPage.evaluate(t => window.require('WAWebCollections').Msg.getModelsArray()
-        .filter(m => m.id?.fromMe && m.t >= t && m.ack >= 1 && ['chat', 'image'].includes(m.type)).length, desde);
+        .filter(m => m.id?.fromMe && m.t >= t && m.ack >= 1 && ['chat', 'image', 'video'].includes(m.type)).length, desde);
       if (ok >= n) break;
       await new Promise(r => setTimeout(r, 5000));
     }
