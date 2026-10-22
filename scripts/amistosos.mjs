@@ -362,8 +362,8 @@ client.on('message_create', async msg => {
       return;
     }
     if (msg.fromMe || dormido) return;
-    // 2) Pedidos en el grupo.
-    if (msg.from.endsWith('@g.us') && await esGrupoAmistosos(msg)) return pedidoGrupo(msg);
+    // 2) Pedidos en el grupo (después de las 22:00 ya no se buscan rivales nuevos).
+    if (msg.from.endsWith('@g.us') && await esGrupoAmistosos(msg)) return cerrado ? undefined : pedidoGrupo(msg);
     // 3) Respuestas por privado de equipos a los que les ofrecimos.
     if (!msg.from.endsWith('@g.us')) return respuestaPrivada(msg);
   } catch (e) { log('error:', e.message); }
@@ -777,7 +777,15 @@ async function comando(body) {
 }
 
 // Corte automático a las 22:00 ART (pedido de Juan 2026-10-13: la búsqueda es de 17 a 22).
-setInterval(() => { if (horaArt() >= '22:00') { log('22:00: fin del día, apago.'); process.exit(0); } if (!dormido) vencerOfertas().catch(e => log('error:', e.message)); }, 60000);
+// Desde las 22:00 no toma pedidos nuevos del grupo, pero sigue atendiendo los comandos de Juan ("+23:40 Lizzard CF")
+// y las respuestas a ofertas abiertas hasta las 23:45 (2026-10-21: a las 22:06 Juan pasó un amistoso y el bot ya se había apagado).
+let cerrado = false;
+setInterval(() => {
+  const h = horaArt();
+  if (h >= '23:45') { log('23:45: fin del día, apago.'); process.exit(0); }
+  if (h >= '22:00' && !cerrado) { cerrado = true; log('22:00: no busco más pedidos; sigo atendiendo comandos y respuestas hasta las 23:45.'); }
+  if (!dormido) vencerOfertas().catch(e => log('error:', e.message));
+}, 60000);
 
 // Oferta sin respuesta en 30 min: se libera el horario para otro pedido. Si el rival contesta
 // después, el aviso a Juan dice que llegó tarde (ver respuestaPrivada).
