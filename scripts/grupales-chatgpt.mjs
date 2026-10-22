@@ -33,6 +33,8 @@ const ESCENAS = {
   'estudio-suelto': 'Estudio de campaña totalmente negro con luz DORADA cálida desde arriba y recortes de luz en los bordes; piso negro satinado. NADA de filas: el plantel repartido en grupos sueltos a distintas profundidades y alturas, como una editorial de moda deportiva — unos de pie, otros apoyados en el hombro de un compañero, uno sentado en el piso, el capitán adelante sentado sobre la pelota. Actitud relajada, segura y canchera.',
   // Para topsecret.ar/enlaces (2026-10-21): "todo el club en un lugar" — vivos, redes, comunidad.
   enlaces: 'De noche en la sala de transmisión del club: detrás del grupo, una gran pared de pantallas encendidas que muestran imágenes DESENFOCADAS de partidos y destellos de luz dorada (las pantallas NO tienen texto, letras, interfaces ni logos de ninguna red social). Esa luz de las pantallas recorta las siluetas desde atrás; adelante, luz dorada cálida y suave. Algunos jugadores con el celular en la mano: uno mostrando la pantalla del celular a cámara (pantalla iluminada sin texto legible), otro mirándolo con media sonrisa; otros apoyados en una consola de transmisión oscura. Clima de equipo conectado, cercano y canchero.',
+  // Vertical para el celular (Juan 2026-10-21: "que no aparezca nadie cortado"): la página la muestra entera.
+  'enlaces-vertical': 'De noche en la sala de transmisión del club: al fondo, una gran pared de pantallas encendidas con imágenes DESENFOCADAS de partidos y destellos de luz dorada (las pantallas NO tienen texto, letras, interfaces ni logos de ninguna red social). El plantel está escalonado sobre unos escalones/tarimas oscuros frente a las pantallas, así todas las caras se ven. La luz de las pantallas recorta las siluetas desde atrás; adelante, luz dorada cálida y suave. Dos jugadores con el celular en la mano (uno mostrando la pantalla a cámara, iluminada y sin texto legible). Clima de equipo conectado, cercano y canchero.',
   'estadio-suelto': 'En el césped del estadio de noche, con los reflectores detrás a contraluz y una leve bruma: el plantel CAMINANDO hacia la cámara desde el centro de la cancha, en una V abierta con el capitán en la punta, todos a paso firme, algunos hablando entre ellos o con la mirada fija en cámara. Cámara baja con teleobjetivo, los de atrás un poco desenfocados por la distancia. Nada de filas ni de pose de foto oficial.',
 };
 
@@ -47,7 +49,11 @@ const PLANES = {
   vestuario: [['Atrás, de pie o apoyados en los casilleros', 'A, B, C, D, E, F, G, H'], ['Adelante, sentados en el banco o agachados', 'I, J, K, L, M, N, O, P, Q']],
   'estudio-suelto': [['A la izquierda, un grupo de cinco a distintas alturas (dos de pie atrás, uno con el brazo sobre el hombro de otro, uno agachado)', 'A, C, D, G, H'], ['Al centro, el capitán L adelante sentado sobre la pelota; detrás de él, de pie y cerca, tres más', 'L, E, F, M'], ['A la derecha, otro grupo de cinco (uno sentado en el piso, uno de costado mirando a cámara, uno con el brazo sobre un compañero)', 'I, J, K, N, B'], ['En primer plano, cerca de cámara, agachados o con una rodilla en el piso', 'O, P, Q']],
   enlaces: [['Atrás, de pie frente a la pared de pantallas, a distintas alturas, alguno apoyado en la consola', 'A, C, D, E, G, H, B'], ['Al medio, de pie: el capitán L al centro con la pelota bajo el brazo, I y K con el celular en la mano', 'F, I, L, K, M'], ['Adelante, agachados, con una rodilla en el piso o sentados en el borde de la consola', 'J, N, O, P, Q']],
+  'enlaces-vertical': [['Arriba de todo, en el escalón más alto frente a las pantallas, de pie', 'A, C, D, E, B'], ['Segundo escalón, de pie, poses distintas', 'G, H, F, M'], ['Tercer escalón, de pie: el capitán L al centro con la pelota bajo el brazo, I y K con el celular en la mano', 'I, L, K, N'], ['Adelante, en el piso, agachados o con una rodilla en el piso', 'J, O, P, Q']],
   'estadio-suelto': [['En la punta de la V, el más adelantado', 'L'], ['Primera línea detrás del capitán, a los costados', 'N, Q, P, J'], ['Segunda línea', 'F, K, M, I, O'], ['Más atrás, más lejos de cámara', 'A, C, D, E, G, H, B']],
+};
+const FORMATOS = {
+  'enlaces-vertical': 'FORMATO: VERTICAL 2:3 (1024x1536), retrato. NADIE CORTADO: los 17 jugadores entran ENTEROS en el cuadro, de la cabeza a los botines, con margen libre en los cuatro bordes (ningún brazo, hombro, pie ni cabeza tocando o saliendo del borde de la imagen). El 20% superior de la imagen queda libre de jugadores (solo el fondo de pantallas, más oscuro) para poner encima el escudo y el título.',
 };
 const planTexto = escena => PLANES[escena].map(([donde, letras]) => `- ${donde} (de izquierda a derecha): ${letras}  → ${letras.split(',').length} jugadores`).join('\n');
 
@@ -108,7 +114,7 @@ function buildPrompt(escena, numeros) {
 ═══ FOTO GRUPAL DEL PLANTEL — TEMPORADA 4 ═══
 Generá UNA fotografía grupal NUEVA de los 17 jugadores del plantel de Top Secret FC juntos en la MISMA escena, con la misma luz y la misma cámara. No es un collage ni recortes pegados: es una sola foto real, coherente, como la foto oficial de presentación de un club grande.
 
-FORMATO: horizontal 3:2 (1536x1024). Todos los jugadores entran completos en el cuadro, con un poco de aire arriba.
+${FORMATOS[escena] || 'FORMATO: horizontal 3:2 (1536x1024). Todos los jugadores entran completos en el cuadro, con un poco de aire arriba.'}
 
 ESCENA: ${ESCENAS[escena]}
 
