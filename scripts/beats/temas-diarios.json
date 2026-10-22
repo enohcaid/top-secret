@@ -360,6 +360,27 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 6 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-22",
+      "id": "2026-10-22-2",
+      "archivo": "2026-10-22-2 - Espejo.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_22_2.py",
+      "duracion": 95,
+      "nombre": "Espejo",
+      "concepto": "Mirarse al espejo del vestuario antes de salir a la cancha — la cara que te devuelve no es la tuya de siempre; en cada sección la imagen se define más hasta que en el gancho C ya no te reconocés — te convertiste en otra cosa.",
+      "bpm": 114,
+      "tonalidad": "sol menor",
+      "rasgo": "reflejo desfasado: eco del lead transportado una 4ta justa arriba y retrasado (delay 6→3→0 semicorcheas); en el gancho C suena simultáneo y al unísono — se alineó con la persona",
+      "recursos": [
+        "reflejo desfasado con convergencia temporal (firma del tema)",
+        "pad de cristal (sines con chorus frío)",
+        "piano de vestuario (notas sueltas, reverb largo)",
+        "lead limpio con sub-octava",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · gancho A 8 · verso 6 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
