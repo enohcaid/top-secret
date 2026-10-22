@@ -9,6 +9,15 @@ export const DIVISIONES_EG = [
   ['ascension-3-espacio-gamer-argentina', 'EG Ascensión'],
   ['under-4-espacio-gamer-argentina', 'EG Under'],
 ];
+// Equipos que EG publica sin escudo: el suyo de VPUG (CopáFácil), en R2 logos/escudos-eg/ (2026-10-21).
+// Villa Die no tiene escudo en ningún lado conocido.
+const ESC = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/';
+export const ESCUDOS_FALTANTES = {
+  'Deportivo Moron eSports': ESC + 'deportivo-moron-esports.webp',
+  'Arabia Team': ESC + 'arabia-team.webp',
+  'City Torque eSp': ESC + 'city-torque-esp.webp',
+  'Nuvo FC': 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvBXyushQcOcLYfub.png?alt=media&token=1',
+};
 const decode = s => s.replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').trim();
 
 export async function equiposDivisionEG(slug) {
@@ -23,7 +32,7 @@ export async function equiposDivisionEG(slug) {
   return aj.data.html.split(/<tbody class="eg-tp-club[^"]*"[^>]*>/).slice(1).map(chunk => ({
     nombre: decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || ''),
     logo: (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
-  })).filter(t => t.nombre);
+  })).filter(t => t.nombre).map(t => ({ ...t, logo: t.logo || ESCUDOS_FALTANTES[t.nombre] || null }));
 }
 
 // [{nombre, div, logo}] de las 4 divisiones; una división que falla no tumba a las otras
