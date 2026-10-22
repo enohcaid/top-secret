@@ -83,9 +83,19 @@ client.on('ready', async () => {
       if (!selector.isMultiple() && archivos.length > 1) throw new Error('el selector de "Fotos y videos" no acepta varios archivos');
       await selector.accept(archivos);
       await new Promise(r => setTimeout(r, 3000 + 1500 * archivos.length));
-      const boton = await p.evaluateHandle(() => document.querySelector('[data-icon*="send"]')?.closest('[role=button],button,div[tabindex]'));
-      if (!boton.asElement()) throw new Error('no encontré el botón de enviar de la vista previa');
-      await boton.asElement().click();
+      // El botón cambió de forma más de una vez (2026-10-22 ya no tenía data-icon "send"): se prueba por ícono,
+      // por etiqueta y, si no aparece, Enter (en la vista previa también envía). El ack de abajo confirma igual.
+      const boton = await p.evaluateHandle(() => {
+        const el = document.querySelector('[data-icon*="send"]')
+          || [...document.querySelectorAll('[aria-label]')].find(e => /^(enviar|send)$/i.test(e.getAttribute('aria-label').trim()));
+        return el?.closest('[role=button],button,div[tabindex]') || el || null;
+      });
+      if (boton.asElement()) await boton.asElement().click();
+      else {
+        await p.screenshot({ path: path.join(ROOT, 'fuentes', 'wa-enviar-sin-boton.png') }).catch(() => {});
+        console.warn('  sin botón de enviar visible (captura en fuentes/wa-enviar-sin-boton.png): pruebo con Enter');
+        await p.keyboard.press('Enter');
+      }
       n += archivos.length;
       archivos.forEach(a => console.log('  →', path.basename(a)));
     }
