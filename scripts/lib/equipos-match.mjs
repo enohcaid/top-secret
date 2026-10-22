@@ -61,6 +61,14 @@ export function buscarEquipo(texto, equipos, alias = {}) {
     if (score >= 0.5) todos.push({ ...e, score });
     if (score >= 0.66 && (!mejor || score > mejor.score)) mejor = { ...e, score };
   }
+  // El nombre más específico gana al que contiene: "instituto cantera" es Instituto Cantera, no
+  // Instituto Esports (que sin el "esports" de ruido queda en "instituto").
+  const tapado = x => todos.some(y => y.score >= x.score && compacto(y.nombre) !== compacto(x.nombre) && compacto(y.nombre).includes(compacto(x.nombre)));
+  if (todos.some(tapado)) {
+    const quedan = todos.filter(x => !tapado(x));
+    todos.length = 0; todos.push(...quedan);
+    mejor = quedan.filter(x => x.score >= 0.66).sort((a, b) => b.score - a.score)[0] || null;
+  }
   // Empate entre equipos distintos (ej. "san jorge": 4BDO San Jorge / San Jorge de Tucuman): no adivinar.
   const empatados = todos.filter(x => mejor && x.score >= mejor.score - 0.2);
   const distintos = [...new Set(empatados.map(x => compacto(x.nombre)))];   // el mismo club en varias ligas no es duda
