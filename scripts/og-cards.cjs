@@ -11,7 +11,7 @@ const CARDS=[
  ['competencias','Competencias','Competencias','VPN · VPUG · 11x11','Posiciones, calendario y estadísticas','logos/duos/duo-ataque-k1.webp','50% 12%'],
  ['nosotros','Nosotros','Nosotros','El club por dentro','Proyecto, identidad y equipaciones','logos/nosotros/manada-k1.webp','50% 35%'],
  ['reclutamiento','Sumate','Sumate','Buscamos agentes','Postulate para Top Secret FC','logos/duos/solo-juanchyroman-k2-v3.webp','50% 10%'],
- ['enlaces','Enlaces','Enlaces','Todo el club en un lugar','Vivos · redes · comunidad','logos/grupales/grupal-ia-tunel-bkfysi.webp','50% 30%'],
+ ['enlaces','Enlaces','Enlaces','Todo el club en un lugar','Vivos · redes · comunidad','logos/grupales/grupal-ia-enlaces-ivl8ys.webp','50% 35%'],
 ];
 // Con argumentos genera solo esas placas: node scripts/og-cards.cjs enlaces
 const SOLO=process.argv.slice(2);

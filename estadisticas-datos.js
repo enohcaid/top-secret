@@ -13,6 +13,7 @@ export const GRUPALES_IA_T4 = {
   estudio: 'logos/grupales/grupal-ia-estudio-bkfysi.webp', estadio: 'logos/grupales/grupal-ia-estadio-bkfysi.webp',
   tunel: 'logos/grupales/grupal-ia-tunel-bkfysi.webp', vestuario: 'logos/grupales/grupal-ia-vestuario-bkfysi.webp',
   'estudio-suelto': 'logos/grupales/grupal-ia-estudio-suelto-blfap0.webp', 'estadio-suelto': 'logos/grupales/grupal-ia-estadio-suelto-blfap0.webp',
+  enlaces: 'logos/grupales/grupal-ia-enlaces-ivl8ys.webp',
 };
 export const GRUPALES_T4 = {
   campana: 'logos/grupales/grupal-t4-campana-babndv.webp', piramide: 'logos/grupales/grupal-t4-piramide-babndv.webp',
