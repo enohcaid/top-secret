@@ -77,6 +77,16 @@ const STATE_FILE = path.join(DIR, `${hoy()}.json`);
 const st = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))
   : { fecha: hoy(), confirmados: {}, pedidos: {}, siguiente: 0 };   // confirmados: slot → equipo
 const save = () => fs.writeFileSync(STATE_FILE, JSON.stringify(st, null, 2));
+// Equipos que hoy ya dijeron que no (Juan, 2026-10-21): no se les vuelve a escribir en el día, aunque
+// vuelvan a publicar o escriba otro del mismo equipo. Clave = nombre del equipo y contacto.
+st.rechazaron = st.rechazaron || {};
+for (const p of Object.values(st.pedidos)) if (p.estado === 'rechazado' || (p.estado === 'descartado' && p.respondio))
+  for (const k of [p.equipo?.nombre, p.autor, p.autorTel].filter(Boolean)) st.rechazaron[k] = st.rechazaron[k] || { motivo: 'rechazó antes hoy' };
+function registrarRechazo(p, motivo) {
+  for (const k of [p.equipo?.nombre, p.autor, p.autorTel].filter(Boolean)) st.rechazaron[k] = { motivo: String(motivo).slice(0, 120), ts: Date.now() };
+  save();
+}
+const yaRechazo = (...claves) => claves.filter(Boolean).map(k => st.rechazaron[k]).find(Boolean) || null;
 // Automático: por --auto o porque Juan mandó "busca amistosos" hoy (queda en el estado del día: sobrevive a reinicios)
 let auto = AUTO || st.auto === true;
 // Una sola instancia (2026-10-21): dos bots con la misma sesión de WhatsApp se pisan. Si hay otro vivo, salgo.
@@ -406,6 +416,9 @@ async function pedidoGrupo(msg) {
     eq = equipoTxt ? equipoEscrito(equipoTxt) : { nombre: nombreContacto || 'sin nombre', div: '?', logo: null };
     if (eq.dudoso) eq = { nombre: equipoTxt.trim(), div: '?', logo: null };
   }
+  // Ya nos dijo que no hoy (ese equipo o ese contacto): ni se le ofrece ni se avisa de nuevo
+  const rech = yaRechazo(eq && !eq.dudoso ? eq.nombre : null, autor, msg.author);
+  if (rech) { log('pedido ignorado (hoy ya nos rechazó):', eq?.nombre || nombreContacto, '|', breve); return; }
   // Rival de los próximos 2 días en el calendario: no se le ofrece amistoso
   const prox = eq && !eq.dudoso ? rivalProximo(eq.nombre) : null;
   if (prox) {
@@ -452,9 +465,40 @@ async function reacomodar() {
   }
 }
 
-async function ofrecer(id, slot, equipoTxt) {
+// Antes de escribirle solo a alguien, se lee su chat privado de hoy (Juan, 2026-10-21): si ya le
+// ofrecimos (el bot o Juan desde el celular) y dijo que no, o no contestó, no se le vuelve a escribir.
+async function hablamosHoy(p) {
+  const desde = Date.parse(`${st.fecha}T00:00:00-03:00`) / 1000;
+  let msgs = [];
+  for (const cid of [p.autor, p.autorTel].filter(Boolean)) {
+    try {
+      const chat = await client.getChatById(cid);
+      msgs = (await chat.fetchMessages({ limit: 40 })).filter(m => m.timestamp >= desde && m.body);
+      if (msgs.length) break;
+    } catch (e) {}
+  }
+  const i = msgs.findIndex(m => m.fromMe && /jugamos|amistoso|top secret|\b\d{1,2}[:.]\d{2}\b/i.test(m.body));
+  if (i < 0) return null;
+  const resp = msgs.slice(i + 1).filter(m => !m.fromMe).map(m => m.body).join('\n');
+  if (!resp) return { motivo: 'hoy ya le ofrecimos y no contestó' };
+  if (NO.test(resp) && !SI.test(resp)) return { motivo: `hoy ya nos dijo que no: “${resp.slice(0, 80)}”`, rechazo: true };
+  return { motivo: `hoy ya hablamos: “${resp.slice(0, 80)}”` };
+}
+
+// manual = lo pidió Juan con un comando ("B", "B 23hs"): ahí manda él y se escribe igual.
+async function ofrecer(id, slot, equipoTxt, manual = false) {
   const p = st.pedidos[id];
   if (!p) return avisar(`⚠️ No existe el pedido ${id}.`);
+  if (!manual && p.estado === 'nuevo') {
+    const previo = yaRechazo(p.equipo?.nombre, p.autor, p.autorTel) || await hablamosHoy(p);
+    if (previo) {
+      if (previo.rechazo) registrarRechazo(p, previo.motivo);
+      p.estado = 'descartado'; save();
+      log(`${id}: no le escribo (${previo.motivo})`);
+      await avisar(`🚫 ${id} ${p.equipo?.nombre || p.contacto || ''}: no le escribo, ${previo.motivo}. Si igual querés: *${id}*.`);
+      return reacomodar();
+    }
+  }
   if (equipoTxt) {
     const eq = equipoEscrito(equipoTxt);
     if (eq.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *${id} <equipo>*.`);
@@ -577,6 +621,7 @@ async function evaluarRespuesta(id, txt) {
   const p = st.pedidos[id];
   if (!p || !['ofrecido', 'vencido'].includes(p.estado)) return;
   log(`${id}: llegó la respuesta del rival`);
+  p.respondio = true; save();
   // Pedido sin equipo: la respuesta a "Qué equipo son?" trae el nombre.
   if (!p.equipo) {
     const eq = matchEquipo(txt, EQUIPOS, { ...ALIAS.alias, ...APR.alias });
@@ -630,7 +675,7 @@ async function evaluarRespuesta(id, txt) {
     return confirmar(id, null, true);
   }
   if (NO.test(txt) && !SI.test(txt) && !DUDA.test(txt)) {
-    p.estado = 'rechazado'; save();
+    p.estado = 'rechazado'; registrarRechazo(p, txt);
     await avisar(`💬 ${id} ${quien} dijo que no: “${txt.slice(0, 200)}”. Libero ${p.slot}.`);
     return reacomodar();
   }
@@ -711,7 +756,10 @@ async function comando(body) {
   if (hora && !SLOTS.includes(hora)) return avisar(`⚠️ ${hora} no es uno de los horarios (${SLOTS.join(', ')}).`);
   // "B preguntale qué tiene libre": le pregunta al rival qué horario tiene, con los que nos quedan
   if (/^pregunt/i.test(resto)) return preguntarLibre(id);
-  if (/^no\b/i.test(resto)) { st.pedidos[id].estado = 'descartado'; save(); await avisar(`🗑️ ${id} descartado.`); return reacomodar(); }
+  if (/^no\b/i.test(resto)) {
+    // descartado después de que el rival contestó = rechazo: no se le vuelve a escribir hoy
+    if (st.pedidos[id].respondio) registrarRechazo(st.pedidos[id], 'Juan lo descartó después de su respuesta');
+    st.pedidos[id].estado = 'descartado'; save(); await avisar(`🗑️ ${id} descartado.`); return reacomodar(); }
   if (/^ok\b/i.test(resto)) {
     // "F ok Los Pibes" / "F ok 23:40 Los Pibes": define el equipo y confirma.
     const eqTxt = sinHora.replace(/^ok\b/i, '').trim();
@@ -725,7 +773,7 @@ async function comando(body) {
     return confirmar(id, hora);
   }
   const equipoTxt = sinHora.trim();
-  return ofrecer(id, hora, equipoTxt || null);
+  return ofrecer(id, hora, equipoTxt || null, true);
 }
 
 // Corte automático a las 22:00 ART (pedido de Juan 2026-10-13: la búsqueda es de 17 a 22).
