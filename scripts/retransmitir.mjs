@@ -143,7 +143,10 @@ async function buscarSiguiente() {
 let partidos = null;
 async function actualizarPartido() {
   try {
-    if (!partidos) partidos = JSON.parse((await node('scripts/placa-envivo.mjs', '--json', '--fecha', NOCHE)).trim().split('\n').pop());
+    // Se relee en cada vuelta: un amistoso puede cambiar de rival en plena noche (2026-10-21: 23:20 pasó de
+    // Atletico de Rafaela a Sarmiento eSports y el overlay seguía mostrando el viejo). Si falla, queda el anterior.
+    try { partidos = JSON.parse((await node('scripts/placa-envivo.mjs', '--json', '--fecha', NOCHE)).trim().split('\n').pop()); }
+    catch (e) { if (!partidos) throw e; }
     // Partido actual: según cuántos partidos vio empezar el vigía esta noche (no por la hora: el 2026-10-19, con atrasos,
     // la hora salteaba la vuelta contra Kannabiense). Sin avisos todavía, el primero de la noche.
     contarInicios(); contarFinales();
