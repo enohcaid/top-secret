@@ -95,7 +95,10 @@ function contarInicios() {
   // "enCurso": el vigía arrancó con un partido ya en juego; cuenta solo si esta noche todavía no se contó ninguno
   // (si no, es un reinicio del vigía a mitad de un partido ya contado). Sin esto, con el vivo empezado tarde, el modo
   // pausa mostraba como "próximo" al rival que ya se había jugado (2026-10-20, Sub 21).
-  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id) && (!x.enCurso || !inicios.length)).map(x => x.id);
+  // Excepción: si el último partido contado ya terminó, el "enCurso" es uno nuevo (2026-10-21: se cayó la PS5, el vigía
+  // se reinició con el partido 3 empezado y el overlay siguió mostrando al rival del 2).
+  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id)
+    && (!x.enCurso || !inicios.length || finales.length >= inicios.length)).map(x => x.id);
   if (!nuevos.length) return false;
   inicios.push(...nuevos); fs.writeFileSync(INICIOS, JSON.stringify(inicios));
   log(`Empieza el partido ${inicios.length} de la noche${partidos?.[inicios.length - 1] ? ` (vs ${partidos[inicios.length - 1].rival})` : ''}.`);
