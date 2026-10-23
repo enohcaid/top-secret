@@ -121,8 +121,9 @@
   }
   // Todos los goles de la noche seguidos, en orden (Juan, 2026-10-21: antes pasaba uno por vuelta de la pausa).
   // Hasta 6 para que la escena no se haga eterna: si hay más, los últimos.
-  async function repeticion() {
-    const lista = (estado.repeticiones || []).filter(r => r.archivo).sort((a, b) => a.id.localeCompare(b.id)).slice(-6);
+  // filtro: en el entretiempo, solo los goles del partido que se está jugando (el rival actual)
+  async function repeticion(filtro = () => true) {
+    const lista = (estado.repeticiones || []).filter(r => r.archivo && filtro(r)).sort((a, b) => a.id.localeCompare(b.id)).slice(-6);
     if (!lista.length) return false;
     for (const r of lista) {
       if (!activo) break;                                      // salió de la pausa (arrancó el partido): se corta
@@ -185,16 +186,20 @@
   // Terminada la noche, el cierre manda: resultados + gracias + próximo partido, intercalado con repeticiones y la tabla.
   const ORDEN = ['charla', 'repeticion', 'entrevista', 'tabla', 'charla', 'proximo', 'repeticion', 'numeros'];
   const ORDEN_CIERRE = ['cierre', 'repeticion', 'tabla', 'cierre', 'repeticion', 'charla'];
-  let activo = false, paso = 0, corriendo = false;
+  let activo = false, paso = 0, corriendo = false, entretiempoVisto = false;
   async function bucle() {
     if (corriendo) return; corriendo = true;
     while (activo) {
       actualizarFranja();
-      const orden = estado.cierre ? ORDEN_CIERRE : ORDEN;
-      const tipo = orden[paso++ % orden.length];
+      // Entretiempo (vigia-vivo.mjs pone estado.entretiempo; Juan, 2026-10-23): lo primero, los goles del primer tiempo
+      if (!estado.entretiempo) entretiempoVisto = false;
+      let tipo;
+      if (estado.entretiempo && !entretiempoVisto) { entretiempoVisto = true; tipo = 'repeticionTiempo'; }
+      else { const orden = estado.cierre ? ORDEN_CIERRE : ORDEN; tipo = orden[paso++ % orden.length]; }
       raiz.classList.toggle('con-tarjeta', tipo !== 'charla');
-      raiz.classList.toggle('con-repe', tipo === 'repeticion');
+      raiz.classList.toggle('con-repe', tipo === 'repeticion' || tipo === 'repeticionTiempo');
       const hizo = tipo === 'charla' ? await charla() : tipo === 'entrevista' ? await entrevista() : tipo === 'repeticion' ? await repeticion()
+        : tipo === 'repeticionTiempo' ? await repeticion(r => !estado.rival || r.rival === estado.rival)
         : tipo === 'tabla' ? await tabla() : tipo === 'cierre' ? await cierre() : await tarjeta(tipo);
       if (hizo) { escena.classList.remove('on'); await espera(600); } else await espera(300);
       if (!jugadores().length) await espera(3000);
@@ -268,6 +273,7 @@
     chip.hidden = !p;
     if (p) { chip.querySelector('.k').textContent = 'PRÓXIMO PARTIDO'; raiz.querySelector('#pChipV').textContent = `${p.hora} · vs ${p.rival}`; }
     raiz.querySelector('#pEsperaMsg').textContent = estado.sinSenal ? 'SE CORTÓ LA SEÑAL · YA VOLVEMOS'
+      : estado.entretiempo ? 'ENTRETIEMPO · YA VUELVE EL PARTIDO'
       : p ? 'ESPERANDO EL PRÓXIMO PARTIDO' : 'YA VOLVEMOS · ESPERANDO QUE ARRANQUE';
   }
 

@@ -303,7 +303,7 @@ async function main() {
   let modo = null, ultimoReporteSeg = -1e9, golesF = 0, golesC = 0, huboPartido = false;
   // Partido nuevo pendiente de confirmar: se avisa recién con 60 s de marcador (el 22/10 un arranque abortado de 45 s
   // contra SF Drysdale contaba como partido y el overlay se habría adelantado un rival toda la noche)
-  let inicioPendiente = null;
+  let inicioPendiente = null, entretiempo = false;
   // Minuto del partido (reloj debajo del marcador, blanco sobre negro): si el marcador se va después del 89' y no
   // aparece el reporte, el partido terminó igual (2026-10-20: el juego se trabó, no hubo reporte y no salió la placa
   // de VICTORIA). Un entretiempo corta en el 45', no se confunde.
@@ -446,6 +446,11 @@ async function main() {
     // Sin reporte: el marcador se fue después del 89' y pasaron 15 s → terminó (el reporte, si llega después, ya no repite)
     if (!enJuego && huboPartido && ultimoMinuto >= 89 && seg - ultimoMarcador >= 15) finDePartido(seg, `sin reporte, último minuto ${ultimoMinuto}'`);
     ponerModo(enJuego ? 'juego' : seg - ultimoReporteSeg <= 12 ? 'reporte' : seg - ultimoMarcador >= 25 ? 'pausa' : (modo || 'pausa'), seg);
+    // Entretiempo (Juan, 2026-10-23: que el modo pausa muestre ahí las repeticiones de los goles del primer tiempo): el
+    // marcador se fue hace 10 s o más con el reloj entre el 40' y el 50' de un partido en curso. Se apaga al volver el
+    // marcador o al terminar el partido.
+    const et = !enJuego && huboPartido && ultimoMinuto >= 40 && ultimoMinuto <= 50 && seg - ultimoMarcador >= 10;
+    if (et !== entretiempo) { entretiempo = et; if (!vodId) editarEstado(e => { e.entretiempo = et; }); if (!vodId || archivoLocal) console.log(`[${hms(seg)}] entretiempo: ${et ? 'sí' : 'no'}`); }
   };
 
   // ffmpeg: 1 cuadro/s crudo por stdout (+ grabación copiada en segmentos)

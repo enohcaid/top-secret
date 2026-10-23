@@ -115,8 +115,8 @@ if (!(process.argv.includes('--solo-lote') && fs.existsSync(final) && fs.existsS
   agregarVoz(mudo, pistas, conVoz, { volumenMusica: 0.55 });
   // Portada (regla de Juan 2026-10-21): la foto de campaña de la nota (ChatGPT) con el 3-3
   const iPort = process.argv.indexOf('--portada');
-  const imgPortada = iPort > 0 ? process.argv[iPort + 1] : path.join(ROOT, 'Renders/Daily News/auto-2026-10-23-2_post.png');
-  await portada({ imagen: imgPortada, kicker: 'ESPACIO GAMER · 22/10', dato: '3-3', titulo: 'De 1-3 a la tijera.\n*Y dos triunfos más.*', foco: '50% 25%' }, jpgPortada);
+  const imgPortada = iPort > 0 ? process.argv[iPort + 1] : path.join(DIR, 'portada-tijera.png');   // imagen propia (ChatGPT): la de la noticia no, se duplica en el feed (Juan)
+  await portada({ imagen: imgPortada, kicker: 'ESPACIO GAMER · 22/10', dato: '3-3', titulo: 'De 1-3 a la tijera.\n*Y dos triunfos más.*', foco: '50% 40%' }, jpgPortada);
   conPortada(conVoz, jpgPortada, final);
 }
 log('Listo: ' + final);

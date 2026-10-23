@@ -95,6 +95,28 @@ function ponerLado(l) {
   setTimeout(() => { document.body.classList.toggle('lado-der', l === 'der'); document.body.classList.remove('mudando'); }, 350);
 }
 
+// Repetición inmediata (Juan, 2026-10-23): cuando vigia-vivo.mjs termina de cortar la repetición de un gol nuestro
+// (~15 s después del gol, ya pasado el festejo) y se sigue jugando, se muestra a pantalla completa: los últimos ~10 s
+// del clip (el gol cae a los 16 s de 20), con el sello REPETICIÓN, el minuto y el marcador; después vuelve el partido.
+// Tapa unos segundos del juego en vivo a propósito. Las repeticiones también quedan para el modo pausa.
+const REPES = q.get('repes') || CLIPS.replace(/clips\/?$/, 'repeticiones/');
+const repesVistas = new Set(); let repesListas = false, repeCola = [], repeSonando = false;
+function repeVivo() {
+  if (repeSonando || !repeCola.length) return;
+  if (estado.modo !== 'juego' || estado.sinSenal) { repeCola = []; return; }   // en pausa ya las muestra overlay-pausa.js
+  const r = repeCola.shift(); repeSonando = true;
+  let c = document.getElementById('repeVivo');
+  if (!c) { c = document.createElement('div'); c.id = 'repeVivo'; document.body.appendChild(c); }
+  c.innerHTML = `<video muted playsinline src="${REPES}${encodeURIComponent(r.archivo)}"></video>
+    <div class="sello">REPETICIÓN</div>
+    <div class="info">${r.minuto > 0 ? `<b>${r.minuto}'</b>` : ''}<span>GOL DE TOP SECRET · ${r.gf}-${r.gc}${r.rival ? ' VS ' + r.rival.toUpperCase() : ''}</span></div>`;
+  const v = c.querySelector('video');
+  const fin = () => { if (!repeSonando) return; repeSonando = false; c.classList.remove('on'); setTimeout(repeVivo, 1500); };
+  v.onloadedmetadata = () => { v.currentTime = Math.max(0, v.duration - 10.5); };
+  v.oncanplay = () => { v.oncanplay = null; v.play().then(() => c.classList.add('on')).catch(fin); };
+  v.onended = fin; v.onerror = fin; setTimeout(fin, 14000);
+}
+
 function gol(ms = 6000) { $('gol').classList.add('on'); setTimeout(() => $('gol').classList.remove('on'), ms); }
 
 async function actualizar() {
@@ -106,6 +128,13 @@ async function actualizar() {
     // menús/lobby/espera: overlay-pausa.js. sinSenal = se cayó la PS5 (enohcaid): la pausa tapa la imagen congelada
     window.pausa?.poner(e.modo === 'pausa' || !!e.sinSenal);
     if (e.modo === 'juego') window.victoria?.ocultar();     // arrancó otro partido: fuera la pantalla de victoria
+    // repeticiones nuevas → repetición inmediata (las que ya estaban al abrir el overlay no se reproducen)
+    for (const r of e.repeticiones || []) {
+      if (!r.archivo || repesVistas.has(r.id)) continue; repesVistas.add(r.id);
+      if (repesListas) repeCola.push(r);
+    }
+    repesListas = true; repeVivo();
+    if (e.modo !== 'juego' || e.sinSenal) document.getElementById('repeVivo')?.classList.remove('on');
     const t = $('torneo'); t.hidden = !e.torneo;
     $('torneoTxt').textContent = e.torneo || ''; $('rivalTxt').textContent = e.rival ? 'vs ' + e.rival : '';
     if (e.escudo) { $('escudo').src = e.escudo; $('escudo').hidden = false; } else $('escudo').hidden = true;

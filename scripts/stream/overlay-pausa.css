@@ -193,3 +193,15 @@ body.vertical #pausa .tabla-eg td:nth-child(3){max-width:420px}
 body.vertical #pausa .cierre .t{font-size:56px}
 #pausa.cerrando #pEspera .pill{background:var(--texto);}
 body.vertical #pausa .cierre ~ .pj{height:640px}body.vertical #pausa .cierre ~ .pj video{height:546px}   /* que el festejo no tape la tarjeta */
+
+/* Repetición inmediata de un gol nuestro durante el juego (overlay.js, 2026-10-23) */
+#repeVivo{position:fixed;inset:0;z-index:60;background:#000;opacity:0;transition:opacity .35s ease;pointer-events:none}
+#repeVivo.on{opacity:1}
+#repeVivo video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+body.vertical #repeVivo video{object-fit:contain}
+#repeVivo .sello{position:absolute;left:44px;top:40px;padding:12px 24px;border-radius:999px;background:#C8A84B;color:#0B0A07;font-family:'JetBrains Mono';font-weight:700;font-size:24px;letter-spacing:.22em}
+#repeVivo .info{position:absolute;left:44px;bottom:44px;display:flex;align-items:center;gap:18px;padding:14px 26px;border-radius:18px;background:rgba(11,10,7,.86);border:1px solid rgba(200,168,75,.45);color:#F2EEE0;font-family:Barlow,sans-serif}
+#repeVivo .info b{font-family:'Bebas Neue';font-size:56px;line-height:.9;color:#C8A84B;font-weight:400}
+#repeVivo .info span{font-family:'JetBrains Mono';font-weight:700;font-size:20px;letter-spacing:.18em}
+body.vertical #repeVivo .sello{top:560px;left:120px}
+body.vertical #repeVivo .info{bottom:auto;top:1300px;left:120px;right:120px}
