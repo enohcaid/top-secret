@@ -402,6 +402,27 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · verso 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-23",
+      "id": "2026-10-23-2",
+      "archivo": "2026-10-23-2 - Astilla.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_23_2.py",
+      "duracion": 84,
+      "nombre": "Astilla",
+      "concepto": "La jugada que sale mal y te rompe la confianza en pedazos — el pase que no llegó, la marca que perdiste; sección a sección juntás los pedazos hasta que en el gancho C la confianza se rearmó más fuerte porque sabés dónde están las grietas.",
+      "bpm": 135,
+      "tonalidad": "lab menor",
+      "rasgo": "fragmento que encaja: granos cristalinos dispersos a intervalos y alturas aleatorias que se organizan sección a sección hasta formar un arpegio rítmico claro — las piezas se rearmaron",
+      "recursos": [
+        "fragmentos cristalinos con organización progresiva (firma del tema)",
+        "lead con grieta que se limpia sección a sección (saw+sine+noise burst)",
+        "pad de sines detuneadas (oscuro)",
+        "piano frágil (intro y final)",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · verso 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
