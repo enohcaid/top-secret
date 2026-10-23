@@ -201,3 +201,35 @@ for (const { l, p } of cola) {
     log(`${l.id} · ${p.id}: ERROR ${msg}`);
   }
 }
+
+// La nota del sitio con su video de TikTok embebido (Juan, 2026-10-23: "las noticias en el sitio no tienen videos").
+// Cuando en un lote ya salieron la nota y el video de TikTok, se busca ese video en el perfil (yt-dlp; TikTok tarda unos
+// minutos en mostrarlo mientras lo revisa) y se embebe en la nota: reemplaza el video propio ({video}) si lo tenía o
+// entra después de la ficha. Se reintenta en cada corrida hasta 6 h después; el lote queda marcado (tiktokEnNota).
+if (conCandado) {
+  const ahoraTT = Date.now();
+  const pend = (await leer()).lotes.filter(l => !l.tiktokEnNota
+    && l.piezas.some(p => /^sitio/.test(p.metodo) && p.estado === 'publicado')
+    && l.piezas.some(p => p.metodo === 'tiktok' && p.estado === 'publicado' && ahoraTT - Date.parse(p.publicadoEn || 0) < 6 * 3600000));
+  if (pend.length) {
+    const r = spawnSync(path.join(ROOT, 'node_modules/yt-dlp-exec/bin/yt-dlp.exe'), ['--no-update', '--flat-playlist', '--print', '%(id)s\t%(title)s', '--playlist-end', '8', 'https://www.tiktok.com/@topsecretfc'], { encoding: 'utf8', timeout: 90000 });
+    const videos = (r.stdout || '').trim().split('\n').filter(Boolean).map(x => { const [id, ...t] = x.split('\t'); return { id, titulo: t.join('\t') }; });
+    const norm = s => (s || '').normalize('NFD').replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 30);
+    for (const l of pend) {
+      const tt = l.piezas.find(p => p.metodo === 'tiktok'), sitio = l.piezas.find(p => /^sitio/.test(p.metodo));
+      const v = videos.find(x => norm(x.titulo) && norm(x.titulo) === norm(tt.texto));
+      const idNota = sitio.noticia?.id;
+      if (!v || !idNota) continue;
+      const lista = await leerKV('published_noticias', []);
+      const n = lista.find(a => a.id === idNota); if (!n) continue;
+      if (n.body.some(b => b && typeof b === 'object' && b.tiktok)) { const d0 = await leer(); const l0 = d0.lotes.find(x => x.id === l.id); if (l0) { l0.tiktokEnNota = v.id; await guardarKV('aprobaciones', d0); } continue; }   // ya lo tiene
+      const bloque = { tiktok: v.id, caption: (l.piezas.find(p => p.local?.video)?.formato ? 'El video en TikTok.' : '') };
+      const iv = n.body.findIndex(b => b && typeof b === 'object' && b.video && b.vertical);
+      if (iv >= 0) { bloque.caption = n.body[iv].caption || bloque.caption; n.body[iv] = bloque; }
+      else { const is = n.body.findIndex(b => b && typeof b === 'object' && b.specs); n.body.splice(is >= 0 ? is + 1 : 1, 0, bloque); }
+      await guardarKV('published_noticias', lista);
+      const d = await leer(); const lo = d.lotes.find(x => x.id === l.id); if (lo) { lo.tiktokEnNota = v.id; await guardarKV('aprobaciones', d); }
+      log(`${l.id}: TikTok ${v.id} embebido en la nota ${idNota}`);
+    }
+  }
+}

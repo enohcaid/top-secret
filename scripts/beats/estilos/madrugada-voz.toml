@@ -1,0 +1,41 @@
+# Con voz (2026-10-23). Concepto: el esfuerzo que nadie ve — levantarse antes que todos, seguir cuando el cuerpo pide
+# parar, sin aplausos. Regla de Juan: la letra cuenta algo humano, NUNCA habla explícitamente de fútbol.
+caption = "melodic trap with Spanish rap vocals, male rapper with a warm raspy Argentine voice, introspective verses and a sung emotional hook, felt piano, soft electric guitar arpeggio, live drums with crisp snare and brushed hats, deep 808 bass, warm strings rising in the chorus, cinematic and hopeful"
+bpm = 128
+keyscale = "D minor"
+lyrics = """[intro]
+
+[verse]
+Suena el despertador y todavía es de noche
+el barrio duerme y yo ya estoy en camino
+nadie me pregunta si dormí, si me duele
+nadie ve la cara que pongo cuando sigo
+Las manos frías, el café que no alcanza
+el reflejo en el vidrio del colectivo
+cargo los sueños de los que me esperan
+y cada paso es un poco más mío
+
+[chorus]
+Que nadie lo vea, no me importa
+lo hago igual cuando la noche es larga
+si el cuerpo me pide parar, no lo escucho
+la madrugada sabe lo que cargo
+
+[verse]
+Mi vieja me decía que el que espera llega
+pero el que camina llega primero
+guardé las ganas en el bolsillo roto
+y las saqué el día que no tuve miedo
+No hay foto de lo que hago a oscuras
+no hay nadie aplaudiendo en el silencio
+pero el sol que sale me encuentra despierto
+y eso, hermano, eso no tiene precio
+
+[chorus]
+Que nadie lo vea, no me importa
+lo hago igual cuando la noche es larga
+si el cuerpo me pide parar, no lo escucho
+la madrugada sabe lo que cargo
+
+[outro]
+"""

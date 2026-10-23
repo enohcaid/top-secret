@@ -14,3 +14,5 @@ metadata:
 **Why:** "2 publicaciones es mucho" — salían la noticia y el reel por separado en cada red.
 
 **How to apply:** al producir una pieza de video sobre un hecho que también tiene nota, armar un lote único (`tipo: 'noticia'`, `publicarA` = ahora) en vez de `noticia-lote.mjs` + el lote del video. Ver el lote `salvada-cabers14-2026-10-23`.
+
+**Video de TikTok en la nota (2026-10-23, Juan: "¿por qué las noticias en el sitio no tienen videos?"):** bloque `{ tiktok: '<id>', caption }` en el body (noticias.html lo muestra con el reproductor oficial `tiktok.com/player/v1/<id>`, 9:16). `publicar.mjs`, en cada corrida, busca el video en el perfil (yt-dlp, @topsecretfc) cuando ya salieron la nota y el TikTok del mismo lote, y lo embebe solo (reemplaza el `{video, vertical}` propio o entra después de la ficha); marca el lote con `tiktokEnNota`.

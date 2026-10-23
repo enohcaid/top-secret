@@ -1,0 +1,41 @@
+# Con voz (2026-10-23). Concepto: la herida que deja alguien que se fue (desamor, una pérdida) y la cicatriz que
+# queda como prueba de que se siguió. Regla de Juan: la letra cuenta algo humano, NUNCA habla explícitamente de fútbol.
+caption = "dark emotional trap with Spanish rap vocals, male rapper with a deep melancholic Argentine voice, half-sung half-rapped delivery, nylon guitar loop, haunting choir pad, sparse piano, slow heavy drums with rimshots, distorted 808 bass, rain atmosphere, raw and honest, the chorus opens up bigger"
+bpm = 140
+keyscale = "F# minor"
+lyrics = """[intro]
+
+[verse]
+Quedó tu taza en el borde de la mesa
+y tu voz pegada en la pared del cuarto
+aprendí a cerrar la puerta despacito
+para no despertar lo que me está doliendo
+Me dijeron que el tiempo lo arregla todo
+pero el tiempo no vino, lo fui a buscar yo
+caminé con la herida abierta en el pecho
+y cada paso fue un poco de perdón
+
+[chorus]
+Me quedó la cicatriz y la llevo de frente
+no la escondo, es la prueba de que sigo de pie
+lo que me rompió también me hizo fuerte
+y hoy la noche me encuentra mirando para adelante
+
+[verse]
+No te guardo rencor, te guardo en una foto
+la que miro cuando necesito acordarme
+de que hubo un tiempo en que no sabía
+que podía romperme y volver a armarme
+Llueve en la ventana como aquella vez
+pero ya no tiemblo, ya no tengo frío
+lo que se fue dejó espacio para lo nuevo
+y lo nuevo, de a poco, se parece a mí
+
+[chorus]
+Me quedó la cicatriz y la llevo de frente
+no la escondo, es la prueba de que sigo de pie
+lo que me rompió también me hizo fuerte
+y hoy la noche me encuentra mirando para adelante
+
+[outro]
+"""
