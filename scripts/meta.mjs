@@ -6,7 +6,7 @@
  *
  *   node scripts/meta.mjs estado                                  verifica tokens y cuentas
  *   node scripts/meta.mjs ig-imagen  <url-publica> "<texto>"      post de una imagen
- *   node scripts/meta.mjs ig-carrusel "<texto>" <url1> <url2> …   carrusel (2-10 imágenes)
+ *   node scripts/meta.mjs ig-carrusel "<texto>" <url1> <url2> …   carrusel (2-10 imágenes o videos .mp4)
  *   node scripts/meta.mjs ig-reel   <url-publica.mp4> "<texto>"   reel (SIN música de la biblioteca: la API no la permite)
  *   node scripts/meta.mjs ig-historia <url-publica.mp4|jpg>        historia (24 h), sin stickers ni música de la biblioteca
  *   node scripts/meta.mjs fb-foto   <url-publica> "<texto>"
@@ -86,7 +86,11 @@ if (cmd === 'estado') {
 } else if (cmd === 'ig-carrusel') {
   const [caption, ...urls] = args;
   const hijos = [];
-  for (const u of urls) { const c = await api(`/${E.META_IG_ID}/media`, { image_url: u, is_carousel_item: 'true', ...igTok() }); hijos.push(c.id); }
+  // un elemento .mp4 entra como video del carrusel (2026-10-23: noticia + su video en una sola publicación)
+  for (const u of urls) {
+    const item = /\.(mp4|mov)(\?|$)/i.test(u) ? { media_type: 'VIDEO', video_url: u } : { image_url: u };
+    const c = await api(`/${E.META_IG_ID}/media`, { ...item, is_carousel_item: 'true', ...igTok() }); hijos.push(c.id);
+  }
   for (const h of hijos) await esperarContenedor(h);
   const c = await api(`/${E.META_IG_ID}/media`, { media_type: 'CAROUSEL', children: hijos.join(','), caption, ...igTok() });
   await esperarContenedor(c.id); await publicarIG(c.id);
