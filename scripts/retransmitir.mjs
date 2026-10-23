@@ -21,7 +21,7 @@ import { spawn, execFile, execFileSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
-import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V } from './stream/salidas.mjs';
+import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V, AUDIO_FILTRO } from './stream/salidas.mjs';
 import { crearVivoIg } from './stream/ig-vivo.mjs';
 import { tituloDeNoche, partidosDe, ponerTitulos } from './stream/titulos-vivo.mjs';
 import { temporada, convocados, espacioGamer, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
@@ -254,8 +254,10 @@ function retransmitir(entrada) {
     const sl = directo ? spawn('python', ['-m', 'streamlink', '--twitch-disable-ads', '--retry-open', '3', '-O', FUENTE, 'best'], { stdio: ['ignore', 'pipe', 'pipe'] }) : null;
     const salidas = destinos.map(d => `[f=flv:onfail=ignore]${d.url}`).join('|');
     const args = directo
-      ? ['-hide_banner', '-loglevel', 'warning', '-i', 'pipe:0', '-map', '0:v', '-map', '0:a?', '-c', 'copy',
-        '-tag:v', '7', '-tag:a', '10',                       // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
+      // video sin recodificar; el audio sí, para normalizarlo igual que con overlay (AUDIO_FILTRO en salidas.mjs)
+      ? ['-hide_banner', '-loglevel', 'warning', '-i', 'pipe:0', '-map', '0:v', '-map', '0:a?', '-c:v', 'copy',
+        '-af', AUDIO_FILTRO, '-c:a', 'aac', '-b:a', '160k', '-ar', '48000',
+        '-tag:v', '7',                                       // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
         '-f', 'tee', salidas]
       : argsCodificador({ entrada: LOCAL, vertical: !process.argv.includes('--sin-instagram'), kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
     const ff = spawn(ffmpegPath, args, { stdio: [directo ? 'pipe' : 'ignore', 'ignore', 'pipe'] });
@@ -350,6 +352,7 @@ async function sesion() {
   try { contarInicios(); contarFinales(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
   caidaDesde = null;
   lanzarVigia();
+  const vigia = setInterval(lanzarVigia, 60000);   // si el vigía se cae en plena sesión, vuelve a arrancar
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
   const inicio = setInterval(() => { { const a = contarInicios(), b = contarFinales(); if (a || b) actualizarPartido(); } }, 15000);   // partido nuevo o terminado: placa y cierre al toque
@@ -392,7 +395,7 @@ async function sesion() {
       log(`Retransmisión directa terminada (ffmpeg ${code}).`);
       await espera(10000);
     }
-  } finally { clearInterval(partido); clearInterval(inicio); clearInterval(audio); modoAudio = null; }
+  } finally { clearInterval(partido); clearInterval(inicio); clearInterval(audio); clearInterval(vigia); modoAudio = null; }
 }
 
 log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}${conOverlay ? ' con overlay' : ' sin overlay'}. Esperando que ${FUENTE} esté en vivo (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);

@@ -34,7 +34,10 @@ const LOCK = path.join(ROOT, 'fuentes/vivo/.vigia.lock');
 const PESTANAS = ['resumen', 'posesión', 'posesion', 'tiros', 'pases', 'defensa', 'eventos', 'portería', 'porteria'];
 
 const args = process.argv.slice(2);
-const vodId = args.includes('--vod') ? args[args.indexOf('--vod') + 1].replace(/^v/, '') : null;
+// --archivo <video>: simulacro sobre una grabación local (como --vod: no escribe en el overlay ni corta repeticiones),
+// mostrando los eventos que habría mandado (modo, goles, inicio y fin de partido). Para probar cambios del vigía.
+const archivoLocal = args.includes('--archivo') ? path.resolve(args[args.indexOf('--archivo') + 1]) : null;
+const vodId = archivoLocal ? 'local-' + path.basename(archivoLocal).replace(/.w+$/, '') : args.includes('--vod') ? args[args.indexOf('--vod') + 1].replace(/^v/, '') : null;
 const grabar = !args.includes('--sin-grabar');
 const soloClips = args.includes('--solo-clips') ? path.resolve(args[args.indexOf('--solo-clips') + 1]) : null;
 const hasta = args.includes('--hasta') ? args[args.indexOf('--hasta') + 1] : '00:30';
@@ -53,6 +56,7 @@ function msHasta(hhmm) {
 async function enVivo() { return (await fuenteEnVivo(FUENTE)) || null; }
 
 function hlsUrl() {
+  if (archivoLocal) return archivoLocal;
   if (!vodId) return urlLectura(FUENTE);
   return execFileSync(YTDLP, ['--no-update', '-g', '-f', 'best[height<=720]/best', `https://www.twitch.tv/videos/${vodId}`], { encoding: 'utf8' }).trim().split('\n')[0];
 }
@@ -297,6 +301,9 @@ async function main() {
   // (menús, lobby, espera: 25 s sin marcador; menos sería pausa en cada festejo o repetición). Y el resultado de cada
   // partido, con los goles contados, al aparecer su primer reporte.
   let modo = null, ultimoReporteSeg = -1e9, golesF = 0, golesC = 0, huboPartido = false;
+  // Partido nuevo pendiente de confirmar: se avisa recién con 60 s de marcador (el 22/10 un arranque abortado de 45 s
+  // contra SF Drysdale contaba como partido y el overlay se habría adelantado un rival toda la noche)
+  let inicioPendiente = null;
   // Minuto del partido (reloj debajo del marcador, blanco sobre negro): si el marcador se va después del 89' y no
   // aparece el reporte, el partido terminó igual (2026-10-20: el juego se trabó, no hubo reporte y no salió la placa
   // de VICTORIA). Un entretiempo corta en el 45', no se confunde.
@@ -320,7 +327,7 @@ async function main() {
     const m = (r.lines || []).map(l => l.text).join(' ').replace(/[Oo]/g, '0').match(/(\d{1,3})\s*[:.]\s*(\d{2})/);
     return m ? +m[1] : null;
   };
-  const ponerModo = (m, seg) => { if (m !== modo && !vodId) { modo = m; avisarOverlay('modo', m); console.log(`[${hms(seg)}] modo: ${m}`); } };
+  const ponerModo = (m, seg) => { if (m === modo) return; modo = m; if (!vodId) avisarOverlay('modo', m); if (!vodId || archivoLocal) console.log(`[${hms(seg)}] modo: ${m}`); };
   // Cada 10 s vuelve a escribir modo y lado si no están en estado.json: retransmitir.mjs lo borra al empezar su
   // sesión, y si el vigía arrancó antes el overlay se quedaba sin modo pausa (2026-10-19).
   let ladoActual = null;
@@ -342,7 +349,11 @@ async function main() {
       // Partido nuevo (no entretiempo: ese dura menos): el marcador vuelve tras ≥ 3 min sin verse. retransmitir.mjs
       // cuenta estos avisos para saber qué partido de la noche se juega (la hora no sirve: siempre hay atrasos).
       // Con el vigía recién arrancado (< 3 min mirando) no se avisa: podría ser un partido ya empezado.
-      if (!vodId && seg - ultimoMarcador >= INICIO_PARTIDO && seg >= INICIO_PARTIDO) { avisarOverlay('inicioPartido'); console.log(`[${hms(seg)}] empieza un partido nuevo`); }
+      if (seg - ultimoMarcador >= INICIO_PARTIDO && seg >= INICIO_PARTIDO) {
+        inicioPendiente = seg;
+        // el anterior se cortó sin reporte antes del 85': sus goles no pasan al partido nuevo
+        if (huboPartido && (golesF || golesC)) { console.log(`[${hms(seg)}] el partido anterior (${golesF}-${golesC}) quedó sin cierre`); golesF = golesC = 0; golesPartido = []; ultimoMinuto = -1; }
+      }
       // Vigía recién arrancado con un partido ya en juego (el vivo empezó tarde, 2026-10-20): se avisa como "en curso";
       // retransmitir.mjs lo cuenta solo si esa noche todavía no contó ninguno (un reinicio del vigía no lo duplica).
       else if (!vodId && ultimoMarcador < 0 && seg < INICIO_PARTIDO) { avisarOverlay('inicioPartido', { enCurso: true }); console.log(`[${hms(seg)}] partido ya en curso al arrancar`); }
@@ -356,6 +367,11 @@ async function main() {
         console.log(`[${hms(seg)}] marcador en pantalla (partido/tiempo #${partidos})`);
       }
       ultimoMarcador = seg;
+      if (inicioPendiente !== null && seg - inicioPendiente >= 60) {
+        inicioPendiente = null;
+        if (!vodId) avisarOverlay('inicioPartido');
+        console.log(`[${hms(seg)}] empieza un partido nuevo (60 s de marcador)`);
+      }
       if (seg % 5 === 3 && seg - inicioMarcador >= 5) { const mi = await leerMinuto(raw); if (mi !== null && mi <= 130) ultimoMinuto = mi; }
       if (!vodId && seg % 2 === 1) {
         if (!lado.nuestros.length) { const a = lado.apellido(await leerZona(raw, PANEL, `panel-${seg}`)); if (a) console.log(`[${hms(seg)}] transmite ${a}`); }
@@ -409,7 +425,10 @@ async function main() {
       const tabs = PESTANAS.filter(p => bajo.includes(p)).length;
       if (tabs >= 3) {
         ultimoReporteSeg = seg;
-        if (huboPartido) finDePartido(seg, 'reporte');       // primer reporte después de un partido: terminó
+        // primer reporte después de un partido: terminó. Salvo en el entretiempo: FC27 también muestra estadísticas ahí
+        // (22/10 vs InfinitX: daba "empate 0-0" al 45' y después no anunciaba la victoria). Con el reloj leído, solo cuenta
+        // desde el 85'; sin reloj (no se pudo leer), como antes.
+        if (huboPartido && (ultimoMinuto < 0 || ultimoMinuto >= 85)) finDePartido(seg, 'reporte');
 
         const firma = textos.slice().sort().join('|');
         const previo = new Set(ultimoReporte.split('|'));
@@ -440,19 +459,23 @@ async function main() {
   }
 
   const correr = url => new Promise(res => {
-    const a = ['-hide_banner', '-loglevel', 'error', '-i', url];
+    // archivo local: a 6x (sin -readrate ffmpeg lo lee entero de una y los cuadros se acumulan en memoria)
+    const a = ['-hide_banner', '-loglevel', 'error', ...(archivoLocal ? ['-readrate', '6'] : []), '-i', url];
     const pref = Date.now(); tramo = { pref, seg0: t };
     if (grabar) a.push('-map', '0', '-c', 'copy', '-f', 'segment', '-segment_time', '900',
       path.join(OUT, 'rec', `${pref}-%03d.ts`));
     a.push('-map', '0:v', '-vf', `fps=1,scale=${W}:${H}`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1');
     const p = spawn(ffmpeg, a, { stdio: ['ignore', 'pipe', 'inherit'] });
     ffmpegActual = p;
-    let pend = Buffer.alloc(0);
+    let pend = Buffer.alloc(0), pendientes = 0;
     p.stdout.on('data', chunk => {
       pend = Buffer.concat([pend, chunk]);
       while (pend.length >= FRAME) {
         const raw = Buffer.from(pend.subarray(0, FRAME)); pend = pend.subarray(FRAME);
-        trabajando = trabajando.then(() => procesar(raw)).catch(e => console.error('cuadro:', e.message));
+        // freno: si el análisis se atrasa (OCR), se deja de leer hasta ponerse al día (cada cuadro son 2,7 MB)
+        pendientes++; if (pendientes > 30) p.stdout.pause();
+        trabajando = trabajando.then(() => procesar(raw)).catch(e => console.error('cuadro:', e.message))
+          .finally(() => { if (--pendientes < 10) p.stdout.resume(); });
       }
     });
     p.on('exit', res);
