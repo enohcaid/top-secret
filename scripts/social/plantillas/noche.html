@@ -96,8 +96,33 @@ html,body{background:var(--bg);overflow:hidden}
 #cierre .prox span{font:700 22px 'JetBrains Mono';letter-spacing:.2em}
 #cierre .marca{position:absolute;left:0;right:0;top:1650px;text-align:center;font:700 26px 'JetBrains Mono';letter-spacing:.3em;color:var(--gold)}
 
+/* transmisión oficial: la grabación del vivo (con el overlay) enmarcada como pantalla */
+#rotulo.oficial{border-color:rgba(229,72,77,.7)}
+#rotulo.oficial i{background:var(--rojo);box-shadow:0 0 22px var(--rojo)}
+#rotulo.logro{background:rgba(255,246,216,.92);color:#0B0A07;border-color:transparent}
+#rotulo.logro i{background:var(--gold);border-radius:3px;box-shadow:none}
+#subrotulo{position:absolute;left:62px;top:222px;font:700 22px 'JetBrains Mono';letter-spacing:.18em;color:var(--text2);z-index:20;display:none}
+#titOficial{position:absolute;left:60px;right:60px;top:300px;font:900 92px/.98 Barlow;letter-spacing:-.02em}
+#titOficial b{color:var(--gold)}
+#pantalla{position:absolute;left:40px;top:720px;width:1000px;height:563px;border-radius:22px;overflow:hidden;
+  box-shadow:0 50px 140px rgba(0,0,0,.9),0 0 0 3px rgba(229,72,77,.55);transform-origin:50% 50%}
+#pantalla img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#pantalla .vivo{position:absolute;right:18px;bottom:16px;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:10px;background:rgba(0,0,0,.6);font:700 18px 'JetBrains Mono';letter-spacing:.2em}
+#pantalla .vivo i{width:12px;height:12px;border-radius:50%;background:var(--rojo)}
+#feats{position:absolute;left:60px;right:60px;top:1370px;display:flex;flex-direction:column;gap:18px}
+#feats div{display:flex;align-items:center;gap:20px;padding:20px 26px;border-radius:20px;background:rgba(11,10,7,.78);border:2px solid rgba(201,168,76,.28);font:800 40px Barlow;opacity:0}
+#feats div i{flex:none;width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px var(--gold)}
+/* el logro: imagen de ChatGPT a pantalla completa, rotulada como recreación */
+#logro .full{filter:contrast(1.06) saturate(1.08)}
+#logro .tono{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,6,5,.55) 0%,transparent 26%,transparent 58%,rgba(7,6,5,.92) 100%)}
+#logro .marco{position:absolute;inset:26px;border:2px solid rgba(241,220,151,.45);border-radius:30px;pointer-events:none}
+#logro .recre{position:absolute;right:56px;top:150px;font:700 20px 'JetBrains Mono';letter-spacing:.24em;color:var(--text2);padding:8px 14px;border-radius:8px;background:rgba(0,0,0,.4)}
+#logro .k{position:absolute;left:66px;top:1300px;font:700 28px 'JetBrains Mono';letter-spacing:.3em;color:var(--gold)}
+#logro .t{position:absolute;left:62px;right:62px;top:1350px;font:900 96px/1 Barlow;letter-spacing:-.02em}
+#logro .t b{color:var(--gold)}
+
 /* subtítulos de la voz */
-#subs{position:absolute;left:70px;right:70px;top:1770px;text-align:center;font:800 44px/1.15 Barlow;z-index:22;text-shadow:0 4px 18px rgba(0,0,0,.9)}
+#subs{position:absolute;left:70px;right:70px;top:1735px;text-align:center;font:800 44px/1.15 Barlow;z-index:22;text-shadow:0 4px 18px rgba(0,0,0,.9)}
 #subs .w{opacity:.35}#subs .w.on{opacity:1}#subs .w.oro{color:var(--gold2)}
 </style>
 </head>
@@ -116,13 +141,27 @@ html,body{background:var(--bg);overflow:hidden}
     <div id="cab"><img class="esc" id="cabEsc" alt=""><div class="txt"><div class="k" id="cabK"></div><div class="r" id="cabR"></div></div></div>
     <div id="chip"><div class="eq">TOP</div><div class="gl top" id="chTop">0</div><div class="gl" id="chRiv">0</div><div class="eq" id="chSig">RIV</div><div class="min" id="chMin"></div></div>
     <div id="banda"><img id="bandaImg" alt=""><div class="tag" id="bandaTag"></div></div>
-    <div id="ficha"><div class="foto"><img id="fichaFoto" alt=""></div><div class="datos"><div class="k">GOL DE TOP SECRET</div><div class="gt" id="fichaGt"></div><div class="como" id="fichaComo"></div></div></div>
+    <div id="ficha"><div class="foto"><img id="fichaFoto" alt=""></div><div class="datos"><div class="k" id="fichaK">GOL DE TOP SECRET</div><div class="gt" id="fichaGt"></div><div class="como" id="fichaComo"></div></div></div>
   </div>
 
   <div id="golpe" class="capa">
     <div class="k" id="goK"></div>
     <div class="big" id="goBig"></div>
     <div class="t" id="goT"></div>
+  </div>
+
+  <div id="oficial" class="capa">
+    <div id="titOficial"></div>
+    <div id="pantalla"><img id="vod" alt=""><div class="vivo"><i></i>EN VIVO</div></div>
+    <div id="feats"></div>
+  </div>
+
+  <div id="logro" class="capa">
+    <img id="logroImg" class="full" alt="">
+    <div class="tono"></div><div class="marco"></div>
+    <div class="recre">RECREACIÓN</div>
+    <div class="k" id="logroK"></div>
+    <div class="t" id="logroT"></div>
   </div>
 
   <div id="cierre" class="capa">
@@ -136,6 +175,7 @@ html,body{background:var(--bg);overflow:hidden}
   <canvas id="grano" width="540" height="960"></canvas>
   <div id="flash"></div>
   <div id="rotulo"><i></i><span></span></div>
+  <div id="subrotulo"></div>
   <div id="subs"></div>
 </div>
 <script>
@@ -153,7 +193,10 @@ const eio = x => (x = cl(x)) < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) 
 const cuadroDe = (clip, lt, fps = 30) => `${clip.dir}/${String(cl(Math.floor(lt * fps) + 1, 1, clip.n)).padStart(4, '0')}.jpg`;
 async function poner(img, src) { if (img.getAttribute('src') !== src) { img.src = src; try { await img.decode(); } catch {} } }
 function mostrarCapa(id) { for (const c of document.querySelectorAll('.capa')) c.style.display = c.id === id ? 'block' : 'none'; }
-function rotulo(clase, texto) { const r = $('#rotulo'); r.style.display = texto ? 'flex' : 'none'; r.className = clase || ''; r.querySelector('span').textContent = texto || ''; }
+function rotulo(clase, texto, sub = '') {
+  const r = $('#rotulo'); r.style.display = texto ? 'flex' : 'none'; r.className = clase || ''; r.querySelector('span').textContent = texto || '';
+  const s = $('#subrotulo'); s.textContent = sub; s.style.display = texto && sub ? 'block' : 'none';
+}
 
 function pintar(datos) {
   D = datos;
@@ -194,7 +237,7 @@ async function tramoGol(tr, lt, cadencia = 30) {
   img.style.left = `${izq}px`; img.style.transformOrigin = `${c * 100}% 50%`; img.style.transform = `scale(${zoom})`;
   $('#bandaTag').textContent = tr.tag || '';
   $('#bandaTag').style.display = tr.tag ? 'block' : 'none';
-  $('#fichaFoto').src = tr.foto; $('#fichaGt').textContent = tr.goleador; $('#fichaComo').textContent = tr.como;
+  $('#fichaK').textContent = tr.etiqueta || 'GOL DE TOP SECRET'; $('#fichaFoto').src = tr.foto; $('#fichaGt').textContent = tr.goleador; $('#fichaComo').textContent = tr.como;
   const fi = $('#ficha'), q = eo((dg + .1) * 2.4); fi.style.opacity = q; fi.style.transform = `translateY(${(1 - q) * 60}px)`;
   if (dg >= 0 && !tr.lento) { $('#flash').style.opacity = .8 * Math.exp(-dg * 6); $('#rayos').style.opacity = .8 * Math.exp(-dg * 1.2); $('#rayos').style.transform = `rotate(${dg * 20}deg)`; }
   if (lt < .3) { $('#flash').style.background = '#C9A84C'; $('#flash').style.opacity = .9 * (1 - lt / .3); } else $('#flash').style.background = '#fff';
@@ -214,11 +257,33 @@ async function mostrar(n, t = 0) {
     const tt = $('#gT'); tt.style.opacity = eo((p - .3) * 4); tt.style.transform = `translateY(${(1 - eo((p - .3) * 4)) * 40}px)`;
     const tach = tt.querySelector('.tachado'); if (tach) tach.style.setProperty('--tach', eo((p - .55) * 4));
   } else if (tr.tipo === 'gol') {
-    rotulo(null, '');
+    rotulo(tr.rotuloClase || null, tr.rotulo || '');
     await tramoGol(tr, lt);
   } else if (tr.tipo === 'repe') {
     rotulo('repe', 'REPETICIÓN');
     await tramoGol({ ...tr, lento: true }, lt * (tr.velocidad || .5), 60);   // cuadros a 60 fps: tiempo del clip = lt × velocidad
+  } else if (tr.tipo === 'oficial') {
+    // la grabación del vivo tal como salió al aire (vende la transmisión); en 'momento' cambia el título
+    mostrarCapa('oficial'); rotulo('oficial', 'TRANSMISIÓN OFICIAL · EN VIVO', tr.sub || '');
+    const src = cuadroDe(tr.clip, lt);
+    await Promise.all([poner($('#vod'), src), poner($('#fondoBlur'), src)]);
+    const dm = lt - tr.momento;
+    $('#titOficial').innerHTML = dm < 0 ? tr.antes : tr.despues; $('#titOficial').style.opacity = eo(lt * 2);
+    const zoom = dm < 0 ? 1 + .06 * eio(lt / tr.momento) : 1.06 + .12 * Math.exp(-dm * 2.2);
+    const sac = dm >= 0 && dm < .6 ? Math.sin(dm * 70) * 16 * (1 - dm / .6) : 0;
+    $('#pantalla').style.transform = `translate(${sac}px, ${sac * .6}px) scale(${zoom})`;
+    if (dm >= 0) { $('#flash').style.opacity = .7 * Math.exp(-dm * 6); $('#rayos').style.opacity = .8 * Math.exp(-dm * 1.2); $('#rayos').style.transform = `rotate(${dm * 20}deg)`; }
+    $('#feats').innerHTML = (tr.feats || []).map(x => `<div><i></i>${x}</div>`).join('');
+    [...document.querySelectorAll('#feats div')].forEach((d, k) => { const q = eo((lt - 1 - k * 1.4) * 3); d.style.opacity = q; d.style.transform = `translateX(${(1 - q) * -60}px)`; });
+  } else if (tr.tipo === 'logro') {
+    // imagen fija (ChatGPT) con acercamiento hacia el punto clave; otra estética y rotulada como recreación
+    mostrarCapa('logro'); rotulo('logro', tr.rotulo || 'EL LOGRO');
+    $('#fondoBlur').style.display = 'none';
+    await poner($('#logroImg'), tr.imagen);
+    $('#logroImg').style.transformOrigin = tr.origen || '50% 50%'; $('#logroImg').style.transform = `scale(${1.02 + (tr.zoom || .16) * eio(lt / dur)})`;
+    $('#logroK').textContent = tr.kicker || ''; $('#logroT').innerHTML = tr.texto || '';
+    const ap = eo(lt * 2.5); $('#logroT').style.opacity = ap; $('#logroT').style.transform = `translateY(${(1 - ap) * 40}px)`;
+    if (lt < .3) $('#flash').style.opacity = .7 * (1 - lt / .3);
   } else if (tr.tipo === 'golpe') {
     mostrarCapa('golpe'); rotulo(null);
     await poner($('#fondoBlur'), cuadroDe(tr.clip, lt));
