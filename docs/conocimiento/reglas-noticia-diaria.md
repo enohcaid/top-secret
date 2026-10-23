@@ -27,3 +27,12 @@ La nota del 14/10 presentó a Lautavester7 como "lateral izquierdo": leyó `play
 
 - Nada de frases que puedan leerse como contenido sexual, aunque sean jerga de fútbol: "la pone", "la mete", "la mandó adentro", "se la dio", "la empujó", "la clavó". Decirlo con pase, asistencia, gol, definición, remate ("asistencia de Elianja20, gol de pepolemmo2710").
 - El vivo sale por Twitch, Kick, YouTube e Instagram: si se lo menciona, las cuatro.
+
+## El día después de partidos oficiales: reporte del resultado (2026-10-23)
+
+- **Si el día anterior hubo partidos oficiales** (VPN, VPUG o Espacio Gamer; no amistosos) en `seed_matches.js` o en el calendario (`calendario/estado.custom` de Firestore, fecha de ayer), la nota del día es **siempre el reporte de esos resultados**: resultado de cada partido, goleadores, la jugada o el momento de la noche, cómo queda el equipo en la tabla. Nada de entrevistas, perfiles ni notas institucionales ese día. (El 23/10 salió una entrevista a Guiidow sobre el partido del martes y la noche del jueves 22 —tres partidos de Espacio Gamer— quedó sin nota.)
+- Si un partido de ayer todavía no está en `seed_matches.js`, el reporte se escribe igual con lo que haya (calendario + resultado), sin inventar goleadores ni minutos.
+
+## Resumen semanal (2026-10-23)
+
+- **La nota del sábado 2026-10-24 es el resumen semanal** de la semana del lunes 19 al jueves 22 de octubre: todos los partidos oficiales de la semana con sus resultados, los goleadores, los números del equipo y cómo queda en cada competencia. Los amistosos, como mucho, en una línea.
