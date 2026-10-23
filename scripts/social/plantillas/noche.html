@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Video de una noche de partidos (scripts/social/piezas/noche-2026-10-22.mjs). Vertical 1080x1920, línea de tiempo
+     continua: mostrar(0, t) dibuja el segundo t (determinístico; espera a que el cuadro esté decodificado).
+     Tramos en D.tramos: gancho · gol (grabación limpia de la transmisión, banda con paneo hacia el arco, marcador que
+     cambia, ficha del goleador) · golpe (un gol rival que cambia la historia) · repe (cámara lenta) · cierre (resultados
+     de la noche + el producto + próximo partido). Mismo lenguaje que gol-sub21.html. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070605;--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.66);--rojo:#E5484D}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+.capa{position:absolute;inset:0;display:none}
+.full{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#fondoBlur{filter:blur(46px) brightness(.26) saturate(.55);transform:scale(1.25)}
+#vignette{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,transparent 40%,rgba(0,0,0,.75) 100%);pointer-events:none}
+#grano{position:absolute;inset:0;width:100%;height:100%;opacity:.10;mix-blend-mode:overlay;pointer-events:none}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:15;pointer-events:none}
+#rayos{position:absolute;left:50%;top:50%;width:3000px;height:3000px;margin:-1500px 0 0 -1500px;opacity:0;
+  background:repeating-conic-gradient(from 0deg,rgba(241,220,151,.16) 0deg 5deg,transparent 5deg 15deg);
+  -webkit-mask:radial-gradient(closest-side,#000 10%,transparent 68%)}
+
+/* rótulo de sección */
+#rotulo{position:absolute;left:60px;top:140px;display:flex;align-items:center;gap:16px;padding:16px 26px;border-radius:999px;
+  font:700 26px 'JetBrains Mono';letter-spacing:.2em;z-index:20;white-space:nowrap;background:rgba(11,10,7,.82);border:2px solid rgba(201,168,76,.55)}
+#rotulo i{width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px var(--gold)}
+#rotulo.repe{background:var(--gold);color:#0B0A07;border-color:var(--gold)}
+#rotulo.repe i{border-radius:4px;background:#0B0A07;box-shadow:none;width:16px;height:16px;transform:rotate(45deg)}
+
+/* gancho */
+#gancho .k{position:absolute;left:0;right:0;top:440px;text-align:center;font:700 30px 'JetBrains Mono';letter-spacing:.32em;color:var(--gold)}
+#gancho .big{position:absolute;left:0;right:0;top:520px;text-align:center;font:400 430px/.8 'Bebas Neue';
+  background:linear-gradient(100deg,var(--gold) 0%,var(--gold) 40%,#FFF6D8 50%,var(--gold) 60%,var(--gold) 100%);background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 20px 60px rgba(201,168,76,.35))}
+#gancho .t{position:absolute;left:60px;right:60px;top:1000px;text-align:center;font:900 92px/1.02 Barlow;letter-spacing:-.01em}
+#gancho .t b{color:var(--gold)}
+#gancho .tachado{position:relative;display:inline-block;color:var(--text2)}
+#gancho .tachado::after{content:'';position:absolute;left:-6px;right:-6px;top:52%;height:10px;background:var(--rojo);transform:scaleX(var(--tach,0));transform-origin:left}
+
+/* cabecera del partido (arriba) */
+#cab{position:absolute;left:60px;right:60px;top:240px;display:flex;align-items:center;gap:24px}
+#cab .esc{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 8px 24px rgba(0,0,0,.6))}
+#cab .txt{flex:1;min-width:0}
+#cab .k{font:700 24px 'JetBrains Mono';letter-spacing:.22em;color:var(--gold)}
+#cab .r{font:900 64px/1 Barlow;letter-spacing:-.01em;margin-top:8px;white-space:nowrap}
+#chip{position:absolute;left:60px;top:400px;display:flex;align-items:stretch;border-radius:18px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);font:400 78px/1 'Bebas Neue'}
+#chip .eq{background:#F2EEE0;color:#0B0A07;padding:14px 26px}
+#chip .gl{background:#0B0A07;color:var(--text);padding:14px 24px;min-width:80px;text-align:center}
+#chip .gl.top{color:var(--gold2)}
+#chip .min{background:#17140d;color:var(--gold);padding:14px 24px;font-size:64px;display:flex;align-items:center}
+
+/* banda con la jugada */
+#banda{position:absolute;left:0;right:0;top:560px;height:840px;overflow:hidden;box-shadow:0 0 0 3px rgba(201,168,76,.45),0 40px 120px rgba(0,0,0,.8)}
+#banda img{position:absolute;top:0;height:100%;width:auto}
+#banda .tag{position:absolute;right:28px;top:24px;font:700 22px 'JetBrains Mono';letter-spacing:.25em;color:var(--gold);
+  padding:8px 14px;border:2px solid var(--gold);border-radius:10px;background:rgba(0,0,0,.5)}
+
+/* ficha del goleador (abajo) */
+#ficha{position:absolute;left:60px;right:60px;top:1430px;height:300px;display:flex;align-items:flex-end;gap:30px}
+#ficha .foto{width:250px;height:300px;overflow:hidden;flex:none;border-radius:24px;border:2px solid rgba(201,168,76,.45);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#ficha .foto img{width:100%;height:auto;display:block}
+#ficha .datos{padding-bottom:30px;min-width:0}
+#ficha .k{font:700 24px 'JetBrains Mono';letter-spacing:.24em;color:var(--gold)}
+#ficha .gt{font:900 76px/1 Barlow;letter-spacing:-.02em;margin-top:10px;white-space:nowrap}
+#ficha .como{font:800 46px/1.1 Barlow;color:var(--gold2);margin-top:10px}
+
+/* golpe (gol rival que cambia la historia) */
+#golpe .k{position:absolute;left:0;right:0;top:620px;text-align:center;font:700 30px 'JetBrains Mono';letter-spacing:.3em;color:var(--rojo)}
+#golpe .big{position:absolute;left:0;right:0;top:700px;text-align:center;font:400 400px/.8 'Bebas Neue';color:var(--text)}
+#golpe .t{position:absolute;left:60px;right:60px;top:1100px;text-align:center;font:900 84px/1.04 Barlow}
+#golpe .t b{color:var(--rojo)}
+
+/* cierre */
+#cierre .res{position:absolute;left:60px;right:60px;top:200px;padding:40px 40px 30px;border-radius:32px;background:rgba(11,10,7,.82);border:2px solid rgba(201,168,76,.45)}
+#cierre .res .k{font:700 24px 'JetBrains Mono';letter-spacing:.24em;color:var(--gold);text-align:center;margin-bottom:10px}
+#cierre .fila{display:flex;align-items:center;gap:26px;padding:20px 6px;border-top:1px solid rgba(201,168,76,.18)}
+#cierre .fila:first-of-type{border-top:0}
+#cierre .fila img{width:96px;height:96px;object-fit:contain;flex:none}
+#cierre .fila .n{flex:1;min-width:0;font:800 46px/1.05 Barlow;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cierre .fila .n span{display:block;font:700 20px 'JetBrains Mono';letter-spacing:.2em;color:var(--text2);margin-bottom:6px}
+#cierre .fila .m{font:400 104px/.8 'Bebas Neue';color:var(--gold)}
+#cierre .fila .m.e{color:var(--text)}
+#cierre .inv{text-align:center;margin-top:18px;font:900 54px Barlow}
+#cierre .inv b{color:var(--gold)}
+#cierre .cta{position:absolute;left:60px;right:60px;top:1110px;text-align:center}
+#cierre .cta .t{font:900 70px/1 Barlow;letter-spacing:-.01em}
+#plats{display:flex;justify-content:center;gap:22px;margin-top:30px}
+#plats div{width:200px;padding:22px 0;border-radius:24px;background:rgba(20,18,13,.9);border:2px solid rgba(201,168,76,.3);display:flex;flex-direction:column;align-items:center;gap:12px;
+  font:400 34px/1 'Bebas Neue';letter-spacing:.06em}
+#plats svg{width:70px;height:70px}
+#cierre .prox{position:absolute;left:60px;right:60px;top:1520px;display:flex;align-items:center;justify-content:center;gap:22px;padding:24px;border-radius:22px;
+  background:var(--gold);color:#0B0A07;font:800 38px Barlow;white-space:nowrap}
+#cierre .prox span{font:700 22px 'JetBrains Mono';letter-spacing:.2em}
+#cierre .marca{position:absolute;left:0;right:0;top:1650px;text-align:center;font:700 26px 'JetBrains Mono';letter-spacing:.3em;color:var(--gold)}
+
+/* subtítulos de la voz */
+#subs{position:absolute;left:70px;right:70px;top:1770px;text-align:center;font:800 44px/1.15 Barlow;z-index:22;text-shadow:0 4px 18px rgba(0,0,0,.9)}
+#subs .w{opacity:.35}#subs .w.on{opacity:1}#subs .w.oro{color:var(--gold2)}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <img id="fondoBlur" class="full" alt="">
+  <div id="rayos"></div>
+
+  <div id="gancho" class="capa">
+    <div class="k" id="gK"></div>
+    <div class="big" id="gBig"></div>
+    <div class="t" id="gT"></div>
+  </div>
+
+  <div id="gol" class="capa">
+    <div id="cab"><img class="esc" id="cabEsc" alt=""><div class="txt"><div class="k" id="cabK"></div><div class="r" id="cabR"></div></div></div>
+    <div id="chip"><div class="eq">TOP</div><div class="gl top" id="chTop">0</div><div class="gl" id="chRiv">0</div><div class="eq" id="chSig">RIV</div><div class="min" id="chMin"></div></div>
+    <div id="banda"><img id="bandaImg" alt=""><div class="tag" id="bandaTag"></div></div>
+    <div id="ficha"><div class="foto"><img id="fichaFoto" alt=""></div><div class="datos"><div class="k">GOL DE TOP SECRET</div><div class="gt" id="fichaGt"></div><div class="como" id="fichaComo"></div></div></div>
+  </div>
+
+  <div id="golpe" class="capa">
+    <div class="k" id="goK"></div>
+    <div class="big" id="goBig"></div>
+    <div class="t" id="goT"></div>
+  </div>
+
+  <div id="cierre" class="capa">
+    <div class="res"><div class="k" id="ciK"></div><div id="filas"></div><div class="inv" id="ciInv"></div></div>
+    <div class="cta"><div class="t">Todos los partidos, <b style="color:var(--gold)">en vivo</b></div><div id="plats"></div></div>
+    <div class="prox"><span>PRÓXIMO</span><div id="proxTxt"></div></div>
+    <div class="marca">#TOPSECRETFC</div>
+  </div>
+
+  <div id="vignette"></div>
+  <canvas id="grano" width="540" height="960"></canvas>
+  <div id="flash"></div>
+  <div id="rotulo"><i></i><span></span></div>
+  <div id="subs"></div>
+</div>
+<script>
+const ICON = {
+  twitch: { n: 'TWITCH', p: '<path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>' },
+  kick: { n: 'KICK', p: '<path fill="#53FC18" d="M1.333 0h8v5.333H12V2.667h2.667V0h8v8H20v2.667h-2.667v2.666H20V16h2.667v8h-8v-2.667H12v-2.666H9.333V24h-8Z"/>' },
+  youtube: { n: 'YOUTUBE', p: '<path fill="#FF0033" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>' },
+  instagram: { n: 'INSTAGRAM', p: '<defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".5" stop-color="#dd2a7b"/><stop offset="1" stop-color="#515bd4"/></linearGradient></defs><path fill="url(#ig)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>' },
+};
+const $ = s => document.querySelector(s);
+let D;
+const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const eo = x => 1 - Math.pow(1 - cl(x), 3);
+const eio = x => (x = cl(x)) < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const cuadroDe = (clip, lt, fps = 30) => `${clip.dir}/${String(cl(Math.floor(lt * fps) + 1, 1, clip.n)).padStart(4, '0')}.jpg`;
+async function poner(img, src) { if (img.getAttribute('src') !== src) { img.src = src; try { await img.decode(); } catch {} } }
+function mostrarCapa(id) { for (const c of document.querySelectorAll('.capa')) c.style.display = c.id === id ? 'block' : 'none'; }
+function rotulo(clase, texto) { const r = $('#rotulo'); r.style.display = texto ? 'flex' : 'none'; r.className = clase || ''; r.querySelector('span').textContent = texto || ''; }
+
+function pintar(datos) {
+  D = datos;
+  $('#plats').innerHTML = ['twitch', 'kick', 'youtube', 'instagram'].map(k => `<div><svg viewBox="0 0 24 24">${ICON[k].p}</svg>${ICON[k].n}</div>`).join('');
+  $('#proxTxt').textContent = D.proximo;
+  $('#ciK').textContent = D.cierre.kicker; $('#ciInv').innerHTML = D.cierre.frase;
+  $('#filas').innerHTML = D.cierre.filas.map(f => `<div class="fila"><img src="${f.escudo}" alt=""><div class="n"><span>${f.etiqueta}</span>${f.rival}</div><div class="m${f.res === 'empate' ? ' e' : ''}">${f.marcador}</div></div>`).join('');
+  const g = $('#grano').getContext('2d'), im = g.createImageData(540, 960); let s = 7;
+  for (let i = 0; i < im.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = s % 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+  g.putImageData(im, 0, 0);
+  return 1;
+}
+
+function subs(t) {
+  const f = (D.voz || []).find(v => t >= v.en - 0.05 && t <= v.en + v.dur + 0.4);
+  const el = $('#subs');
+  if (!f) { el.innerHTML = ''; return; }
+  el.innerHTML = f.palabras.map(w => `<span class="w${t - f.en >= w.t ? ' on' : ''}${new RegExp(D.oro || '^$', 'i').test(w.w) ? ' oro' : ''}">${w.w}</span>`).join(' ');
+}
+
+// Tramo "gol": banda de 840 px de alto con el cuadro (16:9 → 1493 px de ancho), paneo desde el centro hacia el lado
+// del arco (foco 0..1); marcador que cambia en el gol (golEn, segundos del tramo); ficha que entra con el gol.
+async function tramoGol(tr, lt, cadencia = 30) {
+  mostrarCapa('gol');
+  const src = cuadroDe(tr.clip, lt, cadencia);
+  await Promise.all([poner($('#bandaImg'), src), poner($('#fondoBlur'), src)]);
+  const dg = lt - tr.golEn;
+  $('#cabEsc').src = tr.escudo; $('#cabK').textContent = tr.kicker; $('#cabR').textContent = `vs ${tr.rival}`;
+  $('#chSig').textContent = tr.sigla; $('#chMin').textContent = tr.minuto;
+  const [a, b] = (dg >= 0 ? tr.despues : tr.antes).split('-');
+  $('#chTop').textContent = a; $('#chRiv').textContent = b;
+  const ch = $('#chip'); const pop = dg >= 0 ? 1 + .14 * Math.exp(-dg * 4) : 1; ch.style.transform = `scale(${pop})`; ch.style.transformOrigin = 'left center';
+  const ent = eo(lt * 3); $('#cab').style.opacity = ent; $('#chip').style.opacity = ent;
+  const img = $('#bandaImg'), anchoV = 840 * 16 / 9;
+  const c = .5 + (tr.foco - .5) * eio(lt / (tr.golEn + .4));
+  const izq = cl(540 - anchoV * c, 1080 - anchoV, 0);
+  const zoom = 1 + .16 * eio((lt - tr.golEn + 1.6) / 2.2);
+  img.style.left = `${izq}px`; img.style.transformOrigin = `${c * 100}% 50%`; img.style.transform = `scale(${zoom})`;
+  $('#bandaTag').textContent = tr.tag || '';
+  $('#bandaTag').style.display = tr.tag ? 'block' : 'none';
+  $('#fichaFoto').src = tr.foto; $('#fichaGt').textContent = tr.goleador; $('#fichaComo').textContent = tr.como;
+  const fi = $('#ficha'), q = eo((dg + .1) * 2.4); fi.style.opacity = q; fi.style.transform = `translateY(${(1 - q) * 60}px)`;
+  if (dg >= 0 && !tr.lento) { $('#flash').style.opacity = .8 * Math.exp(-dg * 6); $('#rayos').style.opacity = .8 * Math.exp(-dg * 1.2); $('#rayos').style.transform = `rotate(${dg * 20}deg)`; }
+  if (lt < .3) { $('#flash').style.background = '#C9A84C'; $('#flash').style.opacity = .9 * (1 - lt / .3); } else $('#flash').style.background = '#fff';
+}
+
+async function mostrar(n, t = 0) {
+  $('#flash').style.opacity = 0; $('#rayos').style.opacity = 0; $('#fondoBlur').style.display = 'block';
+  const tr = D.tramos.find(x => t >= x.desde && t < x.hasta) || D.tramos[D.tramos.length - 1];
+  const lt = t - tr.desde, dur = tr.hasta - tr.desde;
+  if (tr.tipo === 'gancho') {
+    mostrarCapa('gancho'); rotulo(null);
+    await poner($('#fondoBlur'), cuadroDe(tr.clip, tr.cuadro || 0));
+    const p = lt / dur;
+    $('#gK').textContent = tr.kicker; $('#gBig').textContent = tr.grande; $('#gT').innerHTML = tr.texto;
+    const m = $('#gBig'); m.style.transform = `scale(${1.45 - .45 * eo(p * 2.2)})`; m.style.opacity = eo(p * 3); m.style.backgroundPosition = `${100 - p * 300}% 0`;
+    $('#gK').style.opacity = eo((p - .1) * 4);
+    const tt = $('#gT'); tt.style.opacity = eo((p - .3) * 4); tt.style.transform = `translateY(${(1 - eo((p - .3) * 4)) * 40}px)`;
+    const tach = tt.querySelector('.tachado'); if (tach) tach.style.setProperty('--tach', eo((p - .55) * 4));
+  } else if (tr.tipo === 'gol') {
+    rotulo(null, '');
+    await tramoGol(tr, lt);
+  } else if (tr.tipo === 'repe') {
+    rotulo('repe', 'REPETICIÓN');
+    await tramoGol({ ...tr, lento: true }, lt * (tr.velocidad || .5), 60);   // cuadros a 60 fps: tiempo del clip = lt × velocidad
+  } else if (tr.tipo === 'golpe') {
+    mostrarCapa('golpe'); rotulo(null);
+    await poner($('#fondoBlur'), cuadroDe(tr.clip, lt));
+    $('#goK').textContent = tr.kicker; $('#goBig').textContent = tr.grande; $('#goT').innerHTML = tr.texto;
+    const q = eo(lt * 3); $('#goBig').style.opacity = q; $('#goBig').style.transform = `scale(${1.25 - .25 * q})`;
+    const sac = lt < .5 ? Math.sin(lt * 60) * 16 * (1 - lt / .5) : 0; $('#golpe').style.transform = `translateX(${sac}px)`;
+    $('#goK').style.opacity = eo((lt - .2) * 3); $('#goT').style.opacity = eo((lt - .5) * 3);
+  } else {
+    mostrarCapa('cierre'); rotulo(null);
+    await poner($('#fondoBlur'), cuadroDe(tr.clip, tr.cuadro || 0));
+    const r = $('#cierre .res'); r.style.opacity = eo(lt * 3); r.style.transform = `scale(${1.06 - .06 * eo(lt * 3)})`;
+    [...document.querySelectorAll('#filas .fila')].forEach((f, k) => { const q = eo((lt - .3 - k * .35) * 3); f.style.opacity = q; f.style.transform = `translateX(${(1 - q) * -50}px)`; });
+    $('#ciInv').style.opacity = eo((lt - 1.5) * 3);
+    const c = $('#cierre .cta'); c.style.opacity = eo((lt - 2) * 2.5); c.style.transform = `translateY(${(1 - eo((lt - 2) * 2.5)) * 40}px)`;
+    [...document.querySelectorAll('#plats div')].forEach((d, k) => { const q = eo((lt - 2.4 - k * .2) * 3); d.style.opacity = q; d.style.transform = `translateY(${(1 - q) * 30}px)`; });
+    $('#cierre .prox').style.opacity = eo((lt - 3.4) * 3);
+    $('#cierre .marca').style.opacity = eo((lt - 3.8) * 3);
+    $('#rayos').style.opacity = .22; $('#rayos').style.transform = `rotate(${t * 5}deg)`;
+  }
+  subs(t);
+}
+</script>
+</body>
+</html>
