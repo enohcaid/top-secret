@@ -37,7 +37,11 @@ const PRUEBA = process.argv.includes('--prueba');
 // A 1000 + 96 de audio son ~4,4 Mbps entre las 4 redes.
 const KBPS = +(process.argv[process.argv.indexOf('--kbps') + 1] || 0) || 1000;
 const fi = process.argv.indexOf('--fuente');
-const LOGIN = fi > 0 ? process.argv[fi + 1] : 'enohcaid', FUENTE = `twitch.tv/${LOGIN}`;
+// --fuente también acepta un canal de YouTube (2026-10-22: esa noche se transmitió desde el YouTube de otro jugador):
+// --fuente https://www.youtube.com/@canal → se toma <canal>/live.
+const LOGIN = fi > 0 ? process.argv[fi + 1] : 'enohcaid';
+const YT_FUENTE = /youtube\.com|youtu\.be/i.test(LOGIN);
+const FUENTE = YT_FUENTE ? (/\/live\/?$|watch\?v=/.test(LOGIN) ? LOGIN : LOGIN.replace(/\/?$/, '/live')) : `twitch.tv/${LOGIN}`;
 const LOCAL = 'rtmp://127.0.0.1:1935/live/mix';
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
 const MTX = path.resolve('fuentes/stream/bin/mediamtx/mediamtx.exe');
@@ -220,6 +224,9 @@ async function audioSegunModo() {
 
 // ¿Está en vivo la PS5? GQL de Twitch con el Client-ID público (sin bloquear el proceso).
 async function enVivo() {
+  if (YT_FUENTE) return new Promise(ok => execFile('python', ['-m', 'streamlink', '--json', FUENTE], { timeout: 40000 }, (e, out) => {
+    try { ok(Object.keys(JSON.parse(out).streams || {}).length > 0); } catch { ok(e?.killed ? null : false); }
+  }));
   try {
     const r = await fetch('https://gql.twitch.tv/gql', { method: 'POST', signal: AbortSignal.timeout(10000),
       headers: { 'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko' }, body: JSON.stringify({ query: `query{user(login:"${LOGIN}"){stream{id}}}` }) });
