@@ -24,12 +24,12 @@ const placa = (g, foto) => `<!doctype html><html><head><meta charset="utf-8">${F
 *{margin:0;box-sizing:border-box}body{width:1280px;height:720px;overflow:hidden;font-family:Barlow,sans-serif;color:#F2EEE0;background:transparent;position:relative}
 .p{position:absolute;background:linear-gradient(180deg,#17140d,#0B0A07);border:1px solid rgba(200,168,75,.35);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .mono{font-family:'JetBrains Mono';font-weight:700;letter-spacing:.18em;color:#C8A84B}
-.tl{left:18px;top:18px;width:340px;height:96px;white-space:nowrap;display:flex;align-items:center;gap:14px;padding:0 16px}
+.tl{left:18px;top:18px;width:fit-content;min-width:340px;max-width:760px;height:96px;padding-right:24px!important;white-space:nowrap;display:flex;align-items:center;gap:14px;padding:0 16px}
 .tl .cr{height:50px;width:50px;object-fit:contain}.tl .vs{font-family:'Bebas Neue';font-size:22px;color:rgba(242,238,224,.5)}
 .tl .t{display:flex;flex-direction:column;gap:3px;min-width:0}.tl .k{font-size:11px}.tl .m{font-weight:800;font-size:20px;line-height:1.05;overflow:hidden;text-overflow:ellipsis}
 .tr{left:918px;top:18px;width:344px;height:${TR_H}px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .tr .k{font-size:15px}.tr .sc{font-family:'Bebas Neue';font-size:${TR_H > 150 ? 104 : 64}px;line-height:.9;margin-top:${TR_H > 150 ? 8 : 2}px}.tr .mn{font-weight:500;font-size:${TR_H > 150 ? 20 : 16}px;color:rgba(242,238,224,.75)}
-.bl{left:14px;top:600px;width:360px;height:108px;display:flex;align-items:flex-end;overflow:visible}
+.bl{left:14px;top:600px;width:fit-content;min-width:360px;padding-right:26px;height:108px;display:flex;align-items:flex-end;overflow:visible}
 .bl .ph{position:absolute;left:10px;bottom:0;width:118px;height:150px;overflow:hidden;border-radius:0 0 0 12px}
 .bl .ph img{position:absolute;left:50%;top:0;width:170px;transform:translateX(-50%)}
 .bl .tx{margin-left:138px;padding-bottom:16px}.bl .k{font-size:12px}

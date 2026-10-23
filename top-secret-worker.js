@@ -8,10 +8,6 @@
 const SITE = 'https://topsecret.ar/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
-  'noche-espacio-gamer-22-10': {
-    t: 'Una tijera en el descuento y dos triunfos: la noche de Top Secret en Espacio Gamer',
-    i: MEDIA + 'logos/noticias/noche-2026-10-22-portada.jpg',
-  },
   'nuevos-fichajes-t4': {
     t: 'Seis caras nuevas: los fichajes de la Temporada 4',
     i: MEDIA + 'logos/noticias/fichajes-t4-portada.jpg',

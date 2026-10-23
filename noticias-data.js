@@ -3,38 +3,6 @@
 
 const NOTICIAS = [
   {
-    id: 'noche-espacio-gamer-22-10',
-    category: 'Resultados',
-    title: 'Una tijera en el descuento y dos triunfos: la noche de Top Secret en Espacio Gamer',
-    date: '2026-10-23',
-    dateLabel: '23 de octubre de 2026',
-    excerpt: 'Top Secret empató 3-3 con SF Drysdale con una tijera de Lautavester7 en el último minuto y después le ganó 1-0 a Los Picantes y a InfinitX. Tres goles de Lautavester7 en una sola noche.',
-    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/noche-2026-10-22-portada.jpg',
-    body: [
-      'Tres partidos, siete puntos y una jugada para guardar. El jueves, Top Secret jugó las fechas 1, 3 y 4 de Espacio Gamer: rescató un 3-3 ante SF Drysdale que parecía perdido y cerró la noche con dos triunfos por 1-0, ante Los Picantes e InfinitX.',
-      { specs: [['SF Drysdale', '3-3'], ['Los Picantes', '1-0'], ['InfinitX', '1-0'], ['Lautavester7', '3 goles']] },
-      { video: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/videos/goles/2026-10-22/compilado.mp4', poster: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/videos/goles/2026-10-22/poster.jpg', caption: 'Los cinco goles de la noche.' },
-      { h: '3-3 ante SF Drysdale: de 1-3 a la tijera' },
-      'El estreno de la noche empezó cuesta arriba: SF Drysdale abrió el marcador a los 4 minutos. Cabers14 empató a los 24 con una chilena dentro del área, pero el rival volvió a pasar al frente a los 40 y estiró la ventaja a los 58. Con el 1-3 y media hora por jugar, el partido parecía cerrado.',
-      'No lo estaba. A los 87, Lautavester7 descontó con un remate desde la puerta del área, y en el descuento, en la última jugada del partido, definió de tijera en el área para el 3-3 final.',
-      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/Lautavester7.webp', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/Cabers14.webp'], caption: 'Lautavester7, dos goles ante SF Drysdale · Cabers14, el de la chilena.' },
-      { quote: 'Con 1-3 nadie bajó los brazos. El empate se buscó hasta la última pelota.', by: 'Vestuario · Top Secret FC' },
-      { h: 'Dos 1-0 para cerrar la noche' },
-      'Ante Los Picantes el gol llegó temprano: a los 14 minutos, asistencia de Lautavester7 y gol de NicoBJ_96. Alcanzó para ganarlo, con el arco propio en cero.',
-      'El cierre fue ante InfinitX, de visitante. El gol llegó a los 51: pase de nikileo527 y definición de Lautavester7, su tercer gol de la noche. Cabers14 fue la figura del partido, con 9.1 de nota.',
-      { pair: ['https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/NicoBJ_96.webp', 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/plantel-t4/nikileo527.webp'], caption: 'NicoBJ_96, gol ante Los Picantes · nikileo527, asistencia ante InfinitX.' },
-      { h: 'Invicto en Espacio Gamer' },
-      'Con el 1-0 del martes ante Sub 21, Top Secret suma tres triunfos y un empate en sus primeros cuatro partidos en Espacio Gamer, con seis goles a favor, tres en contra y tres vallas invictas.',
-      'Las posiciones y lo que viene, en <a href="posiciones.html">Competencias</a> y en el <a href="calendario.html">calendario</a>.',
-    ],
-    shareCaption: 'Una tijera en el descuento y dos triunfos. Top Secret empató 3-3 con SF Drysdale y le ganó 1-0 a Los Picantes y a InfinitX en Espacio Gamer. Tres goles de Lautavester7.',
-    shareCaptions: {
-      ig: 'Una tijera en el descuento y dos triunfos.\n\n3-3 ante SF Drysdale, con el empate de tijera de Lautavester7 en el último minuto.\n1-0 ante Los Picantes (NicoBJ_96).\n1-0 ante InfinitX (Lautavester7).\n\nInvictos en Espacio Gamer.\n\n#TopSecretFC #ProClubs #EAFC',
-      x: 'De 1-3 a 3-3 con una tijera de Lautavester7 en el descuento, y después dos 1-0 ante Los Picantes e InfinitX. Top Secret sigue invicto en Espacio Gamer. #TopSecretFC',
-      fb: 'Noche de Espacio Gamer: Top Secret empató 3-3 con SF Drysdale (goles de Cabers14 y Lautavester7, el último de tijera en el descuento) y le ganó 1-0 a Los Picantes y a InfinitX. Tres triunfos y un empate en cuatro partidos. Nota completa y los goles en el sitio.',
-    },
-  },
-  {
     id: 'nuevos-fichajes-t4',
     pinned: true,
     category: 'Club',

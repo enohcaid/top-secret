@@ -25,6 +25,7 @@ import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V } from './stream/salidas.
 import { crearVivoIg } from './stream/ig-vivo.mjs';
 import { tituloDeNoche, partidosDe, ponerTitulos } from './stream/titulos-vivo.mjs';
 import { temporada, convocados, espacioGamer, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
+import { fuenteDe, anotarFuente, enVivo as fuenteEnVivo } from './lib/fuente-vivo.mjs';
 const listaMusica = () => prepararMusica(log);
 
 loadEnv();
@@ -38,10 +39,11 @@ const PRUEBA = process.argv.includes('--prueba');
 const KBPS = +(process.argv[process.argv.indexOf('--kbps') + 1] || 0) || 1000;
 const fi = process.argv.indexOf('--fuente');
 // --fuente también acepta un canal de YouTube (2026-10-22: esa noche se transmitió desde el YouTube de otro jugador):
-// --fuente https://www.youtube.com/@canal → se toma <canal>/live.
-const LOGIN = fi > 0 ? process.argv[fi + 1] : 'enohcaid';
-const YT_FUENTE = /youtube\.com|youtu\.be/i.test(LOGIN);
-const FUENTE = YT_FUENTE ? (/\/live\/?$|watch\?v=/.test(LOGIN) ? LOGIN : LOGIN.replace(/\/?$/, '/live')) : `twitch.tv/${LOGIN}`;
+// --fuente https://www.youtube.com/@canal → se toma <canal>/live. Queda anotada en fuentes/stream/fuente.json y el
+// vigía (que lanza este script al empezar cada sesión) mira la misma (lib/fuente-vivo.mjs).
+const FTE = fuenteDe(fi > 0 ? process.argv[fi + 1] : 'enohcaid');
+const FUENTE = FTE.url;
+if (!process.argv.includes('--prueba')) anotarFuente(FTE);
 const LOCAL = 'rtmp://127.0.0.1:1935/live/mix';
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
 const MTX = path.resolve('fuentes/stream/bin/mediamtx/mediamtx.exe');
@@ -226,16 +228,22 @@ async function audioSegunModo() {
   catch { modoAudio = null; }                                  // reintenta en la próxima vuelta
 }
 
-// ¿Está en vivo la PS5? GQL de Twitch con el Client-ID público (sin bloquear el proceso).
-async function enVivo() {
-  if (YT_FUENTE) return new Promise(ok => execFile('python', ['-m', 'streamlink', '--json', FUENTE], { timeout: 40000 }, (e, out) => {
-    try { ok(Object.keys(JSON.parse(out).streams || {}).length > 0); } catch { ok(e?.killed ? null : false); }
-  }));
-  try {
-    const r = await fetch('https://gql.twitch.tv/gql', { method: 'POST', signal: AbortSignal.timeout(10000),
-      headers: { 'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko' }, body: JSON.stringify({ query: `query{user(login:"${LOGIN}"){stream{id}}}` }) });
-    return !!(await r.json()).data?.user?.stream;
-  } catch { return null; }                                     // sin respuesta: no se sabe
+// ¿Está en vivo la fuente? true | false | null (sin respuesta: no se sabe)
+async function enVivo() { const v = await fuenteEnVivo(FTE); return v === null ? null : !!v; }
+
+// El vigía (goles, repeticiones, modo juego/pausa/reporte, inicio y fin de cada partido, lado de la barra) mira la
+// misma fuente. Antes lo lanzaba solo watch-regen.ps1 y solo si enohcaid estaba en vivo: el 2026-10-22, con la señal
+// desde YouTube, no corrió en toda la noche y el overlay quedó sin nada de eso. Ahora lo lanza cada sesión (el lock
+// del vigía evita que corran dos).
+function lanzarVigia() {
+  if (PRUEBA || process.argv.includes('--sin-vigia')) return;
+  const lock = path.resolve('fuentes/vivo/.vigia.lock');
+  try { process.kill(+fs.readFileSync(lock, 'utf8'), 0); return; } catch {}       // ya hay uno vivo
+  const salida = fs.openSync(path.resolve('scripts/vigia-vivo.log'), 'a');
+  const hasta = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  spawn(process.execPath, ['scripts/vigia-vivo.mjs', '--fuente', FTE.tipo === 'youtube' ? FTE.nombre : FTE.login, '--hasta', hasta],
+    { detached: true, stdio: ['ignore', salida, salida], windowsHide: true }).unref();
+  log(`Vigía lanzado sobre ${FUENTE}.`);
 }
 
 // Reenvía a todos los destinos: 'directo' = la PS5 por streamlink sin recodificar; 'overlay' = el lienzo de OBS desde
@@ -341,6 +349,7 @@ async function sesion() {
   // Vivo nuevo: sin lado de barra ni eventos de una sesión anterior (los vuelve a escribir vigia-vivo.mjs)
   try { contarInicios(); contarFinales(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
   caidaDesde = null;
+  lanzarVigia();
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
   const inicio = setInterval(() => { { const a = contarInicios(), b = contarFinales(); if (a || b) actualizarPartido(); } }, 15000);   // partido nuevo o terminado: placa y cierre al toque

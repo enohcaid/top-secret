@@ -20,12 +20,12 @@ import sharp from 'sharp';
 import ffmpeg from 'ffmpeg-static';
 import { SB_CAJA, SB_NUM, SB_RECORTE, SB_RELOJ, hayMarcador, crearDetector } from './lib/marcador.mjs';
 import { crearLado, BARRA_IZQ, BARRA_DER, PANEL } from './lib/lado-barra.mjs';
+import { fuenteDe, fuenteActual, enVivo as fuenteEnVivo, urlLectura } from './lib/fuente-vivo.mjs';
 
 sharp.cache(false);
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), '..');
 const YTDLP = path.join(ROOT, 'node_modules/yt-dlp-exec/bin/yt-dlp.exe');
-const CANAL = 'enohcaid';                 // desde 2026-10-15 la PS5 transmite acá; topsecretfc sale con overlay desde la PC
 const W = 1280, H = 720, FRAME = W * H * 3;
 const LOCK = path.join(ROOT, 'fuentes/vivo/.vigia.lock');
 
@@ -38,6 +38,8 @@ const vodId = args.includes('--vod') ? args[args.indexOf('--vod') + 1].replace(/
 const grabar = !args.includes('--sin-grabar');
 const soloClips = args.includes('--solo-clips') ? path.resolve(args[args.indexOf('--solo-clips') + 1]) : null;
 const hasta = args.includes('--hasta') ? args[args.indexOf('--hasta') + 1] : '00:30';
+// Fuente: --fuente <canal de Twitch | canal de YouTube>, o la que anotó retransmitir.mjs esta noche, o enohcaid (la PS5)
+const FUENTE = args.includes('--fuente') ? fuenteDe(args[args.indexOf('--fuente') + 1]) : fuenteActual();
 
 // Próxima ocurrencia de HH:MM (hora local de la PC = ART)
 function msHasta(hhmm) {
@@ -47,17 +49,12 @@ function msHasta(hhmm) {
   return fin - new Date();
 }
 
-async function enVivo() {
-  const r = await fetch('https://gql.twitch.tv/gql', {
-    method: 'POST', headers: { 'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko' },
-    body: JSON.stringify({ query: `query{user(login:"${CANAL}"){stream{id createdAt title}}}` }),
-  });
-  return (await r.json())?.data?.user?.stream ?? null;
-}
+// { id } si la fuente está en vivo; null si no (o si no se pudo saber)
+async function enVivo() { return (await fuenteEnVivo(FUENTE)) || null; }
 
 function hlsUrl() {
-  const src = vodId ? `https://www.twitch.tv/videos/${vodId}` : `https://www.twitch.tv/${CANAL}`;
-  return execFileSync(YTDLP, ['--no-update', '-g', '-f', 'best[height<=720]/best', src], { encoding: 'utf8' }).trim().split('\n')[0];
+  if (!vodId) return urlLectura(FUENTE);
+  return execFileSync(YTDLP, ['--no-update', '-g', '-f', 'best[height<=720]/best', `https://www.twitch.tv/videos/${vodId}`], { encoding: 'utf8' }).trim().split('\n')[0];
 }
 
 const hms = s => `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -260,7 +257,7 @@ async function main() {
   let stream = null;
   if (!vodId) {
     stream = await enVivo();
-    if (!stream) { console.log(`${CANAL} no está en vivo.`); return; }
+    if (!stream) { console.log(`${FUENTE.url} no está en vivo.`); return; }
   }
   if (!lockOk()) { console.log('Ya hay un vigía corriendo.'); return; }
 
