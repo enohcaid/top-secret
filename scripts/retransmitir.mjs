@@ -93,6 +93,10 @@ async function publicarHistoria() {
 // Partidos que empezaron esta noche: avisos 'inicioPartido' de vigia-vivo.mjs en estado.json. Se guardan en un archivo
 // por noche porque estado.json se borra al empezar cada sesión (cortes de la PS5, reinicios).
 const INICIOS = path.resolve(`fuentes/stream/inicios-${NOCHE}.json`);
+// Los avisos de una sesión que terminó después de medianoche quedan en estado.json con la misma fecha que la noche
+// siguiente: el 2026-10-22 se contaron al arrancar los 4 partidos de la noche anterior y el overlay mostraba al último
+// rival (y el cierre). El id del aviso es su hora en ms: más de 6 h de antigüedad = de otra noche.
+const reciente = x => !(+x.id > 1e12) || Date.now() - +x.id < 6 * 3600e3;
 let inicios = []; try { inicios = JSON.parse(fs.readFileSync(INICIOS, 'utf8')); } catch {}
 function contarInicios() {
   let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
@@ -101,7 +105,7 @@ function contarInicios() {
   // pausa mostraba como "próximo" al rival que ya se había jugado (2026-10-20, Sub 21).
   // Excepción: si el último partido contado ya terminó, el "enCurso" es uno nuevo (2026-10-21: se cayó la PS5, el vigía
   // se reinició con el partido 3 empezado y el overlay siguió mostrando al rival del 2).
-  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id)
+  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id) && reciente(x)
     && (!x.enCurso || !inicios.length || finales.length >= inicios.length)).map(x => x.id);
   if (!nuevos.length) return false;
   inicios.push(...nuevos); fs.writeFileSync(INICIOS, JSON.stringify(inicios));
@@ -115,7 +119,7 @@ const FINALES = path.resolve(`fuentes/stream/finales-${NOCHE}.json`);
 let finales = []; try { finales = JSON.parse(fs.readFileSync(FINALES, 'utf8')); } catch {}
 function contarFinales() {
   let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
-  const nuevos = (e.eventos || []).filter(x => x.tipo === 'finPartido' && !finales.some(f => f.id === x.id));
+  const nuevos = (e.eventos || []).filter(x => x.tipo === 'finPartido' && !finales.some(f => f.id === x.id) && reciente(x));
   if (!nuevos.length) return false;
   finales.push(...nuevos.map(x => ({ id: x.id, rival: x.rival || '', escudo: x.escudo || '', marcador: x.marcador || '', resultado: x.resultado })));
   fs.writeFileSync(FINALES, JSON.stringify(finales));
