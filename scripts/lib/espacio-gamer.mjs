@@ -40,7 +40,7 @@ export async function equiposDivisionEG(slug) {
   return aj.data.html.split(/<tbody class="eg-tp-club[^"]*"[^>]*>/).slice(1).map(chunk => ({
     nombre: decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || ''),
     logo: (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
-  })).filter(t => t.nombre).map(t => ({ ...t, logo: ESCUDOS_SIN_FONDO[t.nombre] || t.logo || ESCUDOS_FALTANTES[t.nombre] || null }));
+  })).filter(t => t.nombre).map(t => ({ ...t, logo: (t.nombre === 'SF DRYSDALE' && t.logo && !t.logo.includes('xhuncl2klc') ? t.logo : ESCUDOS_SIN_FONDO[t.nombre]) || t.logo || ESCUDOS_FALTANTES[t.nombre] || null }));   // SF DRYSDALE: limpio solo mientras EG tenga el escudo de Suda
 }
 
 // [{nombre, div, logo}] de las 4 divisiones; una división que falla no tumba a las otras

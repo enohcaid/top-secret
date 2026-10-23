@@ -745,7 +745,12 @@ export default {
           const name = decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || '');
           return {
             name,
-            logo: LOGO_LIMPIO[name] || (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
+            logo: (() => {
+              const eg = (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null;
+              // SF DRYSDALE: solo mientras EG le deje el escudo de Suda (xhuncl2klc); si suben el propio, se usa ese
+              if (name === 'SF DRYSDALE' && eg && !eg.includes('xhuncl2klc')) return eg;
+              return LOGO_LIMPIO[name] || eg;
+            })(),
             gp, w, d, l, gf: det('Goles a favor'), gc: det('Goles en contra'), gd, pts
           };
         }).filter(t => t.name);
