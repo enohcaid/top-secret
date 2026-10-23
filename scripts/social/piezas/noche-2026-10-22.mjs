@@ -135,7 +135,8 @@ const musicaNombre = path.basename(musica).replace(/^\d{4}-\d{2}-\d{2} - /, '').
 const desc = `${FIN.toFixed(0)} s · los 5 goles con la señal de la transmisión, repetición de la tijera, resultados de la noche · voz del club · música: ${musicaNombre}`;
 const P = o => ({ decision: 'pendiente', media: [{ tipo: 'video', url, vertical: true }], descripcion: desc, protagonistas: ['Lautavester7', 'Cabers14', 'NicoBJ_96'], local: { video: final }, portada: { url: portadaUrl, local: jpgPortada }, ...o });
 const lote = {
-  id: 'video-noche-2026-10-22', tipo: 'viral', creado: new Date().toISOString(),
+  // resultados: sale apenas se aprueba (Juan, 2026-10-23); sin publicarA, publicar.mjs lo mandaba al próximo turno viral (3/11)
+  id: 'video-noche-2026-10-22', tipo: 'viral', creado: new Date().toISOString(), publicarA: new Date().toISOString(),
   titulo: 'La noche del 22/10 en Espacio Gamer · de 1-3 a la tijera (video para todas las redes)', piezas: [
     P({ id: 'ig-reel', red: 'instagram', formato: 'Reel', metodo: 'ig-reel',
       texto: 'De 1-3 a 3-3 con una tijera en el descuento. Y después, dos 1-0.\n\nCabers14 de cabeza, Lautavester7 tres veces (la última, de tijera) y NicoBJ_96. Invictos en Espacio Gamer.\n\n¿La viste en vivo?\n\n#TopSecretFC #EspacioGamer #ProClubs #EAFC' }),
