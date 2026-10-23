@@ -381,6 +381,27 @@
         "platillo invertido en las transiciones"
       ],
       "estructura": "intro 4 · gancho A 8 · verso 6 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
+    },
+    {
+      "fecha": "2026-10-23",
+      "id": "2026-10-23-1",
+      "archivo": "2026-10-23-1 - Sombra.mp3",
+      "script": "scripts/beats/temas/diario_2026_10_23_1.py",
+      "duracion": 101,
+      "nombre": "Sombra",
+      "concepto": "El jugador que siempre juega a la sombra de otro — hacés el trabajo sucio para que la estrella brille, nadie canta tu nombre, pero la estrella sabe; sección a sección la sombra se acerca hasta que en el gancho C sale a la luz.",
+      "bpm": 112,
+      "tonalidad": "la menor",
+      "rasgo": "sombra que sigue: eco del lead retrasado y oscurecido que persigue al principal; se acerca sección a sección (1 beat → ½ beat → simultáneo) y sube de volumen y brillo hasta que en el gancho C suena igual — la sombra se reveló",
+      "recursos": [
+        "sombra que sigue con convergencia temporal y dinámica (firma del tema)",
+        "piano oscuro aislado (intro y final, dos pianos en el final)",
+        "pad de cuerdas sutiles (triángulos detuneados)",
+        "lead brillante de estrella (saw + sine con vibrato)",
+        "808 melódico con saltos de octava y glide",
+        "platillo invertido en las transiciones"
+      ],
+      "estructura": "intro 4 · verso 8 · gancho A 8 · build 2 · gancho B 8 · puente 4 · gancho C 8 · final 4"
     }
   ]
 }
