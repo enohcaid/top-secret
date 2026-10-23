@@ -731,7 +731,8 @@ export default {
         const LOGO_LIMPIO = {
           'ALL BOYS': ESC + 'all-boys.webp', 'IACC Reserva': ESC + 'iacc-reserva.webp',
           'MISKYMAYU FC': ESC + 'miskymayu-fc.webp', 'MONOTRIBUTISTAS': ESC + 'monotributistas.webp',
-          'Suda eSports': ESC + 'suda-esports.webp', 'Argentinos Jrs Esp': ESC + 'argentinos-jrs-esp.webp',
+          'Suda eSports': ESC + 'suda-esports.webp', 'SF DRYSDALE': ESC + 'suda-esports.webp',   // ex Suda, mismo escudo
+          'Argentinos Jrs Esp': ESC + 'argentinos-jrs-esp.webp',
           'Nuvo FC': 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvBXyushQcOcLYfub.png?alt=media&token=1',
         };
         // Los equipos en zona (playoffs/promo/descenso) vienen como class="eg-tp-club eg-tp-en-zona" style=…:

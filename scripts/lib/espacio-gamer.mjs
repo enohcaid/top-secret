@@ -22,7 +22,7 @@ export const ESCUDOS_FALTANTES = {
 // LT Gaming y NOTTINGAM MIEDO quedan como están: el fondo es parte de la ilustración (ni el relleno ni Canva lo separan).
 export const ESCUDOS_SIN_FONDO = Object.fromEntries(Object.entries({
   'ALL BOYS': 'all-boys', 'IACC Reserva': 'iacc-reserva', 'MISKYMAYU FC': 'miskymayu-fc', 'MONOTRIBUTISTAS': 'monotributistas',
-  'Suda eSports': 'suda-esports', 'Argentinos Jrs Esp': 'argentinos-jrs-esp', 'Lizzard CF': 'lizzard-cf',
+  'Suda eSports': 'suda-esports', 'SF DRYSDALE': 'suda-esports', 'SF Drysdale': 'suda-esports', 'Argentinos Jrs Esp': 'argentinos-jrs-esp', 'Lizzard CF': 'lizzard-cf',
   'Almagro eSports': 'almagro-esports', 'COMUNICACIÓNC': 'comunicacionc', 'Deportivo Murra': 'deportivo-murra',
   'LMJ eSports': 'lmj-esports', 'LosPamba1891': 'lospamba1891',
 }).map(([n, s]) => [n, `${ESC}${s}.webp`]));
