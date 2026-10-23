@@ -117,6 +117,9 @@ try {
     await shot('2');
     console.log('TikTok: enviado (queda "en revisión / Solo yo" unos minutos). URL actual:', p.url());
   }
+} catch (e) {
+  await shot('error');   // qué había en pantalla cuando falló (fuentes/redes/pub-<red>-error.png)
+  throw e;
 } finally {
   await p.close().catch(() => {});   // nunca browser.close(): es el Chrome persistente del pipeline
 }

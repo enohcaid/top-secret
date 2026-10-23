@@ -1,0 +1,38 @@
+# Prueba con voz (2026-10-23): mismo concepto que el tema "Astilla" (la jugada que sale mal y rompe la confianza; se
+# juntan los pedazos y vuelve más fuerte). Letra original del club, rap en español rioplatense. Instrumentos orgánicos
+# (piano, guitarra, batería con cuerpo) en vez de sintes, para que no suene robótico.
+caption = "emotional melodic trap with Spanish rap vocals, male rapper with a raspy Argentine voice, heartfelt and determined delivery, warm felt piano, sad nylon guitar, real live drums with crisp snare, deep 808 bass, subtle string section swelling in the chorus, sung melodic hook in the chorus, intimate verse that builds into an anthemic chorus"
+bpm = 135
+keyscale = "Ab minor"
+lyrics = """[intro]
+
+[verse]
+El pase no llegó, se me cayó la noche
+la marca que perdí me sigue en el reproche
+miro la jugada y el error se repite
+pero el que se esconde es el que no compite
+
+[pre-chorus]
+Junto los pedazos uno por uno
+sé dónde están las grietas, no me engaña ninguno
+
+[chorus]
+Me rompí en astillas y me volví a armar
+sé dónde duele y sé dónde pisar
+si me caigo diez, me levanto once
+la confianza vuelve cuando nadie la conoce
+
+[verse]
+El miedo habla fuerte pero no decide
+vuelvo a pedir la pelota, el corazón lo pide
+el banco, la tribuna, la duda en la garganta
+el que se rompe y vuelve es el que se levanta
+
+[chorus]
+Me rompí en astillas y me volví a armar
+sé dónde duele y sé dónde pisar
+si me caigo diez, me levanto once
+la confianza vuelve cuando nadie la conoce
+
+[outro]
+"""

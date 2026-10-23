@@ -37,6 +37,10 @@ const salida = path.join(ROOT, 'fuentes', 'beats', 'salida', estilo);
 fs.mkdirSync(salida, { recursive: true });
 const toml = s => JSON.stringify(s);   // las cadenas JSON son válidas en TOML
 const seed = opt('--seed', null);
+// Estilos con voz (2026-10-23, Juan: "las canciones con voces, rapeando, tienen mucha más vida; los sintes las hacen
+// robóticas"): si el .toml trae `lyrics`, no se fuerza instrumental y la voz va en español.
+const estiloTxt = fs.readFileSync(archivo, 'utf8');
+const conVoz = /^lyrics\s*=/m.test(estiloTxt);
 // Base para la GTX 1070 (8 GB, arquitectura Pascal): DiT 2B turbo + LM 0.6B con backend PyTorch
 // (vLLM no corre en placas anteriores a Volta) y descarga a CPU.
 const base = [
@@ -45,8 +49,8 @@ const base = [
   `backend = "pt"`,
   `offload_to_cpu = true`,
   `task_type = "text2music"`,
-  `instrumental = true`,
-  `lyrics = "[Instrumental]"`,
+  ...(conVoz ? ['instrumental = false', ...(/^vocal_language\s*=/m.test(estiloTxt) ? [] : ['vocal_language = "es"'])]
+    : ['instrumental = true', 'lyrics = "[Instrumental]"']),
   `thinking = true`,
   `use_cot_caption = false`,
   `use_cot_metas = false`,
@@ -58,7 +62,7 @@ const base = [
   ...(seed ? [`seeds = ${toml(String(seed))}`, `use_random_seed = false`] : []),
 ].join('\n');
 const cfg = path.join(salida, `_config-${Date.now()}.toml`);
-fs.writeFileSync(cfg, `${base}\n${fs.readFileSync(archivo, 'utf8')}\n`);
+fs.writeFileSync(cfg, `${base}\n${estiloTxt}\n`);
 
 console.log(`Generando "${estilo}" → ${path.relative(ROOT, salida)}`);
 const t0 = Date.now();
@@ -69,7 +73,8 @@ fs.rmSync(path.join(ACE, 'instruction.txt'), { force: true });
 const r = spawnSync('python', ['-m', 'uv', 'run', 'python', 'cli.py', '--config', cfg, '--log-level', 'WARNING'], {
   cwd: ACE, stdio: ['pipe', 'inherit', 'inherit'], input: '\n'.repeat(3),
   // ACE-Step exporta MP3 con ffmpeg del PATH: se usa el de ffmpeg-static (devDependency del repo).
-  env: { ...process.env, PYTHONIOENCODING: 'utf-8', PATH: `${path.dirname(ffmpegPath)}${path.delimiter}${process.env.PATH}` },
+  // float32: en la GTX 1070 (Pascal) el float16 se desborda (NaN) al generar con voz (2026-10-23)
+  env: { ...process.env, ACESTEP_DTYPE: process.env.ACESTEP_DTYPE || 'float32', PYTHONIOENCODING: 'utf-8', PATH: `${path.dirname(ffmpegPath)}${path.delimiter}${process.env.PATH}` },
 });
 fs.rmSync(path.join(ACE, 'instruction.txt'), { force: true });
 fs.rmSync(cfg, { force: true });
