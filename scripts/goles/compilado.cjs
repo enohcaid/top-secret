@@ -70,14 +70,17 @@ const tarjeta = inner => `<!doctype html><html><head><meta charset="utf-8">${F}<
     const a = add(['-f', 'lavfi', '-t', String(d), '-i', 'anullsrc=r=48000:cl=stereo']);
     f.push(`[${i}:v]scale=1280:720,setsar=1,fps=30,format=yuv420p,${fadeV(d)}[${lab}v]`, `[${a}:a]anull[${lab}a]`);
   };
+  // Fuente sin audio (2026-10-22: el vivo de YouTube de otro jugador bajó sin pista de audio): silencio en su lugar
+  const conAudio = /Audio:/.test(spawnSync(FF, ['-hide_banner', '-i', SRC], { encoding: 'utf8' }).stderr || '');
   card('intro.png', 2.4, 'c0');
   datos.goles.forEach((g, k) => {
     const d = +(g.fin - g.inicio).toFixed(2);
     const v = add(['-ss', String(g.inicio), '-t', String(d), '-i', SRC]);
     const o = add(['-loop', '1', '-t', String(d), '-i', path.join(W, `l${k + 1}.png`)]);
+    const a = conAudio ? v : add(['-f', 'lavfi', '-t', String(d), '-i', 'anullsrc=r=48000:cl=stereo']);
     f.push(`[${v}:v]scale=1280:720,setsar=1,fps=30[r${k}]`, `[${o}:v]format=rgba[o${k}]`,
       `[r${k}][o${k}]overlay=0:0:shortest=1,format=yuv420p,${fadeV(d)}[g${k}v]`,
-      `[${v}:a]aresample=48000,aformat=channel_layouts=stereo,${fadeA(d)}[g${k}a]`);
+      `[${a}:a]aresample=48000,aformat=channel_layouts=stereo,${fadeA(d)}[g${k}a]`);
   });
   card('outro.png', 2.6, 'c9');
   const segs = ['c0', ...datos.goles.map((_, k) => 'g' + k), 'c9'];

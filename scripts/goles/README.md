@@ -40,3 +40,10 @@ Borrar `fuentes/goles/v<id>/` entera (source.mp4 incluido). El compilado queda e
 
 ## Goles de la semana
 Cada noche con goles deja su compilado en R2 `videos/goles/<fecha>/compilado.mp4` (y los datos en `_fuentes/goles/datos/<fecha>.json`) para armar el video de los goles de la semana. Hasta ahora: 2026-09-30 (amistosos), 2026-10-05 (VPUG Liga Pretemporada, 3 goles de nikileo527), 2026-10-12 (VPUG, 2 goles de NicoBJ_96 — sin compilado propio a pedido de Juan, por ser pocos: el recorte con solo los goles está en R2 `_fuentes/goles/vivo-2026-10-12/source.mp4`; bajarlo a `fuentes/goles/vvivo-2026-10-12/` para usar los datos). Recordar: el video semanal publicado lleva música propia que no se repite (scripts/lib/musica.mjs).
+
+## Noche sin vigía / vivo desde otro canal (2026-10-22)
+Esa noche la señal salió del YouTube de RS32-DaniStone (no de enohcaid), así que el vigía no corrió. Se hizo a mano:
+- **Fuente limpia:** el VOD de YouTube del canal que transmitió (sin overlay) es mejor que el de topsecretfc (el overlay tapa la cancha abajo a la izquierda y puede mostrar el rival equivocado). YouTube recién deja bajarlo unas horas después del vivo, y **solo con yt-dlp actualizado + `--js-runtimes node`** (con la versión vieja se clavaba en 0 KB/s). El audio vino vacío: `compilado.cjs` pone silencio si la fuente no tiene audio.
+- **Goles:** `node scripts/probar-marcador.mjs <source.mp4>` da el segundo de cada cambio de marcador y la fila (local/visita) → recortes del marcador para confirmar el resultado. Clip = cambio − 14 s → cambio + 2,5 s, revisado cuadro a cuadro: cuando el marcador cambia recién en el saque del medio hay que cortar antes (el 2-3 del 22/10).
+- Los clips con overlay de topsecretfc no se usan si la animación del jugador asoma sobre la placa del goleador (quedan dos jugadores en pantalla).
+- 2026-10-22: compilado en R2 `videos/goles/2026-10-22/compilado.mp4` (+ `poster.jpg`), 5 goles (Cabers14, Lautavester7 ×3, NicoBJ_96). El gol a Sub 21 del 20/10 solo existe con overlay: quedó afuera.
