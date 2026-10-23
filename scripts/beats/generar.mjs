@@ -76,7 +76,7 @@ const r = spawnSync('python', ['-m', 'uv', 'run', 'python', 'cli.py', '--config'
   // float32: en la GTX 1070 (Pascal) el float16 se desborda (NaN) al generar con voz (2026-10-23)
   env: { ...process.env, ACESTEP_DTYPE: process.env.ACESTEP_DTYPE || 'float32',
     // la placa quedaba fragmentada (OOM pidiendo 48 MB con 2,6 GB libres); descargar el DiT a la RAM no entra en 16 GB
-    PYTORCH_CUDA_ALLOC_CONF: process.env.PYTORCH_CUDA_ALLOC_CONF || 'expandable_segments:True', PYTHONIOENCODING: 'utf-8', PATH: `${path.dirname(ffmpegPath)}${path.delimiter}${process.env.PATH}` },
+    PYTORCH_CUDA_ALLOC_CONF: process.env.PYTORCH_CUDA_ALLOC_CONF || 'expandable_segments:True', ACESTEP_FREE_DIT_BEFORE_VAE: '1', PYTHONIOENCODING: 'utf-8', PATH: `${path.dirname(ffmpegPath)}${path.delimiter}${process.env.PATH}` },
 });
 fs.rmSync(path.join(ACE, 'instruction.txt'), { force: true });
 fs.rmSync(cfg, { force: true });

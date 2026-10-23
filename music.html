@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Secret FC · Music</title>
+<!-- Música propia del club (pedido de Juan, 2026-10-23: "subí los temas a una página en nuestro dominio, /music").
+     GitHub Pages sirve topsecret.ar/music desde este archivo. Los datos salen del catálogo público que arma
+     scripts/beats/cantar.mjs (R2 musica/catalogo.json): título, concepto, tempo, tonalidad, letra (inglés),
+     versión con voz e instrumental. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Top Secret FC">
+<meta property="og:title" content="Music · Top Secret FC">
+<meta property="og:description" content="Los temas propios del club: cada uno cuenta una historia.">
+<meta property="og:url" content="https://topsecret.ar/music">
+<link rel="icon" type="image/png" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png">
+<link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Bebas+Neue&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0A07; --card:#16130B; --card2:#1D1910;
+  --gold:#C9A84C; --gold2:#E8C97A;
+  --text:#F2EEE0; --text2:rgba(242,238,224,.66); --mid:rgba(242,238,224,.44); --border:rgba(242,238,224,.08);
+  --topbar:64px; --gutter:clamp(16px,3vw,40px); --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Barlow,sans-serif;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:calc(var(--topbar) + 56px) var(--gutter) 90px}
+.kicker{font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.24em;color:var(--gold)}
+h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spacing:-.04em;margin-top:14px}
+.lead{max-width:640px;margin-top:18px;font-size:1.12rem;line-height:1.55;color:var(--text2)}
+.lista{margin-top:48px;display:flex;flex-direction:column;gap:14px}
+.tema{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px 24px;display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:center;transition:border-color .2s ease,background-color .2s ease}
+.tema.sonando{border-color:rgba(201,168,76,.55);background:var(--card2)}
+.play{width:64px;height:64px;border-radius:50%;border:0;background:var(--gold);color:#0B0A07;display:grid;place-items:center;cursor:pointer;transition:transform .15s ease}
+.play:hover{transform:scale(1.06)}
+.play svg{width:24px;height:24px}
+.info{min-width:0}
+.titulo{font-weight:900;font-size:1.6rem;letter-spacing:-.02em;line-height:1.05}
+.meta{margin-top:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--mid);text-transform:uppercase}
+.meta b{color:var(--gold2);font-weight:700}
+.concepto{margin-top:8px;color:var(--text2);font-size:.98rem;line-height:1.45}
+.acciones{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.chip{border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--mono);font-weight:700;font-size:.7rem;letter-spacing:.16em;padding:9px 14px;border-radius:999px;cursor:pointer;text-transform:uppercase;transition:border-color .2s ease,color .2s ease}
+.chip:hover,.chip.on{border-color:var(--gold);color:var(--gold)}
+.chip[disabled]{opacity:.35;cursor:default}
+.barra{grid-column:1/-1;height:4px;border-radius:4px;background:rgba(242,238,224,.08);overflow:hidden;cursor:pointer;display:none}
+.tema.sonando .barra{display:block}
+.barra i{display:block;height:100%;width:0;background:var(--gold)}
+.letra{grid-column:1/-1;display:none;white-space:pre-line;font-size:1.02rem;line-height:1.7;color:var(--text);padding:6px 0 4px 84px;columns:2 300px;column-gap:40px}
+.letra .sec{font-family:var(--mono);font-weight:700;font-size:.68rem;letter-spacing:.22em;color:var(--gold);display:block;margin-top:14px;break-after:avoid}
+.tema.con-letra .letra{display:block}
+.pend{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;color:var(--mid);text-transform:uppercase}
+.vacio{margin-top:40px;color:var(--mid)}
+@media (max-width:700px){
+  .tema{grid-template-columns:52px 1fr;gap:14px;padding:18px}
+  .play{width:52px;height:52px}
+  .acciones{grid-column:1/-1;justify-content:flex-start}
+  .letra{padding-left:0;columns:1}
+  .titulo{font-size:1.35rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">TOP SECRET FC · MUSIC</div>
+  <h1>Music</h1>
+  <p class="lead">Los temas propios del club. Cada uno nace de una historia que cualquiera vivió alguna vez: la noche antes de algo grande, el esfuerzo que nadie ve, la herida que tarda en cerrar.</p>
+  <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
+</div>
+<audio id="audio" preload="none"></audio>
+<script>
+const CATALOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/catalogo.json';
+const PLAY = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>';
+const PAUSA = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+const audio = document.getElementById('audio');
+let temas = [], actual = null, version = {};   // version[slug] = 'voz' | 'instrumental'
+const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const letraHtml = l => esc(l).replace(/^\[(verse|chorus|intro|outro|pre-chorus|bridge)\]\s*$/gim, (_, s) => `<span class="sec">${s.toUpperCase()}</span>`);
+const fuente = t => (version[t.slug] || (t.voz ? 'voz' : 'instrumental')) === 'voz' ? t.voz : t.instrumental;
+
+function pintar() {
+  const lista = document.getElementById('lista');
+  if (!temas.length) { lista.innerHTML = '<div class="vacio">Pronto.</div>'; return; }
+  lista.innerHTML = temas.map(t => `
+    <div class="tema" id="t-${t.slug}">
+      <button class="play" aria-label="Reproducir ${esc(t.titulo)}" data-play="${t.slug}">${PLAY}</button>
+      <div class="info">
+        <div class="titulo">${esc(t.titulo)}</div>
+        <div class="meta">${[t.fecha, t.bpm && `<b>${t.bpm}</b> BPM`, t.tonalidad].filter(Boolean).join(' · ')}</div>
+        <div class="concepto">${esc(t.concepto)}</div>
+      </div>
+      <div class="acciones">
+        ${t.voz ? `<button class="chip on" data-ver="${t.slug}:voz">Con voz</button>` : '<span class="pend">Voz en camino</span>'}
+        ${t.instrumental ? `<button class="chip${t.voz ? '' : ' on'}" data-ver="${t.slug}:instrumental">Instrumental</button>` : ''}
+        ${t.letra ? `<button class="chip" data-letra="${t.slug}">Letra</button>` : ''}
+      </div>
+      <div class="barra" data-barra="${t.slug}"><i></i></div>
+      ${t.letra ? `<div class="letra">${letraHtml(t.letra)}</div>` : ''}
+    </div>`).join('');
+}
+
+function tocar(slug) {
+  const t = temas.find(x => x.slug === slug); if (!t) return;
+  const src = fuente(t); if (!src) return;
+  if (actual === slug && !audio.paused) { audio.pause(); return; }
+  if (actual !== slug || !audio.src.endsWith(src.split('/').pop())) { audio.src = src; }
+  actual = slug; audio.play().catch(() => {});
+}
+function marcar() {
+  document.querySelectorAll('.tema').forEach(el => {
+    const s = el.id.slice(2), on = s === actual;
+    el.classList.toggle('sonando', on);
+    el.querySelector('.play').innerHTML = on && !audio.paused ? PAUSA : PLAY;
+  });
+}
+audio.addEventListener('play', marcar); audio.addEventListener('pause', marcar);
+audio.addEventListener('ended', () => {                   // sigue con el próximo tema
+  const i = temas.findIndex(t => t.slug === actual);
+  if (i >= 0 && i < temas.length - 1) tocar(temas[i + 1].slug); else marcar();
+});
+audio.addEventListener('timeupdate', () => {
+  const b = actual && document.querySelector(`[data-barra="${actual}"] i`);
+  if (b && audio.duration) b.style.width = (audio.currentTime / audio.duration * 100) + '%';
+});
+document.addEventListener('click', e => {
+  const p = e.target.closest('[data-play]'); if (p) return tocar(p.dataset.play);
+  const v = e.target.closest('[data-ver]');
+  if (v) {
+    const [slug, ver] = v.dataset.ver.split(':'); version[slug] = ver;
+    v.parentElement.querySelectorAll('[data-ver]').forEach(c => c.classList.toggle('on', c === v));
+    if (actual === slug) { const pos = audio.currentTime; audio.src = fuente(temas.find(t => t.slug === slug)); audio.currentTime = pos; audio.play().catch(() => {}); }
+    return;
+  }
+  const l = e.target.closest('[data-letra]');
+  if (l) { const el = document.getElementById('t-' + l.dataset.letra); el.classList.toggle('con-letra'); l.classList.toggle('on'); return; }
+  const b = e.target.closest('[data-barra]');
+  if (b && b.dataset.barra === actual && audio.duration) { const r = b.getBoundingClientRect(); audio.currentTime = (e.clientX - r.left) / r.width * audio.duration; }
+});
+
+fetch(CATALOGO + '?' + Date.now()).then(r => r.json()).then(c => {
+  // los más nuevos primero; con voz antes que los que todavía no la tienen
+  temas = (c.temas || []).sort((a, b) => (b.voz ? 1 : 0) - (a.voz ? 1 : 0) || String(b.fecha).localeCompare(String(a.fecha)));
+  pintar();
+}).catch(() => { document.getElementById('lista').innerHTML = '<div class="vacio">No se pudo cargar la música. Probá de nuevo en un rato.</div>'; });
+</script>
+<script src="layout.js?v=25"></script>
+</body>
+</html>
