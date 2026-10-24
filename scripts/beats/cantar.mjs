@@ -16,7 +16,7 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { ROOT, loadEnv } from '../lib/env.mjs';
-import { putFile, getFile } from '../lib/r2.mjs';
+import { putFile as putR2, getFile } from '../lib/r2.mjs';
 
 loadEnv();
 const ACE = path.join(ROOT, 'fuentes', 'beats', 'ACE-Step-1.5');
@@ -28,6 +28,10 @@ const opt = (k, d) => { const i = argv.indexOf(k); return i < 0 ? d : argv[i + 1
 const SOLO = opt('--solo', null), REHACER = argv.includes('--rehacer'), FUERZA = Number(opt('--fuerza', 0.5));
 const log = m => console.log(`${new Date().toLocaleTimeString('es-AR')} [cantar] ${m}`);
 fs.mkdirSync(DIR, { recursive: true });
+// la subida a R2 se cortó una vez (ECONNABORTED) y tiró abajo toda la tanda: 4 intentos con espera
+async function putFile(local, clave) {
+  for (let i = 1; ; i++) { try { return await putR2(local, clave); } catch (e) { if (i >= 4) throw e; log(`  subida de ${clave} falló (${e.code || e.message}), reintento ${i}…`); await new Promise(r => setTimeout(r, 5000 * i)); } }
+}
 
 const letras = JSON.parse(fs.readFileSync(LETRAS, 'utf8'));
 const guardar = () => fs.writeFileSync(LETRAS, JSON.stringify(letras, null, 2) + '\n');
@@ -63,7 +67,11 @@ if (argv.includes('--catalogo')) { await catalogo(); process.exit(0); }
 for (const l of letras) {
   if (SOLO && l.slug !== SOLO) continue;
   if (l.voz && !REHACER) continue;
-  const salida = path.join(DIR, l.slug); fs.rmSync(salida, { recursive: true, force: true }); fs.mkdirSync(salida, { recursive: true });
+  try {
+  const salida = path.join(DIR, l.slug);
+  // si ya se generó (y falló algo después, p. ej. la subida), se reusa: no se vuelve a pedir a la placa
+  const hecho = !REHACER && fs.existsSync(salida) && fs.readdirSync(salida).some(f => f.endsWith('.mp3'));
+  if (!hecho) { fs.rmSync(salida, { recursive: true, force: true }); fs.mkdirSync(salida, { recursive: true }); }
   let src = null;
   if (l.original) { src = path.join(DIR, `${l.slug}-instrumental.mp3`); if (!fs.existsSync(src)) await getFile(`_fuentes/musica/propios/${l.original}`, src); }
   const duracion = Math.round(src ? dur(src) : 95);
@@ -75,10 +83,10 @@ for (const l of letras) {
     `caption = ${toml(l.caption)}`, `bpm = ${l.bpm}`, `keyscale = ${toml(l.tonalidad)}`, `lyrics = ${toml(l.letra)}`,
     `duration = ${duracion}`, `batch_size = 1`, `audio_format = "mp3"`, `save_dir = ${toml(salida)}`,
   ].join('\n') + '\n');
-  log(`${l.titulo} (${src ? 'cover de ' + l.original : 'tema nuevo'}, ${duracion} s)…`);
+  log(`${l.titulo} (${src ? 'cover de ' + l.original : 'tema nuevo'}, ${duracion} s)${hecho ? ' — ya generado, solo sube' : '…'}`);
   const t0 = Date.now();
   fs.rmSync(path.join(ACE, 'instruction.txt'), { force: true });
-  spawnSync('python', ['-m', 'uv', 'run', 'python', 'cli.py', '--config', cfg, '--log-level', 'WARNING'], {
+  if (!hecho) spawnSync('python', ['-m', 'uv', 'run', 'python', 'cli.py', '--config', cfg, '--log-level', 'WARNING'], {
     cwd: ACE, stdio: ['pipe', 'ignore', 'inherit'], input: '\n'.repeat(3),
     // GTX 1070: float32 (el float16 da NaN) y memoria sin fragmentar (ver generar.mjs)
     env: { ...process.env, ACESTEP_DTYPE: 'float32', PYTORCH_CUDA_ALLOC_CONF: 'expandable_segments:True', ACESTEP_FREE_DIT_BEFORE_VAE: '1', PYTHONIOENCODING: 'utf-8', PATH: `${path.dirname(ffmpegPath)}${path.delimiter}${process.env.PATH}` },
@@ -93,5 +101,6 @@ for (const l of letras) {
   l.voz = `musica/voz/${l.slug}.mp3?v=${Date.now().toString(36)}`; l.generado = new Date().toISOString(); guardar();
   log(`  ✓ ${l.titulo} en ${Math.round((Date.now() - t0) / 1000)} s → ${MEDIA}musica/voz/${l.slug}.mp3`);
   await catalogo();
+  } catch (e) { log(`  ✗ ${l.titulo}: ${e.message}`); }
 }
 await catalogo();
