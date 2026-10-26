@@ -31,6 +31,17 @@ body{background:var(--bg);color:var(--text);font-family:Barlow,sans-serif;min-he
 h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spacing:-.04em;margin-top:14px}
 .lead{max-width:640px;margin-top:18px;font-size:1.12rem;line-height:1.55;color:var(--text2)}
 .lista{margin-top:48px;display:flex;flex-direction:column;gap:14px}
+.album{margin-top:56px}
+.album:first-child{margin-top:0}
+.album-cab{display:grid;grid-template-columns:clamp(140px,22vw,220px) 1fr;gap:clamp(18px,3vw,34px);align-items:end;margin-bottom:22px}
+.tapa{aspect-ratio:1;width:100%;border-radius:14px;background:var(--card2) center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.album-tipo{font-family:var(--mono);font-weight:700;font-size:.7rem;letter-spacing:.24em;color:var(--gold);text-transform:uppercase}
+.album-titulo{font-weight:900;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:.95;letter-spacing:-.035em;margin-top:8px}
+.album-titulo small{display:block;font-size:.38em;letter-spacing:.02em;color:var(--text2);font-weight:700;margin-top:6px}
+.album-desc{margin-top:12px;color:var(--text2);line-height:1.5;max-width:560px}
+.album-meta{margin-top:10px;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--mid);text-transform:uppercase}
+.temas{display:flex;flex-direction:column;gap:12px}
+.pista{font-family:var(--mono);font-weight:700;color:var(--mid);margin-right:10px;font-size:.9rem}
 .tema{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px 24px;display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:center;transition:border-color .2s ease,background-color .2s ease}
 .tema.sonando{border-color:rgba(201,168,76,.55);background:var(--card2)}
 .play{width:64px;height:64px;border-radius:50%;border:0;background:var(--gold);color:#0B0A07;display:grid;place-items:center;cursor:pointer;transition:transform .15s ease}
@@ -60,6 +71,7 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
   .acciones{grid-column:1/-1;justify-content:flex-start}
   .letra{padding-left:0;columns:1}
   .titulo{font-size:1.35rem}
+  .album-cab{grid-template-columns:110px 1fr;align-items:center}
 }
 </style>
 </head>
@@ -67,7 +79,7 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
 <div class="wrap">
   <div class="kicker">TOP SECRET FC · MUSIC</div>
   <h1>Music</h1>
-  <p class="lead">Los temas propios del club. Cada uno nace de una historia que cualquiera vivió alguna vez: la noche antes de algo grande, el esfuerzo que nadie ve, la herida que tarda en cerrar.</p>
+  <p class="lead">Los temas propios del club. Cada uno nace de algo que cualquiera vivió alguna vez: lo que nos empuja, lo que nos duele y lo que no podemos dejar de querer.</p>
   <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
 </div>
 <audio id="audio" preload="none"></audio>
@@ -76,20 +88,18 @@ const CATALOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/music
 const PLAY = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>';
 const PAUSA = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
 const audio = document.getElementById('audio');
-let temas = [], actual = null, version = {};   // version[slug] = 'voz' | 'instrumental'
+let temas = [], albumes = [], actual = null, version = {};   // version[slug] = 'voz' | 'instrumental'
 const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const letraHtml = l => esc(l).replace(/^\[(verse|chorus|intro|outro|pre-chorus|bridge)\][ \t]*\r?\n?/gim, (_, s) => `<span class="sec">${s.toUpperCase()}</span>`).replace(/\n{2,}/g, '\n');
 const fuente = t => (version[t.slug] || (t.voz ? 'voz' : 'instrumental')) === 'voz' ? t.voz : t.instrumental;
 
-function pintar() {
-  const lista = document.getElementById('lista');
-  if (!temas.length) { lista.innerHTML = '<div class="vacio">Pronto.</div>'; return; }
-  lista.innerHTML = temas.map(t => `
+const mmss = s => s ? `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}` : '';
+const temaHtml = t => `
     <div class="tema" id="t-${t.slug}">
       <button class="play" aria-label="Reproducir ${esc(t.titulo)}" data-play="${t.slug}"${t.voz || t.instrumental ? '' : ' disabled title="Audio en camino"'}>${PLAY}</button>
       <div class="info">
-        <div class="titulo">${esc(t.titulo)}</div>
-        <div class="meta">${[t.fecha, t.bpm && `<b>${t.bpm}</b> BPM`, t.tonalidad].filter(Boolean).join(' · ')}</div>
+        <div class="titulo"><span class="pista">${String(t.pista || '').padStart(2, '0')}</span>${esc(t.titulo)}</div>
+        <div class="meta">${[t.fecha, t.bpm && `<b>${t.bpm}</b> BPM`, t.tonalidad, mmss(t.duracion)].filter(Boolean).join(' · ')}</div>
         <div class="concepto">${esc(t.concepto)}</div>
       </div>
       <div class="acciones">
@@ -99,7 +109,28 @@ function pintar() {
       </div>
       <div class="barra" data-barra="${t.slug}"><i></i></div>
       ${t.letra ? `<div class="letra">${letraHtml(t.letra)}</div>` : ''}
-    </div>`).join('');
+    </div>`;
+
+function pintar() {
+  const lista = document.getElementById('lista');
+  if (!temas.length) { lista.innerHTML = '<div class="vacio">Pronto.</div>'; return; }
+  lista.innerHTML = albumes.map(al => {
+    const ts = temas.filter(t => t.album === al.id && (al.volumen == null || t.volumen === al.volumen));
+    const vol = al.volumen ? `<small>Vol. ${al.volumen}</small>` : '';
+    return `
+    <section class="album">
+      <div class="album-cab">
+        <div class="tapa" role="img" aria-label="Portada de ${esc(al.titulo)}" style="background-image:url('${esc(al.portada)}')"></div>
+        <div>
+          <div class="album-tipo">Álbum</div>
+          <h2 class="album-titulo">${esc(al.titulo)}${vol}</h2>
+          <p class="album-desc">${esc(al.descripcion)}</p>
+          <div class="album-meta">${ts.length ? `${ts.length} tema${ts.length > 1 ? 's' : ''}` : 'El primer tema llega esta noche'}</div>
+        </div>
+      </div>
+      <div class="temas">${ts.map(temaHtml).join('')}</div>
+    </section>`;
+  }).join('');
 }
 
 function tocar(slug) {
@@ -141,8 +172,11 @@ document.addEventListener('click', e => {
 });
 
 fetch(CATALOGO + '?' + Date.now()).then(r => r.json()).then(c => {
-  // los más nuevos primero; con voz antes que los que todavía no la tienen
-  temas = (c.temas || []).sort((a, b) => (b.voz ? 1 : 0) - (a.voz ? 1 : 0) || String(b.fecha).localeCompare(String(a.fecha)));
+  albumes = c.albumes || [{ id: null, titulo: 'Temas', descripcion: '' }];
+  // orden de reproducción = orden en pantalla: álbum por álbum; Thrive del más nuevo al más viejo
+  const orden = t => albumes.findIndex(a => a.id === t.album && (a.volumen == null || a.volumen === t.volumen));
+  temas = (c.temas || []).map(t => c.albumes ? t : { ...t, album: null })
+    .sort((a, b) => orden(a) - orden(b) || (a.album === 'thrive' ? (b.pista || 0) - (a.pista || 0) : (a.pista || 0) - (b.pista || 0)));
   pintar();
 }).catch(() => { document.getElementById('lista').innerHTML = '<div class="vacio">No se pudo cargar la música. Probá de nuevo en un rato.</div>'; });
 </script>

@@ -138,7 +138,8 @@ Log "Disparando agente cloud para artículo..."
 try {
     # Nota: claude -p ya es no-interactivo; el flag --non-interactive no existe
     # y hacía fallar el disparo del agente.
-    $claudeOutput = & claude -p "Usa la herramienta RemoteTrigger para disparar el trigger de Top Secret FC noticias ahora mismo. El trigger_id es: $triggerId. Accion: run. No hagas nada mas." 2>&1
+    # Haiku: es solo apretar el botón de la rutina, no hace falta un modelo grande (2026-10-26)
+    $claudeOutput = & claude -p --model haiku "Usa la herramienta RemoteTrigger para disparar el trigger de Top Secret FC noticias ahora mismo. El trigger_id es: $triggerId. Accion: run. No hagas nada mas." 2>&1
     Log "Agente disparado: $($claudeOutput | Select-Object -First 3 | Out-String)"
 } catch {
     Log "Error disparando agente: $_"

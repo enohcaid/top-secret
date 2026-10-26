@@ -17,6 +17,7 @@ import { spawnSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { ROOT, loadEnv } from '../lib/env.mjs';
 import { putFile as putR2, getFile } from '../lib/r2.mjs';
+import { armarCatalogo } from './catalogo.mjs';
 
 loadEnv();
 const ACE = path.join(ROOT, 'fuentes', 'beats', 'ACE-Step-1.5');
@@ -38,29 +39,8 @@ const guardar = () => fs.writeFileSync(LETRAS, JSON.stringify(letras, null, 2) +
 const dur = f => { const m = (spawnSync(ffmpegPath, ['-hide_banner', '-i', f], { encoding: 'utf8' }).stderr.match(/Duration: (\d+):(\d+):([\d.]+)/) || []); return m.length ? +m[1] * 3600 + +m[2] * 60 + +m[3] : 90; };
 const toml = s => JSON.stringify(s);
 
-async function catalogo() {
-  const reg = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/beats/temas-diarios.json'), 'utf8')).temas;
-  const lista = [];
-  for (const l of letras) {
-    const t = reg.find(x => x.archivo === l.original);
-    let instrumental = null;
-    if (l.original) {                                     // copia pública del instrumental (los de _fuentes son privados)
-      const clave = `musica/temas/${l.slug}.mp3`;
-      if (!l.instrumentalPublico) {
-        const local = path.join(DIR, `${l.slug}-instrumental.mp3`);
-        if (!fs.existsSync(local)) await getFile(`_fuentes/musica/propios/${l.original}`, local);
-        await putFile(local, clave); l.instrumentalPublico = true; guardar();
-      }
-      instrumental = MEDIA + clave;
-    }
-    lista.push({ slug: l.slug, titulo: l.titulo, fecha: (l.original || '').slice(0, 10) || l.fecha || null, concepto: l.concepto,
-      bpm: l.bpm, tonalidad: l.tonalidad, letra: l.letra, voz: l.voz ? MEDIA + l.voz : null, instrumental, original: t?.nombre || null });
-  }
-  const f = path.join(DIR, 'catalogo.json');
-  fs.writeFileSync(f, JSON.stringify({ actualizado: new Date().toISOString(), temas: lista }, null, 1));
-  await putFile(f, 'musica/catalogo.json');
-  log(`catálogo: ${lista.length} temas (${lista.filter(x => x.voz).length} con voz)`);
-}
+// el catálogo público (por álbum: The Shorts / Thrive) lo arma scripts/beats/catalogo.mjs
+const catalogo = () => armarCatalogo({ log });
 
 if (argv.includes('--catalogo')) { await catalogo(); process.exit(0); }
 
