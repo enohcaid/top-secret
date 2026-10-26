@@ -73,6 +73,8 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 ## Referencias técnicas
 
 - [reference_beats_propios](reference_beats_propios.md) — Tema del día (scripts/beats/diario.mjs, 10:00, automático) + herramientas de composición por código; ACE-Step quedó descartado
+- [reference_ia_local](reference_ia_local.md) — IA de texto de las tareas automáticas (scripts/lib/ia.mjs): Claude en una llamada liviana (~1K tokens de contexto en vez de ~47K) + Ollama local de respaldo; comparación de modelos 2026-10-26 y por qué lo público sigue en Claude
+- [project_thrive](project_thrive.md) — Álbum Thrive: un tema con voz por noche a las 2:00 (scripts/beats/thrive.mjs), amor que no siempre hace bien, 2:30–3:30; The Shorts = los 23 temas anteriores en 2 volúmenes; /music por álbumes
 - [reference_calendario_dead_code](reference_calendario_dead_code.md) — calendario.html tiene funciones de renderizado muertas (nunca invocadas) que pueden confundir — dónde está el widget "HOY" real
 - [reference_canva_imagen_a_video](reference_canva_imagen_a_video.md) — Automatización de "Imagen a video" de Canva (videos de 5 s desde una imagen) con scripts/canva-imagen-a-video.mjs vía el Chrome CDP
 - [reference_canva_resumen_semanal](reference_canva_resumen_semanal.md) — Proceso completo y limitaciones reales para armar el video 'Resumen Semanal' (goles de la semana) en Canva, distinto del proceso de 'Formación Titular'

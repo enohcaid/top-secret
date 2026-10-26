@@ -86,9 +86,9 @@ async function armar() {
     n = { titulo: 'TÍTULO DE MUESTRA', bajada: 'Bajada de muestra', apertura: 'Apertura.', goles: 'Goles.', viene: 'Viene.', cierre: 'Cierre.' };
   } else {
     log('Textos de las redes (Claude)…');
-    t = escribirTextos({ pieza: 'Formato "La semana en datos": un carrusel de 6 placas (portada, resultados, goleadores, mejor promedio, el equipo en números, lo que viene) y un video vertical de 25 s con las mismas escenas animadas y música original del club.', datos: datosTexto });
+    t = await escribirTextos({ pieza: 'Formato "La semana en datos": un carrusel de 6 placas (portada, resultados, goleadores, mejor promedio, el equipo en números, lo que viene) y un video vertical de 25 s con las mismas escenas animadas y música original del club.', datos: datosTexto });
     log('Noticia del sitio (Claude)…');
-    n = escribirNoticia({ datos: datosTexto });
+    n = await escribirNoticia({ datos: datosTexto });
   }
 
   // Noticia del sitio con las placas adentro (mismos bloques que el resto de las notas: specs, img, pair, h).

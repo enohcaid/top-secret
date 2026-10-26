@@ -4,10 +4,11 @@
 // nada deportivo. Duración entre 2:30 y 3:30. Reemplaza al beat diario compuesto por Claude (diario.mjs).
 //
 //   node scripts/beats/thrive.mjs                  → el tema de hoy, si todavía no existe
-//   node scripts/beats/thrive.mjs --fecha 2026-10-27 [--modelo qwen3:14b] [--solo-letra]
+//   node scripts/beats/thrive.mjs --fecha 2026-10-27 [--local] [--modelo gemma3:12b] [--solo-letra]
 //
-// 1. Letra, concepto y sonido: IA local (Ollama, scripts/lib/ia.mjs) con el encargo scripts/beats/thrive-encargo.md;
-//    si la local falla o no pasa los controles, Claude.
+// 1. Letra, concepto y sonido con el encargo scripts/beats/thrive-encargo.md: Claude Opus en UNA llamada liviana
+//    (scripts/lib/ia.mjs, ~1K tokens de contexto); si no tiene cupo o no pasa los controles, el modelo local
+//    (gemma3:12b), para que el tema de la noche salga siempre.
 // 2. Música y voz: ACE-Step text2music en la GTX 1070 (mismo setup que cantar.mjs).
 // 3. Pulido (-14 LUFS, fundido) → R2 musica/thrive/<slug>.mp3, registro scripts/beats/thrive.json, catálogo de
 //    topsecret.ar/music, commit y push. Tarea "TopSecretFC-Thrive" (run-thrive-hidden.vbs). Log: scripts/thrive.log
@@ -60,6 +61,11 @@ function validar(j) {
   if (versos.length < 36) return `letra corta (${versos.length} versos)`;
   const dep = l.match(DEPORTE) || String(j.titulo).match(DEPORTE);
   if (dep) return `palabra deportiva "${dep[0]}"`;
+  // en inglés (el 14B local tituló en castellano): ni acentos ni palabras castellanas comunes en título, sonido o letra
+  const es = `${j.titulo}
+${j.caption}
+${l}`.match(/[áéíóúñ¿¡]|(?:del|las|los|una|que|con|por|para|voz|corazón)/i);
+  if (es) return `castellano en la letra/título/sonido ("${es[0]}")`;
   if (reg.temas.some(t => t.titulo.toLowerCase() === String(j.titulo).toLowerCase())) return `título repetido "${j.titulo}"`;
 }
 
@@ -68,8 +74,8 @@ if (!tema) {
   await asegurarOllama();
   const anteriores = reg.temas.slice(-30).map(t => `- "${t.titulo}" · trait: ${t.rasgo} · ${t.bpm} BPM, ${t.tonalidad} · voice: ${t.voz} · ${t.concepto}`).join('\n') || '(none yet: this is the first song of the album)';
   const encargo = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-encargo.md'), 'utf8').replace('{{FECHA}}', FECHA).replace('{{ANTERIORES}}', anteriores);
-  log(`Escribiendo la letra (${opt('--modelo', MODELO)})…`);
-  const j = await pedirJSON(encargo, { modelo: opt('--modelo', MODELO), claves: ['titulo', 'concepto', 'rasgo', 'caption', 'voz', 'tonalidad', 'letra'], validar, temperatura: 0.9 });
+  log('Escribiendo la letra…');
+  const j = await pedirJSON(encargo, { orden: argv.includes('--local') ? ['local', 'claude'] : ['claude', 'local'], modelo: opt('--modelo', MODELO), claves: ['titulo', 'concepto', 'rasgo', 'caption', 'voz', 'tonalidad', 'letra'], validar, temperatura: 0.9 });
   const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${FECHA}`;
   tema = { fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),
     caption: j.caption.trim(), bpm: Math.round(j.bpm), tonalidad: j.tonalidad.trim(), duracion: Math.round(j.duracion), letra: j.letra.trim() };
