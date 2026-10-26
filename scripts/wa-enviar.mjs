@@ -39,7 +39,9 @@ const client = new Client({
     args: ['--no-first-run', '--disable-extensions', '--disable-gpu'] },
 });
 client.on('qr', () => { console.error('La sesión pide QR: vincularla primero con scripts/amistosos.mjs.'); process.exit(1); });
-setTimeout(() => { console.error('WhatsApp no quedó listo en 5 min.'); process.exit(1); }, 300000);
+// WA_TIMEOUT (ms) para darle más margen cuando la sesión tarda en sincronizar (2026-10-26 no llegó en 5 min).
+const LIMITE = +(process.env.WA_TIMEOUT || 300000);
+setTimeout(() => { console.error(`WhatsApp no terminó en ${LIMITE / 60000} min.`); process.exit(1); }, LIMITE);
 
 client.on('ready', async () => {
   try {
