@@ -2,6 +2,13 @@
 
 La rutina "Top Secret FC — Noticia Diaria" (`trig_01Kz9ev31E5WfSN2mkVrHq7a`) lee este archivo del repo en cada corrida y lo cumple antes de escribir (si contradice su prompt, gana este archivo). Las correcciones de Juan sobre las notas se agregan acá, sin tocar el prompt.
 
+## Solo para la rutina en la nube: es el RESPALDO (2026-10-26)
+
+Desde el 2026-10-26 la nota la escribe la PC del club (`scripts/noticia-diaria.mjs`, 06:00 con reintentos hasta las 12:00). La rutina en la nube corre a las 13:30 y es solo el respaldo por si la PC estuvo apagada:
+- **Antes de escribir nada**, leé `news/recent_topics` (curl a Firestore). Si la primera entrada tiene la fecha ART de hoy, la nota de hoy ya se escribió (aunque el borrador ya no exista porque se publicó o se descartó): terminá **sin escribir nada** en Firestore.
+- Desde la temporada 4 la competencia oficial en curso es **Espacio Gamer** (en `seed_matches.js` figura como league '11x11'); su fixture está en Firestore `calendario/estado`, campo `custom`. Los arrays `*_SCHEDULE` de convocatoria.html no lo tienen.
+<!-- fin respaldo -->
+
 ## Posiciones (2026-10-14)
 
 La nota del 14/10 presentó a Lautavester7 como "lateral izquierdo": leyó `played_pos: 'DI'` como defensor, y es **delantero izquierdo**.

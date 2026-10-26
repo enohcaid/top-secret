@@ -163,7 +163,8 @@ const DATOS = {
 if (diaHoy === 6 && !jugadosRecientes.length && !partidosHoy.length && !FORZAR) { log('Sábado sin partidos: no hay nota (sale el resumen semanal).'); process.exit(0); }
 
 // ── 2. Escritura ─────────────────────────────────────────────────────────────
-const reglasExtra = fs.readFileSync(path.join(ROOT, 'docs/conocimiento/reglas-noticia-diaria.md'), 'utf8').replace(/^# .*\n+/, '').replace(/^La rutina[^\n]*\n+/m, '');
+const reglasExtra = fs.readFileSync(path.join(ROOT, 'docs/conocimiento/reglas-noticia-diaria.md'), 'utf8').replace(/^# .*\n+/, '').replace(/^La rutina[^\n]*\n+/m, '')
+  .replace(/## Solo para la rutina en la nube[\s\S]*?<!-- fin respaldo -->\n*/, '');   // instrucciones del respaldo en la nube
 const encargo = fs.readFileSync(path.join(ROOT, 'scripts/noticia-diaria-encargo.md'), 'utf8')
   .replace('{{HOY}}', HOY).replace('{{DIA}}', dia(HOY)).replace('{{REGLAS_EXTRA}}', reglasExtra).replace('{{SABADO}}', '')
   .replace('{{DATOS}}', JSON.stringify(DATOS, null, 1));
