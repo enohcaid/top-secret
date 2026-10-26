@@ -32,4 +32,4 @@ Dos tareas reales: la letra de Thrive (`thrive-encargo.md`) y los textos de rede
 
 - Generación de texto sin herramientas → `pedirJSON(prompt, { claves, orden: ['claude','local'] })`, nunca `spawnSync(claude, ['-p', …])` con `cwd: ROOT`.
 - Tareas que necesitan leer o editar archivos (por ejemplo `social/producir.mjs`) siguen siendo un agente de Claude. Si se puede, juntar los datos con código y pedirle a la IA solo el texto.
-- Pendiente: la rutina en la nube de la noticia diaria (Opus 5.5, prompt de 45.000 caracteres) se podría pasar a un script local que junte los datos y haga una sola llamada liviana.
+- Noticia diaria (2026-10-26): `scripts/noticia-diaria.mjs`. El código junta todos los datos y controla la nota; Claude escribe en una llamada liviana, con hasta 3 vueltas de corrección y el modelo local de respaldo. La rutina en la nube quedó como respaldo a las 13:30.
