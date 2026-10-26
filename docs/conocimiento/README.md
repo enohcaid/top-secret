@@ -7,7 +7,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 ## Reglas y preferencias (cómo trabajar)
 
 - [feedback_contenido_visual_motion](feedback_contenido_visual_motion.md) — Regla de Juan: el contenido de redes se tiene que ver de otro nivel; videos con motion design sincronizado a la música (60 fps, desenfoque); el club se comunica por audio, no por chat
-- [feedback_musica_unica](feedback_musica_unica.md) — Cada video publicado lleva su propia música, sin repetir temas (registro scripts/musica-usada.json); desde 2026-10-09 solo temas originales del día (scripts/beats/diario.mjs); el video del equipo de la noche es fijo con Locked In
+- [feedback_musica_unica](feedback_musica_unica.md) — Cada video publicado lleva su propia música, sin repetir temas (registro scripts/musica-usada.json); desde 2026-10-26 el tema del día es la instrumental de Thrive (scripts/beats/thrive.mjs); el video del equipo de la noche es fijo con Locked In
 - [feedback_11x11_two_schedule_sources](feedback_11x11_two_schedule_sources.md) — 11x11 (and other) fixture dates in top-secret live in TWO separate places that must both be edited to actually change what the site shows
 - [feedback_always_push](feedback_always_push.md) — User wants every git commit in top-secret pushed to main immediately, no confirmation needed
 - [feedback_alwayspresent_lo_pone_el_jugador](feedback_alwayspresent_lo_pone_el_jugador.md) — alwaysPresent ("fijo") en convocatoria nunca se marca automáticamente al promover/agregar un jugador — lo tiene que activar el jugador mismo
@@ -72,7 +72,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Referencias técnicas
 
-- [reference_beats_propios](reference_beats_propios.md) — Tema del día (scripts/beats/diario.mjs, 10:00, automático) + herramientas de composición por código; ACE-Step quedó descartado
+- [reference_beats_propios](reference_beats_propios.md) — Beats compuestos por código (historia: el tema del día pasó a Thrive el 2026-10-26) + herramientas de composición
 - [reference_ia_local](reference_ia_local.md) — IA de texto de las tareas automáticas (scripts/lib/ia.mjs): Claude en una llamada liviana (~1K tokens de contexto en vez de ~47K) + Ollama local de respaldo; comparación de modelos 2026-10-26 y por qué lo público sigue en Claude
 - [project_thrive](project_thrive.md) — Álbum Thrive: un tema con voz por noche a las 2:00 (scripts/beats/thrive.mjs), amor que no siempre hace bien, 2:30–3:30; The Shorts = los 23 temas anteriores en 2 volúmenes; /music por álbumes
 - [reference_calendario_dead_code](reference_calendario_dead_code.md) — calendario.html tiene funciones de renderizado muertas (nunca invocadas) que pueden confundir — dónde está el widget "HOY" real

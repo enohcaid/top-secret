@@ -13,4 +13,4 @@ Pedido de Juan (2026-10-26):
 
 Pipeline (`scripts/beats/thrive.mjs`): letra, concepto y sonido con `thrive-encargo.md` (Claude en una llamada liviana; si no hay cupo, gemma3:12b local, ver [[reference_ia_local]]) → controles (duración 160–205 s, rima con estructura, cero palabras deportivas, en inglés, sin títulos repetidos) → ACE-Step text2music en la GTX 1070 → -14 LUFS → R2 `musica/thrive/<slug>.mp3` → registro `scripts/beats/thrive.json` → catálogo (`catalogo.mjs`) → commit. Si falla ACE-Step, la letra queda guardada y la próxima corrida retoma.
 
-Reemplaza al beat instrumental diario compuesto por Claude (`diario.mjs`, tarea `TopSecretFC-TemaDelDia` deshabilitada el 2026-10-26). Los videos siguen tomando música de la biblioteca de beats ya compuestos.
+Cada tema tiene también una **versión instrumental**, con el mismo sonido, tempo y tonalidad y sin voz: aparece en la página como "Instrumental" y entra a la música de los videos (`_fuentes/musica/propios/<fecha> - <Título>.mp3`, ver [[feedback_musica_unica]]). Thrive reemplazó al beat diario de Claude: `diario.mjs` y su tarea se borraron el 2026-10-26.

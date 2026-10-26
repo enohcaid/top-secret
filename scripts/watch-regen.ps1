@@ -1,14 +1,13 @@
 ﻿# Corre via Task Scheduler cada 1 minuto.
 # 1) Si el browser descartó la noticia del día → borra sus imágenes del repo
 #    local (Renders/Daily News) y de GitHub.
-# 2) Si el browser pidió regenerar la noticia → dispara el agente cloud
+# 2) Si el browser pidió regenerar la noticia → la reescribe scripts/noticia-diaria.mjs --forzar
 #    (artículo) y después genera las imágenes localmente.
 
 $ErrorActionPreference = 'Stop'
 $repoRoot   = 'D:\proyectos\top-secret'
 $logFile    = "$repoRoot\scripts\daily-images.log"
 $worker     = 'https://top-secret-proxy.juan-c-m-1985.workers.dev'
-$triggerId  = 'trig_01Kz9ev31E5WfSN2mkVrHq7a'
 
 function Log($msg) {
     $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
@@ -134,8 +133,7 @@ try {
 }
 
 # ── PASO 1: Reescribir el artículo en esta PC (scripts/noticia-diaria.mjs) ───
-# Desde 2026-10-26 la nota la escribe el script local (Claude en una llamada liviana, modelo local de respaldo);
-# la rutina en la nube quedó solo de respaldo.
+# Desde 2026-10-26 la nota la escribe el script local (Claude en una llamada liviana, modelo local de respaldo).
 Log "Reescribiendo la noticia (noticia-diaria.mjs --forzar)..."
 try {
     Push-Location $repoRoot

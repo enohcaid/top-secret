@@ -16,3 +16,6 @@ El 2026-08-10 se descubrió que además de la tarea oficial `TopSecretFC-Noticia
 **Además:** se habilitó el log operativo de Task Scheduler (`wevtutil sl "Microsoft-Windows-TaskScheduler/Operational" /e:true`, requiere PowerShell elevada / UAC) — estaba deshabilitado, por eso [[project_topsecret_tareas_imagenes]] no pudo confirmar con certeza el patrón de fallas del 16/7 ni el de esta vez. De ahora en más el Visor de Eventos debería mostrar si Task Scheduler lanza/mata los procesos del pipeline.
 
 **Cómo aplica:** si vuelve a fallar el pipeline de imágenes diarias, primero revisar `Microsoft-Windows-TaskScheduler/Operational` en el Visor de Eventos para esa franja horaria antes de reconstruir todo por inferencia.
+
+
+**2026-10-26:** la tarea duplicada y su lanzador `run-generate-images-hidden.vbs` se borraron del todo.

@@ -7,7 +7,7 @@ metadata:
   modified: 2026-08-19T13:17:33.021Z
 ---
 
-> **Actualización 2026-10-26:** la nota la escribe `scripts/noticia-diaria.mjs` en la PC (tarea `TopSecretFC-NoticiaDiaria`, 06:00 con reintentos hasta las 12:00; ver [[reference_ia_local]]). La rutina en la nube de abajo es solo el **respaldo** de las 13:30 ART; su prompt completo es `scripts/noticia-respaldo-nube.md`. Las correcciones de Juan siguen yendo en `reglas-noticia-diaria.md`.
+> **Actualización 2026-10-26:** la nota la escribe `scripts/noticia-diaria.mjs` en la PC (tarea `TopSecretFC-NoticiaDiaria`, 06:00 con reintentos hasta las 12:00; ver [[reference_ia_local]]). La rutina en la nube de abajo está **desactivada** (Juan: eliminar lo que no se usa); lo que sigue es historia. Las correcciones de Juan siguen yendo en `reglas-noticia-diaria.md`.
 
 
 The daily news article (Firestore `news/draft`, consumed by `noticias.html` and the local image-generation pipeline) is written by a scheduled **cloud routine** — not local code in this repo. Routine id: `trig_01Kz9ev31E5WfSN2mkVrHq7a`, name "Top Secret FC — Noticia Diaria", fires daily at `0 9 * * *` UTC (06:00 ART). Model: `claude-opus-5-5` since 2026-10-09 (was Sonnet 4.6).

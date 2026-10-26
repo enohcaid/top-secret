@@ -3,14 +3,14 @@
 // Dos motores: un modelo local con Ollama (gratis, GTX 1070 de drygan) y Claude en UNA llamada sin herramientas,
 // corrida desde una carpeta neutra (así no carga CLAUDE.md, memorias ni el repo: miles de tokens menos por llamada).
 // `orden` elige quién va primero; el otro es el respaldo, así la tarea sale aunque uno falle o Claude no tenga cupo.
-// Comparación 2026-10-26 (scripts/ia-comparar.mjs, docs/conocimiento/reference_ia_local.md): los locales de 8–14B
+// Comparación 2026-10-26 (docs/conocimiento/reference_ia_local.md): los locales de 8–14B
 // rompen reglas en textos públicos (rimas, idioma, datos inventados) → para lo creativo/público, Claude primero.
 //
 //   import { pedirTexto, pedirJSON } from './lib/ia.mjs';
-//   const j = await pedirJSON(prompt, { claves: ['titulo', 'letra'], modelo: 'qwen3:14b' });
+//   const j = await pedirJSON(prompt, { claves: ['titulo', 'letra'], orden: ['claude', 'local'] });
 //
-// Modelo por defecto: IA_MODELO en .env (o 'qwen3:14b'). Instalar: winget install Ollama.Ollama; modelos en
-// D:\ollama\models (OLLAMA_MODELS); `ollama pull qwen3:14b`. Comparación de modelos: scripts/ia-comparar.mjs.
+// Modelo local: IA_MODELO en .env (o 'gemma3:12b'). Instalar: winget install Ollama.Ollama; modelos en
+// D:\ollama\models (OLLAMA_MODELS); `ollama pull gemma3:12b`.
 import fs from 'fs';
 import os from 'os';
 import path from 'path';

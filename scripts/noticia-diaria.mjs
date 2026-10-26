@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Noticia diaria del sitio, en la PC del club (Juan, 2026-10-26: "pasá la noticia diaria al esquema liviano y asegurate
 // que corra todos los días sí o sí"). Reemplaza a la rutina en la nube trig_01Kz9ev31E5WfSN2mkVrHq7a (Opus 5.5 en modo
-// agente, prompt de 45K caracteres), que queda solo de respaldo.
+// agente, prompt de 45K caracteres), desactivada el mismo día.
 //
 //   node scripts/noticia-diaria.mjs              → la nota de hoy, si todavía no hay
 //   node scripts/noticia-diaria.mjs --forzar     → la reescribe aunque ya exista (botón "regenerar" del sitio)
@@ -163,8 +163,7 @@ const DATOS = {
 if (diaHoy === 6 && !jugadosRecientes.length && !partidosHoy.length && !FORZAR) { log('Sábado sin partidos: no hay nota (sale el resumen semanal).'); process.exit(0); }
 
 // ── 2. Escritura ─────────────────────────────────────────────────────────────
-const reglasExtra = fs.readFileSync(path.join(ROOT, 'docs/conocimiento/reglas-noticia-diaria.md'), 'utf8').replace(/^# .*\n+/, '').replace(/^La rutina[^\n]*\n+/m, '')
-  .replace(/## Solo para la rutina en la nube[\s\S]*?<!-- fin respaldo -->\n*/, '');   // instrucciones del respaldo en la nube
+const reglasExtra = fs.readFileSync(path.join(ROOT, 'docs/conocimiento/reglas-noticia-diaria.md'), 'utf8').replace(/^# .*\n+/, '').replace(/^La noticia diaria la escribe[^\n]*\n+/m, '');
 const encargo = fs.readFileSync(path.join(ROOT, 'scripts/noticia-diaria-encargo.md'), 'utf8')
   .replace('{{HOY}}', HOY).replace('{{DIA}}', dia(HOY)).replace('{{REGLAS_EXTRA}}', reglasExtra).replace('{{SABADO}}', '')
   .replace('{{DATOS}}', JSON.stringify(DATOS, null, 1));

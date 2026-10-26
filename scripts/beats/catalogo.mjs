@@ -53,7 +53,7 @@ export async function armarCatalogo({ log = console.log } = {}) {
   for (const [i, t] of thrive.entries()) {
     if (!t.audio) continue;
     lista.push({ slug: t.slug, titulo: t.titulo, album: 'thrive', pista: i + 1, fecha: t.fecha, concepto: t.concepto, rasgo: t.rasgo,
-      bpm: t.bpm, tonalidad: t.tonalidad, duracion: t.duracion, letra: t.letra, voz: MEDIA + t.audio, instrumental: null });
+      bpm: t.bpm, tonalidad: t.tonalidad, duracion: t.duracion, letra: t.letra, voz: MEDIA + t.audio, instrumental: t.instrumental ? MEDIA + t.instrumental : null });
   }
   const f = path.join(DIR, 'catalogo.json');
   fs.mkdirSync(DIR, { recursive: true });

@@ -2,8 +2,9 @@
 // (regla de Juan, 2026-10-05). Registro versionado en scripts/musica-usada.json, así vale desde cualquier PC.
 //
 // Desde 2026-10-09 (regla de Juan: "un tema por día, 100% nuevo y original; todo lo que tenemos fue testing")
-// los videos usan SOLO los temas originales del club: uno por día, compuesto por scripts/beats/diario.mjs,
-// en fuentes/musica/propios (R2 _fuentes/musica/propios). La biblioteca trap vieja queda solo para los fijos.
+// los videos usan SOLO los temas originales del club, en fuentes/musica/propios (R2 _fuentes/musica/propios).
+// Desde 2026-10-26 el tema de cada día es la versión instrumental del tema de Thrive (scripts/beats/thrive.mjs, 2:00);
+// antes eran beats compuestos por código (scripts/beats/temas/). La biblioteca trap vieja queda solo para los fijos.
 //
 //   elegirMusica('id-del-video', { preferida: 'Nombre' })  → ruta del mp3 (y lo anota como usado)
 //   - Si ese video ya tiene tema asignado, devuelve el mismo (re-renders del mismo video).
@@ -42,7 +43,7 @@ export function elegirMusica(video, { preferida = null } = {}) {
   } else {
     // Los archivos empiezan con la fecha (AAAA-MM-DD - Nombre.mp3): el último libre es el más nuevo.
     tema = [...libs].reverse().find(a => !ocupado(a));
-    if (!tema) throw new Error('No quedan temas originales sin usar: correr node scripts/beats/diario.mjs (compone el tema del día).');
+    if (!tema) throw new Error('No quedan temas originales sin usar: correr node scripts/beats/thrive.mjs (el tema del día y su instrumental).');
   }
   reg.usados[tema] = { video, fecha: new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }) };
   fs.writeFileSync(REG, JSON.stringify(reg, null, 2) + '\n');

@@ -35,7 +35,7 @@ const toml = s => JSON.stringify(s);
 const reg = fs.existsSync(REG) ? JSON.parse(fs.readFileSync(REG, 'utf8')) : { temas: [] };
 const guardar = () => fs.writeFileSync(REG, JSON.stringify(reg, null, 2) + '\n');
 let tema = reg.temas.find(t => t.fecha === FECHA);
-if (tema?.audio) { log(`El tema de ${FECHA} ya existe: "${tema.titulo}".`); process.exit(0); }
+if (tema?.audio && tema?.instrumental) { log(`El tema de ${FECHA} ya existe: "${tema.titulo}".`); process.exit(0); }
 fs.mkdirSync(DIR, { recursive: true });
 
 // Ollama tiene que estar levantado (la app arranca con la sesión; si no, se lo levanta acá)
@@ -84,20 +84,26 @@ if (!tema) {
 }
 if (argv.includes('--solo-letra')) process.exit(0);
 
-// ── 2. Música y voz (ACE-Step) ──────────────────────────────────────────────
-const salida = path.join(DIR, tema.slug);
-const hecho = fs.existsSync(salida) && fs.readdirSync(salida).some(f => f.endsWith('.mp3'));
-if (!hecho) {
+// ── 2. Música (ACE-Step): versión con voz y versión instrumental ──────────────
+// La instrumental (mismo sonido, tempo y tonalidad, sin voz) sale en la página como "Instrumental" y entra a la
+// biblioteca de música de los videos (R2 _fuentes/musica/propios, scripts/lib/musica.mjs): desde que Thrive reemplazó
+// al beat diario, es lo que alimenta la música de los videos (un tema distinto por video).
+const reintento = 'Se reintenta la próxima corrida (lo ya hecho queda guardado).';
+function generar(instrumental) {
+  const salida = path.join(DIR, instrumental ? `${tema.slug}-instrumental` : tema.slug);
+  const crudo = () => fs.existsSync(salida) && fs.readdirSync(salida).find(f => f.endsWith('.mp3'));
+  if (crudo()) return path.join(salida, crudo());
   fs.rmSync(salida, { recursive: true, force: true }); fs.mkdirSync(salida, { recursive: true });
   const cfg = path.join(salida, '_config.toml');
   fs.writeFileSync(cfg, [
     `config_path = "acestep-v15-turbo"`, `lm_model_path = "acestep-5Hz-lm-0.6B"`, `backend = "pt"`, `offload_to_cpu = true`,
-    `task_type = "text2music"`, `instrumental = false`, `vocal_language = "en"`, `thinking = true`,
+    `task_type = "text2music"`, `instrumental = ${instrumental}`, `vocal_language = "en"`, `thinking = true`,
     `use_cot_caption = false`, `use_cot_metas = false`, `use_cot_lyrics = false`,
-    `caption = ${toml(tema.caption)}`, `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`, `lyrics = ${toml(tema.letra)}`,
+    `caption = ${toml(instrumental ? `${tema.caption.replace(/[^,.]*\b(voice|vocals?|singer|rapper|rap|sung|whisper\w*|falsetto)\b[^,.]*[,.]?/gi, "")}, instrumental, no vocals` : tema.caption)}`,
+    `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`, `lyrics = ${toml(instrumental ? '[instrumental]' : tema.letra)}`,
     `duration = ${tema.duracion}`, `batch_size = 1`, `audio_format = "mp3"`, `save_dir = ${toml(salida)}`,
   ].join('\n') + '\n');
-  log(`ACE-Step: ${tema.duracion} s de música…`);
+  log(`ACE-Step: ${tema.duracion} s ${instrumental ? 'instrumental' : 'con voz'}…`);
   const t0 = Date.now();
   fs.rmSync(path.join(ACE, 'instruction.txt'), { force: true });
   spawnSync('python', ['-m', 'uv', 'run', 'python', 'cli.py', '--config', cfg, '--log-level', 'WARNING'], {
@@ -107,20 +113,49 @@ if (!hecho) {
   });
   fs.rmSync(path.join(ACE, 'instruction.txt'), { force: true });
   log(`ACE-Step terminó en ${Math.round((Date.now() - t0) / 60000)} min`);
+  return crudo() ? path.join(salida, crudo()) : null;
 }
-const crudo = fs.readdirSync(salida).find(f => f.endsWith('.mp3'));
-if (!crudo) { log('ERROR: ACE-Step no generó audio. Se reintenta la próxima corrida (la letra queda guardada).'); process.exit(1); }
+// pulido: -14 LUFS (lo que piden las redes), fundido de salida de 3 s
+function pulir(origen, destino) {
+  const d = dur(origen);
+  spawnSync(ffmpegPath, ['-hide_banner', '-loglevel', 'error', '-y', '-i', origen, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, d - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', destino]);
+  return dur(destino);
+}
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
 
-// ── 3. Pulido, R2, catálogo, commit ─────────────────────────────────────────
-const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(path.join(salida, crudo));
-spawnSync(ffmpegPath, ['-hide_banner', '-loglevel', 'error', '-y', '-i', path.join(salida, crudo), '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, d - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', final]);
-const df = dur(final);
-if (df < 150 || df > 210) log(`AVISO: duró ${Math.round(df)} s (fuera de 2:30–3:30)`);
-await putFile(final, `musica/thrive/${tema.slug}.mp3`);
-tema.audio = `musica/thrive/${tema.slug}.mp3?v=${Date.now().toString(36)}`; tema.duracion = Math.round(df); tema.generado = new Date().toISOString(); guardar();
-await armarCatalogo({ log });
+// ── 3. Con voz → R2, registro, catálogo ─────────────────────────────────────
+if (!tema.audio) {
+  const crudo = generar(false);
+  if (!crudo) { log(`ERROR: ACE-Step no generó el tema con voz. ${reintento}`); process.exit(1); }
+  const final = path.join(DIR, `${tema.slug}.mp3`), df = pulir(crudo, final);
+  if (df < 150 || df > 210) log(`AVISO: duró ${Math.round(df)} s (fuera de 2:30–3:30)`);
+  await putFile(final, `musica/thrive/${tema.slug}.mp3`);
+  tema.audio = `musica/thrive/${tema.slug}.mp3?v=${Date.now().toString(36)}`; tema.duracion = Math.round(df); tema.generado = new Date().toISOString(); guardar();
+  await armarCatalogo({ log });
+  log(`✓ "${tema.titulo}" (${mmss(df)}) en topsecret.ar/music`);
+}
+
+// ── 4. Instrumental → página + biblioteca de los videos ─────────────────────
+if (!tema.instrumental) {
+  const crudo = generar(true);
+  if (!crudo) log(`AVISO: ACE-Step no generó la instrumental. ${reintento}`);
+  else {
+    const final = path.join(DIR, `${tema.slug}-instrumental.mp3`); pulir(crudo, final);
+    await putFile(final, `musica/thrive/${tema.slug}-instrumental.mp3`);
+    const biblio = `${FECHA} - ${tema.titulo}.mp3`;    // mismo formato que los beats: la fecha adelante ordena "el más nuevo"
+    fs.mkdirSync(path.join(ROOT, 'fuentes/musica/propios'), { recursive: true });
+    fs.copyFileSync(final, path.join(ROOT, 'fuentes/musica/propios', biblio));
+    await putFile(final, `_fuentes/musica/propios/${biblio}`);
+    tema.instrumental = `musica/thrive/${tema.slug}-instrumental.mp3?v=${Date.now().toString(36)}`; guardar();
+    await armarCatalogo({ log });
+    log(`✓ instrumental de "${tema.titulo}" en la página y en la música de los videos`);
+  }
+}
+
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
 git('add', 'scripts/beats/thrive.json');
-const c = git('commit', '-m', `feat: Thrive — "${tema.titulo}" (${tema.rasgo})\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`);
+const c = git('commit', '-m', `feat: Thrive — "${tema.titulo}" (${tema.rasgo})
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`);
 if (c.status === 0) { const ps = git('push', '-q'); log(ps.status === 0 ? 'Commit y push hechos.' : 'Push falló: ' + ps.stderr.slice(-200)); }
-log(`✓ "${tema.titulo}" (${Math.floor(df / 60)}:${String(Math.round(df % 60)).padStart(2, '0')}) en topsecret.ar/music`);
+if (!tema.instrumental) process.exit(1);   // la tarea de las 05:00 reintenta la instrumental
