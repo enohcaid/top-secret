@@ -31,9 +31,16 @@ body{background:var(--bg);color:var(--text);font-family:Barlow,sans-serif;min-he
 h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spacing:-.04em;margin-top:14px}
 .lead{max-width:640px;margin-top:18px;font-size:1.12rem;line-height:1.55;color:var(--text2)}
 .lista{margin-top:48px;display:flex;flex-direction:column;gap:14px}
-.album{margin-top:56px}
+.album{border-top:1px solid var(--border);padding-top:28px;margin-top:28px}
 .album:first-child{margin-top:0}
-.album-cab{display:grid;grid-template-columns:clamp(140px,22vw,220px) 1fr;gap:clamp(18px,3vw,34px);align-items:end;margin-bottom:22px}
+.album-cab{display:grid;grid-template-columns:clamp(140px,22vw,220px) 1fr auto;gap:clamp(18px,3vw,34px);align-items:end;width:100%;background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.album-cab:focus-visible{outline:2px solid var(--gold);outline-offset:6px;border-radius:14px}
+.flecha{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;color:var(--text2);align-self:center;transition:transform .25s ease,border-color .2s ease,color .2s ease}
+.flecha svg{width:18px;height:18px}
+.album-cab:hover .flecha{border-color:var(--gold);color:var(--gold)}
+.album.abierto .flecha{transform:rotate(180deg)}
+.album .temas{display:none}
+.album.abierto .temas{display:flex;margin-top:22px}
 .tapa{aspect-ratio:1;width:100%;border-radius:14px;background:var(--card2) center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.45)}
 .album-tipo{font-family:var(--mono);font-weight:700;font-size:.7rem;letter-spacing:.24em;color:var(--gold);text-transform:uppercase}
 .album-titulo{font-weight:900;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:.95;letter-spacing:-.035em;margin-top:8px}
@@ -71,7 +78,9 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
   .acciones{grid-column:1/-1;justify-content:flex-start}
   .letra{padding-left:0;columns:1}
   .titulo{font-size:1.35rem}
-  .album-cab{grid-template-columns:110px 1fr;align-items:center}
+  .album-cab{grid-template-columns:96px 1fr auto;gap:14px;align-items:center}
+  .album-desc{display:none}
+  .flecha{width:36px;height:36px}
 }
 </style>
 </head>
@@ -88,23 +97,30 @@ const CATALOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/music
 const PLAY = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>';
 const PAUSA = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
 const audio = document.getElementById('audio');
-let temas = [], albumes = [], actual = null, version = {};   // version[slug] = 'voz' | 'instrumental'
+const FLECHA = '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 9l6 6 6-6"/></svg>';
+let temas = [], albumes = [], actual = null;
 const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const letraHtml = l => esc(l).replace(/^\[(verse|chorus|intro|outro|pre-chorus|bridge)\][ \t]*\r?\n?/gim, (_, s) => `<span class="sec">${s.toUpperCase()}</span>`).replace(/\n{2,}/g, '\n');
-const fuente = t => (version[t.slug] || (t.voz ? 'voz' : 'instrumental')) === 'voz' ? t.voz : t.instrumental;
+// Solo se publica la versión final (con voz): las instrumentales dejaron de estar disponibles (Juan, 2026-10-26)
+const fuente = t => t.voz;
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const fechaLarga = f => { const [y, m, d] = f.split('-').map(Number); return `${d} de ${MESES[m - 1]} de ${y}`; };
+const claveAlbum = al => al.id + (al.volumen ? '-' + al.volumen : '');
+// álbumes abiertos: preferencia de cada visitante (si el navegador no deja guardar, arrancan cerrados)
+const abiertos = new Set((() => { try { return JSON.parse(localStorage.getItem('music-abiertos') || '[]'); } catch { return []; } })());
+const guardarAbiertos = () => { try { localStorage.setItem('music-abiertos', JSON.stringify([...abiertos])); } catch {} };
 
 const mmss = s => s ? `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}` : '';
 const temaHtml = t => `
     <div class="tema" id="t-${t.slug}">
-      <button class="play" aria-label="Reproducir ${esc(t.titulo)}" data-play="${t.slug}"${t.voz || t.instrumental ? '' : ' disabled title="Audio en camino"'}>${PLAY}</button>
+      <button class="play" aria-label="Reproducir ${esc(t.titulo)}" data-play="${t.slug}"${t.voz ? '' : ' disabled title="Audio en camino"'}>${PLAY}</button>
       <div class="info">
         <div class="titulo"><span class="pista">${String(t.pista || '').padStart(2, '0')}</span>${esc(t.titulo)}</div>
         <div class="meta">${[t.fecha, t.bpm && `<b>${t.bpm}</b> BPM`, t.tonalidad, mmss(t.duracion)].filter(Boolean).join(' · ')}</div>
         <div class="concepto">${esc(t.concepto)}</div>
       </div>
       <div class="acciones">
-        ${t.voz ? `<button class="chip on" data-ver="${t.slug}:voz">Con voz</button>` : `<span class="pend">${t.instrumental ? 'Voz en camino' : 'Audio en camino'}</span>`}
-        ${t.instrumental ? `<button class="chip${t.voz ? '' : ' on'}" data-ver="${t.slug}:instrumental">Instrumental</button>` : ''}
+        ${t.voz ? '' : '<span class="pend">Audio en camino</span>'}
         ${t.letra ? `<button class="chip" data-letra="${t.slug}">Letra</button>` : ''}
       </div>
       <div class="barra" data-barra="${t.slug}"><i></i></div>
@@ -115,22 +131,31 @@ function pintar() {
   const lista = document.getElementById('lista');
   if (!temas.length) { lista.innerHTML = '<div class="vacio">Pronto.</div>'; return; }
   lista.innerHTML = albumes.map(al => {
-    const ts = temas.filter(t => t.album === al.id && (al.volumen == null || t.volumen === al.volumen));
+    const ts = temasDe(al), clave = claveAlbum(al);
     const vol = al.volumen ? `<small>Vol. ${al.volumen}</small>` : '';
+    const meta = [al.lanzamiento && `Lanzamiento ${fechaLarga(al.lanzamiento)}`, ts.length ? `${ts.length} tema${ts.length > 1 ? 's' : ''}` : 'El primer tema llega esta noche'].filter(Boolean).join(' · ');
     return `
-    <section class="album">
-      <div class="album-cab">
+    <section class="album${abiertos.has(clave) ? ' abierto' : ''}" id="a-${clave}">
+      <button class="album-cab" data-album="${clave}" aria-expanded="${abiertos.has(clave)}" aria-controls="temas-${clave}">
         <div class="tapa" role="img" aria-label="Portada de ${esc(al.titulo)}" style="background-image:url('${esc(al.portada)}')"></div>
         <div>
           <div class="album-tipo">Álbum</div>
           <h2 class="album-titulo">${esc(al.titulo)}${vol}</h2>
           <p class="album-desc">${esc(al.descripcion)}</p>
-          <div class="album-meta">${ts.length ? `${ts.length} tema${ts.length > 1 ? 's' : ''}` : 'El primer tema llega esta noche'}</div>
+          <div class="album-meta">${meta}</div>
         </div>
-      </div>
-      <div class="temas">${ts.map(temaHtml).join('')}</div>
+        <span class="flecha" aria-hidden="true">${FLECHA}</span>
+      </button>
+      <div class="temas" id="temas-${clave}">${ts.map(temaHtml).join('')}</div>
     </section>`;
   }).join('');
+}
+const temasDe = al => temas.filter(t => t.album === al.id && (al.volumen == null || t.volumen === al.volumen));
+function abrir(clave, abierto) {
+  const el = document.getElementById('a-' + clave); if (!el) return;
+  el.classList.toggle('abierto', abierto);
+  el.querySelector('.album-cab').setAttribute('aria-expanded', abierto);
+  abierto ? abiertos.add(clave) : abiertos.delete(clave); guardarAbiertos();
 }
 
 function tocar(slug) {
@@ -139,6 +164,8 @@ function tocar(slug) {
   if (actual === slug && !audio.paused) { audio.pause(); return; }
   if (actual !== slug || !audio.src.endsWith(src.split('/').pop())) { audio.src = src; }
   actual = slug; audio.play().catch(() => {});
+  const al = albumes.find(a => a.id === t.album && (a.volumen == null || a.volumen === t.volumen));
+  if (al) abrir(claveAlbum(al), true);       // al pasar al tema siguiente de otro disco, ese disco se despliega
 }
 function marcar() {
   document.querySelectorAll('.tema').forEach(el => {
@@ -158,13 +185,8 @@ audio.addEventListener('timeupdate', () => {
 });
 document.addEventListener('click', e => {
   const p = e.target.closest('[data-play]'); if (p) return tocar(p.dataset.play);
-  const v = e.target.closest('[data-ver]');
-  if (v) {
-    const [slug, ver] = v.dataset.ver.split(':'); version[slug] = ver;
-    v.parentElement.querySelectorAll('[data-ver]').forEach(c => c.classList.toggle('on', c === v));
-    if (actual === slug) { const pos = audio.currentTime; audio.src = fuente(temas.find(t => t.slug === slug)); audio.currentTime = pos; audio.play().catch(() => {}); }
-    return;
-  }
+  const a = e.target.closest('[data-album]');
+  if (a) return abrir(a.dataset.album, !a.parentElement.classList.contains('abierto'));
   const l = e.target.closest('[data-letra]');
   if (l) { const el = document.getElementById('t-' + l.dataset.letra); el.classList.toggle('con-letra'); l.classList.toggle('on'); return; }
   const b = e.target.closest('[data-barra]');
@@ -173,10 +195,13 @@ document.addEventListener('click', e => {
 
 fetch(CATALOGO + '?' + Date.now()).then(r => r.json()).then(c => {
   albumes = c.albumes || [{ id: null, titulo: 'Temas', descripcion: '' }];
-  // orden de reproducción = orden en pantalla: álbum por álbum; Thrive del más nuevo al más viejo
+  temas = (c.temas || []).map(t => c.albumes ? t : { ...t, album: null });
+  // discos por orden de lanzamiento (la fecha del primer tema de cada uno); uno sin temas todavía va al final
+  for (const al of albumes) al.lanzamiento = temasDe(al).map(t => t.fecha).filter(Boolean).sort()[0] || null;
+  albumes.sort((a, b) => (a.lanzamiento || '9999') .localeCompare(b.lanzamiento || '9999'));
+  // orden de reproducción = orden en pantalla: disco por disco, pista por pista
   const orden = t => albumes.findIndex(a => a.id === t.album && (a.volumen == null || a.volumen === t.volumen));
-  temas = (c.temas || []).map(t => c.albumes ? t : { ...t, album: null })
-    .sort((a, b) => orden(a) - orden(b) || (a.album === 'thrive' ? (b.pista || 0) - (a.pista || 0) : (a.pista || 0) - (b.pista || 0)));
+  temas.sort((a, b) => orden(a) - orden(b) || (a.pista || 0) - (b.pista || 0));
   pintar();
 }).catch(() => { document.getElementById('lista').innerHTML = '<div class="vacio">No se pudo cargar la música. Probá de nuevo en un rato.</div>'; });
 </script>

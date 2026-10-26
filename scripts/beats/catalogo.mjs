@@ -5,7 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import { ROOT } from '../lib/env.mjs';
-import { putFile, getFile } from '../lib/r2.mjs';
+import { putFile } from '../lib/r2.mjs';
 
 export const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const DIR = path.join(ROOT, 'fuentes', 'beats', 'voz');
@@ -30,30 +30,20 @@ export async function armarCatalogo({ log = console.log } = {}) {
   const letras = JSON.parse(fs.readFileSync(LETRAS, 'utf8'));
   const reg = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/beats/temas-diarios.json'), 'utf8')).temas;
   const lista = [];
-  let cambioLetras = false;
+  // Solo la versión final (con voz): las instrumentales dejaron de publicarse (Juan, 2026-10-26).
+  // La letra que se muestra es la transcripción de lo que realmente canta la versión final (`letraFinal`,
+  // scripts/beats/letra-final.mjs); si todavía no está, la letra escrita.
   for (const [i, l] of letras.entries()) {
     const t = reg.find(x => x.archivo === l.original);
-    let instrumental = null;
-    if (l.original) {                                     // copia pública del instrumental (los de _fuentes son privados)
-      const clave = `musica/temas/${l.slug}.mp3`;
-      if (!l.instrumentalPublico) {
-        const local = path.join(DIR, `${l.slug}-instrumental.mp3`);
-        fs.mkdirSync(DIR, { recursive: true });
-        if (!fs.existsSync(local)) await getFile(`_fuentes/musica/propios/${l.original}`, local);
-        await conReintentos(() => putFile(local, clave)); l.instrumentalPublico = true; cambioLetras = true;
-      }
-      instrumental = MEDIA + clave;
-    }
     lista.push({ slug: l.slug, titulo: l.titulo, album: 'the-shorts', volumen: i < SHORTS_VOL1 ? 1 : 2, pista: i < SHORTS_VOL1 ? i + 1 : i - SHORTS_VOL1 + 1,
-      fecha: (l.original || '').slice(0, 10) || l.fecha || null, concepto: l.concepto,
-      bpm: l.bpm, tonalidad: l.tonalidad, letra: l.letra, voz: l.voz ? MEDIA + l.voz : null, instrumental, original: t?.nombre || null });
+      fecha: (l.original || '').slice(0, 10) || l.fecha || null, concepto: l.concepto, bpm: l.bpm, tonalidad: l.tonalidad,
+      letra: l.letraFinal || l.letra, voz: l.voz ? MEDIA + l.voz : null, original: t?.nombre || null });
   }
-  if (cambioLetras) fs.writeFileSync(LETRAS, JSON.stringify(letras, null, 2) + '\n');
   const thrive = fs.existsSync(THRIVE) ? JSON.parse(fs.readFileSync(THRIVE, 'utf8')).temas : [];
   for (const [i, t] of thrive.entries()) {
     if (!t.audio) continue;
     lista.push({ slug: t.slug, titulo: t.titulo, album: 'thrive', pista: i + 1, fecha: t.fecha, concepto: t.concepto, rasgo: t.rasgo,
-      bpm: t.bpm, tonalidad: t.tonalidad, duracion: t.duracion, letra: t.letra, voz: MEDIA + t.audio, instrumental: t.instrumental ? MEDIA + t.instrumental : null });
+      bpm: t.bpm, tonalidad: t.tonalidad, duracion: t.duracion, letra: t.letraFinal || t.letra, voz: MEDIA + t.audio });
   }
   const f = path.join(DIR, 'catalogo.json');
   fs.mkdirSync(DIR, { recursive: true });
