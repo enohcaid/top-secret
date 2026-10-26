@@ -133,17 +133,17 @@ try {
     Log "Advertencia: no se pudo limpiar el flag: $_"
 }
 
-# ── PASO 1: Disparar agente de artículo via Claude Code CLI ──────────────────
-Log "Disparando agente cloud para artículo..."
+# ── PASO 1: Reescribir el artículo en esta PC (scripts/noticia-diaria.mjs) ───
+# Desde 2026-10-26 la nota la escribe el script local (Claude en una llamada liviana, modelo local de respaldo);
+# la rutina en la nube quedó solo de respaldo.
+Log "Reescribiendo la noticia (noticia-diaria.mjs --forzar)..."
 try {
-    # Nota: claude -p ya es no-interactivo; el flag --non-interactive no existe
-    # y hacía fallar el disparo del agente.
-    # Haiku: es solo apretar el botón de la rutina, no hace falta un modelo grande (2026-10-26)
-    $claudeOutput = & claude -p --model haiku "Usa la herramienta RemoteTrigger para disparar el trigger de Top Secret FC noticias ahora mismo. El trigger_id es: $triggerId. Accion: run. No hagas nada mas." 2>&1
-    Log "Agente disparado: $($claudeOutput | Select-Object -First 3 | Out-String)"
+    Push-Location $repoRoot
+    $out = & node scripts\noticia-diaria.mjs --forzar 2>&1 | Select-String '\[noticia\]'
+    Pop-Location
+    Log "Noticia: $($out | Select-Object -Last 1)"
 } catch {
-    Log "Error disparando agente: $_"
-    Log "Intentando continuar de todas formas..."
+    Log "Error reescribiendo la noticia: $_"
 }
 
 # ── PASO 2: Esperar que el draft aparezca en Firestore (max 10 min) ──────────
