@@ -17,7 +17,7 @@
 // Cada paso queda guardado en scripts/beats/thrive.json y en fuentes/beats/thrive/<slug>/: si algo falla, la corrida
 // siguiente retoma desde ahí. La instrumental no se publica en la página: va a la música de los videos.
 //
-//   node scripts/beats/thrive.mjs [--fecha 2026-10-27]
+//   node scripts/beats/thrive.mjs [--fecha 2026-10-27] [--parte 2]
 // Tarea "TopSecretFC-Thrive" (2:00, reintento 5:00, run-thrive-hidden.vbs). Log: scripts/thrive.log
 import fs from 'fs';
 import path from 'path';
@@ -33,6 +33,8 @@ loadEnv();
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i < 0 ? d : argv[i + 1]; };
 const FECHA = opt('--fecha', new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }));
+// --parte N: otro tema el mismo día (Juan, 2026-10-27: "lanzá otra canción nueva"). Se identifica como <fecha>-<N>.
+const PARTE = opt('--parte', null), ID = PARTE && PARTE !== '1' ? `${FECHA}-${PARTE}` : FECHA;
 const ACE = path.join(ROOT, 'fuentes', 'beats', 'ACE-Step-1.5');
 const DIR = path.join(ROOT, 'fuentes', 'beats', 'thrive');
 const REG = path.join(ROOT, 'scripts', 'beats', 'thrive.json');
@@ -46,9 +48,9 @@ const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2
 
 const reg = fs.existsSync(REG) ? JSON.parse(fs.readFileSync(REG, 'utf8')) : { temas: [] };
 const guardar = () => fs.writeFileSync(REG, JSON.stringify(reg, null, 2) + '\n');
-let tema = reg.temas.find(t => t.fecha === FECHA);
+let tema = reg.temas.find(t => (t.id || t.fecha) === ID);
 // `fijo`: queda como salió, no se toca (Juan, 2026-10-26, sobre "Too Far In")
-if (tema?.fijo || tema?.letraFinal) { log(`El tema de ${FECHA} ya está terminado: "${tema.titulo}".`); process.exit(0); }
+if (tema?.fijo || tema?.letraFinal) { log(`El tema ${ID} ya está terminado: "${tema.titulo}".`); process.exit(0); }
 fs.mkdirSync(DIR, { recursive: true });
 // Una sola corrida a la vez (una prueba a mano y la tarea de las 2:00 se pisarían el mismo tema)
 const LOCK = path.join(DIR, '.corriendo');
@@ -92,8 +94,8 @@ if (!tema) {
       if (/weeknd|lana|ariana|jennie|lily-rose|del rey|grande/i.test(t)) return 'nombra artistas reales en el sonido';
       if (reg.temas.some(x => x.titulo.toLowerCase() === String(j.titulo).toLowerCase())) return `título repetido "${j.titulo}"`;
     } });
-  const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${FECHA}`;
-  tema = { fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),
+  const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${ID}`;
+  tema = { ...(ID !== FECHA ? { id: ID } : {}), fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),
     captionInstrumental: j.caption_instrumental.trim(), captionVoces: j.caption_voces.trim(), bpm: Math.round(j.bpm),
     tonalidad: j.tonalidad.trim(), duracion: Math.round(j.duracion), estructura: j.estructura };
   reg.temas.push(tema); guardar();
@@ -123,7 +125,7 @@ function aceStep(nombre, lineas) {
 const comunes = [`config_path = "acestep-v15-turbo"`, `lm_model_path = "acestep-5Hz-lm-0.6B"`, `backend = "pt"`, `offload_to_cpu = true`, `vocal_language = "en"`, `use_cot_caption = false`, `use_cot_metas = false`, `use_cot_lyrics = false`];
 
 // ── 2. Instrumental compuesta por código ────────────────────────────────────
-const PY_TEMA = path.join(ROOT, 'scripts/beats/temas', `thrive_${FECHA.replace(/-/g, '_')}.py`);
+const PY_TEMA = path.join(ROOT, 'scripts/beats/temas', `thrive_${ID.replace(/-/g, '_')}.py`);
 const WAV = path.join(carpeta, 'instrumental.wav'), INSTR = path.join(carpeta, 'instrumental.mp3');
 function render() {
   const r = spawnSync('python', ['-m', 'uv', 'run', '--no-project', '--with', 'numpy', '--with', 'scipy', '--with', 'soundfile', PY_TEMA, WAV],
@@ -256,7 +258,7 @@ if (!tema.audio) {
   // La instrumental no se publica en la página: va a la música de los videos (privado, _fuentes/musica/propios)
   const pulida = path.join(carpeta, 'instrumental-videos.mp3'), di = dur(INSTR);
   ff('-loglevel', 'error', '-y', '-i', INSTR, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, di - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', pulida);
-  const biblio = `${FECHA} - ${tema.titulo}.mp3`;
+  const biblio = `${ID} - ${tema.titulo}.mp3`;
   fs.mkdirSync(path.join(ROOT, 'fuentes/musica/propios'), { recursive: true });
   fs.copyFileSync(pulida, path.join(ROOT, 'fuentes/musica/propios', biblio));
   await putFile(pulida, `_fuentes/musica/propios/${biblio}`);
