@@ -50,6 +50,15 @@ let tema = reg.temas.find(t => t.fecha === FECHA);
 // `fijo`: queda como salió, no se toca (Juan, 2026-10-26, sobre "Too Far In")
 if (tema?.fijo || tema?.letraFinal) { log(`El tema de ${FECHA} ya está terminado: "${tema.titulo}".`); process.exit(0); }
 fs.mkdirSync(DIR, { recursive: true });
+// Una sola corrida a la vez (una prueba a mano y la tarea de las 2:00 se pisarían el mismo tema)
+const LOCK = path.join(DIR, '.corriendo');
+if (fs.existsSync(LOCK)) {
+  const pid = Number(fs.readFileSync(LOCK, 'utf8'));
+  let vivo = false; try { process.kill(pid, 0); vivo = true; } catch {}
+  if (vivo) { log(`Ya hay una corrida en curso (pid ${pid}).`); process.exit(0); }
+}
+fs.writeFileSync(LOCK, String(process.pid));
+process.on('exit', () => { try { if (fs.readFileSync(LOCK, 'utf8') === String(process.pid)) fs.rmSync(LOCK); } catch {} });
 
 // Ollama (respaldo de la IA para concepto y letra): la app arranca con la sesión; si no, se lo levanta acá
 async function asegurarOllama() {
@@ -154,7 +163,8 @@ if (!fs.existsSync(INSTR)) {
     let codigo;
     try {
       log(`  Claude compone (vuelta ${i})…`);
-      const res = claude(base.replace('{{CORRECCIONES}}', correcciones));
+      // escribir un beat completo (~20 KB de código) le lleva a Opus más de 10 min: con 10 se cortaba (26/10)
+      const res = claude(base.replace('{{CORRECCIONES}}', correcciones), { minutos: 30 });
       codigo = (res.match(/```python\n([\s\S]*?)```/) || [])[1];
       if (!codigo) throw new Error('la respuesta no trae un bloque ```python');
     } catch (e) { log(`  ${e.message.slice(0, 200)}`); if (/usage|límite|limit/i.test(e.message)) break; continue; }
@@ -228,10 +238,12 @@ if (!tema.letra) {
 // ── 4. ACE-Step "cover" sobre la instrumental: canta el dúo y pule el beat (como The Shorts) ───────────────
 if (!tema.audio) {
   log('Voces y pulido (cover sobre la instrumental)…');
-  const voces = aceStep('cover', [...comunes, `task_type = "cover"`, `thinking = true`,
+  // la GTX 1070 a veces tira "CUDA error: illegal memory access" a mitad del cover (26/10): un segundo intento
+  const cover = () => aceStep('cover', [...comunes, `task_type = "cover"`, `thinking = true`,
     `src_audio = ${toml(INSTR)}`, `audio_cover_strength = 0.5`, `instrumental = false`,
     `caption = ${toml(`${tema.captionInstrumental}, ${tema.captionVoces}`)}`, `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`,
     `lyrics = ${toml(tema.letra)}`, `duration = ${Math.round(dur(INSTR))}`]);
+  const voces = cover() || (log('  el cover falló, segundo intento…'), cover());
   if (!voces) { log('ERROR: no salió la versión con voz. Se reintenta en la próxima corrida.'); process.exit(1); }
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);
   ff('-loglevel', 'error', '-y', '-i', voces, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, d - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', final);
