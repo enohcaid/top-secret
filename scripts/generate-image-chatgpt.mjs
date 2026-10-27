@@ -1604,6 +1604,7 @@ if (isDirectRun) {
 }
 
 export {
+  closeHungTabs,
   IMAGE_STYLES,
   styleFromBrief,
   PROJECT_URL,
