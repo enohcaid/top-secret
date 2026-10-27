@@ -33,10 +33,19 @@ setTimeout(() => { console.error(`WhatsApp no terminó en ${LIMITE / 60000} min.
 
 client.on('ready', async () => {
   try {
-    const id = await client.getNumberId(de.replace(/\D/g, ''));
-    if (!id) throw new Error(`${de} no tiene WhatsApp`);
     await new Promise(r => setTimeout(r, 15000));   // recién conectado, WhatsApp Web todavía sincroniza
     const desde = Math.floor(Date.now() / 1000) - horas * 3600;
+    if (de === 'todos') {
+      // Solo lista los archivos recibidos en cualquier chat (para encontrar por dónde llegó algo).
+      const lista = await client.pupPage.evaluate(t => window.require('WAWebCollections').Msg.getModelsArray()
+        .filter(m => m.t >= t && !['chat', 'revoked', 'e2e_notification', 'notification_template', 'gp2', 'ciphertext', 'protocol'].includes(m.type))
+        .sort((a, b) => a.t - b.t)
+        .map(m => `${new Date(m.t * 1000).toISOString()} ${m.type} ${m.id.fromMe ? 'yo' : 'recibido'} ${m.id.remote?._serialized || m.id.remote} ${m.notifyName || ''} ${m.filename || ''} ${m.mimetype || ''}`), desde);
+      console.log(lista.join('\n') || 'Nada.');
+      await client.destroy(); process.exit();
+    }
+    const id = await client.getNumberId(de.replace(/\D/g, ''));
+    if (!id) throw new Error(`${de} no tiene WhatsApp`);
     // El contacto puede estar como @c.us y como @lid (getChatById rompe con @lid): se buscan los
     // mensajes recibidos de cualquiera de los dos en la colección de WhatsApp Web.
     // Se abre el chat (como en wa-enviar) para que WhatsApp Web cargue los mensajes completos, con su mediaData.
@@ -72,9 +81,13 @@ client.on('ready', async () => {
         await msg.downloadMedia({ downloadEvenIfExpensive: true, rmrReason: 1, isUserInitiated: true });
         const etapa = msg.mediaData.mediaStage;
         if (etapa.includes('ERROR') || etapa === 'FETCHING') return { error: `etapa ${etapa}` };
-        const blob = window.require('WAWebMediaInMemoryBlobCache').InMemoryMediaBlobCache.get(msg.mediaObject?.filehash)
-          || msg.mediaObject?.mediaBlob?.forceToBlob();
+        // Primero el blob propio del mensaje: buscar en la caché por un filehash vacío devolvía otro
+        // archivo (2026-10-27 bajó un sticker en vez de la imagen).
+        const fh = msg.mediaObject?.filehash || msg.filehash;
+        const blob = msg.mediaObject?.mediaBlob?.forceToBlob()
+          || (fh && window.require('WAWebMediaInMemoryBlobCache').InMemoryMediaBlobCache.get(fh));
         if (!blob) return { error: 'sin blob' };
+        if (msg.size && Math.abs(blob.size - msg.size) > 16) return { error: `tamaño no coincide (${blob.size} vs ${msg.size})` };
         const u8 = new Uint8Array(await blob.arrayBuffer()); let bin = '';
         for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode(...u8.subarray(i, i + 0x8000));
         return { data: btoa(bin), mimetype: msg.mimetype, filename: msg.filename || '' };
