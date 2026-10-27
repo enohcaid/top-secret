@@ -19,7 +19,7 @@ Pedidos de Juan (2026-10-26):
 5. **Letra publicada = lo que realmente se canta** (`scripts/beats/letra-final.mjs`: Whisper turbo + Claude). Se guarda en `letraFinal`.
 6. La instrumental **no se publica en la página**: va a la música de los videos (`_fuentes/musica/propios/<fecha> - <Título>.mp3`). Esto devuelve los beats compuestos por código a los videos.
 
-Cada paso queda guardado en `scripts/beats/thrive.json` y en `fuentes/beats/thrive/<slug>/`, y la corrida siguiente retoma desde donde quedó. Herramientas de Python: `fuentes/beats/whisper/.venv` (torch cu128, openai-whisper, pronouncing). Modelos: el beat lo compone **Sonnet 5.5** (Opus pensaba más de 18 min y no llegaba a escribir el código); concepto, letra y letra final siguen con **Opus**, porque Juan quiere evaluar la calidad y la versatilidad de lo creativo antes de pasarlos a Sonnet. Para más de un tema el mismo día: `--parte 2`.
+Cada paso queda guardado en `scripts/beats/thrive.json` y en `fuentes/beats/thrive/<slug>/`, y la corrida siguiente retoma desde donde quedó. Herramientas de Python: `fuentes/beats/whisper/.venv` (torch cu128, openai-whisper, pronouncing). Modelos: el beat lo compone **Sonnet 5.5** (Opus pensaba más de 18 min y no llegaba a escribir el código); la **letra** y la letra final también van con **Sonnet** (Juan, 2026-10-27: "en esta etapa solo importa que tenga rimas", y las rimas las controla `rimas.py`); el **concepto** sigue con **Opus**. Para más de un tema el mismo día: `--parte 2`.
 
 ## Página topsecret.ar/music
 - **Discos por orden de lanzamiento** (la fecha de su primer tema), **desplegables**: arrancan cerrados y cada visitante los encuentra como los dejó (localStorage).

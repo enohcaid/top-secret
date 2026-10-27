@@ -228,7 +228,8 @@ if (!tema.letra) {
   let correcciones = '', mejor = null;
   for (let i = 1; i <= 4; i++) {
     log(`Letra (vuelta ${i})…`);
-    const letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: ['claude', 'local'], temperatura: 0.8,
+    const letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
+
       validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : DEPORTE.test(x) ? 'palabra deportiva' : CASTELLANO.test(x) ? 'castellano' : null }))
       .replace(/^```\w*\n?|```$/g, '').trim();
     const r = rimas(letra);
