@@ -33,15 +33,24 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
 .lista{margin-top:48px;display:flex;flex-direction:column;gap:14px}
 .album{border-top:1px solid var(--border);padding-top:28px;margin-top:28px}
 .album:first-child{margin-top:0}
-.album-cab{display:grid;grid-template-columns:clamp(140px,22vw,220px) 1fr auto;gap:clamp(18px,3vw,34px);align-items:end;width:100%;background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.album-cab:focus-visible{outline:2px solid var(--gold);outline-offset:6px;border-radius:14px}
+.album-cab{display:grid;grid-template-columns:clamp(140px,22vw,220px) 1fr;gap:clamp(18px,3vw,34px);align-items:end}
+.album-toggle{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end;width:100%;background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.album-toggle > span:first-child > span{display:block}
+.album-toggle:focus-visible,.tapa:focus-visible{outline:2px solid var(--gold);outline-offset:6px;border-radius:14px}
 .flecha{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;color:var(--text2);align-self:center;transition:transform .25s ease,border-color .2s ease,color .2s ease}
 .flecha svg{width:18px;height:18px}
-.album-cab:hover .flecha{border-color:var(--gold);color:var(--gold)}
+.album-toggle:hover .flecha{border-color:var(--gold);color:var(--gold)}
 .album.abierto .flecha{transform:rotate(180deg)}
 .album .temas{display:none}
 .album.abierto .temas{display:flex;margin-top:22px}
-.tapa{aspect-ratio:1;width:100%;border-radius:14px;background:var(--card2) center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.tapa{aspect-ratio:1;width:100%;border:0;padding:0;border-radius:14px;background:var(--card2) center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.45);cursor:zoom-in;transition:transform .2s ease}
+.tapa:hover{transform:scale(1.02)}
+/* tapa en grande */
+.visor{position:fixed;inset:0;z-index:2000;background:rgba(5,4,2,.92);display:none;place-items:center;padding:24px;cursor:zoom-out}
+.visor.on{display:grid}
+.visor img{max-width:min(92vw,1400px);max-height:84vh;width:auto;height:auto;border-radius:10px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+.visor figcaption{margin-top:14px;text-align:center;font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;color:var(--text2);text-transform:uppercase}
+.visor button{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text);font-size:1.4rem;cursor:pointer}
 .album-tipo{font-family:var(--mono);font-weight:700;font-size:.7rem;letter-spacing:.24em;color:var(--gold);text-transform:uppercase}
 .album-titulo{font-weight:900;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:.95;letter-spacing:-.035em;margin-top:8px}
 .album-titulo small{display:block;font-size:.38em;letter-spacing:.02em;color:var(--text2);font-weight:700;margin-top:6px}
@@ -78,8 +87,9 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
   .acciones{grid-column:1/-1;justify-content:flex-start}
   .letra{padding-left:0;columns:1}
   .titulo{font-size:1.35rem}
-  .album-cab{grid-template-columns:96px 1fr auto;gap:14px;align-items:center}
-  .album-desc{display:none}
+  .album-cab{grid-template-columns:96px 1fr;gap:14px;align-items:center}
+  .album-toggle{align-items:center}
+  .album-toggle > span:first-child > .album-desc{display:none}
   .flecha{width:36px;height:36px}
 }
 </style>
@@ -92,6 +102,7 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
   <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
 </div>
 <audio id="audio" preload="none"></audio>
+<div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Portada"><figure><img id="visor-img" alt=""><figcaption id="visor-txt"></figcaption></figure><button type="button" aria-label="Cerrar">×</button></div>
 <script>
 const CATALOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/catalogo.json';
 const PLAY = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>';
@@ -141,25 +152,39 @@ function pintar() {
     const meta = [al.lanzamiento && `Lanzamiento ${fechaLarga(al.lanzamiento)}`, ts.length ? `${ts.length} tema${ts.length > 1 ? 's' : ''}` : 'El primer tema llega esta noche'].filter(Boolean).join(' · ');
     return `
     <section class="album${abiertos.has(clave) ? ' abierto' : ''}" id="a-${clave}">
-      <button class="album-cab" data-album="${clave}" aria-expanded="${abiertos.has(clave)}" aria-controls="temas-${clave}">
-        <div class="tapa" role="img" aria-label="Portada de ${esc(al.titulo)}" style="background-image:url('${esc(al.portada)}')"></div>
-        <div>
-          <div class="album-tipo">Álbum · ${esc(artista)}</div>
-          <h2 class="album-titulo">${esc(al.titulo)}${vol}</h2>
-          <p class="album-desc">${esc(al.descripcion)}</p>
-          <div class="album-meta">${meta}</div>
-        </div>
-        <span class="flecha" aria-hidden="true">${FLECHA}</span>
-      </button>
+      <div class="album-cab">
+        <button class="tapa" data-tapa="${esc(al.portada)}" data-titulo="${esc(al.titulo + (al.volumen ? ' · Vol. ' + al.volumen : ''))}" aria-label="Ver la portada de ${esc(al.titulo)} en grande" style="background-image:url('${esc(al.portada)}')"></button>
+        <button class="album-toggle" data-album="${clave}" aria-expanded="${abiertos.has(clave)}" aria-controls="temas-${clave}">
+          <span>
+            <span class="album-tipo">Álbum · ${esc(artista)}</span>
+            <span class="album-titulo" role="heading" aria-level="2">${esc(al.titulo)}${vol}</span>
+            <span class="album-desc">${esc(al.descripcion)}</span>
+            <span class="album-meta">${meta}</span>
+          </span>
+          <span class="flecha" aria-hidden="true">${FLECHA}</span>
+        </button>
+      </div>
       <div class="temas" id="temas-${clave}">${ts.map(temaHtml).join('')}</div>
     </section>`;
   }).join('');
 }
+// tapa en grande: clic en la portada; se cierra con clic, Esc o la ×
+let tapaOrigen = null;
+function verTapa(b) {
+  tapaOrigen = b;
+  document.getElementById('visor-img').src = b.dataset.tapa;
+  document.getElementById('visor-img').alt = 'Portada de ' + b.dataset.titulo;
+  document.getElementById('visor-txt').textContent = artista + ' · ' + b.dataset.titulo;
+  document.getElementById('visor').classList.add('on');
+  document.querySelector('#visor button').focus();
+}
+function cerrarTapa() { document.getElementById('visor').classList.remove('on'); tapaOrigen?.focus(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarTapa(); });
 const temasDe = al => temas.filter(t => t.album === al.id && (al.volumen == null || t.volumen === al.volumen));
 function abrir(clave, abierto) {
   const el = document.getElementById('a-' + clave); if (!el) return;
   el.classList.toggle('abierto', abierto);
-  el.querySelector('.album-cab').setAttribute('aria-expanded', abierto);
+  el.querySelector('.album-toggle').setAttribute('aria-expanded', abierto);
   abierto ? abiertos.add(clave) : abiertos.delete(clave); guardarAbiertos();
 }
 
@@ -190,6 +215,9 @@ audio.addEventListener('timeupdate', () => {
 });
 document.addEventListener('click', e => {
   const p = e.target.closest('[data-play]'); if (p) return tocar(p.dataset.play);
+  const tp = e.target.closest('[data-tapa]');
+  if (tp) return verTapa(tp);
+  if (e.target.closest('#visor')) return cerrarTapa();
   const a = e.target.closest('[data-album]');
   if (a) return abrir(a.dataset.album, !a.parentElement.classList.contains('abierto'));
   const l = e.target.closest('[data-letra]');

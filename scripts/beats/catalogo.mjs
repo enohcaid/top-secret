@@ -17,11 +17,11 @@ const SHORTS_VOL1 = 12;   // los primeros 12 de letras.json son el volumen 1, el
 // Las portadas llevan ?v=N: R2 se sirve con caché de un año; al cambiar una portada, subir el número.
 export const ARTISTA = 'Tacet Sin';
 export const ALBUMES = [
-  { id: 'thrive', titulo: 'Thrive', portada: MEDIA + 'musica/portadas/thrive.webp?v=3',
+  { id: 'thrive', titulo: 'Thrive', portada: MEDIA + 'musica/portadas/thrive.webp?v=5',
     descripcion: 'Amor, pasión, entrega y sacrificio: querer algo que no siempre nos hace bien, y crecer igual. Un tema nuevo cada noche.' },
-  { id: 'the-shorts', volumen: 1, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-1.webp?v=3',
+  { id: 'the-shorts', volumen: 1, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-1.webp?v=5',
     descripcion: 'Temas cortos, cada uno un momento: la noche antes de algo grande, el esfuerzo que nadie ve, la herida que tarda en cerrar.' },
-  { id: 'the-shorts', volumen: 2, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-2.webp?v=3',
+  { id: 'the-shorts', volumen: 2, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-2.webp?v=5',
     descripcion: 'La segunda parte: más tarde, más adentro.' },
 ];
 

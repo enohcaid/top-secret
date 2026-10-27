@@ -55,12 +55,13 @@ async function firma(id, alto) {
 async function publicar(id) {
   const png = path.join(OUT, `${id}.png`), webp = path.join(OUT, `${id}.webp`), LADO = 1400;
   const m = await sharp(png).metadata(), lado = Math.min(m.width, m.height);
-  const altoLogo = Math.round(LADO * 0.075), margen = Math.round(LADO * 0.045);
+  const altoLogo = Math.round(LADO * 0.075), margen = Math.round(LADO * 0.045);   // logo: así está bien (Juan)
   const logo = await sharp(path.join(ROOT, 'logos/rebrand/Clean logo.png')).resize({ height: altoLogo })
     .composite([{ input: Buffer.from([255, 255, 255, Math.round(255 * 0.88)]), raw: { width: 1, height: 1, channels: 4 }, tile: true, blend: 'dest-in' }]).png().toBuffer();
   const lm = await sharp(logo).metadata();
   const sombra = await sharp(logo).ensureAlpha().tint({ r: 0, g: 0, b: 0 }).blur(6).png().toBuffer();
-  const texto = await firma(id, Math.round(altoLogo * 0.62)), tm = await sharp(texto).metadata();
+  // nombre y disco: que se lean también en la tapa chica de la página (Juan: "no se lee el nombre, ni el artista")
+  const texto = await firma(id, Math.round(LADO * 0.15)), tm = await sharp(texto).metadata();
   await sharp(png).extract({ left: Math.floor((m.width - lado) / 2), top: Math.floor((m.height - lado) / 2), width: lado, height: lado })
     .resize(LADO, LADO)
     .composite([{ input: sombra, left: LADO - margen - lm.width + 2, top: LADO - margen - lm.height + 3, blend: 'multiply' },
