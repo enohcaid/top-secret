@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Álbum "Thrive" de Tacet Sin: un tema nuevo cada noche a las 2:00 (Juan, 2026-10-26). Amor, pasión, entrega y sacrificio
+// Álbum "Thrive" de Tacet Sin: un tema nuevo por semana, los domingos a las 2:00 (Juan, 2026-10-27; antes, uno por noche). Amor, pasión, entrega y sacrificio
 // desde los rasgos psicológicos de querer algo que no siempre nos hace bien; nada deportivo; entre 2:30 y 3:30.
 // Referencias del disco: duetos de The Weeknd con mujeres (Lust for Life, The Abyss, Love Me Harder, One of the Girls) →
 // cada tema es un dúo masculino-femenino, alt-R&B / synth-pop oscuro y cinematográfico con ADN de trap.

@@ -6,7 +6,7 @@ metadata:
 ---
 
 Pedidos de Juan (2026-10-26):
-- **Un tema por día, sin excepción.** Se genera a las **2:00** (tarea `TopSecretFC-Thrive`, reintento a las 5:00, límite de 5 horas, `scripts/run-thrive-hidden.vbs`, log `scripts/thrive.log`). Dura **más de 2:30 y como máximo 3:30**.
+- **Un tema por semana** (Juan, 2026-10-27: el consumo de Claude no da para uno por día). Se genera los **domingos a las 2:00** (tarea `TopSecretFC-Thrive`, reintento el domingo a las 5:00, límite de 5 horas, `scripts/run-thrive-hidden.vbs`, log `scripts/thrive.log`). Dura **más de 2:30 y como máximo 3:30**.
 - **Temática**: amor, pasión, sentimiento, entrega y sacrificio, trabajados desde los **rasgos psicológicos de querer algo que no siempre nos hace bien**. Lejos de lo deportivo. Letras en inglés.
 - **Referencias del disco**: duetos de The Weeknd con mujeres: *Lust for Life*, *The Abyss*, *Love Me Harder* y *One of the Girls*. Cada tema es un **dúo masculino-femenino** de alt-R&B / synth-pop oscuro y cinematográfico. Los nombres de artistas nunca van en la descripción del sonido que recibe el modelo.
 - **"Too Far In"** (26/10, el primero) **queda como está**: tiene `fijo: true` en `thrive.json` y ningún proceso lo toca.
@@ -19,7 +19,7 @@ Pedidos de Juan (2026-10-26):
 5. **Letra publicada = lo que realmente se canta** (`scripts/beats/letra-final.mjs`: Whisper turbo + Claude). Se guarda en `letraFinal`.
 6. La instrumental **no se publica en la página**: va a la música de los videos (`_fuentes/musica/propios/<fecha> - <Título>.mp3`). Esto devuelve los beats compuestos por código a los videos.
 
-Cada paso queda guardado en `scripts/beats/thrive.json` y en `fuentes/beats/thrive/<slug>/`, y la corrida siguiente retoma desde donde quedó. Herramientas de Python: `fuentes/beats/whisper/.venv` (torch cu128, openai-whisper, pronouncing). Costo en Claude: unas 3 a 6 llamadas livianas por noche (la composición es la más grande, unos 25 mil tokens de entrada).
+Cada paso queda guardado en `scripts/beats/thrive.json` y en `fuentes/beats/thrive/<slug>/`, y la corrida siguiente retoma desde donde quedó. Herramientas de Python: `fuentes/beats/whisper/.venv` (torch cu128, openai-whisper, pronouncing). Modelos: el beat lo compone **Sonnet 5.5** (Opus pensaba más de 18 min y no llegaba a escribir el código); concepto, letra y letra final siguen con **Opus**, porque Juan quiere evaluar la calidad y la versatilidad de lo creativo antes de pasarlos a Sonnet. Para más de un tema el mismo día: `--parte 2`.
 
 ## Página topsecret.ar/music
 - **Discos por orden de lanzamiento** (la fecha de su primer tema), **desplegables**: arrancan cerrados y cada visitante los encuentra como los dejó (localStorage).
