@@ -44,9 +44,11 @@ export async function ollama(prompt, { modelo = MODELO, json = false, temperatur
 
 // pensar: tope de tokens de razonamiento (MAX_THINKING_TOKENS). Sin tope, Opus llegó a pensar 18 min antes de
 // escribir el código de un beat (27/10) y la llamada se cortaba.
+// Modelos por nombre completo: el alias 'sonnet' de este Claude Code apunta a claude-sonnet-4-6 (27/10).
+const MODELOS = { opus: 'claude-opus-5-5', sonnet: 'claude-sonnet-5-5', haiku: 'claude-haiku-5-5' };
 export function claude(prompt, { modelo = 'opus', minutos = 10, pensar } = {}) {
-  const r = spawnSync(CLAUDE, ['-p', '--model', modelo, '--output-format', 'json', '--tools', '', '--system-prompt', 'You are a precise writer. Follow the brief exactly and answer only with what it asks for.'], {
-    cwd: os.tmpdir(), input: prompt, encoding: 'utf8', timeout: minutos * 60000, env: { ...process.env, ...(pensar != null ? { MAX_THINKING_TOKENS: String(pensar) } : {}) }, maxBuffer: 16 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'),
+  const r = spawnSync(CLAUDE, ['-p', '--model', MODELOS[modelo] || modelo, '--output-format', 'json', '--tools', '', '--system-prompt', 'You are a precise writer. Follow the brief exactly and answer only with what it asks for.'], {
+    cwd: os.tmpdir(), input: prompt, encoding: 'utf8', timeout: minutos * 60000, env: { ...process.env, CLAUDE_CODE_MAX_OUTPUT_TOKENS: '64000', ...(pensar != null ? { MAX_THINKING_TOKENS: String(pensar) } : {}) }, maxBuffer: 16 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'),
   });
   const j = (() => { try { return JSON.parse(r.stdout); } catch { return null; } })();
   if (!j?.result) throw new Error(`Claude sin respuesta (código ${r.status}): ${(r.stdout || r.stderr || '').slice(-200)}`);
