@@ -281,11 +281,47 @@ client.on('ready', async () => {
   yo = client.info.wid._serialized;
   try { yoLid = await client.pupPage.evaluate(() => window.require('WAWebUserPrefsMeUser').getMaybeMeLidUser()?._serialized || null); } catch (e) {}
   log('conectado como', client.info.pushname, yo, yoLid || '(sin lid)', PRUEBA ? '(MODO PRUEBA)' : '');
-  if (PRUEBA || AUTO) { dormido = false; return arrancarBusqueda(); }   // corridas a mano con --prueba / --auto
-  // Reinicio en un día en que Juan ya lo había mandado a buscar: sigue buscando
-  if (st.auto) { dormido = false; return arrancarBusqueda(); }
-  log('esperando "busca amistosos"');
+  vigilarConexion();
+  if (PRUEBA || AUTO || st.auto) { dormido = false; await arrancarBusqueda(); }   // --prueba / --auto, o reinicio en un día en que Juan ya lo mandó a buscar
+  else log('esperando "busca amistosos"');
+  await comandosAtrasados();
 });
+
+// Comandos que Juan mandó mientras el bot estaba trabado o reiniciándose (2026-10-26: "+22:40 iago" se perdió).
+// Solo desde el último comando procesado hoy: en el primer arranque del día no se repite nada.
+async function comandosAtrasados() {
+  if (!st.ultimoComando) return;
+  try {
+    const msgs = await client.pupPage.evaluate((ids, desde) => ids.flatMap(id => {
+      const chat = window.require('WAWebCollections').Chat.get(id);
+      return (chat?.msgs.getModelsArray() || []).filter(m => m.t > desde && m.id.fromMe && m.body).map(m => ({ t: m.t, body: m.body }));
+    }), [yo, yoLid].filter(Boolean), st.ultimoComando);
+    const pendientes = msgs.filter(m => !esAviso(m.body)).sort((a, b) => a.t - b.t);
+    for (const m of pendientes) {
+      log('comando atrasado:', m.body.slice(0, 40).replace(/\n/g, ' '));
+      st.ultimoComando = m.t; save();
+      for (const linea of m.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
+    }
+  } catch (e) { log('no pude leer comandos atrasados:', e.message.split('\n')[0]); }
+}
+
+// WhatsApp Web puede quedar conectado pero sin pasar mensajes (2026-10-26: de 21:08 a 21:28 no llegó nada, ni
+// comandos ni respuestas, sin error ni "desconectado"). Cada 2 min: si la página no responde o no está
+// CONNECTED dos veces seguidas, sale con error
+// y el vigilante (amistosos-vigilado.mjs) lo relanza; al volver lee pedidos, respuestas y comandos atrasados.
+function vigilarConexion() {
+  let fallos = 0;
+  const conTope = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('sin respuesta')), ms))]);
+  setInterval(async () => {
+    let estado;
+    try { estado = await conTope(client.getState(), 30000); } catch (e) { estado = e.message; }
+    if (estado !== 'CONNECTED') {
+      if (++fallos >= 2) { log('WhatsApp no responde o no está conectado:', estado, '— salgo para reiniciar'); process.exit(1); }
+      return;
+    }
+    fallos = 0;
+  }, 120000);
+}
 
 async function arrancarBusqueda(motivo = '') {
   // No se usa getChats()/msg.getChat(): fallan con contactos @lid en whatsapp-web.js. El grupo se
@@ -351,12 +387,15 @@ async function revisarRespuestas() {
 }
 
 // Mensajes nuevos (de otros y míos).
+// Mensajes que manda el bot a Juan (no son comandos)
+const esAviso = b => b.startsWith('🕵️') || /^(📣|✅|💬|⚠️|📋|🗑️|🎉|⏱️|⚡|📅|🔁)/u.test(b);
 client.on('message_create', async msg => {
   try {
     if (!yo) return;
     // 1) Comandos de Juan en su chat consigo mismo.
     // El chat consigo mismo puede venir como @c.us o como @lid (yoLid).
-    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !msg.body.startsWith('🕵️') && !/^(📣|✅|💬|⚠️|📋|🗑️|🎉|⏱️|⚡|📅|🔁)/u.test(msg.body)) {
+    if (msg.fromMe && (msg.to === yo || msg.to === yoLid || msg.to === msg.from) && !esAviso(msg.body)) {
+      if (msg.timestamp) { st.ultimoComando = Math.max(st.ultimoComando || 0, msg.timestamp); save(); }
       // Varios comandos en un mismo mensaje, uno por línea ("B\nC no\nD no").
       for (const linea of msg.body.split('\n').map(l => l.trim()).filter(Boolean)) await comando(linea);
       return;
@@ -389,8 +428,11 @@ async function esGrupoAmistosos(msg) {
 
 async function pedidoGrupo(msg) {
   const mid = msg.id?._serialized;
-  if (mid && vistos.has(mid)) return;
-  if (mid) vistos.add(mid);
+  // Los ids también quedan en el estado del día: al reiniciar, revisarAtrasados relee el grupo y sin esto
+  // volvía a ofrecerle a un pedido ya atendido (2026-10-26: a Argentinos Jrs, que ya jugaba 23:00, dos veces).
+  st.vistos = st.vistos || [];
+  if (mid && (vistos.has(mid) || st.vistos.includes(mid))) return;
+  if (mid) { vistos.add(mid); st.vistos.push(mid); save(); }
   if (st.buscaDesde && msg.timestamp && msg.timestamp < st.buscaDesde) return;   // anterior a "busca amistosos"
   if (!PIDE.test(msg.body)) { log('mensaje del grupo sin pedido:', msg.body.slice(0, 60).replace(/\n/g, ' ')); return; }
   if (!libre() && !PRUEBA) return;
@@ -420,6 +462,9 @@ async function pedidoGrupo(msg) {
   const rech = yaRechazo(eq && !eq.dudoso ? eq.nombre : null, autor, msg.author);
   if (rech) { log('pedido ignorado (hoy ya nos rechazó):', eq?.nombre || nombreContacto, '|', breve); return; }
   // Rival de los próximos 2 días en el calendario: no se le ofrece amistoso
+  // Ya tenemos amistoso con ese equipo hoy: no se le ofrece otro horario
+  const yaJuega = eq && !eq.dudoso && Object.entries(st.confirmados).find(([, n]) => n.toLowerCase() === eq.nombre.toLowerCase());
+  if (yaJuega) { log(`pedido ignorado (ya jugamos ${yaJuega[0]}):`, eq.nombre, '|', breve); return; }
   const prox = eq && !eq.dudoso ? rivalProximo(eq.nombre) : null;
   if (prox) {
     log(`pedido ignorado (rival del ${prox.fecha}):`, eq.nombre, '|', breve);
