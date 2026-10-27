@@ -13,6 +13,9 @@
   const DIA = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   const TEMP = { t4: 'Temporada 4', t3: 'Temporada 3', t2: 'Temporada 2', t1: 'Temporada 1' };
   const LGKEY = { VPN: 'vpn', VPUG: 'vpug', '11x11': 'e11' };
+  // Logo de cada liga en la cabecera de su tarjeta (los blancos se invierten en el tema claro)
+  const LOGO = { VPN: 'vpn', VPUG: 'vpug', 'Espacio Gamer': 'espacio-gamer', '11x11': '11x11' };
+  const logoLiga = liga => LOGO[liga] ? `<img class="comp-logo${liga === 'VPN' || liga === 'VPUG' ? ' mono' : ''}" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/ligas/${LOGO[liga]}.webp" alt="${liga}" loading="lazy">` : '';
   const fechaCorta = d => { const x = new Date(d + 'T12:00:00'); return `${x.getDate()} ${MES[x.getMonth()].toLowerCase()}`; };
 
   // ── Torneo de cada partido de RAW: las cabeceras de bloque del propio script ──
@@ -111,7 +114,7 @@
     const chip = c.ligaKey === 'amis' ? 'AMI' : c.liga === 'Espacio Gamer' ? 'EG' : c.liga;
     return `<section class="comp-card ${c.enCurso ? 'en-curso' : 'fin'}${abierta ? ' abierta' : ''}" data-clave="${esc(c.clave)}">
       <button class="comp-head" type="button" aria-expanded="${abierta}">
-        <span class="nh-lbadge ${c.ligaKey}">${esc(chip)}</span>
+        ${logoLiga(c.liga) || `<span class="nh-lbadge ${c.ligaKey}">${esc(chip)}</span>`}
         <span class="comp-tit"><b>${esc(c.liga === 'Amistosos' ? 'Amistosos' : c.liga)}</b>${c.nombre ? `<span>${esc(c.nombre)}</span>` : ''}</span>
         <span class="comp-estado">${c.enCurso ? '<i></i>EN CURSO' : 'FINALIZADO'}</span>
         <span class="comp-chev" aria-hidden="true">▾</span>

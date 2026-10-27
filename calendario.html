@@ -400,6 +400,8 @@ footer span{color:var(--gold);}
 .comp-card.en-curso{border-color:color-mix(in srgb,var(--gold) 45%,var(--border))}
 .comp-head{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px 6px;background:transparent;border:0;color:var(--text);cursor:pointer;text-align:left}
 .comp-head .nh-lbadge{min-width:42px;text-align:center}
+.comp-head .comp-logo{height:36px;width:62px;object-fit:contain;flex-shrink:0}
+.light-mode .comp-head .comp-logo.mono{filter:invert(1)}
 .comp-tit{flex:1;min-width:0;display:flex;flex-direction:column}
 .comp-tit b{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;line-height:1.1}
 .comp-tit span{font-size:.78rem;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3233,7 +3235,7 @@ fetchVpnBadges(); // async — re-renders hero once VPN team logos are loaded
 <footer>
   <span>Top Secret FC</span> · Temporada 4 · 2026
 </footer>
-<script src="calendario-competencias.js?v=4"></script>
+<script src="calendario-competencias.js?v=5"></script>
 <script src="calendario-share.js?v=5"></script>
 <script src="layout.js?v=25"></script>
 </body>

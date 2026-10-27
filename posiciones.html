@@ -79,6 +79,10 @@ body {
   margin-bottom: -2px; transition: color .18s, border-bottom-color .18s;
 }
 .tab:hover { color: var(--text); }
+.tab { display: inline-flex; align-items: center; gap: 10px; }
+.tab-logo { height: 22px; width: auto; max-width: 64px; object-fit: contain; opacity: .55; transition: opacity .18s; }
+.tab:hover .tab-logo, .tab.active .tab-logo { opacity: 1; }
+.light-mode .tab-logo.mono { filter: invert(1); }
 .tab[data-league="vpn"].active   { color: var(--vpn);  border-bottom-color: var(--vpn);  }
 .tab[data-league="vpug"].active  { color: var(--vpug); border-bottom-color: var(--vpug); }
 .tab[data-league="e11"].active   { color: var(--e11);  border-bottom-color: var(--e11);  }
@@ -840,6 +844,20 @@ function switchTab(id, season, btn) {
   const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
   if (rows.length) gsap.fromTo(rows, {opacity:0, x:-8}, {opacity:1, x:0, duration:0.35, stagger:0.02, ease:'power2.out'});
 }
+
+/* ── Logo de cada liga en su pestaña (11x11 hasta la T3, Espacio Gamer desde la T4) ── */
+(function logosTabs() {
+  const M = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/ligas/';
+  document.querySelectorAll('.tab[data-league]').forEach(tab => {
+    const lg = tab.dataset.league, t4 = !!tab.closest('#s-t4');
+    const archivo = lg === 'e11' ? (t4 ? 'espacio-gamer' : '11x11') : lg;
+    const img = document.createElement('img');
+    img.className = 'tab-logo' + (lg === 'e11' ? '' : ' mono');
+    img.src = M + archivo + '.webp'; img.alt = ''; img.loading = 'lazy';
+    img.onerror = () => img.remove();
+    tab.prepend(img);
+  });
+})();
 
 /* ── RENDER T1 STATIC TABLES ── */
 function renderT1() {

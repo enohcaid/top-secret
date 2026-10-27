@@ -263,6 +263,9 @@ footer{border-top:1px solid var(--border);padding:28px 0 36px;}
 .league-card:nth-child(2){border-top-color:var(--vpug) !important;}
 .league-card:nth-child(3){border-top-color:var(--e11) !important;}
 .lc-dot{display:none;}
+.lc-logo{position:absolute;top:22px;right:0;height:38px;width:auto;max-width:42%;object-fit:contain;object-position:right center;}
+.lc-logo.crest{top:12px;height:62px;}
+.light-mode .lc-logo.mono{filter:invert(1);}
 .top-card-head{padding:0 0 10px;}
 .top-entry{padding:12px 0;}
 .results-list{gap:0;}
@@ -440,15 +443,15 @@ footer{border-top:0;}
 
       <div class="sub-title">Ligas</div>
       <div class="leagues-grid">
-        <a class="league-card" href="posiciones.html"><span class="lc-dot" style="background:var(--vpn)"></span>
+        <a class="league-card" href="posiciones.html"><span class="lc-dot" style="background:var(--vpn)"></span><img class="lc-logo mono" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/ligas/vpn.webp" alt="VPN" loading="lazy">
           <div class="lc-tag" style="color:var(--vpn)">VPN · 2da División</div><div class="lc-name">Virtual Pro Network</div>
           <div class="lc-pos"><div class="lc-pos-num" id="lc-vpn-pos">—</div><div class="lc-pos-suf">lugar</div></div>
           <div class="lc-pts" id="lc-vpn-pts">cargando...</div><span class="lc-badge" id="lc-vpn-badge">T3</span></a>
-        <a class="league-card" href="posiciones.html"><span class="lc-dot" style="background:var(--vpug)"></span>
+        <a class="league-card" href="posiciones.html"><span class="lc-dot" style="background:var(--vpug)"></span><img class="lc-logo mono" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/ligas/vpug.webp" alt="VPUG" loading="lazy">
           <div class="lc-tag" style="color:var(--vpug)">VPUG</div><div class="lc-name">Virtual Pro — Clubs Pro</div>
           <div class="lc-pos"><div class="lc-pos-num" id="lc-vpug-pos">—</div><div class="lc-pos-suf">lugar</div></div>
           <div class="lc-pts" id="lc-vpug-pts">cargando...</div><span class="lc-badge" id="lc-vpug-badge">T3</span></a>
-        <a class="league-card" href="posiciones.html"><span class="lc-dot" style="background:var(--e11)"></span>
+        <a class="league-card" href="posiciones.html"><span class="lc-dot" style="background:var(--e11)"></span><img class="lc-logo crest" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/ligas/espacio-gamer.webp" alt="Espacio Gamer" loading="lazy">
           <div class="lc-tag" style="color:var(--e11)">Espacio Gamer</div><div class="lc-name">Challengers · Argentina</div>
           <div class="lc-pos"><div class="lc-pos-num" id="lc-e11-pos">—</div><div class="lc-pos-suf">lugar</div></div>
           <div class="lc-pts" id="lc-e11-pts">cargando...</div><span class="lc-badge" id="lc-e11-badge">T3</span></a>
