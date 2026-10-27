@@ -46,9 +46,12 @@ export function claude(prompt, { modelo = 'opus', minutos = 10 } = {}) {
   const r = spawnSync(CLAUDE, ['-p', '--model', modelo, '--output-format', 'json', '--tools', '', '--system-prompt', 'You are a precise writer. Follow the brief exactly and answer only with what it asks for.'], {
     cwd: os.tmpdir(), input: prompt, encoding: 'utf8', timeout: minutos * 60000, maxBuffer: 16 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'),
   });
-  const res = (() => { try { return JSON.parse(r.stdout).result; } catch { return null; } })();
-  if (!res) throw new Error(`Claude sin respuesta (código ${r.status}): ${(r.stdout || r.stderr || '').slice(-200)}`);
-  return res;
+  const j = (() => { try { return JSON.parse(r.stdout); } catch { return null; } })();
+  if (!j?.result) throw new Error(`Claude sin respuesta (código ${r.status}): ${(r.stdout || r.stderr || '').slice(-200)}`);
+  // sin cupo, Claude "responde" igual con el aviso de límite como texto (26/10 pasó por composición fallida): es un error
+  if (j.is_error || (j.result.length < 400 && /usage limit|out of (extra )?usage|hit your limit|limit (will )?reset|rate limit/i.test(j.result)))
+    throw new Error(`Claude sin cupo: ${j.result.slice(0, 200)}`);
+  return j.result;
 }
 
 const sacarJSON = t => JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1));
