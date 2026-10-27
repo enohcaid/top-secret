@@ -83,6 +83,16 @@ try {
     Log "Error en publicacion de la ronda: $_"
 }
 
+# ── PASO M: demos de música revisadas en aprobar.html (todo bien → se publica; "a mejorar" → se rehace) ──
+# Sale enseguida si no hay decisiones nuevas (una lectura de KV). Log: scripts\thrive.log
+try {
+    Push-Location $repoRoot
+    cmd /c "node scripts\beats\musica-aprobacion.mjs >> scripts\thrive.log 2>&1"
+    Pop-Location
+} catch {
+    Log "Error revisando musica: $_"
+}
+
 # ── PASO V: vigía del vivo de Twitch (goles + pantallas del reporte) ──────────
 # Si enohcaid (señal de la PS5) está en vivo y no hay vigía corriendo (lock con PID vivo), lo lanza en segundo plano.
 # Solo en la ventana de partidos que pidió Juan: lunes a jueves 22:30-00:30 (misma que retransmitir).

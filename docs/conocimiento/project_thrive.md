@@ -26,3 +26,13 @@ Cada paso queda guardado en `scripts/beats/thrive.json` y en `fuentes/beats/thri
 - **Sin versiones instrumentales**: solo el botón "Letra", que muestra `letraFinal`.
 - **The Shorts**: los 23 temas cortos con voz de `scripts/beats/letras.json`. Vol. 1 son los primeros 12 (`SHORTS_VOL1` en `scripts/beats/catalogo.mjs`).
 - **Portadas** abstractas, sin fútbol, hechas con ChatGPT: `node scripts/beats/portadas-albumes.mjs [id…]` → R2 `musica/portadas/<id>.webp`.
+
+## Revisión en aprobar.html: demos y entrenamiento (2026-10-27)
+
+Juan: "intentemos entrenar a Gemma para que en el futuro se encargue de todo. Hagamos una sección en aprobaciones para la música, así Gemma puede trabajar sobre el error y yo reviso qué genera y qué hay que mejorar."
+- **Ningún tema nuevo se publica solo.** Entra como **demo** en `aprobar.html`, sección **Música** (lote `musica-<slug>`, `etapa: 'musica'`), con el reproductor y una tarjeta por parte: **concepto, beat, letra y voces**. Cada tarjeta dice quién hizo esa parte y tiene un cuadro "Qué mejorar" con los botones "Está bien" / "A mejorar" (`decision` aprobada / descartada).
+- `scripts/beats/musica-aprobacion.mjs` (desde `watch-regen.ps1`, cada minuto) procesa las decisiones:
+  - Todo bien → `publicado: true` y entra al catálogo de /music.
+  - Algo "a mejorar" → `thrive.mjs --revisar <slug>` rehace esa parte y lo que depende de ella, con el comentario, y vuelve como versión siguiente. Letra y voces las rehace Gemma primero; el beat, Sonnet. Si se rechaza el concepto, sale un tema nuevo.
+- El catálogo solo muestra temas con `publicado: true`. "Too Far In" y "Still Here" están publicados. **Flicker** volvió a ser demo, versión 1 (`node scripts/beats/musica-aprobacion.mjs --demo <slug>`).
+- Cada decisión, con su comentario, queda en `fuentes/ia/dataset/musica-feedback.jsonl`: es la base para entrenar a Gemma, junto con los ejemplos de Claude ([[reference_ia_local]]).

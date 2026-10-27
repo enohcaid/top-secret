@@ -44,7 +44,8 @@ export async function armarCatalogo({ log = console.log } = {}) {
   }
   const thrive = fs.existsSync(THRIVE) ? JSON.parse(fs.readFileSync(THRIVE, 'utf8')).temas : [];
   for (const [i, t] of thrive.entries()) {
-    if (!t.audio) continue;
+    // Solo lo aprobado por Juan (desde 2026-10-27 cada tema nuevo pasa antes por aprobar.html como demo)
+    if (!t.audio || t.publicado !== true) continue;
     lista.push({ slug: t.slug, titulo: t.titulo, album: 'thrive', pista: i + 1, fecha: t.fecha, concepto: t.concepto, rasgo: t.rasgo,
       bpm: t.bpm, tonalidad: t.tonalidad, duracion: t.duracion, letra: t.letraFinal || t.letra, voz: MEDIA + t.audio });
   }

@@ -28,13 +28,17 @@ import { putFile } from '../lib/r2.mjs';
 import { pedirJSON, pedirTexto, claude, guardarEjemplo, ultimoMotor } from '../lib/ia.mjs';
 import { armarCatalogo } from './catalogo.mjs';
 import { letraFinal } from './letra-final.mjs';
+import { mandarAAprobar } from './musica-aprobacion.mjs';
 
 loadEnv();
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i < 0 ? d : argv[i + 1]; };
 const FECHA = opt('--fecha', new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }));
 // --parte N: otro tema el mismo día (Juan, 2026-10-27: "lanzá otra canción nueva"). Se identifica como <fecha>-<N>.
-const PARTE = opt('--parte', null), ID = PARTE && PARTE !== '1' ? `${FECHA}-${PARTE}` : FECHA;
+const PARTE = opt('--parte', null);
+let ID = PARTE && PARTE !== '1' ? `${FECHA}-${PARTE}` : FECHA;
+// --revisar <slug>: rehace las partes que Juan marcó "a mejorar" en aprobar.html, con su comentario (musica-aprobacion.mjs)
+const REVISAR = opt('--revisar', null);
 const ACE = path.join(ROOT, 'fuentes', 'beats', 'ACE-Step-1.5');
 const DIR = path.join(ROOT, 'fuentes', 'beats', 'thrive');
 const REG = path.join(ROOT, 'scripts', 'beats', 'thrive.json');
@@ -48,9 +52,12 @@ const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2
 
 const reg = fs.existsSync(REG) ? JSON.parse(fs.readFileSync(REG, 'utf8')) : { temas: [] };
 const guardar = () => fs.writeFileSync(REG, JSON.stringify(reg, null, 2) + '\n');
-let tema = reg.temas.find(t => (t.id || t.fecha) === ID);
+let tema = REVISAR ? reg.temas.find(t => t.slug === REVISAR) : reg.temas.find(t => (t.id || t.fecha) === ID);
 // `fijo`: queda como salió, no se toca (Juan, 2026-10-26, sobre "Too Far In")
-if (tema?.fijo || tema?.letraFinal) { log(`El tema ${ID} ya está terminado: "${tema.titulo}".`); process.exit(0); }
+if (REVISAR) {
+  if (!tema?.revision) { log(`Nada que revisar en ${REVISAR}.`); process.exit(0); }
+  ID = tema.id || tema.fecha;
+} else if (tema?.fijo || tema?.letraFinal) { log(`El tema ${ID} ya está terminado: "${tema.titulo}".`); process.exit(0); }
 fs.mkdirSync(DIR, { recursive: true });
 // Una sola corrida a la vez (una prueba a mano y la tarea de las 2:00 se pisarían el mismo tema)
 const LOCK = path.join(DIR, '.corriendo');
@@ -76,10 +83,48 @@ await asegurarOllama();
 const DEPORTE = /\b(ball|goal|goals|pass(?:es|ed)?|team|club|match|game|field|pitch|stadium|crowd|jersey|coach|referee|whistle|score[ds]?|scoreboard|striker|keeper|kick(?:ed|s)?|penalty|trophy|league)\b/i;
 const CASTELLANO = /[áéíóúñ¿¡]|\b(?:del|las|los|una|que|con|por|para|voz|corazón)\b/i;
 
+// ── 0. Revisión: se borra lo que Juan marcó "a mejorar" (y lo que depende de eso) y se rehace con su comentario ──
+const FEEDBACK = REVISAR ? tema.revision : null;
+const fb = parte => FEEDBACK && parte in FEEDBACK
+  ? `
+## The artist's feedback on the previous version (${parte}) — fix exactly this, keep what worked
+${FEEDBACK[parte] || '(marked "to improve" without a comment: make it clearly better and different)'}
+` : '';
+let reemplaza = null;
+if (REVISAR) {
+  const v = (tema.version || 1) + 1, vieja = path.join(DIR, tema.slug);
+  log(`Revisión de "${tema.titulo}" → versión ${v}: ${Object.keys(FEEDBACK).join(', ')}`);
+  const borrar = (...ks) => ks.forEach(k => delete tema[k]);
+  if ('concepto' in FEEDBACK) {
+    // concepto nuevo = tema nuevo (otro título y otro beat); el anterior queda como referencia de lo que no
+    reemplaza = { slug: tema.slug, titulo: tema.titulo, concepto: tema.concepto, rasgo: tema.rasgo, version: v };
+    reg.temas.splice(reg.temas.indexOf(tema), 1); tema = null;
+  } else {
+    if ('beat' in FEEDBACK) { borrar('instrumental', 'secciones', 'beat'); for (const x of ['instrumental.mp3', 'instrumental.wav', 'instrumental-ace', 'instrumental-videos.mp3']) fs.rmSync(path.join(vieja, x), { recursive: true, force: true }); }
+    if ('beat' in FEEDBACK || 'letra' in FEEDBACK) borrar('letra', 'letraPor', 'avisosRima');
+    if ('voces' in FEEDBACK) {
+      // la descripción de las voces se reescribe con el comentario (modelo local primero)
+      const nueva = await pedirTexto(`Rewrite this vocal description for an AI music model so it fixes the artist's feedback. Keep it a male–female duet, English, comma-separated, max 30 words, no artist names. Answer only with the new description.
+
+Current: ${tema.captionVoces}
+${fb('voces')}`,
+        { orden: ['local', 'claude'], claudeModelo: 'sonnet', validar: x => x.split(/s+/).length > 45 ? 'muy larga' : CASTELLANO.test(x) ? 'castellano' : null }).catch(() => null);
+      if (nueva) tema.captionVoces = nueva.replace(/^["']|["']$/g, '').trim();
+    }
+    borrar('audio', 'letraFinal', 'generado');
+    fs.rmSync(path.join(vieja, 'cover'), { recursive: true, force: true });
+    tema.version = v;
+  }
+  guardar();
+}
+
 // ── 1. Concepto y sonido ─────────────────────────────────────────────────────
 if (!tema) {
   const anteriores = reg.temas.slice(-30).map(t => `- "${t.titulo}" · trait: ${t.rasgo} · ${t.bpm} BPM, ${t.tonalidad} · sound: ${t.captionInstrumental || t.caption}`).join('\n') || '(none yet)';
-  const encargo = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-concepto.md'), 'utf8').replace('{{FECHA}}', FECHA).replace('{{ANTERIORES}}', anteriores);
+  const encargo = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-concepto.md'), 'utf8').replace('{{FECHA}}', FECHA).replace('{{ANTERIORES}}', anteriores)
+    + (reemplaza ? `
+## This replaces "${reemplaza.titulo}" (${reemplaza.rasgo}: ${reemplaza.concepto}), rejected by the artist
+${fb('concepto')}` : '');
   log('Concepto y sonido…');
   const j = await pedirJSON(encargo, { orden: ['claude', 'local'], tarea: 'thrive-concepto', temperatura: 0.9,
     claves: ['titulo', 'concepto', 'rasgo', 'caption_instrumental', 'caption_voces', 'voz', 'tonalidad', 'estructura'],
@@ -98,7 +143,7 @@ if (!tema) {
       if (reg.temas.some(x => norm(x.rasgo) === norm(j.rasgo))) return `rasgo repetido "${j.rasgo}": elegí otro`;
     } });
   const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${ID}`;
-  tema = { ...(ID !== FECHA ? { id: ID } : {}), fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),
+  tema = { ...(ID !== FECHA ? { id: ID } : {}), ...(reemplaza ? { version: reemplaza.version, reemplaza: reemplaza.slug } : {}), fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),
     captionInstrumental: j.caption_instrumental.trim(), captionVoces: j.caption_voces.trim(), bpm: Math.round(j.bpm),
     tonalidad: j.tonalidad.trim(), duracion: Math.round(j.duracion), estructura: j.estructura };
   reg.temas.push(tema); guardar();
@@ -163,7 +208,7 @@ if (!fs.existsSync(INSTR)) {
     .replace('{{ANTERIORES}}', anteriores).replace('{{REGLAS}}', fs.readFileSync(path.join(ROOT, 'docs/conocimiento/feedback_composicion_musical.md'), 'utf8').replace(/^---[\s\S]*?---\n/, ''))
     .replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{ESTRUCTURA}}', tema.estructura.join(', ')).replace('{{DURACION}}', tema.duracion)
     .replace('{{COMPONER}}', fs.readFileSync(path.join(ROOT, 'scripts/beats/componer.py'), 'utf8')).replace('{{EJEMPLO}}', ejemplo);
-  let correcciones = '', ok = false;
+  let correcciones = fb('beat'), ok = false;
   for (let i = 1; i <= 3 && !ok; i++) {
     let codigo;
     try {
@@ -180,7 +225,7 @@ if (!fs.existsSync(INSTR)) {
     const err = r.error ? [r.error] : controlarBeat(r.secciones);
     if (!err.length) { ok = true; if (i === 1) guardarEjemplo('thrive-beat', base.replace('{{CORRECCIONES}}', ''), codigo); tema.secciones = r.secciones; tema.beat = (codigo.match(/Rasgo distintivo:\s*([^\n]+)/i) || [, tema.captionInstrumental])[1].trim(); break; }
     log(`  a corregir: ${err.map(e => e.split('\n')[0]).join(' · ')}`);
-    correcciones = `\n## Your previous version failed. Fix it and return the complete file again\n${err.map(e => `- ${e}`).join('\n')}\n\nPrevious file:\n\`\`\`python\n${codigo}\n\`\`\`\n`;
+    correcciones = `${fb('beat')}\n## Your previous version failed. Fix it and return the complete file again\n${err.map(e => `- ${e}`).join('\n')}\n\nPrevious file:\n\`\`\`python\n${codigo}\n\`\`\`\n`;
   }
   if (ok) {
     ff('-loglevel', 'error', '-y', '-i', WAV, '-b:a', '256k', INSTR);
@@ -225,7 +270,7 @@ if (!tema.letra) {
     .replace('{{VOCES}}', tema.captionVoces).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{DURACION}}', tema.duracion)
     .replace('{{COMPAS}}', compas.toFixed(2)).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
     .replace('{{MAPA}}', secciones.map((s, i) => `${i + 1}. ${s.nombre !== '?' ? s.nombre + ' · ' : ''}${mmss(s.inicio)}–${mmss(s.fin)} · ${s.compases} bars`).join('\n'));
-  let correcciones = '', mejor = null;
+  let correcciones = fb('letra'), mejor = null;
   // Modelo local primero (Juan, 2026-10-27): 3 vueltas con Gemma corrigiendo rimas; si no rima, Claude Sonnet.
   for (let i = 1; i <= 5; i++) {
     log(`Letra (vuelta ${i})…`);
@@ -237,7 +282,7 @@ if (!tema.letra) {
     if (!mejor || r.problemas.length < mejor.r.problemas.length) mejor = { letra, r, motor: ultimoMotor };
     if (r.ok) break;
     log(`  rimas a corregir: ${r.problemas.length}`);
-    correcciones = `\n## Your previous version\n${letra}\n\n## Fix these lines (they do not rhyme BY SOUND; keep everything else)\n- ${r.problemas.join('\n- ')}\n`;
+    correcciones = `${fb('letra')}\n## Your previous version\n${letra}\n\n## Fix these lines (they do not rhyme BY SOUND; keep everything else)\n- ${r.problemas.join('\n- ')}\n`;
   }
   if (mejor.r.ok && mejor.motor === 'claude') guardarEjemplo('thrive-letra', base.replace('{{CORRECCIONES}}', ''), mejor.letra);
   tema.letra = mejor.letra; tema.letraPor = mejor.motor; if (!mejor.r.ok) tema.avisosRima = mejor.r.problemas; guardar();
@@ -276,9 +321,13 @@ log('Letra final (Whisper)…');
 try { tema.letraFinal = await letraFinal(tema, path.join(DIR, `${tema.slug}.mp3`)); }
 catch (e) { log(`  no se pudo transcribir (${e.message}); se publica la letra escrita`); tema.letraFinal = tema.letra; }
 guardar();
+delete tema.revision;
+if (tema.publicado !== true) tema.publicado = false;   // se publica cuando Juan lo aprueba en aprobar.html
+guardar();
+await mandarAAprobar(tema);
 await armarCatalogo({ log });
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
 git('add', 'scripts/beats/thrive.json', ...(fs.existsSync(PY_TEMA) ? [PY_TEMA] : []));
 const c = git('commit', '-m', `feat: Thrive — "${tema.titulo}" (${tema.rasgo})\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`);
 if (c.status === 0) { const ps = git('push', '-q'); log(ps.status === 0 ? 'Commit y push hechos.' : 'Push falló: ' + ps.stderr.slice(-200)); }
-log(`✓ "${tema.titulo}" publicado en topsecret.ar/music`);
+log(`✓ "${tema.titulo}" (versión ${tema.version || 1}) listo para revisar en aprobar.html`);

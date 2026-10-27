@@ -133,6 +133,13 @@ button:disabled{opacity:.4;cursor:default}
 .nota figure.par figcaption{grid-column:1/-1}
 .nota figcaption{font-size:12px;color:var(--mid);margin-top:4px}
 .nota a{color:var(--gold2)}
+/* Música: demos de Thrive (una tarjeta por parte) */
+.m-audio{display:block;width:min(520px,100%);margin-top:12px;height:40px}
+.m-detalle{margin:4px 16px 0;padding:12px 14px;border-radius:10px;background:var(--card2);font-size:14px;line-height:1.5;color:var(--text2);white-space:pre-line;max-height:320px;overflow-y:auto}
+.m-detalle.letra{font-size:14.5px;color:var(--text)}
+.m-detalle .sec{display:block;margin-top:8px;font:800 11px 'Barlow Condensed',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.pieza.musica.descartada{opacity:1;border-color:rgba(245,197,24,.55)}
+.chip.descartada.m{background:rgba(245,197,24,.15);color:var(--warn)}
 #pin{display:none;max-width:360px;margin:40px auto;text-align:center}
 #pin input{width:100%;font:600 22px Barlow,sans-serif;text-align:center;letter-spacing:.3em;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);margin:14px 0}
 .aviso{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
@@ -143,7 +150,7 @@ button:disabled{opacity:.4;cursor:default}
 <body>
 <div class="wrap">
   <h1>Aprobaciones</h1>
-  <p class="lead">Todo lo que está por publicarse en las redes del club. Revisá cada pieza, corregí el texto si hace falta y aprobala. Solo sale lo aprobado, a la hora indicada.</p>
+  <p class="lead">Todo lo que está por publicarse: las piezas de las redes del club y las demos de música de Tacet Sin. Revisá cada una, corregí o comentá lo que haga falta y aprobala. Solo sale lo aprobado.</p>
   <div id="pin">
     <div>PIN de administrador</div>
     <input type="password" inputmode="numeric" autocomplete="off" id="pin-in">
@@ -152,7 +159,7 @@ button:disabled{opacity:.4;cursor:default}
   <div id="lotes"></div>
 </div>
 <div class="aviso" id="aviso"></div>
-<script src="aprobar.js?v=9"></script>
+<script src="aprobar.js?v=10"></script>
 <script src="layout.js?v=25"></script>
 </body>
 </html>

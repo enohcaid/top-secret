@@ -150,6 +150,26 @@
     </article>`;
   }
 
+  // Música (Juan, 2026-10-27): cada tema de Thrive llega como demo; una tarjeta por parte (concepto, beat, letra,
+  // voces) con quién la hizo y un cuadro para decir qué mejorar. "A mejorar" = la PC la rehace con ese comentario.
+  const ESTADO_MUSICA = { pendiente: 'Sin revisar', aprobada: 'Está bien', descartada: 'A mejorar' };
+  function parteMusica(l, p) {
+    const estado = p.decision || 'pendiente', cerrada = !!l.estado;
+    const detalle = esc(p.detalle || '').replace(/^\[([^\]]+)\]$/gm, '<b class="sec">$1</b>');
+    return `<article class="pieza musica ${p.decision || ''}" data-lote="${esc(l.id)}" data-pieza="${esc(p.id)}">
+      <div class="pieza-cab">
+        <div><div class="formato">${esc(p.formato)}</div><div class="desc">${esc(p.descripcion || '')}</div></div>
+        <span class="chip ${estado}">${ESTADO_MUSICA[estado]}</span>
+      </div>
+      <div class="m-detalle${p.id === 'letra' ? ' letra' : ''}">${detalle}</div>
+      <div class="texto"><label>Qué mejorar</label><textarea data-lim="2000" ${cerrada ? 'disabled' : ''} placeholder="Opcional si está bien. Si marcás 'A mejorar', contá qué cambiarías">${esc(p.texto || '')}</textarea><div class="cuenta"></div></div>
+      <div class="botones">
+        <button class="no" data-accion="descartada" ${cerrada ? 'disabled' : ''}>A mejorar</button>
+        <button class="si" data-accion="aprobada" ${cerrada || p.decision === 'aprobada' ? 'disabled' : ''}>Está bien</button>
+      </div>
+    </article>`;
+  }
+
   // Cada lote es una cabecera + UNA fila horizontal de tarjetas (antes: una grilla por red, la página se hacía
   // eterna). Los lotes ya decididos arrancan plegados; el usuario puede abrir/cerrar cualquiera y se recuerda.
   const sinDecidir = l => l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length;
@@ -157,6 +177,21 @@
   const plegado = l => cerrados.has(l.id) || (!abiertos.has(l.id) && !sinDecidir(l) && !l.piezas.some(p => p.estado === 'error'));
   function lote(l) {
     const pend = sinDecidir(l), esGuion = l.etapa === 'guion';
+    if (l.etapa === 'musica') {
+      const cerrado = plegado(l);
+      const meta = `${esc(l.bajada || '')}${l.estado === 'revisando' ? ' · rehaciendo lo marcado: vuelve como versión nueva' : l.estado === 'publicado' ? ' · aprobado y publicado en /music' : pend ? ` · ${pend} parte${pend > 1 ? 's' : ''} sin revisar` : ' · procesando tu revisión'}`;
+      return `<section class="lote musica${cerrado ? ' cerrado' : ''}" data-lote="${esc(l.id)}">
+        <div class="lote-cab">
+          <div><h2>${esc(l.titulo)}</h2><div class="meta">${meta}</div>
+            ${l.tema?.audio ? `<audio class="m-audio" controls preload="none" src="${esc(l.tema.audio)}"></audio>` : ''}</div>
+          <div class="acciones">
+            ${pend && !l.estado ? '<button class="si" data-todo="aprobada">Todo está bien</button>' : ''}
+            <button class="plegar" data-plegar>${cerrado ? 'Ver las partes' : 'Ocultar'}</button>
+          </div>
+        </div>
+        <div class="fila">${l.piezas.map(p => `<div class="celda">${parteMusica(l, p)}</div>`).join('')}</div>
+      </section>`;
+    }
     const orden = esGuion ? l.piezas
       : Object.keys(REDES).flatMap(r => l.piezas.filter(p => p.red === r))
           .concat(l.piezas.filter(p => !REDES[p.red]));
@@ -194,7 +229,7 @@
     const firma = JSON.stringify(nuevos);
     if (!forzar && firma === ultimo) return;
     if (!forzar && ['TEXTAREA', 'INPUT'].includes(document.activeElement?.tagName)) return;
-    if (!forzar && [...document.querySelectorAll('video')].some(v => !v.paused && !v.ended)) return;
+    if (!forzar && [...document.querySelectorAll('video, audio')].some(v => !v.paused && !v.ended)) return;
     lotes = nuevos; ultimo = firma;
     pintar();
   }
@@ -206,6 +241,8 @@
   const finGuion = l => l.semanaHasta ? Date.parse(l.semanaHasta) + DIA
     : (m => m ? Date.parse(m[1] + 'T00:00:00-03:00') + 7 * DIA : Date.parse(l.creado) + 10 * DIA)(l.id.match(/(\d{4}-\d{2}-\d{2})$/));
   const estadoLote = l => {
+    if (l.etapa === 'musica') return l.estado === 'publicado' ? (Date.now() - Date.parse(l.creado) < 7 * DIA ? 'publicadas' : null)
+      : !l.estado && sinDecidir(l) ? 'aprobar' : 'programadas';
     if (sinDecidir(l)) return 'aprobar';
     if (l.etapa === 'guion') return Date.now() < finGuion(l) && l.piezas.some(p => p.decision === 'aprobada') ? 'programadas' : null;
     if (l.piezas.some(p => p.decision === 'aprobada' && p.estado !== 'publicado')) return 'programadas';
@@ -229,13 +266,16 @@
     const tabs = `<nav class="tabs">${PESTANAS.map(x => `<button class="tab ${x.id === pestana ? 'on' : ''}" data-tab="${x.id}">${x.nombre}${badge[x.id] ? `<i>${badge[x.id]}</i>` : ''}</button>`).join('')}</nav>`;
     let cuerpo;
     if (pestana === 'aprobar') {
-      const g = por.aprobar.filter(l => l.etapa === 'guion'), resto = por.aprobar.filter(l => l.etapa !== 'guion').sort((a, b) => cuando(a) - cuando(b));
-      cuerpo = (g.length ? bloque('Ideas para la próxima semana', 'Primero se aprueba la idea; después se produce y vuelve acá para el visto bueno final.', g, '') : '')
+      const mus = por.aprobar.filter(l => l.etapa === 'musica');
+      const g = por.aprobar.filter(l => l.etapa === 'guion'), resto = por.aprobar.filter(l => l.etapa !== 'guion' && l.etapa !== 'musica').sort((a, b) => cuando(a) - cuando(b));
+      cuerpo = (mus.length ? bloque('Música', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, se publica en /music.', mus, '') : '')
+        + (g.length ? bloque('Ideas para la próxima semana', 'Primero se aprueba la idea; después se produce y vuelve acá para el visto bueno final.', g, '') : '')
         + bloque('Visto bueno final', 'Piezas ya producidas: revisalas, corregí el texto si hace falta y aprobalas.', resto, g.length ? 'No hay piezas producidas esperando.' : 'Nada para aprobar por ahora.');
     } else if (pestana === 'programadas') {
-      const listas = por.programadas.filter(l => l.etapa !== 'guion').sort((a, b) => cuando(a) - cuando(b));
+      const listas = por.programadas.filter(l => l.etapa !== 'guion' && l.etapa !== 'musica').sort((a, b) => cuando(a) - cuando(b));
       const prod = por.programadas.filter(l => l.etapa === 'guion');
-      cuerpo = bloque('Por publicarse', 'Aprobado y con hora: sale solo. Hasta que salga, todavía podés corregir el texto o descartarlo.', listas, 'No hay nada programado.')
+      const mus = por.programadas.filter(l => l.etapa === 'musica');
+      cuerpo = (mus.length ? bloque('Música en revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Para aprobar".', mus, '') : '') + bloque('Por publicarse', 'Aprobado y con hora: sale solo. Hasta que salga, todavía podés corregir el texto o descartarlo.', listas, 'No hay nada programado.')
         + (prod.length ? bloque('Ideas aprobadas, en producción', 'Se están produciendo; cuando estén listas vuelven a "Para aprobar".', prod, '') : '');
     } else {
       cuerpo = bloque('Publicadas', 'Lo que salió en los últimos 7 días.', por.publicadas.sort((a, b) => cuando(b) - cuando(a)), 'Nada publicado en los últimos días.');
@@ -246,12 +286,12 @@
     $('#lotes').innerHTML = tabs + cuerpo;
     document.querySelectorAll('.lote').forEach(s => { const f = s.querySelector('.fila'); if (f && scroll[s.dataset.lote]) f.scrollLeft = scroll[s.dataset.lote]; });
     document.querySelectorAll('textarea').forEach(contar);
-    document.querySelectorAll('.pieza:not(.guion)').forEach(revisar);
+    document.querySelectorAll('.pieza:not(.guion):not(.musica)').forEach(revisar);
   }
 
   // Revisor de descripciones (revisar-textos.js, el mismo que usa la PC): avisos en vivo bajo el texto.
   let revisor = null;
-  import('./revisar-textos.js?v=1').then(m => { revisor = m; document.querySelectorAll('.pieza:not(.guion)').forEach(revisar); }).catch(() => {});
+  import('./revisar-textos.js?v=1').then(m => { revisor = m; document.querySelectorAll('.pieza:not(.guion):not(.musica)').forEach(revisar); }).catch(() => {});
   function revisar(art) {
     const ul = art.querySelector('.avisos');
     const l = lotes.find(x => x.id === art.dataset.lote), p = l?.piezas.find(x => x.id === art.dataset.pieza);
@@ -288,7 +328,8 @@
       lotes = lotes.map(x => x.id === l.id ? l : x);
       // El lote queda abierto donde está (aunque ya esté todo decidido) hasta el próximo cambio de pestaña o recarga.
       if (cambios.decision) { if (!cerrados.has(l.id)) abiertos.add(l.id); pintar(); }
-      aviso(cambios.decision ? (cambios.decision === 'aprobada' ? 'Aprobado' : cambios.decision === 'descartada' ? 'Descartado' : 'Guardado') : 'Texto guardado');
+      const mus = l.etapa === 'musica';
+      aviso(cambios.decision ? (cambios.decision === 'aprobada' ? (mus ? 'Está bien' : 'Aprobado') : cambios.decision === 'descartada' ? (mus ? 'A mejorar' : 'Descartado') : 'Guardado') : 'Texto guardado');
     } catch (e) { aviso(e.message); }
   }
 
@@ -308,7 +349,7 @@
   });
   document.addEventListener('input', e => {
     if (e.target.tagName === 'TEXTAREA') contar(e.target);
-    const art = e.target.closest('.pieza:not(.guion)');
+    const art = e.target.closest('.pieza:not(.guion):not(.musica)');
     if (art) revisar(art);
   });
   // El texto y el título corregidos se guardan al salir del cuadro.
