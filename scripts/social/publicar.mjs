@@ -65,14 +65,21 @@ if (!ESTADO) {
 }
 
 const ahora = Date.now();
+// Una pieza con error se reintenta sola hasta que salga (Juan, 2026-10-27: la historia de Instagram de la nota del
+// 26/10 falló una vez y quedó así). Espera 10 min, después 20, 40 y de ahí cada hora, dentro de la ventana de 36 h del lote.
+const esperaReintento = n => Math.min(10 * 2 ** Math.max(0, n - 1), 60) * 60000;
+const reintentable = p => p.estado === 'error' && ahora >= Date.parse(p.reintentarDesde || 0);
 const cola = ESTADO ? [] : data.lotes.filter(l => l.publicarA && Date.parse(l.publicarA) <= ahora && ahora - Date.parse(l.publicarA) < 36 * 3600000)
-  .flatMap(l => l.piezas.filter(p => p.decision === 'aprobada' && (!p.estado || (p.estado === 'publicando' && ahora - Date.parse(p.desde || 0) > 15 * 60000))).map(p => ({ l, p })));
+  .flatMap(l => l.piezas.filter(p => p.decision === 'aprobada' && (!p.estado || reintentable(p) || (p.estado === 'publicando' && ahora - Date.parse(p.desde || 0) > 15 * 60000))).map(p => ({ l, p })));
 
 function correr(script, args) {
   const r = spawnSync(process.execPath, [path.join(ROOT, script), ...args], { cwd: ROOT, encoding: 'utf8', timeout: 20 * 60000 });
   const out = `${r.stdout || ''}${r.stderr || ''}`.trim();
   // El motivo real (no la última línea de Node, "Node.js v24…"): la primera línea con Error/Timeout.
-  const motivo = out.split('\n').map(s => s.trim()).find(s => /error|timeout|exceeded|no encontr/i.test(s) && !/^at /.test(s) && !/^Node\.js/.test(s));
+  // Primero una línea "Error: …": el 2026-10-26 quedó guardada la línea de código del throw en vez del mensaje de Meta.
+  const lineas = out.split('\n').map(s => s.trim());
+  const motivo = lineas.find(s => /^(\w*Error|Timeout\w*):/.test(s))
+    || lineas.find(s => /error|timeout|exceeded|no encontr/i.test(s) && !/^at /.test(s) && !/^Node\.js/.test(s) && !/\bthrow\b|[{};]$/.test(s));
   if (r.status !== 0) throw new Error(motivo || out.split('\n').filter(Boolean).pop() || `${script} salió con ${r.status}`);
   return out;
 }
@@ -197,8 +204,10 @@ for (const { l, p } of cola) {
     await guardarKV('social_historial', h);
   } catch (e) {
     const msg = String(e.message || e).slice(0, 300);
-    await actualizarPieza(l.id, p.id, { estado: 'error', error: msg });
-    log(`${l.id} · ${p.id}: ERROR ${msg}`);
+    const intentos = (fresca.intentos || 0) + 1, desde = new Date(Date.now() + esperaReintento(intentos));
+    const hora = desde.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
+    await actualizarPieza(l.id, p.id, { estado: 'error', error: `${msg} (intento ${intentos}, reintenta ${hora})`, intentos, reintentarDesde: desde.toISOString() });
+    log(`${l.id} · ${p.id}: ERROR ${msg} — intento ${intentos}, reintenta ${hora}`);
   }
 }
 
