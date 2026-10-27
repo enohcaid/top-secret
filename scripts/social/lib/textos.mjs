@@ -20,5 +20,5 @@ export function escribirNoticia({ datos }) {
 async function pedir(archivoEncargo, vars, claves) {
   let encargo = fs.readFileSync(path.join(ROOT, 'scripts/social', archivoEncargo), 'utf8');
   for (const [k, v] of Object.entries(vars)) encargo = encargo.replace(`{{${k}}}`, typeof v === 'string' ? v : JSON.stringify(v, null, 2));
-  return pedirJSON(encargo, { claves, orden: ['claude', 'local'], temperatura: 0.7 });
+  return pedirJSON(encargo, { claves, orden: ['claude', 'local'], tarea: archivoEncargo.replace(/-encargo.md$/, ''), temperatura: 0.7 });
 }

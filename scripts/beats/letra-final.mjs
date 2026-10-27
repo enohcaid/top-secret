@@ -52,7 +52,7 @@ Write the lyrics as they are actually sung:
 - Ignore hallucinations (e.g. a final "Thank you.").
 - Keep the section tags ([intro], [verse], [pre-chorus], [chorus], [bridge], [outro]) on their own lines, placed where those sections are actually sung. Instrumental sections with no singing get no lines.
 Answer ONLY with the lyrics, nothing else.`;
-  const letra = await pedirTexto(prompt, { orden: ['claude', 'local'], claudeModelo: 'sonnet', validar: x => (!/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : x.split('\n').filter(l => l.trim() && !/^\[/.test(l.trim())).length < 8 ? 'letra demasiado corta' : null) });
+  const letra = await pedirTexto(prompt, { orden: ['local', 'claude'], claudeModelo: 'sonnet', tarea: 'letra-final', validar: x => (!/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : x.split('\n').filter(l => l.trim() && !/^\[/.test(l.trim())).length < 8 ? 'letra demasiado corta' : null) });
   return letra.replace(/^```\w*\n?|```$/g, '').trim();
 }
 

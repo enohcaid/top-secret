@@ -33,3 +33,14 @@ Dos tareas reales: la letra de Thrive (`thrive-encargo.md`) y los textos de rede
 - Generación de texto sin herramientas → `pedirJSON(prompt, { claves, orden: ['claude','local'] })`, nunca `spawnSync(claude, ['-p', …])` con `cwd: ROOT`.
 - Tareas que necesitan leer o editar archivos (por ejemplo `social/producir.mjs`) siguen siendo un agente de Claude. Si se puede, juntar los datos con código y pedirle a la IA solo el texto.
 - Noticia diaria (2026-10-26): `scripts/noticia-diaria.mjs`. El código junta todos los datos y controla la nota; Claude escribe en una llamada liviana, con hasta 3 vueltas de corrección y el modelo local de respaldo. La rutina en la nube se desactivó.
+
+## Modelo local primero + ejemplos para entrenarlo (2026-10-27)
+
+Juan: "¿qué pasó con la IA que instalamos para hacerse cargo de partes del proceso sin consumir tokens? Aunque las primeras versiones no estén a la altura, podemos entrenar el modelo y perfeccionarlo".
+
+- **Local primero donde el código controla la calidad**:
+  - Letra de Thrive: Gemma escribe y `rimas.py` controla, hasta 3 vueltas. Si no rima, escribe Claude Sonnet. Queda anotado quién la escribió en `letraPor` (`thrive.json`).
+  - Letra final (`letra-final.mjs`): Gemma primero.
+  - Lo público con muchas reglas (noticia diaria, textos de redes) y lo más creativo (concepto, beat) siguen con Claude primero.
+- **Dataset**: cada respuesta de Claude que pasa los controles se guarda en `fuentes/ia/dataset/<tarea>.jsonl` como `{fecha, prompt, respuesta}` (`guardarEjemplo` en `scripts/lib/ia.mjs`). Tareas: `noticia-diaria`, `textos`, `noticia`, `thrive-concepto`, `thrive-beat`, `thrive-letra`, `letra-final`. Queda solo en drygan (`fuentes/` está en .gitignore).
+- **Entrenamiento (pendiente, con unos cientos de ejemplos por tarea)**: la GTX 1070 (8 GB) no alcanza para entrenar un 12B. El plan es LoRA sobre un modelo de 4 a 8B en una GPU gratuita (Google Colab), exportarlo a GGUF y correrlo con Ollama. Después se compara a ciegas contra Claude, tarea por tarea, antes de pasarle más trabajo.

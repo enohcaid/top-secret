@@ -25,7 +25,7 @@ import { spawn, spawnSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { ROOT, loadEnv } from '../lib/env.mjs';
 import { putFile } from '../lib/r2.mjs';
-import { pedirJSON, pedirTexto, claude } from '../lib/ia.mjs';
+import { pedirJSON, pedirTexto, claude, guardarEjemplo, ultimoMotor } from '../lib/ia.mjs';
 import { armarCatalogo } from './catalogo.mjs';
 import { letraFinal } from './letra-final.mjs';
 
@@ -81,7 +81,7 @@ if (!tema) {
   const anteriores = reg.temas.slice(-30).map(t => `- "${t.titulo}" · trait: ${t.rasgo} · ${t.bpm} BPM, ${t.tonalidad} · sound: ${t.captionInstrumental || t.caption}`).join('\n') || '(none yet)';
   const encargo = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-concepto.md'), 'utf8').replace('{{FECHA}}', FECHA).replace('{{ANTERIORES}}', anteriores);
   log('Concepto y sonido…');
-  const j = await pedirJSON(encargo, { orden: ['claude', 'local'], temperatura: 0.9,
+  const j = await pedirJSON(encargo, { orden: ['claude', 'local'], tarea: 'thrive-concepto', temperatura: 0.9,
     claves: ['titulo', 'concepto', 'rasgo', 'caption_instrumental', 'caption_voces', 'voz', 'tonalidad', 'estructura'],
     validar: j => {
       if (!(j.bpm >= 70 && j.bpm <= 140)) return `bpm ${j.bpm}`;
@@ -178,7 +178,7 @@ if (!fs.existsSync(INSTR)) {
     fs.rmSync(WAV, { force: true });
     const r = render();
     const err = r.error ? [r.error] : controlarBeat(r.secciones);
-    if (!err.length) { ok = true; tema.secciones = r.secciones; tema.beat = (codigo.match(/Rasgo distintivo:\s*([^\n]+)/i) || [, tema.captionInstrumental])[1].trim(); break; }
+    if (!err.length) { ok = true; if (i === 1) guardarEjemplo('thrive-beat', base.replace('{{CORRECCIONES}}', ''), codigo); tema.secciones = r.secciones; tema.beat = (codigo.match(/Rasgo distintivo:\s*([^\n]+)/i) || [, tema.captionInstrumental])[1].trim(); break; }
     log(`  a corregir: ${err.map(e => e.split('\n')[0]).join(' · ')}`);
     correcciones = `\n## Your previous version failed. Fix it and return the complete file again\n${err.map(e => `- ${e}`).join('\n')}\n\nPrevious file:\n\`\`\`python\n${codigo}\n\`\`\`\n`;
   }
@@ -226,19 +226,21 @@ if (!tema.letra) {
     .replace('{{COMPAS}}', compas.toFixed(2)).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
     .replace('{{MAPA}}', secciones.map((s, i) => `${i + 1}. ${s.nombre !== '?' ? s.nombre + ' · ' : ''}${mmss(s.inicio)}–${mmss(s.fin)} · ${s.compases} bars`).join('\n'));
   let correcciones = '', mejor = null;
-  for (let i = 1; i <= 4; i++) {
+  // Modelo local primero (Juan, 2026-10-27): 3 vueltas con Gemma corrigiendo rimas; si no rima, Claude Sonnet.
+  for (let i = 1; i <= 5; i++) {
     log(`Letra (vuelta ${i})…`);
-    const letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
+    const letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: i <= 3 ? ['local', 'claude'] : ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
 
       validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : DEPORTE.test(x) ? 'palabra deportiva' : CASTELLANO.test(x) ? 'castellano' : null }))
       .replace(/^```\w*\n?|```$/g, '').trim();
     const r = rimas(letra);
-    if (!mejor || r.problemas.length < mejor.r.problemas.length) mejor = { letra, r };
+    if (!mejor || r.problemas.length < mejor.r.problemas.length) mejor = { letra, r, motor: ultimoMotor };
     if (r.ok) break;
     log(`  rimas a corregir: ${r.problemas.length}`);
     correcciones = `\n## Your previous version\n${letra}\n\n## Fix these lines (they do not rhyme BY SOUND; keep everything else)\n- ${r.problemas.join('\n- ')}\n`;
   }
-  tema.letra = mejor.letra; if (!mejor.r.ok) tema.avisosRima = mejor.r.problemas; guardar();
+  if (mejor.r.ok && mejor.motor === 'claude') guardarEjemplo('thrive-letra', base.replace('{{CORRECCIONES}}', ''), mejor.letra);
+  tema.letra = mejor.letra; tema.letraPor = mejor.motor; if (!mejor.r.ok) tema.avisosRima = mejor.r.problemas; guardar();
   log(`Letra lista${mejor.r.ok ? ', rimas OK' : ` (quedan ${mejor.r.problemas.length} rimas flojas)`}`);
 }
 

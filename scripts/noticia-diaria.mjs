@@ -21,7 +21,7 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { ROOT, loadEnv } from './lib/env.mjs';
-import { claude, ollama } from './lib/ia.mjs';
+import { claude, ollama, guardarEjemplo } from './lib/ia.mjs';
 import { styleFromBrief } from './generate-image-chatgpt.mjs';
 
 loadEnv();
@@ -236,7 +236,7 @@ escribir: for (const [motor, vueltas] of motores) {
       if (n.sin_nota) { log('El modelo dice que hoy no corresponde nota.'); process.exit(0); }
       const err = controlar(n);
       if (!mejor || err.length < mejor.err.length) mejor = { n, err, motor };
-      if (!err.length) break escribir;
+      if (!err.length) { if (motor === 'claude' && i === 1) guardarEjemplo('noticia-diaria', encargo, JSON.stringify(n)); break escribir; }
       log(`  a corregir: ${err.join(' · ')}`);
       pedido = `${encargo}\n\n## Tu respuesta anterior\n${JSON.stringify(n)}\n\n## Corregí esto y devolvé el JSON completo de nuevo\n- ${err.join('\n- ')}`;
     } catch (e) {

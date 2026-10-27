@@ -58,15 +58,28 @@ export function claude(prompt, { modelo = 'opus', minutos = 10, pensar } = {}) {
   return j.result;
 }
 
+// Ejemplos para entrenar el modelo local (Juan, 2026-10-27: "aunque las primeras versiones no estén a la altura,
+// podemos entrenar el modelo y perfeccionarlo"): cada respuesta de Claude que pasa los controles se guarda como par
+// encargo → respuesta en fuentes/ia/dataset/<tarea>.jsonl. Con unos cientos por tarea se entrena (LoRA) un modelo chico.
+export let ultimoMotor = null;
+export function guardarEjemplo(tarea, prompt, respuesta) {
+  if (!tarea) return;
+  try {
+    const dir = path.join(ROOT, 'fuentes', 'ia', 'dataset');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(path.join(dir, `${tarea}.jsonl`), JSON.stringify({ fecha: new Date().toISOString(), prompt, respuesta }) + '\n');
+  } catch {}
+}
+
 const sacarJSON = t => JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1));
 
 // Texto libre. `validar(texto)` devuelve un error (string) o nada.
-export async function pedirTexto(prompt, { validar, orden = ['local', 'claude'], claudeModelo = 'opus', ...opc } = {}) {
+export async function pedirTexto(prompt, { validar, orden = ['local', 'claude'], claudeModelo = 'opus', tarea, ...opc } = {}) {
   for (const motor of orden) {
     try {
       const texto = motor === 'claude' ? claude(prompt, { modelo: claudeModelo }) : (await ollama(prompt, opc)).texto;
       const err = validar?.(texto);
-      if (!err) { log(`${motor === 'claude' ? 'Claude ' + claudeModelo : opc.modelo || MODELO} respondió`); return texto; }
+      if (!err) { log(`${motor === 'claude' ? 'Claude ' + claudeModelo : opc.modelo || MODELO} respondió`); ultimoMotor = motor; if (motor === 'claude') guardarEjemplo(tarea, prompt, texto); return texto; }
       log(`${motor}: respuesta inválida (${err})`);
     } catch (e) { log(`${motor} no disponible: ${e.message}`); }
   }
@@ -74,13 +87,13 @@ export async function pedirTexto(prompt, { validar, orden = ['local', 'claude'],
 }
 
 // JSON con las claves pedidas (strings no vacíos); 2 intentos por motor, en el orden pedido.
-export async function pedirJSON(prompt, { claves = [], validar, orden = ['local', 'claude'], claudeModelo = 'opus', ...opc } = {}) {
+export async function pedirJSON(prompt, { claves = [], validar, orden = ['local', 'claude'], claudeModelo = 'opus', tarea, ...opc } = {}) {
   const chequear = j => { const f = claves.filter(k => !(typeof j[k] === 'string' ? j[k].trim() : j[k] != null)); return f.length ? `faltan ${f.join(', ')}` : validar?.(j); };
   for (const motor of orden) for (let i = 1; i <= 2; i++) {
     try {
       const texto = motor === 'claude' ? claude(prompt, { modelo: claudeModelo }) : (await ollama(prompt, { ...opc, json: true })).texto;
       const j = sacarJSON(texto), err = chequear(j);
-      if (!err) { log(`${motor === 'claude' ? 'Claude ' + claudeModelo : opc.modelo || MODELO} respondió`); return j; }
+      if (!err) { log(`${motor === 'claude' ? 'Claude ' + claudeModelo : opc.modelo || MODELO} respondió`); ultimoMotor = motor; if (motor === 'claude') guardarEjemplo(tarea, prompt, JSON.stringify(j)); return j; }
       log(`${motor}: respuesta inválida, intento ${i} (${err})`);
     } catch (e) {
       log(`${motor}, intento ${i}: ${e.message}`);
