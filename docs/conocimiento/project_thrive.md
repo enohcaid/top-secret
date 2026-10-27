@@ -1,6 +1,6 @@
 ---
 name: project_thrive
-description: Álbum Thrive (un tema por noche a las 2:00: instrumental → letra para esa instrumental con rimas por sonido → voces en dúo) y The Shorts (los 23 temas anteriores, vol. 1 y 2) en topsecret.ar/music — reglas de Juan, proceso y página
+description: Álbum Thrive de Tacet Sin (un tema por noche a las 2:00: beat compuesto por código → letra para ese beat con rimas por sonido → ACE-Step cover canta el dúo y pule) y The Shorts (23 temas, vol. 1 y 2) en topsecret.ar/music
 metadata:
   type: project
 ---
@@ -11,15 +11,15 @@ Pedidos de Juan (2026-10-26):
 - **Referencias del disco**: duetos de The Weeknd con mujeres: *Lust for Life*, *The Abyss*, *Love Me Harder* y *One of the Girls*. Cada tema es un **dúo masculino-femenino** de alt-R&B / synth-pop oscuro y cinematográfico. Los nombres de artistas nunca van en la descripción del sonido que recibe el modelo.
 - **"Too Far In"** (26/10, el primero) **queda como está**: tiene `fijo: true` en `thrive.json` y ningún proceso lo toca.
 
-## Proceso (orden definido por Juan)
-1. **Instrumental primero**, porque marca el estilo. Claude define el concepto y el sonido (`thrive-concepto.md`) y ACE-Step turbo genera la instrumental.
-2. **La letra se escribe para esa instrumental.** El código mide sus secciones (sonoridad por compás → secciones y energía) y Claude escribe (`thrive-letra.md`) con un verso cada 2 compases y la etiqueta de quién canta (`[verse - female]`, `[chorus - male & female]`).
-3. **Las rimas se controlan por pronunciación**, no por escritura (`scripts/beats/rimas.py`, diccionario fonético CMU: "love/move" no riman, "through/blue" sí). Los versos que fallan vuelven a Claude, hasta 4 vueltas.
-4. **La voz va al final**: ACE-Step **base** (`acestep-v15-base`), tarea `lego` (pista de voces sobre la instrumental). Si devuelve solo la voz, se mezcla con la instrumental. Si lego falla, el respaldo es `cover` con el turbo.
-5. **La letra publicada es lo que realmente se canta**: `scripts/beats/letra-final.mjs` (Whisper turbo en la GTX 1070 + Claude cruza la transcripción con la letra escrita). Guarda `letraFinal`.
-6. La instrumental **no se publica**: va solo a la música de los videos (`_fuentes/musica/propios/<fecha> - <Título>.mp3`).
+## Proceso (Juan, 2026-10-26: "para la instrumental es mejor lo que generamos con código, pero cuando ACE-Step agrega voces y pule el beat queda perfecto; esa es la combinación que busco, la de The Shorts")
+1. **Concepto y sonido**: lo define Claude (`thrive-concepto.md`).
+2. **Instrumental compuesta por código**. Claude escribe el `.py` en **una** llamada (`thrive-componer.md`, con `componer.py`, un tema de ejemplo y las reglas de [[feedback_composicion_musical]]). El código lo renderiza y lo controla: duración, una línea `SECCIONES=` con las secciones reales, dinámica por sección (intro y outro 6–8 dB debajo del estribillo, verso debajo del estribillo) y que no sature. Si algo falla, le devuelve los errores, hasta 3 vueltas. El `.py` queda en `scripts/beats/temas/thrive_<fecha>.py`. Respaldo si no sale: instrumental de ACE-Step (text2music).
+3. **Letra para esa instrumental**: sobre las secciones y compases que declara el beat (`thrive-letra.md`), con la etiqueta de quién canta. Las rimas se controlan por pronunciación (`scripts/beats/rimas.py`, diccionario fonético CMU), hasta 4 vueltas.
+4. **ACE-Step "cover" sobre la instrumental** (turbo, fuerza 0,5, igual que `cantar.mjs` en The Shorts): canta el dúo y pule el beat. (`lego` con el modelo base se probó el 26/10 y se descartó; el modelo se borró.)
+5. **Letra publicada = lo que realmente se canta** (`scripts/beats/letra-final.mjs`: Whisper turbo + Claude). Se guarda en `letraFinal`.
+6. La instrumental **no se publica en la página**: va a la música de los videos (`_fuentes/musica/propios/<fecha> - <Título>.mp3`). Esto devuelve los beats compuestos por código a los videos.
 
-Cada paso queda guardado en `scripts/beats/thrive.json` y en `fuentes/beats/thrive/<slug>/`, y la corrida siguiente retoma desde donde quedó. Claude escribe en llamadas livianas, con el modelo local de respaldo ([[reference_ia_local]]). Herramientas de Python: `fuentes/beats/whisper/.venv` (torch cu128, openai-whisper, pronouncing).
+Cada paso queda guardado en `scripts/beats/thrive.json` y en `fuentes/beats/thrive/<slug>/`, y la corrida siguiente retoma desde donde quedó. Herramientas de Python: `fuentes/beats/whisper/.venv` (torch cu128, openai-whisper, pronouncing). Costo en Claude: unas 3 a 6 llamadas livianas por noche (la composición es la más grande, unos 25 mil tokens de entrada).
 
 ## Página topsecret.ar/music
 - **Discos por orden de lanzamiento** (la fecha de su primer tema), **desplegables**: arrancan cerrados y cada visitante los encuentra como los dejó (localStorage).

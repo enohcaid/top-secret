@@ -16,6 +16,31 @@
       "generado": "2026-10-26T21:56:07.726Z",
       "letraFinal": "[intro]\nMm-mm... mm-mm...\n\n[verse]\nMoved my books across the bridge, January rain\nTaped the boxes with both names — your writing, then my strain\nI learned to sleep along the left, I learned to like the cold\nKnew your coffee order by the time I was nineteen years old\nThe savings bled through March and I didn't say a word\nI pawned the chain my mother left — you never even heard\nSix years of rent in someone else's town, someone else's street\nI put down roots in borrowed ground before I felt the heat\n\n[pre-chorus]\nAnd now you're asking why I stay\nAs if the door still opens the same way\n\n[chorus]\nToo far in to find the door\nToo far in to know who I was before\nEvery box I moved still pins me to this floor\nI'm too far in — what was it for?\n\n[verse]\nThe lease came up in autumn, felt it tighten in my chest\nA slant of light across the room — I turned and faced the rest\nYour jacket on the kitchen chair like it had always hung\nThe coffee pot still set for two, the morning barely strung\nI typed a one-way ticket in the browser late at night\nThe price so low it mocked me, every digit burning bright\nI closed the tab and washed the cups and ironed all your shirts\nI've stitched myself into this seam too tight to feel it hurts\n\n[pre-chorus]\nAnd still you're asking why I stay\nAs if I'd recognize myself away\n\n[chorus]\nToo far in to find the door\nToo far in to know who I was before\nEvery box I moved still pins me to this floor\nI'm too far in — what was it for?\n\n[bridge]\nWhat if this was never love — just math I couldn't undo?\nA ledger full of everything I ever gave to you\nThe penny jar so full by now it cannot leave the shelf\nI'd have to break the glass to go — the shards would take what's left\n\n[chorus]\nToo far in to find the door\nToo far in to know who I was before\nI could lift the boxes, I could leave this floor\nBut I'm too far in — I always need one more\n\n[outro]\nOne more... one more...",
       "fijo": true
+    },
+    {
+      "fecha": "2026-10-27",
+      "slug": "flicker",
+      "titulo": "Flicker",
+      "concepto": "Estás enganchada a alguien que te da todo una noche y desaparece la siguiente, y cada vez que vuelve el alivio se siente igual que amor.",
+      "rasgo": "Refuerzo intermitente",
+      "voz": "dúo: ella abre aireada y etérea, él entra cálido e íntimo en tenor medio, armonías entrelazadas en el estribillo",
+      "captionInstrumental": "Dark synth-pop, pulsing arpeggiated analog synths, 80s drum machine, deep sub-bass, shimmering reverb pads, cinematic tension, hypnotic, restless, building dynamics, 108 BPM, F# minor.",
+      "captionVoces": "Male and female duet. She opens: airy ethereal mid-range. He enters: warm intimate tenor. Layered harmonies in chorus, call-and-response verses.",
+      "bpm": 108,
+      "tonalidad": "F# minor",
+      "duracion": 192,
+      "estructura": [
+        "intro",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ]
     }
   ]
 }
