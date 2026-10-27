@@ -219,7 +219,7 @@ document.addEventListener('click', e => {
   if (tp) return verTapa(tp);
   if (e.target.closest('#visor')) return cerrarTapa();
   const a = e.target.closest('[data-album]');
-  if (a) return abrir(a.dataset.album, !a.parentElement.classList.contains('abierto'));
+  if (a) return abrir(a.dataset.album, !a.closest('.album').classList.contains('abierto'));
   const l = e.target.closest('[data-letra]');
   if (l) { const el = document.getElementById('t-' + l.dataset.letra); el.classList.toggle('con-letra'); l.classList.toggle('on'); return; }
   const b = e.target.closest('[data-barra]');
