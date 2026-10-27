@@ -23,10 +23,18 @@ export function leerPedido(texto) {
       horas.push({ hora, libre: !OCUPADA.test(resto) && !rival });
     } else if (linea.trim()) cabecera.push(linea);
   }
+  // Horas escritas dentro del texto ("Amistoso 22:40? 2da/1ra", "buscamos 23hs"): son las únicas que tiene
+  // libres (Juan, 2026-10-26: si pone una hora, solo tiene esa). "23" pelado no cuenta: puede ser parte del nombre.
+  for (const l of cabecera) {
+    for (const m of l.matchAll(/(?<![\p{L}\p{N}])(2[0-3])\s*(?:[:.;]\s*([0-5]\d)|hs?\b)(?!\d)/giu)) {
+      const hora = `${m[1]}:${m[2] || '00'}`;
+      if (!horas.some(h => h.hora === hora)) horas.push({ hora, libre: true });
+    }
+  }
   const equipoTxt = cabecera
     .filter(l => !/privad|escrib|\bmd\b|\bdm\b|contact/i.test(l))
     .join(' ')
-    .replace(/\b\d{1,2}(?:\s*hs?\b|[:.;]\d{2})/gi, ' ')                 // horas sueltas en el encabezado ("buscamos 22hs")
+    .replace(/\b\d{1,2}(?:[:.;]\d{2}\s*(?:hs?\b)?|\s*hs?\b)/gi, ' ')               // horas sueltas en el encabezado ("buscamos 22hs")
     // divisiones entre paréntesis o sueltas: "(1ra/2da)", "(2da/3ra/4ta)", "3°"
     .replace(/\(?\s*\d\s*(?:ra|da|ta|ro|do|to|°|º)(?:\s*[\/-]\s*\d\s*(?:ra|da|ta|ro|do|to|°|º))*\s*\)?/gi, ' ')
     .replace(/\bamistos[oa]s?\b|\bbusca(n|mos)?\b|\bvs\.?\b|🆚|\bhoy\b|\bpara\b|\bquien\b|\balguien\b|\bjugar\b/gi, ' ')
