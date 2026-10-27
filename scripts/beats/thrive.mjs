@@ -168,8 +168,9 @@ if (!fs.existsSync(INSTR)) {
     let codigo;
     try {
       log(`  Claude compone (vuelta ${i})…`);
-      // escribir un beat completo (~20 KB de código) le lleva a Opus más de 10 min: con 10 se cortaba (26/10)
-      const res = claude(base.replace('{{CORRECCIONES}}', correcciones), { minutos: 30, pensar: 12000 });
+      // Sonnet y razonamiento acotado (Juan, 2026-10-27: "no podemos tardar tanto"): Opus pensaba ~18 min a ~11 tokens/s
+      // y escribir el archivo le llevaba otros 10–15; Sonnet escribe varias veces más rápido y es muy bueno con código.
+      const res = claude(base.replace('{{CORRECCIONES}}', correcciones), { modelo: 'sonnet', minutos: 15, pensar: 4000 });
       codigo = (res.match(/```(?:python|py)?[ \t]*\r?\n([\s\S]*?)```/i) || [])[1];
       if (!codigo || !/import |def /.test(codigo)) throw new Error(`la respuesta no trae el código del beat; empieza con: ${res.slice(0, 160).replace(/\s+/g, ' ')}`);
     } catch (e) { log(`  ${e.message.slice(0, 260)}`); if (/sin cupo/i.test(e.message)) break; continue; }

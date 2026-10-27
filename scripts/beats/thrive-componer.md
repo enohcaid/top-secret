@@ -21,6 +21,7 @@ You are the beatmaker of the album "Thrive" by Tacet Sin. Write, as Python code,
 - Dynamics: intro and outro 6–8 dB below the choruses; verses below the choruses; nothing clipped (normalize by the 99.95 percentile, soft master, like the example).
 - Docstring at the top: concept, emotion per section, distinctive trait, structure.
 - Runtime under ~3 minutes on a normal CPU (vectorize; no per-sample Python loops over the whole song).
+- Keep the file compact (about 250–400 lines): reuse the toolkit's instruments and write helpers once; no long commented-out alternatives.
 {{CORRECCIONES}}
 ## componer.py (the toolkit)
 ```python
