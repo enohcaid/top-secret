@@ -47,6 +47,100 @@
       "generado": "2026-10-27T04:19:32.091Z",
       "letraFinal": "[intro - female]\nA silent hum, a fading gleam\n\n[verse - female]\nShadows lengthen, a hollow space\nEach fleeting touch, a blurred embrace\nThis fragile hope, a whispered plea\nA ghost of warmth returning to me\n\n[verse - male]\nThe promised dawn, a distant shore\nA phantom echo wanting more\nA stolen glance, a fleeting sign\nLost in the labyrinth of your design\n\n[pre-chorus - female]\nI chase the fragments, a fragile chain\nA desperate craving, a sweet, sharp pain\nThis empty promise, a gilded lie\nBurning slowly behind my eye\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[verse - female]\nThe memory lingers, a velvet trace\nA hollow comfort in this empty place\nA fragile moment, a stolen kiss\nA fleeting glimpse of what I miss\n\n[verse - male]\nThe echo of laughter, a haunting sound\nA whispered secret buried underground\nA fragile illusion, a tempting guise\nReflected sorrow in your weary eyes\n\n[pre-chorus - female]\nI build my castles on shifting sand\nA futile longing for your guiding hand\nThis empty solace, a bittersweet art\nTearing slowly at my heart\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[bridge - female]\n(spoken, layered with reverb)\nIs this a choice? Or am I bound?\nThis twisted comfort, a carousel round...\nI crave the absence, I despise the call...\nDo I thrive on the wreckage of it all?\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[outro - female]\nFading… fading… light…",
       "fijo": true
+    },
+    {
+      "id": "2026-10-27-2",
+      "fecha": "2026-10-27",
+      "slug": "still-here",
+      "titulo": "Still Here",
+      "concepto": "Llorar a alguien que todavía está al lado tuyo, velando en silencio una versión que ya murió mientras la persona sigue respirando.",
+      "rasgo": "Duelo por algo que sigue vivo",
+      "voz": "dúo: ella abre etérea y aireada, él entra grave y cálido, armonías en capas en el estribillo",
+      "captionInstrumental": "Dark cinematic alt-R&B, layered reverbed electric guitars, shoegaze textures, deep sub-bass, ethereal pad swells, tight electronic drums, mournful yet urgent, building dynamics, 120 BPM, C minor.",
+      "captionVoces": "Female and male duet; she opens airy ethereal mid-range, he enters low and warm, layered harmonies in chorus, intimate whispered bridge.",
+      "bpm": 120,
+      "tonalidad": "C minor",
+      "duracion": 194,
+      "estructura": [
+        "intro",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 16,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 16,
+          "fin": 40,
+          "compases": 12
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 40,
+          "fin": 48,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 48,
+          "fin": 72,
+          "compases": 12
+        },
+        {
+          "nombre": "verse",
+          "inicio": 72,
+          "fin": 96,
+          "compases": 12
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 96,
+          "fin": 104,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 104,
+          "fin": 128,
+          "compases": 12
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 128,
+          "fin": 144,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 144,
+          "fin": 176,
+          "compases": 16
+        },
+        {
+          "nombre": "outro",
+          "inicio": 176,
+          "fin": 192,
+          "compases": 8
+        }
+      ],
+      "beat": "el cuerpo como instrumento. Un latido (lub-dub) y un aliento de ruido",
+      "instrumental": "codigo",
+      "letra": "[intro]\n(Instrumental only - ethereal swells)\n\n[verse - male]\nThe ghost of you, a constant hue\nAcross the room, a fading view\nI trace your face, a fragile grace\nLost in this space, a hollow place\n\n[verse - female]\nThe scent remains, a ghostly strain\nThrough window panes, a silver rain\nI watch you breathe, a silent plea\nBeyond belief, you’re lost to me\n\n[pre-chorus - female]\nAnd all the while, a frozen smile\nA practiced style, a cruel exile\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\n\n[verse - male]\nThe laughter rings, of bygone things\nA broken swing, the joy it brings\nI memorize, your weary eyes\nBehind disguise, a sweet surprise\n\n[verse - female]\nThe memories bloom, within this room\nDispelling gloom, a silent tomb\nI hold your hand, a shifting dune\nAcross the land, beneath the moon\n\n[pre-chorus - female]\nAnd all the while, a hollow dial\nA measured mile, a slow denial\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\n\n[bridge - female]\n(Whispered)\nIs this what living means? To hide the past?\nTo watch a dream shatter, fading fast?\nBecause I loved too true, held on too tight?\nAnd now your colors dim, into the night?\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\nStill here, I feel you there\nA fading prayer, beyond despair\nStill here, a subtle trace\nLost in this space, embrace\n\n[outro]\n(Instrumental fades in, then out - echoing pad swells)\nLost in this space…",
+      "audio": "musica/thrive/still-here.mp3?v=mvqtk0rh",
+      "generado": "2026-10-27T15:07:06.077Z",
+      "letraFinal": "[intro]\n(Instrumental only - ethereal swells)\n\n[verse - male]\nThe ghost of you, a constant hue\nAcross the room, a fading view\nI trace your face, a fragile grace\nLost in this space, a hollow place\n\n[verse - female]\nThe scent remains, a ghostly strain\nThrough window panes, a silver rain\nI watch you breathe, a silent plea\nBeyond belief, you’re lost to me\n\n[pre-chorus - female]\nAnd all the while, a frozen smile\nA practiced style, a cruel exile\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\n\n[verse - male]\nThe laughter rings, of bygone things\nA broken swing, the joy it brings\nI memorize, your weary eyes\nBehind disguise, a sweet surprise\n\n[verse - female]\nThe memories bloom, within this room\nDispelling gloom, a silent tomb\nI hold your hand, a shifting dune\nAcross the land, beneath the moon\n\n[pre-chorus - female]\nAnd all the while, a hollow dial\nA measured mile, a slow denial\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\n\n[bridge - female]\n(Whispered)\nIs this what living means? To hide the past?\nTo watch a dream shatter, fading fast?\nBecause I loved too true, held on too tight?\nAnd now your colors dim, into the night?\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\nStill here, I feel you there\nA fading prayer, beyond despair\nStill here, a subtle trace\nLost in this space, embrace\n\n[outro]\n(Instrumental fades in, then out - echoing pad swells)\nLost in this space…"
     }
   ]
 }
