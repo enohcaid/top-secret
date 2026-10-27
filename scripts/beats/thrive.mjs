@@ -93,6 +93,9 @@ if (!tema) {
       if (CASTELLANO.test(t)) return 'castellano en título o sonido';
       if (/weeknd|lana|ariana|jennie|lily-rose|del rey|grande/i.test(t)) return 'nombra artistas reales en el sonido';
       if (reg.temas.some(x => x.titulo.toLowerCase() === String(j.titulo).toLowerCase())) return `título repetido "${j.titulo}"`;
+      // nada repetido (Juan, 2026-10-27): ni el título ni el rasgo psicológico de un tema anterior
+      const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[^a-z ]/g, '').trim();
+      if (reg.temas.some(x => norm(x.rasgo) === norm(j.rasgo))) return `rasgo repetido "${j.rasgo}": elegí otro`;
     } });
   const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${ID}`;
   tema = { ...(ID !== FECHA ? { id: ID } : {}), fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),

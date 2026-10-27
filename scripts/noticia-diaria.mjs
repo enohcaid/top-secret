@@ -22,6 +22,7 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 import { ROOT, loadEnv } from './lib/env.mjs';
 import { claude, ollama } from './lib/ia.mjs';
+import { styleFromBrief } from './generate-image-chatgpt.mjs';
 
 loadEnv();
 const argv = process.argv.slice(2);
@@ -144,6 +145,7 @@ function feriado(f) {
   return null;
 }
 
+const LUGAR = { TUNEL: 'túnel', VESTUARIO: 'vestuario', ESTADIO_NOCHE: 'estadio / cancha de noche', ACCION_PARTIDO: 'acción en la cancha', CAMPANA_ESTUDIO: 'estudio', RETRATO_EDITORIAL: 'retrato' };
 const diaHoy = new Date(HOY + 'T12:00:00-03:00').getUTCDay();   // 0 domingo … 6 sábado
 const DATOS = {
   hoy: HOY, dia: dia(HOY),
@@ -155,6 +157,10 @@ const DATOS = {
   notas_recientes: topicos.slice(0, 5),
   protagonistas_recientes: [...new Set(destacados.filter(e => e.date >= sumar(HOY, -7)).map(e => e.player))],
   tomas_recientes: estilos.filter(e => e.toma).slice(0, 3).map(e => e.toma),
+  // Juan, 2026-10-27: "si noto algo repetido ya no sirve" (el 26 y el 27 salió el equipo en el túnel). Lugar de la foto
+  // de cada día reciente + la escena que se pidió: la de hoy tiene que ser otra cosa.
+  escenas_recientes: estilos.filter(e => e.date >= sumar(HOY, -7) && e.date < HOY).map(e => `${e.date}: ${LUGAR[e.style] || e.style}`),
+  imagenes_recientes: topicos.filter(t => t.escena && t.date < HOY).slice(0, 5).map(t => `${t.date}: ${t.escena}`),
   premio_ultimos_30_dias: premios.filter(w => w.date >= sumar(HOY, -30)).map(w => w.player),
   futbol_externo: futbolExterno,
 };
@@ -206,6 +212,9 @@ function controlar(n) {
   if (plano(n.imageBrief).length > 300) err.push(`imageBrief de ${plano(n.imageBrief).length} caracteres (máximo 300)`);
   if (!/cancha de noche|estadio|t[úu]nel|vestuario|estudio/i.test(n.imageBrief)) err.push('el imageBrief no nombra el lugar (cancha de noche, estadio, túnel, vestuario o estudio)');
   if (n.toma && !TOMAS.includes(n.toma)) err.push(`toma "${n.toma}" no existe`);
+  const estiloHoy = styleFromBrief({ imageBrief: n.imageBrief })?.id;
+  const usados = estilos.filter(e => e.date >= sumar(HOY, -3) && e.date < HOY).map(e => e.style);
+  if (estiloHoy && usados.includes(estiloHoy)) err.push(`la foto vuelve a ser en ${LUGAR[estiloHoy] || estiloHoy}, que ya se usó en los últimos 3 días (${[...new Set(usados.map(u => LUGAR[u] || u))].join(', ')}): elegí otro lugar y otra composición`);
   if (n.toma && DATOS.tomas_recientes.includes(n.toma)) err.push(`toma "${n.toma}" repetida (recientes: ${DATOS.tomas_recientes.join(', ')})`);
   if (String(n.shareCaption).length > 280) err.push('shareCaption de más de 280 caracteres');
   if (jugadosRecientes.length && n.angulo !== 'RESULTADO') err.push('ayer hubo partidos oficiales: la nota tiene que ser RESULTADO');
@@ -252,7 +261,7 @@ if (PRUEBA) {
 }
 await escribirDoc('news/draft', { data: JSON.stringify(draft) });
 const conHoy = (lista, nuevos, max) => [...nuevos, ...lista.filter(e => e.date !== HOY)].slice(0, max);
-await escribirDoc('news/recent_topics', { entries: conHoy(topicos, [{ date: HOY, angle: n.angulo, title: n.title }], 5) });
+await escribirDoc('news/recent_topics', { entries: conHoy(topicos, [{ date: HOY, angle: n.angulo, title: n.title, escena: n.imageBrief }], 5) });
 if (n.protagonistas?.length) await escribirDoc('news/featured_players_history', { entries: conHoy(destacados, n.protagonistas.filter(p => PLANTEL.includes(p)).map(player => ({ player, date: HOY })), 40) });
 const cobertura = {};
 for (const b of bajas.filter(b => b.estado === 'baja')) {
