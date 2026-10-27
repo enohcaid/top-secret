@@ -366,7 +366,7 @@ async function revisarAtrasados() {
     const msgs = await client.pupPage.evaluate((id, desde) => {
       const chat = window.require('WAWebCollections').Chat.get(id);
       return (chat?.msgs.getModelsArray() || []).filter(m => m.t >= desde && !m.id.fromMe && m.body)
-        .map(m => ({ id: m.id._serialized, body: m.body, author: m.author?._serialized || m.id.participant?._serialized || '', notify: m.notifyName || m.senderObj?.pushname || '' }));
+        .map(m => ({ id: m.id._serialized || String(m.id), body: m.body, author: m.author?._serialized || m.id.participant?._serialized || '', notify: m.notifyName || m.senderObj?.pushname || '' }));
     }, grupoId, desde);
     log(`mensajes de hoy en el grupo: ${msgs.length}`);
     for (const m of msgs) await pedidoGrupo({ id: { _serialized: m.id }, body: m.body, from: grupoId, author: m.author, _data: { notifyName: m.notify } });
@@ -427,7 +427,8 @@ async function esGrupoAmistosos(msg) {
 }
 
 async function pedidoGrupo(msg) {
-  const mid = msg.id?._serialized;
+  // Sin id (algunas lecturas del grupo no lo traen) se identifica por autor + texto
+  const mid = msg.id?._serialized || `${msg.author || msg.from}|${String(msg.body).slice(0, 80)}`;
   // Los ids también quedan en el estado del día: al reiniciar, revisarAtrasados relee el grupo y sin esto
   // volvía a ofrecerle a un pedido ya atendido (2026-10-26: a Argentinos Jrs, que ya jugaba 23:00, dos veces).
   st.vistos = st.vistos || [];
