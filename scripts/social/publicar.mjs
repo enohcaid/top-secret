@@ -67,8 +67,11 @@ if (!ESTADO) {
 const ahora = Date.now();
 // Una pieza con error se reintenta sola hasta que salga (Juan, 2026-10-27: la historia de Instagram de la nota del
 // 26/10 falló una vez y quedó así). Espera 10 min, después 20, 40 y de ahí cada hora, dentro de la ventana de 36 h del lote.
+// Solo Instagram y Facebook (API de Meta: si da error, no se publicó). X, TikTok y YouTube van por Chrome y pueden fallar
+// después de haber publicado: reintentarlos duplicaría la publicación, así que quedan en error para revisar a mano.
+const conReintento = p => /^(ig|fb)-/.test(p.metodo);
 const esperaReintento = n => Math.min(10 * 2 ** Math.max(0, n - 1), 60) * 60000;
-const reintentable = p => p.estado === 'error' && ahora >= Date.parse(p.reintentarDesde || 0);
+const reintentable = p => p.estado === 'error' && conReintento(p) && ahora >= Date.parse(p.reintentarDesde || 0);
 const cola = ESTADO ? [] : data.lotes.filter(l => l.publicarA && Date.parse(l.publicarA) <= ahora && ahora - Date.parse(l.publicarA) < 36 * 3600000)
   .flatMap(l => l.piezas.filter(p => p.decision === 'aprobada' && (!p.estado || reintentable(p) || (p.estado === 'publicando' && ahora - Date.parse(p.desde || 0) > 15 * 60000))).map(p => ({ l, p })));
 
@@ -204,6 +207,11 @@ for (const { l, p } of cola) {
     await guardarKV('social_historial', h);
   } catch (e) {
     const msg = String(e.message || e).slice(0, 300);
+    if (!conReintento(p)) {
+      await actualizarPieza(l.id, p.id, { estado: 'error', error: `${msg} (no se reintenta sola: revisar si salió)` });
+      log(`${l.id} · ${p.id}: ERROR ${msg} — sin reintento (puede haber salido)`);
+      continue;
+    }
     const intentos = (fresca.intentos || 0) + 1, desde = new Date(Date.now() + esperaReintento(intentos));
     const hora = desde.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit' });
     await actualizarPieza(l.id, p.id, { estado: 'error', error: `${msg} (intento ${intentos}, reintenta ${hora})`, intentos, reintentarDesde: desde.toISOString() });
