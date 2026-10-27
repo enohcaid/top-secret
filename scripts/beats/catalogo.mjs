@@ -13,12 +13,15 @@ const LETRAS = path.join(ROOT, 'scripts', 'beats', 'letras.json');
 const THRIVE = path.join(ROOT, 'scripts', 'beats', 'thrive.json');
 const SHORTS_VOL1 = 12;   // los primeros 12 de letras.json son el volumen 1, el resto el 2
 
+// Artista: Tacet Sin (Juan, 2026-10-26; "tacet" = "calla" en la partitura). Logo: el Clean logo de Top Secret, blanco.
+// Las portadas llevan ?v=N: R2 se sirve con caché de un año; al cambiar una portada, subir el número.
+export const ARTISTA = 'Tacet Sin';
 export const ALBUMES = [
-  { id: 'thrive', titulo: 'Thrive', portada: MEDIA + 'musica/portadas/thrive.webp',
+  { id: 'thrive', titulo: 'Thrive', portada: MEDIA + 'musica/portadas/thrive.webp?v=3',
     descripcion: 'Amor, pasión, entrega y sacrificio: querer algo que no siempre nos hace bien, y crecer igual. Un tema nuevo cada noche.' },
-  { id: 'the-shorts', volumen: 1, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-1.webp',
+  { id: 'the-shorts', volumen: 1, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-1.webp?v=3',
     descripcion: 'Temas cortos, cada uno un momento: la noche antes de algo grande, el esfuerzo que nadie ve, la herida que tarda en cerrar.' },
-  { id: 'the-shorts', volumen: 2, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-2.webp',
+  { id: 'the-shorts', volumen: 2, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-2.webp?v=3',
     descripcion: 'La segunda parte: más tarde, más adentro.' },
 ];
 
@@ -47,7 +50,7 @@ export async function armarCatalogo({ log = console.log } = {}) {
   }
   const f = path.join(DIR, 'catalogo.json');
   fs.mkdirSync(DIR, { recursive: true });
-  fs.writeFileSync(f, JSON.stringify({ actualizado: new Date().toISOString(), albumes: ALBUMES, temas: lista }, null, 1));
+  fs.writeFileSync(f, JSON.stringify({ actualizado: new Date().toISOString(), artista: ARTISTA, albumes: ALBUMES, temas: lista }, null, 1));
   await conReintentos(() => putFile(f, 'musica/catalogo.json'));
   log(`catálogo: ${lista.length} temas (${lista.filter(x => x.album === 'thrive').length} en Thrive, ${lista.filter(x => x.voz).length} con voz)`);
 }

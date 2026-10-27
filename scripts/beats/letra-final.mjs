@@ -61,7 +61,8 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
     if (!fs.existsSync(F.archivo)) continue;
     const json = JSON.parse(fs.readFileSync(F.archivo, 'utf8'));
     for (const t of F.lista(json)) {
-      if ((SOLO && t.slug !== SOLO) || !F.audio(t) || !t.letra || (t.letraFinal && !REHACER)) continue;
+      // `fijo`: el tema queda como salió, no se toca (Juan, 2026-10-26, sobre "Too Far In")
+      if ((SOLO && t.slug !== SOLO) || t.fijo || !F.audio(t) || !t.letra || (t.letraFinal && !REHACER)) continue;
       try {
         const mp3 = F.local(t);
         if (!fs.existsSync(mp3)) { fs.mkdirSync(path.dirname(mp3), { recursive: true }); await getFile(F.audio(t).split('?')[0], mp3); }

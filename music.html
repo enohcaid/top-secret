@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Top Secret FC · Music</title>
+<title>Tacet Sin · Music</title>
 <!-- Música propia del club (pedido de Juan, 2026-10-23: "subí los temas a una página en nuestro dominio, /music").
      GitHub Pages sirve topsecret.ar/music desde este archivo. Los datos salen del catálogo público que arma
      scripts/beats/cantar.mjs (R2 musica/catalogo.json): título, concepto, tempo, tonalidad, letra (inglés),
      versión con voz e instrumental. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Top Secret FC">
-<meta property="og:title" content="Music · Top Secret FC">
-<meta property="og:description" content="Los temas propios del club: cada uno cuenta una historia.">
+<meta property="og:title" content="Tacet Sin · Top Secret FC">
+<meta property="og:description" content="Tacet Sin, el proyecto musical de Top Secret FC: The Shorts y Thrive.">
 <meta property="og:url" content="https://topsecret.ar/music">
 <link rel="icon" type="image/png" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png">
 <link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
@@ -87,8 +87,8 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
 <body>
 <div class="wrap">
   <div class="kicker">TOP SECRET FC · MUSIC</div>
-  <h1>Music</h1>
-  <p class="lead">Los temas propios del club. Cada uno nace de algo que cualquiera vivió alguna vez: lo que nos empuja, lo que nos duele y lo que no podemos dejar de querer.</p>
+  <h1 id="artista">Tacet Sin</h1>
+  <p class="lead">El proyecto musical de Top Secret. Cada tema nace de algo que cualquiera vivió alguna vez: lo que nos empuja, lo que nos duele y lo que no podemos dejar de querer.</p>
   <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
 </div>
 <audio id="audio" preload="none"></audio>
@@ -98,9 +98,14 @@ const PLAY = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11
 const PAUSA = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
 const audio = document.getElementById('audio');
 const FLECHA = '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 9l6 6 6-6"/></svg>';
-let temas = [], albumes = [], actual = null;
+let temas = [], albumes = [], actual = null, artista = 'Tacet Sin';
 const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-const letraHtml = l => esc(l).replace(/^\[(verse|chorus|intro|outro|pre-chorus|bridge)\][ \t]*\r?\n?/gim, (_, s) => `<span class="sec">${s.toUpperCase()}</span>`).replace(/\n{2,}/g, '\n');
+// etiquetas de sección: [verse], [chorus - male &amp; female]… (en Thrive dicen quién canta)
+const QUIEN = { 'male': 'él', 'female': 'ella', 'male & female': 'los dos', 'female & male': 'los dos', 'both': 'los dos' };
+const letraHtml = l => esc(l).replace(/^\[(verse|chorus|intro|outro|pre-chorus|bridge)(?:\s*-\s*([^\]]+))?\][ \t]*\r?\n?/gim, (_, s, q) => {
+  const quien = q && (QUIEN[q.replace(/&amp;/g, '&').trim().toLowerCase()] || q.trim());
+  return `<span class="sec">${s.toUpperCase()}${quien ? ' · ' + quien.toUpperCase() : ''}</span>`;
+}).replace(/\n{2,}/g, '\n');
 // Solo se publica la versión final (con voz): las instrumentales dejaron de estar disponibles (Juan, 2026-10-26)
 const fuente = t => t.voz;
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -139,7 +144,7 @@ function pintar() {
       <button class="album-cab" data-album="${clave}" aria-expanded="${abiertos.has(clave)}" aria-controls="temas-${clave}">
         <div class="tapa" role="img" aria-label="Portada de ${esc(al.titulo)}" style="background-image:url('${esc(al.portada)}')"></div>
         <div>
-          <div class="album-tipo">Álbum</div>
+          <div class="album-tipo">Álbum · ${esc(artista)}</div>
           <h2 class="album-titulo">${esc(al.titulo)}${vol}</h2>
           <p class="album-desc">${esc(al.descripcion)}</p>
           <div class="album-meta">${meta}</div>
@@ -195,6 +200,7 @@ document.addEventListener('click', e => {
 
 fetch(CATALOGO + '?' + Date.now()).then(r => r.json()).then(c => {
   albumes = c.albumes || [{ id: null, titulo: 'Temas', descripcion: '' }];
+  artista = c.artista || artista;
   temas = (c.temas || []).map(t => c.albumes ? t : { ...t, album: null });
   // discos por orden de lanzamiento (la fecha del primer tema de cada uno); uno sin temas todavía va al final
   for (const al of albumes) al.lanzamiento = temasDe(al).map(t => t.fecha).filter(Boolean).sort()[0] || null;
