@@ -46,10 +46,10 @@ client.on('ready', async () => {
     }
     const id = await client.getNumberId(de.replace(/\D/g, ''));
     if (!id) throw new Error(`${de} no tiene WhatsApp`);
-    // El contacto puede estar como @c.us y como @lid (getChatById rompe con @lid): se buscan los
-    // mensajes recibidos de cualquiera de los dos en la colección de WhatsApp Web.
+    // El contacto puede estar como @c.us y como @lid (getChatById rompe con @lid): se busca su chat
+    // más reciente con cualquiera de los dos ids.
     // Se abre el chat (como en wa-enviar) para que WhatsApp Web cargue los mensajes completos, con su mediaData.
-    const ids = await client.pupPage.evaluate(async cus => {
+    const chatId = await client.pupPage.evaluate(async cus => {
       const W = window.require('WAWebCollections');
       const ids = new Set([cus]);
       const c = W.Contact.get(cus);
@@ -57,13 +57,15 @@ client.on('ready', async () => {
       for (const ct of W.Contact.getModelsArray()) if (ct.phoneNumber && (ct.phoneNumber._serialized || String(ct.phoneNumber)) === cus) ids.add(ct.id._serialized);
       const ch = W.Chat.getModelsArray().filter(ch => ids.has(ch.id._serialized)).sort((a, b) => (b.t || 0) - (a.t || 0))[0];
       if (ch) await window.require('WAWebCmd').Cmd.openChatBottom({ chat: ch });
-      return [...ids];
+      return ch?.id._serialized;
     }, id._serialized);
+    if (!chatId) throw new Error(`no hay chat con ${de}`);
     await new Promise(r => setTimeout(r, 8000));
-    const msgs = await client.pupPage.evaluate((ids, t) => window.require('WAWebCollections').Msg.getModelsArray()
-      .filter(m => m.t >= t && ids.includes(m.id?.remote?._serialized || String(m.id?.remote)))
-      .sort((a, b) => a.t - b.t)
-      .map(m => ({ id: m.id._serialized, t: m.t, yo: !!m.id.fromMe, type: m.type, body: m.type === 'chat' ? m.body : (m.caption || ''), filename: m.filename || '' })), ids, desde);
+    // Los mensajes se leen de la lista del chat abierto, no de W.Msg: ahí el modelo de una imagen puede venir
+    // sin id y confundirse con otro mensaje (2026-10-27 bajó un sticker en lugar del logo de VPUG).
+    const msgs = await client.pupPage.evaluate((chatId, t) => window.require('WAWebCollections').Chat.get(chatId).msgs.getModelsArray()
+      .map((m, i) => ({ i, t: m.t, yo: !!m.id.fromMe, type: m.type, body: m.type === 'chat' ? m.body : (m.caption || ''), filename: m.filename || '' }))
+      .filter(m => m.t >= t), chatId, desde);
     if (!msgs.length) console.log(`Sin mensajes recibidos de ${de} en las últimas ${horas} h.`);
     fs.mkdirSync(dir, { recursive: true });
     for (const m of msgs) {
@@ -72,14 +74,11 @@ client.on('ready', async () => {
       if (m.yo || m.type === 'chat') { console.log(`[${hora}] ${m.yo ? 'Juan' : 'recibido'} ${m.type}: ${m.body}`); continue; }
       // msg.downloadMedia() de whatsapp-web.js 1.34.7 no anda con la WhatsApp Web actual (2026-10-27):
       // se usa lo mismo que la rama main de GitHub (resolveMediaBlob): bajar y leer la caché en memoria.
-      const media = await client.pupPage.evaluate(async id => {
-        const W = window.require('WAWebCollections');
-        // Puede haber dos modelos con el mismo id (uno "invis" de tipo chat): se toma el que trae la media.
-        const iguales = W.Msg.getModelsArray().filter(m => m.id._serialized === id);
-        const msg = iguales.find(m => m.mediaData) || iguales[0];
-        if (!msg?.mediaData) return { error: 'sin media cargada' };
+      const media = await client.pupPage.evaluate(async (chatId, i, t) => {
+        const msg = window.require('WAWebCollections').Chat.get(chatId).msgs.getModelsArray()[i];
+        if (!msg || msg.t !== t) return { error: 'el chat cambió mientras bajaba' };
         await msg.downloadMedia({ downloadEvenIfExpensive: true, rmrReason: 1, isUserInitiated: true });
-        const etapa = msg.mediaData.mediaStage;
+        const etapa = String(msg.mediaData?.mediaStage || '');
         if (etapa.includes('ERROR') || etapa === 'FETCHING') return { error: `etapa ${etapa}` };
         // Primero el blob propio del mensaje: buscar en la caché por un filehash vacío devolvía otro
         // archivo (2026-10-27 bajó un sticker en vez de la imagen).
@@ -91,7 +90,7 @@ client.on('ready', async () => {
         const u8 = new Uint8Array(await blob.arrayBuffer()); let bin = '';
         for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode(...u8.subarray(i, i + 0x8000));
         return { data: btoa(bin), mimetype: msg.mimetype, filename: msg.filename || '' };
-      }, m.id).catch(e => ({ error: e.message }));
+      }, chatId, m.i, m.t).catch(e => ({ error: e.message }));
       if (!media?.data) { console.log(`[${hora}] ${m.type} sin bajar: ${media?.error}`); continue; }
       const ext = (media.mimetype.split('/')[1] || 'bin').split(';')[0].replace('jpeg', 'jpg');
       const nombre = `${new Date(m.t * 1000).toISOString().slice(0, 19).replace(/[:T]/g, '-')}-${(media.filename || m.filename || m.type).replace(/[^\w.\- ]/g, '_')}`;

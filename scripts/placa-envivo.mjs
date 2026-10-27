@@ -15,7 +15,7 @@ import sharp from 'sharp';
 
 const CFG = {
   ligas: {                                                    // el torneo (subtítulo) sale de cada partido: ver torneoDe()
-    VPUG: { logo: 'logos/VPUG logo.png', color: '#3ecf8e' },
+    VPUG: { logo: 'logos/VPUG logo 2026.png', color: '#3ecf8e' },
     VPN: { logo: 'logos/VPN logo.png', color: '#f5c518' },
     '11x11': { logo: 'logos/11x11 logo.png', color: '#4a9eff' },
     'Espacio Gamer': { logo: 'logos/Espacio Gamer logo.png', color: '#4a9eff' },   // ex 11x11 desde la T4

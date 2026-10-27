@@ -16,7 +16,7 @@ const CFG = {
   eyebrow: 'LIGA PRETEMPORADA · GRUPO D',
   liga: 'VIRTUAL PRO URUGUAY GAMING',
   fecha: 'LUNES 5 OCT',
-  logoLiga: 'logos/VPUG logo.png',
+  logoLiga: 'logos/VPUG logo 2026.png',
   color: '#3ecf8e',                                            // verde VPUG (token --vpug)
   jugadores: ['Juan_Martinez4', 'Lautavester7', 'NicoBJ_96'],  // el del medio va adelante y más grande
   partidos: [
