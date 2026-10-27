@@ -56,7 +56,7 @@ Answer ONLY with the lyrics, nothing else.`;
   return letra.replace(/^```\w*\n?|```$/g, '').trim();
 }
 
-if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
+if (process.argv[1] && import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   for (const F of FUENTES) {
     if (!fs.existsSync(F.archivo)) continue;
     const json = JSON.parse(fs.readFileSync(F.archivo, 'utf8'));

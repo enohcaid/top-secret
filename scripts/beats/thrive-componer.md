@@ -5,7 +5,9 @@ You are the beatmaker of the album "Thrive" by Tacet Sin. Write, as Python code,
 
 ## Sound
 - Style for this song: {{CAPTION}}
-- Album references (describe, never imitate): The Weeknd's duets with female artists — "Lust for Life" (slow, dreamy, cinematic, vintage strings), "The Abyss" (dark, hypnotic, cinematic synths), "Love Me Harder" (R&B-pop, pulsing synths, big chorus), "One of the Girls" (dark seductive synth-pop, 80s drum machine). Dark, cinematic alt-R&B / synth-pop with trap DNA (808s, hats).
+- **REAL TRAP** (the artist, 2026-10-27, about the previous beat: "it is not trap, or doesn't sound like real trap; too pop"): half-time groove (snare/clap on beat 3 of each bar), hi-hats with 1/16 and 1/32 rolls and triplet fills that change every few bars, a gliding 808 that carries the bass and breathes (octave jumps, slides into the downbeats, rests), hard kick layered with the 808. Melody dark, minor and sparse (bell, pluck, piano, choir or string texture), loops that evolve; distortion/saturation with intent. NOT pop: no four-on-the-floor kick, no bright major progressions, no big shiny synth-pop chords.
+- Album mood references (describe, never imitate): The Weeknd's duets with female artists ("Lust for Life", "The Abyss", "Love Me Harder", "One of the Girls"): darkness, seduction, cinema — but the GENRE is trap.
+- A male rapper will rap the verses and a female voice sings only the hook/bridge: verses need a groove with pocket for a rap flow; the hook/bridge can open up with a more melodic, atmospheric moment for her.
 - Room for the voices: in verses and pre-choruses keep the mid range (300 Hz–3 kHz) sparse — no busy lead over the vocal line, pads low and filtered, melody answering in the gaps. The choruses open up: more layers, wider, brighter, but still a space in the center for the duet.
 - Previous Thrive beats (sound different from them: main instrument, texture, groove):
 {{ANTERIORES}}

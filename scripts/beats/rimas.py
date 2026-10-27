@@ -4,7 +4,9 @@ pronuncian"). Usa el diccionario fonético CMU (paquete `pronouncing`), no la or
 
     fuentes/beats/whisper/.venv/Scripts/python.exe scripts/beats/rimas.py <letra.txt>
 
-Por sección, cada verso tiene que rimar con el siguiente (pareados) o con el de dos más adelante (alternadas). Acepta
+Esquema al FINAL de la frase, no todo rimando (Juan, 2026-10-27: "TODO rima y se pierde el contenido; la rima es para la
+terminación de las frases"): en cada sección, por grupos de 4 versos, el último del grupo tiene que rimar con el 2.° o el
+3.° (cubre ABCB, ABAB y AABB); en un grupo de 2, el 2.° con el 1.°. Los demás versos quedan libres para el contenido. Acepta
 rima perfecta (misma parte rimante desde la última vocal acentuada) y asonante fuerte (misma última vocal acentuada y
 misma consonante final o ninguna). Imprime un JSON: {"ok": bool, "problemas": ["…"], "desconocidas": [palabras]}.
 """
@@ -64,11 +66,16 @@ def revisar(texto):
             if w and f is None:
                 desconocidas.add(w)
             r.append(rimante(f) if f else None)
-        for i, v in enumerate(versos):
-            vecinos = [j for j in (i - 2, i - 1, i + 1, i + 2) if 0 <= j < len(versos)]
-            res = [riman(r[i], r[j]) for j in vecinos]
-            if r[i] is not None and not any(x for x in res) and all(x is not None for x in res):
-                problemas.append(f'"{v}" — "{ultima(v)}" no rima (por sonido) con ningún verso vecino')
+        # grupos de 4 (el resto, si son 2 o 3, forma un grupo más): el cierre del grupo tiene que rimar
+        for ini in range(0, len(versos), 4):
+            g = list(range(ini, min(ini + 4, len(versos))))
+            if len(g) < 2:
+                continue
+            ult = g[-1]
+            candidatos = [g[1], g[2]] if len(g) == 4 else g[:-1]
+            res = [riman(r[ult], r[j]) for j in candidatos]
+            if r[ult] is not None and not any(x for x in res) and all(x is not None for x in res):
+                problemas.append(f'"{versos[ult]}" — la frase cierra con "{ultima(versos[ult])}", que no rima (por sonido) con el cierre anterior del esquema')
     return {"ok": not problemas, "problemas": problemas, "desconocidas": sorted(desconocidas)}
 
 

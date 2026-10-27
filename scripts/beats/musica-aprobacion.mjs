@@ -29,7 +29,7 @@ export const PARTES = [
 ];
 
 // Lote de aprobación de un tema (reemplaza al de la versión anterior: mismo id)
-export async function mandarAAprobar(t) {
+export async function mandarAAprobar(t, comentarios = {}) {   // comentarios: texto ya cargado por parte (lo que Juan dijo en el chat)
   const quien = {
     concepto: 'Claude Opus',
     beat: t.instrumental === 'codigo' ? 'Claude Sonnet, compuesto por código' : t.instrumental === 'ace' ? 'ACE-Step (respaldo)' : 'ACE-Step',
@@ -49,7 +49,7 @@ export async function mandarAAprobar(t) {
     id: `musica-${t.slug}`, etapa: 'musica', creado: new Date().toISOString(),
     titulo: `Thrive · ${t.titulo}`, bajada: `Demo, versión ${t.version || 1}`,
     tema: { slug: t.slug, titulo: t.titulo, version: t.version || 1, audio: MEDIA + t.audio },
-    piezas: PARTES.map(p => ({ id: p.id, red: 'musica', formato: p.formato, descripcion: `${p.desc} · ${quien[p.id]}`, detalle: detalle[p.id], texto: '' })),
+    piezas: PARTES.map(p => ({ id: p.id, red: 'musica', formato: p.formato, descripcion: `${p.desc} · ${quien[p.id]}`, detalle: detalle[p.id], texto: comentarios[p.id] || '' })),
   });
   log(`"${t.titulo}" (versión ${t.version || 1}) en aprobar.html`);
 }
@@ -83,7 +83,7 @@ export async function procesar() {
 }
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
 
-if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
+if (process.argv[1] && import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   const i = process.argv.indexOf('--demo');
   if (i > 0) {
     const reg = leerReg(), t = reg.temas.find(x => x.slug === process.argv[i + 1]);

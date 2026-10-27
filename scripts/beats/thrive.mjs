@@ -137,6 +137,11 @@ ${fb('concepto')}` : '');
       if (DEPORTE.test(t)) return 'palabra deportiva';
       if (CASTELLANO.test(t)) return 'castellano en título o sonido';
       if (/weeknd|lana|ariana|jennie|lily-rose|del rey|grande/i.test(t)) return 'nombra artistas reales en el sonido';
+      // Juan, 2026-10-27: el amor es abstracto (nunca una persona) y el género es trap de verdad
+      const persona = String(j.concepto).match(/(alguien|una persona|pareja|novi[oa]|amante|tu ex|el otro|la otra|ella|él)/i);
+      if (persona) return `el concepto habla de una persona ("${persona[0]}"): el amor de Thrive es abstracto, por algo que no es una persona`;
+      if (!/trap/i.test(j.caption_instrumental)) return 'el sonido no dice trap: tiene que ser trap de verdad';
+      if (!/rap/i.test(j.caption_voces)) return 'las voces tienen que tener a un rapero liderando';
       if (reg.temas.some(x => x.titulo.toLowerCase() === String(j.titulo).toLowerCase())) return `título repetido "${j.titulo}"`;
       // nada repetido (Juan, 2026-10-27): ni el título ni el rasgo psicológico de un tema anterior
       const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[^a-z ]/g, '').trim();
@@ -257,6 +262,22 @@ function medir(mp3) {
   }
   return secs.map(s => ({ nombre: '?', inicio: +(s.desde * compas).toFixed(1), fin: +((s.desde + s.e.length) * compas).toFixed(1), compases: s.e.length }));
 }
+// Juan, 2026-10-27: el rapero lidera; la voz femenina solo en partes concretas (como mucho un tercio de los versos),
+// y el amor no es por una persona (nada de "baby", "girl", "my lover").
+function controlarVoces(letra) {
+  let actual = '', total = 0, ella = 0;
+  for (const l of letra.split('\n')) {
+    const tag = l.trim().match(/^\[(.+)\]$/);
+    if (tag) { actual = tag[1].toLowerCase(); continue; }
+    if (!l.trim()) continue;
+    total++;
+    if (/female/.test(actual) && !/\bmale\b|&|\band\b/.test(actual.replace('female', ''))) ella++;
+  }
+  if (total && ella / total > 0.38) return `la voz femenina canta ${ella} de ${total} versos: tiene que aparecer solo en partes concretas (hook, puente); el rapero lidera`;
+  if (/\[verse[^\]]*female/i.test(letra) && !/\[verse[^\]]*\bmale/i.test(letra)) return 'los versos tienen que ser del rapero';
+  const p = letra.match(/\b(baby|babe|girl|boy|my lover|lover|my ex|darling)\b/i);
+  if (p) return `"${p[0]}": el amor de Thrive es abstracto, no por una persona`;
+}
 function rimas(letra) {
   const f = path.join(carpeta, '_letra.txt'); fs.writeFileSync(f, letra);
   const r = spawnSync(PY, [path.join(ROOT, 'scripts/beats/rimas.py'), f], { encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
@@ -276,7 +297,7 @@ if (!tema.letra) {
     log(`Letra (vuelta ${i})…`);
     const letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: i <= 3 ? ['local', 'claude'] : ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
 
-      validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : DEPORTE.test(x) ? 'palabra deportiva' : CASTELLANO.test(x) ? 'castellano' : null }))
+      validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : DEPORTE.test(x) ? 'palabra deportiva' : CASTELLANO.test(x) ? 'castellano' : controlarVoces(x) }))
       .replace(/^```\w*\n?|```$/g, '').trim();
     const r = rimas(letra);
     if (!mejor || r.problemas.length < mejor.r.problemas.length) mejor = { letra, r, motor: ultimoMotor };
