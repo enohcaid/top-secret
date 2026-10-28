@@ -33,6 +33,10 @@
   --vpug:   #3ECF8E;
   --e11:    #4A9EFF;
   --plata:  #B9C0CA;
+  --z-asc:   #3ECF8E;   /* zonas de la tabla: ascenso directo, playoff, promoción, descenso */
+  --z-po:    #4A9EFF;
+  --z-promo: #F0A030;
+  --z-desc:  #E05A4F;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -152,6 +156,9 @@ td.left { text-align: left; }
   color: var(--mid); width: 32px;
 }
 .td-pos.p1 { color: var(--gold); }
+/* Zona de cada puesto (renderTable con zonas): franja a la izquierda y número del color de la zona */
+.standings-table tbody tr[data-zona] td:first-child { box-shadow: inset 3px 0 0 var(--zona); }
+.standings-table tbody tr[data-zona] .td-pos { color: var(--zona); }
 .td-pos.p2 { color: #888; }
 .td-pos.p3 { color: #a07040; }
 
@@ -193,6 +200,7 @@ td.left { text-align: left; }
   background: var(--gray); border-radius: 8px;
   border: 1px solid var(--border);
 }
+.zone-legend[hidden] { display: none; }
 .zl-item { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--mid); }
 
 /* ── SEASON SELECTOR ── */
@@ -528,6 +536,12 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       </div>
       <div class="group-header">Challengers (2°) · Tabla de posiciones</div>
       <div class="table-wrap"><table class="standings-table" id="t4-e11-table" style="display:none"></table></div>
+      <div class="zone-legend" id="t4-e11-zonas" hidden>
+        <div class="zl-item"><span class="zone-dot" style="background:var(--z-asc)"></span>1° · Ascenso directo</div>
+        <div class="zl-item"><span class="zone-dot" style="background:var(--z-po)"></span>2° a 9° · Playoff</div>
+        <div class="zl-item"><span class="zone-dot" style="background:var(--z-promo)"></span>17° y 18° · Promoción</div>
+        <div class="zl-item"><span class="zone-dot" style="background:var(--z-desc)"></span>19° y 20° · Descenso</div>
+      </div>
       <div class="prox-wrap" id="t4-e11-prox">
         <div class="prox-badge">Temporada 4 · Espacio Gamer</div>
         <div class="prox-title">Próximamente</div>
@@ -779,7 +793,8 @@ function normE11(raw) {
 // En todas las tablas nuestra fila usa el escudo oficial, no el que cargó cada liga.
 const OUR_LOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/clean-metal-96.webp';
 
-function renderTable(tableId, data, accentColor) {
+// zonas (opcional): [{desde, hasta, color}] por puesto, p. ej. ZONAS_EG
+function renderTable(tableId, data, accentColor, zonas = []) {
   const table = document.getElementById(tableId);
   table.style.display = '';
   table.innerHTML = `
@@ -812,6 +827,8 @@ function renderTable(tableId, data, accentColor) {
 
     const tr = document.createElement('tr');
     if (rowClass) tr.className = rowClass;
+    const zona = zonas.find(z => pos >= z.desde && pos <= z.hasta);
+    if (zona) { tr.dataset.zona = ''; tr.style.setProperty('--zona', zona.color); }
     tr.innerHTML = `
       <td><div class="td-pos ${posClass}">${pos}</div></td>
       <td class="left">
@@ -945,6 +962,13 @@ async function fetchT4VPUG() {
 }
 
 /* ── FETCH & RENDER T4 ESPACIO GAMER (ex 11x11) ── */
+// Reglamento de Challengers (Juan, 2026-10-28): 1° asciende directo, 2°–9° playoff, 17°–18° promoción, 19°–20° descienden
+const ZONAS_EG = [
+  { desde: 1,  hasta: 1,  color: 'var(--z-asc)' },
+  { desde: 2,  hasta: 9,  color: 'var(--z-po)' },
+  { desde: 17, hasta: 18, color: 'var(--z-promo)' },
+  { desde: 19, hasta: 20, color: 'var(--z-desc)' },
+];
 // Sin fallback hardcodeado: si la liga todavía no publicó equipos o el Worker falla, queda "Próximamente".
 async function fetchT4EG() {
   try {
@@ -954,7 +978,8 @@ async function fetchT4EG() {
     const data = normVPUG(Array.isArray(raw) ? raw : []);
     if (!data.length) throw new Error('empty');
     document.getElementById('t4-e11-prox').style.display = 'none';
-    renderTable('t4-e11-table', data, 'var(--e11)');
+    renderTable('t4-e11-table', data, 'var(--e11)', ZONAS_EG);
+    document.getElementById('t4-e11-zonas').hidden = false;
     gsap.to('#t4-e11-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
   } catch(e) { /* queda el bloque Próximamente */ }
 }
