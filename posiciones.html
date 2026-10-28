@@ -859,6 +859,19 @@ function switchTab(id, season, btn) {
   });
 })();
 
+/* ── Al entrar, la T4 abre en la liga que se está jugando (por fecha de inicio, ART). Sumar acá cada competencia
+   nueva de la T4 con su primer día: gana la última que ya arrancó. ── */
+const LIGAS_T4 = [
+  { liga: 'vpug', desde: '2026-09-29' },   // Copa de Pretemporada VPUG
+  { liga: 'e11',  desde: '2026-10-20' },   // Espacio Gamer, arranque oficial de la T4
+];
+(function ligaActivaT4() {
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
+  const activa = LIGAS_T4.filter(l => l.desde <= hoy).at(-1);
+  const btn = activa && document.querySelector(`#s-t4 .tab[data-league="${activa.liga}"]`);
+  if (btn) switchTab(activa.liga, 't4', btn);
+})();
+
 /* ── RENDER T1 STATIC TABLES ── */
 function renderT1() {
   renderTable('t1-vpn-table',  VPN_T1_DATA, 'var(--vpn)');
