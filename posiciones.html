@@ -86,6 +86,17 @@ body {
 .tab[data-league="vpn"].active   { color: var(--vpn);  border-bottom-color: var(--vpn);  }
 .tab[data-league="vpug"].active  { color: var(--vpug); border-bottom-color: var(--vpug); }
 .tab[data-league="e11"].active   { color: var(--e11);  border-bottom-color: var(--e11);  }
+.tab-vivo {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 10px;
+  font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text, #fff);
+  background: color-mix(in srgb, currentColor 14%, transparent); border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+}
+.tab[data-league="e11"] .tab-vivo { color: var(--e11); }
+.tab[data-league="vpn"] .tab-vivo { color: var(--vpn); }
+.tab[data-league="vpug"] .tab-vivo { color: var(--vpug); }
+.tab-vivo::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: tab-vivo 1.6s ease-in-out infinite; }
+@keyframes tab-vivo { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .tab-vivo::before { animation: none; } }
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 
@@ -401,7 +412,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
     </button>
     <button class="season-btn active" id="sbtn-t4" onclick="switchSeason('t4',this)" style="border-color:rgba(201,168,76,.5);color:var(--gold);">
       <span class="sb-label">T4 2026</span>
-      <span class="sb-sub">Pretemporada</span>
+      <span class="sb-sub">En curso</span>
     </button>
   </div>
 
@@ -475,18 +486,18 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
   <!-- ════════════ TEMPORADA 4 ════════════ -->
   <div id="s-t4">
     <div class="tabs">
-      <button class="tab active" data-league="vpug" onclick="switchTab('vpug','t4',this)">VPUG · Pretemporada</button>
+      <button class="tab active" data-league="e11"  onclick="switchTab('e11','t4',this)">Espacio Gamer</button>
       <button class="tab"        data-league="vpn"  onclick="switchTab('vpn','t4',this)">VPN</button>
-      <button class="tab"        data-league="e11"  onclick="switchTab('e11','t4',this)">Espacio Gamer</button>
+      <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t4',this)">VPUG</button>
     </div>
 
     <!-- VPUG T4 — Liga Pretemporada VPUG (FC-27), grupo de TOP Secret -->
-    <div class="tab-pane active" id="t4-pane-vpug">
+    <div class="tab-pane" id="t4-pane-vpug">
       <div class="preseason">
         <div>
-          <div class="preseason-kicker">Temporada 4 · Pretemporada</div>
-          <div class="preseason-title">Copa de Pretemporada VPUG</div>
-          <p class="preseason-sub">La <strong>Temporada 4 oficial todavía no arrancó</strong>: esta copa es la preparación del plantel antes del comienzo. Terminamos segundos en el Grupo D y pasamos a los playoffs de la Fase Oro.</p>
+          <div class="preseason-kicker">Temporada 4 · VPUG</div>
+          <div class="preseason-title">Arranca el lunes 9 de noviembre</div>
+          <p class="preseason-sub">La temporada de VPUG empieza el <strong>9 de noviembre</strong>. Mientras tanto, así nos fue en la Copa de Pretemporada: terminamos segundos en el Grupo D y pasamos a los playoffs de la Fase Oro.</p>
         </div>
       </div>
       <div id="t4-vpug-playoffs-wrap" hidden>
@@ -501,13 +512,13 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
     <div class="tab-pane" id="t4-pane-vpn">
       <div class="prox-wrap">
         <div class="prox-badge">Temporada 4 · VPN</div>
-        <div class="prox-title">Próximamente</div>
-        <p class="prox-sub">La tabla aparece cuando arranque la Temporada 4 oficial. Por ahora jugamos la Copa de Pretemporada de VPUG.</p>
+        <div class="prox-title">Arranca el 9 de noviembre</div>
+        <p class="prox-sub">La temporada de VPN empieza el lunes 9 de noviembre. La tabla aparece acá cuando arranque.</p>
       </div>
     </div>
 
     <!-- Espacio Gamer T4 (ex 11x11) — CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA, vía Worker /eg-table -->
-    <div class="tab-pane" id="t4-pane-e11">
+    <div class="tab-pane active" id="t4-pane-e11">
       <div class="preseason">
         <div>
           <div class="preseason-kicker">Temporada 4 · Espacio Gamer</div>
@@ -859,17 +870,22 @@ function switchTab(id, season, btn) {
   });
 })();
 
-/* ── Al entrar, la T4 abre en la liga que se está jugando (por fecha de inicio, ART). Sumar acá cada competencia
-   nueva de la T4 con su primer día: gana la última que ya arrancó. ── */
+/* ── Ligas de la T4 en juego (por fecha de inicio, ART): su pestaña lleva la marca "En juego" y la página abre en
+   la primera de la lista que ya arrancó. Sumar acá cada competencia nueva de la T4 con su primer día. ── */
 const LIGAS_T4 = [
-  { liga: 'vpug', desde: '2026-09-29' },   // Copa de Pretemporada VPUG
   { liga: 'e11',  desde: '2026-10-20' },   // Espacio Gamer, arranque oficial de la T4
+  { liga: 'vpn',  desde: '2026-11-09' },
+  { liga: 'vpug', desde: '2026-11-09' },
 ];
 (function ligaActivaT4() {
   const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
-  const activa = LIGAS_T4.filter(l => l.desde <= hoy).at(-1);
-  const btn = activa && document.querySelector(`#s-t4 .tab[data-league="${activa.liga}"]`);
-  if (btn) switchTab(activa.liga, 't4', btn);
+  const enJuego = LIGAS_T4.filter(l => l.desde <= hoy);
+  enJuego.forEach(l => {
+    const tab = document.querySelector(`#s-t4 .tab[data-league="${l.liga}"]`);
+    if (tab) tab.insertAdjacentHTML('beforeend', '<span class="tab-vivo">En juego</span>');
+  });
+  const btn = enJuego[0] && document.querySelector(`#s-t4 .tab[data-league="${enJuego[0].liga}"]`);
+  if (btn) switchTab(enJuego[0].liga, 't4', btn);
 })();
 
 /* ── RENDER T1 STATIC TABLES ── */
