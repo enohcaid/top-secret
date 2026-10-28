@@ -46,15 +46,29 @@ export async function ollama(prompt, { modelo = MODELO, json = false, temperatur
 // escribir el código de un beat (27/10) y la llamada se cortaba.
 // Modelos por nombre completo: el alias 'sonnet' de este Claude Code apunta a claude-sonnet-4-6 (27/10).
 const MODELOS = { opus: 'claude-opus-5-5', sonnet: 'claude-sonnet-5-5', haiku: 'claude-haiku-5-5' };
-export function claude(prompt, { modelo = 'opus', minutos = 10, pensar } = {}) {
+// El claude.exe de ~/.local/bin no se autoactualiza en modo -p: el 28/10 quedó en 2.1.96, el modelo pedía 2.1.280+ y
+// la noticia diaria cayó al modelo local. Si el CLI dice que es viejo, se actualiza una vez y se reintenta.
+let actualizado = false;
+export function claude(prompt, opc = {}) {
+  try { return claudeUnaVez(prompt, opc); } catch (e) {
+    if (actualizado || !/does not support this model|or newer is required|claude update/i.test(e.message)) throw e;
+    actualizado = true;
+    log('Claude Code desactualizado: corriendo "claude update"…');
+    const u = spawnSync(CLAUDE, ['update'], { encoding: 'utf8', timeout: 5 * 60000, shell: CLAUDE.endsWith('.cmd') });
+    log((u.stdout || u.stderr || '').trim().split('\n').pop());
+    return claudeUnaVez(prompt, opc);
+  }
+}
+function claudeUnaVez(prompt, { modelo = 'opus', minutos = 10, pensar } = {}) {
   const r = spawnSync(CLAUDE, ['-p', '--model', MODELOS[modelo] || modelo, '--output-format', 'json', '--tools', '', '--system-prompt', 'You are a precise writer. Follow the brief exactly and answer only with what it asks for.'], {
     cwd: os.tmpdir(), input: prompt, encoding: 'utf8', timeout: minutos * 60000, env: { ...process.env, CLAUDE_CODE_MAX_OUTPUT_TOKENS: '64000', ...(pensar != null ? { MAX_THINKING_TOKENS: String(pensar) } : {}) }, maxBuffer: 16 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'),
   });
   const j = (() => { try { return JSON.parse(r.stdout); } catch { return null; } })();
   if (!j?.result) throw new Error(`Claude sin respuesta (código ${r.status}): ${(r.stdout || r.stderr || '').slice(-200)}`);
   // sin cupo, Claude "responde" igual con el aviso de límite como texto (26/10 pasó por composición fallida): es un error
-  if (j.is_error || (j.result.length < 400 && /usage limit|out of (extra )?usage|hit your limit|limit (will )?reset|rate limit/i.test(j.result)))
+  if (j.result.length < 400 && /usage limit|out of (extra )?usage|hit your limit|limit (will )?reset|rate limit/i.test(j.result))
     throw new Error(`Claude sin cupo: ${j.result.slice(0, 200)}`);
+  if (j.is_error) throw new Error(`Claude con error: ${j.result.slice(0, 300)}`);
   return j.result;
 }
 

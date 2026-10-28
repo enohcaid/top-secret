@@ -28,7 +28,8 @@ while ((Get-Date) -lt $deadline) {
     try {
         $doc   = Invoke-RestMethod $fsUrl -TimeoutSec 10
         $draft = $doc.fields.data.stringValue | ConvertFrom-Json
-        if ($draft.date -eq $today) {
+        # sin titulo = borrador roto (28/10 se generaron imagenes para uno vacio): seguir esperando
+        if ($draft.date -eq $today -and $draft.title) {
             if ($draft.imagePost) { Log "El draft de hoy ya tiene imagenes - nada que hacer."; exit 0 }
             $draftOk = $true
             break

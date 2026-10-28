@@ -66,8 +66,9 @@ const draftDoc = await intentar(() => leerDoc('news/draft'));
 const draftHoy = draftDoc?.data ? JSON.parse(draftDoc.data) : null;
 const topicos = (await intentar(() => leerDoc('news/recent_topics')))?.entries || [];
 if (!FORZAR && !PRUEBA) {
-  if (draftHoy?.date === HOY) { log(`Ya hay borrador de hoy: "${draftHoy.title}".`); process.exit(0); }
-  if (topicos[0]?.date === HOY) { log(`La nota de hoy ya se escribió ("${topicos[0].title}").`); process.exit(0); }
+  // un borrador sin título (el 28/10 se guardó uno vacío del modelo local) no cuenta: se reescribe
+  if (draftHoy?.date === HOY && draftHoy.title) { log(`Ya hay borrador de hoy: "${draftHoy.title}".`); process.exit(0); }
+  if (topicos[0]?.date === HOY && topicos[0].title) { log(`La nota de hoy ya se escribió ("${topicos[0].title}").`); process.exit(0); }
 }
 
 // ── 1. Datos ─────────────────────────────────────────────────────────────────
@@ -237,7 +238,7 @@ escribir: for (const [motor, vueltas] of motores) {
       const err = controlar(n);
       if (!mejor || err.length < mejor.err.length) mejor = { n, err, motor };
       if (!err.length) { if (motor === 'claude' && i === 1) guardarEjemplo('noticia-diaria', encargo, JSON.stringify(n)); break escribir; }
-      log(`  a corregir: ${err.join(' · ')}`);
+      log(`  a corregir: ${err.join(' · ')}${err.some(e => e.startsWith('falta "')) ? ` (claves recibidas: ${Object.keys(n).join(', ') || 'ninguna'})` : ''}`);
       pedido = `${encargo}\n\n## Tu respuesta anterior\n${JSON.stringify(n)}\n\n## Corregí esto y devolvé el JSON completo de nuevo\n- ${err.join('\n- ')}`;
     } catch (e) {
       log(`  ${motor}: ${e.message.slice(0, 300)}`);
@@ -245,7 +246,10 @@ escribir: for (const [motor, vueltas] of motores) {
     }
   }
 }
-if (!mejor) { log('ERROR: ningún motor pudo escribir la nota. Se reintenta en el próximo horario de la tarea.'); process.exit(1); }
+// Con avisos de estilo la nota se guarda (Juan la revisa); sin título/cuerpo no: es un borrador vacío que encima
+// frenaba los reintentos del día (28/10, "undefined").
+const incompleta = mejor?.err.some(e => /^falta "|^"body" tiene/.test(e));
+if (!mejor || incompleta) { log(`ERROR: ningún motor pudo escribir la nota${incompleta ? ` (la mejor vino incompleta: ${mejor.err.join(' · ')})` : ''}. Se reintenta en el próximo horario de la tarea.`); process.exit(1); }
 const { n, err, motor } = mejor;
 
 // ── 3. Guardado ──────────────────────────────────────────────────────────────
