@@ -37,13 +37,23 @@ const PRUEBA = process.argv.includes('--prueba');
 // la PS5 (~3,4 Mbps, por cable): 4 copias a 1500 la llenaban y la PS5 perdía su conexión con Twitch (2026-10-19).
 // A 1000 + 96 de audio son ~4,4 Mbps entre las 4 redes.
 const KBPS = +(process.argv[process.argv.indexOf('--kbps') + 1] || 0) || 1000;
-const fi = process.argv.indexOf('--fuente');
 // --fuente también acepta un canal de YouTube (2026-10-22: esa noche se transmitió desde el YouTube de otro jugador):
 // --fuente https://www.youtube.com/@canal → se toma <canal>/live. Queda anotada en fuentes/stream/fuente.json y el
 // vigía (que lanza este script al empezar cada sesión) mira la misma (lib/fuente-vivo.mjs).
-const FTE = fuenteDe(fi > 0 ? process.argv[fi + 1] : 'enohcaid');
-const FUENTE = FTE.url;
-if (!process.argv.includes('--prueba')) anotarFuente(FTE);
+// Fuentes que se vigilan (Juan, 2026-10-28): la PS5 de Juan (enohcaid), el Twitch de cabers1414 y el YouTube de
+// RS32-DaniStone. Se arranca con la primera que esté en vivo, en este orden; si en plena sesión se cae la que se usa y
+// otra está al aire, se pasa a esa. --fuente <canal> (repetible) reemplaza la lista.
+const FUENTES_POR_DEFECTO = ['enohcaid', 'cabers1414', 'https://www.youtube.com/@danielvillarruel4868'];
+const fuentesArg = process.argv.flatMap((a, k) => a === '--fuente' && process.argv[k + 1] ? [process.argv[k + 1]] : []);
+const FUENTES = (fuentesArg.length ? fuentesArg : FUENTES_POR_DEFECTO).map(x => fuenteDe(x));
+let FTE = FUENTES[0], FUENTE = FTE.url;
+function usarFuente(f) { FTE = f; FUENTE = f.url; if (!PRUEBA) anotarFuente(f); }
+// La primera de la lista que esté en vivo (se consultan todas a la vez; YouTube tarda hasta 40 s), o null
+async function fuenteEnElAire(excepto = null) {
+  const lista = FUENTES.filter(f => f !== excepto);
+  const vivos = await Promise.all(lista.map(f => fuenteEnVivo(f).catch(() => null)));
+  return lista.find((f, k) => vivos[k]) || null;
+}
 const LOCAL = 'rtmp://127.0.0.1:1935/live/mix';
 const OBS_DIR = 'C:\\Program Files\\obs-studio\\bin\\64bit';
 const MTX = path.resolve('fuentes/stream/bin/mediamtx/mediamtx.exe');
@@ -208,6 +218,18 @@ async function seguirSesion() {
       await reconectarFuente();
       marcarSinSenal(false);
     }
+    return true;
+  }
+  // Otra de las fuentes está al aire: se pasa a esa sin cortar las redes (streamlink nuevo + vigía sobre la nueva)
+  const otra = FUENTES.length > 1 ? await fuenteEnElAire(FTE) : null;
+  if (otra) {
+    log(`${FUENTE} no está en vivo y ${otra.url} sí: paso a esa fuente.`);
+    usarFuente(otra);
+    try { process.kill(+fs.readFileSync(path.resolve('fuentes/vivo/.vigia.lock'), 'utf8')); } catch {}   // el vigía viejo mira la fuente anterior
+    lanzarVigia();
+    caidaDesde = null;
+    await reconectarFuente();
+    marcarSinSenal(false);
     return true;
   }
   if (!caidaDesde) { caidaDesde = Date.now(); log(`${FUENTE} se cayó: pongo la pausa y las redes siguen al aire (espero hasta ${GRACIA_SIN_SENAL / 60000} min).`); }
@@ -398,7 +420,7 @@ async function sesion() {
   } finally { clearInterval(partido); clearInterval(inicio); clearInterval(audio); clearInterval(vigia); modoAudio = null; }
 }
 
-log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}${conOverlay ? ' con overlay' : ' sin overlay'}. Esperando que ${FUENTE} esté en vivo (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);
+log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}${conOverlay ? ' con overlay' : ' sin overlay'}. Esperando que alguna fuente esté en vivo (${FUENTES.map(f => f.url).join(', ')}) (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);
 process.on('SIGINT', async () => { await bajarCadena(); process.exit(0); });
 // Títulos de la noche en Twitch/Kick/YouTube antes de que arranque el vivo (titulos-vivo.mjs; Instagram lo pone al crear
 // su vivo). En segundo plano: si una red falla queda en el log y el vivo sigue igual.
@@ -410,7 +432,9 @@ if (!PRUEBA && !process.argv.includes('--sin-titulos')) {
   })();
 }
 while (Date.now() < limite) {
-  if (await enVivo()) {
+  const f = await fuenteEnElAire();
+  if (f) {
+    usarFuente(f);
     log(`${FUENTE} en vivo: empiezo a retransmitir.`);
     await sesion();
     log('Sesión terminada. Vuelvo a esperar.');
