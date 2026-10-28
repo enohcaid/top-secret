@@ -748,8 +748,10 @@ export default {
             logo: (() => {
               const eg = (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null;
               // SF DRYSDALE: solo mientras EG le deje el escudo de Suda (xhuncl2klc); si suben el propio, se usa ese
-              if (name === 'SF DRYSDALE' && eg && !eg.includes('xhuncl2klc')) return eg;
-              return LOGO_LIMPIO[name] || eg;
+              if (name.toUpperCase() === 'SF DRYSDALE' && eg && !eg.includes('xhuncl2klc')) return eg;
+              // sin distinguir mayúsculas: EG pasó de 'MONOTRIBUTISTAS' a 'Monotributistas' y volvía el escudo con fondo
+              const k = Object.keys(LOGO_LIMPIO).find(n => n.toLowerCase() === name.toLowerCase());
+              return (k && LOGO_LIMPIO[k]) || eg;
             })(),
             gp, w, d, l, gf: det('Goles a favor'), gc: det('Goles en contra'), gd, pts
           };

@@ -810,6 +810,8 @@ const E11_T4_BADGES = {
   'Suda eSports':           'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/suda-esports.webp',
   'WAP eSports':            'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-162806-ikyvnqcvqk.png',
 };
+const badgeSinMayus = (mapa, n) => n && (mapa[n] || mapa[Object.keys(mapa).find(k => k.toLowerCase() === n.toLowerCase())]);   // EG cambia mayúsculas de los nombres
+
 // Etiqueta visible de la liga: acá solo hay partidos de hoy (T4 en adelante), así que '11x11' = "Espacio Gamer".
 const lgLabel = m => m.league === '11x11' ? 'Espacio Gamer' : m.league;
 const E11_T3_BADGES = {
@@ -1041,7 +1043,7 @@ function getTodayMatches() {
     .map(m => {
       if (m.badge) return m;
       if (m.league === 'VPUG')  return {...m, badge: VPUG_T4_BADGES[m.rival]||VPUG_T2_BADGES[m.rival]||VPUG_T3_BADGES[m.rival]||null};
-      if (m.league === '11x11') return {...m, badge: E11_T4_BADGES[m.rival]||E11_T3_BADGES[m.rival]||null};
+      if (m.league === '11x11') return {...m, badge: badgeSinMayus(E11_T4_BADGES, m.rival)||badgeSinMayus(E11_T3_BADGES, m.rival)||null};
       if (m.league === 'VPN') {
         const live = vpnFixtures.find(v => (v.rival||'').toLowerCase().trim() === (m.rival||'').toLowerCase().trim());
         return {...m, badge: (live && live.badge) || null};
@@ -1070,7 +1072,7 @@ function getTodayMatches() {
   const from11x11 = E11_T3_SCHEDULE
     .filter(m => m.date === TODAY)
     .filter(m => !fromCustom.some(c => c.league === '11x11' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({...m, badge: E11_T4_BADGES[m.rival]||E11_T3_BADGES[m.rival]||null}));
+    .map(m => ({...m, badge: badgeSinMayus(E11_T4_BADGES, m.rival)||badgeSinMayus(E11_T3_BADGES, m.rival)||null}));
   // Deduplicate VPN: skip if calCustom already has same rival
   const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase().trim() === (v.rival||'').toLowerCase().trim())

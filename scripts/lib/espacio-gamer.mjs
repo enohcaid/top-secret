@@ -26,6 +26,8 @@ export const ESCUDOS_SIN_FONDO = Object.fromEntries(Object.entries({
   'Almagro eSports': 'almagro-esports', 'COMUNICACIÓNC': 'comunicacionc', 'Deportivo Murra': 'deportivo-murra',
   'LMJ eSports': 'lmj-esports', 'LosPamba1891': 'lospamba1891',
 }).map(([n, s]) => [n, `${ESC}${s}.webp`]));
+// EG cambia mayúsculas de los nombres sin aviso ('MONOTRIBUTISTAS' → 'Monotributistas'): buscar sin distinguirlas
+const porNombre = (mapa, n) => mapa[n] ?? mapa[Object.keys(mapa).find(k => k.toLowerCase() === n.toLowerCase())];
 const decode = s => s.replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/&quot;/g, '"').trim();
 
 export async function equiposDivisionEG(slug) {
@@ -40,7 +42,7 @@ export async function equiposDivisionEG(slug) {
   return aj.data.html.split(/<tbody class="eg-tp-club[^"]*"[^>]*>/).slice(1).map(chunk => ({
     nombre: decode((chunk.match(/class="eg-tp-nombre">\s*<span title="([^"]+)"/) || [])[1] || ''),
     logo: (chunk.match(/<img class="eg-tp-logo" src="([^"]+)"/) || [])[1] || null,
-  })).filter(t => t.nombre).map(t => ({ ...t, logo: (t.nombre === 'SF DRYSDALE' && t.logo && !t.logo.includes('xhuncl2klc') ? t.logo : ESCUDOS_SIN_FONDO[t.nombre]) || t.logo || ESCUDOS_FALTANTES[t.nombre] || null }));   // SF DRYSDALE: limpio solo mientras EG tenga el escudo de Suda
+  })).filter(t => t.nombre).map(t => ({ ...t, logo: (t.nombre.toUpperCase() === 'SF DRYSDALE' && t.logo && !t.logo.includes('xhuncl2klc') ? t.logo : porNombre(ESCUDOS_SIN_FONDO, t.nombre)) || t.logo || porNombre(ESCUDOS_FALTANTES, t.nombre) || null }));   // SF DRYSDALE: limpio solo mientras EG tenga el escudo de Suda
 }
 
 // [{nombre, div, logo}] de las 4 divisiones; una división que falla no tumba a las otras

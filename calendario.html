@@ -1529,7 +1529,8 @@ const E11_T4_BADGES = {
   'Suda eSports':           'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/suda-esports.webp',
   'WAP eSports':            'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-162806-ikyvnqcvqk.png',
 };
-function e11Badge(rival){ return E11_T4_BADGES[rival] || E11_T3_BADGES[rival] || null; }
+const badgeSinMayus = (mapa, n) => n && (mapa[n] || mapa[Object.keys(mapa).find(k => k.toLowerCase() === n.toLowerCase())]);   // EG cambia mayúsculas de los nombres
+function e11Badge(rival){ return badgeSinMayus(E11_T4_BADGES, rival) || badgeSinMayus(E11_T3_BADGES, rival) || null; }
 // Etiqueta visible de la liga: desde la T4 la clave '11x11' se muestra como "Espacio Gamer".
 const lgLabel = m => (m.league === '11x11' && (m.date || '') > '2026-09-28') ? 'Espacio Gamer' : m.league;
 
