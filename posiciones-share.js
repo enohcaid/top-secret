@@ -4,7 +4,7 @@
 // "Compartir todas" en la barra de ligas). La vista previa abre en un modal;
 // "Enviar por WhatsApp" usa el share nativo con la imagen (celular) y si el
 // navegador no comparte archivos, descarga la imagen y abre WhatsApp con el link.
-// posiciones.html llama TSPos.register(tableId, data) desde renderTable().
+// posiciones.html llama TSPos.register(tableId, data, zonas) desde renderTable() (zonas: ascenso/playoff/descenso por puesto).
 (function () {
   const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
   const MEDIA = WORKER + '/media/';
@@ -38,12 +38,14 @@
     }
     return '';
   }
-  function register(tableId, data) {
+  // Las zonas traen colores como var(--z-…) del CSS de la página: el canvas necesita el valor.
+  const cssColor = v => { const m = /var\((--[^)]+)\)/.exec(v || ''); return m ? getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim() : v; };
+  function register(tableId, data, zonas = []) {
     const id = parseId(tableId);
     const table = document.getElementById(tableId);
     if (!id || !table || !data || !data.length) return;
     const wrap = table.closest('.table-wrap') || table;
-    tables[tableId] = { data, ...id, group: groupLabel(wrap) };
+    tables[tableId] = { data, ...id, group: groupLabel(wrap), zonas: zonas.map(z => ({ ...z, color: cssColor(z.color) })) };
     if (!(wrap.previousElementSibling || {}).classList?.contains('pos-share-bar')) {
       const bar = document.createElement('div');
       bar.className = 'pos-share-bar';
@@ -146,17 +148,19 @@
     ctx.fillRect(COLS[5][2] - 48, y, 96, rowH * t.data.length);
     t.data.forEach((r, i) => {
       const ry = y + i * rowH, cy = ry + rowH / 2;
+      const zona = (t.zonas || []).find(z => i + 1 >= z.desde && i + 1 <= z.hasta);
       if (r.us) {
         ctx.fillStyle = rgba('#C8A84B', 0.16); ctx.fillRect(P, ry, W - P * 2, rowH);
         ctx.fillStyle = C.gold; ctx.fillRect(P, ry, 6, rowH);
       } else if (i % 2) {
         ctx.fillStyle = 'rgba(242,238,224,.025)'; ctx.fillRect(P, ry, W - P * 2, rowH);
       }
+      if (zona) { ctx.fillStyle = zona.color; ctx.fillRect(P, ry, 6, rowH); }   // franja de la zona (gana sobre la dorada)
       if (i) { ctx.fillStyle = C.line; ctx.fillRect(P, ry, W - P * 2, 1); }
       const big = Math.round(rowH * 0.42);
       ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
       ctx.font = `800 ${big}px ${COND}`;
-      ctx.fillStyle = i === 0 ? color : r.us ? C.gold : C.dim;
+      ctx.fillStyle = zona ? zona.color : i === 0 ? color : r.us ? C.gold : C.dim;
       ctx.fillText(String(i + 1), P + 30, cy + 1);
       // Escudo (o sigla si no carga).
       const ls = Math.round(rowH * 0.64), lx = P + 92;
@@ -181,6 +185,20 @@
       ctx.textAlign = 'left';
     });
     return y + rowH * t.data.length;
+  }
+
+  // Leyenda de zonas debajo de una tabla (punto de color + nombre), en una sola línea. Devuelve el alto usado.
+  const LEY_H = 64;
+  function drawLeyenda(ctx, t, y) {
+    if (!t.zonas || !t.zonas.length) return 0;
+    ctx.font = `600 24px ${COND}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    let x = P + 8;
+    t.zonas.forEach(z => {
+      ctx.fillStyle = z.color; ctx.beginPath(); ctx.arc(x + 7, y + LEY_H / 2, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = C.dim; ctx.fillText(z.nombre, x + 24, y + LEY_H / 2 + 1);
+      x += 24 + ctx.measureText(z.nombre).width + 34;
+    });
+    return LEY_H;
   }
 
   // Cabecera común: escudo + kicker + título grande + subtítulo, estado a la derecha.
@@ -218,7 +236,7 @@
     const y = H - 92;
     ctx.fillStyle = C.line; ctx.fillRect(P, y, W - P * 2, 2);
     ctx.font = `600 24px ${COND}`; ctx.textBaseline = 'middle'; ctx.fillStyle = C.faint;
-    ctx.textAlign = 'left'; tracked(ctx, 'ENOHCAID.GITHUB.IO/TOP-SECRET', P, y + 46, 3);
+    ctx.textAlign = 'left'; tracked(ctx, 'TOPSECRET.AR', P, y + 46, 3);
     ctx.textAlign = 'right'; ctx.fillStyle = C.gold; tracked(ctx, 'TOP SECRET FC', W - P, y + 46, 4);
     ctx.textAlign = 'left';
   }
@@ -240,17 +258,17 @@
   async function single(t) {
     await fontsReady();
     const color = LEAGUE[t.league].color;
-    const top = 290, colH = 56, foot = 120, n = t.data.length;
-    const rowH = Math.max(56, Math.min(96, Math.floor((1350 - top - colH - foot) / n)));
-    const H = Math.max(1350, top + colH + rowH * n + foot);
+    const top = 290, colH = 56, foot = 120, n = t.data.length, ley = t.zonas && t.zonas.length ? LEY_H : 0;
+    const rowH = Math.max(56, Math.min(96, Math.floor((1350 - top - colH - ley - foot) / n)));
+    const H = Math.max(1350, top + colH + rowH * n + ley + foot);
     const [cv, ctx] = newCanvas(H);
     background(ctx, H, color);
     await drawHeader(ctx, { title: lgName(t), titleColor: color, sub: [seasonName(t.season), t.group].filter(Boolean).join(' · '), season: t.season });
     // Centra el bloque de la tabla en el espacio disponible.
-    const block = colH + rowH * n;
+    const block = colH + rowH * n + ley;
     const y0 = top + Math.max(0, Math.floor((H - foot - top - block) / 2));
     drawColHead(ctx, y0, colH, color);
-    await drawRows(ctx, t, y0 + colH, rowH);
+    drawLeyenda(ctx, t, await drawRows(ctx, t, y0 + colH, rowH) + 6);
     drawFooter(ctx, H);
     return cv;
   }
@@ -259,7 +277,7 @@
   async function all(list) {
     await fontsReady();
     const season = list[0].season, rowH = 58, secH = 96, colH = 48, gap = 44, top = 290, foot = 120;
-    const H = top + list.reduce((s, t) => s + secH + colH + rowH * t.data.length, 0) + gap * (list.length - 1) + foot + 20;
+    const H = top + list.reduce((s, t) => s + secH + colH + rowH * t.data.length + (t.zonas && t.zonas.length ? LEY_H : 0), 0) + gap * (list.length - 1) + foot + 20;
     const [cv, ctx] = newCanvas(H);
     background(ctx, H, C.gold);
     const leagues = [...new Set(list.map(t => lgName(t)))].join(' · ');
@@ -278,7 +296,8 @@
       }
       y += secH;
       drawColHead(ctx, y, colH, color);
-      y = await drawRows(ctx, t, y + colH, rowH) + gap;
+      y = await drawRows(ctx, t, y + colH, rowH);
+      y += drawLeyenda(ctx, t, y) + gap;
     }
     drawFooter(ctx, H);
     return cv;

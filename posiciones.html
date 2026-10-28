@@ -536,12 +536,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       </div>
       <div class="group-header">Challengers (2°) · Tabla de posiciones</div>
       <div class="table-wrap"><table class="standings-table" id="t4-e11-table" style="display:none"></table></div>
-      <div class="zone-legend" id="t4-e11-zonas" hidden>
-        <div class="zl-item"><span class="zone-dot" style="background:var(--z-asc)"></span>1° · Ascenso directo</div>
-        <div class="zl-item"><span class="zone-dot" style="background:var(--z-po)"></span>2° a 9° · Playoff</div>
-        <div class="zl-item"><span class="zone-dot" style="background:var(--z-promo)"></span>17° y 18° · Promoción</div>
-        <div class="zl-item"><span class="zone-dot" style="background:var(--z-desc)"></span>19° y 20° · Descenso</div>
-      </div>
+      <div class="zone-legend" id="t4-e11-zonas" hidden></div>
       <div class="prox-wrap" id="t4-e11-prox">
         <div class="prox-badge">Temporada 4 · Espacio Gamer</div>
         <div class="prox-title">Próximamente</div>
@@ -587,7 +582,7 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="posiciones-share.js?v=4"></script>
+<script src="posiciones-share.js?v=5"></script>
 <script>
 /* page load */
 window.addEventListener('DOMContentLoaded', () => {
@@ -847,7 +842,7 @@ function renderTable(tableId, data, accentColor, zonas = []) {
       <td><strong class="td-pts">${t.pts}</strong></td>`;
     tbody.appendChild(tr);
   });
-  if (window.TSPos) TSPos.register(tableId, data);
+  if (window.TSPos) TSPos.register(tableId, data, zonas);
 }
 
 /* ── SEASON SWITCH ── */
@@ -963,11 +958,12 @@ async function fetchT4VPUG() {
 
 /* ── FETCH & RENDER T4 ESPACIO GAMER (ex 11x11) ── */
 // Reglamento de Challengers (Juan, 2026-10-28): 1° asciende directo, 2°–9° playoff, 17°–18° promoción, 19°–20° descienden
+// (también arma la leyenda de la página y la de la placa para compartir)
 const ZONAS_EG = [
-  { desde: 1,  hasta: 1,  color: 'var(--z-asc)' },
-  { desde: 2,  hasta: 9,  color: 'var(--z-po)' },
-  { desde: 17, hasta: 18, color: 'var(--z-promo)' },
-  { desde: 19, hasta: 20, color: 'var(--z-desc)' },
+  { desde: 1,  hasta: 1,  color: 'var(--z-asc)',   nombre: '1° · Ascenso directo' },
+  { desde: 2,  hasta: 9,  color: 'var(--z-po)',    nombre: '2° a 9° · Playoff' },
+  { desde: 17, hasta: 18, color: 'var(--z-promo)', nombre: '17° y 18° · Promoción' },
+  { desde: 19, hasta: 20, color: 'var(--z-desc)',  nombre: '19° y 20° · Descenso' },
 ];
 // Sin fallback hardcodeado: si la liga todavía no publicó equipos o el Worker falla, queda "Próximamente".
 async function fetchT4EG() {
@@ -979,7 +975,9 @@ async function fetchT4EG() {
     if (!data.length) throw new Error('empty');
     document.getElementById('t4-e11-prox').style.display = 'none';
     renderTable('t4-e11-table', data, 'var(--e11)', ZONAS_EG);
-    document.getElementById('t4-e11-zonas').hidden = false;
+    const ley = document.getElementById('t4-e11-zonas');
+    ley.innerHTML = ZONAS_EG.map(z => `<div class="zl-item"><span class="zone-dot" style="background:${z.color}"></span>${z.nombre}</div>`).join('');
+    ley.hidden = false;
     gsap.to('#t4-e11-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
   } catch(e) { /* queda el bloque Próximamente */ }
 }
