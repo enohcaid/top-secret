@@ -52,15 +52,17 @@ export function infoTema(ruta) {
 }
 export const creditoTexto = titulo => `Música: "${titulo}" — ${ARTISTA} (The Shorts) · topsecret.ar/music`;
 
-// Tarjeta "Sonando ahora" (rotulo-tema.js en la raíz, la misma que dibuja video-equipo.js en el navegador): cuadros
-// PNG transparentes del tamaño del video, a 30 fps, dibujados con Playwright; quedan en caché por tema y tamaño.
-// Devuelve los argumentos de entrada para ffmpeg; en el filtro: [video][N:v]overlay=eof_action=pass.
-export async function rotuloEntrada(ruta, ancho = 1080, alto = 1920) {
+// Tarjeta "Sonando ahora" (rotulo-tema.js en la raíz, la misma que dibuja video-equipo.js en el navegador): queda
+// todo el video en la franja de arriba. Cuadros PNG transparentes de esa franja (ancho del video), a 30 fps, dibujados
+// con Playwright; se guarda solo el último juego (tema + tamaño + duración) para re-renders del mismo video.
+// Devuelve los argumentos de entrada para ffmpeg; en el filtro: [video][N:v]overlay=0:0:eof_action=pass.
+export async function rotuloEntrada(ruta, ancho = 1080, alto = 1920, dur = 60) {
   const t = infoTema(ruta);
-  const dir = path.join(DIR, 'rotulos', `${t.slug}-${ancho}x${alto}`);
-  const patron = path.join(dir, '%03d.png');
+  const raiz = path.join(DIR, 'rotulos'), nombre = `${t.slug}-${ancho}x${alto}-${Math.round(dur * 10)}`;
+  const dir = path.join(raiz, nombre);
+  const patron = path.join(dir, '%04d.png');
   if (!fs.existsSync(path.join(dir, 'listo'))) {
-    fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
+    fs.rmSync(raiz, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
     const cat = JSON.parse(fs.readFileSync(LOCAL_ALBUMES, 'utf8'));
     const portada = cat.find(a => a.id === 'the-shorts' && a.volumen === t.volumen)?.portada;
     const { chromium } = await import('playwright');
@@ -70,18 +72,17 @@ export async function rotuloEntrada(ruta, ancho = 1080, alto = 1920) {
       await page.setContent(`<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600&family=Barlow+Condensed:wght@700;800&display=block" rel="stylesheet">
         <p style="font-family:'Barlow Condensed';font-weight:800">a</p><p style="font-family:'Barlow';font-weight:600">a</p>`, { waitUntil: 'networkidle' });
       await page.addScriptTag({ path: path.join(ROOT, 'rotulo-tema.js') });
-      const n = await page.evaluate(async ([W, H, tema, src]) => {
+      await page.evaluate(async ([W, H, dur, tema, src]) => {
         await document.fonts.ready;
-        await Promise.all(["800 56px 'Barlow Condensed'", "700 23px 'Barlow Condensed'", "600 31px 'Barlow'"].map(f => document.fonts.load(f)));
+        await Promise.all(["800 38px 'Barlow Condensed'", "700 18px 'Barlow Condensed'", "600 25px 'Barlow'"].map(f => document.fonts.load(f)));
         const img = new Image(); img.crossOrigin = 'anonymous';
         if (src) await new Promise(r => { img.onload = img.onerror = r; img.src = src; });
-        window._c = document.createElement('canvas'); _c.width = W; _c.height = H;
-        window._f = f => { const x = _c.getContext('2d'); x.clearRect(0, 0, W, H); TSRotuloTema.dibujar(x, W, H, f / 30, tema, img.width ? img : null); return _c.toDataURL('image/png'); };
-        return Math.ceil(TSRotuloTema.DUR * 30);
-      }, [ancho, alto, { titulo: t.titulo, artista: ARTISTA }, portada]);
-      for (let f = 0; f < n; f++) {
+        window._c = document.createElement('canvas'); _c.width = W; _c.height = TSRotuloTema.franja(W, H);
+        window._f = f => { const x = _c.getContext('2d'); x.clearRect(0, 0, _c.width, _c.height); TSRotuloTema.dibujar(x, W, H, f / 30, tema, img.width ? img : null, dur); return _c.toDataURL('image/png'); };
+      }, [ancho, alto, dur, { titulo: t.titulo, artista: ARTISTA }, portada]);
+      for (let f = 0; f < Math.ceil(dur * 30); f++) {
         const b64 = (await page.evaluate(f => _f(f), f)).split(',')[1];
-        fs.writeFileSync(path.join(dir, String(f).padStart(3, '0') + '.png'), Buffer.from(b64, 'base64'));
+        fs.writeFileSync(path.join(dir, String(f).padStart(4, '0') + '.png'), Buffer.from(b64, 'base64'));
       }
       fs.writeFileSync(path.join(dir, 'listo'), '');
     } finally { await browser.close(); }

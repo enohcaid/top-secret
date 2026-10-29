@@ -137,7 +137,7 @@
     estado('Cargando jugadores…', 2);
     await cargarScript(ESCENA_JS);
     if (!window.TSRotuloTema) await new Promise(r => {          // tarjeta "Sonando ahora" del tema (rotulo-tema.js)
-      const s = document.createElement('script'); s.src = 'rotulo-tema.js?v=1'; s.onload = s.onerror = r; document.head.appendChild(s);
+      const s = document.createElement('script'); s.src = 'rotulo-tema.js?v=2'; s.onload = s.onerror = r; document.head.appendChild(s);
     });
     const { Muxer, ArrayBufferTarget } = await import(MUXER);
 
@@ -170,7 +170,7 @@
       if (error) throw error;
       await escena.cuadro(f, { raw: true });
       if (out !== cv) out.getContext('2d').drawImage(cv, 0, 0, out.width, out.height);
-      if (pista && window.TSRotuloTema) TSRotuloTema.dibujar(out.getContext('2d'), out.width, out.height, f / 30, { titulo: tema.titulo, artista: 'Tacet Sin' }, tema.portada);
+      if (pista && window.TSRotuloTema) TSRotuloTema.dibujar(out.getContext('2d'), out.width, out.height, f / 30, { titulo: tema.titulo, artista: 'Tacet Sin' }, tema.portada, total / 30);
       const vf = new VideoFrame(out, { timestamp: Math.round(f * 1e6 / 30), duration: Math.round(1e6 / 30) });
       venc.encode(vf, { keyFrame: f % 60 === 0 });
       vf.close();

@@ -64,9 +64,9 @@ export async function video(plantilla, datos, salida, { escenas, gancho = 0, mus
   const total = gancho + escenas.reduce((s, e) => s + e.dur, 0);
   const args = ['-hide_banner', '-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-'];
   if (musica) {
-    // Con música, la tarjeta "Sonando ahora" del tema (Tacet Sin) en los primeros segundos (scripts/lib/musica.mjs)
-    args.push('-ss', musicaDesde.toFixed(3), '-i', musica, ...(await rotuloEntrada(musica, TAM.story.width, TAM.story.height)));
-    args.push('-filter_complex', `[0:v]${desenfoque ? 'tmix=frames=2:weights=1 1,fps=30' : 'null'}[b];[b][2:v]overlay=eof_action=pass[v]`, '-map', '[v]', '-map', '1:a');
+    // Con música, la tarjeta "Sonando ahora" del tema (Tacet Sin) arriba, todo el video (scripts/lib/musica.mjs)
+    args.push('-ss', musicaDesde.toFixed(3), '-i', musica, ...(await rotuloEntrada(musica, TAM.story.width, TAM.story.height, total)));
+    args.push('-filter_complex', `[0:v]${desenfoque ? 'tmix=frames=2:weights=1 1,fps=30' : 'null'}[b];[b][2:v]overlay=0:0:eof_action=pass[v]`, '-map', '[v]', '-map', '1:a');
   } else if (desenfoque) args.push('-vf', 'tmix=frames=2:weights=1 1,fps=30');
   args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', desenfoque ? '30' : String(fps));
   if (musica) args.push('-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:d=0.3,afade=t=out:st=${(total - 1.2).toFixed(2)}:d=1.2`, '-shortest');

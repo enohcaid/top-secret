@@ -142,8 +142,8 @@ if (!SIN_MUSICA) {
   const mp3 = path.basename(mp3Path), dirM = path.dirname(mp3Path);
   const dur = total / 30;
   // Tarjeta "Sonando ahora" del tema (scripts/lib/musica.mjs + rotulo-tema.js) sobre el video
-  execFileSync(ffmpegPath, ['-y', '-v', 'error', '-i', tmp, '-i', path.join(dirM, mp3), ...(await rotuloEntrada(mp3Path)),
-    '-filter_complex', `[1:a]atrim=0:${dur},afade=t=in:d=0.5,afade=t=out:st=${(dur - 2).toFixed(2)}:d=2,loudnorm=I=-14:TP=-1.5,aresample=48000[a];[2:v][0:v]scale2ref[r][b];[b][r]overlay=eof_action=pass[v]`,
+  execFileSync(ffmpegPath, ['-y', '-v', 'error', '-i', tmp, '-i', path.join(dirM, mp3), ...(await rotuloEntrada(mp3Path, 1080, 1920, dur)),
+    '-filter_complex', `[1:a]atrim=0:${dur},afade=t=in:d=0.5,afade=t=out:st=${(dur - 2).toFixed(2)}:d=2,loudnorm=I=-14:TP=-1.5,aresample=48000[a];[0:v][2:v]overlay=0:0:eof_action=pass[v]`,
     '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p',
     '-c:a', 'aac', '-b:a', '192k', '-shortest', OUT]);
   fs.rmSync(tmp);
