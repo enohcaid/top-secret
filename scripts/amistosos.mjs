@@ -11,7 +11,7 @@
  * Nombres mal escritos: scripts/lib/equipos-match.mjs + scripts/amistosos-alias.json. Cuando Juan corrige
  * un equipo ("A Chacarita"), el bot recuerda ese número de teléfono → equipo en fuentes/amistosos/aprendidos.json.
  *
- * Arranque (2026-10-21): la tarea lo lanza lun–jue a las 17:00. Si el calendario de hoy NO tiene partidos de liga
+ * Arranque (2026-10-21; desde 2026-10-29 a las 10:00): la tarea lo lanza lun–jue a las 10:00, dormido (atiende "+" y "estado"). Si el calendario de hoy NO tiene partidos de liga
  * (VPN/VPUG/Espacio Gamer), busca solo en automático; si tiene, queda dormido hasta "busca amistosos".
  * desactivado.json ("desactivar") = no arranca solo nunca, hasta "activar".
  *
@@ -95,7 +95,7 @@ try { process.kill(+fs.readFileSync(LOCK, 'utf8'), 0); console.log(horaArt(), 'y
 fs.writeFileSync(LOCK, String(process.pid));
 process.on('exit', () => { try { if (fs.readFileSync(LOCK, 'utf8') === String(process.pid)) fs.rmSync(LOCK); } catch {} });
 // Pausa por WhatsApp: "apagar" duerme el bot hasta las 22:00; "desactivar" además deja este archivo,
-// y mientras exista el bot arranca a las 17:00 dormido (conectado, sin buscar ni avisar) hasta "activar".
+// y mientras exista el bot arranca a las 10:00 dormido (conectado, sin buscar ni avisar) hasta "activar".
 const OFF_FILE = path.join(DIR, 'desactivado.json');
 // Arranca SIEMPRE dormido (Juan, 2026-10-21: "solo puede arrancar bajo mi comando"): busca únicamente cuando Juan manda
 // "busca amistosos", y solo si hoy NO hay partidos de liga en el calendario (si hay, no busca y le dice cuáles).
@@ -333,8 +333,8 @@ async function arrancarBusqueda(motivo = '') {
   if (!libre()) {
     log('todos los horarios de hoy ya están ocupados' + (PRUEBA ? ' — en prueba igual aviso los pedidos para ver la detección' : ''));
     if (!PRUEBA) {
-      await avisar(`🕵️ Hoy no hace falta buscar amistosos: los horarios ya están cubiertos.\n${SLOTS.map(s => `${s} ${st.confirmados[s]}`).join('\n')}`);
-      setTimeout(() => process.exit(0), 3000); return;
+      dormido = true;                                                    // sigue conectado para los "+"
+      return avisar(`🕵️ Hoy no hace falta buscar amistosos: los horarios ya están cubiertos.\n${SLOTS.map(s => `${s} ${st.confirmados[s]}`).join('\n')}`);
     }
   }
   await avisar(`${motivo ? motivo + '\n' : ''}🕵️ *Bot de amistosos ${+process.env.AMISTOSOS_REINICIO ? 'reiniciado' : 'activo'}*${PRUEBA ? ' (prueba)' : ''}${auto ? ' (automático)' : ''}\nHorarios: ${SLOTS.map(s => st.confirmados[s] ? `~${s}~ ${st.confirmados[s]}` : s).join(' · ')}\nTe aviso cada pedido del grupo con una letra. Respondé acá: *A* (ofrecer), *A 23:20*, *A no*, *A ok*, o *estado*. Si coordinaste uno vos: *+ 23:00 Equipo*.\nPara pararlo: *apagar* (por hoy) o *desactivar* (hasta que mandes *activar*).`);
@@ -590,7 +590,8 @@ async function confirmar(id, slot, rival = false) {
   }
   await avisar(`✅ *Amistoso confirmado*: Top Secret vs *${p.equipo.nombre}* a las *${p.slot}*.${ok ? ' Cargado en el calendario y la convocatoria.' : ' ⚠️ No pude cargarlo en el sitio: agregalo a mano (al rival no le contesté).'}${anotado}\nQuedan: ${SLOTS.filter(s => !st.confirmados[s]).join(', ') || 'ninguno 🎉'}`);
   await reacomodar();
-  if (SLOTS.every(s => st.confirmados[s])) { await avisar('🎉 Los 4 horarios están cubiertos. Apago el bot.'); setTimeout(() => process.exit(0), 3000); }
+  // Lleno: deja de buscar pero sigue conectado (el vigilante no relanza una salida 0 y Juan puede seguir mandando "+").
+  if (SLOTS.every(s => st.confirmados[s]) && !dormido) { dormido = true; await avisar('🎉 Los 4 horarios están cubiertos. Dejo de buscar (sigo atento a *+ hh:mm Equipo* y *estado*).'); }
 }
 
 async function respuestaPrivada(msg) {
@@ -736,8 +737,8 @@ async function comando(body) {
     dormido = true;
     log(siempre ? 'desactivado por WhatsApp' : 'apagado por hoy por WhatsApp');
     return avisar(siempre
-      ? '🕵️ *Bot de amistosos desactivado.* No arranca solo hasta que mandes *activar* (o *busca amistosos* para un día puntual; escucha lunes a jueves de 17:00 a 22:00).'
-      : '🕵️ *Bot de amistosos apagado por hoy.* Mañana arranca solo a las 17:00. Si querés que vuelva hoy, mandá *activar*.');
+      ? '🕵️ *Bot de amistosos desactivado.* No arranca solo hasta que mandes *activar* (o *busca amistosos* para un día puntual; escucha lunes a jueves de 10:00 a 23:45).'
+      : '🕵️ *Bot de amistosos apagado por hoy.* Sigo atento a *+ hh:mm Equipo*. Si querés que vuelva a buscar hoy, mandá *activar*.');
   }
   // "busca amistosos": arranca YA en automático por el resto del día (pedido de Juan, 2026-10-21)
   if (/^(busc[aá](r|me|nos)?|conseguime|conseguinos)\s+(amistosos?|rivales?)\b/i.test(body)) {
@@ -759,19 +760,17 @@ async function comando(body) {
   if (/^(activar|prender)$/i.test(body)) {
     const estaba = dormido || fs.existsSync(OFF_FILE);
     fs.rmSync(OFF_FILE, { force: true });
-    if (!dormido) return avisar(estaba ? '🕵️ Listo: vuelve a arrancar solo (lunes a jueves desde las 17:00, los días sin partidos de liga). Hoy ya estaba buscando.' : '🕵️ El bot ya está activo.');
+    if (!dormido) return avisar(estaba ? '🕵️ Listo: vuelve a arrancar solo (lunes a jueves desde las 10:00, los días sin partidos de liga). Hoy ya estaba buscando.' : '🕵️ El bot ya está activo.');
     dormido = false;
     log('activado por WhatsApp');
     return arrancarBusqueda();
   }
-  if (dormido) {
-    if (/^estado$/i.test(body)) return avisar(`🕵️ Bot ${fs.existsSync(OFF_FILE) ? 'desactivado' : 'apagado por hoy'}. Mandá *busca amistosos* para que busque en automático (o *activar* para el modo con tu aprobación).`);
-    return;
-  }
-  const m = body.match(/^([A-Z]{1,2}\d?)\b\s*(.*)$/i);
   // Amistoso que coordinó Juan por su cuenta: "+ 23:00 Chacarita" (o "agregar 23:00 Chacarita").
+  // Vale también con el bot dormido (Juan, 2026-10-29: cargar con el + en cualquier momento de 10 a 22;
+  // antes el dormido lo ignoraba sin avisar, p. ej. "+22:40 Villa Die" el 27/10).
   const man = body.match(/^(?:\+|agregar)\s*(\d{1,2})[:.](\d{2})\s+(.+)$/i);
   if (man) {
+    if (!EQUIPOS.length) await cargarEquipos();                       // dormido: todavía no se cargaron
     const hora = `${man[1].padStart(2, '0')}:${man[2]}`, txt = man[3].trim();
     const eq = equipoEscrito(txt);
     if (eq.dudoso) return avisar(`⚠️ ¿${eq.dudoso.join(' o ')}? Mandá el nombre más completo: *+ ${hora} <equipo>*.`);
@@ -786,6 +785,11 @@ async function comando(body) {
     save();
     return reacomodar();
   }
+  if (dormido) {
+    if (/^estado$/i.test(body)) return avisar(`🕵️ Bot ${fs.existsSync(OFF_FILE) ? 'desactivado' : 'en espera'}.${Object.keys(st.confirmados).length ? '\nHoy: ' + Object.entries(st.confirmados).sort().map(([s, n]) => `${s} ${n}`).join(' · ') : ''}\nCargá un amistoso con *+ 23:00 Equipo*, o mandá *busca amistosos* para que busque en automático (o *activar* para el modo con tu aprobación).`);
+    return;
+  }
+  const m = body.match(/^([A-Z]{1,2}\d?)\b\s*(.*)$/i);
   if (/^estado$/i.test(body)) {
     const lista = Object.entries(st.pedidos).filter(([, p]) => p.estado !== 'descartado').map(([id, p]) => `${id} ${p.equipo ? p.equipo.nombre : '?'} — ${p.estado}${p.slot ? ' ' + p.slot : ''}`);
     return avisar(`📋 Horarios: ${SLOTS.map(s => `${s} ${st.confirmados[s] ? '✅ ' + st.confirmados[s] : (ocupados().has(s) ? '⏳' : 'libre')}`).join(' · ')}\n${lista.join('\n') || 'Sin pedidos.'}`);
@@ -822,7 +826,7 @@ async function comando(body) {
   return ofrecer(id, hora, equipoTxt || null, true);
 }
 
-// Corte automático a las 22:00 ART (pedido de Juan 2026-10-13: la búsqueda es de 17 a 22).
+// Corte automático a las 22:00 ART (pedido de Juan 2026-10-13: la búsqueda termina a las 22; desde 2026-10-29 arranca a las 10).
 // Desde las 22:00 no toma pedidos nuevos del grupo, pero sigue atendiendo los comandos de Juan ("+23:40 Lizzard CF")
 // y las respuestas a ofertas abiertas hasta las 23:45 (2026-10-21: a las 22:06 Juan pasó un amistoso y el bot ya se había apagado).
 let cerrado = false;
