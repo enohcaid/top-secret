@@ -54,7 +54,28 @@ export async function espacioGamer() {
 }
 
 // Música de fondo del modo pausa: los temas propios del club (fuentes/musica/propios, de R2), lista para el overlay
+// Desde 2026-10-28 (Juan) suenan los temas con voz de Tacet Sin (catálogo público de topsecret.ar/music), bajados a
+// fuentes/musica/tacet-sin/; si el catálogo no responde, quedan las instrumentales propias de antes.
 export async function listaMusica(log = console.log) {
+  try {
+    const cat = await (await fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/catalogo.json', { signal: AbortSignal.timeout(20000) })).json();
+    const dir = path.resolve('fuentes/musica/tacet-sin');
+    fs.mkdirSync(dir, { recursive: true });
+    const temas = [];
+    for (const t of cat.temas.filter(x => x.voz)) {
+      const f = path.join(dir, t.slug + '.mp3');
+      if (!fs.existsSync(f)) {
+        const r = await fetch(t.voz, { signal: AbortSignal.timeout(120000) });
+        if (!r.ok) continue;
+        fs.writeFileSync(f, Buffer.from(await r.arrayBuffer()));
+      }
+      temas.push('../../fuentes/musica/tacet-sin/' + encodeURIComponent(t.slug + '.mp3'));
+    }
+    if (temas.length) {
+      fs.writeFileSync(path.resolve('fuentes/stream/musica.json'), JSON.stringify(temas));
+      return log(`Música del modo pausa: ${temas.length} temas de Tacet Sin.`);
+    }
+  } catch (e) { log('Catálogo de Tacet Sin no disponible, uso las instrumentales:', e.message.slice(0, 150)); }
   try {
     execFileSync(process.execPath, ['scripts/r2.mjs', 'sync-down', '_fuentes/musica/propios', 'fuentes/musica/propios'], { stdio: 'ignore', timeout: 300000 });
     const temas = fs.readdirSync('fuentes/musica/propios').filter(a => /[.]mp3$/i.test(a)).map(a => '../../fuentes/musica/propios/' + encodeURIComponent(a));
