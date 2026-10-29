@@ -222,11 +222,11 @@ const IMAGE_STYLES = [
   { id: 'RETRATO_EDITORIAL',
     label: 'Campaña — Retrato editorial',
     palette: 'gris carbón y negro, luz suave de ventana, piel natural, acento DORADO mínimo',
-    prompt: 'Retrato editorial de revista deportiva: plano medio cercano del jugador, mirada a cámara o tres cuartos, luz suave y natural, fondo liso desenfocado, textura real de la tela del kit.' },
+    prompt: 'Retrato editorial de revista deportiva en plano entero del grupo, mirada a cámara o tres cuartos, luz suave y natural, fondo liso desenfocado, textura real de la tela del kit.' },
   { id: 'ACCION_PARTIDO',
     label: 'Campaña — Acción en cancha',
     palette: 'verde del césped, cielo nocturno, luces de estadio; contraste alto, acento DORADO',
-    prompt: 'Foto de acción congelada en pleno partido: el jugador en movimiento (remate, carrera, festejo), teleobjetivo, fondo de estadio desenfocado, gotas de sudor y pasto levantado, nitidez total en el kit y la cara.' },
+    prompt: 'Foto de acción congelada en pleno partido: los jugadores en movimiento (remate, carrera, festejo), plano general a la altura de los ojos, fondo de estadio desenfocado, gotas de sudor y pasto levantado, nitidez total en el kit y la cara.' },
   { id: 'VESTUARIO',
     label: 'Campaña — Vestuario',
     palette: 'vestuario oscuro de madera y metal, luz cálida puntual, acento DORADO',
@@ -465,13 +465,14 @@ function selectFeaturedPlayers(allMentioned, featuredHistory, draft = {}) {
 // jugadores REALES con render adjunto (los que hace más que no salen; nunca arqueros, que irían de
 // naranja en un festejo de campo). Si el brief no pide compañeros, en la escena no hay nadie más.
 const MAX_TEAMMATES = 2;
+const FOTO_JUGADORES = 5;
 function selectTeammates(featured, featuredHistory, draft = {}, mentionedInNote = []) {
   const brief = (typeof draft.imageBrief === 'string' ? draft.imageBrief : '').toLowerCase();
-  if (!/plantel|compañer|companer|equipo|grupo|abraz|vestuario|todos/.test(brief)) return [];
+  // Juan, 2026-10-29: "siempre hay 5 jugadores en la foto" — se completa siempre hasta FOTO_JUGADORES.
   const lastFeatured = new Map();
   featuredHistory.forEach((e, i) => { if (!lastFeatured.has(e.player)) lastFeatured.set(e.player, i); });
   const recency = p => lastFeatured.has(p) ? lastFeatured.get(p) : Infinity;
-  const slots = Math.min(MAX_TEAMMATES, MAX_FEATURED_PLAYERS + MAX_TEAMMATES - featured.length);
+  const slots = Math.max(0, FOTO_JUGADORES - featured.length);
   // Primero los otros jugadores que nombra la nota; después, los que hace más que no salen.
   const pool = PLAYERS_WITH_RENDERS.filter(p => !featured.includes(p) && !GOALKEEPERS.includes(p));
   const inNote = pool.filter(p => mentionedInNote.includes(p));
@@ -691,6 +692,11 @@ ${brandFormatBlock()}
 ${scene}
 ⚠️ Esta escena sale de la noticia y MANDA: respetá el lugar, la acción, la emoción y cuántos jugadores aparecen. Tiene que ser una foto con VIDA — gente haciendo algo, expresiones reales, cuerpo en movimiento o en tensión — no una pose quieta de catálogo, salvo que la escena pida explícitamente un retrato.
 ${playerBlock}
+
+═══ REGLAS FIJAS DE LA FOTO (Juan, 2026-10-29) ═══
+- Aparecen EXACTAMENTE ${FOTO_JUGADORES} jugadores del club (los de la lista de arriba), ni más ni menos, todos enteros y reconocibles.
+- Encuadre fijo: plano general a plano entero, cámara a la altura de los ojos, toda la escena y los ${FOTO_JUGADORES} jugadores de cuerpo entero a la vista. PROHIBIDO el zoom, el primer plano, el plano detalle, el picado, el contrapicado, la vista aérea, el ángulo holandés o cualquier punto de vista inusual.
+- Pelota: UNA sola en toda la imagen, o ninguna. Jamás dos pelotas.
 
 ═══ LUZ Y TRATAMIENTO ═══
 Referencia de tratamiento fotográfico (${style.label}): ${style.prompt}

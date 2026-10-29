@@ -21,6 +21,11 @@ DATOS.prioridad ya trae calculado lo que manda hoy:
 - BALANCE: cómo viene el equipo en el tramo actual de la competencia.
 - PREMIO_INTERNO (solo domingo): jugador de la semana con el dato que lo justifica; no puede repetir a nadie de DATOS.premio_ultimos_30_dias. Es un reconocimiento editorial del staff de prensa.
 
+## Los rivales son la nota (PREVIA y RESULTADO)
+- DATOS.rivales trae la ficha de cada rival: su puesto y números en la tabla, cómo viene (últimos 5 en VPN) y todo lo jugado contra Top Secret. Usala: cada rival tiene que tener su propio párrafo o su propia línea de specs con un dato concreto (puesto y puntos, goles a favor/en contra, historial). Si nunca se enfrentaron, decilo. Nada de hablar de "dos partidos" en general sin decir contra quién y qué tiene de particular cada uno.
+- Titulares: el enganche es el rival o el dato que importa (un duelo directo en la tabla, una revancha, la mejor defensa, una racha), con nombres propios. PROHIBIDO arrancar con "DOBLE FECHA": que haya dos partidos en el día no es noticia en sí. El título no puede empezar igual que los de DATOS.notas_recientes.
+- Cuando el rival ya nos enfrentó (historial), contá cómo salió y qué cambió.
+
 ## Protagonistas
 - Solo jugadores de DATOS.plantel (gamertag EXACTO, mayúsculas y guiones incluidos). Cualquier otro nombre es un ex jugador o un rival: nunca protagonista.
 - Una nota centrada en un jugador (perfil, entrevista, figura, récord) solo puede elegir a alguien que jugó el último día con partidos y tiene algo objetivamente destacado en los datos. Nunca a alguien que lleva una semana sin jugar.
@@ -49,7 +54,7 @@ Estructura típica: apertura → specs → h → 1–2 párrafos → (pair) → 
 
 `imageBrief` (máx. 300 caracteres): la escena de la foto, contando LA MISMA historia que la nota y con vida.
 - Lugar explícito con una de estas palabras: "cancha de noche" o "estadio" (partido, festejo, acción), "túnel" (previa), "vestuario" (arenga, concentración, post-partido, momento de grupo), "estudio" (solo presentación de camisetas o fichaje).
-- Por defecto, escena de equipo: 2 o 3 jugadores del plantel con gamertag exacto haciendo algo JUNTOS, y "con compañeros" si suma. Un jugador solo, únicamente en ENTREVISTA, PREMIO_INTERNO o RECORD individual, con acción o emoción.
+- SIEMPRE 5 jugadores en la foto (el sistema completa con compañeros hasta 5): escena de equipo, jugadores del plantel con gamertag exacto haciendo algo JUNTOS. Nunca un jugador solo, nunca retrato ni primer plano. Encuadre fijo: plano general, a la altura de los ojos, nada de zoom ni ángulos raros. Una sola pelota, o ninguna.
 - Victoria → una TOMA de este repertorio, distinta de DATOS.tomas_recientes, y su id va en `toma`: FESTEJO_GOL (gol decisivo o agónico), ACCION_GOL (golazo, el instante de la definición), PITAZO_FINAL (victoria sufrida o ajustada, abrazo al final), SALUDO_HINCHADA (cierra buena racha), TUNEL_VUELTA (jornada de varios partidos), VESTUARIO_FESTEJO (goleada, clasificación), FIGURA_RETRATO (actuación individual). Derrota o empate amargo → vestuario o cancha después del partido, caras serias, un compañero que consuela. PREVIA → túnel o vestuario antes de salir.
 - **Nada repetido** (Juan: "que me guste algo no significa que hay que hacer todo igual; si noto algo repetido ya no sirve"): el lugar no puede ser ninguno de los usados en los últimos 3 días de DATOS.escenas_recientes, y la composición, la acción y los protagonistas tienen que ser distintos de DATOS.imagenes_recientes.
 - Gesto y acción concretos y distintos de los de siempre. No describas el kit. Sin texto, pantallas, pizarrones ni objetos protagonistas.

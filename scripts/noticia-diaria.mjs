@@ -23,6 +23,7 @@ import { pathToFileURL } from 'url';
 import { ROOT, loadEnv } from './lib/env.mjs';
 import { claude, ollama, guardarEjemplo } from './lib/ia.mjs';
 import { styleFromBrief } from './generate-image-chatgpt.mjs';
+import { buscarEquipo, norm } from './lib/equipos-match.mjs';
 
 loadEnv();
 const argv = process.argv.slice(2);
@@ -107,6 +108,27 @@ for (const c of custom.filter(c => c.date === AYER && oficial(c.league))) {
 const tablaEG = await intentar(async () => (await (await fetch(`${WORKER}/eg-table`, { signal: AbortSignal.timeout(30000) })).json())
   .map((t, i) => ({ pos: i + 1, equipo: t.name, pj: t.gp, g: t.w, e: t.d, p: t.l, gf: t.gf, gc: t.gc, pts: t.pts })));
 
+// Rivales: lo que la nota tiene que contar de cada uno (Juan, 2026-10-29: las notas salían todas "doble fecha en…" sin hablar de los
+// rivales ni usar lo que hay en las páginas). Fila de su tabla, cómo viene y todo lo que Top Secret jugó contra él.
+const tablaVPN = await intentar(async () => (await (await fetch(`${WORKER}/vpn-table`, { signal: AbortSignal.timeout(30000) })).json())
+  .map((t, i) => ({ nombre: (t.team?.name || '').trim(), pos: i + 1, pj: t.gp, g: t.gw, e: t.gt, p: t.gl, gf: t.gf, gc: t.gc, pts: t.pts,
+    ultimos: (t.matches || []).filter(m => m.gteam1 != null && m.gteam2 != null).slice(-5).map(m => (m.team1 === t.tid ? m.gteam1 - m.gteam2 : m.gteam2 - m.gteam1))
+      .map(d => d > 0 ? 'G' : d < 0 ? 'P' : 'E').join('') })), []);
+const tablaVPUG = await intentar(async () => (await (await fetch(`${WORKER}/vpug-table-t4`, { signal: AbortSignal.timeout(30000) })).json())
+  .map(t => ({ nombre: t.name, grupo: t.group || null, pj: t.gp, g: t.w, e: t.d, p: t.l, gf: t.gf, gc: t.gc, pts: t.pts })), []);
+const TABLAS = { 'Espacio Gamer': (tablaEG || []).map(t => ({ ...t, nombre: t.equipo })), VPN: tablaVPN, VPUG: tablaVPUG };
+function fichaRival(liga, rival) {
+  const eq = TABLAS[liga] || [];
+  const hit = eq.length ? buscarEquipo(rival, eq.map(t => ({ nombre: t.nombre }))) : null;
+  const fila = hit && !hit.dudoso && hit.score >= 0.8 ? eq.find(t => t.nombre === hit.nombre) : null;
+  const historial = SEED_MATCHES.filter(m => buscarEquipo(m.rival, [{ nombre: rival }])?.score >= 0.8)
+    .map(m => ({ fecha: m.date, liga: LIGA(m.league), resultado: String(m.match_result), notas: m.notes || null }));
+  return { rival, liga, en_la_tabla: fila ? { pos: fila.pos ?? eq.indexOf(fila) + 1, pj: fila.pj, g: fila.g, e: fila.e, p: fila.p, gf: fila.gf, gc: fila.gc, pts: fila.pts, ...(fila.grupo ? { grupo: fila.grupo } : {}), ...(fila.ultimos ? { ultimos_5: fila.ultimos } : {}) } : null,
+    historial_contra_top_secret: historial.length ? historial : 'nunca se enfrentaron' };
+}
+const vistos = new Set();
+const rivales = [...partidosHoy, ...jugadosRecientes, ...fixture.slice(0, 6)].filter(m => m.rival && !vistos.has(m.liga + m.rival) && vistos.add(m.liga + m.rival)).map(m => fichaRival(m.liga, m.rival));
+
 const conv = await intentar(() => leerDoc('convocatoria/state'), {});
 const coberturas = (await intentar(() => leerDoc('news/injury_cover_stories')))?.players || {};
 const bajas = Object.entries(conv.availability || {}).filter(([gt, a]) => PLANTEL.includes(gt) && ['black', 'red'].includes(a?.status)).map(([gt, a]) => {
@@ -152,6 +174,7 @@ const DATOS = {
   hoy: HOY, dia: dia(HOY),
   prioridad: { resultado_obligatorio: jugadosRecientes, partidos_hoy: partidosHoy, feriado: feriado(HOY), es_domingo: diaHoy === 0 },
   partidos_de_la_temporada: partidos, proximos_partidos: fixture,
+  rivales,   // ficha de cada rival de hoy / de ayer / de lo que viene: USARLA, la nota es sobre ellos
   tabla_espacio_gamer: tablaEG,
   plantel: ROSTER_T4.map(r => ({ gt: r.key, dorsal: r.num, puesto: r.posn })),
   bajas: bajas.map(({ realKey, ...b }) => b), reclutas, eventos_ultimos_7_dias: eventos,
@@ -217,6 +240,15 @@ function controlar(n) {
   const usados = estilos.filter(e => e.date >= sumar(HOY, -3) && e.date < HOY).map(e => e.style);
   if (estiloHoy && usados.includes(estiloHoy)) err.push(`la foto vuelve a ser en ${LUGAR[estiloHoy] || estiloHoy}, que ya se usó en los últimos 3 días (${[...new Set(usados.map(u => LUGAR[u] || u))].join(', ')}): elegí otro lugar y otra composición`);
   if (n.toma && DATOS.tomas_recientes.includes(n.toma)) err.push(`toma "${n.toma}" repetida (recientes: ${DATOS.tomas_recientes.join(', ')})`);
+  const ini = t => plano(t).toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ0-9 ]/g, '').split(/\s+/).slice(0, 3).join(' ');
+  const parecido = topicos.slice(0, 5).find(t => t.date < HOY && ini(t.title) === ini(n.title));
+  if (parecido) err.push(`el título empieza igual que el de ${parecido.date} ("${parecido.title}"): buscá otro enganche, con el rival y el dato que importa, sin "DOBLE FECHA"`);
+  if (/^doble fecha/i.test(plano(n.title))) err.push('el título no puede arrancar con "DOBLE FECHA": ya se usó demasiado');
+  if (['PREVIA', 'RESULTADO'].includes(n.angulo)) {
+    const objetivo = (n.angulo === 'PREVIA' ? partidosHoy : jugadosRecientes).map(m => m.rival);
+    const sinRival = objetivo.filter(r => { const w = norm(r).split(' ').filter(x => x.length > 2 && !['esports', 'esp'].includes(x)); return !w.some(x => norm(todo).includes(x)); });
+    if (sinRival.length) err.push(`la nota no habla de: ${sinRival.join(', ')}. Cada rival lleva su dato (puesto, puntos, cómo viene, historial contra Top Secret) de DATOS.rivales`);
+  }
   if (String(n.shareCaption).length > 280) err.push('shareCaption de más de 280 caracteres');
   if (jugadosRecientes.length && n.angulo !== 'RESULTADO') err.push('ayer hubo partidos oficiales: la nota tiene que ser RESULTADO');
   if (!jugadosRecientes.length && partidosHoy.length && n.angulo !== 'PREVIA') err.push('hoy hay partido: la nota tiene que ser PREVIA');
