@@ -5,13 +5,13 @@
 // Rotación (Juan, 2026-10-28): los temas se pueden repetir, pero nunca uno de los últimos NO_REPETIR videos; entre los
 // que quedan, el que hace más que no suena (o nunca sonó). Registro versionado en scripts/musica-usada.json
 // (`historial`; `usados`/`fijos` son de la regla vieja de "un tema por video, nunca repetido" y quedan como archivo).
-// Cada video dice qué tema suena: rótulo en pantalla (filtroRotulo) + línea en el texto de cada publicación
+// Cada video dice qué tema suena: tarjeta "Sonando ahora" en pantalla (rotuloEntrada) + línea en el texto de cada publicación
 // (creditoTexto, lo agrega agregarLote de scripts/social/lib/aprobaciones.mjs).
 //
 //   elegirMusica('id-del-video', { preferida: 'Cold Hands' })  → ruta del mp3 (y lo anota en el historial)
 //   - Si ese video ya tiene tema asignado, devuelve el mismo (re-renders del mismo video).
 //   - 'preferida' busca en título o slug, sin distinguir mayúsculas; puede ser uno usado hace poco (lo pidió alguien).
-//   infoTema(ruta) → { slug, titulo, volumen } · creditoTexto(titulo) · filtroRotulo(ruta) (drawtext de ffmpeg)
+//   infoTema(ruta) → { slug, titulo, volumen } · creditoTexto(titulo) · rotuloEntrada(ruta, ancho, alto) (tarjeta animada)
 import fs from 'fs';
 import path from 'path';
 
@@ -20,6 +20,7 @@ const REG = path.join(ROOT, 'scripts/musica-usada.json');
 const DIR = path.join(ROOT, 'fuentes/musica/tacet-sin');
 const CATALOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/catalogo.json';
 const LOCAL = path.join(DIR, 'catalogo.json');
+const LOCAL_ALBUMES = path.join(DIR, 'albumes.json');
 const NO_REPETIR = 8;
 export const ARTISTA = 'Tacet Sin';
 
@@ -37,6 +38,7 @@ export async function bajarTheShorts() {
       if (r.ok) fs.writeFileSync(f, Buffer.from(await r.arrayBuffer()));
     }
     fs.writeFileSync(LOCAL, JSON.stringify(temas, null, 1));
+    fs.writeFileSync(LOCAL_ALBUMES, JSON.stringify(cat.albumes || [], null, 1));
   } catch (e) { if (!fs.existsSync(LOCAL)) throw new Error('No pude bajar el catálogo de The Shorts: ' + e.message); }
   return lista();
 }
@@ -50,16 +52,41 @@ export function infoTema(ruta) {
 }
 export const creditoTexto = titulo => `Música: "${titulo}" — ${ARTISTA} (The Shorts) · topsecret.ar/music`;
 
-// Rótulo "MÚSICA · TACET SIN — Título" arriba a la izquierda, del segundo 0,6 al 5,5 con fundidos (fuera de la zona
-// que tapan los botones de Reels/TikTok). Para la cadena -vf de ffmpeg (escala con el ancho del video).
-export function filtroRotulo(ruta) {
+// Tarjeta "Sonando ahora" (rotulo-tema.js en la raíz, la misma que dibuja video-equipo.js en el navegador): cuadros
+// PNG transparentes del tamaño del video, a 30 fps, dibujados con Playwright; quedan en caché por tema y tamaño.
+// Devuelve los argumentos de entrada para ffmpeg; en el filtro: [video][N:v]overlay=eof_action=pass.
+export async function rotuloEntrada(ruta, ancho = 1080, alto = 1920) {
   const t = infoTema(ruta);
-  const txt = path.join(DIR, `rotulo-${t.slug}.txt`);
-  fs.writeFileSync(txt, `MÚSICA · ${ARTISTA.toUpperCase()} — ${t.titulo}`);
-  const esc = p => p.replace(/\\/g, '/').replace(/:/g, '\\:');
-  const a = `if(lt(t,0.6),0,if(lt(t,1.1),(t-0.6)/0.5,if(lt(t,5),1,if(lt(t,5.5),(5.5-t)/0.5,0))))`;
-  return `drawtext=fontfile='${esc('C:/Windows/Fonts/bahnschrift.ttf')}':textfile='${esc(txt)}':fontsize=w*0.03:fontcolor=white`
-    + `:box=1:boxcolor=black@0.45:boxborderw=w*0.012:x=w*0.06:y=h*0.11:alpha='${a}'`;
+  const dir = path.join(DIR, 'rotulos', `${t.slug}-${ancho}x${alto}`);
+  const patron = path.join(dir, '%03d.png');
+  if (!fs.existsSync(path.join(dir, 'listo'))) {
+    fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
+    const cat = JSON.parse(fs.readFileSync(LOCAL_ALBUMES, 'utf8'));
+    const portada = cat.find(a => a.id === 'the-shorts' && a.volumen === t.volumen)?.portada;
+    const { chromium } = await import('playwright');
+    const browser = await chromium.launch();
+    try {
+      const page = await browser.newPage();
+      await page.setContent(`<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600&family=Barlow+Condensed:wght@700;800&display=block" rel="stylesheet">
+        <p style="font-family:'Barlow Condensed';font-weight:800">a</p><p style="font-family:'Barlow';font-weight:600">a</p>`, { waitUntil: 'networkidle' });
+      await page.addScriptTag({ path: path.join(ROOT, 'rotulo-tema.js') });
+      const n = await page.evaluate(async ([W, H, tema, src]) => {
+        await document.fonts.ready;
+        await Promise.all(["800 56px 'Barlow Condensed'", "700 23px 'Barlow Condensed'", "600 31px 'Barlow'"].map(f => document.fonts.load(f)));
+        const img = new Image(); img.crossOrigin = 'anonymous';
+        if (src) await new Promise(r => { img.onload = img.onerror = r; img.src = src; });
+        window._c = document.createElement('canvas'); _c.width = W; _c.height = H;
+        window._f = f => { const x = _c.getContext('2d'); x.clearRect(0, 0, W, H); TSRotuloTema.dibujar(x, W, H, f / 30, tema, img.width ? img : null); return _c.toDataURL('image/png'); };
+        return Math.ceil(TSRotuloTema.DUR * 30);
+      }, [ancho, alto, { titulo: t.titulo, artista: ARTISTA }, portada]);
+      for (let f = 0; f < n; f++) {
+        const b64 = (await page.evaluate(f => _f(f), f)).split(',')[1];
+        fs.writeFileSync(path.join(dir, String(f).padStart(3, '0') + '.png'), Buffer.from(b64, 'base64'));
+      }
+      fs.writeFileSync(path.join(dir, 'listo'), '');
+    } finally { await browser.close(); }
+  }
+  return ['-framerate', '30', '-start_number', '0', '-i', patron];
 }
 
 export async function elegirMusica(video, { preferida = null } = {}) {

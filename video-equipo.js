@@ -103,21 +103,16 @@
     const pool = libres.length ? libres : temas;
     const t = pool[Math.floor(Math.random() * pool.length)];
     try { localStorage.setItem('ts_ve_temas', JSON.stringify([...recientes, t.slug].slice(-8))); } catch (_) {}
+    // Portada del volumen para la tarjeta "Sonando ahora" (rotulo-tema.js)
+    const src = (cat.albumes || []).find(a => a.id === 'the-shorts' && a.volumen === t.volumen)?.portada;
+    if (src) {
+      const img = new Image(); img.crossOrigin = 'anonymous';
+      await new Promise(r => { img.onload = img.onerror = r; img.src = src; });
+      if (img.width) t.portada = img;
+    }
     return t;
   }
   const creditoTexto = t => `Música: "${t.titulo}" — Tacet Sin (The Shorts) · topsecret.ar/music`;
-  // Rótulo del tema arriba a la izquierda, del segundo 0,6 al 5,5 con fundidos (igual que scripts/lib/musica.mjs)
-  function rotulo(ctx, w, h, seg, tema) {
-    const a = seg < 0.6 ? 0 : seg < 1.1 ? (seg - 0.6) / 0.5 : seg < 5 ? 1 : seg < 5.5 ? (5.5 - seg) / 0.5 : 0;
-    if (!a) return;
-    const txt = `MÚSICA · TACET SIN — ${tema.titulo}`, fs = Math.round(w * 0.03), pad = Math.round(w * 0.012);
-    ctx.save(); ctx.globalAlpha = a;
-    ctx.font = `600 ${fs}px 'Barlow Condensed', 'Barlow', sans-serif`; ctx.textBaseline = 'top';
-    const x = w * 0.06, y = h * 0.11, ancho = ctx.measureText(txt).width;
-    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x - pad, y - pad, ancho + pad * 2, fs * 1.2 + pad * 2);
-    ctx.fillStyle = '#fff'; ctx.fillText(txt, x, y);
-    ctx.restore();
-  }
 
   async function musica(durS, tema) {
     if (!window.AudioEncoder || !tema) return null;
@@ -141,6 +136,9 @@
     if (!cfg.items.length) { showToast('Primero armá el equipo en la cancha', 'info'); return null; }
     estado('Cargando jugadores…', 2);
     await cargarScript(ESCENA_JS);
+    if (!window.TSRotuloTema) await new Promise(r => {          // tarjeta "Sonando ahora" del tema (rotulo-tema.js)
+      const s = document.createElement('script'); s.src = 'rotulo-tema.js?v=1'; s.onload = s.onerror = r; document.head.appendChild(s);
+    });
     const { Muxer, ArrayBufferTarget } = await import(MUXER);
 
     const cv = document.createElement('canvas'); cv.width = 1080; cv.height = 1920;
@@ -172,7 +170,7 @@
       if (error) throw error;
       await escena.cuadro(f, { raw: true });
       if (out !== cv) out.getContext('2d').drawImage(cv, 0, 0, out.width, out.height);
-      if (pista) rotulo(out.getContext('2d'), out.width, out.height, f / 30, tema);
+      if (pista && window.TSRotuloTema) TSRotuloTema.dibujar(out.getContext('2d'), out.width, out.height, f / 30, { titulo: tema.titulo, artista: 'Tacet Sin' }, tema.portada);
       const vf = new VideoFrame(out, { timestamp: Math.round(f * 1e6 / 30), duration: Math.round(1e6 / 30) });
       venc.encode(vf, { keyFrame: f % 60 === 0 });
       vf.close();

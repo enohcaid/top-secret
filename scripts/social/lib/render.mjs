@@ -8,7 +8,7 @@ import { pathToFileURL } from 'url';
 import { chromium } from 'playwright';
 import ffmpeg from 'ffmpeg-static';
 import { ROOT } from '../../lib/env.mjs';
-import { filtroRotulo } from '../../lib/musica.mjs';
+import { rotuloEntrada } from '../../lib/musica.mjs';
 
 const TAM = { post: { width: 1080, height: 1350 }, story: { width: 1080, height: 1920 } };
 export const archivo = f => pathToFileURL(f).href;   // rutas locales → file:// para la plantilla
@@ -63,10 +63,11 @@ export async function video(plantilla, datos, salida, { escenas, gancho = 0, mus
   const { browser, page } = await abrir(plantilla, 'story', datos);
   const total = gancho + escenas.reduce((s, e) => s + e.dur, 0);
   const args = ['-hide_banner', '-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-'];
-  if (musica) args.push('-ss', musicaDesde.toFixed(3), '-i', musica);
-  // Con música, el rótulo del tema (Tacet Sin — título) en los primeros segundos (scripts/lib/musica.mjs)
-  const vf = [desenfoque && 'tmix=frames=2:weights=1 1,fps=30', musica && filtroRotulo(musica)].filter(Boolean);
-  if (vf.length) args.push('-vf', vf.join(','));
+  if (musica) {
+    // Con música, la tarjeta "Sonando ahora" del tema (Tacet Sin) en los primeros segundos (scripts/lib/musica.mjs)
+    args.push('-ss', musicaDesde.toFixed(3), '-i', musica, ...(await rotuloEntrada(musica, TAM.story.width, TAM.story.height)));
+    args.push('-filter_complex', `[0:v]${desenfoque ? 'tmix=frames=2:weights=1 1,fps=30' : 'null'}[b];[b][2:v]overlay=eof_action=pass[v]`, '-map', '[v]', '-map', '1:a');
+  } else if (desenfoque) args.push('-vf', 'tmix=frames=2:weights=1 1,fps=30');
   args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', desenfoque ? '30' : String(fps));
   if (musica) args.push('-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:d=0.3,afade=t=out:st=${(total - 1.2).toFixed(2)}:d=1.2`, '-shortest');
   args.push('-movflags', '+faststart', salida);
