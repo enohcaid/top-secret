@@ -226,7 +226,7 @@ const IMAGE_STYLES = [
   { id: 'ACCION_PARTIDO',
     label: 'Campaña — Acción en cancha',
     palette: 'verde del césped, cielo nocturno, luces de estadio; contraste alto, acento DORADO',
-    prompt: 'Foto de acción congelada en pleno partido: los jugadores en movimiento (remate, carrera, festejo), plano general a la altura de los ojos, fondo de estadio desenfocado, gotas de sudor y pasto levantado, nitidez total en el kit y la cara.' },
+    prompt: 'Foto congelada en la cancha: los jugadores haciendo EXACTAMENTE lo que dice la escena (no inventes remates, carreras ni pelotas que la escena no pida), plano general a la altura de los ojos, fondo de estadio desenfocado, nitidez total en el kit y la cara.' },
   { id: 'VESTUARIO',
     label: 'Campaña — Vestuario',
     palette: 'vestuario oscuro de madera y metal, luz cálida puntual, acento DORADO',

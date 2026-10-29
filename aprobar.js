@@ -252,6 +252,7 @@
     { id: 'aprobar', nombre: 'Para aprobar' },
     { id: 'programadas', nombre: 'Programadas' },
     { id: 'publicadas', nombre: 'Publicadas' },
+    { id: 'demos', nombre: 'Demos' },   // las canciones de Tacet Sin, aparte de las piezas de redes (Juan, 2026-10-29)
   ];
   let pestana = (() => { try { return localStorage.getItem('ts_aprobar_tab2') || 'aprobar'; } catch { return 'aprobar'; } })();
   const cuando = l => Date.parse(l.publicarA || l.creado);
@@ -262,23 +263,27 @@
     const por = { aprobar: [], programadas: [], publicadas: [] };
     lotes.forEach(l => { const e = estadoLote(l); if (e) por[e].push(l); });
     if (!PESTANAS.some(x => x.id === pestana)) pestana = 'aprobar';
-    const badge = { aprobar: por.aprobar.reduce((s, l) => s + sinDecidir(l), 0), programadas: por.programadas.filter(l => l.etapa !== 'guion').length, publicadas: 0 };
+    const esMus = l => l.etapa === 'musica';
+    const badge = { aprobar: por.aprobar.filter(l => !esMus(l)).reduce((s, l) => s + sinDecidir(l), 0), programadas: por.programadas.filter(l => l.etapa !== 'guion' && !esMus(l)).length, publicadas: 0,
+      demos: por.aprobar.filter(esMus).reduce((s, l) => s + sinDecidir(l), 0) };
     const tabs = `<nav class="tabs">${PESTANAS.map(x => `<button class="tab ${x.id === pestana ? 'on' : ''}" data-tab="${x.id}">${x.nombre}${badge[x.id] ? `<i>${badge[x.id]}</i>` : ''}</button>`).join('')}</nav>`;
     let cuerpo;
     if (pestana === 'aprobar') {
-      const mus = por.aprobar.filter(l => l.etapa === 'musica');
       const g = por.aprobar.filter(l => l.etapa === 'guion'), resto = por.aprobar.filter(l => l.etapa !== 'guion' && l.etapa !== 'musica').sort((a, b) => cuando(a) - cuando(b));
-      cuerpo = (mus.length ? bloque('Música', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, se publica en /music.', mus, '') : '')
-        + (g.length ? bloque('Ideas para la próxima semana', 'Primero se aprueba la idea; después se produce y vuelve acá para el visto bueno final.', g, '') : '')
+      cuerpo = (g.length ? bloque('Ideas para la próxima semana', 'Primero se aprueba la idea; después se produce y vuelve acá para el visto bueno final.', g, '') : '')
         + bloque('Visto bueno final', 'Piezas ya producidas: revisalas, corregí el texto si hace falta y aprobalas.', resto, g.length ? 'No hay piezas producidas esperando.' : 'Nada para aprobar por ahora.');
     } else if (pestana === 'programadas') {
-      const listas = por.programadas.filter(l => l.etapa !== 'guion' && l.etapa !== 'musica').sort((a, b) => cuando(a) - cuando(b));
+      const listas = por.programadas.filter(l => l.etapa !== 'guion' && !esMus(l)).sort((a, b) => cuando(a) - cuando(b));
       const prod = por.programadas.filter(l => l.etapa === 'guion');
-      const mus = por.programadas.filter(l => l.etapa === 'musica');
-      cuerpo = (mus.length ? bloque('Música en revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Para aprobar".', mus, '') : '') + bloque('Por publicarse', 'Aprobado y con hora: sale solo. Hasta que salga, todavía podés corregir el texto o descartarlo.', listas, 'No hay nada programado.')
+      cuerpo = bloque('Por publicarse', 'Aprobado y con hora: sale solo. Hasta que salga, todavía podés corregir el texto o descartarlo.', listas, 'No hay nada programado.')
         + (prod.length ? bloque('Ideas aprobadas, en producción', 'Se están produciendo; cuando estén listas vuelven a "Para aprobar".', prod, '') : '');
+    } else if (pestana === 'demos') {
+      const m = e => por[e].filter(esMus);
+      cuerpo = bloque('Demos para escuchar', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, se publica en /music.', m('aprobar'), 'No hay demos esperando.')
+        + (m('programadas').length ? bloque('En revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Demos para escuchar".', m('programadas'), '') : '')
+        + (m('publicadas').length ? bloque('Publicadas', 'Lo que salió en los últimos 7 días.', m('publicadas'), '') : '');
     } else {
-      cuerpo = bloque('Publicadas', 'Lo que salió en los últimos 7 días.', por.publicadas.sort((a, b) => cuando(b) - cuando(a)), 'Nada publicado en los últimos días.');
+      cuerpo = bloque('Publicadas', 'Lo que salió en los últimos 7 días.', por.publicadas.filter(l => !esMus(l)).sort((a, b) => cuando(b) - cuando(a)), 'Nada publicado en los últimos días.');
     }
     // Redibujar sin perder la posición de cada fila horizontal.
     const scroll = {};
