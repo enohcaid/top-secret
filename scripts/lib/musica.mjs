@@ -42,8 +42,11 @@ export async function bajarTheShorts() {
   } catch (e) { if (!fs.existsSync(LOCAL)) throw new Error('No pude bajar el catálogo de The Shorts: ' + e.message); }
   return lista();
 }
-const lista = () => JSON.parse(fs.readFileSync(LOCAL, 'utf8'))
-  .map(t => ({ ...t, ruta: path.join(DIR, t.slug + '.mp3') })).filter(t => fs.existsSync(t.ruta));
+const lista = () => {
+  let albumes = []; try { albumes = JSON.parse(fs.readFileSync(LOCAL_ALBUMES, 'utf8')); } catch {}
+  return JSON.parse(fs.readFileSync(LOCAL, 'utf8')).map(t => ({ ...t, ruta: path.join(DIR, t.slug + '.mp3'),
+    portada: albumes.find(a => a.id === 'the-shorts' && a.volumen === t.volumen)?.portada || null })).filter(t => fs.existsSync(t.ruta));
+};
 
 export function infoTema(ruta) {
   const slug = path.basename(ruta).replace(/\.\w+$/, '');

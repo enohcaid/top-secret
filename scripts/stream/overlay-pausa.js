@@ -208,10 +208,38 @@
   }
 
   // Música de fondo (solo la horizontal)
-  const audio = new Audio(); let temas = [], nTema = 0, fundido = null;
-  if (!VERTICAL) fetch(MUSICA + '?' + Date.now()).then(r => r.json()).then(l => { temas = mezclar(l); if (activo && !audio.src) tocar(); }).catch(() => {});   // si ya arrancó en pausa (recarga en plena pausa)
+  const audio = new Audio(); let temas = [], nTema = 0, fundido = null, temaActual = null;
+  // musica.json: [{ src, titulo, portada }] (temas de The Shorts, datos-vivo.mjs); antes, solo rutas
+  if (!VERTICAL) fetch(MUSICA + '?' + Date.now()).then(r => r.json()).then(l => { temas = mezclar(l.map(x => typeof x === 'string' ? { src: x } : x)); if (activo && !audio.src) tocar(); }).catch(() => {});   // si ya arrancó en pausa (recarga en plena pausa)
   audio.onended = () => { nTema++; tocar(); };
-  function tocar() { if (!temas.length) return; audio.src = temas[nTema % temas.length]; audio.volume = 0; audio.play().then(() => fundir(VOL)).catch(() => {}); }
+  function tocar() { if (!temas.length) return; temaActual = temas[nTema % temas.length]; audio.src = temaActual.src; audio.volume = 0; audio.play().then(() => fundir(VOL)).catch(() => {}); }
+
+  // Tarjeta "Sonando ahora" (Juan, 2026-10-28): qué tema de Tacet Sin suena, mientras suena. La horizontal (la única que
+  // reproduce) deja el tema en localStorage, que comparten las fuentes de navegador de OBS, y la vertical lo lee.
+  const CLAVE_TEMA = 'ts_tema_vivo';
+  const tc = document.createElement('canvas'); tc.id = 'pTema'; raiz.appendChild(tc);
+  const portadas = {}; let avisado = 0;
+  function portadaDe(src) {
+    if (!src) return null;
+    if (!portadas[src]) { const i = new Image(); i.crossOrigin = 'anonymous'; i.src = src; portadas[src] = i; }
+    return portadas[src].complete && portadas[src].naturalWidth ? portadas[src] : null;
+  }
+  function avisarTema() {
+    const t = temaActual && !audio.paused && audio.volume > 0 && temaActual.titulo
+      ? { titulo: temaActual.titulo, portada: temaActual.portada || null, inicio: Date.now() - audio.currentTime * 1000, dur: audio.duration || 0 } : null;
+    if (Date.now() - avisado > 500) { avisado = Date.now(); try { localStorage.setItem(CLAVE_TEMA, JSON.stringify(t)); } catch (_) {} }
+    return t;
+  }
+  function pintarTema() {
+    let t = null;
+    if (VERTICAL) { try { t = JSON.parse(localStorage.getItem(CLAVE_TEMA) || 'null'); } catch (_) {} }
+    else t = avisarTema();
+    if (window.TSRotuloTema && !tc.width) { tc.width = 1080; tc.height = TSRotuloTema.franja(1080, 1920); }
+    const ctx = tc.getContext('2d'); ctx.clearRect(0, 0, tc.width, tc.height);
+    if (t && activo && window.TSRotuloTema) TSRotuloTema.dibujar(ctx, 1080, 1920, (Date.now() - t.inicio) / 1000, { titulo: t.titulo, artista: 'Tacet Sin' }, portadaDe(t.portada), t.dur);
+    requestAnimationFrame(pintarTema);
+  }
+  tc.width = 0; requestAnimationFrame(pintarTema);
   function fundir(objetivo, fin) {
     clearInterval(fundido);
     fundido = setInterval(() => { const v = audio.volume + (objetivo > audio.volume ? 0.02 : -0.02);

@@ -57,7 +57,8 @@ export async function espacioGamer() {
 // biblioteca que los videos (scripts/lib/musica.mjs, bajados a fuentes/musica/tacet-sin/). Lista para el overlay.
 export async function listaMusica(log = console.log) {
   try {
-    const temas = (await bajarTheShorts()).map(t => '../../fuentes/musica/tacet-sin/' + encodeURIComponent(t.slug + '.mp3'));
+    // Con título y portada: el overlay muestra la tarjeta "Sonando ahora" (rotulo-tema.js) mientras suena
+    const temas = (await bajarTheShorts()).map(t => ({ src: '../../fuentes/musica/tacet-sin/' + encodeURIComponent(t.slug + '.mp3'), titulo: t.titulo, portada: t.portada }));
     if (!temas.length) throw new Error('no hay temas bajados');
     fs.writeFileSync(path.resolve('fuentes/stream/musica.json'), JSON.stringify(temas));
     log(`Música del modo pausa: ${temas.length} temas de The Shorts.`);

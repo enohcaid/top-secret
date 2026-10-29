@@ -14,6 +14,9 @@ body.en-pausa #pausa{opacity:1}
 #pausa .chip .v{font-weight:800;font-size:26px;margin-top:4px;white-space:nowrap}
 
 #pausa .escena{position:absolute;inset:0;opacity:0;transition:opacity .5s ease}
+/* Tarjeta "Sonando ahora" del tema de Tacet Sin (rotulo-tema.js): fila de arriba, entre el nombre del club y el chip */
+#pTema{position:absolute;left:490px;top:14px;width:864px;pointer-events:none;z-index:50}
+body.vertical #pTema{left:14px;top:106px;width:972px}
 #pausa .escena.on{opacity:1}
 /* Jugadores: el clip (720×586) con su placa abajo */
 #pausa .pj{position:absolute;bottom:40px;width:1000px;height:910px}
