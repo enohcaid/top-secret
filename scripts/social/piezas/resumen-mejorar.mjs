@@ -38,7 +38,7 @@ console.log('Video con motion + clip IA…');
 const GANCHO = 1.6;
 const clipHero = fs.existsSync(path.join(dir, 'hero.mp4')) ? cuadros(path.join(dir, 'hero.mp4')) : null;
 const plantillaVideo = { ...pieza.plantilla, hero: null, heroClip: clipHero ? { dir: archivo(clipHero.dir), n: clipHero.n, gancho: GANCHO, vel: 0.8 } : null };
-const musica = elegirMusica(id);
+const musica = await elegirMusica(id);
 const tema = dropDelTema(musica) || { drop: 0 };
 const mp4 = path.join(dir, `${id}.mp4`);
 await video('semana.html', plantillaVideo, mp4, { escenas: semana.ESCENAS_VIDEO, gancho: GANCHO, musica, fps: 60, desenfoque: true, musicaDesde: Math.max(0, tema.drop - GANCHO) });

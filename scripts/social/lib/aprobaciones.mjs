@@ -1,6 +1,7 @@
 // Lotes de aprobación (KV `aprobaciones` del Worker, el mismo que lee aprobar.html). La PC los escribe por la
 // API de Cloudflare (credenciales del .env); la página solo cambia decisión y texto vía el Worker.
 import { need } from '../../lib/env.mjs';
+import { creditoTexto } from '../../lib/musica.mjs';
 
 const KV = k => `https://api.cloudflare.com/client/v4/accounts/${need('CF_ACCOUNT_ID')}/storage/kv/namespaces/${need('KV_NAMESPACE_ID')}/values/${k}`;
 const AUTH = () => ({ 'X-Auth-Email': need('CF_EMAIL'), 'X-Auth-Key': need('CF_API_KEY') });
@@ -21,7 +22,11 @@ export const leer = () => leerKV('aprobaciones', { lotes: [] });
 
 // Agrega (o reemplaza, si ya existe con ese id) un lote. Se guardan como mucho los últimos 40 (con 15 se caían
 // lotes programados todavía sin publicar cuando entraban varias piezas juntas, 2026-10-15).
+// Cada publicación con música dice qué tema suena (Juan, 2026-10-28): `musica` = título del tema de The Shorts.
 export async function agregarLote(lote) {
+  for (const p of lote.piezas || []) {
+    if (p.musica && typeof p.texto === 'string' && !p.texto.includes(p.musica)) p.texto = `${p.texto.trimEnd()}\n\n${creditoTexto(p.musica)}`;
+  }
   const data = await leer();
   data.lotes = [lote, ...data.lotes.filter(l => l.id !== lote.id)].slice(0, 40);
   await guardarKV('aprobaciones', data);

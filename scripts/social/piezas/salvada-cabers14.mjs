@@ -96,7 +96,7 @@ if (cuadrosArg) {
 
 // Música: tema propio que no se repite; un gancho del tema cae en la salvada
 const { elegirMusica } = await import('../../lib/musica.mjs');
-const musica = elegirMusica('salvada-cabers14-2026-10-22');
+const musica = await elegirMusica('salvada-cabers14-2026-10-22');
 const ganchos = (() => {
   try {
     const t = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/beats/temas-diarios.json'), 'utf8')).temas.find(x => x.archivo === path.basename(musica));

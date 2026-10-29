@@ -70,7 +70,8 @@ export function narracion(frases, carpeta, opts = {}) {
 
 // Mezcla las pistas de voz sobre un video ya renderizado: la voz arriba, la música (el audio que ya tenga) baja
 // sola mientras se habla (sidechain) y vuelve en los silencios. Devuelve la ruta de salida.
-export function agregarVoz(videoIn, pistas, salida, { volumenMusica = 0.6 } = {}) {
+// Desde 2026-10-28 la música es cantada (The Shorts): nunca más de 0,35, para que la voz en off quede siempre arriba (Juan).
+export function agregarVoz(videoIn, pistas, salida, { volumenMusica = 0.35 } = {}) {
   const total = duracion(videoIn);
   const fin = pistas.at(-1);
   if (fin && fin.en + fin.dur > total + 0.05) throw new Error(`La voz termina en ${(fin.en + fin.dur).toFixed(1)} s y el video dura ${total.toFixed(1)} s: acortá el texto o alargá las escenas.`);
@@ -81,7 +82,7 @@ export function agregarVoz(videoIn, pistas, salida, { volumenMusica = 0.6 } = {}
   const vz = `${pistas.map((_, i) => `[v${i}]`).join('')}amix=inputs=${pistas.length}:normalize=0,apad,atrim=0:${total.toFixed(3)}`;
   const f = tieneAudio
     ? [...voces, `${vz},asplit=2[vz1][vz2]`,
-       `[0:a]aresample=48000,volume=${volumenMusica}[mu]`,
+       `[0:a]aresample=48000,volume=${Math.min(volumenMusica, 0.35)}[mu]`,
        `[mu][vz1]sidechaincompress=threshold=0.02:ratio=10:attack=15:release=450[mud]`,
        `[mud][vz2]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.95[a]`]
     : [...voces, `${vz},alimiter=limit=0.95[a]`];

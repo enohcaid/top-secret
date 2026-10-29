@@ -14,7 +14,7 @@ import path from 'path';
 import { spawn, execFileSync } from 'child_process';
 import { chromium } from 'playwright';
 import ffmpegPath from 'ffmpeg-static';
-import { elegirMusica, musicaFija } from '../lib/musica.mjs';
+import { elegirMusica, filtroRotulo } from '../lib/musica.mjs';
 import { ROSTER_T4 } from '../../roster.js';
 import { list as r2list, del as r2del } from '../lib/r2.mjs';
 
@@ -136,14 +136,15 @@ await new Promise(r => ff.on('close', r));
 await browser.close(); server.close();
 console.log(`\r${total}/${total} cuadros en ${Math.round((Date.now() - t0) / 1000)} s`);
 
-// ── Música (trap libre, regla del club): fundido de entrada 0,5 s y de salida 2 s, loudnorm ──
+// ── Música (The Shorts de Tacet Sin, con su rótulo en pantalla): fundido de entrada 0,5 s y de salida 2 s, loudnorm ──
 if (!SIN_MUSICA) {
-  const mp3Path = MODO === 'equipo' ? musicaFija('Locked In') : elegirMusica(VIDEO_ID, { preferida: MUSICA });
+  const mp3Path = await elegirMusica(VIDEO_ID, { preferida: MUSICA });
   const mp3 = path.basename(mp3Path), dirM = path.dirname(mp3Path);
   const dur = total / 30;
   execFileSync(ffmpegPath, ['-y', '-v', 'error', '-i', tmp, '-i', path.join(dirM, mp3),
     '-filter_complex', `[1:a]atrim=0:${dur},afade=t=in:d=0.5,afade=t=out:st=${(dur - 2).toFixed(2)}:d=2,loudnorm=I=-14:TP=-1.5,aresample=48000[a]`,
-    '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', OUT]);
+    '-map', '0:v', '-map', '[a]', '-vf', filtroRotulo(mp3Path), '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac', '-b:a', '192k', '-shortest', OUT]);
   fs.rmSync(tmp);
   console.log('Música:', mp3);
 } else fs.renameSync(tmp, OUT);

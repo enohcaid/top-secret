@@ -47,7 +47,7 @@ log('Clips (Canva imagen a video)…');
 const clips = {};
 for (const e of ESCENAS) { const mp4 = animar(imgs[e.id], e.movimiento); clips[e.id] = cuadros(mp4); clips[e.id].dir = archivo(clips[e.id].dir); log(`  ${e.id} ✓`); }
 
-const musica = elegirMusica('viral-pov-arquero', { preferida: process.env.TEMA || 'Vértigo' });
+const musica = await elegirMusica('viral-pov-arquero', { preferida: process.env.TEMA || 'Vértigo' });
 const tema = dropDelTema(musica) || { drop: 0, bpm: 148 };
 const B = 60 / tema.bpm;
 const T = (t, txt, extra = {}) => ({ t: t * B, txt, ...extra });

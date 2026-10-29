@@ -10,9 +10,7 @@
 // caché immutable de un año, así que pisar el archivo no alcanza.
 import fs from 'fs';
 import path from 'path';
-import { execFileSync } from 'child_process';
 import sharp from 'sharp';
-import ffmpegPath from 'ffmpeg-static';
 import { ROSTER_T4 } from '../../roster.js';
 import { putFile } from '../lib/r2.mjs';
 
@@ -42,11 +40,4 @@ for (const gt of lista) {
   console.log(`${gt}: ${(fs.statSync(out).size / 1024).toFixed(0)} KB`);
 }
 
-// Música: los primeros 30 s de "Locked In" (trap libre, regla del club); el fundido de salida lo hace el navegador
-const mp3 = path.join(OUT, 'musica.mp3');
-if (!pedidos.length || !fs.existsSync(mp3)) {
-  const src = path.join(ROOT, 'fuentes/musica/trap/Locked In - Anno Domini Beats.mp3');
-  execFileSync(ffmpegPath, ['-y', '-v', 'error', '-i', src, '-t', '30', '-af', 'loudnorm=I=-14:TP=-1.5', '-ar', '48000', '-b:a', '160k', mp3]);
-  await putFile(mp3, `video-equipo/${VER}/musica.mp3`);
-  console.log('musica.mp3:', (fs.statSync(mp3).size / 1024).toFixed(0), 'KB');
-}
+// La música ya no sale de acá: video-equipo.js elige un tema de The Shorts del catálogo cada vez (2026-10-28).

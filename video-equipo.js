@@ -3,7 +3,9 @@
    y al final los partidos del día) y lo comparte por WhatsApp / redes.
    - Cuadros de cada jugador: hojas webp en R2 video-equipo/<VER>/<gt>.webp (scripts/video-plantel/web-assets.mjs).
    - Escena: scripts/video-plantel/escena.js (crearEscena), la misma que usa render.mjs en la PC.
-   - Video: WebCodecs (H.264) + mp4-muxer; música trap libre (regla del club) con AAC si el navegador lo soporta.
+   - Video: WebCodecs (H.264) + mp4-muxer; música con AAC si el navegador lo soporta: un tema de The Shorts de Tacet Sin
+     distinto cada vez (catálogo de topsecret.ar/music, sin repetir los últimos), con su nombre en el video y en el texto
+     al compartir (Juan, 2026-10-28).
    Lee de convocatoria.html: lineup, captain, PLAYERS, FORMATIONS, SLOT_LABEL_ES, getTodayMatches, TODAY. */
 (function () {
   const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
@@ -92,11 +94,36 @@
     return null;
   }
 
-  async function musica(durS) {
-    if (!window.AudioEncoder) return null;
+  // Tema de The Shorts que no haya sonado en los últimos videos armados en este navegador
+  async function elegirTema() {
+    const cat = await (await fetch(`${MEDIA}/musica/catalogo.json`)).json();
+    const temas = cat.temas.filter(t => t.voz && t.album === 'the-shorts');
+    let recientes = []; try { recientes = JSON.parse(localStorage.getItem('ts_ve_temas') || '[]'); } catch (_) {}
+    const libres = temas.filter(t => !recientes.includes(t.slug));
+    const pool = libres.length ? libres : temas;
+    const t = pool[Math.floor(Math.random() * pool.length)];
+    try { localStorage.setItem('ts_ve_temas', JSON.stringify([...recientes, t.slug].slice(-8))); } catch (_) {}
+    return t;
+  }
+  const creditoTexto = t => `Música: "${t.titulo}" — Tacet Sin (The Shorts) · topsecret.ar/music`;
+  // Rótulo del tema arriba a la izquierda, del segundo 0,6 al 5,5 con fundidos (igual que scripts/lib/musica.mjs)
+  function rotulo(ctx, w, h, seg, tema) {
+    const a = seg < 0.6 ? 0 : seg < 1.1 ? (seg - 0.6) / 0.5 : seg < 5 ? 1 : seg < 5.5 ? (5.5 - seg) / 0.5 : 0;
+    if (!a) return;
+    const txt = `MÚSICA · TACET SIN — ${tema.titulo}`, fs = Math.round(w * 0.03), pad = Math.round(w * 0.012);
+    ctx.save(); ctx.globalAlpha = a;
+    ctx.font = `600 ${fs}px 'Barlow Condensed', 'Barlow', sans-serif`; ctx.textBaseline = 'top';
+    const x = w * 0.06, y = h * 0.11, ancho = ctx.measureText(txt).width;
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x - pad, y - pad, ancho + pad * 2, fs * 1.2 + pad * 2);
+    ctx.fillStyle = '#fff'; ctx.fillText(txt, x, y);
+    ctx.restore();
+  }
+
+  async function musica(durS, tema) {
+    if (!window.AudioEncoder || !tema) return null;
     const conf = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: 2, bitrate: 160000 };
     try { if (!(await AudioEncoder.isConfigSupported(conf)).supported) return null; } catch (_) { return null; }
-    const buf = await (await fetch(`${MEDIA}/video-equipo/${VER}/musica.mp3`)).arrayBuffer();
+    const buf = await (await fetch(tema.voz)).arrayBuffer();
     const ac = new OfflineAudioContext(2, 48000, 48000);
     const audio = await ac.decodeAudioData(buf);
     const sr = audio.sampleRate, len = Math.min(audio.length, Math.floor(durS * sr));
@@ -128,7 +155,9 @@
       if (!vconf) throw new Error('Este navegador no puede generar video (probá con Chrome actualizado).');
       out = document.createElement('canvas'); out.width = 720; out.height = 1280;
     }
-    const pista = await musica(total / 30).catch(() => null);
+    const tema = await elegirTema().catch(() => null);
+    const pista = await musica(total / 30, tema).catch(() => null);
+    actual.tema = pista ? tema : null;
 
     const muxer = new Muxer({
       target: new ArrayBufferTarget(), fastStart: 'in-memory',
@@ -143,6 +172,7 @@
       if (error) throw error;
       await escena.cuadro(f, { raw: true });
       if (out !== cv) out.getContext('2d').drawImage(cv, 0, 0, out.width, out.height);
+      if (pista) rotulo(out.getContext('2d'), out.width, out.height, f / 30, tema);
       const vf = new VideoFrame(out, { timestamp: Math.round(f * 1e6 / 30), duration: Math.round(1e6 / 30) });
       venc.encode(vf, { keyFrame: f % 60 === 0 });
       vf.close();
@@ -177,10 +207,11 @@
     try {
       const blob = await generar();
       if (!blob) { limpiar(); return; }
+      const tema = actual && actual.tema;
       const nombre = `TopSecret-FC-equipo-${TODAY}.mp4`;
       const file = new File([blob], nombre, { type: 'video/mp4' });
       estado('¡Listo!', 100);
-      actual = { blob, file };
+      actual = { blob, file, tema };
       const prev = m.querySelector('#vePrev'); prev.src = nuevaUrl(blob); prev.style.display = 'block'; prev.play().catch(() => {});
       const bot = m.querySelector('#veBotones'); bot.style.display = 'flex'; bot.innerHTML = '';
       const boton = (txt, primario, fn) => {
@@ -193,7 +224,7 @@
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         boton('Compartir (WhatsApp)', true, async () => {
           try {
-            await navigator.share({ files: [file], title: 'Top Secret FC · Equipo de hoy' });
+            await navigator.share({ files: [file], title: 'Top Secret FC · Equipo de hoy', ...(tema ? { text: creditoTexto(tema) } : {}) });
             limpiar(); showToast('Video compartido');                 // compartido → se libera todo
           } catch (e) { if (e.name !== 'AbortError') showToast('No se pudo compartir', 'info'); }
         });

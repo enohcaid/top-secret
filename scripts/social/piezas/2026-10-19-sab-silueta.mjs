@@ -43,7 +43,7 @@ for (const l of linea) {
 const total = t;
 const revela = pistas.c1.en + pistas.c1.dur + 0.5;
 
-const musica = elegirMusica('viral-silueta-nikileo527', { preferida: process.env.TEMA || undefined });
+const musica = await elegirMusica('viral-silueta-nikileo527', { preferida: process.env.TEMA || undefined });
 const datos = {
   img: archivo(path.join(ROOT, 'Renders', J, 'Unica4.png')), nombre: J, sub: 'Lateral · 10',
   pistas: PISTAS.map(([n, txt], k) => ({ n, txt, t: pistas[`p${k + 1}`].en })),

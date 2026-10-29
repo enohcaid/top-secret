@@ -23,8 +23,8 @@ const v = Date.now().toString(36);
 const subir = async f => { const key = `social/viral/${path.basename(f)}`; await putFile(f, key); return `${MEDIA}/${key}?v=${v}`; };
 
 // ── Música: un tema propio por video ──
-const mCabeza = elegirMusica('viral-cabeza-fria', { preferida: 'Frío' });
-const mAntes = elegirMusica('viral-antes-despues-lautavester7', { preferida: 'Deuda' });
+const mCabeza = await elegirMusica('viral-cabeza-fria', { preferida: 'Frío' });
+const mAntes = await elegirMusica('viral-antes-despues-lautavester7', { preferida: 'Deuda' });
 
 // ── Carrusel "Cabeza fría" con los textos claros ──
 const d = await cargar();

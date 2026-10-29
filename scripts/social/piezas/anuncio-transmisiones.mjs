@@ -25,7 +25,7 @@ const log = m => console.log(`${new Date().toLocaleTimeString('es-AR')} [anuncio
 fs.mkdirSync(DIR, { recursive: true });
 
 // Tema: 110 BPM, drop 1 a los 8,73 s y drop 2 (gancho B) a los 48 s (intro 4 · gancho A 8 · verso 8 · build 2 compases)
-const musica = elegirMusica('anuncio-nuevas-transmisiones');
+const musica = await elegirMusica('anuncio-nuevas-transmisiones');
 const BPM = 110, BAR = 4 * 60 / BPM, DROP1 = 4 * BAR, DROP2 = 22 * BAR, FIN = DROP2 + 4.8 * BAR;
 
 // Tramos del metraje en segundos del VIDEO DE LOS MOMENTOS (media); la grabación va DESFASE segundos atrás.

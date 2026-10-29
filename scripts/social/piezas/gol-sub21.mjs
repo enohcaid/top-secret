@@ -77,7 +77,7 @@ const clip = k => { const d = path.join(DIR, `cuadros-${k}`); return { dir: arch
 // Música: "Debut" (tema del 20/10, 140 BPM): el tema del club sobre el primer partido oficial. Arranca en 26,4 s para que
 // el final del verso y el build acompañen el ataque y el drop del gancho B (37,71 s del tema) caiga justo en el gol.
 const { elegirMusica } = await import('../../lib/musica.mjs');
-const musica = elegirMusica('gol-agonico-sub21', { preferida: 'Debut' });
+const musica = await elegirMusica('gol-agonico-sub21', { preferida: 'Debut' });
 const BPM = 140, BAR = 4 * 60 / BPM, DROP_B = 22 * BAR;
 const T = { oficial: 3, gol: 3 + 8.3, goool: 14, repe: 17, logro: 25, cierre: 33, fin: 41 };
 const musicaDesde = DROP_B - T.gol;

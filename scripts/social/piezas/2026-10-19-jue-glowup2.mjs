@@ -42,7 +42,7 @@ const prom = x => x.rs.reduce((a, b) => a + b, 0) / (x.rs.length || 1);
 const mejor = 1 + st.map((x, i) => [x.pj >= 5 ? prom(x) : 0, i]).sort((a, b) => b[0] - a[0])[0][1];
 const COLORES = ['#8A7F45', '#2F55A8', '#7A7A7A', '#B48A2E'];   // kit de cada temporada (oliva, azul noche, negro AIA, negro y oro)
 
-const musica = elegirMusica('viral-antes-despues-huber236', { preferida: process.env.TEMA || undefined });
+const musica = await elegirMusica('viral-antes-despues-huber236', { preferida: process.env.TEMA || undefined });
 const tema = dropDelTema(musica) || { bpm: 130 };
 const B = 60 / tema.bpm;
 const fila = 1.6, inicio = fila + 3.5 * B, paso = 6 * B;

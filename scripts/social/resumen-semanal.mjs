@@ -13,7 +13,7 @@ import path from 'path';
 import { spawn } from 'child_process';
 import { ROOT } from '../lib/env.mjs';
 import { putFile } from '../lib/r2.mjs';
-import { elegirMusica } from '../lib/musica.mjs';
+import { elegirMusica, infoTema } from '../lib/musica.mjs';
 import { cargar, hoyART, diaSemana, fechaCorta, TEMPORADA } from './lib/datos.mjs';
 import { carrusel, video } from './lib/render.mjs';
 import { escribirTextos, escribirNoticia } from './lib/textos.mjs';
@@ -56,10 +56,10 @@ async function armar() {
   log('Carrusel…');
   const slides = await carrusel('semana.html', pieza.plantilla, dir, 'slide');
   log('Video vertical…');
-  const musica = elegirMusica(id);
+  const musica = await elegirMusica(id);
   const mp4 = path.join(dir, `${id}.mp4`);
   await video('semana.html', pieza.plantilla, mp4, { escenas: semana.ESCENAS_VIDEO, gancho: 1.6, musica });
-  const nombreTema = path.basename(musica).replace(/\.\w+$/, '').replace(/^\d{4}-\d{2}-\d{2} - /, '');
+  const nombreTema = infoTema(musica).titulo;
 
   log('Subiendo a R2…');
   const v = Date.now().toString(36);

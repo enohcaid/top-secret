@@ -11,7 +11,7 @@ Plan de Juan (2026-10-09): generar contenido propio para cada red con los format
 - **Revisa él todo antes de publicar**, siempre en la MISMA página: `aprobar.html` (sin link en el menú, pide el PIN de admin). Se le abre sola en el navegador predeterminado cuando el lote está listo.
 - **Ritmo:** el día siguiente a cada jornada + los sábados (repaso semanal); si pasan más de 2 días sin ronda, igual sale una. Hora: 14:00.
 - **No limitarse a lo que ya existe:** crear lo necesario (diseño, animación, imágenes, renders) para que el contenido sea de calidad.
-- Música: el tema original del día ([[reference_beats_propios]]), uno distinto por video ([[feedback_musica_unica]]).
+- Música: un tema de The Shorts de Tacet Sin, rotando, con su nombre en el video y en el texto ([[feedback_musica_the_shorts]]).
 
 **Cómo funciona (scripts/social/):**
 - `ronda.mjs` (tarea `TopSecretFC-RondaRedes`, 12:30, log `scripts/ronda-redes.log`): decide si toca, arma las piezas, pide los textos a Claude (`textos-encargo.md`, reglas por red), sube a R2 `social/<fecha>/`, deja el lote en KV `aprobaciones` y abre la página. `--fecha`, `--forzar`, `--no-abrir`, `--sin-textos`.

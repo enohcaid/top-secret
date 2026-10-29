@@ -43,7 +43,7 @@ for (const [k, c] of CARAS.entries()) { caras.push(await generarImagen({ id: `ca
 await cerrar();
 if (process.argv.includes('--solo-imagenes')) { log('Listo (solo imágenes).'); process.exit(0); }
 
-const musica = elegirMusica('viral-reaccion-nicobj96', { preferida: process.env.TEMA || undefined });
+const musica = await elegirMusica('viral-reaccion-nicobj96', { preferida: process.env.TEMA || undefined });
 const tema = dropDelTema(musica) || { drop: 0, bpm: 130 };
 const B = 60 / tema.bpm, inicio = 4 * B, paso = 4 * B;
 const total = inicio + goles.length * paso + 8 * B;

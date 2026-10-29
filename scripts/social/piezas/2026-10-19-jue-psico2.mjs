@@ -85,7 +85,7 @@ const escenas = GUION.map((g, i) => {
   return o;
 });
 const total = t;
-const musica = elegirMusica('viral-cabeza-fria-2', { preferida: process.env.TEMA || undefined });
+const musica = await elegirMusica('viral-cabeza-fria-2', { preferida: process.env.TEMA || undefined });
 log(`Render (${total.toFixed(1)} s, ${path.basename(musica)})…`);
 const base = path.join(DIR, 'cabeza-fria-2-sin-voz.mp4');
 await video('cabeza-fria.html', { escenas: escenas.map(({ t0, ...x }) => x) }, base, { escenas: [{ n: 0, dur: total }], fps: 60, desenfoque: true, musica });

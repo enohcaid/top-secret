@@ -56,7 +56,7 @@ for (const k of KITS) {
 await cerrar();
 if (process.argv.includes('--solo-imagenes')) { log('Listo (solo imágenes).'); process.exit(0); }
 
-const musica = elegirMusica('viral-tierlist-camisetas', { preferida: process.env.TEMA || undefined });
+const musica = await elegirMusica('viral-tierlist-camisetas', { preferida: process.env.TEMA || undefined });
 const tema = dropDelTema(musica) || { drop: 0, bpm: 130 };
 const B = 60 / tema.bpm;
 const datos = {

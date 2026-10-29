@@ -93,7 +93,7 @@ if (cuadrosArg) {
 
 // Música: tema propio que no se repite (se elige recién acá: las capturas de revisión no gastan un tema); el drop cae en la tijera
 const { elegirMusica } = await import('../../lib/musica.mjs');
-const musica = elegirMusica('noche-espacio-gamer-2026-10-22');
+const musica = await elegirMusica('noche-espacio-gamer-2026-10-22');
 // el primer gancho del tema que llegue a la tijera (Astilla: gancho A en 21,3 s, antes; gancho B en 39,1 → desde 12,1 s)
 const ganchos = (() => {
   try {

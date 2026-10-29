@@ -85,7 +85,7 @@ const escenas = ESCENAS.map((e, i) => {
   return o;
 });
 const total = t;
-const musica = elegirMusica('viral-sab-doc', { preferida: process.env.TEMA || undefined });
+const musica = await elegirMusica('viral-sab-doc', { preferida: process.env.TEMA || undefined });
 log(`Render (${total.toFixed(1)} s, música ${path.basename(musica)})…`);
 const base = path.join(DIR, 'documental-sin-voz.mp4');
 await video('documental.html', { escenas: escenas.map(({ escena, movimiento, jugadores, voz, ...x }) => x), escudo: archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png')) },
