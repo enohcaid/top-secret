@@ -99,9 +99,18 @@ client.on('ready', async () => {
       // Ojo: el <input type=file accept="image/*"> que está en la página es el de "Nuevo sticker"
       // (2026-10-13 así salieron stickers en vez de fotos). Hay que hacer click en "Fotos y videos"
       // y tomar el selector de archivos que abre ese ítem.
-      const item = await p.evaluateHandle(() => [...document.querySelectorAll('li, [role=button], [role=menuitem], div, span')]
-        .find(e => e.childElementCount <= 3 && /^fotos y videos$/i.test((e.innerText || '').trim()))?.closest('li,[role=button],[role=menuitem]') || null);
-      if (!item.asElement()) throw new Error('no encontré "Fotos y videos" en el menú Adjuntar');
+      // El texto del ítem cambia (con/sin tilde, "Fotos y videos" / "Fotos y vídeos" / "Photos & videos"):
+      // se busca por patrón y, si no aparece, se listan las opciones del menú para diagnosticar.
+      const item = await p.evaluateHandle(() => {
+        const el = [...document.querySelectorAll('li, [role=button], [role=menuitem], div, span')]
+          .find(e => e.childElementCount <= 3 && /^(fotos\s*(y|&)\s*v[ií]deos|photos\s*(&|and)\s*videos)$/i.test((e.innerText || '').trim()));
+        return el ? (el.closest('li,[role=button],[role=menuitem]') || el) : null;
+      });
+      if (!item.asElement()) {
+        const opciones = await p.evaluate(() => [...document.querySelectorAll('[role=menuitem], [role=application] li, li')]
+          .map(e => (e.innerText || '').trim()).filter(Boolean).slice(0, 15));
+        throw new Error(`no encontré "Fotos y videos" en el menú Adjuntar (opciones: ${opciones.join(' | ') || 'ninguna'})`);
+      }
       const [selector] = await Promise.all([p.waitForFileChooser({ timeout: 15000 }), item.asElement().click()]);
       if (!selector.isMultiple() && archivos.length > 1) throw new Error('el selector de "Fotos y videos" no acepta varios archivos');
       await selector.accept(archivos);
