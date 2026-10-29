@@ -185,7 +185,8 @@ async function actualizarPartido() {
     // Espacio Gamer (tabla + nuestros números), resultados de la noche y el próximo partido: tarjetas de la pausa y cierre
     const eg = await espacioGamer(); if (eg) e.eg = eg;
     e.noche = finales.map(({ id, ...f }) => f);
-    e.cierre = !e.proximos.length && finales.length > 0 && finales.length >= n;   // terminó el último partido de la noche
+    // Terminó el último partido de la noche, o la fuente se cortó sin partido en juego (ver noHayPartidoEnCurso)
+    e.cierre = (!e.proximos.length || !!caidaDesde) && finales.length > 0 && finales.length >= n;
     e.siguiente = await buscarSiguiente();
     // Solo los convocados de hoy en el palco y las charlas (convocatoria.html); si no hay datos, todos
     const conv = await convocados(); if (conv) e.jugadores = conv;
@@ -198,7 +199,13 @@ async function actualizarPartido() {
 // ("SE CORTÓ LA SEÑAL · YA VOLVEMOS", tapa la imagen congelada) y, cuando la fuente vuelve, se reconecta streamlink
 // y la fuente 'Partido' de OBS. La sesión termina recién si la fuente sigue caída GRACIA_SIN_SENAL seguidos.
 const GRACIA_SIN_SENAL = 15 * 60000;
+// Si la fuente se corta con los partidos ya terminados (Juan, 2026-10-28: el que transmite apaga al final de la noche,
+// aunque en la lista quede un partido que no se jugó), es el final: la pausa pasa al cierre ("FIN DE LA TRANSMISIÓN",
+// resultados, próximo partido) y las redes se cortan a los GRACIA_FIN. Si la fuente vuelve, sigue todo como antes.
+const GRACIA_FIN = 5 * 60000;
+const noHayPartidoEnCurso = () => finales.length > 0 && finales.length >= inicios.length;
 let caidaDesde = null;                                          // ms en que se vio caída la fuente (null = en el aire)
+let caidaFinal = false;                                         // la caída actual fue con los partidos terminados
 function marcarSinSenal(v) {
   try {
     let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
@@ -217,6 +224,7 @@ async function seguirSesion() {
       caidaDesde = null;
       await reconectarFuente();
       marcarSinSenal(false);
+      if (caidaFinal) { caidaFinal = false; await actualizarPartido(); }   // saca el cierre
     }
     return true;
   }
@@ -230,12 +238,18 @@ async function seguirSesion() {
     caidaDesde = null;
     await reconectarFuente();
     marcarSinSenal(false);
+    if (caidaFinal) { caidaFinal = false; await actualizarPartido(); }
     return true;
   }
-  if (!caidaDesde) { caidaDesde = Date.now(); log(`${FUENTE} se cayó: pongo la pausa y las redes siguen al aire (espero hasta ${GRACIA_SIN_SENAL / 60000} min).`); }
+  if (!caidaDesde) {
+    caidaDesde = Date.now(); caidaFinal = noHayPartidoEnCurso();
+    if (caidaFinal) { log(`${FUENTE} se cortó con los partidos terminados: pongo el cierre y corto en ${GRACIA_FIN / 60000} min si no vuelve.`); await actualizarPartido(); }
+    else log(`${FUENTE} se cayó: pongo la pausa y las redes siguen al aire (espero hasta ${GRACIA_SIN_SENAL / 60000} min).`);
+  }
   marcarSinSenal(true);
-  if (Date.now() - caidaDesde < GRACIA_SIN_SENAL) return true;
-  log(`${FUENTE} lleva ${GRACIA_SIN_SENAL / 60000} min caído: termino la transmisión.`);
+  const gracia = caidaFinal ? GRACIA_FIN : GRACIA_SIN_SENAL;
+  if (Date.now() - caidaDesde < gracia) return true;
+  log(`${FUENTE} lleva ${gracia / 60000} min caído: termino la transmisión.`);
   return false;
 }
 
@@ -372,7 +386,7 @@ async function sesion() {
   publicarHistoria();
   // Vivo nuevo: sin lado de barra ni eventos de una sesión anterior (los vuelve a escribir vigia-vivo.mjs)
   try { contarInicios(); contarFinales(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
-  caidaDesde = null;
+  caidaDesde = null; caidaFinal = false;
   lanzarVigia();
   const vigia = setInterval(lanzarVigia, 60000);   // si el vigía se cae en plena sesión, vuelve a arrancar
   await actualizarPartido();
