@@ -237,5 +237,47 @@ footer a{color:var(--text2);border-bottom:1px solid var(--border);}
   } catch (e) { /* storage bloqueado */ }
 })();
 </script>
+<script>
+// Abrir la APP en el celu (Juan, 2026-10-29: "no te abre la aplicación, te abre una página"). Desde el navegador interno de
+// Instagram/TikTok un https con target=_blank queda adentro de ese navegador: en Android se usa un intent con el paquete de
+// la app, en iOS el esquema propio de la app. Si no hay app (o el navegador no deja), se abre la web como antes.
+// En PC no se toca nada: los enlaces se abren en una pestaña nueva.
+(() => {
+  const ua = navigator.userAgent || '';
+  const android = /Android/i.test(ua);
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!android && !ios) return;
+  const APPS = {
+    twitch:    { pkg: 'tv.twitch.android.app',         ios: 'twitch://stream/topsecretfc' },
+    youtube:   { pkg: 'com.google.android.youtube',    ios: 'youtube://www.youtube.com/@TOPSecretFC' },
+    instagram: { pkg: 'com.instagram.android',         ios: 'instagram://user?username=fctopsecret' },
+    tiktok:    { pkg: 'com.zhiliaoapp.musically',      ios: 'tiktok://user?username=topsecretfc' },
+    x:         { pkg: 'com.twitter.android',           ios: 'twitter://user?screen_name=FCTOPSecret' },
+    facebook:  { pkg: 'com.facebook.katana',           ios: 'fb://facewebmodal/f?href=' },
+    whatsapp:  { pkg: 'com.whatsapp',                  ios: 'whatsapp://chat?code=G3zmPxrMZsYB1MqWCEhrkU' },
+    spotify:   { pkg: 'com.spotify.music',             ios: 'spotify:playlist:2ZxlBpEotLjBqLekRlU9bd' },
+  };
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="https://"]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+    const ev = a.dataset.ev || (a.id === 'liveBanner' ? 'twitch' : '');
+    const app = APPS[ev];
+    if (!app) return;
+    const web = a.href, u = new URL(web);
+    e.preventDefault();
+    if (android) {
+      location.href = `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=https;package=${app.pkg};S.browser_fallback_url=${encodeURIComponent(web)};end`;
+      return;
+    }
+    // iOS: probar el esquema de la app; si la página sigue visible a los 1,2 s, no se abrió nada → la web.
+    let salio = false;
+    const marca = () => { salio = true; };
+    document.addEventListener('visibilitychange', marca, { once: true });
+    window.addEventListener('pagehide', marca, { once: true });
+    location.href = ev === 'facebook' ? app.ios + encodeURIComponent(web) : app.ios;
+    setTimeout(() => { if (!salio && !document.hidden) location.href = web; }, 1200);
+  });
+})();
+</script>
 </body>
 </html>
