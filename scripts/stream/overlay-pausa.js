@@ -209,7 +209,7 @@
 
   // Música de fondo (solo la horizontal)
   const audio = new Audio(); let temas = [], nTema = 0, fundido = null;
-  if (!VERTICAL) fetch(MUSICA + '?' + Date.now()).then(r => r.json()).then(l => { temas = mezclar(l); }).catch(() => {});
+  if (!VERTICAL) fetch(MUSICA + '?' + Date.now()).then(r => r.json()).then(l => { temas = mezclar(l); if (activo && !audio.src) tocar(); }).catch(() => {});   // si ya arrancó en pausa (recarga en plena pausa)
   audio.onended = () => { nTema++; tocar(); };
   function tocar() { if (!temas.length) return; audio.src = temas[nTema % temas.length]; audio.volume = 0; audio.play().then(() => fundir(VOL)).catch(() => {}); }
   function fundir(objetivo, fin) {
