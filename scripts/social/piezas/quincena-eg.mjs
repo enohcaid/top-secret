@@ -6,7 +6,8 @@
 // Fuentes del metraje (cuadros en fuentes/redes/…):
 //   20/10 Sub 21      gol-sub21/cuadros-repe (grabación limpia del vigía, 60 fps; el gol a los 2,8 s)
 //   22/10 (3 partidos) noche-2026-10-22/cuadros-g1…g5 + repe (vivo de YouTube de RS32-DaniStone, sin overlay)
-//   27/10 Parke Avellane quincena-eg/cuadros-pke1 (vigía 1690 s +12), -pke2 (2402 s +12), -pke2repe (2408,5 s, 60 fps)
+//   27/10 Parke Avellane quincena-eg/cuadros-pke1 (vigía 1690 s +12), -pke2 (2402 s +12)
+// Largo ≤ 90 s (límite histórico de los Reels por la API de Meta): por eso una sola repetición.
 // Resultados: fixture oficial de espaciogamer.cl. Goleadores del 27/10 leídos del video (sin pantalla de Eventos): el
 // 1-1 de Lautavester7 (gambeta al arquero) y el 2-1 del 90+ de Cabers14 (rebote en el área chica) — confirmar con Juan.
 //
@@ -57,31 +58,30 @@ const sfd = { escudo: esc('SF Drysdale'), rival: 'SF Drysdale', sigla: 'SFD', ki
 const pke = { escudo: esc('Parke Avellane'), rival: 'Parke Avellane', sigla: 'PKE', kicker: 'ESPACIO GAMER · FECHA 6' };
 const jornada = (i, dur, fondo) => ({ tipo: 'jornada', dur, clip: fondo, kicker: `ESPACIO GAMER · NOCHE ${i + 1}`, numero: NOCHES[i].dia, titulo: NOCHES[i].titulo, filas: NOCHES[i].partidos.map(fila) });
 const TRAMOS = [
-  { tipo: 'gancho', dur: 5.4, clip: ia('apertura'), kicker: 'ESPACIO GAMER · 20/10 AL 29/10', grande: '15 DÍAS', texto: '8 partidos. 8 goles.<br><b class="o">Lo mejor de la quincena.</b>' },
+  { tipo: 'gancho', dur: 5.0, clip: ia('apertura'), kicker: 'ESPACIO GAMER · 20/10 AL 29/10', grande: '15 DÍAS', texto: '8 partidos. 8 goles.<br><b class="o">Lo mejor de la quincena.</b>' },
   jornada(0, 3.8, ia('apertura')),
   { tipo: 'gol', dur: 4.1, clip: enRedes('gol-sub21/cuadros-repe', 60), golEn: 2.8, foco: .85, escudo: esc('Sub 21'), rival: 'Sub 21', sigla: 'S21',
     kicker: 'ESPACIO GAMER · FECHA 2', minuto: "91'", antes: '0-0', despues: '1-0', goleador: 'pepolemmo2710', foto: foto('pepolemmo2710'), como: 'Asistencia de Elianja20' },
   jornada(1, 3.8, N22('g3')),
-  { tipo: 'gol', dur: 5.6, clip: N22('g1'), desdeClip: 2, golEn: 3.8, foco: .72, ...sfd, minuto: "24'", antes: '0-1', despues: '1-1', goleador: 'Cabers14', foto: foto('Cabers14'), como: 'De cabeza' },
-  { tipo: 'gol', dur: 5.4, clip: N22('g2'), desdeClip: 2, golEn: 4.0, foco: .12, ...sfd, minuto: "87'", antes: '1-3', despues: '2-3', goleador: 'Lautavester7', foto: foto('Lautavester7'), como: 'Desde la puerta del área' },
+  { tipo: 'gol', dur: 4.8, clip: N22('g1'), desdeClip: 2.8, golEn: 3.0, foco: .72, ...sfd, minuto: "24'", antes: '0-1', despues: '1-1', goleador: 'Cabers14', foto: foto('Cabers14'), como: 'De cabeza' },
+  { tipo: 'gol', dur: 5.0, clip: N22('g2'), desdeClip: 2.4, golEn: 3.6, foco: .12, ...sfd, minuto: "87'", antes: '1-3', despues: '2-3', goleador: 'Lautavester7', foto: foto('Lautavester7'), como: 'Desde la puerta del área' },
   { tipo: 'gol', dur: 6.8, clip: N22('g3'), desdeClip: 1.5, golEn: 5.5, foco: .16, ...sfd, minuto: "90+'", antes: '2-3', despues: '3-3', goleador: 'Lautavester7', foto: foto('Lautavester7'), como: 'De tijera, en el descuento' },
   { tipo: 'repe', dur: 5.2, clip: N22('repe'), velocidad: .5, golEn: 2.0, foco: .16, ...sfd, minuto: "90+'", antes: '2-3', despues: '3-3', goleador: 'Lautavester7', foto: foto('Lautavester7'), como: 'De tijera, en el descuento', tag: '0.5x' },
-  { tipo: 'ia', dur: 3.6, clip: ia('tijera'), kicker: 'SF DRYSDALE · MINUTO 90+', texto: 'De 1-3 a 3-3.<br><b class="o">De tijera.</b>' },
-  { tipo: 'gol', dur: 5.2, clip: N22('g4'), golEn: 3.7, foco: .8, escudo: esc('Los Picantes'), rival: 'Los Picantes', sigla: 'LP', kicker: 'ESPACIO GAMER · FECHA 3', minuto: "14'", antes: '0-0', despues: '1-0',
+  { tipo: 'ia', dur: 3.0, clip: ia('tijera'), kicker: 'SF DRYSDALE · MINUTO 90+', texto: 'De 1-3 a 3-3.<br><b class="o">De tijera.</b>' },
+  { tipo: 'gol', dur: 4.6, clip: N22('g4'), desdeClip: .6, golEn: 3.1, foco: .8, escudo: esc('Los Picantes'), rival: 'Los Picantes', sigla: 'LP', kicker: 'ESPACIO GAMER · FECHA 3', minuto: "14'", antes: '0-0', despues: '1-0',
     goleador: 'NicoBJ_96', foto: foto('NicoBJ_96'), como: 'Asistencia de Lautavester7' },
-  { tipo: 'gol', dur: 5.0, clip: N22('g5'), golEn: 3.0, foco: .78, escudo: esc('InfinitX'), rival: 'InfinitX', sigla: 'INF', kicker: 'ESPACIO GAMER · FECHA 4', minuto: "51'", antes: '0-0', despues: '1-0',
+  { tipo: 'gol', dur: 4.5, clip: N22('g5'), desdeClip: .5, golEn: 2.5, foco: .78, escudo: esc('InfinitX'), rival: 'InfinitX', sigla: 'INF', kicker: 'ESPACIO GAMER · FECHA 4', minuto: "51'", antes: '0-0', despues: '1-0',
     goleador: 'Lautavester7', foto: foto('Lautavester7'), como: 'Asistencia de nikileo527' },
   jornada(2, 4.6, enRedes('quincena-eg/cuadros-pke2')),
-  { tipo: 'gol', dur: 6.2, clip: enRedes('quincena-eg/cuadros-pke1'), desdeClip: 5, golEn: 4.7, foco: .82, ...pke, minuto: "20'", antes: '0-1', despues: '1-1', goleador: 'Lautavester7', foto: foto('Lautavester7'), como: 'Gambeta al arquero' },
-  { tipo: 'gol', dur: 6.2, clip: enRedes('quincena-eg/cuadros-pke2'), desdeClip: 5, golEn: 4.3, foco: .18, ...pke, minuto: "90+'", antes: '1-1', despues: '2-1', goleador: 'Cabers14', foto: foto('Cabers14'), como: 'En el descuento, para ganarlo' },
-  { tipo: 'repe', dur: 4.6, clip: enRedes('quincena-eg/cuadros-pke2repe', 60), velocidad: .5, golEn: 2.8, foco: .2, ...pke, minuto: "90+'", antes: '1-1', despues: '2-1', goleador: 'Cabers14', foto: foto('Cabers14'), como: 'En el descuento, para ganarlo', tag: '0.5x' },
+  { tipo: 'gol', dur: 5.4, clip: enRedes('quincena-eg/cuadros-pke1'), desdeClip: 5.8, golEn: 3.9, foco: .82, ...pke, minuto: "20'", antes: '0-1', despues: '1-1', goleador: 'Lautavester7', foto: foto('Lautavester7'), como: 'Gambeta al arquero' },
+  { tipo: 'gol', dur: 5.4, clip: enRedes('quincena-eg/cuadros-pke2'), desdeClip: 5.8, golEn: 3.5, foco: .18, ...pke, minuto: "90+'", antes: '1-1', despues: '2-1', goleador: 'Cabers14', foto: foto('Cabers14'), como: 'En el descuento, para ganarlo' },
   { tipo: 'ia', dur: 3.6, clip: ia('descuento'), kicker: 'PARKE AVELLANE · MINUTO 90+', texto: 'Otra vez<br><b class="o">en el descuento.</b>' },
-  jornada(3, 6.4, ia('noche-dura')),
-  { tipo: 'tabla', dur: 6.6, clip: N22('g3'), cuadro: 8, kicker: 'ESPACIO GAMER · TABLA DESPUÉS DE 8 FECHAS', posicion: '7º',
+  jornada(3, 6.0, ia('noche-dura')),
+  { tipo: 'tabla', dur: 5.8, clip: N22('g3'), cuadro: 8, kicker: 'ESPACIO GAMER · TABLA DESPUÉS DE 8 FECHAS', posicion: '7º',
     puntos: '13 PUNTOS<span>A UNO DEL QUINTO</span>',
     record: [{ n: 4, t: 'GANADOS' }, { n: 1, t: 'EMPATE' }, { n: 3, t: 'PERDIDOS' }, { n: '8-12', t: 'GOLES' }],
     goleadores: GOLEADORES.map(([gt, goles]) => ({ gt, goles, foto: foto(gt) })) },
-  { tipo: 'cierre', dur: 9.4, clip: ia('revancha'), kicker: 'LO QUE VIENE · MARTES 3/11', titulo: 'Dos partidos<br><b class="o">para volver a sumar</b>',
+  { tipo: 'cierre', dur: 8.5, clip: ia('revancha'), kicker: 'LO QUE VIENE · MARTES 3/11', titulo: 'Dos partidos<br><b class="o">para volver a sumar</b>',
     filas: PROXIMOS.map(p => ({ ...p, escudo: esc(p.rival) })) },
 ];
 let t0 = 0;
@@ -106,10 +106,10 @@ const pistas = narracion([
   { en: tr(11) + 0.2, texto: 'Martes veintisiete. Primero, una derrota.' },
   { en: tr(12) + 0.4, texto: 'Después, el extremo dejó en el camino al arquero.' },
   { en: tr(13) + 0.6, texto: 'Y en el descuento, otra vez el central.' },
-  { en: tr(14) + 1.2, texto: 'Dos a uno en el noventa.' },
-  { en: tr(16) + 0.3, texto: 'Jueves veintinueve. La noche más dura: dos derrotas por tres a cero.' },
-  { en: tr(17) + 0.3, texto: 'Trece puntos. Séptimos, a uno del quinto.' },
-  { en: tr(18) + 0.3, texto: 'El martes, el líder y Argentinos. Todos los partidos, en vivo, por Twitch, Kick, YouTube e Instagram.' },
+  { en: tr(14) + 0.3, texto: 'Dos a uno en el noventa.' },
+  { en: tr(15) + 0.3, texto: 'Jueves veintinueve. La noche más dura: dos derrotas por tres a cero.' },
+  { en: tr(16) + 0.3, texto: 'Trece puntos. Séptimos, a uno del quinto.' },
+  { en: tr(17) + 0.3, texto: 'El martes, el líder y Argentinos. Todos los partidos, en vivo, por Twitch, Kick, YouTube e Instagram.' },
 ], path.join(DIR, 'voz'));
 
 const datos = {
@@ -131,7 +131,9 @@ if (iC > 0) {
     await p.evaluate(t => mostrar(0, t), s); await p.waitForTimeout(150);
     await p.locator('#lienzo').screenshot({ path: path.join(DIR, `rev-${formato}-${String(s).replace('.', '_')}.jpg`), type: 'jpeg', quality: 80 });
   }
-  await b.close(); log(`capturas en ${DIR} (${FIN.toFixed(1)} s en total)`); process.exit(0);
+  await b.close(); log(`capturas en ${DIR} (${FIN.toFixed(1)} s en total)`);
+  for (const v of pistas) { const tr = TRAMOS.find(x => v.en >= x.desde && v.en < x.hasta); log(`  voz ${v.en.toFixed(1)}–${(v.en + v.dur).toFixed(1)} s · tramo ${tr.tipo} hasta ${tr.hasta}${v.en + v.dur > tr.hasta + 0.3 ? '  ← se pasa' : ''} · ${v.texto}`); }
+  process.exit(0);
 }
 
 // ── Render de los dos formatos ──────────────────────────────────────────────
