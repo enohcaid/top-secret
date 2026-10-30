@@ -1239,7 +1239,7 @@ function openPanel(p, card) {
   const dlLink = document.getElementById('pp-dl');
   dlLink.hidden = season !== 4;
   if (season === 4) {
-    dlLink.href = mediaUrl(`Renders/${renderFolder(p)}/Frente4-cerca.png`) + `&dl=${encodeURIComponent(p.key + '-frente.png')}`;
+    dlLink.href = mediaUrl(`Renders/${renderFolder(p)}/Frente4-cerca.png`).replace(/\?v=.*/, '?v=2026-10-30') + `&dl=${encodeURIComponent(p.key + '-frente.png')}`;
     dlLink.setAttribute('download', p.key + '-frente.png');
   }
   document.getElementById('pp-badge').textContent = p.pos;

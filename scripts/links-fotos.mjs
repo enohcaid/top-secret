@@ -7,7 +7,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
-const RENDER_V = '2026-09-30';
+const RENDER_V = '2026-10-30'; // versión propia de Frente4-cerca (se subió sin fondo el 2026-10-30)
 const { ROSTER_T4 } = await import(pathToFileURL(path.resolve('roster.js')).href);
 
 fs.rmSync('plantilla', { recursive: true, force: true });
