@@ -1235,11 +1235,11 @@ function openPanel(p, card) {
   photoWrap.insertBefore(img, photoWrap.firstChild);
 
   /* identity */
-  /* descarga directa de la imagen de frente (el Worker fuerza la descarga con ?dl=) */
+  /* descarga directa de la imagen de frente cerca, generada con scripts/frente-cerca.mjs (el Worker fuerza la descarga con ?dl=) */
   const dlLink = document.getElementById('pp-dl');
   dlLink.hidden = season !== 4;
   if (season === 4) {
-    dlLink.href = mediaUrl(`Renders/${renderFolder(p)}/Frente4.png`) + `&dl=${encodeURIComponent(p.key + '-frente.png')}`;
+    dlLink.href = mediaUrl(`Renders/${renderFolder(p)}/Frente4-cerca.png`) + `&dl=${encodeURIComponent(p.key + '-frente.png')}`;
     dlLink.setAttribute('download', p.key + '-frente.png');
   }
   document.getElementById('pp-badge').textContent = p.pos;
