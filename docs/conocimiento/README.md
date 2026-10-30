@@ -97,3 +97,4 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_wa_enviar_reporte_angel](reference_wa_enviar_reporte_angel.md) — Mandar fotos desde el WhatsApp personal (scripts/wa-enviar.mjs); reporte de VPUG a Angel; MessageMedia roto y el input de sticker
 - [project_overlay_vivo](project_overlay_vivo.md) — Vivo con overlay en las 3 transmisiones: PS5 → Enohcaid → OBS (overlay + clips de jugadores) → MediaMTX → topsecretfc/Kick/YouTube; tanda automática de clips; subida ~10 Mbps
 - [feedback_una_publicacion_por_red](feedback_una_publicacion_por_red.md) — noticia + video del mismo hecho = una publicación por red
+- [project_resumen_quincenal_eg](project_resumen_quincenal_eg.md) — Resumen quincenal de Espacio Gamer (31/10 placas, 1/11 video YouTube + vertical): scripts quincena-eg*, datos del fixture de EG, sync de EA con 403, detector de ChatGPT que tomaba el adjunto

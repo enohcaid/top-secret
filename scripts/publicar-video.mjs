@@ -2,7 +2,8 @@
 // Publica un video vertical en YouTube (Short), X o TikTok desde el Chrome con CDP (scripts/abrir-chrome-chatgpt.ps1),
 // que tiene las sesiones del club. Instagram y Facebook van por la API: scripts/meta.mjs (ig-reel / fb-video).
 //
-//   node scripts/publicar-video.mjs youtube <video.mp4> --titulo "…" --texto "…"
+//   node scripts/publicar-video.mjs youtube <video.mp4> --titulo "…" --texto "…" [--miniatura portada.jpg]
+//     (un video horizontal sale como video normal, no Short; --miniatura sube la miniatura propia si el canal lo permite)
 //   node scripts/publicar-video.mjs x       <video.mp4> --texto "…"
 //   node scripts/publicar-video.mjs tiktok  <video.mp4> --texto "…" [--hashtags "A,B,C"]
 //
@@ -16,7 +17,7 @@ import { asegurarVentana, enfocar } from './lib/ventana.mjs';
 const argv = process.argv.slice(2);
 const opt = k => { const i = argv.indexOf(k); return i < 0 ? null : argv[i + 1]; };
 const [red, archivo] = argv;
-const TITULO = opt('--titulo'), TEXTO = (opt('--texto') || '').replace(/\\n/g, '\n');
+const MINIATURA = opt('--miniatura'), TITULO = opt('--titulo'), TEXTO = (opt('--texto') || '').replace(/\\n/g, '\n');
 const HASHTAGS = (opt('--hashtags') || '').split(',').map(s => s.trim()).filter(Boolean);
 const VIDEO = path.resolve(archivo || '');
 if (!['youtube', 'x', 'tiktok'].includes(red) || !fs.existsSync(VIDEO)) {
@@ -45,6 +46,11 @@ try {
     await boxes.nth(0).type(TITULO, { delay: 5 });
     await boxes.nth(1).click(); await boxes.nth(1).type(TEXTO, { delay: 2 });
     await espera(1000);
+    // Miniatura propia (videos horizontales): si el canal no tiene la función habilitada, sigue con la automática
+    if (MINIATURA && fs.existsSync(MINIATURA)) {
+      try { await p.locator('input#file-loader').first().setInputFiles(path.resolve(MINIATURA), { timeout: 15000 }); await espera(6000); }
+      catch (e) { console.log('miniatura no subida:', e.message.split(String.fromCharCode(10))[0]); }
+    }
     await p.locator('tp-yt-paper-radio-button[name="VIDEO_MADE_FOR_KIDS_NOT_MFK"]').click();
     await espera(800);
     for (let i = 0; i < 3; i++) { await p.locator('#next-button').click(); await espera(2500); }

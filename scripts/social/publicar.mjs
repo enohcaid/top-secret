@@ -180,7 +180,7 @@ async function publicar(p) {
     case 'x-video':     return link(correr('scripts/publicar-video.mjs', ['x', video, '--texto', p.texto]));
     case 'tiktok':      return link(correr('scripts/publicar-video.mjs', ['tiktok', video, '--texto', p.texto])) || 'https://www.tiktok.com/@topsecretfc';
     case 'tiktok-fotos': return link(correr('scripts/publicar-tiktok-fotos.mjs', [...p.local.slides, '--titulo', p.titulo || '', '--texto', p.texto])) || 'https://www.tiktok.com/@topsecretfc';
-    case 'youtube':     return link(correr('scripts/publicar-video.mjs', ['youtube', video, '--titulo', p.titulo, '--texto', p.texto]));
+    case 'youtube':     return link(correr('scripts/publicar-video.mjs', ['youtube', video, '--titulo', p.titulo, '--texto', p.texto, ...(p.miniatura && fs.existsSync(p.miniatura) ? ['--miniatura', p.miniatura] : [])]));
     default: throw new Error('Método desconocido: ' + p.metodo);
   }
 }

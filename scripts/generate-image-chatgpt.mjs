@@ -740,7 +740,9 @@ function buildResizePrompt() {
   return `Usa la relación de aspecto 9:16`;
 }
 
-async function waitForGeneratedImage(page, excludeSrcs = []) {
+// excludeSizes: [[w,h]] de los adjuntos — opcional; lo usan los pedidos horizontales (lib/imagen.mjs): el adjunto (render
+// 1024x1536) a veces se monta sin las marcas que lo excluyen y se tomaba como la imagen generada (2026-10-30).
+async function waitForGeneratedImage(page, excludeSrcs = [], excludeSizes = []) {
   console.log('  Esperando imagen (hasta 25 min)...');
   // La espera larga la maneja el loop de abajo con su propio deadline; cada
   // acción individual tiene que poder fallar (timeout 0 = colgarse para siempre).
@@ -772,7 +774,7 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
   let   lastProgress = 0;
 
   while (Date.now() - start < TIMEOUT_MS) {
-    const state = await page.evaluate((excludeSrcs) => {
+    const state = await page.evaluate(([excludeSrcs, excludeSizes]) => {
       // Excluir imágenes del mensaje del USUARIO (los adjuntos que subimos
       // aparecen ahí y el detector los confundía con la imagen generada).
       // No se puede exigir contenedor "assistant": la imagen generada se
@@ -788,6 +790,7 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
         // del snapshot preExisting y se detectaba como imagen generada.
         if (/adjunto|attachment|uploaded/i.test(img.alt || '')) continue;
         if (img.closest('form')) continue;
+        if (excludeSizes.some(([w, h]) => img.naturalWidth === w && img.naturalHeight === h)) continue;
         if (
           img.complete &&
           img.naturalWidth  > 300 &&
@@ -808,7 +811,7 @@ async function waitForGeneratedImage(page, excludeSrcs = []) {
       const msgs = [...document.querySelectorAll('[data-message-author-role="assistant"]')];
       const lastText = msgs[msgs.length - 1]?.textContent?.trim().slice(0, 300) || '';
       return { imgSrc, streaming, lastText };
-    }, excludeSrcs);
+    }, [excludeSrcs, excludeSizes]);
 
     if (state.imgSrc) {
       console.log('\n  Imagen detectada.');
@@ -1078,7 +1081,7 @@ async function sendPromptInProject(page, prompt, { freshChat = true, attachments
   }
 }
 
-async function generateImage(page, draft, format, prompt, { freshChat, excludeSrcs, attachments = [] }) {
+async function generateImage(page, draft, format, prompt, { freshChat, excludeSrcs, attachments = [], excludeSizes = [] }) {
   const now      = new Date();
   const dateStr  = draft.date || now.toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   // Usar draft.id (único por artículo) en vez de solo la fecha — dos noticias
@@ -1094,7 +1097,7 @@ async function generateImage(page, draft, format, prompt, { freshChat, excludeSr
   console.log(`\nGenerando imagen ${format.toUpperCase()}...`);
 
   await sendPromptInProject(page, prompt, { freshChat, attachments });
-  const imgUrl = await waitForGeneratedImage(page, excludeSrcs);
+  const imgUrl = await waitForGeneratedImage(page, excludeSrcs, excludeSizes);
   await downloadImage(page, imgUrl, outputPath);
 
   return { filename, imgUrl };

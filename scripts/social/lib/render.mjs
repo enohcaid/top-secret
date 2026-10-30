@@ -10,7 +10,7 @@ import ffmpeg from 'ffmpeg-static';
 import { ROOT } from '../../lib/env.mjs';
 import { rotuloEntrada } from '../../lib/musica.mjs';
 
-const TAM = { post: { width: 1080, height: 1350 }, story: { width: 1080, height: 1920 } };
+const TAM = { post: { width: 1080, height: 1350 }, story: { width: 1080, height: 1920 }, yt: { width: 1920, height: 1080 } };
 export const archivo = f => pathToFileURL(f).href;   // rutas locales → file:// para la plantilla
 
 async function abrir(plantilla, formato, datos) {
@@ -58,14 +58,15 @@ export function dropDelTema(musica) {
 // escenas: [{ n, dur }]; gancho: segundos de la pantalla de gancho al principio (0 = sin gancho).
 // fps 60 + desenfoque: se renderiza a 60 cuadros y se mezclan de a 2 (desenfoque de movimiento real) → 30 fps.
 // musicaDesde: segundo del tema en que arranca el audio (para que el drop caiga en el momento clave del video).
-export async function video(plantilla, datos, salida, { escenas, gancho = 0, musica = null, fps = 30, desenfoque = false, musicaDesde = 0 }) {
+// formato: 'story' (vertical, por defecto) o 'yt' (horizontal 1920x1080, video de YouTube).
+export async function video(plantilla, datos, salida, { escenas, gancho = 0, musica = null, fps = 30, desenfoque = false, musicaDesde = 0, formato = 'story' }) {
   fs.mkdirSync(path.dirname(salida), { recursive: true });
-  const { browser, page } = await abrir(plantilla, 'story', datos);
+  const { browser, page } = await abrir(plantilla, formato, datos);
   const total = gancho + escenas.reduce((s, e) => s + e.dur, 0);
   const args = ['-hide_banner', '-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-'];
   if (musica) {
     // Con música, la tarjeta "Sonando ahora" del tema (Tacet Sin) arriba, todo el video (scripts/lib/musica.mjs)
-    args.push('-ss', musicaDesde.toFixed(3), '-i', musica, ...(await rotuloEntrada(musica, TAM.story.width, TAM.story.height, total)));
+    args.push('-ss', musicaDesde.toFixed(3), '-i', musica, ...(await rotuloEntrada(musica, TAM[formato].width, TAM[formato].height, total)));
     args.push('-filter_complex', `[0:v]${desenfoque ? 'tmix=frames=2:weights=1 1,fps=30' : 'null'}[b];[b][2:v]overlay=0:0:eof_action=pass[v]`, '-map', '[v]', '-map', '1:a');
   } else if (desenfoque) args.push('-vf', 'tmix=frames=2:weights=1 1,fps=30');
   args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', desenfoque ? '30' : String(fps));

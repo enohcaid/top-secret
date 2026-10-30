@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Placas del resumen quincenal (carrusel 1080x1350; scripts/social/piezas/quincena-eg-placas.mjs). pintar(D) arma las
+     escenas y devuelve cuántas son; mostrar(i) deja visible la escena i en su estado final (lib/render.mjs carrusel()). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0907;--card:rgba(17,15,11,.86);--line:rgba(201,168,76,.22);--gold:#C9A84C;--gold2:#F1DC97;--text:#F4EFE0;--text2:rgba(244,239,224,.62);--rojo:#E5484D;--verde:#5BC88A}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg)}
+#lienzo{position:relative;width:1080px;height:1350px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+.esc{position:absolute;inset:0;display:none}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.velo{position:absolute;inset:0}
+.k{font:700 24px 'JetBrains Mono';letter-spacing:.26em;color:var(--gold);text-transform:uppercase}
+.tit{font:900 104px/.96 Barlow;letter-spacing:-.025em}
+.tit b,.o{color:var(--gold)}
+.marca{position:absolute;left:64px;right:64px;top:56px;display:flex;justify-content:space-between;align-items:center;z-index:3}
+.marca span{font:700 20px 'JetBrains Mono';letter-spacing:.24em;color:var(--text2)}
+.marca img{height:64px}
+.pie{position:absolute;left:64px;right:64px;bottom:44px;display:flex;justify-content:space-between;font:700 20px 'JetBrains Mono';letter-spacing:.2em;color:var(--text2);z-index:3}
+.pie b{color:var(--gold)}
+.cancha{position:absolute;inset:0;opacity:.07;background:
+  linear-gradient(var(--gold),var(--gold)) 50% 0/2px 100% no-repeat,
+  radial-gradient(circle at 50% 50%,transparent 180px,var(--gold) 181px,var(--gold) 183px,transparent 184px)}
+.fila{display:flex;align-items:center;gap:22px;padding:20px 26px;border-radius:22px;background:var(--card);border:2px solid var(--line)}
+.fila img{width:84px;height:84px;object-fit:contain;flex:none}
+.fila .n{flex:1;min-width:0;font:800 40px/1.05 'Barlow Condensed';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila .n span{display:block;font:700 17px 'JetBrains Mono';letter-spacing:.18em;color:var(--text2);margin-bottom:6px;text-transform:none}
+.fila .m{font:400 86px/.8 'Bebas Neue'}
+.fila .r{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font:800 24px Barlow;color:#0A0907}
+.fila.V .r{background:var(--verde)}.fila.E .r{background:var(--gold2)}.fila.D .r{background:var(--rojo)}
+.fila.V .m{color:var(--gold)}
+.fila .hora{font:400 72px/.8 'Bebas Neue';color:var(--gold)}
+
+/* 1 portada */
+.e-portada .bg{height:72%}
+.e-portada .velo{background:linear-gradient(180deg,rgba(10,9,7,.6) 0%,rgba(10,9,7,.05) 22%,rgba(10,9,7,.2) 46%,var(--bg) 72%)}
+.e-portada .bloque{position:absolute;left:64px;right:64px;bottom:120px}
+.e-portada .big{font:400 250px/.8 'Bebas Neue';color:var(--gold);margin-top:16px}
+.e-portada .tit{font-size:92px;margin-top:6px}
+.cifras{display:flex;gap:18px;margin-top:40px}
+.cifras div{flex:1;padding:20px 0;border-radius:20px;background:var(--card);border:2px solid var(--line);text-align:center;font:400 84px/1 'Bebas Neue'}
+.cifras div span{display:block;font:700 17px 'JetBrains Mono';letter-spacing:.2em;color:var(--text2);margin-top:6px}
+/* 2-3 semanas */
+.e-semana .cab{position:absolute;left:64px;right:64px;top:170px}
+.e-semana .tit{font-size:92px;margin-top:14px}
+.e-semana .filas{position:absolute;left:64px;right:64px;top:480px;display:flex;flex-direction:column;gap:16px}
+.e-semana .dia{font:700 19px 'JetBrains Mono';letter-spacing:.22em;color:var(--gold);margin:10px 0 0 6px}
+/* 4 goleadores */
+.e-gol .cab{position:absolute;left:64px;right:64px;top:170px}
+.e-gol .tit{font-size:92px;margin-top:14px}
+.e-gol .podio{position:absolute;left:30px;right:30px;bottom:0;height:820px;display:flex;align-items:flex-end;justify-content:center;gap:0}
+.e-gol .col{position:relative;flex:1;height:100%;display:flex;justify-content:center}
+.e-gol .col img{position:absolute;bottom:0;height:var(--h);left:50%;transform:translateX(-50%);filter:drop-shadow(0 20px 40px rgba(0,0,0,.7))}
+.e-gol .dato{position:absolute;left:0;right:0;bottom:120px;text-align:center;z-index:2}
+.e-gol .dato b{display:block;font:400 150px/.8 'Bebas Neue';color:var(--gold);text-shadow:0 10px 40px rgba(0,0,0,.8)}
+.e-gol .dato span{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:10px;background:rgba(10,9,7,.85);font:800 26px 'Barlow Condensed';white-space:nowrap}
+.e-gol .desv{position:absolute;left:0;right:0;bottom:0;height:260px;background:linear-gradient(transparent,var(--bg) 70%)}
+/* 5-6 momentos */
+.e-mom .velo{background:linear-gradient(180deg,rgba(10,9,7,.95) 0%,rgba(10,9,7,.6) 9%,transparent 25%,transparent 33%,rgba(10,9,7,.8) 52%,rgba(10,9,7,.94) 78%,var(--bg) 100%)}
+.e-mom .bloque{position:absolute;left:64px;right:64px;bottom:120px}
+.e-mom .big{font:400 230px/.8 'Bebas Neue';color:var(--gold)}
+.e-mom .tit{font-size:84px;margin-top:10px}
+.e-mom .lista{margin-top:26px;display:flex;flex-direction:column;gap:10px;font:800 34px/1.15 'Barlow Condensed'}
+.e-mom .lista div{display:flex;gap:16px;align-items:baseline}
+.e-mom .lista i{font:400 46px/1 'Bebas Neue';color:var(--gold);font-style:normal;width:90px;flex:none}
+.e-mom .recre{position:absolute;right:64px;top:140px;font:700 18px 'JetBrains Mono';letter-spacing:.22em;color:var(--text2);padding:8px 12px;border-radius:8px;background:rgba(0,0,0,.5);z-index:3}
+.e-mom .vivo{position:absolute;right:64px;top:140px;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:rgba(0,0,0,.6);font:700 18px 'JetBrains Mono';letter-spacing:.2em;z-index:3}
+.e-mom .vivo i{width:12px;height:12px;border-radius:50%;background:var(--rojo)}
+/* 7 tabla */
+.e-tabla .cab{position:absolute;left:64px;right:64px;top:170px}
+.e-tabla .pos{display:flex;align-items:flex-end;gap:26px;margin-top:14px}
+.e-tabla .pos .p{font:400 240px/.78 'Bebas Neue';color:var(--gold)}
+.e-tabla .pos .pt{font:900 60px/1 Barlow;padding-bottom:18px}
+.e-tabla .pos .pt span{display:block;font:700 19px 'JetBrains Mono';letter-spacing:.2em;color:var(--text2);margin-top:10px}
+.e-tabla .tabla{position:absolute;left:64px;right:64px;top:600px;display:flex;flex-direction:column;gap:12px}
+.e-tabla .t{display:grid;grid-template-columns:60px 70px 1fr 70px 90px;align-items:center;gap:16px;padding:14px 22px;border-radius:18px;background:var(--card);border:2px solid var(--line);font:800 34px 'Barlow Condensed';text-transform:uppercase}
+.e-tabla .t img{width:60px;height:60px;object-fit:contain}
+.e-tabla .t .ps{font:400 52px/1 'Bebas Neue';color:var(--text2)}
+.e-tabla .t .pj{font:700 22px 'JetBrains Mono';color:var(--text2);text-align:right}
+.e-tabla .t .pts{font:400 60px/1 'Bebas Neue';text-align:right}
+.e-tabla .t.ts{background:var(--gold);color:#0A0907;border-color:var(--gold)}
+.e-tabla .t.ts .ps,.e-tabla .t.ts .pj{color:#0A0907}
+.e-tabla .nota{position:absolute;left:64px;right:64px;bottom:110px;font:700 19px 'JetBrains Mono';letter-spacing:.14em;color:var(--text2)}
+/* 8 lo que viene */
+.e-prox .velo{background:linear-gradient(180deg,rgba(10,9,7,.75) 0%,rgba(10,9,7,.45) 40%,rgba(10,9,7,.92) 75%,var(--bg) 100%)}
+.e-prox .cab{position:absolute;left:64px;right:64px;top:170px}
+.e-prox .tit{font-size:92px;margin-top:14px}
+.e-prox .filas{position:absolute;left:64px;right:64px;top:600px;display:flex;flex-direction:column;gap:18px}
+.e-prox .vivo{position:absolute;left:64px;right:64px;bottom:120px;padding:22px;border-radius:20px;background:var(--gold);color:#0A0907;text-align:center;font:800 34px Barlow}
+</style>
+</head>
+<body>
+<div id="lienzo"></div>
+<script>
+let ESC = [];
+const fila = f => `<div class="fila ${f.res || ''}"><img src="${f.escudo}" alt=""><div class="n"><span>${f.etiqueta}</span>${f.rival}</div>${f.hora ? `<div class="hora">${f.hora}</div>` : `<div class="m">${f.marcador}</div><div class="r">${f.res}</div>`}</div>`;
+function pintar(D) {
+  const marca = `<div class="marca"><span>${D.kicker}</span><img src="${D.escudo}" alt=""></div>`;
+  const pie = i => `<div class="pie"><span>Top Secret FC</span><span><b>${String(i + 1).padStart(2, '0')}</b> / 08</span></div>`;
+  const e = [];
+  e.push(`<section class="esc e-portada"><img class="bg" src="${D.portada.imagen}" style="object-position:${D.portada.foco || '50% 50%'}"><div class="velo"></div>${marca}
+    <div class="bloque"><div class="k">${D.portada.kicker}</div><div class="big">${D.portada.big}</div><div class="tit">${D.portada.titulo}</div>
+    <div class="cifras">${D.portada.cifras.map(c => `<div>${c.n}<span>${c.t}</span></div>`).join('')}</div></div>`);
+  for (const s of D.semanas) e.push(`<section class="esc e-semana"><div class="cancha"></div>${marca}
+    <div class="cab"><div class="k">${s.kicker}</div><div class="tit">${s.titulo}</div></div>
+    <div class="filas">${s.noches.map(n => `<div class="dia">${n.dia}</div>${n.filas.map(fila).join('')}`).join('')}</div>`);
+  const alto = [760, 640, 560, 560];
+  e.push(`<section class="esc e-gol"><div class="cancha"></div>${marca}
+    <div class="cab"><div class="k">Goleadores de la quincena</div><div class="tit">${D.goleadoresTitulo}</div></div>
+    <div class="podio">${D.goleadores.map((g, i) => `<div class="col"><img src="${g.img}" style="--h:${alto[i]}px" alt=""><div class="dato"><b>${g.goles}</b><span>${g.gt}</span></div></div>`).join('')}</div><div class="desv"></div>`);
+  for (const m of D.momentos) e.push(`<section class="esc e-mom"><img class="bg" src="${m.imagen}" style="object-position:${m.foco || '50% 50%'}"><div class="velo"></div>${marca}
+    ${m.recreacion ? '<div class="recre">RECREACIÓN · IA</div>' : '<div class="vivo"><i></i>TRANSMISIÓN</div>'}
+    <div class="bloque"><div class="k">${m.kicker}</div>${m.big ? `<div class="big">${m.big}</div>` : ''}<div class="tit">${m.titulo}</div>
+    ${m.lista ? `<div class="lista">${m.lista.map(x => `<div><i>${x[0]}</i>${x[1]}</div>`).join('')}</div>` : ''}</div>`);
+  e.push(`<section class="esc e-tabla"><div class="cancha"></div>${marca}
+    <div class="cab"><div class="k">Tabla de Espacio Gamer</div><div class="pos"><div class="p">${D.tabla.posicion}</div><div class="pt">${D.tabla.puntos}</div></div></div>
+    <div class="tabla">${D.tabla.filas.map(t => `<div class="t${t.ts ? ' ts' : ''}"><div class="ps">${t.pos}</div><img src="${t.logo}" alt=""><div>${t.nombre}</div><div class="pj">${t.pj} PJ</div><div class="pts">${t.pts}</div></div>`).join('')}</div>
+    <div class="nota">${D.tabla.nota}</div>`);
+  e.push(`<section class="esc e-prox"><img class="bg" src="${D.prox.imagen}"><div class="velo"></div>${marca}
+    <div class="cab"><div class="k">${D.prox.kicker}</div><div class="tit">${D.prox.titulo}</div></div>
+    <div class="filas">${D.prox.filas.map(fila).join('')}</div>
+    <div class="vivo">En vivo por Twitch, Kick, YouTube e Instagram</div>`);
+  const L = document.getElementById('lienzo');
+  L.innerHTML = e.map((h, i) => h + pie(i) + '</section>').join('');
+  ESC = [...L.querySelectorAll('.esc')];
+  return ESC.length;
+}
+function mostrar(i) { ESC.forEach((s, k) => { s.style.display = k === i ? 'block' : 'none'; }); }
+</script>
+</body>
+</html>
