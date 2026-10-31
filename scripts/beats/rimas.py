@@ -48,7 +48,8 @@ def riman(a, b):
 
 
 def ultima(verso):
-    ws = re.findall(r"[A-Za-z']+", verso)
+    # los ad-libs entre paréntesis al final ("(yeah)", "(no)") no cierran la frase: la rima es la palabra de antes
+    ws = re.findall(r"[A-Za-z']+", re.sub(r"\(.*?\)", "", verso))
     return ws[-1].strip("'") if ws else None
 
 
