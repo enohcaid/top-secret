@@ -1,10 +1,23 @@
-// Partituras de Thrive escritas por Gemma (Juan, 2026-10-31: "hay que enseñarle a componer a Gemma; no podemos dejar que
-// ACE haga los beats porque hace pop"). Gemma no escribe código: escribe la partitura (acordes, motivos, 808, grillas de
-// batería, arreglo, kit) y scripts/beats/partitura.py la toca. El encargo baja de ~20K tokens a ~2K y entra entero en la
-// GTX 1070.
-// El código NO corrige la música de Gemma (Juan, 2026-10-31: "no lo repares vos, repará lo que falló en Gemma y que Gemma
-// lo vuelva a intentar"): detecta cada falla, la ata a una parte concreta y le pregunta a Gemma solo por esa parte, hasta
-// que pase. Lo único que hace el código es traducir el formato y armar las secciones según la función de cada parte.
+// Partituras de Thrive compuestas por Gemma sobre un MOLDE (Juan, 2026-10-31: "dejá de darle tanta libertad y
+// establecele un patrón sobre el cual crear; una estructura que imite tu forma de crear los beats").
+//
+// Historia: con formato libre (código, después JSON con nombres y largos) Gemma copiaba el ejemplo, no sabía sumar
+// duraciones, metía grillas donde iban nombres y, al reintentar, devolvía lo mismo. Le sale bien ELEGIR entre opciones
+// concretas. Así que el molde sigue los pasos con que se compone un beat de trap acá:
+//   1. armonía: una progresión menor oscura para el verso y otra para el estribillo (vocabulario PROGRESIONES)
+//   2. batería: patrones de trap de bombo y hats, ordenados de despojado a cargado; el estribillo más cargado que el
+//      verso; la segunda mitad de cada parte = la misma grilla con un fill (redoble o tresillo) en el último tiempo
+//   3. 808: sigue al bombo (golpea con él) con la figura de grados que elige Gemma, respira antes de cada golpe y el
+//      estribillo termina deslizándose (glide) hacia el compás siguiente
+//   4. melodía: una célula rítmica (vocabulario LLAMADAS) + las notas que elige Gemma; la respuesta, otra célula que
+//      ocupa los huecos de la llamada (RESPUESTAS)
+//   5. un momento distintivo: la sección donde la melodía se transforma y cómo
+//   6. transiciones antes de cada estribillo (corte, redoble, tapestop: cada una como mucho dos veces)
+//   7. carácter del kit (KITS)
+// El vocabulario son técnicas del género (patrones de batería, células rítmicas, progresiones típicas), no material de
+// temas anteriores; las notas y las combinaciones son de Gemma. Todo lo elegible es válido de entrada: lo que se controla
+// después (estribillo más que verso, progresiones distintas, transiciones, originalidad) se le vuelve a preguntar a Gemma
+// con opciones cerradas — el código no corrige su música.
 // Las partituras aprobadas quedan en scripts/beats/partituras/<slug>.json: el control de originalidad compara contra ellas.
 import fs from 'fs';
 import path from 'path';
@@ -14,39 +27,66 @@ import { ollama } from '../lib/ia.mjs';
 export const DIR_PARTITURAS = path.join(ROOT, 'scripts/beats/partituras');
 const INSTR = ['campana', 'pluck', 'piano', 'lead', 'vox', 'cuerdas'], TEXT = ['pad', 'coro', 'cuerdas'];
 const NOMBRES = ['intro', 'verse', 'pre-chorus', 'chorus', 'bridge', 'outro'];
-const VARIAC = ['normal', 'media', 'invertida', 'retrogrado', 'octava'], FINALES = ['nada', 'corte', 'tapestop', 'redoble'];
-const KNOBS = ['bombo_golpe', 'bombo_cola', 'clap_tono', 'hat_metal', 'dist_808', 'sala', 'brillo', 'swing', 'cinta', 'crush'];
+const VARIAC = ['media', 'invertida', 'retrogrado', 'octava'], TRANSICIONES = ['corte', 'redoble', 'tapestop'];
 
-const str = { type: 'string' }, num = { type: 'number' }, bool = { type: 'boolean' };
+// ── Vocabulario del molde ────────────────────────────────────────────────────
+// progresiones menores (grados de la escala, un acorde por compás)
+const PROGRESIONES = {
+  'i-VI-III-VII': '1 6 3 7', 'i-iv-VI-v': '1 4 6 5', 'i-VI-iv-v': '1 6 4 5', 'i-VII-VI-VII': '1 7 6 7', 'i-III-VII-VI': '1 3 7 6',
+  'VI-VII-i-i': '6 7 1 1', 'i-i-VI-VI': '1 1 6 6', 'i-iv-i-VI': '1 4 1 6', 'i-v-VI-iv': '1 5 6 4', 'iv-VI-i-VII': '4 6 1 7',
+};
+// bombos de medio tiempo (nunca en el 3, donde va el clap; nunca en los cuatro tiempos), de menos a más
+const BOMBOS = {
+  suelto: 'x.........x.....', rebote: 'x......x..x.....', arrastre: 'x.....x...x.....', sincopa: 'x..x......x..x..',
+  empuje: 'x..x...x..x.x...', tren: 'x..x.x....x.xx..', galope: 'xx....x...xx..x.',
+};
+const HATS = {
+  corcheas_respira: 'x.x.x...x.x.x...', corcheas: 'x.x.x.x.x.x.x.x.', semis_respira: 'x.xxx.x.x.xxx.x.', rodante: 'x.xrx.x.x.xrx.xt',
+  galope: 'xx.xxx.xxx.xxx.x', semis: 'xxxxxxxxxxxxxxxx',
+};
+const FILLS = { redoble: 'rrrr', medio_redoble: 'x.rr', tresillo: 'tttt', redoble_tresillo: 'rrtt', tresillo_tardio: '..tt', picado: 'xrxr' };
+const ABIERTOS = { nada: '................', final: '..............x.', contratiempo: '......x.......x.' };
+// células de 2 compases (32 semicorcheas): o = ataque, - = sostiene, . = silencio
+const LLAMADAS = {
+  suspiro: 'o-------o---o---................', pregunta: 'o--.o--.o-------........o--.o---', escalera: 'o.o.o.o-----....o.o.o-----......',
+  eco: 'o---o---........o---o---........', arrastre: 'o-----o-o-------....o-----o-----', golpe: 'o.....o.....o...o---------......',
+};
+const RESPUESTAS = {
+  contesta: '........o-o-o---........o-o-----', sombra: '....o---....o-------....o-------', cierre: '................o.o.o-o---------',
+  picado: '........o.o.o.o.........o.o.o...',
+};
+const KITS = {
+  pesado: { bombo_golpe: 0.9, bombo_cola: 0.7, clap_tono: 0.3, hat_metal: 0.5, dist_808: 0.8, sala: 0.4, brillo: 0.3, swing: 0.15, cinta: 0.2, crush: 0.1 },
+  nocturno: { bombo_golpe: 0.6, bombo_cola: 0.5, clap_tono: 0.5, hat_metal: 0.4, dist_808: 0.4, sala: 0.8, brillo: 0.5, swing: 0.25, cinta: 0.35, crush: 0 },
+  crudo: { bombo_golpe: 0.8, bombo_cola: 0.4, clap_tono: 0.6, hat_metal: 0.8, dist_808: 0.9, sala: 0.3, brillo: 0.6, swing: 0.1, cinta: 0.1, crush: 0.35 },
+  frio: { bombo_golpe: 0.5, bombo_cola: 0.6, clap_tono: 0.7, hat_metal: 0.7, dist_808: 0.5, sala: 0.6, brillo: 0.7, swing: 0.2, cinta: 0.2, crush: 0.15 },
+  hipnotico: { bombo_golpe: 0.7, bombo_cola: 0.8, clap_tono: 0.4, hat_metal: 0.6, dist_808: 0.6, sala: 0.7, brillo: 0.35, swing: 0.3, cinta: 0.45, crush: 0.05 },
+};
+const golpes = s => (s.match(/[xrt]/g) || []).length;
+for (const [n, r] of Object.entries({ ...LLAMADAS, ...RESPUESTAS })) if (r.length !== 32) throw new Error(`célula ${n}: ${r.length} casilleros`);
+for (const [n, b] of Object.entries({ ...BOMBOS, ...HATS })) if (b.length !== 16) throw new Error(`patrón ${n}: ${b.length} casilleros`);
+
+// ── Esquema: todo son elecciones; las notas, números del 1 al 9 ──────────────
+const str = { type: 'string' }, bool = { type: 'boolean' };
 const obj = (props, req = Object.keys(props)) => ({ type: 'object', properties: props, required: req });
-const grupos = c => ({ type: 'string', pattern: `^${c}{4} ${c}{4} ${c}{4} ${c}{4}$` });
-// Partes con NOMBRE FIJO (31/10): con nombres libres, Gemma metía la grilla de batería en el lugar del nombre ("bateria":
-// "x... x... x... x...") y el estribillo quedaba sin batería; las referencias cruzadas son una trampa para un modelo chico.
-// Escribe el material de cada parte (verso, estribillo, puente) y las secciones se arman según la función de cada una,
-// lo que además garantiza que las partes se distingan.
-// Melodías y 808 en GRILLA de casilleros (31/10): con tokens GRADO/LARGO, Gemma no lograba que los largos sumaran
-// (escribía 244, 136, 496 semicorcheas en vez de 32, ronda tras ronda, aun con el error delante). Las grillas de batería
-// le salían siempre bien: con casilleros fijos el largo es correcto por construcción y no hay nada que sumar.
-// Casillero = una semicorchea: 1–7 nota (grado; 8 y 9 = 1 y 2 una octava arriba), - sostiene, . silencio,
-// ~ (solo 808) sostiene y desliza hacia la nota siguiente.
-const grillaN = (n, c) => ({ type: 'string', pattern: `^${Array(n).fill(`${c}{4}`).join(' ')}$` });
-const motivoEsq = grillaN(8, '[1-9.-]'), bajoEsq = grillaN(4, '[1-8.~-]');
-const gradosEsq = { type: 'array', items: { type: 'integer', minimum: 1, maximum: 7 }, minItems: 2, maxItems: 8 };
-// grillas en 4 grupos de 4 (un modelo de 12B no cuenta 16 caracteres seguidos; de a 4 sí)
-const bateriaEsq = () => obj({ bombo: grupos('[x.]'), hats: grupos('[xrt.]'), abierto: grupos('[x.]') });
-const arregloEsq = n => ({ type: 'array', minItems: n, maxItems: n,
-  items: obj({ seccion: { type: 'string', enum: NOMBRES }, variacion: { type: 'string', enum: VARIAC }, final: { type: 'string', enum: FINALES } }) });
+const de = o => ({ type: 'string', enum: Object.keys(o) });
+const grado = { type: 'integer', minimum: 1, maximum: 9 };
+const parteEsq = obj({ bombo: de(BOMBOS), hats: de(HATS), fill: de(FILLS), abierto: de(ABIERTOS),
+  figura_808: { type: 'array', items: { type: 'integer', enum: [1, 3, 4, 5, 7, 8] }, minItems: 2, maxItems: 4 } });
+const melodiaEsq = r => obj({ ritmo: de(r), notas: { type: 'array', items: grado, minItems: 8, maxItems: 8 } });
+const conMelodia = plan => plan.map((p, i) => (ROLES[p.nombre]?.melodia ? i : null)).filter(x => x !== null);
 export const esquema = plan => obj({
-  rasgo: str, armonica: bool,
-  kit: obj(Object.fromEntries(KNOBS.map(k => [k, num]))),
-  melodia_instrumento: { type: 'string', enum: INSTR }, respuesta_instrumento: { type: 'string', enum: INSTR },
-  textura_instrumento: { type: 'string', enum: TEXT },
-  progresion_verso: gradosEsq, progresion_estribillo: gradosEsq,
-  llamada: motivoEsq, respuesta: motivoEsq, bajo_verso: bajoEsq, bajo_estribillo: bajoEsq,
-  bateria_verso: bateriaEsq(), bateria_verso_b: bateriaEsq(), bateria_estribillo: bateriaEsq(), bateria_estribillo_b: bateriaEsq(), bateria_puente: bateriaEsq(),
-  arreglo: arregloEsq(plan.length),
+  rasgo: str, armonica: bool, kit: de(KITS),
+  melodia_instrumento: { type: 'string', enum: INSTR }, respuesta_instrumento: { type: 'string', enum: INSTR }, textura_instrumento: { type: 'string', enum: TEXT },
+  progresion_verso: de(PROGRESIONES), progresion_estribillo: de(PROGRESIONES),
+  verso: parteEsq, estribillo: parteEsq, puente: obj({ bombo: de(BOMBOS), hats: de(HATS) }),
+  llamada: melodiaEsq(LLAMADAS), respuesta: melodiaEsq(RESPUESTAS),
+  momento: obj({ seccion: { type: 'integer', enum: conMelodia(plan) }, variacion: { type: 'string', enum: VARIAC } }),
+  transiciones: { type: 'array', items: { type: 'string', enum: TRANSICIONES }, minItems: coros(plan), maxItems: coros(plan) },
 });
-// Qué toca cada parte según su función (el material es de Gemma)
+const coros = plan => plan.filter((p, i) => i > 0 && p.nombre === 'chorus').length;
+
+// Qué toca cada parte según su función
 const ROLES = {
   intro: { melodia: true, textura: true, acordes: 'verso', energia: 1 },
   verse: { respuesta: true, bajo: 'verso', bateria: 'verso', bateria_b: 'verso_b', acordes: 'verso', energia: 3 },
@@ -76,12 +116,11 @@ export function planCompases(estructura, compases) {
   return plan;
 }
 
-// ── Lectura: solo traduce el formato (no cambia notas, largos ni grillas) ──
-const grilla = s => String(s || '').replace(/\s+/g, '');
-// grilla de casilleros → tokens GRADO/LARGO que entiende partitura.py (traducción pura: no cambia ninguna nota)
+// ── Del molde a la partitura que toca partitura.py (traducción: no decide nada musical) ──
+// grilla de casilleros (1–9 nota, - sostiene, . silencio, ~ sostiene y desliza) → tokens GRADO/LARGO
 function aTokens(g) {
   const out = []; let glide = false;
-  for (const c of grilla(g)) {
+  for (const c of g) {
     const ult = out.at(-1);
     if (/[1-9]/.test(c)) { const n = +c; out.push({ n: n > 7 ? `${n - 7}+` : String(n), d: 1, gl: glide }); glide = false; }
     else if (c === '.') { if (ult?.n === 'r') ult.d++; else out.push({ n: 'r', d: 1 }); }
@@ -89,44 +128,58 @@ function aTokens(g) {
   }
   return out.map(t => `${t.n}${t.gl ? '~' : ''}/${t.d}`).join(' ');
 }
-const fila = h => (h.match(/.{1,4}/g) || []).join(' ');
-const largo = s => String(s || '').trim().split(/\s+/).reduce((a, t) => a + (+t.split('/')[1] || 0), 0);
-const clamp01 = x => Math.min(1, Math.max(0, Number.isFinite(+x) ? +x : 0.5));
-const PARTES_NOTAS = { llamada: ['motivos', 'llamada', 32], respuesta: ['motivos', 'respuesta', 32], bajo_verso: ['bajos', 'verso', 16], bajo_estribillo: ['bajos', 'estribillo', 16] };
+// célula rítmica + notas de Gemma → grilla
+const melodia = (ritmo, notas) => { let k = 0; return [...ritmo].map(c => (c === 'o' ? String(notas[k++ % notas.length]) : c)).join(''); };
+// 808 sobre los golpes del bombo: cada nota dura hasta un casillero antes del golpe siguiente (respira); con glide, la
+// penúltima se sostiene sin respirar y desliza hacia el último golpe del compás (el acento)
+function linea808(bombo, figura, glide) {
+  const pos = [...bombo].map((c, i) => (c === 'x' ? i : null)).filter(x => x !== null), g = Array(16).fill('.');
+  pos.forEach((p, i) => {
+    const fin = i + 1 < pos.length ? pos[i + 1] - 1 : 15;
+    g[p] = String(figura[i % figura.length]);
+    const desliza = glide && i === pos.length - 2;
+    for (let k = p + 1; k < (desliza ? pos[i + 1] : fin); k++) g[k] = desliza ? '~' : '-';
+  });
+  return g.join('');
+}
+const conFill = (hats, fill) => hats.slice(0, 12) + FILLS[fill];
 
 export function leer(j, { bpm, tonalidad, plan }) {
   const P = {
-    bpm, tonalidad, armonica: !!j.armonica, rasgo: String(j.rasgo || '').trim(),
-    kit: Object.fromEntries(KNOBS.map(k => [k, clamp01(j.kit?.[k])])),
+    bpm, tonalidad, armonica: !!j.armonica, rasgo: String(j.rasgo || '').trim(), kit: { ...KITS[j.kit] }, molde: j,
     melodia: j.melodia_instrumento, respuesta: j.respuesta_instrumento, textura: j.textura_instrumento,
-    progresiones: {}, motivos: {}, bajos: {}, baterias: {}, secciones: [], arreglo: j.arreglo || [], grillas: {},
+    progresiones: { verso: PROGRESIONES[j.progresion_verso], estribillo: PROGRESIONES[j.progresion_estribillo] },
+    motivos: { llamada: aTokens(melodia(LLAMADAS[j.llamada.ritmo], j.llamada.notas)), respuesta: aTokens(melodia(RESPUESTAS[j.respuesta.ritmo], j.respuesta.notas)) },
+    bajos: {
+      verso: aTokens(linea808(BOMBOS[j.verso.bombo], j.verso.figura_808, false)),
+      estribillo: aTokens(linea808(BOMBOS[j.estribillo.bombo], j.estribillo.figura_808, true)),   // el estribillo siempre desliza
+    },
+    baterias: {}, secciones: [],
   };
-  for (const k of ['verso', 'estribillo']) if (Array.isArray(j[`progresion_${k}`])) P.progresiones[k] = j[`progresion_${k}`].join(' ');
-  for (const k of Object.keys(PARTES_NOTAS)) if (j[k]) ponerNotas(P, k, j[k]);
-  for (const k of ['verso', 'verso_b', 'estribillo', 'estribillo_b', 'puente']) {
-    const d = j[`bateria_${k}`];
-    if (d) P.baterias[k] = { bombo: grilla(d.bombo), hats: grilla(d.hats), abierto: grilla(d.abierto) };
+  for (const k of ['verso', 'estribillo']) {
+    const p = j[k];
+    P.baterias[k] = { bombo: BOMBOS[p.bombo], hats: HATS[p.hats], abierto: ABIERTOS[p.abierto] };
+    P.baterias[`${k}_b`] = { ...P.baterias[k], hats: conFill(HATS[p.hats], p.fill) };
   }
+  P.baterias.puente = { bombo: BOMBOS[j.puente.bombo], hats: HATS[j.puente.hats], abierto: ABIERTOS.nada };
   armarSecciones(P, plan);
   return P;
 }
-function ponerNotas(P, k, g) {
-  const [tabla, clave] = PARTES_NOTAS[k];
-  P.grillas[k] = String(g).trim(); P[tabla][clave] = aTokens(g);
-}
-// secciones = el plan de compases + el arreglo de Gemma (variación y transición) + lo que toca cada parte por su función
 export function armarSecciones(P, plan) {
+  const j = P.molde;
+  let c = 0;
   P.secciones = plan.map((p, i) => {
-    const R = ROLES[p.nombre] || ROLES.verse, a = P.arreglo[i] || {};
+    const R = ROLES[p.nombre] || ROLES.verse, siguienteCoro = plan[i + 1]?.nombre === 'chorus';
     return { nombre: p.nombre, compases: p.compases, acordes: R.acordes,
-      melodia: R.melodia ? 'llamada' : null, respuesta: R.respuesta ? 'respuesta' : null, variacion: a.variacion || 'normal',
-      bajo: R.bajo || null, bateria: R.bateria || null, bateria_b: R.bateria_b || null,
-      textura: !!R.textura, energia: R.energia, final: a.final || 'nada' };
+      melodia: R.melodia ? 'llamada' : null, respuesta: R.respuesta ? 'respuesta' : null,
+      variacion: j.momento?.seccion === i ? j.momento.variacion : 'normal',
+      bajo: R.bajo || null, bateria: R.bateria || null, bateria_b: R.bateria_b || null, textura: !!R.textura, energia: R.energia,
+      final: siguienteCoro ? (j.transiciones?.[c++] || 'corte') : 'nada' };
   });
 }
 
-// ── Control: cada falla atada a una parte, para preguntarle a Gemma solo por esa parte ──
-const grados = s => String(s).split(/\s+/).filter(t => !t.startsWith('r')).map(t => t.split('/')[0]);
+// ── Controles (cada uno se le vuelve a preguntar a Gemma con opciones cerradas) ──
+const nums = s => String(s).split(/\s+/).filter(t => !t.startsWith('r')).map(t => t.split('/')[0]);
 const parecido = (a, b) => {   // proporción de la secuencia de notas compartida en orden (LCS)
   if (!a.length || !b.length) return 0;
   const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
@@ -138,138 +191,90 @@ export function anteriores(excepto) {
   return fs.readdirSync(DIR_PARTITURAS).filter(f => f.endsWith('.json') && f !== `${excepto}.json`)
     .map(f => ({ slug: f.slice(0, -5), ...JSON.parse(fs.readFileSync(path.join(DIR_PARTITURAS, f), 'utf8')) }));
 }
-// Devuelve [{parte, error}]: parte = llamada | respuesta | bajo_verso | bajo_estribillo | bateria_<x> | arreglo | todo
 export function criticar(P, { slug }) {
-  const F = [], mal = (parte, error) => F.push({ parte, error });
-  for (const [k, [tabla, clave, debe]] of Object.entries(PARTES_NOTAS)) {
-    const s = P[tabla][clave];
-    if (!s) { mal(k, `${k} is missing`); continue; }
-    if (largo(s) !== debe) mal(k, `${k} lasts ${largo(s)} sixteenths; it must last exactly ${debe}`);
-    if (tabla === 'motivos' && grados(s).length < 3) mal(k, `${k} has fewer than 3 notes`);
-    if (tabla === 'bajos' && !/(^|\s)r\//.test(s)) mal(k, `${k} never rests: the 808 must breathe — leave silent sixteenths (.) in the grid`);
-  }
-  if (!Object.values(P.bajos).some(b => b.includes('~'))) mal('bajo_estribillo', 'no glide (~) anywhere in the 808: glide into one accent');
-  for (const k of ['verso', 'verso_b', 'estribillo', 'estribillo_b', 'puente']) {
-    const d = P.baterias[k];
-    if (!d) { mal(`bateria_${k}`, `bateria_${k} is missing`); continue; }
-    if ([0, 4, 8, 12].every(i => d.bombo[i] === 'x')) mal(`bateria_${k}`, `bateria_${k}: four-on-the-floor kick is pop, not trap`);
-    if (!d.bombo.includes('x') && k !== 'puente') mal(`bateria_${k}`, `bateria_${k} has no kick`);
-  }
-  const B = P.baterias;
-  if (B.verso && B.verso_b && B.verso.hats === B.verso_b.hats) mal('bateria_verso_b', 'bateria_verso_b has the same hats as bateria_verso: it must be a variation with a fill');
-  if (B.estribillo && B.estribillo_b && B.estribillo.hats === B.estribillo_b.hats) mal('bateria_estribillo_b', 'bateria_estribillo_b has the same hats as bateria_estribillo: it must be a variation with a fill');
-  // el estribillo tiene que ser MÁS que el verso (no solo distinto): más bombos o más golpes de hats
-  const golpes = (s, c) => (s.match(new RegExp(`[${c}]`, 'g')) || []).length;
-  if (B.verso && B.estribillo && !(golpes(B.estribillo.bombo, 'x') > golpes(B.verso.bombo, 'x') || golpes(B.estribillo.hats, 'xrt') > golpes(B.verso.hats, 'xrt')))
-    mal('bateria_estribillo', `bateria_estribillo is not bigger than bateria_verso (verse: ${golpes(B.verso.bombo, 'x')} kicks and ${golpes(B.verso.hats, 'xrt')} hat hits; chorus: ${golpes(B.estribillo.bombo, 'x')} kicks and ${golpes(B.estribillo.hats, 'xrt')} hat hits): the chorus needs MORE kicks or more hat hits`);
-  if (!Object.values(B).some(d => /[rt]/.test(d.hats))) mal('bateria_estribillo_b', 'no hi-hat roll (r) or triplet (t) anywhere');
-  // arreglo: transición antes de cada estribillo, cada recurso como mucho dos veces, al menos una transformación
-  const S = P.secciones;
-  const antes = S.map((s, i) => (s.nombre === 'chorus' && i > 0 ? i - 1 : null)).filter(x => x !== null);
-  const sin = antes.filter(i => S[i].final === 'nada');
-  if (sin.length) mal('arreglo', `entries ${antes.join(', ')} come right before a chorus and each one needs a final (corte, tapestop or redoble); ${sin.join(', ')} still ${sin.length > 1 ? 'have' : 'has'} "nada"`);
-  const fin = S.filter(s => s.final !== 'nada').map(s => s.final);
-  for (const f of new Set(fin)) if (fin.filter(x => x === f).length > 2) mal('arreglo', `"${f}" is used ${fin.filter(x => x === f).length} times (entries ${S.map((s, i) => (s.final === f ? i : null)).filter(x => x !== null).join(', ')}): use each device at most twice — mix corte, tapestop and redoble`);
-  if (!S.some(s => s.melodia && s.variacion !== 'normal')) mal('arreglo', 'the llamada never transforms (variacion): the distinctive trait needs at least one');
-  // originalidad: nada del material de partituras anteriores
+  const F = [], mal = (parte, error) => F.push({ parte, error }), j = P.molde;
+  if (golpes(BOMBOS[j.estribillo.bombo]) <= golpes(BOMBOS[j.verso.bombo]) && golpes(HATS[j.estribillo.hats]) <= golpes(HATS[j.verso.hats]))
+    mal('estribillo', 'the chorus drums are not bigger than the verse drums');
+  if (j.progresion_estribillo === j.progresion_verso) mal('progresion_estribillo', 'the chorus uses the same progression as the verse');
+  for (const t of TRANSICIONES) if ((j.transiciones || []).filter(x => x === t).length > 2) mal('transiciones', `"${t}" is used more than twice`);
+  if (new Set(j.llamada.notas).size < 3) mal('llamada', 'the call melody uses fewer than 3 different notes');
   for (const a of anteriores(slug)) {
-    for (const [n, m] of Object.entries(P.motivos)) for (const m2 of Object.values(a.motivos || {}))
-      if (parecido(grados(m), grados(m2)) > 0.7) mal(n, `${n} is too similar to a motif of the earlier song "${a.slug}": write a new one`);
-    for (const p of Object.values(P.progresiones)) for (const p2 of Object.values(a.progresiones || {}))
-      if (p === p2 && p.split(' ').length >= 4) mal('todo', `a progression (${p}) is the same as in "${a.slug}"`);
+    if (a.motivos?.llamada && parecido(nums(P.motivos.llamada), nums(a.motivos.llamada)) > 0.7) mal('llamada', `the call melody is too similar to the one of the earlier song "${a.slug}"`);
+    if (a.molde && a.molde.progresion_verso === j.progresion_verso && a.molde.progresion_estribillo === j.progresion_estribillo) mal('progresion_estribillo', `the same pair of progressions as the earlier song "${a.slug}"`);
   }
   return F;
 }
 
-// ── Gemma vuelve a intentar SOLO la parte que falló ─────────────────────────
 async function preguntar(texto, esquema, temperatura = 0.8) {
   const r = await ollama(texto, { esquema, temperatura, contexto: 4096, mantener: true, timeoutMin: 15 });
   return JSON.parse(r.texto);
 }
-// Si devuelve exactamente lo rechazado (31/10: el mismo 808 y la misma batería 3 rondas seguidas), se le avisa y se le
-// pregunta otra vez con más temperatura
-async function preguntarDistinto(texto, esquema, igual) {
-  const j = await preguntar(texto, esquema);
-  return igual(j) ? preguntar(`${texto}\nYour last answer was IDENTICAL to the rejected one. Change it so it fixes the problem.`, esquema, 1.1) : j;
-}
-const SINTAXIS = 'Grid: one character per sixteenth, in groups of 4. A digit starts a note (scale degree 1–7; 8 and 9 = degrees 1 and 2 an octave up), - holds the note, . is silence, ~ (808 only) holds and glides into the next note.';
 export async function reintentar(P, fallas, tema, plan, log = () => {}) {
   const ctx = `You are composing a dark trap beat: "${tema.titulo}" (${tema.bpm} BPM, ${tema.tonalidad}) — ${tema.captionInstrumental}.`;
-  const porParte = {};
-  for (const f of fallas) (porParte[f.parte] ||= []).push(f.error);
-  for (const [parte, errores] of Object.entries(porParte)) {
-    const que = errores.map(e => `- ${e}`).join('\n');
-    if (parte in PARTES_NOTAS) {
-      const [tabla] = PARTES_NOTAS[parte], esBajo = tabla === 'bajos';
-      const papel = esBajo ? `one bar of the 808 line, 4 groups of 4 (${parte === 'bajo_verso' ? 'verse: sparse' : 'chorus: busier'}); the degree is counted from the chord root of each bar, 8 = root an octave up` : `a 2-bar motif, 8 groups of 4 (${parte === 'llamada' ? 'the call, the main melody' : 'the answer to the call'})`;
-      const j = await preguntarDistinto(`${ctx}\nThis is your ${parte}, ${papel}:\n${P.grillas[parte] || '(missing)'}\nIt was rejected:\n${que}\n${SINTAXIS}\nWrite it again. Answer JSON {"notas": "..."}.`,
-        obj({ notas: esBajo ? bajoEsq : motivoEsq }), x => grilla(x.notas) === grilla(P.grillas[parte]));
-      ponerNotas(P, parte, j.notas);
-      log(`      ${parte}: ${P.grillas[parte]}`);
-    } else if ((parte === 'bateria_verso_b' || parte === 'bateria_estribillo_b') && P.baterias[parte.slice(8, -2)] && errores.every(e => /same hats/.test(e))) {
-      // variación = TU grilla con el último grupo cambiado por un fill (el esquema exige un redoble o un tresillo ahí)
-      const base = P.baterias[parte.slice(8, -2)], k = parte.slice(8);
-      const fill = '([rt][xrt.]{3}|[xrt.][rt][xrt.]{2}|[xrt.]{2}[rt][xrt.]|[xrt.]{3}[rt])';
-      const esq = obj({ hats: { type: 'string', pattern: `^[xrt.]{4} [xrt.]{4} [xrt.]{4} ${fill}$` } });
-      const j = await preguntarDistinto(`${ctx}\nThese are your hats for one bar, 4 groups of 4 sixteenths (x hit, r 1/32 roll, t triplet, . nothing):\n${fila(base.hats)}\nWrite the VARIATION that plays in the second half of the section: keep the first three groups or change them a little, and turn the LAST group into a fill with a roll (r) or a triplet (t), different from what is there now. Answer JSON {"hats": "...."}.`,
-        esq, x => grilla(x.hats) === base.hats);
-      P.baterias[k] = { ...base, hats: grilla(j.hats) };
-      log(`      bateria_${k} (variación): hats ${fila(P.baterias[k].hats)}`);
-    } else if (parte === 'bateria_estribillo' && P.baterias.verso && errores.every(e => /not bigger/.test(e))) {
-      // estribillo más grande: con números concretos y SIN mostrarle una grilla para copiar
-      const v = P.baterias.verso, nk = (v.bombo.match(/x/g) || []).length, nh = (v.hats.match(/[xrt]/g) || []).length;
-      const j = await preguntarDistinto(`${ctx}\nWrite the CHORUS drums for one bar, 4 groups of 4 sixteenths (kick: x/. ; hats: x hit, r 1/32 roll, t triplet, . nothing; open hat: x/.; the clap is already on beat 3). The verse has ${nk} kicks and ${nh} hat hits; the chorus must hit harder: write a kick with ${nk + 2} x (syncopated, pushing the 808 — never on all four beats) and hats with at least ${nh + 2} hits including rolls. Answer JSON {"bombo": "....", "hats": "....", "abierto": "...."}.`,
-        bateriaEsq(), x => grilla(x.bombo) === v.bombo && grilla(x.hats) === v.hats);
-      P.baterias.estribillo = { bombo: grilla(j.bombo), hats: grilla(j.hats), abierto: grilla(j.abierto) };
-      log(`      bateria_estribillo: kick ${fila(P.baterias.estribillo.bombo)} · hats ${fila(P.baterias.estribillo.hats)}`);
-    } else if (parte.startsWith('bateria_')) {
-      const k = parte.slice(8), d = P.baterias[k], par = { verso_b: 'verso', estribillo_b: 'estribillo', estribillo: 'verso' }[k];
-      const ref = par && P.baterias[par] ? `\nFor reference, bateria_${par}: kick ${fila(P.baterias[par].bombo)} · hats ${fila(P.baterias[par].hats)}` : '';
-      const j = await preguntarDistinto(`${ctx}\nThis is your bateria_${k}, one bar in 4 groups of 4 sixteenths (kick: x/. ; hats: x hit, r 1/32 roll, t triplet, . nothing; the clap is already on beat 3):\nkick ${d ? fila(d.bombo) : '(missing)'} · hats ${d ? fila(d.hats) : '(missing)'} · open hat ${d ? fila(d.abierto) : '(missing)'}${ref}\nIt was rejected:\n${que}\nWrite it again. Answer JSON {"bombo": "....", "hats": "....", "abierto": "...."} in 4 groups of 4.`, bateriaEsq(),
-        x => d && grilla(x.bombo) === d.bombo && grilla(x.hats) === d.hats);
-      P.baterias[k] = { bombo: grilla(j.bombo), hats: grilla(j.hats), abierto: grilla(j.abierto) };
-      log(`      bateria_${k}: kick ${fila(P.baterias[k].bombo)} · hats ${fila(P.baterias[k].hats)}`);
-    } else if (parte === 'arreglo') {
-      // una decisión por vez, con las opciones válidas en el esquema (reescribiendo el arreglo entero arreglaba una cosa y
-      // rompía otra). Las decisiones son de Gemma: el código solo le muestra qué opciones quedan.
-      P.arreglo = plan.map((p, i) => ({ seccion: p.nombre, variacion: P.arreglo[i]?.variacion || 'normal', final: P.arreglo[i]?.final || 'nada' }));
-      const usos = f => P.arreglo.filter(a => a.final === f).length;
-      const dispositivos = ['corte', 'tapestop', 'redoble'];
-      const resumen = () => plan.map((p, i) => `${i}. ${p.nombre}${P.arreglo[i].final !== 'nada' ? ` → ${P.arreglo[i].final}` : ''}`).join(' · ');
-      const antesDeCoro = plan.map((p, i) => (plan[i + 1]?.nombre === 'chorus' ? i : null)).filter(x => x !== null);
-      for (let i = 0; i < plan.length; i++) {
-        const a = P.arreglo[i], sobra = a.final !== 'nada' && usos(a.final) > 2, falta = antesDeCoro.includes(i) && a.final === 'nada';
-        if (!sobra && !falta) continue;
-        const opciones = dispositivos.filter(f => usos(f) < 2 && f !== a.final).concat(antesDeCoro.includes(i) ? [] : ['nada']);
-        if (!opciones.length) continue;
-        const j = await preguntar(`${ctx}\nArrangement so far: ${resumen()}\nChoose the transition at the end of section ${i} (${plan[i].nombre}), ${antesDeCoro.includes(i) ? 'right before a chorus: mark its arrival' : 'not before a chorus'}. Each device (corte, tapestop, redoble) may be used at most twice in the song. Options: ${opciones.join(', ')}. Answer JSON {"final": "..."}.`,
-          obj({ final: { type: 'string', enum: opciones } }));
-        a.final = j.final;
-      }
-      if (!P.arreglo.some((a, i) => a.variacion !== 'normal' && ROLES[plan[i].nombre]?.melodia)) {
-        const conMelodia = plan.map((p, i) => (ROLES[p.nombre]?.melodia ? i : null)).filter(x => x !== null);
-        const j = await preguntar(`${ctx}\nThe main melody never transforms, and the song needs ONE distinctive moment. Sections where the melody plays: ${conMelodia.map(i => `${i} (${plan[i].nombre})`).join(', ')}. Choose the section and the transformation (media = half speed, invertida = mirrored, retrogrado = backwards, octava = an octave up). Answer JSON {"seccion": n, "variacion": "..."}.`,
-          obj({ seccion: { type: 'integer', enum: conMelodia }, variacion: { type: 'string', enum: VARIAC.filter(v => v !== 'normal') } }));
-        P.arreglo[j.seccion].variacion = j.variacion;
-      }
-      armarSecciones(P, plan);
-      log(`      arreglo: ${P.secciones.map(s => `${s.nombre}${s.variacion !== 'normal' ? ' ' + s.variacion : ''}${s.final !== 'nada' ? ' → ' + s.final : ''}`).join(' · ')}`);
-    }
+  const j = P.molde, partes = new Set(fallas.map(f => f.parte));
+  if (partes.has('estribillo')) {
+    // opciones: solo patrones más cargados que los del verso
+    const bv = golpes(BOMBOS[j.verso.bombo]), hv = golpes(HATS[j.verso.hats]);
+    const bombos = Object.keys(BOMBOS).filter(k => golpes(BOMBOS[k]) > bv), hats = Object.keys(HATS).filter(k => golpes(HATS[k]) > hv);
+    const r = await preguntar(`${ctx}\nThe verse drums are kick "${j.verso.bombo}" and hats "${j.verso.hats}". The chorus must hit harder. Choose the chorus kick and hats from these busier patterns.\nKicks: ${bombos.map(k => `${k} ${BOMBOS[k]}`).join(' · ') || '(none: keep the hats busier)'}\nHats: ${hats.map(k => `${k} ${HATS[k]}`).join(' · ')}\nAnswer JSON {"bombo": "...", "hats": "..."}.`,
+      obj({ bombo: { type: 'string', enum: bombos.length ? bombos : Object.keys(BOMBOS) }, hats: { type: 'string', enum: hats.length ? hats : Object.keys(HATS) } }));
+    Object.assign(j.estribillo, r);
+    log(`      estribillo: bombo ${r.bombo}, hats ${r.hats}`);
   }
+  if (partes.has('progresion_estribillo')) {
+    const usadas = new Set(anteriores(tema.slug).filter(a => a.molde?.progresion_verso === j.progresion_verso).map(a => a.molde.progresion_estribillo));
+    const opciones = Object.keys(PROGRESIONES).filter(k => k !== j.progresion_verso && !usadas.has(k));
+    const r = await preguntar(`${ctx}\nThe verse progression is ${j.progresion_verso}. Choose a DIFFERENT progression for the chorus, one that lifts it. Options: ${opciones.join(', ')}. Answer JSON {"progresion": "..."}.`,
+      obj({ progresion: { type: 'string', enum: opciones } }));
+    j.progresion_estribillo = r.progresion;
+    log(`      progresión del estribillo: ${r.progresion}`);
+  }
+  if (partes.has('transiciones')) {
+    const nuevas = [];
+    for (let i = 0; i < j.transiciones.length; i++) {
+      const opciones = TRANSICIONES.filter(t => nuevas.filter(x => x === t).length < 2);
+      const r = await preguntar(`${ctx}\nChoose the transition that announces chorus ${i + 1} of ${j.transiciones.length}${nuevas.length ? ` (before: ${nuevas.join(', ')})` : ''}. Each one may be used at most twice. Options: ${opciones.join(', ')}. Answer JSON {"transicion": "..."}.`,
+        obj({ transicion: { type: 'string', enum: opciones } }));
+      nuevas.push(r.transicion);
+    }
+    j.transiciones = nuevas;
+    log(`      transiciones: ${nuevas.join(', ')}`);
+  }
+  if (partes.has('llamada')) {
+    const r = await preguntar(`${ctx}\nYour call melody (rhythm "${j.llamada.ritmo}", scale degrees ${j.llamada.notas.join(' ')}) was rejected: ${fallas.filter(f => f.parte === 'llamada').map(f => f.error).join('; ')}. Write 8 NEW scale degrees (1–7; 8 and 9 = 1 and 2 an octave up) for the same rhythm: a dark line with a clear shape. Answer JSON {"notas": [..8 numbers..]}.`,
+      obj({ notas: { type: 'array', items: grado, minItems: 8, maxItems: 8 } }), 1.0);
+    j.llamada.notas = r.notas;
+    log(`      llamada: ${r.notas.join(' ')}`);
+  }
+  // se rearma todo lo que sale del molde
+  Object.assign(P, leer(j, { bpm: P.bpm, tonalidad: P.tonalidad, plan }));
 }
 
-// Resumen de las partituras anteriores para el encargo (que suene distinto: instrumentos y kit)
+// El vocabulario, para el encargo
+export function vocabulario() {
+  const lista = (o, f = v => v) => Object.entries(o).map(([k, v]) => `${k} ${f(v)}`).join(' · ');
+  return [
+    `Progressions (verse / chorus): ${Object.keys(PROGRESIONES).join(', ')}`,
+    `Kicks, from sparse to busy (16 sixteenths, x = kick): ${lista(BOMBOS)}`,
+    `Hats, from sparse to busy (x hit, r 1/32 roll, t triplet): ${lista(HATS)}`,
+    `Fills for the second half of each part (replace the last beat of the hats): ${lista(FILLS)}`,
+    `Open hat: ${Object.keys(ABIERTOS).join(', ')}`,
+    `Call rhythms, 2 bars (o = a note, - = held, . = silence): ${lista(LLAMADAS)}`,
+    `Answer rhythms (they fill the gaps of the call): ${lista(RESPUESTAS)}`,
+    `Kit character: ${Object.keys(KITS).join(', ')}`,
+  ].join('\n');
+}
 export function resumenAnteriores(slug) {
-  const a = anteriores(slug).slice(-6);
-  return a.length ? a.map(x => `"${x.slug}": ${x.melodia}/${x.respuesta}/${x.textura}, kit ${Object.entries(x.kit).map(([k, v]) => `${k} ${v}`).join(', ')}`).join('; ') : 'none yet';
+  const a = anteriores(slug).slice(-6).filter(x => x.molde);
+  return a.length ? a.map(x => `"${x.slug}": kit ${x.molde.kit}, ${x.melodia}/${x.respuesta}/${x.textura}, verse ${x.molde.progresion_verso}, chorus ${x.molde.progresion_estribillo}, call ${x.molde.llamada.ritmo}`).join('; ') : 'none yet';
 }
 
 export async function pedirPartitura(tema, { compases, plan, correcciones = '' }) {
   const base = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-partitura.md'), 'utf8')
-    .replace('{{PLAN}}', plan.map(s => `${s.nombre} ${s.compases} bars`).join(', '))
+    .replace('{{PLAN}}', plan.map((s, i) => `${i}. ${s.nombre} (${s.compases} bars)`).join(', '))
     .replace('{{TITULO}}', tema.titulo).replace('{{CONCEPTO}}', tema.concepto).replace('{{RASGO}}', tema.rasgo)
     .replace('{{CAPTION}}', tema.captionInstrumental).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad)
-    .replace('{{COMPASES}}', compases).replace('{{DURACION}}', tema.duracion).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
+    .replace('{{DURACION}}', tema.duracion).replace('{{VOCABULARIO}}', vocabulario())
     .replace('{{ANTERIORES}}', resumenAnteriores(tema.slug)).replace('{{CORRECCIONES}}', correcciones);
   const r = await ollama(base, { esquema: esquema(plan), temperatura: 0.85, contexto: 12288, mantener: true, timeoutMin: 40 });
   return { j: JSON.parse(r.texto), segundos: r.segundos, tokens: r.tokens, tokensEncargo: r.tokensEncargo, encargo: base };
