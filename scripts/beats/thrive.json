@@ -188,6 +188,121 @@
       },
       "motor": "local",
       "publicado": false
+    },
+    {
+      "id": "2026-10-31-2-local",
+      "motor": "local",
+      "fecha": "2026-10-31",
+      "slug": "asphalt-ghosts",
+      "titulo": "Asphalt Ghosts",
+      "concepto": "Se aferra a la nostalgia de una ciudad que nunca existió, una promesa de pertenencia que solo se encuentra en la memoria y la adicción.",
+      "rasgo": "Ambivalencia",
+      "voz": "dúo: él, voz grave con flow entrecortado; ella, susurros angelicales y resonantes",
+      "captionInstrumental": "dark trap, cinematic trap, gliding 808 bass, crisp trap hi-hats with triplets, haunting bells, granular textures, spacious reverb, melancholic pads, slow tempo.",
+      "captionVoces": "Male rapper: deep, textured voice, double-time flow. Female voice: breathy, ethereal, layered harmonies, haunting ad-libs.",
+      "bpm": 78,
+      "tonalidad": "G minor",
+      "duracion": 147,
+      "estructura": [
+        "intro",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 6.15,
+          "compases": 2
+        },
+        {
+          "nombre": "verse",
+          "inicio": 6.15,
+          "fin": 30.77,
+          "compases": 8
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 30.77,
+          "fin": 36.92,
+          "compases": 2
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 36.92,
+          "fin": 61.54,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 61.54,
+          "fin": 86.15,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 86.15,
+          "fin": 110.77,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 110.77,
+          "fin": 120,
+          "compases": 3
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 120,
+          "fin": 138.46,
+          "compases": 6
+        },
+        {
+          "nombre": "outro",
+          "inicio": 138.46,
+          "fin": 144.62,
+          "compases": 2
+        }
+      ],
+      "beat": "The call transforms into a backwards echo during the bridge, symbolizing the distorted memories of a lost place.",
+      "vueltasBeat": 1,
+      "instrumental": "partitura",
+      "historia": {
+        "quien": "The narrator is a young man, mid-twenties, living in a rapidly gentrifying industrial district of Buenos Aires, Argentina, circa 2010. He's a former street artist, now working a dead-end job in a warehouse, feeling disconnected and haunted by the city’s fading working-class identity.",
+        "verso1": "The verse opens with the narrator standing on a crumbling concrete platform overlooking a former factory complex, now slated for luxury apartments. He's tracing faded murals on the walls – remnants of his past and the community that once thrived there; he remembers painting them with friends, fueled by cheap beer and a sense of rebellious belonging.",
+        "gancho": "Asphalt whispers, fading light",
+        "estribillo": "The chorus expresses a longing for a Buenos Aires that never truly existed – a time of gritty authenticity, shared struggle, and artistic freedom, now lost to progress and commercialization; it's a yearning for a feeling of belonging rooted in a collective past, laced with the bittersweet taste of addiction to that memory.",
+        "verso2": "The narrator is approached by a developer who recognizes his artwork and offers him a commission to create a 'heritage mural' for the new apartment complex.  He initially resists, feeling it's a betrayal of his ideals, but the promise of money and a renewed sense of purpose (however hollow) lures him in.",
+        "puente": "While painting the mural, the narrator notices a young girl sketching nearby, mirroring his own youthful passion. He realizes the 'ghosts' he's chasing aren't just about the past, but about the potential for creation and connection that exists *now*, and that clinging solely to nostalgia prevents him from shaping a new future."
+      },
+      "letra": "[intro]\n(uh-huh)\n\n[verse - male rap]\nConcrete platform, three below\nFactory walls, where the murals grow\nUsed to paint them, 'til the sun went down\nCheap beer, laughter, all around (yeah)\nTwenty-six, warehouse shift\nAnother day, another gift\nOf dust and shadows, steel and grime\nLost in the edges of fading time\n\n[pre-chorus - female]\nAsphalt ghosts in the pouring rain\nA memory blooming in my veins\n\n[chorus - female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[verse - male rap]\nHe recognized the work, a name he knew\n“Heritage mural,\" a job for you\nMoney on the table, a chance to build\nAnother lie, expertly skilled (no)\nTen thousand pesos, a steady hand\nPainting the past across the land\nA skyline rising, cold and new\nLost in the promise, lost in the view\n\n[chorus - male & female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[verse - male rap]\nBrush in my hand, another shade\nThe faces blurring, the choices made\nShe watched me working, quiet and still\nA sketchbook open, a rising skill (again)\nSeventeen, maybe eighteen years\nWiping away her silent tears\nAnother artist, a spark in her eye\nThe future reflecting, passing me by (I know)\n\n[chorus - male & female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[bridge - female]\nNot just the ruins, the yesterday\nA canvas waiting, come what may\n\n[chorus - male & female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[outro]\n(uh-huh)\nFading light.",
+      "letraPor": "local",
+      "avisosRima": [
+        "forbidden poetic words: whispers — say it the way a person would",
+        "almost no first person: the verses must sound like someone talking (\"I\", \"my\")",
+        "\"Cheap beer, laughter, all around (yeah)\" — la frase cierra con \"yeah\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"A memory blooming in my veins\" — la frase cierra con \"veins\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"Another lie, expertly skilled (no)\" — la frase cierra con \"no\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"A sketchbook open, a rising skill (again)\" — la frase cierra con \"again\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"The future reflecting, passing me by (I know)\" — la frase cierra con \"know\", que no rima (por sonido) con el cierre anterior del esquema"
+      ],
+      "audio": "musica/thrive/asphalt-ghosts.mp3?v=mvwm13ay",
+      "generado": "2026-10-31T16:23:02.650Z",
+      "letraFinal": "[intro]\n(uh-huh)\n\n[verse - male rap]\nConcrete platform, three below\nFactory walls, where the murals grow\nUsed to paint them, 'til the sun went down\nCheap beer, laughter, all around (yeah)\nTwenty-six, warehouse shift\nAnother day, another gift\nOf dust and shadows, steel and grime\nLost in the edges of fading time\n\n[pre-chorus - female]\nAsphalt ghosts in the pouring rain\nA memory blooming in my veins\n\n[chorus - female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[verse - male rap]\nHe recognized the work, a name he knew\n“Heritage mural,\" a job for you\nMoney on the table, a chance to build\nAnother lie, expertly skilled (no)\nTen thousand pesos, a steady hand\nPainting the past across the land\nA skyline rising, cold and new\nLost in the promise, lost in the view\n\n[chorus - male & female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[verse - male rap]\nBrush in my hand, another shade\nThe faces blurring, the choices made\nShe watched me working, quiet and still\nA sketchbook open, a rising skill (again)\nSeventeen, maybe eighteen years\nWiping away her silent tears\nAnother artist, a spark in her eye\nThe future reflecting, passing me by (I know)\n\n[chorus - male & female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[bridge - female]\nNot just the ruins, the yesterday\nA canvas waiting, come what may\n\n[chorus - male & female]\nAsphalt whispers, fading light\nAsphalt whispers, fading light\nThis city promised, felt so right\nAsphalt whispers, fading light\n\n[outro]\n(uh-huh)\nFading light.",
+      "tiempos": {
+        "beat": 281,
+        "historia": 311,
+        "letra": 1143,
+        "voces": 1031,
+        "letraFinal": 0
+      },
+      "publicado": false
     }
   ]
 }
