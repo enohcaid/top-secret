@@ -21,9 +21,9 @@ Psychological trait: {{RASGO}}. Sound: {{CAPTION}}
 
 ## Syntax
 - progresion_verso / progresion_estribillo: list of scale degrees (numbers 1–7), one chord per bar, looped. 1 = the minor tonic. Make them different.
-- Note tokens are DEGREE/LENGTH separated by spaces. DEGREE: a scale degree number 1–7 (add + for an octave up, - for an octave down) or r for a rest. LENGTH: how many sixteenths it lasts.
-- llamada and respuesta: exactly 2 bars: the LENGTHS add up to 32.
-- bajo_verso and bajo_estribillo: exactly 1 bar: the LENGTHS add up to 16. DEGREE is counted from the chord root of each bar (1 = root, 5 = fifth, 1+ = root an octave up). Put ~ right after the DEGREE to glide into that note.
+- Melodies and 808 are GRIDS: one character per sixteenth, in groups of 4 separated by spaces. A digit starts a note (scale degree 1–7; 8 and 9 = degrees 1 and 2 an octave up), - holds the note, . is silence.
+- llamada and respuesta: 2 bars = 8 groups of 4.
+- bajo_verso and bajo_estribillo: 1 bar = 4 groups of 4. The degree is counted from the chord root of each bar (1 = root, 5 = fifth, 8 = root an octave up). ~ holds the note and glides into the next one.
 - Drum grids: one bar written as 4 groups of 4 sixteenths separated by spaces. bombo: x = kick, . = nothing (the clap is already on beat 3 = the first step of the third group). hats: x hit, r 1/32 roll, t triplet, . nothing. abierto: x open hat.
 - Instruments: melodia_instrumento (plays the llamada) / respuesta_instrumento from campana, pluck, piano, lead, vox, cuerdas; textura_instrumento from pad, coro, cuerdas. Kit knobs 0–1: bombo_golpe, bombo_cola, clap_tono, hat_metal, dist_808, sala, brillo, swing, cinta, crush. armonica: true = harmonic minor (more tension).
 {{CORRECCIONES}}

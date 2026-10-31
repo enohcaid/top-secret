@@ -24,9 +24,13 @@ const grupos = c => ({ type: 'string', pattern: `^${c}{4} ${c}{4} ${c}{4} ${c}{4
 // "x... x... x... x...") y el estribillo quedaba sin batería; las referencias cruzadas son una trampa para un modelo chico.
 // Escribe el material de cada parte (verso, estribillo, puente) y las secciones se arman según la función de cada una,
 // lo que además garantiza que las partes se distingan.
-// Tokens de nota con la sintaxis impuesta por el esquema: GRADO[+|-][~]/LARGO o r/LARGO
-const NOTA = '(r|[1-7][+-]?~?)/[1-9][0-9]?';
-const notasEsq = { type: 'string', pattern: `^${NOTA}( ${NOTA})*$` };
+// Melodías y 808 en GRILLA de casilleros (31/10): con tokens GRADO/LARGO, Gemma no lograba que los largos sumaran
+// (escribía 244, 136, 496 semicorcheas en vez de 32, ronda tras ronda, aun con el error delante). Las grillas de batería
+// le salían siempre bien: con casilleros fijos el largo es correcto por construcción y no hay nada que sumar.
+// Casillero = una semicorchea: 1–7 nota (grado; 8 y 9 = 1 y 2 una octava arriba), - sostiene, . silencio,
+// ~ (solo 808) sostiene y desliza hacia la nota siguiente.
+const grillaN = (n, c) => ({ type: 'string', pattern: `^${Array(n).fill(`${c}{4}`).join(' ')}$` });
+const motivoEsq = grillaN(8, '[1-9.-]'), bajoEsq = grillaN(4, '[1-8.~-]');
 const gradosEsq = { type: 'array', items: { type: 'integer', minimum: 1, maximum: 7 }, minItems: 2, maxItems: 8 };
 // grillas en 4 grupos de 4 (un modelo de 12B no cuenta 16 caracteres seguidos; de a 4 sí)
 const bateriaEsq = () => obj({ bombo: grupos('[x.]'), hats: grupos('[xrt.]'), abierto: grupos('[x.]') });
@@ -38,7 +42,7 @@ export const esquema = plan => obj({
   melodia_instrumento: { type: 'string', enum: INSTR }, respuesta_instrumento: { type: 'string', enum: INSTR },
   textura_instrumento: { type: 'string', enum: TEXT },
   progresion_verso: gradosEsq, progresion_estribillo: gradosEsq,
-  llamada: notasEsq, respuesta: notasEsq, bajo_verso: notasEsq, bajo_estribillo: notasEsq,
+  llamada: motivoEsq, respuesta: motivoEsq, bajo_verso: bajoEsq, bajo_estribillo: bajoEsq,
   bateria_verso: bateriaEsq(), bateria_verso_b: bateriaEsq(), bateria_estribillo: bateriaEsq(), bateria_estribillo_b: bateriaEsq(), bateria_puente: bateriaEsq(),
   arreglo: arregloEsq(plan.length),
 });
@@ -74,8 +78,19 @@ export function planCompases(estructura, compases) {
 
 // ── Lectura: solo traduce el formato (no cambia notas, largos ni grillas) ──
 const grilla = s => String(s || '').replace(/\s+/g, '');
-const largo = s => String(s || '').trim().split(/\s+/).reduce((a, t) => a + (+t.split('/')[1] || 0), 0);
+// grilla de casilleros → tokens GRADO/LARGO que entiende partitura.py (traducción pura: no cambia ninguna nota)
+function aTokens(g) {
+  const out = []; let glide = false;
+  for (const c of grilla(g)) {
+    const ult = out.at(-1);
+    if (/[1-9]/.test(c)) { const n = +c; out.push({ n: n > 7 ? `${n - 7}+` : String(n), d: 1, gl: glide }); glide = false; }
+    else if (c === '.') { if (ult?.n === 'r') ult.d++; else out.push({ n: 'r', d: 1 }); }
+    else { if (ult) ult.d++; else out.push({ n: 'r', d: 1 }); if (c === '~') glide = true; }
+  }
+  return out.map(t => `${t.n}${t.gl ? '~' : ''}/${t.d}`).join(' ');
+}
 const fila = h => (h.match(/.{1,4}/g) || []).join(' ');
+const largo = s => String(s || '').trim().split(/\s+/).reduce((a, t) => a + (+t.split('/')[1] || 0), 0);
 const clamp01 = x => Math.min(1, Math.max(0, Number.isFinite(+x) ? +x : 0.5));
 const PARTES_NOTAS = { llamada: ['motivos', 'llamada', 32], respuesta: ['motivos', 'respuesta', 32], bajo_verso: ['bajos', 'verso', 16], bajo_estribillo: ['bajos', 'estribillo', 16] };
 
@@ -84,16 +99,20 @@ export function leer(j, { bpm, tonalidad, plan }) {
     bpm, tonalidad, armonica: !!j.armonica, rasgo: String(j.rasgo || '').trim(),
     kit: Object.fromEntries(KNOBS.map(k => [k, clamp01(j.kit?.[k])])),
     melodia: j.melodia_instrumento, respuesta: j.respuesta_instrumento, textura: j.textura_instrumento,
-    progresiones: {}, motivos: {}, bajos: {}, baterias: {}, secciones: [], arreglo: j.arreglo || [],
+    progresiones: {}, motivos: {}, bajos: {}, baterias: {}, secciones: [], arreglo: j.arreglo || [], grillas: {},
   };
   for (const k of ['verso', 'estribillo']) if (Array.isArray(j[`progresion_${k}`])) P.progresiones[k] = j[`progresion_${k}`].join(' ');
-  for (const [k, [tabla, clave]] of Object.entries(PARTES_NOTAS)) if (j[k]) P[tabla][clave] = String(j[k]).trim();
+  for (const k of Object.keys(PARTES_NOTAS)) if (j[k]) ponerNotas(P, k, j[k]);
   for (const k of ['verso', 'verso_b', 'estribillo', 'estribillo_b', 'puente']) {
     const d = j[`bateria_${k}`];
     if (d) P.baterias[k] = { bombo: grilla(d.bombo), hats: grilla(d.hats), abierto: grilla(d.abierto) };
   }
   armarSecciones(P, plan);
   return P;
+}
+function ponerNotas(P, k, g) {
+  const [tabla, clave] = PARTES_NOTAS[k];
+  P.grillas[k] = String(g).trim(); P[tabla][clave] = aTokens(g);
 }
 // secciones = el plan de compases + el arreglo de Gemma (variación y transición) + lo que toca cada parte por su función
 export function armarSecciones(P, plan) {
@@ -139,14 +158,18 @@ export function criticar(P, { slug }) {
   const B = P.baterias;
   if (B.verso && B.verso_b && B.verso.hats === B.verso_b.hats) mal('bateria_verso_b', 'bateria_verso_b has the same hats as bateria_verso: it must be a variation with a fill');
   if (B.estribillo && B.estribillo_b && B.estribillo.hats === B.estribillo_b.hats) mal('bateria_estribillo_b', 'bateria_estribillo_b has the same hats as bateria_estribillo: it must be a variation with a fill');
-  if (B.verso && B.estribillo && B.verso.bombo === B.estribillo.bombo && B.verso.hats === B.estribillo.hats)
-    mal('bateria_estribillo', 'bateria_estribillo is the same as bateria_verso: the chorus needs its own, bigger drums so the parts are clearly different');
+  // el estribillo tiene que ser MÁS que el verso (no solo distinto): más bombos o más golpes de hats
+  const golpes = (s, c) => (s.match(new RegExp(`[${c}]`, 'g')) || []).length;
+  if (B.verso && B.estribillo && !(golpes(B.estribillo.bombo, 'x') > golpes(B.verso.bombo, 'x') || golpes(B.estribillo.hats, 'xrt') > golpes(B.verso.hats, 'xrt')))
+    mal('bateria_estribillo', `bateria_estribillo is not bigger than bateria_verso (verse: ${golpes(B.verso.bombo, 'x')} kicks and ${golpes(B.verso.hats, 'xrt')} hat hits; chorus: ${golpes(B.estribillo.bombo, 'x')} kicks and ${golpes(B.estribillo.hats, 'xrt')} hat hits): the chorus needs MORE kicks or more hat hits`);
   if (!Object.values(B).some(d => /[rt]/.test(d.hats))) mal('bateria_estribillo_b', 'no hi-hat roll (r) or triplet (t) anywhere');
   // arreglo: transición antes de cada estribillo, cada recurso como mucho dos veces, al menos una transformación
   const S = P.secciones;
-  S.forEach((s, i) => { if (s.nombre === 'chorus' && i > 0 && S[i - 1].final === 'nada') mal('arreglo', `section ${i} (${S[i - 1].nombre}) has no transition (final) before the chorus that follows`); });
+  const antes = S.map((s, i) => (s.nombre === 'chorus' && i > 0 ? i - 1 : null)).filter(x => x !== null);
+  const sin = antes.filter(i => S[i].final === 'nada');
+  if (sin.length) mal('arreglo', `entries ${antes.join(', ')} come right before a chorus and each one needs a final (corte, tapestop or redoble); ${sin.join(', ')} still ${sin.length > 1 ? 'have' : 'has'} "nada"`);
   const fin = S.filter(s => s.final !== 'nada').map(s => s.final);
-  for (const f of new Set(fin)) if (fin.filter(x => x === f).length > 2) mal('arreglo', `"${f}" is used ${fin.filter(x => x === f).length} times: each device at most twice`);
+  for (const f of new Set(fin)) if (fin.filter(x => x === f).length > 2) mal('arreglo', `"${f}" is used ${fin.filter(x => x === f).length} times (entries ${S.map((s, i) => (s.final === f ? i : null)).filter(x => x !== null).join(', ')}): use each device at most twice — mix corte, tapestop and redoble`);
   if (!S.some(s => s.melodia && s.variacion !== 'normal')) mal('arreglo', 'the llamada never transforms (variacion): the distinctive trait needs at least one');
   // originalidad: nada del material de partituras anteriores
   for (const a of anteriores(slug)) {
@@ -163,7 +186,7 @@ async function preguntar(texto, esquema) {
   const r = await ollama(texto, { esquema, temperatura: 0.8, contexto: 4096, mantener: true, timeoutMin: 15 });
   return JSON.parse(r.texto);
 }
-const SINTAXIS = 'Note tokens: DEGREE/LENGTH separated by spaces; DEGREE = scale degree 1–7 (+ octave up, - octave down, ~ right after it = glide into the note) or r for a rest; LENGTH = sixteenths it lasts.';
+const SINTAXIS = 'Grid: one character per sixteenth, in groups of 4. A digit starts a note (scale degree 1–7; 8 and 9 = degrees 1 and 2 an octave up), - holds the note, . is silence, ~ (808 only) holds and glides into the next note.';
 export async function reintentar(P, fallas, tema, plan, log = () => {}) {
   const ctx = `You are composing a dark trap beat: "${tema.titulo}" (${tema.bpm} BPM, ${tema.tonalidad}) — ${tema.captionInstrumental}.`;
   const porParte = {};
@@ -171,12 +194,12 @@ export async function reintentar(P, fallas, tema, plan, log = () => {}) {
   for (const [parte, errores] of Object.entries(porParte)) {
     const que = errores.map(e => `- ${e}`).join('\n');
     if (parte in PARTES_NOTAS) {
-      const [tabla, clave, debe] = PARTES_NOTAS[parte];
-      const papel = tabla === 'bajos' ? `one bar of the 808 line (${parte === 'bajo_verso' ? 'verse: sparse' : 'chorus: busier'}); DEGREE counted from the chord root of each bar, 1+ = root an octave up` : `a 2-bar motif (${parte === 'llamada' ? 'the call, the main melody' : 'the answer to the call'})`;
-      const j = await preguntar(`${ctx}\nThis is your ${parte}, ${papel}:\n${P[tabla][clave] || '(missing)'}\nIt was rejected:\n${que}\n${SINTAXIS}\nRewrite it so the LENGTHS add up to exactly ${debe}. Count them before answering. Answer JSON {"notas": "..."}.`,
-        obj({ notas: notasEsq }));
-      P[tabla][clave] = String(j.notas).trim();
-      log(`      ${parte} (${largo(P[tabla][clave])}/${debe}): ${P[tabla][clave]}`);
+      const [tabla] = PARTES_NOTAS[parte], esBajo = tabla === 'bajos';
+      const papel = esBajo ? `one bar of the 808 line, 4 groups of 4 (${parte === 'bajo_verso' ? 'verse: sparse' : 'chorus: busier'}); the degree is counted from the chord root of each bar, 8 = root an octave up` : `a 2-bar motif, 8 groups of 4 (${parte === 'llamada' ? 'the call, the main melody' : 'the answer to the call'})`;
+      const j = await preguntar(`${ctx}\nThis is your ${parte}, ${papel}:\n${P.grillas[parte] || '(missing)'}\nIt was rejected:\n${que}\n${SINTAXIS}\nWrite it again. Answer JSON {"notas": "..."}.`,
+        obj({ notas: esBajo ? bajoEsq : motivoEsq }));
+      ponerNotas(P, parte, j.notas);
+      log(`      ${parte}: ${P.grillas[parte]}`);
     } else if (parte.startsWith('bateria_')) {
       const k = parte.slice(8), d = P.baterias[k], par = { verso_b: 'verso', estribillo_b: 'estribillo', estribillo: 'verso' }[k];
       const ref = par && P.baterias[par] ? `\nFor reference, bateria_${par}: kick ${fila(P.baterias[par].bombo)} · hats ${fila(P.baterias[par].hats)}` : '';
