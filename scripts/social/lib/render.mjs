@@ -74,9 +74,15 @@ export async function video(plantilla, datos, salida, { escenas, gancho = 0, mus
   args.push('-movflags', '+faststart', salida);
   const ff = spawn(ffmpeg, args, { stdio: ['pipe', 'ignore', 'pipe'] });
   let err = ''; ff.stderr.on('data', d => { err = (err + d).slice(-2000); });
-  // con -shortest ffmpeg puede cerrar la entrada en el último cuadro: sin esto Node se cae con 'write EOF' (2026-10-30)
-  ff.stdin.on('error', e => { err += ` · stdin: ${e.code}`; });
-  const escribir = buf => new Promise(r => ff.stdin.write(buf) ? r() : ff.stdin.once('drain', r));
+  // con -shortest ffmpeg puede cerrar la entrada en el último cuadro: sin esto Node se caía con 'write EOF', y esperando
+  // un 'drain' que no llega se colgaba (2026-10-30). Cerrada la entrada, los cuadros que quedan se descartan.
+  let cerrada = false;
+  ff.stdin.on('error', e => { cerrada = true; err += ` · stdin: ${e.code}`; });
+  ff.stdin.on('close', () => { cerrada = true; });
+  const escribir = buf => cerrada ? Promise.resolve() : new Promise(r => {
+    if (ff.stdin.write(buf)) return r();
+    for (const ev of ['drain', 'error', 'close']) ff.stdin.once(ev, r);
+  });
   const cuadro = async () => escribir(await page.locator('#lienzo').screenshot({ type: 'jpeg', quality: 94 }));
 
   for (let k = 0; k < Math.round(gancho * fps); k++) { await page.evaluate(t => mostrar(0, t, true), k / fps); await cuadro(); }
