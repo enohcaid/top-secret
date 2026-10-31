@@ -158,8 +158,10 @@ function newsMedia(n) {
   return `<div class="news-fallback"><img src="${mediaUrl('logos/rebrand/clean-white.webp')}" alt=""></div>`;
 }
 
+let newsShown = false;
 function renderNews(list) {
   const shown = list.filter(n => !n.noStrip).slice(0, 5);
+  const again = newsShown; newsShown = true;
   $('news-grid').innerHTML = shown.map((n, i) => `
     <a class="news-card${i === 0 ? ' big' : ''}" href="noticias.html?id=${encodeURIComponent(n.id)}">
       ${newsMedia(n)}
@@ -171,19 +173,24 @@ function renderNews(list) {
         <div class="news-date">${n.dateLabel || n.date || ''}</div>
       </div>
     </a>`).join('');
-  revealIn($('news-grid').children);
+  // Si se vuelve a dibujar (llegaron las publicadas tarde), no se esconden de nuevo.
+  if (!again) revealIn($('news-grid').children);
 }
 
+// Se espera a las noticias publicadas antes de dibujar: dibujar primero las locales hacía que la
+// grilla se rearmara al segundo y las imágenes desaparecieran mientras bajaban las nuevas.
 const byDate = (a, b) => (b.date || '').localeCompare(a.date || '');
-renderNews([...autoNews, ...manualNews].sort(byDate));
+const localNews = () => renderNews([...autoNews, ...manualNews].sort(byDate));
+const newsTimeout = setTimeout(localNews, 2500);
 (async () => {
   try {
     const r = await fetch(WORKER + '/published-noticias');
-    if (!r.ok) return;
+    if (!r.ok) throw 0;
     const { articles } = await r.json();
-    if (!articles || !articles.length) return;
+    if (!articles || !articles.length) throw 0;
+    clearTimeout(newsTimeout);
     renderNews([...articles, ...manualNews, ...autoNews].sort(byDate));
-  } catch (e) { /* mantiene el render local si falla el fetch */ }
+  } catch (e) { clearTimeout(newsTimeout); if (!newsShown) localNews(); }
 })();
 
 /* ── MIEMBROS ── */
@@ -329,7 +336,20 @@ if (!reduced && typeof gsap !== 'undefined') {
     next.alt = s.cap;
     next.src = s.src;
   }
-  const start = () => { clearInterval(timer); if (!reduced) timer = setInterval(() => show(cur + 1), 6000); };
+  // La primera queda fija hasta que todas las demás están descargadas: así cada cambio es
+  // inmediato y nunca se espera (ni se ve el hueco de) una foto que todavía baja.
+  let ready = false;
+  const start = () => { clearInterval(timer); if (!reduced && ready) timer = setInterval(() => show(cur + 1), 6000); };
+  const preload = s => new Promise(res => {
+    const im = new Image();
+    im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(res);
+    im.onerror = () => { s.bad = true; res(); };
+    im.src = s.src;
+  });
+  const begin = () => Promise.all(slides.slice(1).map(preload)).then(() => {
+    for (let i = slides.length - 1; i > 0; i--) if (slides[i].bad) slides.splice(i, 1);
+    ready = true; start();
+  });
   $('hero-prev').addEventListener('click', () => { show(cur - 1, -1); start(); });
   $('hero-next').addEventListener('click', () => { show(cur + 1); start(); });
   const visual = document.querySelector('.hero-visual');
@@ -337,7 +357,8 @@ if (!reduced && typeof gsap !== 'undefined') {
   visual.addEventListener('mouseleave', start);
   const first = imgs[0];
   if (first.complete) kenBurns(first); else first.addEventListener('load', () => kenBurns(first), { once: true });
-  start();
+  // Las duplas se bajan después del resto de la página, para no competir con lo visible.
+  if (document.readyState === 'complete') begin(); else addEventListener('load', begin, { once: true });
 })();
 
 /* ── TWITCH EN VIVO (sobre la imagen del hero) ── */
