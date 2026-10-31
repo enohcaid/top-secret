@@ -30,9 +30,11 @@ export const PARTES = [
 
 // Lote de aprobación de un tema (reemplaza al de la versión anterior: mismo id)
 export async function mandarAAprobar(t, comentarios = {}) {   // comentarios: texto ya cargado por parte (lo que Juan dijo en el chat)
+  const local = t.motor === 'local';   // tema hecho solo con la IA local (thrive.mjs --local)
   const quien = {
-    concepto: 'Claude Opus',
-    beat: t.instrumental === 'codigo' ? 'Claude Sonnet, compuesto por código' : t.instrumental === 'ace' ? 'ACE-Step (respaldo)' : 'ACE-Step',
+    concepto: local ? 'Gemma (modelo local)' : 'Claude Opus',
+    beat: t.instrumental === 'codigo' ? (local ? 'Gemma, compuesto por código' : 'Claude Sonnet, compuesto por código')
+      : t.instrumental === 'ace' ? (local ? 'ACE-Step (respaldo: Gemma no logró componerlo)' : 'ACE-Step (respaldo)') : 'ACE-Step',
     letra: t.letraPor === 'local' ? 'Gemma (modelo local)' : 'Claude',
     voces: 'ACE-Step (cover sobre el beat)',
   };
@@ -47,7 +49,7 @@ export async function mandarAAprobar(t, comentarios = {}) {   // comentarios: te
   }
   await agregarLote({
     id: `musica-${t.slug}`, etapa: 'musica', creado: new Date().toISOString(),
-    titulo: `Thrive · ${t.titulo}`, bajada: `Demo, versión ${t.version || 1}`,
+    titulo: `Thrive · ${t.titulo}`, bajada: `${local ? 'Demo con IA local' : 'Demo'}, versión ${t.version || 1}`,
     tema: { slug: t.slug, titulo: t.titulo, version: t.version || 1, audio: MEDIA + t.audio },
     piezas: PARTES.map(p => ({ id: p.id, red: 'musica', formato: p.formato, descripcion: `${p.desc} · ${quien[p.id]}`, detalle: detalle[p.id], texto: comentarios[p.id] || '' })),
   });

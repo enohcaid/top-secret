@@ -37,17 +37,16 @@ const FECHA = opt('--fecha', new Date().toLocaleDateString('sv-SE', { timeZone: 
 // --parte N: otro tema el mismo día (Juan, 2026-10-27: "lanzá otra canción nueva"). Se identifica como <fecha>-<N>.
 const PARTE = opt('--parte', null);
 let ID = PARTE && PARTE !== '1' ? `${FECHA}-${PARTE}` : FECHA;
-// --local: demo con la IA local sola (Gemma escribe concepto, beat y letra; Juan, 2026-10-31: "a ver cuánto tarda y qué
-// logra"). Todo queda en pruebas/thrive-local: no toca thrive.json, R2, aprobar.html ni git.
-const LOCAL = argv.includes('--local');
-if (LOCAL) { process.env.IA_SOLO_LOCAL = '1'; ID += '-local'; }
+// --local: tema hecho solo con la IA local (Gemma escribe concepto, beat y letra; Juan, 2026-10-31: "a ver cuánto tarda y
+// qué logra"). Entra a aprobar.html como cualquier demo, marcado `motor: 'local'`; sus revisiones también van con Gemma.
+let LOCAL = argv.includes('--local');
+if (LOCAL) ID += '-local';
 const tiempos = {}, cron = (k, t0) => { tiempos[k] = (tiempos[k] || 0) + Math.round((Date.now() - t0) / 1000); };
 // --revisar <slug>: rehace las partes que Juan marcó "a mejorar" en aprobar.html, con su comentario (musica-aprobacion.mjs)
 const REVISAR = opt('--revisar', null);
 const ACE = path.join(ROOT, 'fuentes', 'beats', 'ACE-Step-1.5');
-const DIR = LOCAL ? path.join(ROOT, 'pruebas', 'thrive-local') : path.join(ROOT, 'fuentes', 'beats', 'thrive');
-const REG_REAL = path.join(ROOT, 'scripts', 'beats', 'thrive.json');
-const REG = LOCAL ? path.join(DIR, 'thrive.json') : REG_REAL;
+const DIR = path.join(ROOT, 'fuentes', 'beats', 'thrive');
+const REG = path.join(ROOT, 'scripts', 'beats', 'thrive.json');
 const PY = path.join(ROOT, 'fuentes/beats/whisper/.venv/Scripts/python.exe');
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [thrive] ${m}`);
 const ff = (...a) => spawnSync(ffmpegPath, ['-hide_banner', ...a], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
@@ -56,15 +55,16 @@ const lufs = (f, desde, hasta) => Number((((ff('-ss', String(desde), '-t', Strin
 const toml = s => JSON.stringify(s);
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
 
-// la demo local arranca de una copia del registro real (para no repetir títulos ni rasgos) y escribe solo la suya
-const reg = [REG, REG_REAL].filter(f => fs.existsSync(f)).map(f => JSON.parse(fs.readFileSync(f, 'utf8')))[0] || { temas: [] };
+const reg = fs.existsSync(REG) ? JSON.parse(fs.readFileSync(REG, 'utf8')) : { temas: [] };
 const guardar = () => fs.writeFileSync(REG, JSON.stringify(reg, null, 2) + '\n');
 let tema = REVISAR ? reg.temas.find(t => t.slug === REVISAR) : reg.temas.find(t => (t.id || t.fecha) === ID);
 // `fijo`: queda como salió, no se toca (Juan, 2026-10-26, sobre "Too Far In")
 if (REVISAR) {
   if (!tema?.revision) { log(`Nada que revisar en ${REVISAR}.`); process.exit(0); }
   ID = tema.id || tema.fecha;
+  if (tema.motor === 'local') LOCAL = true;
 } else if (tema?.fijo || tema?.letraFinal) { log(`El tema ${ID} ya está terminado: "${tema.titulo}".`); process.exit(0); }
+if (LOCAL) process.env.IA_SOLO_LOCAL = '1';
 fs.mkdirSync(DIR, { recursive: true });
 // Una sola corrida a la vez (una prueba a mano y la tarea de las 2:00 se pisarían el mismo tema)
 const LOCK = path.join(DIR, '.corriendo');
@@ -156,7 +156,7 @@ ${fb('concepto')}` : '');
       if (reg.temas.some(x => norm(x.rasgo) === norm(j.rasgo))) return `rasgo repetido "${j.rasgo}": elegí otro`;
     } });
   const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${ID}`;
-  tema = { ...(ID !== FECHA ? { id: ID } : {}), ...(reemplaza ? { version: reemplaza.version, reemplaza: reemplaza.slug } : {}), fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),
+  tema = { ...(ID !== FECHA ? { id: ID } : {}), ...(LOCAL ? { motor: 'local' } : {}), ...(reemplaza ? { version: reemplaza.version, reemplaza: reemplaza.slug } : {}), fecha: FECHA, slug, titulo: j.titulo.trim(), concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: j.voz.trim(),
     captionInstrumental: j.caption_instrumental.trim(), captionVoces: j.caption_voces.trim(), bpm: Math.round(j.bpm),
     tonalidad: j.tonalidad.trim(), duracion: Math.round(j.duracion), estructura: j.estructura };
   reg.temas.push(tema); guardar(); cron('concepto', t0);
@@ -186,7 +186,7 @@ function aceStep(nombre, lineas) {
 const comunes = [`config_path = "acestep-v15-turbo"`, `lm_model_path = "acestep-5Hz-lm-0.6B"`, `backend = "pt"`, `offload_to_cpu = true`, `vocal_language = "en"`, `use_cot_caption = false`, `use_cot_metas = false`, `use_cot_lyrics = false`];
 
 // ── 2. Instrumental compuesta por código ────────────────────────────────────
-const PY_TEMA = path.join(LOCAL ? DIR : path.join(ROOT, 'scripts/beats/temas'), `thrive_${ID.replace(/-/g, '_')}.py`);
+const PY_TEMA = path.join(ROOT, 'scripts/beats/temas', `thrive_${ID.replace(/-/g, '_')}.py`);
 const WAV = path.join(carpeta, 'instrumental.wav'), INSTR = path.join(carpeta, 'instrumental.mp3');
 function render() {
   const r = spawnSync('python', ['-m', 'uv', 'run', '--no-project', '--with', 'numpy', '--with', 'scipy', '--with', 'soundfile', PY_TEMA, WAV],
@@ -255,7 +255,7 @@ if (!fs.existsSync(INSTR)) {
       `caption = ${toml(tema.captionInstrumental + ', instrumental')}`, `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`,
       `lyrics = ${toml(tema.estructura.map(s => `[${s}]`).join('\n\n'))}`, `duration = ${tema.duracion}`]);
     if (!a) { log('ERROR: no salió la instrumental. Se reintenta en la próxima corrida.'); process.exit(1); }
-    fs.copyFileSync(a, INSTR); tema.instrumental = 'ace'; if (!LOCAL) fs.rmSync(PY_TEMA, { force: true }); guardar();
+    fs.copyFileSync(a, INSTR); tema.instrumental = 'ace'; fs.rmSync(PY_TEMA, { force: true }); guardar();
   }
   cron('beat', t0);
 }
@@ -339,20 +339,18 @@ if (!tema.audio) {
   ff('-loglevel', 'error', '-y', '-i', voces, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, d - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', final);
   const df = dur(final);
   if (df < 150 || df > 210) log(`AVISO: duró ${Math.round(df)} s (fuera de 2:30–3:30)`);
-  if (!LOCAL) await putFile(final, `musica/thrive/${tema.slug}.mp3`);
-  tema.audio = LOCAL ? path.relative(ROOT, final) : `musica/thrive/${tema.slug}.mp3?v=${Date.now().toString(36)}`; tema.duracion = Math.round(df); tema.generado = new Date().toISOString(); guardar();
+  await putFile(final, `musica/thrive/${tema.slug}.mp3`);
+  tema.audio = `musica/thrive/${tema.slug}.mp3?v=${Date.now().toString(36)}`; tema.duracion = Math.round(df); tema.generado = new Date().toISOString(); guardar();
   cron('voces', t0);
   log(`✓ "${tema.titulo}" (${mmss(df)}) con voz`);
 
   // La instrumental no se publica en la página: va a la música de los videos (privado, _fuentes/musica/propios)
-  if (!LOCAL) {
-    const pulida = path.join(carpeta, 'instrumental-videos.mp3'), di = dur(INSTR);
-    ff('-loglevel', 'error', '-y', '-i', INSTR, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, di - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', pulida);
-    const biblio = `${ID} - ${tema.titulo}.mp3`;
-    fs.mkdirSync(path.join(ROOT, 'fuentes/musica/propios'), { recursive: true });
-    fs.copyFileSync(pulida, path.join(ROOT, 'fuentes/musica/propios', biblio));
-    await putFile(pulida, `_fuentes/musica/propios/${biblio}`);
-  }
+  const pulida = path.join(carpeta, 'instrumental-videos.mp3'), di = dur(INSTR);
+  ff('-loglevel', 'error', '-y', '-i', INSTR, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, di - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', pulida);
+  const biblio = `${ID} - ${tema.titulo}.mp3`;
+  fs.mkdirSync(path.join(ROOT, 'fuentes/musica/propios'), { recursive: true });
+  fs.copyFileSync(pulida, path.join(ROOT, 'fuentes/musica/propios', biblio));
+  await putFile(pulida, `_fuentes/musica/propios/${biblio}`);
 }
 
 // ── 5. Letra final (lo que realmente se canta), catálogo, commit ─────────────
@@ -363,10 +361,8 @@ catch (e) { log(`  no se pudo transcribir (${e.message}); se publica la letra es
 cron('letraFinal', t0Final);
 guardar();
 if (LOCAL) {
-  tema.tiempos = { ...tema.tiempos, ...tiempos }; guardar();
-  log(`Demo local terminada: "${tema.titulo}" → ${path.relative(ROOT, path.join(DIR, `${tema.slug}.mp3`))}`);
-  log(`Tiempos: ${Object.entries(tema.tiempos).map(([k, s]) => `${k} ${mmss(s)}`).join(' · ')} · total ${mmss(Object.values(tema.tiempos).reduce((a, b) => a + b, 0))}`);
-  process.exit(0);
+  tema.tiempos = { ...tema.tiempos, ...tiempos };
+  log(`Tiempos (IA local): ${Object.entries(tema.tiempos).map(([k, s]) => `${k} ${mmss(s)}`).join(' · ')} · total ${mmss(Object.values(tema.tiempos).reduce((a, b) => a + b, 0))}`);
 }
 delete tema.revision;
 if (tema.publicado !== true) tema.publicado = false;   // se publica cuando Juan lo aprueba en aprobar.html

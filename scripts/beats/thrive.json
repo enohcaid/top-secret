@@ -147,6 +147,47 @@
       "publicado": false,
       "version": 1,
       "letraPor": "claude"
+    },
+    {
+      "id": "2026-10-31-local",
+      "fecha": "2026-10-31",
+      "slug": "static-bloom",
+      "titulo": "Static Bloom",
+      "concepto": "Un amor obsesivo a una ciudad, una trampa de luces y promesas rotas, donde la belleza esconde la decadencia y el alma se consume en la búsqueda de algo inalcanzable.",
+      "rasgo": "Racionalización",
+      "voz": "dúo: él con voz profunda y melodías quebradas, ella con susurros etéreos y reverberación extensa",
+      "captionInstrumental": "dark trap, melodic trap, gliding 808 bass, crisp trap hi-hats with triplets, detuned bells, layered ambient textures, spacious production, cinematic atmosphere.",
+      "captionVoces": "Male rapper: brooding, textured flow, introspective delivery. Female voice: breathy, ethereal, layered harmonies, haunting melodies.",
+      "bpm": 72,
+      "tonalidad": "A minor",
+      "duracion": 188,
+      "estructura": [
+        "intro",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "instrumental": "ace",
+      "letra": "[intro - male & female]\n(soft, layered vocals, almost whispered)\nDust settles… neon bleeds…\n\n[verse 1 - male rap]\nConcrete canyons, a gilded cage I roam\nPromises whispered, a siren’s hollow tone\nEvery street corner, a memory’s faint trace\nLost in the echoes of this desolate space.\nThese towers loom, monuments to the fall\nReflecting ambition, consuming us all\nI chase the phantom, a light I cannot seize\nA manufactured dream, designed to appease.\nThe rhythm pulses, a hypnotic beat\nDragging me deeper, bittersweet\nA fractured mosaic, beauty laced with rust\nTrading my spirit, for fleeting, fragile trust.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[verse 2 - male rap]\nRain on the pavement, a silver, slick sheen\nWashing away the colors I’ve seen\nAnother shadow stretches, long and thin\nAnother casualty drawn deep within.\nThey built this empire on fragile, hollow ground\nWhere every victory is a silent sound\nI justify the hunger, the endless quest\nTo find a solace, a moment’s fleeting rest.\nThis fever burns, a constant, anxious plea\nA desperate yearning to finally be free\nBut freedom's a fiction, a carefully spun lie\nJust another illusion as the moments fly.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - male & female]\n(male: darker, more rhythmic delivery; female: ethereal harmonies)\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[bridge - female]\n(slow, sustained notes, layered vocals)\nThe light fractures… the shadows grow…\nA silent surrender… a whispered woe…\nI built my kingdom on shifting sand…\nA fading memory… a ghost in the land…\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[outro - male & female]\n(male: spoken word, fading out; female: humming, echoing)\nDust settles… neon bleeds… (female hums a single, drawn-out note)",
+      "letraPor": "local",
+      "audio": "musica/thrive/static-bloom.mp3?v=mvwa69zr",
+      "generado": "2026-10-31T09:14:18.999Z",
+      "letraFinal": "[intro - male & female]\n(soft, layered vocals, almost whispered)\nDust settles… neon bleeds…\n\n[verse 1 - male rap]\nConcrete canyons, a gilded cage I roam\nPromises whispered, a siren, a solo tone\nThe memories faint trains\nThe rhythm pulsing, a hypnotic beat\nDragging me deeper, better sweep\nA fractured musee, beauty laced with roots\nThese towers loom, monuments to the fall\nReflecting ambition, consuming us all\nI chase the phantom, a light I cannot seize\nA manufactured dream, designed to appease.\nThe rhythm pulses, a hypnotic beat\nDragging me deeper, bittersweet\nA fractured mosaic, beauty laced with rust\nTrading my spirit, for fleeting, fragile trust.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[verse 2 - male rap]\nRain on the pavement, a silver slick sheen\nWashing away the colors I’ve seen\nAnother shadow stretches, long and thin\nThey built this empire, a fragile hologram\nI justify the hunger, the endless quest\nTo find a solace, a moment’s fleeting rest.\nThis fever burns, a constant, anxious plea\nA desperate yearning to finally be free\nBut freedom's a fiction, a carefully spun lie\nJust another illusion as the moments fly.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - male & female]\n(male: darker, more rhythmic delivery; female: ethereal harmonies)\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sides are fading here\nEverything I wanted\n\n[bridge - female]\n(slow, sustained notes, layered vocals)\nThe light fractures… the shadows grow…\nA silent surrender… a whispered woe…\nI built my kingdom on shifting sand…\nA fading memory… a ghost in the land…\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[outro - male & female]\n(male: spoken word, fading out; female: humming, echoing)\nDust settles… neon bleeds… (female hums a single, drawn-out note)",
+      "tiempos": {
+        "concepto": 618,
+        "beat": 12808,
+        "letra": 233,
+        "voces": 992,
+        "letraFinal": 344
+      },
+      "motor": "local",
+      "publicado": false
     }
   ]
 }
