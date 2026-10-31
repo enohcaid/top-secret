@@ -11,6 +11,7 @@ Psychological trait: {{RASGO}}. Sound: {{CAPTION}}
 - Hi-hats CHANGE at least every 8 bars: use rolls (r) and triplets (t) in fills, not the same grid all song.
 - Melody: dark and SPARSE, call (melodia) and response (respuesta). Leave rests. It must DEVELOP: the same motif comes back transformed (variacion), and the last chorus brings something new.
 - Space for the voices: a male rapper on the verses, a female voice on hooks/bridge. Verses: drums + 808 + at most the respuesta, sparse. Choruses open up (melodia + textura).
+- THE PARTS MUST BE CLEARLY DIFFERENT (the artist: "you can't tell the parts of the song apart"): the chorus has its OWN drum grid (busier kick, more hat motion) and the melody; the verse is sparse; the bridge strips down; mark the arrival of each chorus with a transition at the end of the section before it.
 - Each device (corte, tapestop, redoble, a variation) 1–2 times in the whole song, never as a habit.
 - One DISTINCTIVE TRAIT that tells the concept, made with a transformation at a precise moment (e.g. the motif half-speed in the bridge, reversed in the outro). Say it in "rasgo".
 - Your own kit: choose knob values that fit THIS song (not 0.5 everywhere). Previous songs used: {{ANTERIORES}}

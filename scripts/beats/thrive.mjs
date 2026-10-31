@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Álbum "Thrive" de Tacet Sin: un tema nuevo por semana, los domingos a las 2:00 (Juan, 2026-10-27; antes, uno por noche). Amor, pasión, entrega y sacrificio
-// desde los rasgos psicológicos de querer algo que no siempre nos hace bien; nada deportivo; entre 2:30 y 3:30.
+// desde los rasgos psicológicos de querer algo que no siempre nos hace bien; nada deportivo; entre 2:00 y 2:30 (Juan, 2026-10-31; antes 2:30–3:30).
 // Referencias del disco: duetos de The Weeknd con mujeres (Lust for Life, The Abyss, Love Me Harder, One of the Girls) →
 // cada tema es un dúo masculino-femenino, alt-R&B / synth-pop oscuro y cinematográfico con ADN de trap.
 //
@@ -110,6 +110,7 @@ if (REVISAR) {
   } else {
     if ('beat' in FEEDBACK) { borrar('instrumental', 'secciones', 'beat'); for (const x of ['instrumental.mp3', 'instrumental.wav', 'instrumental-ace', 'instrumental-videos.mp3']) fs.rmSync(path.join(vieja, x), { recursive: true, force: true }); }
     if ('beat' in FEEDBACK || 'letra' in FEEDBACK) borrar('letra', 'letraPor', 'avisosRima');
+    if ('letra' in FEEDBACK) borrar('historia');
     if ('voces' in FEEDBACK) {
       // la descripción de las voces se reescribe con el comentario (modelo local primero)
       const nueva = await pedirTexto(`Rewrite this vocal description for an AI music model so it fixes the artist's feedback. Keep it a male–female duet, English, comma-separated, max 30 words, no artist names. Answer only with the new description.
@@ -139,7 +140,7 @@ ${fb('concepto')}` : '');
     claves: ['titulo', 'concepto', 'rasgo', 'caption_instrumental', 'caption_voces', 'voz', 'tonalidad', 'estructura'],
     validar: j => {
       if (!(j.bpm >= 70 && j.bpm <= 140)) return `bpm ${j.bpm}`;
-      if (!(j.duracion >= 165 && j.duracion <= 205)) return `duración ${j.duracion}`;
+      if (!(j.duracion >= 120 && j.duracion <= 150)) return `duración ${j.duracion} (va entre 120 y 150 s)`;
       if (!/^[A-G][#b]? (major|minor)$/.test(String(j.tonalidad).trim())) return `tonalidad "${j.tonalidad}"`;
       if (!Array.isArray(j.estructura) || !j.estructura.includes('chorus')) return 'estructura sin estribillo';
       const t = `${j.titulo}\n${j.caption_instrumental}\n${j.caption_voces}`;
@@ -231,7 +232,7 @@ async function beatPorPartitura() {
       if (notas.length) log(`    reparado: ${notas.join(' · ')}`);
       let err = criticar(P, { compases, slug: tema.slug });
       // lo que falta es un elemento puntual (glide, variación de hats): se le pregunta solo eso
-      if (err.length && err.every(e => /no glide|never changes|keeps the same hats|no hi-hat roll/.test(e))) {
+      if (err.length && err.every(e => /no glide|never changes|keeps the same hats|no hi-hat roll|chorus uses the same drums/.test(e))) {
         const t1 = Date.now();
         await retocar(P, err, tema, log);
         log(`    retoques: ${mmss((Date.now() - t1) / 1000)}`);
@@ -369,8 +370,25 @@ function rimas(letra) {
 if (!tema.letra) {
   const secciones = tema.secciones || medir(INSTR), compas = 240 / tema.bpm;
   tema.duracion = Math.round(dur(INSTR)); guardar();
+  // carril local: primero la historia y después la letra que la cuenta (Juan, 2026-10-31: "la letra no tiene sentido,
+  // debe contarse algo"). Un modelo chico escribe mejor una letra con sentido si la trama ya está decidida.
+  if (LOCAL && !tema.historia) {
+    log('Historia de la letra…');
+    const t0h = Date.now();
+    tema.historia = await pedirJSON(`You are planning the STORY that the lyrics of a trap song will tell, before writing them.
+Song: "${tema.titulo}" — ${tema.concepto} (psychological trait: ${tema.rasgo}).
+Rules: the love is ABSTRACT — the narrator loves something that is not a person (see the concept): never a lover, an ex, "baby". Nothing about sport.
+Make it a real story a listener can follow: one narrator (first person), a concrete place and time, things that HAPPEN (actions, objects, something someone said), a change from the first verse to the second, and a turn in the bridge.
+Answer JSON, every value in English, plain words, 1–2 sentences each:
+{"quien": "who the narrator is and the situation", "verso1": "what happens in verse 1 (concrete scene)", "gancho": "the hook phrase, 3 to 6 words, that the chorus repeats", "estribillo": "what the chorus means in the story", "verso2": "what happens next in verse 2 (it moved on: consequence or escalation)", "puente": "the turn: what the narrator realizes or decides"}
+${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2', 'puente'], temperatura: 0.85 });
+    guardar(); cron('historia', t0h);
+    log(`  gancho: "${tema.historia.gancho}" · ${tema.historia.quien}`);
+  }
+  const H = tema.historia;
   // carril local: encargo nuevo ("menos es más") a prueba antes de pasarlo al proceso semanal
   const base = fs.readFileSync(path.join(ROOT, `scripts/beats/${LOCAL ? 'thrive-letra-v2.md' : 'thrive-letra.md'}`), 'utf8')
+    .replace('{{HISTORIA}}', H ? `- Narrator: ${H.quien}\n- Verse 1: ${H.verso1}\n- Chorus: ${H.estribillo} Hook phrase: "${H.gancho}"\n- Verse 2: ${H.verso2}\n- Bridge (the turn): ${H.puente}` : '')
     .replace('{{TITULO}}', tema.titulo).replace('{{CONCEPTO}}', tema.concepto).replace('{{RASGO}}', tema.rasgo).replace('{{CAPTION}}', tema.captionInstrumental)
     .replace('{{VOCES}}', tema.captionVoces).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{DURACION}}', tema.duracion)
     .replace('{{COMPAS}}', compas.toFixed(2)).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
@@ -414,7 +432,7 @@ if (!tema.audio) {
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);
   ff('-loglevel', 'error', '-y', '-i', voces, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, d - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', final);
   const df = dur(final);
-  if (df < 150 || df > 210) log(`AVISO: duró ${Math.round(df)} s (fuera de 2:30–3:30)`);
+  if (df < 115 || df > 160) log(`AVISO: duró ${Math.round(df)} s (fuera de 2:00–2:30)`);
   await putFile(final, `musica/thrive/${tema.slug}.mp3`);
   tema.audio = `musica/thrive/${tema.slug}.mp3?v=${Date.now().toString(36)}`; tema.duracion = Math.round(df); tema.generado = new Date().toISOString(); guardar();
   cron('voces', t0);

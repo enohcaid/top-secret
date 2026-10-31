@@ -12,6 +12,10 @@ You are the songwriter of the album "Thrive". The INSTRUMENTAL is already produc
 {{MAPA}}
 Planned structure: {{ESTRUCTURA}}
 
+## THE STORY — the lyrics must tell exactly this (the artist, 2026-10-31: "the lyrics make no sense, they must tell something")
+{{HISTORIA}}
+Each verse is a moment of this story, in order: a listener who hears the song once must be able to say what happened. The chorus repeats the hook phrase. The bridge is the turn. Every section must sound different from the others: the verse tells (rap), the chorus repeats (melody), the bridge changes.
+
 ## How real trap is written — LESS IS MORE (the artist, 2026-10-31)
 1. THE HOOK IS A MANTRA. One short phrase (3 to 6 words) that sticks, repeated: the chorus has at most 4 lines and at most 2 different ones. Shape: phrase / phrase / answer line / phrase. The title can be the phrase.
 2. VERSES SOUND LIKE SOMEONE TALKING. First person, present tense, plain words. At most one line per bar, 4 to 12 words each. Concrete details instead of abstractions: a time of night, an object, a street, a habit, a number, something someone said. One idea per line.

@@ -101,6 +101,18 @@ export function reparar(j, { bpm, tonalidad, compases, plan }) {
   }
   // espacio para el rapero: en los versos, como mucho la respuesta (regla de arreglo, se repara sola)
   for (const s of P.secciones) if (s.nombre === 'verse' && s.melodia && s.respuesta) { s.melodia = null; notas.push('verso: sin melodía (lugar para el rap)'); }
+  // que se distingan las partes (Juan, 2026-10-31: "no se distinguen las partes de la canción"): el estribillo lleva la
+  // melodía y la textura, y la sección que lo precede termina con una transición (corte o redoble, alternados)
+  const m1 = Object.keys(P.motivos)[0];
+  let alterna = 0;
+  P.secciones.forEach((s, i) => {
+    if (s.nombre === 'chorus') {
+      if (!s.melodia && m1) { s.melodia = m1; notas.push('estribillo: con melodía'); }
+      s.textura = true;
+      const prev = P.secciones[i - 1];
+      if (prev && prev.final === 'nada') { prev.final = alterna++ % 2 ? 'redoble' : 'corte'; notas.push(`${prev.nombre} → estribillo: ${prev.final}`); }
+    }
+  });
   // compases: si siguió las secciones del plan pero sumó mal, valen los del plan; si la diferencia es chica, se ajusta el outro
   let total = P.secciones.reduce((a, s) => a + s.compases, 0);
   if (total !== compases && plan && plan.length === P.secciones.length && plan.every((p, i) => p.nombre === P.secciones[i].nombre)) {
@@ -156,6 +168,10 @@ export function criticar(P, { compases, slug }) {
     if (s.compases >= 8 && s.bateria && (!s.bateria_b || P.baterias[s.bateria_b]?.hats === P.baterias[s.bateria]?.hats))
       err.push(`the ${s.nombre} of ${s.compases} bars keeps the same hats all along: set bateria_b with a different hats grid`);
   }
+  const batVerso = new Set(S.filter(s => s.nombre === 'verse').flatMap(s => [s.bateria, s.bateria_b]).filter(Boolean));
+  const igual = (a, b) => P.baterias[a] && P.baterias[b] && P.baterias[a].bombo === P.baterias[b].bombo && P.baterias[a].hats === P.baterias[b].hats;
+  if (S.some(s => s.nombre === 'chorus' && s.bateria && [...batVerso].some(v => v === s.bateria || igual(v, s.bateria))))
+    err.push('the chorus uses the same drums as the verse: the chorus needs its own drum grid so the parts are clearly different');
   const fin = S.filter(s => s.final !== 'nada').map(s => s.final);
   for (const f of new Set(fin)) if (fin.filter(x => x === f).length > 2) err.push(`"${f}" used ${fin.filter(x => x === f).length} times: each device at most twice`);
   if (!S.some(s => s.melodia && s.variacion !== 'normal')) err.push('the melody never transforms (variacion): the distinctive trait needs it');
@@ -217,6 +233,20 @@ export async function retocar(P, err, tema, log = () => {}) {
         P.baterias[`${n}_b`] = { ...d, hats: h };
         for (const s of P.secciones) if (s.bateria === n && s.compases >= 8) s.bateria_b = `${n}_b`;
         hechos.push(`hats ${n}_b: ${fila(h)}`);
+      }
+    }
+  }
+  if (err.some(e => /chorus uses the same drums/.test(e))) {
+    const coros = P.secciones.filter(s => s.nombre === 'chorus' && s.bateria), d = P.baterias[coros[0]?.bateria];
+    if (d) {
+      const fila = h => h.match(/.{4}/g).join(' ');
+      const esq = { type: 'object', properties: { bombo: grupos('[x.]'), hats: grupos('[xrt.]') }, required: ['bombo', 'hats'] };
+      const j = await preguntar(`${ctx}\nThe verse drums of one bar (4 groups of 4 sixteenths; the clap is already on beat 3):\nkick ${fila(d.bombo)}\nhats ${fila(d.hats)}\nWrite the CHORUS drums: clearly bigger and different from the verse so the listener feels the chorus arrive — a busier kick that pushes the 808 and hats with more motion (1/32 rolls r, triplets t). Not four-on-the-floor. Answer JSON {"bombo": "....", "hats": "...."} in 4 groups of 4.`, esq);
+      const nb = { bombo: grilla(j.bombo, 'x'), hats: grilla(j.hats, 'xrt'), abierto: d.abierto };
+      if (nb.bombo.includes('x') && !(nb.bombo === d.bombo && nb.hats === d.hats) && ![0, 4, 8, 12].every(i => nb.bombo[i] === 'x')) {
+        P.baterias.estribillo = nb; P.baterias.estribillo_b = { ...nb, hats: d.hats === nb.hats ? nb.hats : nb.hats.slice(0, 12) + 'rrtt' };
+        for (const s of coros) { s.bateria = 'estribillo'; s.bateria_b = 'estribillo_b'; }
+        hechos.push(`batería del estribillo: ${fila(nb.bombo)} / ${fila(nb.hats)}`);
       }
     }
   }

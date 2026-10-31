@@ -42,7 +42,7 @@ export async function mandarAAprobar(t, comentarios = {}) {   // comentarios: te
   const detalle = {
     concepto: `${t.concepto}\n\nRasgo: ${t.rasgo}`,
     beat: `${t.beat || t.captionInstrumental}\n\n${t.bpm} BPM · ${t.tonalidad} · ${Math.floor(t.duracion / 60)}:${String(t.duracion % 60).padStart(2, '0')}`,
-    letra: t.letraFinal || t.letra,
+    letra: (t.historia ? `Historia: ${t.historia.quien} · 1) ${t.historia.verso1} · Estribillo "${t.historia.gancho}" · 2) ${t.historia.verso2} · Puente: ${t.historia.puente}\n\n` : '') + (t.letraFinal || t.letra),
     voces: `${t.voz}\n\n${t.captionVoces}`,
   };
   if (t.reemplaza) {   // concepto rehecho = tema nuevo: la demo anterior sale de la lista
