@@ -44,3 +44,19 @@ Juan: "¿qué pasó con la IA que instalamos para hacerse cargo de partes del pr
   - Lo público con muchas reglas (noticia diaria, textos de redes) y lo más creativo (concepto, beat) siguen con Claude primero.
 - **Dataset**: cada respuesta de Claude que pasa los controles se guarda en `fuentes/ia/dataset/<tarea>.jsonl` como `{fecha, prompt, respuesta}` (`guardarEjemplo` en `scripts/lib/ia.mjs`). Tareas: `noticia-diaria`, `textos`, `noticia`, `thrive-concepto`, `thrive-beat`, `thrive-letra`, `letra-final`. Queda solo en drygan (`fuentes/` está en .gitignore).
 - **Entrenamiento (pendiente, con unos cientos de ejemplos por tarea)**: la GTX 1070 (8 GB) no alcanza para entrenar un 12B. El plan es LoRA sobre un modelo de 4 a 8B en una GPU gratuita (Google Colab), exportarlo a GGUF y correrlo con Ollama. Después se compara a ciegas contra Claude, tarea por tarea, antes de pasarle más trabajo.
+
+## Demo "todo local" de Thrive (2026-10-31, `node scripts/beats/thrive.mjs --local`)
+
+Juan quiso ver cuánto tarda y qué logra el método de Thrive solo con la IA local. `--local` (`IA_SOLO_LOCAL=1` en `ia.mjs`) deja todo en `pruebas/thrive-local/` y no toca thrive.json, R2, aprobar.html ni git. Resultado: **"Static Bloom"** (3:08).
+
+| etapa | tiempo | resultado |
+|---|---|---|
+| concepto (Gemma) | ~10 min, 2 intentos | sirve: amor obsesivo por una ciudad, racionalización, 72 BPM; el 1.er intento puso 142 BPM |
+| beat por código (Gemma, contexto 40K) | **3 vueltas de ~65 min** | **no compone**: devuelve el archivo de ejemplo casi idéntico (otro tema, otro tempo y otra duración). Respaldo: ACE-Step text2music (21 min) |
+| letra (Gemma) | 4 min, 1 vuelta, rimas OK | prolija pero llena de clichés ("gilded cage", "fractured"); versos en pareados AABB, que Juan pidió evitar (todo rima) |
+| voces (ACE-Step cover) | 16 min | igual que siempre |
+| letra final (Whisper + Gemma) | 6 min | **peor que la escrita**: copia lo que Whisper oyó mal ("musee", "laced with roots") en vez de usar la letra escrita, y corta un estribillo |
+
+Total ~4 h 10 min (contra ~55 min con Claude escribiendo el beat). Conclusión: con la 1070, Gemma 12B no puede componer el beat (un encargo de ~20K tokens con código largo lo supera); concepto y letra salen usables pero planos. La letra final local hace más daño que bien.
+
+Gotchas que salieron: (1) `fetch` de Node corta a los 5 min sin cabeceras y Ollama no manda nada hasta leer todo el encargo → `ollama()` usa `http`; el pedido abandonado seguía ocupando la placa y por eso ACE-Step no generó nada en la primera corrida. (2) Un tema `.py` fuera de `scripts/beats/temas/` no encuentra `componer.py` → `render()` pasa `PYTHONPATH`.

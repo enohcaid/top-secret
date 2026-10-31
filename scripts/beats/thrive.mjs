@@ -190,7 +190,8 @@ const PY_TEMA = path.join(LOCAL ? DIR : path.join(ROOT, 'scripts/beats/temas'), 
 const WAV = path.join(carpeta, 'instrumental.wav'), INSTR = path.join(carpeta, 'instrumental.mp3');
 function render() {
   const r = spawnSync('python', ['-m', 'uv', 'run', '--no-project', '--with', 'numpy', '--with', 'scipy', '--with', 'soundfile', PY_TEMA, WAV],
-    { cwd: ROOT, encoding: 'utf8', timeout: 15 * 60000, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+    // PYTHONPATH: el tema importa componer.py relativo a su carpeta; en la demo --local vive en pruebas/ y no lo encontraba
+    { cwd: ROOT, encoding: 'utf8', timeout: 15 * 60000, env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONPATH: path.join(ROOT, 'scripts/beats') } });
   if (r.status !== 0 || !fs.existsSync(WAV)) return { error: `El script falló:\n${(r.stderr || r.error?.message || '').slice(-2500)}` };
   const m = (r.stdout || '').match(/SECCIONES=(\[.*\])/);
   let secciones; try { secciones = JSON.parse(m[1]); } catch { return { error: 'No imprimió la línea SECCIONES= con un JSON válido.' }; }
