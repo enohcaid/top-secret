@@ -32,7 +32,7 @@ export const PARTES = [
 export async function mandarAAprobar(t, comentarios = {}) {   // comentarios: texto ya cargado por parte (lo que Juan dijo en el chat)
   const local = t.motor === 'local';   // tema hecho solo con la IA local (thrive.mjs --local)
   const quien = {
-    concepto: local ? 'Gemma (modelo local)' : 'Claude Opus',
+    concepto: t.conceptoPor === 'claude' ? 'Claude Opus' : local ? 'Gemma (modelo local)' : 'Claude Opus',   // conceptoPor: rehecho con Gemma sobre un concepto de Claude
     beat: t.instrumental === 'partitura' ? `Gemma, partitura (${t.vueltasBeat || 1} vuelta${t.vueltasBeat > 1 ? 's' : ''}) tocada por el intérprete`
       : t.instrumental === 'codigo' ? (local ? 'Gemma, compuesto por código' : 'Claude Sonnet, compuesto por código')
       : t.instrumental === 'ace' ? (local ? 'ACE-Step (respaldo: Gemma no logró componerlo)' : 'ACE-Step (respaldo)') : 'ACE-Step',
