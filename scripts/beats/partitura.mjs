@@ -38,12 +38,15 @@ export function planCompases(estructura, compases) {
   const base = { intro: 4, verse: 8, 'pre-chorus': 4, chorus: 8, bridge: 4, outro: 4 };
   const plan = estructura.map(n => ({ nombre: NOMBRES.includes(n) ? n : 'verse', compases: base[n] || 4 }));
   let dif = compases - plan.reduce((a, s) => a + s.compases, 0);
-  const orden = ['verse', 'chorus', 'bridge', 'pre-chorus'];
-  for (let vuelta = 0; dif && vuelta < 40; vuelta++) {
-    const s = plan.filter(x => x.nombre === orden[vuelta % orden.length])[Math.floor(vuelta / orden.length) % 2] ||
-      plan.find(x => x.nombre === orden[vuelta % orden.length]);
+  // para alargar, los versos primero; para acortar, se recorta desde el final (último estribillo, intro, pre) y los versos
+  // quedan enteros: son los que cuentan la historia
+  const orden = dif > 0 ? ['verse', 'chorus'] : ['chorus', 'intro', 'pre-chorus', 'outro', 'bridge', 'chorus', 'verse'];
+  for (let vuelta = 0; dif && vuelta < 60; vuelta++) {
+    const candidatas = plan.filter(x => x.nombre === orden[vuelta % orden.length]);
+    if (dif < 0) candidatas.reverse();
+    const s = candidatas[Math.floor(vuelta / orden.length) % Math.max(1, candidatas.length)];
     if (!s) continue;
-    const paso = Math.sign(dif) * Math.min(Math.abs(dif), 4);
+    const paso = Math.sign(dif) * Math.min(Math.abs(dif), dif > 0 ? 4 : 2);
     if (s.compases + paso >= 2 && s.compases + paso <= 16) { s.compases += paso; dif -= paso; }
   }
   if (dif) plan.at(-1).compases = Math.max(1, plan.at(-1).compases + dif);
