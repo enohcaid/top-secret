@@ -206,6 +206,22 @@ export async function reintentar(P, fallas, tema, plan, log = () => {}) {
         obj({ notas: esBajo ? bajoEsq : motivoEsq }), x => grilla(x.notas) === grilla(P.grillas[parte]));
       ponerNotas(P, parte, j.notas);
       log(`      ${parte}: ${P.grillas[parte]}`);
+    } else if ((parte === 'bateria_verso_b' || parte === 'bateria_estribillo_b') && P.baterias[parte.slice(8, -2)] && errores.every(e => /same hats/.test(e))) {
+      // variación = TU grilla con el último grupo cambiado por un fill (el esquema exige un redoble o un tresillo ahí)
+      const base = P.baterias[parte.slice(8, -2)], k = parte.slice(8);
+      const fill = '([rt][xrt.]{3}|[xrt.][rt][xrt.]{2}|[xrt.]{2}[rt][xrt.]|[xrt.]{3}[rt])';
+      const esq = obj({ hats: { type: 'string', pattern: `^[xrt.]{4} [xrt.]{4} [xrt.]{4} ${fill}$` } });
+      const j = await preguntarDistinto(`${ctx}\nThese are your hats for one bar, 4 groups of 4 sixteenths (x hit, r 1/32 roll, t triplet, . nothing):\n${fila(base.hats)}\nWrite the VARIATION that plays in the second half of the section: keep the first three groups or change them a little, and turn the LAST group into a fill with a roll (r) or a triplet (t), different from what is there now. Answer JSON {"hats": "...."}.`,
+        esq, x => grilla(x.hats) === base.hats);
+      P.baterias[k] = { ...base, hats: grilla(j.hats) };
+      log(`      bateria_${k} (variación): hats ${fila(P.baterias[k].hats)}`);
+    } else if (parte === 'bateria_estribillo' && P.baterias.verso && errores.every(e => /not bigger/.test(e))) {
+      // estribillo más grande: con números concretos y SIN mostrarle una grilla para copiar
+      const v = P.baterias.verso, nk = (v.bombo.match(/x/g) || []).length, nh = (v.hats.match(/[xrt]/g) || []).length;
+      const j = await preguntarDistinto(`${ctx}\nWrite the CHORUS drums for one bar, 4 groups of 4 sixteenths (kick: x/. ; hats: x hit, r 1/32 roll, t triplet, . nothing; open hat: x/.; the clap is already on beat 3). The verse has ${nk} kicks and ${nh} hat hits; the chorus must hit harder: write a kick with ${nk + 2} x (syncopated, pushing the 808 — never on all four beats) and hats with at least ${nh + 2} hits including rolls. Answer JSON {"bombo": "....", "hats": "....", "abierto": "...."}.`,
+        bateriaEsq(), x => grilla(x.bombo) === v.bombo && grilla(x.hats) === v.hats);
+      P.baterias.estribillo = { bombo: grilla(j.bombo), hats: grilla(j.hats), abierto: grilla(j.abierto) };
+      log(`      bateria_estribillo: kick ${fila(P.baterias.estribillo.bombo)} · hats ${fila(P.baterias.estribillo.hats)}`);
     } else if (parte.startsWith('bateria_')) {
       const k = parte.slice(8), d = P.baterias[k], par = { verso_b: 'verso', estribillo_b: 'estribillo', estribillo: 'verso' }[k];
       const ref = par && P.baterias[par] ? `\nFor reference, bateria_${par}: kick ${fila(P.baterias[par].bombo)} · hats ${fila(P.baterias[par].hats)}` : '';
@@ -214,10 +230,29 @@ export async function reintentar(P, fallas, tema, plan, log = () => {}) {
       P.baterias[k] = { bombo: grilla(j.bombo), hats: grilla(j.hats), abierto: grilla(j.abierto) };
       log(`      bateria_${k}: kick ${fila(P.baterias[k].bombo)} · hats ${fila(P.baterias[k].hats)}`);
     } else if (parte === 'arreglo') {
-      const lista = plan.map((p, i) => `${i}. ${p.nombre} (${p.compases} bars): variacion ${P.arreglo[i]?.variacion || 'normal'}, final ${P.arreglo[i]?.final || 'nada'}`).join('\n');
-      const j = await preguntar(`${ctx}\nThis is your arrangement, one entry per section in order (variacion transforms the main melody in that section: normal, media = half speed, invertida, retrogrado, octava; final = the transition at its end: nada, corte, tapestop, redoble):\n${lista}\nIt was rejected:\n${que}\nWrite it again: same sections in the same order. Answer JSON {"arreglo": [{"seccion": "...", "variacion": "...", "final": "..."}, ...]}.`,
-        obj({ arreglo: arregloEsq(plan.length) }));
-      P.arreglo = j.arreglo; armarSecciones(P, plan);
+      // una decisión por vez, con las opciones válidas en el esquema (reescribiendo el arreglo entero arreglaba una cosa y
+      // rompía otra). Las decisiones son de Gemma: el código solo le muestra qué opciones quedan.
+      P.arreglo = plan.map((p, i) => ({ seccion: p.nombre, variacion: P.arreglo[i]?.variacion || 'normal', final: P.arreglo[i]?.final || 'nada' }));
+      const usos = f => P.arreglo.filter(a => a.final === f).length;
+      const dispositivos = ['corte', 'tapestop', 'redoble'];
+      const resumen = () => plan.map((p, i) => `${i}. ${p.nombre}${P.arreglo[i].final !== 'nada' ? ` → ${P.arreglo[i].final}` : ''}`).join(' · ');
+      const antesDeCoro = plan.map((p, i) => (plan[i + 1]?.nombre === 'chorus' ? i : null)).filter(x => x !== null);
+      for (let i = 0; i < plan.length; i++) {
+        const a = P.arreglo[i], sobra = a.final !== 'nada' && usos(a.final) > 2, falta = antesDeCoro.includes(i) && a.final === 'nada';
+        if (!sobra && !falta) continue;
+        const opciones = dispositivos.filter(f => usos(f) < 2 && f !== a.final).concat(antesDeCoro.includes(i) ? [] : ['nada']);
+        if (!opciones.length) continue;
+        const j = await preguntar(`${ctx}\nArrangement so far: ${resumen()}\nChoose the transition at the end of section ${i} (${plan[i].nombre}), ${antesDeCoro.includes(i) ? 'right before a chorus: mark its arrival' : 'not before a chorus'}. Each device (corte, tapestop, redoble) may be used at most twice in the song. Options: ${opciones.join(', ')}. Answer JSON {"final": "..."}.`,
+          obj({ final: { type: 'string', enum: opciones } }));
+        a.final = j.final;
+      }
+      if (!P.arreglo.some((a, i) => a.variacion !== 'normal' && ROLES[plan[i].nombre]?.melodia)) {
+        const conMelodia = plan.map((p, i) => (ROLES[p.nombre]?.melodia ? i : null)).filter(x => x !== null);
+        const j = await preguntar(`${ctx}\nThe main melody never transforms, and the song needs ONE distinctive moment. Sections where the melody plays: ${conMelodia.map(i => `${i} (${plan[i].nombre})`).join(', ')}. Choose the section and the transformation (media = half speed, invertida = mirrored, retrogrado = backwards, octava = an octave up). Answer JSON {"seccion": n, "variacion": "..."}.`,
+          obj({ seccion: { type: 'integer', enum: conMelodia }, variacion: { type: 'string', enum: VARIAC.filter(v => v !== 'normal') } }));
+        P.arreglo[j.seccion].variacion = j.variacion;
+      }
+      armarSecciones(P, plan);
       log(`      arreglo: ${P.secciones.map(s => `${s.nombre}${s.variacion !== 'normal' ? ' ' + s.variacion : ''}${s.final !== 'nada' ? ' → ' + s.final : ''}`).join(' · ')}`);
     }
   }
