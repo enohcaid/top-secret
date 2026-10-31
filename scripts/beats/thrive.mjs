@@ -326,6 +326,32 @@ function controlarVoces(letra) {
   const p = letra.match(/\b(baby|babe|girl|boy|my lover|lover|my ex|darling)\b/i);
   if (p) return `"${p[0]}": el amor de Thrive es abstracto, no por una persona`;
 }
+// Oficio de letra de trap (Juan, 2026-10-31: "hay que usar referencias de temas de trap real para aprender, a veces menos
+// es más"; carril local, thrive-letra-v2.md): hook como mantra, versos que suenan a alguien hablando, nada de dicción
+// poética. Las letras anteriores apilaban "…, a fragile grace, a hollow place". Devuelve problemas en inglés, para el modelo.
+const CLICHES = /\b(fragile|hollow|fleeting|phantom|gilded|fractured|whisper\w*|echo\w*|ethereal|shimmer\w*|velvet|siren\w*|labyrinth|tapestry|desolate|embrac\w*|solace|ember\w*)\b/gi;
+function oficio(letra) {
+  const p = [], palabras = l => l.replace(/\(.*?\)/g, '').split(/\s+/).filter(Boolean).length;
+  const norm = l => l.toLowerCase().replace(/\(.*?\)/g, '').replace(/[^a-z' ]/g, '').trim();
+  const cl = [...new Set((letra.match(CLICHES) || []).map(w => w.toLowerCase()))];
+  if (cl.length) p.push(`forbidden poetic words: ${cl.join(', ')} — say it the way a person would`);
+  const lineas = letra.split('\n').map(l => l.trim()).filter(l => l && !/^\[/.test(l) && !/^\(.*\)$/.test(l));
+  const apos = lineas.filter(l => /(^|,\s*)an?\s+[a-z']+\s+[a-z']+\s*[,.]?$/i.test(l.replace(/\(.*?\)/g, '').trim()));
+  if (apos.length > 2) p.push(`${apos.length} lines pile up descriptions like "a cold dark place" (max 2 in the song): ${apos.slice(0, 3).map(l => `"${l}"`).join(', ')}`);
+  const partes = letra.split(/^\s*\[([^\]]+)\]\s*$/m);
+  for (let i = 1; i < partes.length; i += 2) {
+    const tag = partes[i].toLowerCase(), ls = partes[i + 1].split('\n').map(l => l.trim()).filter(l => l && !/^\(.*\)$/.test(l));
+    if (/chorus|hook/.test(tag) && !/pre/.test(tag)) {
+      if (ls.length > 4) p.push(`a chorus has ${ls.length} lines (max 4)`);
+      const distintas = new Set(ls.map(norm)).size;
+      if (distintas > 2) p.push(`a chorus has ${distintas} different lines: the hook is a mantra, one short phrase repeated (max 2 different lines)`);
+    }
+    if (/pre/.test(tag) && ls.length > 2) p.push(`the pre-chorus has ${ls.length} lines (max 2)`);
+    if (/verse/.test(tag)) { const largas = ls.filter(l => palabras(l) > 12); if (largas.length) p.push(`verse lines too long (max 12 words): "${largas[0]}"`); }
+  }
+  if ((letra.match(/\b(I|I'm|I've|I'll|I'd|me|my)\b/g) || []).length < 6) p.push('almost no first person: the verses must sound like someone talking ("I", "my")');
+  return p;
+}
 function rimas(letra) {
   const f = path.join(carpeta, '_letra.txt'); fs.writeFileSync(f, letra);
   const r = spawnSync(PY, [path.join(ROOT, 'scripts/beats/rimas.py'), f], { encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
@@ -334,7 +360,8 @@ function rimas(letra) {
 if (!tema.letra) {
   const secciones = tema.secciones || medir(INSTR), compas = 240 / tema.bpm;
   tema.duracion = Math.round(dur(INSTR)); guardar();
-  const base = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-letra.md'), 'utf8')
+  // carril local: encargo nuevo ("menos es más") a prueba antes de pasarlo al proceso semanal
+  const base = fs.readFileSync(path.join(ROOT, `scripts/beats/${LOCAL ? 'thrive-letra-v2.md' : 'thrive-letra.md'}`), 'utf8')
     .replace('{{TITULO}}', tema.titulo).replace('{{CONCEPTO}}', tema.concepto).replace('{{RASGO}}', tema.rasgo).replace('{{CAPTION}}', tema.captionInstrumental)
     .replace('{{VOCES}}', tema.captionVoces).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{DURACION}}', tema.duracion)
     .replace('{{COMPAS}}', compas.toFixed(2)).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
@@ -344,16 +371,21 @@ if (!tema.letra) {
   // Modelo local primero (Juan, 2026-10-27): 3 vueltas con Gemma corrigiendo rimas; si no rima, Claude Sonnet.
   for (let i = 1; i <= 5; i++) {
     log(`Letra (vuelta ${i})…`);
-    const letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: i <= 3 ? ['local', 'claude'] : ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
-
-      validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : DEPORTE.test(x) ? 'palabra deportiva' : CASTELLANO.test(x) ? 'castellano' : controlarVoces(x) }))
-      .replace(/^```\w*\n?|```$/g, '').trim();
+    let letra;
+    try {
+      letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: i <= 3 ? ['local', 'claude'] : ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
+        validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : DEPORTE.test(x) ? 'palabra deportiva' : CASTELLANO.test(x) ? 'castellano' : controlarVoces(x) }))
+        .replace(/^```\w*\n?|```$/g, '').trim();
+    } catch (e) { log(`  ${e.message}`); continue; }   // solo local no tiene respaldo: otra vuelta
     const r = rimas(letra);
+    const of = LOCAL ? oficio(letra) : [];
+    r.problemas = [...of, ...r.problemas]; r.ok = r.ok && !of.length;
     if (!mejor || r.problemas.length < mejor.r.problemas.length) mejor = { letra, r, motor: ultimoMotor };
     if (r.ok) break;
-    log(`  rimas a corregir: ${r.problemas.length}`);
-    correcciones = `${fb('letra')}\n## Your previous version\n${letra}\n\n## Fix these lines (they do not rhyme BY SOUND; keep everything else)\n- ${r.problemas.join('\n- ')}\n`;
+    log(`  a corregir: ${r.problemas.length}${of.length ? ` (oficio: ${of.map(x => x.split(':')[0]).join(' · ')})` : ''}`);
+    correcciones = `${fb('letra')}\n## Your previous version\n${letra}\n\n## ${LOCAL ? 'Fix exactly this (keep everything else)' : 'Fix these lines (they do not rhyme BY SOUND; keep everything else)'}\n- ${r.problemas.join('\n- ')}\n`;
   }
+  if (!mejor) { log('ERROR: no salió ninguna letra. Se reintenta en la próxima corrida.'); process.exit(1); }
   if (mejor.r.ok && mejor.motor === 'claude') guardarEjemplo('thrive-letra', base.replace('{{CORRECCIONES}}', ''), mejor.letra);
   tema.letra = mejor.letra; tema.letraPor = mejor.motor; if (!mejor.r.ok) tema.avisosRima = mejor.r.problemas; guardar(); cron('letra', t0);
   log(`Letra lista${mejor.r.ok ? ', rimas OK' : ` (quedan ${mejor.r.problemas.length} rimas flojas)`}`);
@@ -391,7 +423,9 @@ if (!tema.audio) {
 // ── 5. Letra final (lo que realmente se canta), catálogo, commit ─────────────
 log('Letra final (Whisper)…');
 const t0Final = Date.now();
-try { tema.letraFinal = await letraFinal(tema, path.join(DIR, `${tema.slug}.mp3`)); }
+// carril local: la letra escrita (la final de Gemma copiaba lo que Whisper oía mal: "a fractured musee", 31/10)
+if (LOCAL) { tema.letraFinal = tema.letra; log('  local: se publica la letra escrita'); }
+else try { tema.letraFinal = await letraFinal(tema, path.join(DIR, `${tema.slug}.mp3`)); }
 catch (e) { log(`  no se pudo transcribir (${e.message}); se publica la letra escrita`); tema.letraFinal = tema.letra; tema.letraFinalFallo = true; }
 cron('letraFinal', t0Final);
 guardar();

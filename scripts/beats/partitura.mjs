@@ -14,8 +14,6 @@ const INSTR = ['campana', 'pluck', 'piano', 'lead', 'vox', 'cuerdas'], TEXT = ['
 const NOMBRES = ['intro', 'verse', 'pre-chorus', 'chorus', 'bridge', 'outro'];
 const VARIAC = ['normal', 'media', 'invertida', 'retrogrado', 'octava'], FINALES = ['nada', 'corte', 'tapestop', 'redoble'];
 const KNOBS = ['bombo_golpe', 'bombo_cola', 'clap_tono', 'hat_metal', 'dist_808', 'sala', 'brillo', 'swing', 'cinta', 'crush'];
-// fragmentos de sintaxis del encargo: si aparecen como material, es copia
-const FRAGMENTOS = ['3/2 r/6', '1/3 r/1'];
 
 const str = { type: 'string' }, num = { type: 'number' }, bool = { type: 'boolean' };
 const obj = (props, req = Object.keys(props)) => ({ type: 'object', properties: props, required: req });
@@ -56,15 +54,19 @@ export function planCompases(estructura, compases) {
 const TOKEN = /^(r|-?\d+)([+-]*)(~?)\/(\d+)$/;
 function ajustarLargo(notas, largo) {
   // '~2/4' (glide antes del grado) también vale: se normaliza a '2~/4'
-  const toks = String(notas).trim().split(/\s+/).map(t => t.replace(/^~(r|-?\d+[+-]*)\//, '$1~/')).filter(t => TOKEN.test(t) && +t.split('/')[1] > 0);
-  const out = []; let p = 0;
-  for (const t of toks) {
-    const d = +t.split('/')[1];
-    if (p + d > largo) { if (largo - p > 0) out.push(t.replace(/\/\d+$/, `/${largo - p}`)); p = largo; break; }
-    out.push(t); p += d;
+  let toks = String(notas).trim().split(/\s+/).map(t => t.replace(/^~(r|-?\d+[+-]*)\//, '$1~/')).filter(t => TOKEN.test(t) && +t.split('/')[1] > 0)
+    .map(t => ({ nota: t.split('/')[0], d: +t.split('/')[1] }));
+  // si se pasa, se comprime en proporción (antes se cortaba la cola, y con ella los glides que Gemma sí escribía);
+  // si aun así no entra, salen primero los silencios y después las últimas notas
+  const suma = () => toks.reduce((a, t) => a + t.d, 0);
+  if (suma() > largo) {
+    const f = largo / suma();
+    toks = toks.map(t => ({ ...t, d: Math.max(1, Math.round(t.d * f)) }));
+    while (suma() > largo && toks.some(t => t.nota === 'r')) toks.splice(toks.findLastIndex(t => t.nota === 'r'), 1);
+    while (suma() > largo) { const t = toks.reduce((a, b) => (b.d > a.d ? b : a)); if (t.d > 1) t.d--; else toks.pop(); }
   }
-  if (p < largo) out.push(`r/${largo - p}`);
-  return out.join(' ');
+  if (suma() < largo) toks.push({ nota: 'r', d: largo - suma() });
+  return toks.map(t => `${t.nota}/${t.d}`).join(' ');
 }
 const grilla = (s, ok) => (String(s || '').toLowerCase().replace(/\s+/g, '').replace(new RegExp(`[^${ok}]`, 'g'), '.') + '.'.repeat(16)).slice(0, 16);
 const clamp01 = x => Math.min(1, Math.max(0, Number.isFinite(+x) ? +x : 0.5));
@@ -97,6 +99,8 @@ export function reparar(j, { bpm, tonalidad, compases, plan }) {
       bajo: ref(P.bajos, s.bajo), bateria: ref(P.baterias, s.bateria), bateria_b: ref(P.baterias, s.bateria_b), textura: !!s.textura, energia: e,
       final: FINALES.includes(s.final) ? s.final : 'nada' });
   }
+  // espacio para el rapero: en los versos, como mucho la respuesta (regla de arreglo, se repara sola)
+  for (const s of P.secciones) if (s.nombre === 'verse' && s.melodia && s.respuesta) { s.melodia = null; notas.push('verso: sin melodía (lugar para el rap)'); }
   // compases: si siguió las secciones del plan pero sumó mal, valen los del plan; si la diferencia es chica, se ajusta el outro
   let total = P.secciones.reduce((a, s) => a + s.compases, 0);
   if (total !== compases && plan && plan.length === P.secciones.length && plan.every((p, i) => p.nombre === P.secciones[i].nombre)) {
@@ -152,13 +156,10 @@ export function criticar(P, { compases, slug }) {
     if (s.compases >= 8 && s.bateria && (!s.bateria_b || P.baterias[s.bateria_b]?.hats === P.baterias[s.bateria]?.hats))
       err.push(`the ${s.nombre} of ${s.compases} bars keeps the same hats all along: set bateria_b with a different hats grid`);
   }
-  if (S.filter(s => s.nombre === 'verse').some(s => s.melodia && s.respuesta)) err.push('a verse has melodia AND respuesta: leave room for the rapper (at most the respuesta)');
   const fin = S.filter(s => s.final !== 'nada').map(s => s.final);
   for (const f of new Set(fin)) if (fin.filter(x => x === f).length > 2) err.push(`"${f}" used ${fin.filter(x => x === f).length} times: each device at most twice`);
   if (!S.some(s => s.melodia && s.variacion !== 'normal')) err.push('the melody never transforms (variacion): the distinctive trait needs it');
-  // originalidad: ni los fragmentos del encargo ni el material de partituras anteriores
-  const todo = [...Object.values(P.motivos), ...Object.values(P.bajos)].join(' ');
-  for (const f of FRAGMENTOS) if (todo.includes(f)) err.push(`"${f}" is the syntax fragment from the brief: invent your own material`);
+  // originalidad: nada del material de partituras anteriores (el encargo ya no trae fragmentos de ejemplo: Gemma los copiaba)
   for (const a of anteriores(slug)) {
     for (const [n, m] of Object.entries(P.motivos)) for (const [n2, m2] of Object.entries(a.motivos || {}))
       if (parecido(grados(m), grados(m2)) > 0.7) err.push(`motif ${n} is too similar to motif ${n2} of the earlier song "${a.slug}": write a new one`);
