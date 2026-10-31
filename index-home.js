@@ -336,20 +336,27 @@ if (!reduced && typeof gsap !== 'undefined') {
     next.alt = s.cap;
     next.src = s.src;
   }
-  // La primera queda fija hasta que todas las demás están descargadas: así cada cambio es
-  // inmediato y nunca se espera (ni se ve el hueco de) una foto que todavía baja.
-  let ready = false;
-  const start = () => { clearInterval(timer); if (!reduced && ready) timer = setInterval(() => show(cur + 1), 6000); };
-  const preload = s => new Promise(res => {
+  // Las duplas se precargan de a una en el orden de la rotación; el cambio automático solo pasa
+  // a una foto ya descargada (si la siguiente no llegó, espera esa sola), así nunca se ve el
+  // hueco de una foto que todavía baja.
+  const preload = s => s.p ||= new Promise(res => {
     const im = new Image();
-    im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(res);
+    im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => { s.ok = true; res(); });
     im.onerror = () => { s.bad = true; res(); };
     im.src = s.src;
   });
-  const begin = () => Promise.all(slides.slice(1).map(preload)).then(() => {
-    for (let i = slides.length - 1; i > 0; i--) if (slides[i].bad) slides.splice(i, 1);
-    ready = true; start();
-  });
+  (async () => { for (const s of SLIDES.slice(1)) await preload(s); })();
+  function advance() {
+    const idx = (cur + 1) % slides.length, s = slides[idx];
+    if (s.ok || idx === 0) return show(idx);
+    clearInterval(timer);
+    preload(s).then(() => {
+      if (s.bad) { const i = slides.indexOf(s); if (i > 0) slides.splice(i, 1); }
+      else show(slides.indexOf(s));
+      start();
+    });
+  }
+  const start = () => { clearInterval(timer); if (!reduced) timer = setInterval(advance, 6000); };
   $('hero-prev').addEventListener('click', () => { show(cur - 1, -1); start(); });
   $('hero-next').addEventListener('click', () => { show(cur + 1); start(); });
   const visual = document.querySelector('.hero-visual');
@@ -357,8 +364,7 @@ if (!reduced && typeof gsap !== 'undefined') {
   visual.addEventListener('mouseleave', start);
   const first = imgs[0];
   if (first.complete) kenBurns(first); else first.addEventListener('load', () => kenBurns(first), { once: true });
-  // Las duplas se bajan después del resto de la página, para no competir con lo visible.
-  if (document.readyState === 'complete') begin(); else addEventListener('load', begin, { once: true });
+  start();
 })();
 
 /* ── TWITCH EN VIVO (sobre la imagen del hero) ── */
