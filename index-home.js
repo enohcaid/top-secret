@@ -271,7 +271,6 @@ window.closePlayerModal = closePlayerModal;
 /* ── ANIMACIONES ── */
 if (!reduced && typeof gsap !== 'undefined') {
   gsap.from('.hero-copy > *', { opacity: 0, y: 26, duration: .8, stagger: .12, ease: 'power3.out', delay: .05 });
-  gsap.from('.hero-photo', { opacity: 0, scale: 1.04, duration: 1.1, ease: 'power3.out' });
   revealIn(document.querySelectorAll('.block-head, .stat-card, .league-card, .top-card, .result-row, .tile, .social-tile'));
 }
 
