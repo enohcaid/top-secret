@@ -35,7 +35,8 @@ b.o,.oro{color:var(--gold)}
 #rotulo.repe i{border-radius:4px;background:#0B0A07;box-shadow:none;width:16px;height:16px;transform:rotate(45deg)}
 #rotulo.recre{background:rgba(255,246,216,.92);color:#0B0A07;border-color:transparent}
 #rotulo.recre i{background:var(--gold);border-radius:3px;box-shadow:none}
-.h #rotulo{top:130px;left:70px;font-size:22px;padding:12px 22px}
+/* en horizontal la tarjeta de la música ocupa arriba a la izquierda: el rótulo va abajo a la derecha */
+.h #rotulo{top:auto;bottom:120px;left:auto;right:70px;font-size:22px;padding:12px 22px}
 
 /* gancho y foto animada (ia) */
 .clipIA{filter:contrast(1.05) saturate(1.05)}
@@ -61,7 +62,7 @@ b.o,.oro{color:var(--gold)}
 #jornada .cab{position:absolute;left:60px;right:60px;top:300px}
 #jornada .num{font:400 230px/.8 'Bebas Neue';color:var(--gold);letter-spacing:.01em}
 #jornada .tit{font:900 92px/1 Barlow;letter-spacing:-.02em;margin-top:22px}
-#jornada .filas{position:absolute;left:60px;right:60px;top:860px;display:flex;flex-direction:column;gap:20px}
+#jornada .filas{position:absolute;left:60px;right:60px;top:1010px;display:flex;flex-direction:column;gap:20px}
 .fila{display:flex;align-items:center;gap:24px;padding:20px 28px;border-radius:24px;background:rgba(11,10,7,.82);border:2px solid rgba(201,168,76,.25)}
 .fila img{width:96px;height:96px;object-fit:contain;flex:none}
 .fila .n{flex:1;min-width:0;font:800 46px/1.05 Barlow;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -122,11 +123,11 @@ b.o,.oro{color:var(--gold)}
 #tabla .rec div span{display:block;font:700 18px 'JetBrains Mono';letter-spacing:.18em;color:var(--text2);margin-top:6px}
 #tabla .gols{position:absolute;left:60px;right:60px;top:1060px}
 #tabla .gol{display:flex;align-items:center;gap:22px;padding:14px 0;border-top:1px solid rgba(201,168,76,.2)}
-#tabla .gol img{width:88px;height:88px;border-radius:50%;object-fit:cover;object-position:50% 12%;border:2px solid rgba(201,168,76,.5);background:#14110b;flex:none}
+#tabla .gol img{width:96px;height:96px;border-radius:50%;object-fit:cover;object-position:50% 18%;border:2px solid rgba(201,168,76,.5);background:#14110b;flex:none}
 #tabla .gol .g{flex:1;font:800 46px Barlow;white-space:nowrap}
 #tabla .gol .c{font:400 84px/.8 'Bebas Neue';color:var(--gold)}
-.h #tabla .izq{left:110px;right:auto;width:760px;top:200px}
-.h #tabla .gols{left:auto;right:110px;width:820px;top:220px}
+.h #tabla .izq{left:110px;right:auto;width:760px;top:270px}
+.h #tabla .gols{left:auto;right:110px;width:820px;top:270px}
 
 /* cierre */
 #cierre .bgIA{filter:brightness(.38) saturate(.8)}

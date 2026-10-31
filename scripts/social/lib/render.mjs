@@ -74,6 +74,8 @@ export async function video(plantilla, datos, salida, { escenas, gancho = 0, mus
   args.push('-movflags', '+faststart', salida);
   const ff = spawn(ffmpeg, args, { stdio: ['pipe', 'ignore', 'pipe'] });
   let err = ''; ff.stderr.on('data', d => { err = (err + d).slice(-2000); });
+  // con -shortest ffmpeg puede cerrar la entrada en el último cuadro: sin esto Node se cae con 'write EOF' (2026-10-30)
+  ff.stdin.on('error', e => { err += ` · stdin: ${e.code}`; });
   const escribir = buf => new Promise(r => ff.stdin.write(buf) ? r() : ff.stdin.once('drain', r));
   const cuadro = async () => escribir(await page.locator('#lienzo').screenshot({ type: 'jpeg', quality: 94 }));
 

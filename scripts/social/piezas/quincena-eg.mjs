@@ -155,13 +155,17 @@ const SAL = {
 };
 const jpgPortada = path.join(DIR, 'portada-vertical.jpg'), jpgMiniatura = path.join(DIR, 'miniatura-youtube.jpg');
 if (!process.argv.includes('--solo-lote')) {
-  for (const formato of ['story', 'yt']) {
+  // --formatos story|yt: rehacer uno solo (cada render a 60 fps tarda ~25 min)
+  const iF = process.argv.indexOf('--formatos');
+  for (const formato of iF > 0 ? process.argv[iF + 1].split(',') : ['story', 'yt']) {
     log(`Render ${formato} (${FIN.toFixed(1)} s; música desde ${musicaDesde.toFixed(2)} s)…`);
-    await video(PLANTILLA, datos, SAL[formato].mudo, { escenas: [{ n: 0, dur: FIN }], musica, fps: 60, desenfoque: true, musicaDesde, formato });
+    // --solo-mezcla: el render mudo ya está, solo rehacer la voz
+    if (!(process.argv.includes('--solo-mezcla') && fs.existsSync(SAL[formato].mudo)))
+      await video(PLANTILLA, datos, SAL[formato].mudo, { escenas: [{ n: 0, dur: FIN }], musica, fps: 60, desenfoque: true, musicaDesde, formato });
     agregarVoz(SAL[formato].mudo, pistas, SAL[formato].voz, { volumenMusica: 0.55 });
   }
   // Portada propia (la tijera: las placas del sábado usan otras fotos, regla de Juan 2026-10-23)
-  await portada({ imagen: path.join(DIR_IA, 'tijera.png'), kicker: 'ESPACIO GAMER · 15 DÍAS', dato: '8 GOLES', titulo: 'Tijera, descuento\n*y una noche dura.*', foco: '50% 40%' }, jpgPortada);
+  await portada({ imagen: path.join(DIR_IA, 'tijera.png'), kicker: 'ESPACIO GAMER · 15 DÍAS', dato: '8 GOLES', titulo: 'Tijera, descuento\n*y una noche dura.*', foco: '58% 40%' }, jpgPortada);
   conPortada(SAL.story.voz, jpgPortada, SAL.story.final);
   await miniatura(path.join(DIR_IA, 'tijera.png'), jpgMiniatura);
 }
@@ -174,14 +178,16 @@ async function miniatura(img, salida) {
   const b = await chromium.launch();
   try {
     const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
+    // setContent = about:blank, que no puede leer file://: las imágenes van como data URL
+    const dataUrl = f => `data:image/png;base64,${fs.readFileSync(f).toString('base64')}`;
     await p.setContent(`<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@900&family=Bebas+Neue&family=JetBrains+Mono:wght@700&display=block" rel="stylesheet">
       <div id="m" style="position:relative;width:1280px;height:720px;overflow:hidden;background:#070605;color:#F4EFE0;font-family:Barlow">
-        <img src="${archivo(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 40%">
+        <img src="${dataUrl(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 40%">
         <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,6,5,.95) 0%,rgba(7,6,5,.7) 38%,transparent 66%)"></div>
-        <div style="position:absolute;left:56px;top:70px;font:700 22px 'JetBrains Mono';letter-spacing:.28em;color:#C9A84C">ESPACIO GAMER · 20/10 AL 29/10</div>
-        <div style="position:absolute;left:50px;top:110px;font:400 250px/.82 'Bebas Neue';color:#C9A84C">15 DÍAS</div>
-        <div style="position:absolute;left:56px;top:330px;width:620px;font:900 64px/1.02 Barlow;letter-spacing:-.02em">8 goles, una tijera<br>y el 90+</div>
-        <img src="${archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png'))}" style="position:absolute;left:56px;bottom:50px;height:110px">
+        <div style="position:absolute;left:56px;top:56px;font:700 22px 'JetBrains Mono';letter-spacing:.28em;color:#C9A84C">ESPACIO GAMER · 20/10 AL 29/10</div>
+        <div style="position:absolute;left:50px;top:118px;font:400 250px/1 'Bebas Neue';color:#C9A84C">15 DÍAS</div>
+        <div style="position:absolute;left:56px;top:370px;width:620px;font:900 64px/1.02 Barlow;letter-spacing:-.02em">8 goles, una tijera<br>y el 90+</div>
+        <img src="${dataUrl(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png'))}" style="position:absolute;left:56px;bottom:50px;height:110px">
       </div>`, { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);
     await p.locator('#m').screenshot({ path: salida, type: 'jpeg', quality: 92 });
