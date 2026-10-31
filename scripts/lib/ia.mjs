@@ -13,6 +13,7 @@
 // D:\ollama\models (OLLAMA_MODELS); `ollama pull gemma3:12b`.
 import fs from 'fs';
 import os from 'os';
+import http from 'http';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { ROOT, loadEnv } from './env.mjs';
@@ -26,16 +27,18 @@ const log = m => console.log(`  [ia] ${m}`);
 // Llama a Ollama. Libera la placa al terminar (keep_alive 0): a la noche la GTX 1070 la necesita ACE-Step.
 // contexto: num_ctx. Si el encargo no entra, Ollama no avisa: descarta el principio (por eso se avisa en el log).
 export async function ollama(prompt, { modelo = MODELO, json = false, temperatura = 0.8, pensar = false, sistema, timeoutMin = 30, contexto = 16384 } = {}) {
-  const r = await fetch(`${OLLAMA}/api/chat`, {
-    method: 'POST', headers: { 'content-type': 'application/json' }, signal: AbortSignal.timeout(timeoutMin * 60000),
-    // stream: true — sin streaming, fetch de Node corta a los 5 min sin cabeceras (los 14B tardan más)
-    body: JSON.stringify({ model: modelo, stream: true, keep_alive: 0, think: pensar, ...(json ? { format: 'json' } : {}),
-      options: { temperature: temperatura, num_ctx: contexto },
-      messages: [...(sistema ? [{ role: 'system', content: sistema }] : []), { role: 'user', content: prompt }] }),
+  // http de Node y no fetch: fetch corta a los 5 min sin cabeceras, y Ollama no manda nada hasta leer todo el encargo
+  // (un encargo de ~20K tokens, como el del beat, tarda más que eso en la 1070: 31/10). El tope lo pone timeoutMin.
+  const body = JSON.stringify({ model: modelo, stream: true, keep_alive: 0, think: pensar, ...(json ? { format: 'json' } : {}),
+    options: { temperature: temperatura, num_ctx: contexto },
+    messages: [...(sistema ? [{ role: 'system', content: sistema }] : []), { role: 'user', content: prompt }] });
+  const r = await new Promise((ok, mal) => {
+    const req = http.request(`${OLLAMA}/api/chat`, { method: 'POST', headers: { 'content-type': 'application/json' }, signal: AbortSignal.timeout(timeoutMin * 60000) }, ok);
+    req.on('error', mal); req.end(body);
   });
-  if (!r.ok) throw new Error(`Ollama ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  if (r.statusCode !== 200) { let t = ''; for await (const p of r) t += p; throw new Error(`Ollama ${r.statusCode}: ${t.slice(0, 200)}`); }
   let texto = '', fin = {}, resto = '';
-  for await (const parte of r.body) {
+  for await (const parte of r) {
     resto += Buffer.from(parte).toString('utf8');
     const lineas = resto.split('\n'); resto = lineas.pop();
     for (const l of lineas) if (l.trim()) { const j = JSON.parse(l); texto += j.message?.content || ''; if (j.done) fin = j; }
