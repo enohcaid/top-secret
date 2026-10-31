@@ -26,7 +26,7 @@ import ffmpegPath from 'ffmpeg-static';
 import { ROOT, loadEnv } from '../lib/env.mjs';
 import { putFile } from '../lib/r2.mjs';
 import { pedirJSON, pedirTexto, claude, liberar, guardarEjemplo, ultimoMotor } from '../lib/ia.mjs';
-import { pedirPartitura, reparar, criticar, guardarPartitura, planCompases } from './partitura.mjs';
+import { pedirPartitura, reparar, criticar, retocar, guardarPartitura, planCompases } from './partitura.mjs';
 import { armarCatalogo } from './catalogo.mjs';
 import { letraFinal } from './letra-final.mjs';
 import { mandarAAprobar } from './musica-aprobacion.mjs';
@@ -226,9 +226,17 @@ async function beatPorPartitura() {
       let j;
       try { const r = await pedirPartitura(tema, { compases, plan, correcciones }); j = r.j; log(`    ${mmss(r.segundos)} · encargo ${r.tokensEncargo} tokens, respuesta ${r.tokens}`); }
       catch (e) { log(`    ${e.message.slice(0, 200)}`); continue; }
+      fs.writeFileSync(path.join(carpeta, `partitura-gemma-${i}.json`), JSON.stringify(j, null, 2) + '\n');   // lo que escribió, tal cual
       const { P, notas } = reparar(j, { bpm: tema.bpm, tonalidad: tema.tonalidad, compases, plan });
       if (notas.length) log(`    reparado: ${notas.join(' · ')}`);
       let err = criticar(P, { compases, slug: tema.slug });
+      // lo que falta es un elemento puntual (glide, variación de hats): se le pregunta solo eso
+      if (err.length && err.every(e => /no glide|never changes|keeps the same hats|no hi-hat roll/.test(e))) {
+        const t1 = Date.now();
+        await retocar(P, err, tema, log);
+        log(`    retoques: ${mmss((Date.now() - t1) / 1000)}`);
+        err = criticar(P, { compases, slug: tema.slug });
+      }
       if (!err.length) {
         fs.writeFileSync(JSONP, JSON.stringify(P, null, 2) + '\n');
         fs.rmSync(WAV, { force: true });
@@ -241,7 +249,8 @@ async function beatPorPartitura() {
         }
       }
       log(`    a corregir: ${err.join(' · ')}`);
-      correcciones = `${fb('beat')}\n## Your previous score was rejected. Fix exactly this and answer with the complete JSON again\n${err.map(e => `- ${e}`).join('\n')}\n\nPrevious score:\n${JSON.stringify(j)}\n`;
+      // sin la partitura anterior: con ella delante, Gemma la volvía a escribir igual (31/10, 6 vueltas idénticas)
+      correcciones = `${fb('beat')}\n## A previous attempt was rejected for these reasons — avoid them this time\n${err.map(e => `- ${e}`).join('\n')}\n`;
     }
     return false;
   } finally { await liberar(); }

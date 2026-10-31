@@ -186,6 +186,44 @@ export async function pedirPartitura(tema, { compases, plan, correcciones = '' }
   return { j: JSON.parse(r.texto), segundos: r.segundos, tokens: r.tokens, tokensEncargo: r.tokensEncargo, encargo: base };
 }
 
+// Retoques puntuales (31/10): con la partitura entera y la lista de errores, Gemma devolvía la misma partitura 6 vueltas
+// seguidas. Una pregunta chica por elemento ("esta línea de 808, con un glide") la resuelve. Lo que escribe sigue siendo suyo.
+const lineaEsq = { type: 'object', properties: { notas: { type: 'string' } }, required: ['notas'] };
+const hatsEsq = { type: 'object', properties: { hats: grupos('[xrt.]') }, required: ['hats'] };
+async function preguntar(texto, esquema) {
+  const r = await ollama(texto, { esquema, temperatura: 0.8, contexto: 4096, mantener: true, timeoutMin: 15 });
+  return JSON.parse(r.texto);
+}
+export async function retocar(P, err, tema, log = () => {}) {
+  const ctx = `Trap beat for "${tema.titulo}" (${tema.bpm} BPM, ${tema.tonalidad}): ${tema.captionInstrumental}.`;
+  const hechos = [];
+  if (err.some(e => /no glide/.test(e))) {
+    for (const [n, b] of Object.entries(P.bajos)) {
+      const j = await preguntar(`${ctx}\nThis is one bar of the 808 line (tokens DEGREE/LENGTH in sixteenths, lengths add up to 16, r = rest, degree counted from the chord root, 1+ = octave up):\n${b}\nRewrite it so it glides into ONE accent: put ~ right after the degree of the note it slides into (for example 5~/2 or 1+~/3). Keep the rests so it breathes. Lengths must still add up to 16. Answer JSON {"notas": "..."}.`, lineaEsq);
+      const nueva = ajustarLargo(j.notas, 16);
+      if (nueva.includes('~')) { P.bajos[n] = nueva; hechos.push(`808 ${n} con glide: ${nueva}`); break; }
+    }
+  }
+  const sinCambio = err.some(e => /never changes|keeps the same hats|no hi-hat roll/.test(e));
+  if (sinCambio) {
+    const fila = h => h.match(/.{4}/g).join(' ');
+    const falta = P.secciones.filter(s => s.compases >= 8 && s.bateria && (!s.bateria_b || P.baterias[s.bateria_b]?.hats === P.baterias[s.bateria]?.hats)).map(s => s.bateria);
+    const usadas = [...new Set(falta.length ? falta : P.secciones.map(s => s.bateria).filter(Boolean))];
+    for (const n of usadas) {
+      const d = P.baterias[n];
+      const j = await preguntar(`${ctx}\nThis is the hi-hat grid of one bar, 4 groups of 4 sixteenths (x hit, . nothing):\n${fila(d.hats)}\nWrite a VARIATION for the second half of each section: keep the feel, change the pattern, and add a fill with a 1/32 roll (r) and/or a triplet (t) — trap hats. Answer JSON {"hats": "xxxx xxxx xxxx xxxx"} with your own pattern.`, hatsEsq);
+      const h = grilla(j.hats, 'xrt');
+      if (h !== d.hats && /[rt]/.test(h)) {
+        P.baterias[`${n}_b`] = { ...d, hats: h };
+        for (const s of P.secciones) if (s.bateria === n && s.compases >= 8) s.bateria_b = `${n}_b`;
+        hechos.push(`hats ${n}_b: ${fila(h)}`);
+      }
+    }
+  }
+  if (hechos.length) log(`    retoques de Gemma: ${hechos.join(' · ')}`);
+  return hechos.length > 0;
+}
+
 export function guardarPartitura(slug, P) {
   fs.mkdirSync(DIR_PARTITURAS, { recursive: true });
   fs.writeFileSync(path.join(DIR_PARTITURAS, `${slug}.json`), JSON.stringify(P, null, 2) + '\n');
