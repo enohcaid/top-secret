@@ -26,10 +26,12 @@ const log = m => console.log(`  [ia] ${m}`);
 
 // Llama a Ollama. Libera la placa al terminar (keep_alive 0): a la noche la GTX 1070 la necesita ACE-Step.
 // contexto: num_ctx. Si el encargo no entra, Ollama no avisa: descarta el principio (por eso se avisa en el log).
-export async function ollama(prompt, { modelo = MODELO, json = false, temperatura = 0.8, pensar = false, sistema, timeoutMin = 30, contexto = 16384 } = {}) {
+// esquema: JSON schema que Ollama impone al decodificar (las claves y la forma salen siempre bien).
+// mantener: deja el modelo cargado entre vueltas de un mismo trabajo (liberar() al terminar).
+export async function ollama(prompt, { modelo = MODELO, json = false, esquema, temperatura = 0.8, pensar = false, sistema, timeoutMin = 30, contexto = 16384, mantener = false } = {}) {
   // http de Node y no fetch: fetch corta a los 5 min sin cabeceras, y Ollama no manda nada hasta leer todo el encargo
   // (un encargo de ~20K tokens, como el del beat, tarda más que eso en la 1070: 31/10). El tope lo pone timeoutMin.
-  const body = JSON.stringify({ model: modelo, stream: true, keep_alive: 0, think: pensar, ...(json ? { format: 'json' } : {}),
+  const body = JSON.stringify({ model: modelo, stream: true, keep_alive: mantener ? '15m' : 0, think: pensar, ...(esquema ? { format: esquema } : json ? { format: 'json' } : {}),
     options: { temperature: temperatura, num_ctx: contexto },
     messages: [...(sistema ? [{ role: 'system', content: sistema }] : []), { role: 'user', content: prompt }] });
   const r = await new Promise((ok, mal) => {
@@ -45,6 +47,11 @@ export async function ollama(prompt, { modelo = MODELO, json = false, temperatur
   }
   if (fin.prompt_eval_count > contexto * 0.95) log(`AVISO: el encargo llenó el contexto (${fin.prompt_eval_count}/${contexto} tokens): se perdió el principio`);
   return { texto: texto.replace(/<think>[\s\S]*?<\/think>/g, '').trim(), segundos: Math.round((fin.total_duration || 0) / 1e9), tokens: fin.eval_count, tokensEncargo: fin.prompt_eval_count };
+}
+
+// Descarga el modelo de la placa (después de un trabajo con `mantener`; a la noche la GTX 1070 la usa ACE-Step)
+export async function liberar(modelo = MODELO) {
+  await fetch(`${OLLAMA}/api/generate`, { method: 'POST', body: JSON.stringify({ model: modelo, keep_alive: 0 }) }).catch(() => {});
 }
 
 // pensar: tope de tokens de razonamiento (MAX_THINKING_TOKENS). Sin tope, Opus llegó a pensar 18 min antes de

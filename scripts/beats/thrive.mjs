@@ -25,7 +25,8 @@ import { spawn, spawnSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { ROOT, loadEnv } from '../lib/env.mjs';
 import { putFile } from '../lib/r2.mjs';
-import { pedirJSON, pedirTexto, claude, ollama, guardarEjemplo, ultimoMotor } from '../lib/ia.mjs';
+import { pedirJSON, pedirTexto, claude, liberar, guardarEjemplo, ultimoMotor } from '../lib/ia.mjs';
+import { pedirPartitura, reparar, criticar, guardarPartitura, planCompases } from './partitura.mjs';
 import { armarCatalogo } from './catalogo.mjs';
 import { letraFinal } from './letra-final.mjs';
 import { mandarAAprobar } from './musica-aprobacion.mjs';
@@ -188,8 +189,8 @@ const comunes = [`config_path = "acestep-v15-turbo"`, `lm_model_path = "acestep-
 // ── 2. Instrumental compuesta por código ────────────────────────────────────
 const PY_TEMA = path.join(ROOT, 'scripts/beats/temas', `thrive_${ID.replace(/-/g, '_')}.py`);
 const WAV = path.join(carpeta, 'instrumental.wav'), INSTR = path.join(carpeta, 'instrumental.mp3');
-function render() {
-  const r = spawnSync('python', ['-m', 'uv', 'run', '--no-project', '--with', 'numpy', '--with', 'scipy', '--with', 'soundfile', PY_TEMA, WAV],
+function render(script = PY_TEMA, args = []) {
+  const r = spawnSync('python', ['-m', 'uv', 'run', '--no-project', '--with', 'numpy', '--with', 'scipy', '--with', 'soundfile', script, ...args, WAV],
     // PYTHONPATH: el tema importa componer.py relativo a su carpeta; en la demo --local vive en pruebas/ y no lo encontraba
     { cwd: ROOT, encoding: 'utf8', timeout: 15 * 60000, env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONPATH: path.join(ROOT, 'scripts/beats') } });
   if (r.status !== 0 || !fs.existsSync(WAV)) return { error: `El script falló:\n${(r.stderr || r.error?.message || '').slice(-2500)}` };
@@ -213,6 +214,46 @@ function controlarBeat(secciones) {
   if (pico > -0.05) err.push(`satura (pico ${pico} dBFS): normalizar como el ejemplo`);
   return err;
 }
+// Local (2026-10-31): Gemma no escribe código, escribe la PARTITURA (partitura.mjs) y partitura.py la toca. Escribir
+// ~400 líneas de Python con un encargo de ~20K tokens la superaba: copiaba el ejemplo y tardaba ~65 min por vuelta.
+async function beatPorPartitura() {
+  const compases = Math.round(tema.duracion / (240 / tema.bpm)), plan = planCompases(tema.estructura, compases);
+  const JSONP = path.join(carpeta, 'partitura.json');
+  let correcciones = fb('beat');
+  try {
+    for (let i = 1; i <= 6; i++) {
+      log(`  Gemma escribe la partitura (vuelta ${i})…`);
+      let j;
+      try { const r = await pedirPartitura(tema, { compases, plan, correcciones }); j = r.j; log(`    ${mmss(r.segundos)} · encargo ${r.tokensEncargo} tokens, respuesta ${r.tokens}`); }
+      catch (e) { log(`    ${e.message.slice(0, 200)}`); continue; }
+      const { P, notas } = reparar(j, { bpm: tema.bpm, tonalidad: tema.tonalidad, compases, plan });
+      if (notas.length) log(`    reparado: ${notas.join(' · ')}`);
+      let err = criticar(P, { compases, slug: tema.slug });
+      if (!err.length) {
+        fs.writeFileSync(JSONP, JSON.stringify(P, null, 2) + '\n');
+        fs.rmSync(WAV, { force: true });
+        const r = render(path.join(ROOT, 'scripts/beats/partitura.py'), [JSONP]);
+        err = r.error ? [r.error] : controlarBeat(r.secciones);
+        if (!err.length) {
+          Object.assign(tema, { secciones: r.secciones, beat: P.rasgo || tema.captionInstrumental, vueltasBeat: i });
+          guardarPartitura(tema.slug, P);
+          return true;
+        }
+      }
+      log(`    a corregir: ${err.join(' · ')}`);
+      correcciones = `${fb('beat')}\n## Your previous score was rejected. Fix exactly this and answer with the complete JSON again\n${err.map(e => `- ${e}`).join('\n')}\n\nPrevious score:\n${JSON.stringify(j)}\n`;
+    }
+    return false;
+  } finally { await liberar(); }
+}
+if (!fs.existsSync(INSTR) && LOCAL) {
+  log('Instrumental: partitura de Gemma…');
+  const t0 = Date.now();
+  if (!(await beatPorPartitura())) { log('ERROR: Gemma no logró una partitura que pase los controles. Se reintenta en la próxima corrida.'); process.exit(1); }
+  ff('-loglevel', 'error', '-y', '-i', WAV, '-b:a', '256k', INSTR);
+  tema.instrumental = 'partitura'; guardar(); cron('beat', t0);
+  log(`  ✓ beat de la partitura (${mmss(dur(INSTR))}): scripts/beats/partituras/${tema.slug}.json`);
+}
 if (!fs.existsSync(INSTR)) {
   log('Instrumental compuesta por código…');
   const t0 = Date.now();
@@ -227,12 +268,10 @@ if (!fs.existsSync(INSTR)) {
   for (let i = 1; i <= 3 && !ok; i++) {
     let codigo;
     try {
-      log(`  ${LOCAL ? 'Gemma' : 'Claude'} compone (vuelta ${i})…`);
+      log(`  Claude compone (vuelta ${i})…`);
       // Sonnet y razonamiento acotado (Juan, 2026-10-27: "no podemos tardar tanto"): Opus pensaba ~18 min a ~11 tokens/s
       // y escribir el archivo le llevaba otros 10–15; Sonnet escribe varias veces más rápido y es muy bueno con código.
-      // Local: el encargo (~20K tokens con componer.py y el ejemplo) + el archivo anterior + la respuesta no entran en 16K.
-      const res = LOCAL ? (await ollama(base.replace('{{CORRECCIONES}}', correcciones), { contexto: 40960, temperatura: 0.6, timeoutMin: 150 })).texto
-        : claude(base.replace('{{CORRECCIONES}}', correcciones), { modelo: 'sonnet', minutos: 15, pensar: 4000 });
+      const res = claude(base.replace('{{CORRECCIONES}}', correcciones), { modelo: 'sonnet', minutos: 15, pensar: 4000 });
       codigo = (res.match(/```(?:python|py)?[ \t]*\r?\n([\s\S]*?)```/i) || [])[1];
       if (!codigo || !/import |def /.test(codigo)) throw new Error(`la respuesta no trae el código del beat; empieza con: ${res.slice(0, 160).replace(/\s+/g, ' ')}`);
     } catch (e) { log(`  ${e.message.slice(0, 260)}`); if (/sin cupo/i.test(e.message)) break; continue; }
@@ -240,7 +279,7 @@ if (!fs.existsSync(INSTR)) {
     fs.rmSync(WAV, { force: true });
     const r = render();
     const err = r.error ? [r.error] : controlarBeat(r.secciones);
-    if (!err.length) { ok = true; if (i === 1 && !LOCAL) guardarEjemplo('thrive-beat', base.replace('{{CORRECCIONES}}', ''), codigo); tema.secciones = r.secciones; tema.beat = (codigo.match(/Rasgo distintivo:\s*([^\n]+)/i) || [, tema.captionInstrumental])[1].trim(); break; }
+    if (!err.length) { ok = true; if (i === 1) guardarEjemplo('thrive-beat', base.replace('{{CORRECCIONES}}', ''), codigo); tema.secciones = r.secciones; tema.beat = (codigo.match(/Rasgo distintivo:\s*([^\n]+)/i) || [, tema.captionInstrumental])[1].trim(); break; }
     log(`  a corregir: ${err.map(e => e.split('\n')[0]).join(' · ')}`);
     correcciones = `${fb('beat')}\n## Your previous version failed. Fix it and return the complete file again\n${err.map(e => `- ${e}`).join('\n')}\n\nPrevious file:\n\`\`\`python\n${codigo}\n\`\`\`\n`;
   }
@@ -249,13 +288,9 @@ if (!fs.existsSync(INSTR)) {
     tema.instrumental = 'codigo'; guardar();
     log(`  ✓ beat compuesto (${mmss(dur(INSTR))}): ${path.relative(ROOT, PY_TEMA)}`);
   } else {
-    // respaldo: instrumental de ACE-Step, para que el tema de la noche salga igual
-    log('  la composición por código no salió: respaldo con ACE-Step text2music');
-    const a = aceStep('instrumental-ace', [...comunes, `task_type = "text2music"`, `instrumental = true`, `thinking = true`,
-      `caption = ${toml(tema.captionInstrumental + ', instrumental')}`, `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`,
-      `lyrics = ${toml(tema.estructura.map(s => `[${s}]`).join('\n\n'))}`, `duration = ${tema.duracion}`]);
-    if (!a) { log('ERROR: no salió la instrumental. Se reintenta en la próxima corrida.'); process.exit(1); }
-    fs.copyFileSync(a, INSTR); tema.instrumental = 'ace'; fs.rmSync(PY_TEMA, { force: true }); guardar();
+    // Sin respaldo de ACE-Step (Juan, 2026-10-31: "no podemos dejar que ACE haga los beats porque no respeta nuestro
+    // estilo, hace pop"): la corrida termina y la retoma el reintento de las 5:00 (o la próxima revisión).
+    log('ERROR: la composición por código no salió. Se reintenta en la próxima corrida.'); process.exit(1);
   }
   cron('beat', t0);
 }
@@ -370,7 +405,7 @@ guardar();
 await mandarAAprobar(tema);
 await armarCatalogo({ log });
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
-git('add', 'scripts/beats/thrive.json', ...(fs.existsSync(PY_TEMA) ? [PY_TEMA] : []));
+git('add', 'scripts/beats/thrive.json', ...(fs.existsSync(PY_TEMA) ? [PY_TEMA] : []), ...(fs.existsSync(path.join(ROOT, 'scripts/beats/partituras')) ? ['scripts/beats/partituras'] : []));
 const c = git('commit', '-m', `feat: Thrive — "${tema.titulo}" (${tema.rasgo})\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`);
 if (c.status === 0) { const ps = git('push', '-q'); log(ps.status === 0 ? 'Commit y push hechos.' : 'Push falló: ' + ps.stderr.slice(-200)); }
 log(`✓ "${tema.titulo}" (versión ${tema.version || 1}) listo para revisar en aprobar.html`);
