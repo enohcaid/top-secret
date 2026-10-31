@@ -164,15 +164,15 @@ if (!process.argv.includes('--solo-lote')) {
       await video(PLANTILLA, datos, SAL[formato].mudo, { escenas: [{ n: 0, dur: FIN }], musica, fps: 60, desenfoque: true, musicaDesde, formato });
     agregarVoz(SAL[formato].mudo, pistas, SAL[formato].voz, { volumenMusica: 0.55 });
   }
-  // Portada propia (la tijera: las placas del sábado usan otras fotos, regla de Juan 2026-10-23)
-  await portada({ imagen: path.join(DIR_IA, 'tijera.png'), kicker: 'ESPACIO GAMER · 15 DÍAS', dato: '8 GOLES', titulo: 'Tijera, descuento\n*y una noche dura.*', foco: '58% 40%' }, jpgPortada);
+  // Portada propia (foto 'portada', que no está en las placas ni en el video; regla de Juan 2026-10-23)
+  await portada({ imagen: path.join(DIR_IA, 'portada.png'), kicker: 'ESPACIO GAMER · 15 DÍAS', dato: '8 GOLES', titulo: 'Tijera, descuento\n*y una noche dura.*', foco: '50% 30%' }, jpgPortada);
   conPortada(SAL.story.voz, jpgPortada, SAL.story.final);
-  await miniatura(path.join(DIR_IA, 'tijera.png'), jpgMiniatura);
+  await miniatura(path.join(DIR_IA, 'portada.png'), jpgMiniatura);
 }
 log('Listo: ' + SAL.story.final + ' · ' + SAL.yt.voz);
 if (process.argv.includes('--sin-lote')) process.exit(0);
 
-// Miniatura de YouTube 1280x720: la foto de la tijera, el título grande a la izquierda y el escudo.
+// Miniatura de YouTube 1280x720: la foto de la portada, el título grande a la izquierda y el escudo.
 async function miniatura(img, salida) {
   const { chromium } = await import('playwright');
   const b = await chromium.launch();
@@ -182,7 +182,7 @@ async function miniatura(img, salida) {
     const dataUrl = f => `data:image/png;base64,${fs.readFileSync(f).toString('base64')}`;
     await p.setContent(`<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@900&family=Bebas+Neue&family=JetBrains+Mono:wght@700&display=block" rel="stylesheet">
       <div id="m" style="position:relative;width:1280px;height:720px;overflow:hidden;background:#070605;color:#F4EFE0;font-family:Barlow">
-        <img src="${dataUrl(img)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 40%">
+        <img src="${dataUrl(img)}" style="position:absolute;top:0;left:340px;width:1280px;height:720px;object-fit:cover;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 30%)">
         <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,6,5,.95) 0%,rgba(7,6,5,.7) 38%,transparent 66%)"></div>
         <div style="position:absolute;left:56px;top:56px;font:700 22px 'JetBrains Mono';letter-spacing:.28em;color:#C9A84C">ESPACIO GAMER · 20/10 AL 29/10</div>
         <div style="position:absolute;left:50px;top:118px;font:400 250px/1 'Bebas Neue';color:#C9A84C">15 DÍAS</div>
