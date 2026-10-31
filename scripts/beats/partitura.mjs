@@ -146,7 +146,7 @@ export function criticar(P, { slug }) {
     if (!s) { mal(k, `${k} is missing`); continue; }
     if (largo(s) !== debe) mal(k, `${k} lasts ${largo(s)} sixteenths; it must last exactly ${debe}`);
     if (tabla === 'motivos' && grados(s).length < 3) mal(k, `${k} has fewer than 3 notes`);
-    if (tabla === 'bajos' && !/(^|\s)r\//.test(s)) mal(k, `${k} never rests: the 808 must breathe (add rests r)`);
+    if (tabla === 'bajos' && !/(^|\s)r\//.test(s)) mal(k, `${k} never rests: the 808 must breathe — leave silent sixteenths (.) in the grid`);
   }
   if (!Object.values(P.bajos).some(b => b.includes('~'))) mal('bajo_estribillo', 'no glide (~) anywhere in the 808: glide into one accent');
   for (const k of ['verso', 'verso_b', 'estribillo', 'estribillo_b', 'puente']) {
@@ -182,9 +182,15 @@ export function criticar(P, { slug }) {
 }
 
 // ── Gemma vuelve a intentar SOLO la parte que falló ─────────────────────────
-async function preguntar(texto, esquema) {
-  const r = await ollama(texto, { esquema, temperatura: 0.8, contexto: 4096, mantener: true, timeoutMin: 15 });
+async function preguntar(texto, esquema, temperatura = 0.8) {
+  const r = await ollama(texto, { esquema, temperatura, contexto: 4096, mantener: true, timeoutMin: 15 });
   return JSON.parse(r.texto);
+}
+// Si devuelve exactamente lo rechazado (31/10: el mismo 808 y la misma batería 3 rondas seguidas), se le avisa y se le
+// pregunta otra vez con más temperatura
+async function preguntarDistinto(texto, esquema, igual) {
+  const j = await preguntar(texto, esquema);
+  return igual(j) ? preguntar(`${texto}\nYour last answer was IDENTICAL to the rejected one. Change it so it fixes the problem.`, esquema, 1.1) : j;
 }
 const SINTAXIS = 'Grid: one character per sixteenth, in groups of 4. A digit starts a note (scale degree 1–7; 8 and 9 = degrees 1 and 2 an octave up), - holds the note, . is silence, ~ (808 only) holds and glides into the next note.';
 export async function reintentar(P, fallas, tema, plan, log = () => {}) {
@@ -196,14 +202,15 @@ export async function reintentar(P, fallas, tema, plan, log = () => {}) {
     if (parte in PARTES_NOTAS) {
       const [tabla] = PARTES_NOTAS[parte], esBajo = tabla === 'bajos';
       const papel = esBajo ? `one bar of the 808 line, 4 groups of 4 (${parte === 'bajo_verso' ? 'verse: sparse' : 'chorus: busier'}); the degree is counted from the chord root of each bar, 8 = root an octave up` : `a 2-bar motif, 8 groups of 4 (${parte === 'llamada' ? 'the call, the main melody' : 'the answer to the call'})`;
-      const j = await preguntar(`${ctx}\nThis is your ${parte}, ${papel}:\n${P.grillas[parte] || '(missing)'}\nIt was rejected:\n${que}\n${SINTAXIS}\nWrite it again. Answer JSON {"notas": "..."}.`,
-        obj({ notas: esBajo ? bajoEsq : motivoEsq }));
+      const j = await preguntarDistinto(`${ctx}\nThis is your ${parte}, ${papel}:\n${P.grillas[parte] || '(missing)'}\nIt was rejected:\n${que}\n${SINTAXIS}\nWrite it again. Answer JSON {"notas": "..."}.`,
+        obj({ notas: esBajo ? bajoEsq : motivoEsq }), x => grilla(x.notas) === grilla(P.grillas[parte]));
       ponerNotas(P, parte, j.notas);
       log(`      ${parte}: ${P.grillas[parte]}`);
     } else if (parte.startsWith('bateria_')) {
       const k = parte.slice(8), d = P.baterias[k], par = { verso_b: 'verso', estribillo_b: 'estribillo', estribillo: 'verso' }[k];
       const ref = par && P.baterias[par] ? `\nFor reference, bateria_${par}: kick ${fila(P.baterias[par].bombo)} · hats ${fila(P.baterias[par].hats)}` : '';
-      const j = await preguntar(`${ctx}\nThis is your bateria_${k}, one bar in 4 groups of 4 sixteenths (kick: x/. ; hats: x hit, r 1/32 roll, t triplet, . nothing; the clap is already on beat 3):\nkick ${d ? fila(d.bombo) : '(missing)'} · hats ${d ? fila(d.hats) : '(missing)'} · open hat ${d ? fila(d.abierto) : '(missing)'}${ref}\nIt was rejected:\n${que}\nWrite it again. Answer JSON {"bombo": "....", "hats": "....", "abierto": "...."} in 4 groups of 4.`, bateriaEsq());
+      const j = await preguntarDistinto(`${ctx}\nThis is your bateria_${k}, one bar in 4 groups of 4 sixteenths (kick: x/. ; hats: x hit, r 1/32 roll, t triplet, . nothing; the clap is already on beat 3):\nkick ${d ? fila(d.bombo) : '(missing)'} · hats ${d ? fila(d.hats) : '(missing)'} · open hat ${d ? fila(d.abierto) : '(missing)'}${ref}\nIt was rejected:\n${que}\nWrite it again. Answer JSON {"bombo": "....", "hats": "....", "abierto": "...."} in 4 groups of 4.`, bateriaEsq(),
+        x => d && grilla(x.bombo) === d.bombo && grilla(x.hats) === d.hats);
       P.baterias[k] = { bombo: grilla(j.bombo), hats: grilla(j.hats), abierto: grilla(j.abierto) };
       log(`      bateria_${k}: kick ${fila(P.baterias[k].bombo)} · hats ${fila(P.baterias[k].hats)}`);
     } else if (parte === 'arreglo') {
