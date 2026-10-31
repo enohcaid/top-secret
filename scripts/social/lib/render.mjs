@@ -81,7 +81,8 @@ export async function video(plantilla, datos, salida, { escenas, gancho = 0, mus
   ff.stdin.on('close', () => { cerrada = true; });
   const escribir = buf => cerrada ? Promise.resolve() : new Promise(r => {
     if (ff.stdin.write(buf)) return r();
-    for (const ev of ['drain', 'error', 'close']) ff.stdin.once(ev, r);
+    const listo = () => { for (const ev of ['drain', 'error', 'close']) ff.stdin.off(ev, listo); r(); };
+    for (const ev of ['drain', 'error', 'close']) ff.stdin.on(ev, listo);
   });
   const cuadro = async () => escribir(await page.locator('#lienzo').screenshot({ type: 'jpeg', quality: 94 }));
 
