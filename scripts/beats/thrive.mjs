@@ -26,7 +26,7 @@ import ffmpegPath from 'ffmpeg-static';
 import { ROOT, loadEnv } from '../lib/env.mjs';
 import { putFile } from '../lib/r2.mjs';
 import { pedirJSON, pedirTexto, claude, liberar, guardarEjemplo, ultimoMotor } from '../lib/ia.mjs';
-import { pedirPartitura, reparar, criticar, retocar, guardarPartitura, planCompases } from './partitura.mjs';
+import { pedirPartitura, leer, criticar, reintentar, guardarPartitura, planCompases } from './partitura.mjs';
 import { armarCatalogo } from './catalogo.mjs';
 import { letraFinal } from './letra-final.mjs';
 import { mandarAAprobar } from './musica-aprobacion.mjs';
@@ -222,22 +222,23 @@ async function beatPorPartitura() {
   const JSONP = path.join(carpeta, 'partitura.json');
   let correcciones = fb('beat');
   try {
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 3; i++) {
       log(`  Gemma escribe la partitura (vuelta ${i})…`);
       let j;
       try { const r = await pedirPartitura(tema, { compases, plan, correcciones }); j = r.j; log(`    ${mmss(r.segundos)} · encargo ${r.tokensEncargo} tokens, respuesta ${r.tokens}`); }
       catch (e) { log(`    ${e.message.slice(0, 200)}`); continue; }
       fs.writeFileSync(path.join(carpeta, `partitura-gemma-${i}.json`), JSON.stringify(j, null, 2) + '\n');   // lo que escribió, tal cual
-      const { P, notas } = reparar(j, { bpm: tema.bpm, tonalidad: tema.tonalidad, compases, plan });
-      if (notas.length) log(`    reparado: ${notas.join(' · ')}`);
-      let err = criticar(P, { compases, slug: tema.slug });
-      // lo que falta es un elemento puntual (glide, variación de hats): se le pregunta solo eso
-      if (err.length && err.every(e => /no glide|never changes|keeps the same hats|no hi-hat roll|chorus uses the same drums/.test(e))) {
+      const P = leer(j, { bpm: tema.bpm, tonalidad: tema.tonalidad, plan });
+      // el código no corrige: le dice a Gemma qué parte falló y por qué, y Gemma la vuelve a escribir (hasta 4 rondas)
+      let fallas = criticar(P, { slug: tema.slug });
+      for (let r = 1; r <= 4 && fallas.length && !fallas.some(f => f.parte === 'todo'); r++) {
+        log(`    ronda ${r}: Gemma reintenta ${[...new Set(fallas.map(f => f.parte))].join(', ')}`);
         const t1 = Date.now();
-        await retocar(P, err, tema, log);
-        log(`    retoques: ${mmss((Date.now() - t1) / 1000)}`);
-        err = criticar(P, { compases, slug: tema.slug });
+        await reintentar(P, fallas, tema, plan, log);
+        log(`      (${mmss((Date.now() - t1) / 1000)})`);
+        fallas = criticar(P, { slug: tema.slug });
       }
+      let err = fallas.map(f => f.error);
       if (!err.length) {
         fs.writeFileSync(JSONP, JSON.stringify(P, null, 2) + '\n');
         fs.rmSync(WAV, { force: true });
