@@ -47,7 +47,7 @@ Juan: "¿qué pasó con la IA que instalamos para hacerse cargo de partes del pr
 
 ## Demo "todo local" de Thrive (2026-10-31, `node scripts/beats/thrive.mjs --local`)
 
-Juan quiso ver cuánto tarda y qué logra el método de Thrive solo con la IA local. `--local` (`IA_SOLO_LOCAL=1` en `ia.mjs`) deja todo en `pruebas/thrive-local/` y no toca thrive.json, R2, aprobar.html ni git. Resultado: **"Static Bloom"** (3:08).
+Juan quiso ver cuánto tarda y qué logra el método de Thrive solo con la IA local. `--local` (`IA_SOLO_LOCAL=1` en `ia.mjs`) sigue el flujo normal y el tema entra a aprobar.html como "Demo con IA local" (`motor: 'local'` en thrive.json; si se marca "A mejorar", la revisión también la hace Gemma). Juan, 2026-10-31: las demos van en aprobaciones. Resultado: **"Static Bloom"** (3:08).
 
 | etapa | tiempo | resultado |
 |---|---|---|
