@@ -24,12 +24,13 @@ const CLAUDE = [path.join(os.homedir(), '.local/bin/claude.exe'), path.join(os.h
 const log = m => console.log(`  [ia] ${m}`);
 
 // Llama a Ollama. Libera la placa al terminar (keep_alive 0): a la noche la GTX 1070 la necesita ACE-Step.
-export async function ollama(prompt, { modelo = MODELO, json = false, temperatura = 0.8, pensar = false, sistema, timeoutMin = 30 } = {}) {
+// contexto: num_ctx. Si el encargo no entra, Ollama no avisa: descarta el principio (por eso se avisa en el log).
+export async function ollama(prompt, { modelo = MODELO, json = false, temperatura = 0.8, pensar = false, sistema, timeoutMin = 30, contexto = 16384 } = {}) {
   const r = await fetch(`${OLLAMA}/api/chat`, {
     method: 'POST', headers: { 'content-type': 'application/json' }, signal: AbortSignal.timeout(timeoutMin * 60000),
     // stream: true — sin streaming, fetch de Node corta a los 5 min sin cabeceras (los 14B tardan más)
     body: JSON.stringify({ model: modelo, stream: true, keep_alive: 0, think: pensar, ...(json ? { format: 'json' } : {}),
-      options: { temperature: temperatura, num_ctx: 16384 },
+      options: { temperature: temperatura, num_ctx: contexto },
       messages: [...(sistema ? [{ role: 'system', content: sistema }] : []), { role: 'user', content: prompt }] }),
   });
   if (!r.ok) throw new Error(`Ollama ${r.status}: ${(await r.text()).slice(0, 200)}`);
@@ -39,7 +40,8 @@ export async function ollama(prompt, { modelo = MODELO, json = false, temperatur
     const lineas = resto.split('\n'); resto = lineas.pop();
     for (const l of lineas) if (l.trim()) { const j = JSON.parse(l); texto += j.message?.content || ''; if (j.done) fin = j; }
   }
-  return { texto: texto.replace(/<think>[\s\S]*?<\/think>/g, '').trim(), segundos: Math.round((fin.total_duration || 0) / 1e9) };
+  if (fin.prompt_eval_count > contexto * 0.95) log(`AVISO: el encargo llenó el contexto (${fin.prompt_eval_count}/${contexto} tokens): se perdió el principio`);
+  return { texto: texto.replace(/<think>[\s\S]*?<\/think>/g, '').trim(), segundos: Math.round((fin.total_duration || 0) / 1e9), tokens: fin.eval_count, tokensEncargo: fin.prompt_eval_count };
 }
 
 // pensar: tope de tokens de razonamiento (MAX_THINKING_TOKENS). Sin tope, Opus llegó a pensar 18 min antes de
@@ -85,10 +87,13 @@ export function guardarEjemplo(tarea, prompt, respuesta) {
   } catch {}
 }
 
+// IA_SOLO_LOCAL=1: todo con el modelo local, sin Claude (demo de lo que logra Gemma sola, 2026-10-31)
+const soloLocal = () => process.env.IA_SOLO_LOCAL === '1';
 const sacarJSON = t => JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1));
 
 // Texto libre. `validar(texto)` devuelve un error (string) o nada.
 export async function pedirTexto(prompt, { validar, orden = ['local', 'claude'], claudeModelo = 'opus', tarea, ...opc } = {}) {
+  if (soloLocal()) orden = ['local'];
   for (const motor of orden) {
     try {
       const texto = motor === 'claude' ? claude(prompt, { modelo: claudeModelo }) : (await ollama(prompt, opc)).texto;
@@ -103,10 +108,16 @@ export async function pedirTexto(prompt, { validar, orden = ['local', 'claude'],
 // JSON con las claves pedidas (strings no vacíos); 2 intentos por motor, en el orden pedido.
 export async function pedirJSON(prompt, { claves = [], validar, orden = ['local', 'claude'], claudeModelo = 'opus', tarea, ...opc } = {}) {
   const chequear = j => { const f = claves.filter(k => !(typeof j[k] === 'string' ? j[k].trim() : j[k] != null)); return f.length ? `faltan ${f.join(', ')}` : validar?.(j); };
-  for (const motor of orden) for (let i = 1; i <= 2; i++) {
+  // solo local: sin respaldo, así que más intentos y cada uno sabe por qué se rechazó el anterior
+  const intentos = soloLocal() ? 4 : 2;
+  if (soloLocal()) orden = ['local'];
+  let fallo = '';
+  for (const motor of orden) for (let i = 1; i <= intentos; i++) {
     try {
-      const texto = motor === 'claude' ? claude(prompt, { modelo: claudeModelo }) : (await ollama(prompt, { ...opc, json: true })).texto;
+      const encargo = soloLocal() && fallo ? `${prompt}\n\n## Your previous answer was rejected: ${fallo}. Fix that.` : prompt;
+      const texto = motor === 'claude' ? claude(prompt, { modelo: claudeModelo }) : (await ollama(encargo, { ...opc, json: true })).texto;
       const j = sacarJSON(texto), err = chequear(j);
+      fallo = err || '';
       if (!err) { log(`${motor === 'claude' ? 'Claude ' + claudeModelo : opc.modelo || MODELO} respondió`); ultimoMotor = motor; if (motor === 'claude') guardarEjemplo(tarea, prompt, JSON.stringify(j)); return j; }
       log(`${motor}: respuesta inválida, intento ${i} (${err})`);
     } catch (e) {
