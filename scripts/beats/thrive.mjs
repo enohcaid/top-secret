@@ -45,6 +45,8 @@ if (LOCAL) ID += '-local';
 const tiempos = {}, cron = (k, t0) => { tiempos[k] = (tiempos[k] || 0) + Math.round((Date.now() - t0) / 1000); };
 // --revisar <slug>: rehace las partes que Juan marcó "a mejorar" en aprobar.html, con su comentario (musica-aprobacion.mjs)
 const REVISAR = opt('--revisar', null);
+// --seguir <slug>: retoma un tema que quedó a medias (desde la etapa que falló), sin rehacer lo que ya salió
+const SEGUIR = opt('--seguir', null);
 const ACE = path.join(ROOT, 'fuentes', 'beats', 'ACE-Step-1.5');
 const DIR = path.join(ROOT, 'fuentes', 'beats', 'thrive');
 const REG = path.join(ROOT, 'scripts', 'beats', 'thrive.json');
@@ -58,11 +60,15 @@ const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2
 
 const reg = fs.existsSync(REG) ? JSON.parse(fs.readFileSync(REG, 'utf8')) : { temas: [] };
 const guardar = () => fs.writeFileSync(REG, JSON.stringify(reg, null, 2) + '\n');
-let tema = REVISAR ? reg.temas.find(t => t.slug === REVISAR) : reg.temas.find(t => (t.id || t.fecha) === ID);
+let tema = REVISAR || SEGUIR ? reg.temas.find(t => t.slug === (REVISAR || SEGUIR)) : reg.temas.find(t => (t.id || t.fecha) === ID);
 // `fijo`: queda como salió, no se toca (Juan, 2026-10-26, sobre "Too Far In")
 if (REVISAR) {
   if (!tema?.revision) { log(`Nada que revisar en ${REVISAR}.`); process.exit(0); }
   ID = tema.id || tema.fecha;
+  if (tema.motor === 'local') LOCAL = true;
+} else if (SEGUIR) {
+  if (!tema) { log(`No existe ${SEGUIR}.`); process.exit(1); }
+  ID = tema.id || tema.fecha; delete tema.revision;
   if (tema.motor === 'local') LOCAL = true;
 } else if (tema?.fijo || tema?.letraFinal) { log(`El tema ${ID} ya está terminado: "${tema.titulo}".`); process.exit(0); }
 if (LOCAL) process.env.IA_SOLO_LOCAL = '1';
@@ -427,7 +433,7 @@ if (!tema.audio) {
   const cover = () => aceStep('cover', [...comunes, `task_type = "cover"`, `thinking = true`,
     `src_audio = ${toml(INSTR)}`, `audio_cover_strength = 0.5`, `instrumental = false`,
     `caption = ${toml(`${tema.captionInstrumental}, ${tema.captionVoces}`)}`, `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`,
-    `lyrics = ${toml(tema.letra)}`, `duration = ${Math.round(dur(INSTR))}`]);
+    `lyrics = ${toml(tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'))}`, `duration = ${Math.round(dur(INSTR))}`]);
   const voces = cover() || (log('  el cover falló, segundo intento…'), cover());
   if (!voces) { log('ERROR: no salió la versión con voz. Se reintenta en la próxima corrida.'); process.exit(1); }
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);
