@@ -157,10 +157,6 @@
       "version": 2,
       "motor": "local",
       "conceptoPor": "claude",
-      "revision": {
-        "beat": "Full remake with the new method: the previous version is discarded. Compose it from scratch for this concept — keep only the title and the concept, nothing from before.",
-        "letra": "Full remake with the new method: the previous version is discarded. Compose it from scratch for this concept — keep only the title and the concept, nothing from before."
-      },
       "secciones": [
         {
           "nombre": "intro",
@@ -236,7 +232,14 @@
         "\"Still here.\" — la frase cierra con \"here\", que no rima (por sonido) con el cierre anterior del esquema",
         "\"Silent watch.\" — la frase cierra con \"watch\", que no rima (por sonido) con el cierre anterior del esquema",
         "\"Still here.\" — la frase cierra con \"here\", que no rima (por sonido) con el cierre anterior del esquema"
-      ]
+      ],
+      "audio": "musica/thrive/still-here.mp3?v=mvx3l7cn",
+      "generado": "2026-11-01T00:34:34.487Z",
+      "letraFinal": "[intro]\n(Still here)\n\n[verse - male rap]\nTwo a.m., fluorescent hum\nAetheria needs water, adjusting the sum\nSixteen point three, numbers glow\nOriginal’s gone, a weight I know\nBlight hit fast, erased the green\nRebuilding now, a sterile scene\nThree years in, the same routine starts\nFading bloom, a ghost in my parts (yeah)\n\n[pre-chorus - female]\nThis light feels wrong.\nHolding on, where do we belong?\n\n[chorus - female]\nStill here.\nSilent watch.\n\n[chorus - male & female]\nFading bloom.\nStill here.\n\n[verse - male rap]\nChloe stopped by, fresh from the door\nTalked of futures, wanting more\nSaid look ahead, what could unfold\nChecked the CO2, story untold\nShe doesn’t see what’s lost in the haze\nThe smell of damp, through these sterile days\nJust metal lines, precise and cold\nFading bloom, a story old (no)\n\n[chorus - female]\nStill here.\nSilent watch.\n\n[chorus - male & female]\nFading bloom.\nStill here.\n\n[bridge - female]\nNot the flower. The space to be.\nA lost wildness, a possibility.\n\n[chorus - male & female]\nStill here.\nFading bloom.\nStill here.\n\n[outro]\n(Still here)",
+      "tiempos": {
+        "voces": 1089,
+        "letraFinal": 0
+      }
     },
     {
       "id": "2026-10-31-local",
