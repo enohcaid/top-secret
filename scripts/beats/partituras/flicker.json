@@ -1,0 +1,261 @@
+{
+  "bpm": 108,
+  "tonalidad": "F# minor",
+  "armonica": true,
+  "rasgo": "The call transforms into a mirrored reflection during the bridge, symbolizing the cyclical nature of this intermittent reinforcement.",
+  "kit": {
+    "bombo_golpe": 0.7,
+    "bombo_cola": 0.8,
+    "clap_tono": 0.4,
+    "hat_metal": 0.6,
+    "dist_808": 0.6,
+    "sala": 0.7,
+    "brillo": 0.35,
+    "swing": 0.3,
+    "cinta": 0.45,
+    "crush": 0.05
+  },
+  "molde": {
+    "rasgo": "The call transforms into a mirrored reflection during the bridge, symbolizing the cyclical nature of this intermittent reinforcement.",
+    "armonica": true,
+    "kit": "hipnotico",
+    "melodia_instrumento": "piano",
+    "respuesta_instrumento": "vox",
+    "textura_instrumento": "pad",
+    "progresion_verso": "i-VI-III-VII",
+    "progresion_estribillo": "i-VII-VI-VII",
+    "verso": {
+      "bombo": "rebote",
+      "hats": "corcheas_respira",
+      "fill": "medio_redoble",
+      "abierto": "final",
+      "figura_808": [
+        1,
+        3,
+        4,
+        5
+      ]
+    },
+    "estribillo": {
+      "bombo": "tren",
+      "hats": "galope",
+      "fill": "redoble",
+      "abierto": "contratiempo",
+      "figura_808": [
+        1,
+        3,
+        5,
+        7
+      ]
+    },
+    "puente": {
+      "bombo": "suelto",
+      "hats": "corcheas_respira"
+    },
+    "llamada": {
+      "ritmo": "escalera",
+      "notas": [
+        1,
+        3,
+        5,
+        6,
+        5,
+        4,
+        3,
+        1
+      ]
+    },
+    "respuesta": {
+      "ritmo": "sombra",
+      "notas": [
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        7
+      ]
+    },
+    "momento": {
+      "seccion": 6,
+      "variacion": "media"
+    },
+    "transiciones": [
+      "corte",
+      "redoble",
+      "tapestop"
+    ]
+  },
+  "melodia": "piano",
+  "respuesta": "vox",
+  "textura": "pad",
+  "progresiones": {
+    "verso": "1 6 3 7",
+    "estribillo": "1 7 6 7"
+  },
+  "motivos": {
+    "llamada": "1/1 r/1 3/1 r/1 5/1 r/1 6/6 r/4 5/1 r/1 4/1 r/1 3/6 r/6",
+    "respuesta": "r/4 7/4 r/4 6/8 r/4 5/8"
+  },
+  "bajos": {
+    "verso": "1/6 r/1 3/2 r/1 4/5 r/1",
+    "estribillo": "1/2 r/1 3/1 r/1 5/4 r/1 7/1 r/1 1/1 3/2 r/1"
+  },
+  "baterias": {
+    "verso": {
+      "bombo": "x......x..x.....",
+      "hats": "x.x.x...x.x.x...",
+      "abierto": "..............x."
+    },
+    "verso_b": {
+      "bombo": "x......x..x.....",
+      "hats": "x.x.x...x.x.x.rr",
+      "abierto": "..............x."
+    },
+    "estribillo": {
+      "bombo": "x..x.x....x.xx..",
+      "hats": "xx.xxx.xxx.xxx.x",
+      "abierto": "......x.......x."
+    },
+    "estribillo_b": {
+      "bombo": "x..x.x....x.xx..",
+      "hats": "xx.xxx.xxx.xrrrr",
+      "abierto": "......x.......x."
+    },
+    "puente": {
+      "bombo": "x.........x.....",
+      "hats": "x.x.x...x.x.x...",
+      "abierto": "................"
+    }
+  },
+  "secciones": [
+    {
+      "nombre": "intro",
+      "compases": 4,
+      "acordes": "verso",
+      "melodia": "llamada",
+      "respuesta": null,
+      "variacion": "normal",
+      "bajo": null,
+      "bateria": null,
+      "bateria_b": null,
+      "textura": true,
+      "energia": 1,
+      "final": "nada"
+    },
+    {
+      "nombre": "verse",
+      "compases": 12,
+      "acordes": "verso",
+      "melodia": null,
+      "respuesta": "respuesta",
+      "variacion": "normal",
+      "bajo": "verso",
+      "bateria": "verso",
+      "bateria_b": "verso_b",
+      "textura": false,
+      "energia": 3,
+      "final": "nada"
+    },
+    {
+      "nombre": "pre-chorus",
+      "compases": 4,
+      "acordes": "verso",
+      "melodia": "llamada",
+      "respuesta": null,
+      "variacion": "normal",
+      "bajo": "verso",
+      "bateria": "puente",
+      "bateria_b": null,
+      "textura": true,
+      "energia": 3,
+      "final": "corte"
+    },
+    {
+      "nombre": "chorus",
+      "compases": 11,
+      "acordes": "estribillo",
+      "melodia": "llamada",
+      "respuesta": "respuesta",
+      "variacion": "normal",
+      "bajo": "estribillo",
+      "bateria": "estribillo",
+      "bateria_b": "estribillo_b",
+      "textura": true,
+      "energia": 5,
+      "final": "nada"
+    },
+    {
+      "nombre": "verse",
+      "compases": 8,
+      "acordes": "verso",
+      "melodia": null,
+      "respuesta": "respuesta",
+      "variacion": "normal",
+      "bajo": "verso",
+      "bateria": "verso",
+      "bateria_b": "verso_b",
+      "textura": false,
+      "energia": 3,
+      "final": "redoble"
+    },
+    {
+      "nombre": "chorus",
+      "compases": 8,
+      "acordes": "estribillo",
+      "melodia": "llamada",
+      "respuesta": "respuesta",
+      "variacion": "normal",
+      "bajo": "estribillo",
+      "bateria": "estribillo",
+      "bateria_b": "estribillo_b",
+      "textura": true,
+      "energia": 5,
+      "final": "nada"
+    },
+    {
+      "nombre": "bridge",
+      "compases": 4,
+      "acordes": "estribillo",
+      "melodia": "llamada",
+      "respuesta": null,
+      "variacion": "media",
+      "bajo": null,
+      "bateria": "puente",
+      "bateria_b": null,
+      "textura": true,
+      "energia": 2,
+      "final": "tapestop"
+    },
+    {
+      "nombre": "chorus",
+      "compases": 8,
+      "acordes": "estribillo",
+      "melodia": "llamada",
+      "respuesta": "respuesta",
+      "variacion": "normal",
+      "bajo": "estribillo",
+      "bateria": "estribillo",
+      "bateria_b": "estribillo_b",
+      "textura": true,
+      "energia": 5,
+      "final": "nada"
+    },
+    {
+      "nombre": "outro",
+      "compases": 4,
+      "acordes": "verso",
+      "melodia": "llamada",
+      "respuesta": null,
+      "variacion": "normal",
+      "bajo": null,
+      "bateria": null,
+      "bateria_b": null,
+      "textura": true,
+      "energia": 1,
+      "final": "nada"
+    }
+  ]
+}

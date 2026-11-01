@@ -29,27 +29,105 @@
       "captionVoces": "Male and female duet. She opens: airy ethereal mid-range. He enters: warm intimate tenor. Layered harmonies in chorus, call-and-response verses.",
       "bpm": 108,
       "tonalidad": "F# minor",
-      "duracion": 192,
+      "duracion": 143,
       "estructura": [
         "intro",
         "verse",
         "pre-chorus",
         "chorus",
         "verse",
-        "pre-chorus",
         "chorus",
         "bridge",
         "chorus",
         "outro"
       ],
-      "instrumental": "ace",
-      "letra": "[intro - female]\nA silent hum, a fading gleam\n\n[verse - female]\nShadows lengthen, a hollow space\nEach fleeting touch, a blurred embrace\nThis fragile hope, a whispered plea\nA ghost of warmth returning to me\n\n[verse - male]\nThe promised dawn, a distant shore\nA phantom echo wanting more\nA stolen glance, a fleeting sign\nLost in the labyrinth of your design\n\n[pre-chorus - female]\nI chase the fragments, a fragile chain\nA desperate craving, a sweet, sharp pain\nThis empty promise, a gilded lie\nBurning slowly behind my eye\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[verse - female]\nThe memory lingers, a velvet trace\nA hollow comfort in this empty place\nA fragile moment, a stolen kiss\nA fleeting glimpse of what I miss\n\n[verse - male]\nThe echo of laughter, a haunting sound\nA whispered secret buried underground\nA fragile illusion, a tempting guise\nReflected sorrow in your weary eyes\n\n[pre-chorus - female]\nI build my castles on shifting sand\nA futile longing for your guiding hand\nThis empty solace, a bittersweet art\nTearing slowly at my heart\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[bridge - female]\n(spoken, layered with reverb)\nIs this a choice? Or am I bound?\nThis twisted comfort, a carousel round...\nI crave the absence, I despise the call...\nDo I thrive on the wreckage of it all?\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[outro - female]\nFading… fading… light…",
-      "audio": "musica/thrive/flicker.mp3?v=mvq6f8u2",
-      "generado": "2026-10-27T04:19:32.091Z",
-      "letraFinal": "[intro - female]\nA silent hum, a fading gleam\n\n[verse - female]\nShadows lengthen, a hollow space\nEach fleeting touch, a blurred embrace\nThis fragile hope, a whispered plea\nA ghost of warmth returning to me\n\n[verse - male]\nThe promised dawn, a distant shore\nA phantom echo wanting more\nA stolen glance, a fleeting sign\nLost in the labyrinth of your design\n\n[pre-chorus - female]\nI chase the fragments, a fragile chain\nA desperate craving, a sweet, sharp pain\nThis empty promise, a gilded lie\nBurning slowly behind my eye\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[verse - female]\nThe memory lingers, a velvet trace\nA hollow comfort in this empty place\nA fragile moment, a stolen kiss\nA fleeting glimpse of what I miss\n\n[verse - male]\nThe echo of laughter, a haunting sound\nA whispered secret buried underground\nA fragile illusion, a tempting guise\nReflected sorrow in your weary eyes\n\n[pre-chorus - female]\nI build my castles on shifting sand\nA futile longing for your guiding hand\nThis empty solace, a bittersweet art\nTearing slowly at my heart\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[bridge - female]\n(spoken, layered with reverb)\nIs this a choice? Or am I bound?\nThis twisted comfort, a carousel round...\nI crave the absence, I despise the call...\nDo I thrive on the wreckage of it all?\n\n[chorus - male & female]\nFlicker, ignite, then disappear\nA siren's song, a rising fear\nFlicker, a rush, a dizzying height\nLost in the darkness of your fading light\n\n[outro - female]\nFading… fading… light…",
       "publicado": false,
-      "version": 1,
-      "letraPor": "local"
+      "version": 2,
+      "motor": "local",
+      "conceptoPor": "claude",
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 8.89,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 8.89,
+          "fin": 35.56,
+          "compases": 12
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 35.56,
+          "fin": 44.44,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 44.44,
+          "fin": 68.89,
+          "compases": 11
+        },
+        {
+          "nombre": "verse",
+          "inicio": 68.89,
+          "fin": 86.67,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 86.67,
+          "fin": 104.44,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 104.44,
+          "fin": 113.33,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 113.33,
+          "fin": 131.11,
+          "compases": 8
+        },
+        {
+          "nombre": "outro",
+          "inicio": 131.11,
+          "fin": 140,
+          "compases": 4
+        }
+      ],
+      "beat": "The call transforms into a mirrored reflection during the bridge, symbolizing the cyclical nature of this intermittent reinforcement.",
+      "vueltasBeat": 1,
+      "instrumental": "partitura",
+      "historia": {
+        "quien": "The narrator is a young architect working late nights in a nearly empty, modern office building in downtown São Paulo. They've become fixated on the building’s automated lighting system – specifically, a single, powerful spotlight that occasionally illuminates a specific, beautiful corner of the city skyline.",
+        "verso1": "It's 3:17 AM. The narrator is hunched over blueprints, exhaustion blurring the lines, when the spotlight suddenly flickers to life, bathing the skyline in an intense, beautiful glow. They’ve been anticipating this moment, and the brief, radiant view feels like a reward for their dedication and loneliness.",
+        "gancho": "City breathes, light returns.",
+        "estribillo": "The chorus expresses the addictive cycle of anticipation and fleeting satisfaction the narrator experiences from the spotlight's return. It's a feeling of almost-love, a desperate relief coupled with knowing the light will inevitably vanish again – a phantom promise.",
+        "verso2": "Days turn into weeks, and the narrator starts manipulating the building's system, subtly at first, then with increasing boldness. They discover how to prolong the light's duration, dim it, and even redirect it, but the manipulations bring a hollowness and a growing sense of dependence on this impersonal source of validation.",
+        "puente": "The narrator realizes the 'love' isn't for the light itself, but for the *power* it gives them – the control, the brief illusion of influence over something vast and indifferent. They decide to actively try and *break* the cycle, by sabotaging the spotlight, risking the loss of the feeling entirely."
+      },
+      "letra": "[intro]\n(Flicker)\n\n[verse - male rap]\n3:17 AM, blueprints bleedin' blue\nAnother night, same view, nothin’ new\nHunched over lines, a city sleeps below\nThen the light hits, a sudden, silent show\nJust a spotlight, on the skyline's grace\nA perfect corner, a temporary space\nBeen waitin' for it, a programmed release\nBrief reward for this lonely, late-night peace (yeah)\nThirty-two floors, a cage of steel and glass\nChasin’ something, movin’ way too fast.\nAnother hour, another broken promise\nThis city breathes, light returns.\n\n[chorus - female]\nFlicker\nCity breathes, light returns\nFlicker\nCity breathes, light returns\n\n[verse - male rap]\nWeeks blur, a pattern starts to form\nSubtle shifts now, weathering the storm\nDim the glow, extend the light’s embrace\nRedirect the beam to a different place\nFound a loophole, a digital command\nControl the skyline with my own hand\nBut the feeling's fading, a hollow delight\nTrading solace for the fading light (no)\nSeven adjustments, late night, slow burn\nSomething’s missing, somethin’ I can’t learn.\nAnother hour, another broken promise\nThis city breathes, light returns.\n\n[chorus - male & female]\nFlicker\nCity breathes, light returns\nFlicker\nCity breathes, light returns\n\n[bridge - female]\nNot for the light, the power I crave\nControl the void, a temporary wave.\n\n[chorus - male & female]\nFlicker\nCity breathes, light returns\nFlicker\nCity breathes, light returns\n\n[outro]\n(Flicker)",
+      "letraPor": "local",
+      "avisosRima": [
+        "forbidden poetic words: embrace, hollow, solace — say it the way a person would",
+        "5 lines pile up descriptions like \"a cold dark place\" (max 2 in the song): \"A perfect corner, a temporary space\", \"Been waitin' for it, a programmed release\", \"Found a loophole, a digital command\"",
+        "almost no first person: the verses must sound like someone talking (\"I\", \"my\")",
+        "\"This city breathes, light returns.\" — la frase cierra con \"returns\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"This city breathes, light returns.\" — la frase cierra con \"returns\", que no rima (por sonido) con el cierre anterior del esquema"
+      ],
+      "audio": "musica/thrive/flicker.mp3?v=mvx2x6re",
+      "generado": "2026-11-01T00:15:53.978Z",
+      "letraFinal": "[intro]\n(Flicker)\n\n[verse - male rap]\n3:17 AM, blueprints bleedin' blue\nAnother night, same view, nothin’ new\nHunched over lines, a city sleeps below\nThen the light hits, a sudden, silent show\nJust a spotlight, on the skyline's grace\nA perfect corner, a temporary space\nBeen waitin' for it, a programmed release\nBrief reward for this lonely, late-night peace (yeah)\nThirty-two floors, a cage of steel and glass\nChasin’ something, movin’ way too fast.\nAnother hour, another broken promise\nThis city breathes, light returns.\n\n[chorus - female]\nFlicker\nCity breathes, light returns\nFlicker\nCity breathes, light returns\n\n[verse - male rap]\nWeeks blur, a pattern starts to form\nSubtle shifts now, weathering the storm\nDim the glow, extend the light’s embrace\nRedirect the beam to a different place\nFound a loophole, a digital command\nControl the skyline with my own hand\nBut the feeling's fading, a hollow delight\nTrading solace for the fading light (no)\nSeven adjustments, late night, slow burn\nSomething’s missing, somethin’ I can’t learn.\nAnother hour, another broken promise\nThis city breathes, light returns.\n\n[chorus - male & female]\nFlicker\nCity breathes, light returns\nFlicker\nCity breathes, light returns\n\n[bridge - female]\nNot for the light, the power I crave\nControl the void, a temporary wave.\n\n[chorus - male & female]\nFlicker\nCity breathes, light returns\nFlicker\nCity breathes, light returns\n\n[outro]\n(Flicker)",
+      "tiempos": {
+        "voces": 1586,
+        "letraFinal": 0
+      }
     },
     {
       "id": "2026-10-27-2",
@@ -63,90 +141,102 @@
       "captionVoces": "Female and male duet; she opens airy ethereal mid-range, he enters low and warm, layered harmonies in chorus, intimate whispered bridge.",
       "bpm": 120,
       "tonalidad": "C minor",
-      "duracion": 194,
+      "duracion": 143,
       "estructura": [
         "intro",
         "verse",
         "pre-chorus",
         "chorus",
         "verse",
-        "pre-chorus",
         "chorus",
         "bridge",
         "chorus",
         "outro"
       ],
+      "publicado": false,
+      "version": 2,
+      "motor": "local",
+      "conceptoPor": "claude",
+      "revision": {
+        "beat": "Full remake with the new method: the previous version is discarded. Compose it from scratch for this concept — keep only the title and the concept, nothing from before.",
+        "letra": "Full remake with the new method: the previous version is discarded. Compose it from scratch for this concept — keep only the title and the concept, nothing from before."
+      },
       "secciones": [
         {
           "nombre": "intro",
           "inicio": 0,
-          "fin": 16,
-          "compases": 8
+          "fin": 8,
+          "compases": 4
         },
         {
           "nombre": "verse",
-          "inicio": 16,
+          "inicio": 8,
+          "fin": 32,
+          "compases": 12
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 32,
           "fin": 40,
-          "compases": 12
-        },
-        {
-          "nombre": "pre-chorus",
-          "inicio": 40,
-          "fin": 48,
           "compases": 4
         },
         {
           "nombre": "chorus",
-          "inicio": 48,
-          "fin": 72,
+          "inicio": 40,
+          "fin": 64,
           "compases": 12
         },
         {
           "nombre": "verse",
-          "inicio": 72,
-          "fin": 96,
+          "inicio": 64,
+          "fin": 88,
           "compases": 12
-        },
-        {
-          "nombre": "pre-chorus",
-          "inicio": 96,
-          "fin": 104,
-          "compases": 4
         },
         {
           "nombre": "chorus",
-          "inicio": 104,
-          "fin": 128,
-          "compases": 12
+          "inicio": 88,
+          "fin": 108,
+          "compases": 10
         },
         {
           "nombre": "bridge",
-          "inicio": 128,
-          "fin": 144,
-          "compases": 8
+          "inicio": 108,
+          "fin": 116,
+          "compases": 4
         },
         {
           "nombre": "chorus",
-          "inicio": 144,
-          "fin": 176,
-          "compases": 16
+          "inicio": 116,
+          "fin": 132,
+          "compases": 8
         },
         {
           "nombre": "outro",
-          "inicio": 176,
-          "fin": 192,
-          "compases": 8
+          "inicio": 132,
+          "fin": 140,
+          "compases": 4
         }
       ],
-      "beat": "el cuerpo como instrumento. Un latido (lub-dub) y un aliento de ruido",
-      "instrumental": "codigo",
-      "letra": "[intro]\n(Instrumental only - ethereal swells)\n\n[verse - male]\nThe ghost of you, a constant hue\nAcross the room, a fading view\nI trace your face, a fragile grace\nLost in this space, a hollow place\n\n[verse - female]\nThe scent remains, a ghostly strain\nThrough window panes, a silver rain\nI watch you breathe, a silent plea\nBeyond belief, you’re lost to me\n\n[pre-chorus - female]\nAnd all the while, a frozen smile\nA practiced style, a cruel exile\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\n\n[verse - male]\nThe laughter rings, of bygone things\nA broken swing, the joy it brings\nI memorize, your weary eyes\nBehind disguise, a sweet surprise\n\n[verse - female]\nThe memories bloom, within this room\nDispelling gloom, a silent tomb\nI hold your hand, a shifting dune\nAcross the land, beneath the moon\n\n[pre-chorus - female]\nAnd all the while, a hollow dial\nA measured mile, a slow denial\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\n\n[bridge - female]\n(Whispered)\nIs this what living means? To hide the past?\nTo watch a dream shatter, fading fast?\nBecause I loved too true, held on too tight?\nAnd now your colors dim, into the night?\n\n[chorus - male & female]\nStill here, you’re breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\nStill here, I feel you there\nA fading prayer, beyond despair\nStill here, a subtle trace\nLost in this space, embrace\n\n[outro]\n(Instrumental fades in, then out - echoing pad swells)\nLost in this space…",
-      "audio": "musica/thrive/still-here.mp3?v=mvqtk0rh",
-      "generado": "2026-10-27T15:07:06.077Z",
-      "letraFinal": "[verse]\nThe ghost of you, a constant hue\nAcross the room, a fading view\nI trace your face, a fragile grace\nLost in this space, a hollow place\n\n[verse]\nThe scent remains, a ghostly strain\nThrough window panes, a silver rain\nI watch you breathe, a silent plea\nBeyond belief, you're lost to me\n\n[pre-chorus]\nAnd all the while, a frozen smile\nA practiced style, a cruel exile\n\n[chorus]\nStill here, you're breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, lost year by year\nBeyond compare\n\n[verse]\nThe laughter rings, of bygone things\nA broken swing, the joy it brings\nI memorize, your weary eyes\nBehind disguise, a sweet surprise\n\n[verse]\nThe memories bloom, within this room\nDispelling gloom, a silent tomb\nI hold your hand, a shifting dune\nAcross the land, beneath the moon\n\n[pre-chorus]\nAnd all the while, a hollow dial\nA measured mile, a slow denial\n\n[chorus]\nStill here, you're breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\n\n[bridge]\nIs this what living means? To hide the past?\nTo watch a dream shatter, fading fast?\nBecause I loved too true, held on too tight?\nAnd now your colors dim, into the night?\n\n[chorus]\nStill here, you're breathing near\nA phantom fear, crystal clear\nStill here, a shadowed care\nLost year by year, beyond compare\nStill here, I feel you there\nA fading prayer, beyond despair\nStill here, a subtle trace\nLost in this space\nEmbrace\n\n[outro]\nLost in this space…",
-      "publicado": false,
-      "version": 1,
-      "letraPor": "claude"
+      "beat": "The call, initially a mournful climb, in the bridge momentarily slows and mirrors itself, highlighting the trapped nature of grief alongside a living presence.",
+      "vueltasBeat": 1,
+      "instrumental": "partitura",
+      "historia": {
+        "quien": "The narrator is a botanist, Elias, working late in a research greenhouse, meticulously caring for a rare, genetically modified orchid known as 'Aetheria.' He's mourning the original, wild version of the orchid, now extinct, while tending to its altered descendant.",
+        "verso1": "Elias is meticulously adjusting the humidity levels around Aetheria, using specialized equipment. He remembers the day the original Aetheria, vibrant and untamed, was declared extinct due to a blight, and the immense pressure to recreate it through genetic engineering.",
+        "gancho": "Silent watch, fading bloom",
+        "estribillo": "He's grieving a lost wildness, a version of the orchid that no longer exists, while continuing to nurture its sterile, engineered replacement; it's a mourning *for* something that 'lives' on in a diminished form.",
+        "verso2": "A young intern, Chloe, enters the greenhouse, complimenting Elias’s dedication but subtly questioning the point of clinging to the past, suggesting he should focus on the potential of Aetheria's modified traits for wider applications. Elias defensively shuts down the conversation, doubling his efforts to maintain the last vestiges of the original's environment.",
+        "puente": "Looking at Aetheria, Elias realizes he isn't mourning the *orchid* itself, but the potential for true, unburdened natural growth and discovery that its extinction represents; he decides to start a clandestine project to recreate a natural habitat outside the lab, even if it’s just a small corner, to give *something* a chance to truly bloom."
+      },
+      "letra": "[intro]\n(Still here)\n\n[verse - male rap]\nTwo a.m., fluorescent hum\nAetheria needs water, adjusting the sum\nSixteen point three, numbers glow\nOriginal’s gone, a weight I know\nBlight hit fast, erased the green\nRebuilding now, a sterile scene\nThree years in, the same routine starts\nFading bloom, a ghost in my parts (yeah)\n\n[pre-chorus - female]\nThis light feels wrong.\nHolding on, where do we belong?\n\n[chorus - female]\nStill here.\nSilent watch.\n\n[chorus - male & female]\nFading bloom.\nStill here.\n\n[verse - male rap]\nChloe stopped by, fresh from the door\nTalked of futures, wanting more\nSaid look ahead, what could unfold\nChecked the CO2, story untold\nShe doesn’t see what’s lost in the haze\nThe smell of damp, through these sterile days\nJust metal lines, precise and cold\nFading bloom, a story old (no)\n\n[chorus - female]\nStill here.\nSilent watch.\n\n[chorus - male & female]\nFading bloom.\nStill here.\n\n[bridge - female]\nNot the flower. The space to be.\nA lost wildness, a possibility.\n\n[chorus - male & female]\nStill here.\nFading bloom.\nStill here.\n\n[outro]\n(Still here)",
+      "letraPor": "local",
+      "avisosRima": [
+        "almost no first person: the verses must sound like someone talking (\"I\", \"my\")",
+        "\"Silent watch.\" — la frase cierra con \"watch\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"Still here.\" — la frase cierra con \"here\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"Silent watch.\" — la frase cierra con \"watch\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"Still here.\" — la frase cierra con \"here\", que no rima (por sonido) con el cierre anterior del esquema"
+      ]
     },
     {
       "id": "2026-10-31-local",
@@ -160,25 +250,17 @@
       "captionVoces": "Male rapper: brooding, textured flow, introspective delivery. Female voice: breathy, ethereal, layered harmonies, haunting melodies.",
       "bpm": 72,
       "tonalidad": "A minor",
-      "duracion": 188,
+      "duracion": 143,
       "estructura": [
         "intro",
         "verse",
-        "pre-chorus",
         "chorus",
         "verse",
-        "pre-chorus",
         "chorus",
         "bridge",
         "chorus",
         "outro"
       ],
-      "instrumental": "ace",
-      "letra": "[intro - male & female]\n(soft, layered vocals, almost whispered)\nDust settles… neon bleeds…\n\n[verse 1 - male rap]\nConcrete canyons, a gilded cage I roam\nPromises whispered, a siren’s hollow tone\nEvery street corner, a memory’s faint trace\nLost in the echoes of this desolate space.\nThese towers loom, monuments to the fall\nReflecting ambition, consuming us all\nI chase the phantom, a light I cannot seize\nA manufactured dream, designed to appease.\nThe rhythm pulses, a hypnotic beat\nDragging me deeper, bittersweet\nA fractured mosaic, beauty laced with rust\nTrading my spirit, for fleeting, fragile trust.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[verse 2 - male rap]\nRain on the pavement, a silver, slick sheen\nWashing away the colors I’ve seen\nAnother shadow stretches, long and thin\nAnother casualty drawn deep within.\nThey built this empire on fragile, hollow ground\nWhere every victory is a silent sound\nI justify the hunger, the endless quest\nTo find a solace, a moment’s fleeting rest.\nThis fever burns, a constant, anxious plea\nA desperate yearning to finally be free\nBut freedom's a fiction, a carefully spun lie\nJust another illusion as the moments fly.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - male & female]\n(male: darker, more rhythmic delivery; female: ethereal harmonies)\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[bridge - female]\n(slow, sustained notes, layered vocals)\nThe light fractures… the shadows grow…\nA silent surrender… a whispered woe…\nI built my kingdom on shifting sand…\nA fading memory… a ghost in the land…\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[outro - male & female]\n(male: spoken word, fading out; female: humming, echoing)\nDust settles… neon bleeds… (female hums a single, drawn-out note)",
-      "letraPor": "local",
-      "audio": "musica/thrive/static-bloom.mp3?v=mvwa69zr",
-      "generado": "2026-10-31T09:14:18.999Z",
-      "letraFinal": "[intro - male & female]\n(soft, layered vocals, almost whispered)\nDust settles… neon bleeds…\n\n[verse 1 - male rap]\nConcrete canyons, a gilded cage I roam\nPromises whispered, a siren, a solo tone\nThe memories faint trains\nThe rhythm pulsing, a hypnotic beat\nDragging me deeper, better sweep\nA fractured musee, beauty laced with roots\nThese towers loom, monuments to the fall\nReflecting ambition, consuming us all\nI chase the phantom, a light I cannot seize\nA manufactured dream, designed to appease.\nThe rhythm pulses, a hypnotic beat\nDragging me deeper, bittersweet\nA fractured mosaic, beauty laced with rust\nTrading my spirit, for fleeting, fragile trust.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[verse 2 - male rap]\nRain on the pavement, a silver slick sheen\nWashing away the colors I’ve seen\nAnother shadow stretches, long and thin\nThey built this empire, a fragile hologram\nI justify the hunger, the endless quest\nTo find a solace, a moment’s fleeting rest.\nThis fever burns, a constant, anxious plea\nA desperate yearning to finally be free\nBut freedom's a fiction, a carefully spun lie\nJust another illusion as the moments fly.\n\n[pre-chorus - female]\n(breathy, echoing)\nThe air hangs heavy, a shimmering disguise\nA gilded promise reflected in my eyes.\n\n[chorus - male & female]\n(male: darker, more rhythmic delivery; female: ethereal harmonies)\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sides are fading here\nEverything I wanted\n\n[bridge - female]\n(slow, sustained notes, layered vocals)\nThe light fractures… the shadows grow…\nA silent surrender… a whispered woe…\nI built my kingdom on shifting sand…\nA fading memory… a ghost in the land…\n\n[chorus - female]\nStatic bloom, a fractured grace\nLost within this vacant space\nCity sighs, a fading hue\nEverything I wanted, untrue.\n\n[outro - male & female]\n(male: spoken word, fading out; female: humming, echoing)\nDust settles… neon bleeds… (female hums a single, drawn-out note)",
       "tiempos": {
         "concepto": 618,
         "beat": 12808,
@@ -187,7 +269,79 @@
         "letraFinal": 344
       },
       "motor": "local",
-      "publicado": false
+      "publicado": false,
+      "revision": {
+        "beat": "Full remake with the new method: the previous version is discarded. Compose it from scratch for this concept — keep only the title and the concept, nothing from before.",
+        "letra": "Full remake with the new method: the previous version is discarded. Compose it from scratch for this concept — keep only the title and the concept, nothing from before."
+      },
+      "version": 2,
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 6.67,
+          "compases": 2
+        },
+        {
+          "nombre": "verse",
+          "inicio": 6.67,
+          "fin": 33.33,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 33.33,
+          "fin": 60,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 60,
+          "fin": 86.67,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 86.67,
+          "fin": 113.33,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 113.33,
+          "fin": 120,
+          "compases": 2
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 120,
+          "fin": 133.33,
+          "compases": 4
+        },
+        {
+          "nombre": "outro",
+          "inicio": 133.33,
+          "fin": 140,
+          "compases": 2
+        }
+      ],
+      "beat": "The call transforms into a distorted echo, reflecting the protagonist's fractured perception of the city's promises.",
+      "vueltasBeat": 1,
+      "instrumental": "partitura",
+      "historia": {
+        "quien": "The narrator is a disillusioned architectural photographer in his late 20s, living in Neo-Veridia, a futuristic, over-developed metropolis, ten years after its construction boom. He’s been chasing the 'perfect' image of the city for years, believing it holds a key to understanding something profound, but is increasingly hollowed out by the pursuit.",
+        "verso1": "The song opens with the photographer observing Neo-Veridia at dusk from his apartment window - a panoramic view of gleaming towers piercing the smog. He meticulously adjusts his camera settings, obsessively framing the city’s skyline, seeking that one, elusive shot that captures its 'soul,' ignoring the growing emptiness he feels.",
+        "gancho": "Static Bloom, Neon Decay",
+        "estribillo": "The chorus expresses a desperate, consuming love for Neo-Veridia – recognizing its beauty as a dangerous illusion, a 'static bloom' of manufactured perfection masking a decaying core. It's a city that promises everything but delivers only emptiness and the slow erosion of self.",
+        "verso2": "He ventures out into the city, documenting the cracks appearing in the polished facade: a crumbling plaza, a boarded-up theatre, the weary faces of maintenance workers. He captures these details, initially seeing them as flaws, but slowly recognizing they represent a truth the city's architects and promoters actively suppress.",
+        "puente": "While reviewing his photos, the photographer realizes that his pursuit of Neo-Veridia’s ‘soul’ was a rationalization - a way to avoid confronting his own stagnation and the failure of his dreams. He decides to stop photographing the city and instead, focuses on documenting the people struggling within its shadows, seeking a different kind of truth."
+      },
+      "letra": "[intro]\n(Static…)\n\n[verse - male rap]\nTwo a.m., still at the window\nChrome towers, reflecting the glow\nAdjust the settings, f-stop’s at two\nAnother building, splitting the view\nSeven years, searching for something real\nAnother promise, another deal\nMaintenance man, sweeping the floor\n(yeah)\nForgot a call, the message stays there\nThis city’s a bill, I can’t settle\nFifteen floors up, the neon’s bright\nAnother pixel, burning through the night\n(again)\n\n[chorus - female]\nStatic Bloom, Neon Decay\nStatic Bloom, Neon Decay\nLost in the light, can't find my way\nStatic Bloom, Neon Decay\n\n[verse - male rap]\nCracked concrete, pigeons take flight\nA closed theatre, swallowed by night\nThe blueprints were wrong, a perfect disguise\nAnother reflection, in my tired eyes\nAnother shutter, another click made\nTrying to catch something that won’t stay\nThe faces down there, weary and low\n(no)\nI told myself I'd be okay\nAnother shadow, stretching below\nTen years looking, for a sign to show\n(I know)\nForgot the feeling, forgot the flow\n\n[chorus - male & female]\nStatic Bloom, Neon Decay\nStatic Bloom, Neon Decay\nLost in the light, can't find my way\nStatic Bloom, Neon Decay\n\n[verse - male rap]\nReviewing the pictures, late into the dark\nThe angles are sharp, missing the mark\nThe glossy surface, the empty inside\nAnother reason, to want to hide\nA reason to believe, a convenient lie\n(yeah)\nAvoiding the quiet, the truth passing by\nStopped chasing the skyline, the manufactured sheen\nAnother exposure, fading from the scene\n(again)\n\n[chorus - male & female]\nStatic Bloom, Neon Decay\nStatic Bloom, Neon Decay\nLost in the light, can't find my way\nStatic Bloom, Neon Decay\n\n[bridge - female]\nThe lens deceives, a beautiful show\nI photograph their struggle, letting them go.\n\n[chorus - male & female]\nStatic Bloom, Neon Decay\nStatic Bloom, Neon Decay\nLost in the light, can't find my way\nStatic Bloom, Neon Decay\n\n[outro]\n(Bloom…)",
+      "letraPor": "local",
+      "avisosRima": [
+        "3 lines pile up descriptions like \"a cold dark place\" (max 2 in the song): \"The blueprints were wrong, a perfect disguise\", \"A reason to believe, a convenient lie\", \"The lens deceives, a beautiful show\"",
+        "\"Forgot a call, the message stays there\" — la frase cierra con \"there\", que no rima (por sonido) con el cierre anterior del esquema"
+      ]
     },
     {
       "id": "2026-10-31-2-local",
