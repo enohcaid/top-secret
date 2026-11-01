@@ -134,6 +134,45 @@ ${fb('voces')}`,
 }
 
 // ── 1. Concepto y sonido ─────────────────────────────────────────────────────
+// carril local (Juan, 2026-11-01): un concepto de álbum y cada tema desde un ángulo distinto; ángulo, voces y tempo se
+// eligen entre lo que no se usó en los temas recientes (thrive-album.mjs)
+if (!tema && LOCAL) {
+  const { ALBUM, ANGULOS, ENERGIAS, CASTING, opciones } = await import('./thrive-album.mjs');
+  const op = opciones(reg.temas);
+  const anteriores = reg.temas.slice(-12).map(t => `- "${t.titulo}" · ${t.angulo ? `angle ${t.angulo}, ` : ''}${t.rasgo} · ${t.bpm} BPM · voices: ${t.captionVoces} · beat: ${t.captionInstrumental}`).join('\n');
+  const encargo = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-concepto-v2.md'), 'utf8').replace('{{ALBUM}}', ALBUM)
+    .replace('{{ANGULOS}}', op.angulos.map(a => `- ${a}: ${ANGULOS[a].idea} (energy: ${ANGULOS[a].energia})`).join('\n'))
+    .replace('{{CASTING}}', op.casting.map(c => `- ${c}: ${CASTING[c].caption}`).join('\n'))
+    .replace('{{ENERGIAS}}', Object.entries(ENERGIAS).map(([k, e]) => `- ${k}: ${e.bpm[0]}–${e.bpm[1]} BPM, ${e.beat}`).join('\n'))
+    .replace('{{ANTERIORES}}', anteriores);
+  const esq = { type: 'object', required: ['titulo', 'angulo', 'concepto', 'rasgo', 'casting', 'caption_instrumental', 'tonalidad', 'bpm', 'estructura'], properties: {
+    titulo: { type: 'string' }, angulo: { type: 'string', enum: op.angulos }, concepto: { type: 'string' }, rasgo: { type: 'string' },
+    casting: { type: 'string', enum: op.casting }, caption_instrumental: { type: 'string' },
+    tonalidad: { type: 'string', pattern: '^[A-G][#b]? minor$' }, bpm: { type: 'integer', minimum: 128, maximum: 168 },
+    estructura: { type: 'array', items: { type: 'string', enum: ['intro', 'verse', 'pre-chorus', 'chorus', 'bridge', 'outro'] }, minItems: 6, maxItems: 10 } } };
+  log('Concepto (álbum, carril local)…');
+  const t0 = Date.now();
+  const j = await pedirJSON(encargo, { esquema: esq, temperatura: 0.95, claves: esq.required,
+    validar: j => {
+      const e = ENERGIAS[ANGULOS[j.angulo]?.energia];
+      if (!e) return `ángulo "${j.angulo}"`;
+      if (j.bpm < e.bpm[0] || j.bpm > e.bpm[1]) return `bpm ${j.bpm}: the angle "${j.angulo}" has energy ${ANGULOS[j.angulo].energia}, its tempo is ${e.bpm[0]}–${e.bpm[1]}`;
+      if (!(j.estructura.filter(x => x === 'verse').length >= 2 && j.estructura.filter(x => x === 'chorus').length >= 2)) return 'the structure needs 2 verses and at least 2 choruses';
+      if (!/trap/i.test(j.caption_instrumental)) return 'caption_instrumental must say trap';
+      const t = `${j.titulo}\n${j.caption_instrumental}`;
+      if (DEPORTE.test(t)) return 'no sport words';
+      if (reg.temas.some(x => x.titulo.toLowerCase() === String(j.titulo).toLowerCase())) return `title "${j.titulo}" already exists`;
+      const norm = x => String(x).toLowerCase().normalize('NFD').replace(/[^a-z ]/g, '').trim();
+      if (reg.temas.some(x => norm(x.rasgo) === norm(j.rasgo))) return `trait "${j.rasgo}" already used`;
+    } });
+  const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${ID}`;
+  const C = CASTING[j.casting], en = ANGULOS[j.angulo].energia;
+  tema = { ...(ID !== FECHA ? { id: ID } : {}), motor: 'local', fecha: FECHA, slug, titulo: j.titulo.trim(), angulo: j.angulo, energia: en, casting: j.casting,
+    concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: C.voz, captionInstrumental: `${j.caption_instrumental.trim()}, ${ENERGIAS[en].beat}`, captionVoces: C.caption,
+    bpm: j.bpm, tonalidad: j.tonalidad.trim(), duracion: 140, estructura: j.estructura };
+  reg.temas.push(tema); guardar(); cron('concepto', t0);
+  log(`"${tema.titulo}" — ángulo ${tema.angulo} (${en}), voces ${tema.casting}, ${tema.bpm} BPM, ${tema.tonalidad}`);
+}
 if (!tema) {
   const anteriores = reg.temas.slice(-30).map(t => `- "${t.titulo}" · trait: ${t.rasgo} · ${t.bpm} BPM, ${t.tonalidad} · sound: ${t.captionInstrumental || t.caption}`).join('\n') || '(none yet)';
   const encargo = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-concepto.md'), 'utf8').replace('{{FECHA}}', FECHA).replace('{{ANTERIORES}}', anteriores)
@@ -343,6 +382,27 @@ function controlarVoces(letra) {
   const p = letra.match(/\b(baby|babe|girl|boy|my lover|lover|my ex|darling)\b/i);
   if (p) return `"${p[0]}": el amor de Thrive es abstracto, no por una persona`;
 }
+// Carril local: cómo se marcan las voces según el casting del tema (thrive-album.mjs), y el control correspondiente,
+// devuelto como corrección para Gemma (Juan, 2026-11-01: rechazar la letra entera sin decir por qué gastaba las vueltas)
+async function tagsVoces() {
+  if (!LOCAL) return '';
+  const { CASTING } = await import('./thrive-album.mjs');
+  return CASTING[tema.casting]?.tags || 'male rapper on every verse and the bridge, female ONLY in the chorus: [verse - male rap], [chorus - female sung], [bridge - male rap]';
+}
+async function vocesLocal(letra) {
+  const { CASTING } = await import('./thrive-album.mjs');
+  const C = CASTING[tema.casting || 'rapero_y_hook'], p = [];
+  const tags = [...letra.matchAll(/^\s*\[([^\]]+)\]\s*$/gm)].map(m => m[1].toLowerCase());
+  const conElla = tags.filter(t => /female|woman|girl/.test(t)), conEl = tags.filter(t => /\bmale\b/.test(t.replace(/female/g, '')));
+  if (!C.ella && conElla.length) p.push(`there is NO female voice in this song: fix the tags ${conElla.map(t => `[${t}]`).join(', ')} (${C.tags})`);
+  if (C.ella && !/male rapper/.test(C.tags) && conEl.length) p.push(`there is NO male voice in this song: fix the tags ${conEl.map(t => `[${t}]`).join(', ')} (${C.tags})`);
+  if (tema.casting === 'rapero_y_hook' || !tema.casting) { const v = controlarVoces(letra); if (v && !/abstracto/.test(v)) p.push(`${v} (${C.tags})`); }
+  const amor = letra.match(/\b(baby|babe|girl|boy|my lover|lover|my ex|darling)\b/i);
+  if (amor) p.push(`"${amor[0]}": the love in this album is abstract, never a person — rewrite that line`);
+  const dep = letra.match(DEPORTE);
+  if (dep) p.push(`"${dep[0]}": nothing about sport — rewrite that line`);
+  return p;
+}
 // Oficio de letra de trap (Juan, 2026-10-31: "hay que usar referencias de temas de trap real para aprender, a veces menos
 // es más"; carril local, thrive-letra-v2.md): hook como mantra, versos que suenan a alguien hablando, nada de dicción
 // poética. Las letras anteriores apilaban "…, a fragile grace, a hollow place". Devuelve problemas en inglés, para el modelo.
@@ -382,13 +442,23 @@ if (!tema.letra) {
   if (LOCAL && !tema.historia) {
     log('Historia de la letra…');
     const t0h = Date.now();
-    tema.historia = await pedirJSON(`You are planning the STORY that the lyrics of a trap song will tell, before writing them.
-Song: "${tema.titulo}" — ${tema.concepto} (psychological trait: ${tema.rasgo}).
-Rules: the love is ABSTRACT — the narrator loves something that is not a person (see the concept): never a lover, an ex, "baby". Nothing about sport.
-Make it a real story a listener can follow: one narrator (first person), a concrete place and time, things that HAPPEN (actions, objects, something someone said), a change from the first verse to the second, and a turn in the bridge.
-Answer JSON, every value in English, plain words, 1–2 sentences each:
-{"quien": "who the narrator is and the situation", "verso1": "what happens in verse 1 (concrete scene)", "gancho": "the hook phrase, 3 to 6 words, that the chorus repeats", "estribillo": "what the chorus means in the story", "verso2": "what happens next in verse 2 (it moved on: consequence or escalation)", "puente": "the turn: what the narrator realizes or decides"}
-${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2', 'puente'], temperatura: 0.85 });
+    // Juan, 2026-11-01: "letras que cuentan historias demasiado específicas y en contextos demasiado complejos, quien escuche
+    // tiene que poder relacionarse": la historia es una situación en primera persona que cualquiera vivió, sin nombres,
+    // ciudades, profesiones ni años (antes salían "un arquitecto en São Paulo", "un botánico llamado Elias")
+    const { ALBUM, ANGULOS } = await import('./thrive-album.mjs');
+    const ESPECIFICO = /\b(architect|botanist|photographer|engineer|doctor|lawyer|scientist|artist|developer|named|called|city of|São|Sao|Paulo|Buenos|Aires|Tokyo|London|Paris|New York|Neo-\w+|19\d\d|20\d\d|circa|futuristic|metropolis)\b/i;
+    tema.historia = await pedirJSON(`You are planning what the lyrics of a trap song will say, before writing them.
+Album: ${ALBUM}
+This song: "${tema.titulo}" — ${tema.angulo ? ANGULOS[tema.angulo]?.idea + '. ' : ''}${tema.concepto} (trait: ${tema.rasgo}).
+Rules:
+- It is ME talking (first person), about a situation ANYONE has lived: a listener must think "that is me". Plain, everyday details (a phone, rent, my mother's voice, the bus at 6 a.m., the friend who stayed) — never a name, a city, a job title, a year or an unusual plot.
+- The love is ABSTRACT — never a lover, an ex, "baby". Nothing about sport.
+- It moves: verse 1 is where I am, verse 2 is what changed or got worse, the bridge is what I decide.
+Answer JSON, every value in English, plain words, 1–2 sentences each, in first person ("I"):
+{"quien": "who I am in one line, as anyone could be", "verso1": "where I am now (an everyday scene)", "gancho": "the hook phrase, 2 to 5 words, easy to shout, that the chorus repeats", "estribillo": "what the hook means to me", "verso2": "what changed or got worse", "puente": "what I realize or decide"}
+${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2', 'puente'], temperatura: 0.85,
+      validar: h => { const t = Object.values(h).join(' '), m = t.match(ESPECIFICO); if (m) return `"${m[0]}" makes it too specific: no names, cities, jobs, years or unusual plots — an everyday situation anyone has lived`;
+        if (!/\b(I|I'm|my|me)\b/.test(`${h.quien} ${h.verso1}`)) return 'write it in first person ("I")'; } });
     guardar(); cron('historia', t0h);
     log(`  gancho: "${tema.historia.gancho}" · ${tema.historia.quien}`);
   }
@@ -397,7 +467,7 @@ ${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2',
   const base = fs.readFileSync(path.join(ROOT, `scripts/beats/${LOCAL ? 'thrive-letra-v2.md' : 'thrive-letra.md'}`), 'utf8')
     .replace('{{HISTORIA}}', H ? `- Narrator: ${H.quien}\n- Verse 1: ${H.verso1}\n- Chorus: ${H.estribillo} Hook phrase: "${H.gancho}"\n- Verse 2: ${H.verso2}\n- Bridge (the turn): ${H.puente}` : '')
     .replace('{{TITULO}}', tema.titulo).replace('{{CONCEPTO}}', tema.concepto).replace('{{RASGO}}', tema.rasgo).replace('{{CAPTION}}', tema.captionInstrumental)
-    .replace('{{VOCES}}', tema.captionVoces).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{DURACION}}', tema.duracion)
+    .replace('{{VOCES}}', tema.captionVoces).replace('{{TAGS}}', await tagsVoces()).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{DURACION}}', tema.duracion)
     .replace('{{COMPAS}}', compas.toFixed(2)).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
     .replace('{{MAPA}}', secciones.map((s, i) => `${i + 1}. ${s.nombre !== '?' ? s.nombre + ' · ' : ''}${mmss(s.inicio)}–${mmss(s.fin)} · ${s.compases} bars`).join('\n'));
   let correcciones = fb('letra'), mejor = null;
@@ -408,11 +478,11 @@ ${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2',
     let letra;
     try {
       letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: i <= 3 ? ['local', 'claude'] : ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
-        validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : DEPORTE.test(x) ? 'palabra deportiva' : CASTELLANO.test(x) ? 'castellano' : controlarVoces(x) }))
+        validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : CASTELLANO.test(x) ? 'castellano' : LOCAL ? null : DEPORTE.test(x) ? 'palabra deportiva' : controlarVoces(x) }))
         .replace(/^```\w*\n?|```$/g, '').trim();
     } catch (e) { log(`  ${e.message}`); continue; }   // solo local no tiene respaldo: otra vuelta
     const r = rimas(letra);
-    const of = LOCAL ? oficio(letra) : [];
+    const of = LOCAL ? [...oficio(letra), ...(await vocesLocal(letra))] : [];
     r.problemas = [...of, ...r.problemas]; r.ok = r.ok && !of.length;
     if (!mejor || r.problemas.length < mejor.r.problemas.length) mejor = { letra, r, motor: ultimoMotor };
     if (r.ok) break;

@@ -1,4 +1,4 @@
-You are the songwriter of the album "Thrive". The INSTRUMENTAL is already produced (a real trap beat); now write the lyrics that FIT it. A male rapper and a female voice will sing them on top of this exact instrumental.
+You are the songwriter of the album "Thrive". The INSTRUMENTAL is already produced (a real trap beat); now write the lyrics that FIT it. The voices that will sing them on top of this exact instrumental: {{VOCES}}.
 
 ## The song
 - Title: {{TITULO}}
@@ -12,9 +12,9 @@ You are the songwriter of the album "Thrive". The INSTRUMENTAL is already produc
 {{MAPA}}
 Planned structure: {{ESTRUCTURA}}
 
-## THE STORY — the lyrics must tell exactly this (the artist, 2026-10-31: "the lyrics make no sense, they must tell something")
+## WHAT IT SAYS — the lyrics must say exactly this (the artist: "the lyrics must tell something", and "whoever listens has to relate to it")
 {{HISTORIA}}
-Each verse is a moment of this story, in order: a listener who hears the song once must be able to say what happened. The chorus repeats the hook phrase. The bridge is the turn. Every section must sound different from the others: the verse tells (rap), the chorus repeats (melody), the bridge changes.
+Each verse is a moment of this, in order. It is ME talking about something anyone has lived: no names, no cities, no job titles, no years, no strange plot. A listener must think "that is me". The chorus repeats the hook phrase. The bridge is the turn. Every section must sound different from the others: the verse tells (rap), the chorus repeats (melody), the bridge changes.
 
 ## How real trap is written — LESS IS MORE (the artist, 2026-10-31)
 1. THE HOOK IS A MANTRA. One short phrase (3 to 6 words) that sticks, repeated: the chorus has at most 4 lines and at most 2 different ones. Shape: phrase / phrase / answer line / phrase. The title can be the phrase.
@@ -29,7 +29,8 @@ Contrast (lines written only for this brief, never reuse them):
 - talking, right: "Two a.m., I'm still not home / Told my brother I'd call, I didn't"
 
 ## Who sings
-- The male rapper leads: he raps the verses. The female voice only in the hook (alone or with him), the pre-chorus or the bridge — at most a third of the lines. Mark it in every tag: [verse - male rap], [chorus - female], [chorus - male & female], [bridge - female].
+- {{TAGS}}. Mark EVERY section tag like that; never add a voice that is not listed.
+- Change the flow inside the song: one verse can switch to a faster double-time flow halfway, the chorus is a chant people can shout.
 - THE LOVE IS ABSTRACT: the song loves something that is not a person (see the concept). No lover, no ex, no "baby". If you say "you", it is that thing (the night, the city…).
 - Nothing about sport. Intense is fine; explicit is not.
 

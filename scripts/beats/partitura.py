@@ -29,6 +29,10 @@ Al final imprime SECCIONES=[…] (inicio y fin reales de cada sección) como los
                  "energia": 3, "final": "nada|corte|tapestop|redoble"}]
 }
 variacion: normal | media (a media velocidad, ocupa 4 compases) | invertida (espejo) | retrogrado | octava
+Variación dentro del tema (Juan, 2026-11-01: "cambios y variaciones es lo que le da vida"), por sección:
+  "kit": nombre en P["kits"] (cambio de beat con otro sonido de batería), "clap": "medio" (en el 3) | "doble" (en 2 y 4:
+  el mismo tempo se siente al doble), "final": "silencio" (último compás sin batería ni 808: queda la voz sola antes del
+  estribillo), "filtro": "radio" (la sección suena por una radio: sin graves ni agudos).
 """
 import json
 import os
@@ -163,8 +167,12 @@ def render(P):
     sidechain, notas808, cortes = np.zeros(N), [], []
     nivel = np.ones(N)
     voz = np.zeros(N)                              # 1 donde canta alguien: los medios se abren para la voz
-    B, CL = bombo_k(k['bombo_golpe'], k['bombo_cola']), clap_k(k['clap_tono'])
-    H, HO = hat_k(k['hat_metal']), hat_k(k['hat_metal'], True)
+    def sonidos(kk):
+        return (bombo_k(kk['bombo_golpe'], kk['bombo_cola']), clap_k(kk['clap_tono']), hat_k(kk['hat_metal']), hat_k(kk['hat_metal'], True))
+    kits = {None: sonidos(k)}
+    for nombre_k, kk in P.get('kits', {}).items():
+        kits[nombre_k] = sonidos({**k, **kk})
+    filtros = []
     ir = reverb_ir(dur=1.6 + 2.2 * k['sala'], brillo=4000 + 4000 * k['brillo'])
     jit = lambda: rng.normal(0, 0.004)
     vel = lambda: 1 - rng.uniform(0, 0.25)
@@ -179,11 +187,16 @@ def render(P):
         if S['nombre'] in ('verse', 'pre-chorus', 'chorus', 'bridge'):
             voz[i0:i1] = 1 if S['nombre'] in ('verse', 'pre-chorus') else 0.6
         prog = progs.get(S.get('acordes'), next(iter(progs.values())))
+        B, CL, H, HO = kits.get(S.get('kit'), kits[None])
+        claps = (beat, 3 * beat) if S.get('clap') == 'doble' else (2 * beat,)
+        if S.get('filtro') == 'radio':
+            filtros.append((t_s, (c0 + largo) * compas))
         for c in range(largo):
             t_c = t_s + c * compas
             grado = prog[c % len(prog)]
             ac = acorde(raiz, grado, escala)
             ultimo = c == largo - 1
+            mudo = ultimo and S.get('final') == 'silencio'
             # Textura (armonía de fondo)
             if S.get('textura'):
                 tx = P.get('textura', 'pad')
@@ -193,7 +206,7 @@ def render(P):
                 poner(pistas['armonia'], x, t_c)
             # Batería: clap en el 3 (medio tiempo), siempre
             nombre_d = S.get('bateria_b') if S.get('bateria_b') and c >= largo // 2 and largo >= 8 else S.get('bateria')
-            D = P.get('baterias', {}).get(nombre_d) if nombre_d else None
+            D = P.get('baterias', {}).get(nombre_d) if nombre_d and not mudo else None
             if D:
                 for s, ch in enumerate(D.get('bombo', '')[:16]):
                     if ch == 'x' and not (ultimo and S.get('final') == 'corte' and s >= 8):
@@ -201,7 +214,8 @@ def render(P):
                         poner(pistas['drums'], paneo(B, 0) * 0.95, t_k)
                         poner(sidechain[None], np.exp(-t_arr(0.3) * 12)[None], t_k)
                 if not (ultimo and S.get('final') == 'corte'):
-                    poner(pistas['drums'], paneo(CL, 0.04) * 0.75 * vel(), t_c + 2 * beat + jit() * 0.4)
+                    for t_cl in claps:
+                        poner(pistas['drums'], paneo(CL, 0.04) * 0.75 * vel(), t_c + t_cl + jit() * 0.4)
                 for s, ch in enumerate(D.get('hats', '')[:16]):
                     t_h = t_c + s * semi + (k['swing'] * 0.33 * semi if s % 2 else 0) + jit()
                     if ch == 'x':
@@ -217,7 +231,7 @@ def render(P):
                     for j in range(12):
                         poner(pistas['drums'], paneo(repitch(CL, 1 + j * 0.04), 0) * (0.2 + 0.05 * j), t_c + 2 * beat + j * beat / 6)
             # 808: grados desde la raíz del acorde del compás; ~ = glide hacia la nota
-            if S.get('bajo') in bajos:
+            if S.get('bajo') in bajos and not mudo:
                 base = raiz - 24 + escala[grado % 7]          # octava 1 (A1 = 55 Hz)
                 if base > 40:
                     base -= 12
@@ -276,6 +290,14 @@ def render(P):
     mix = drums + bajo + arm * 0.8 + mel * 0.8 + res * 0.7
     for tipo, t0, d in cortes:
         mix = tape_stop(mix, t0, d) if tipo == 'tapestop' else stutter(mix, t0, d, d / 4)
+    for a, b in filtros:                           # "radio": banda angosta, con fundido corto en los bordes
+        i0, i1 = int(a * SR), int(b * SR)
+        tramo = mix[:, i0:i1]
+        radio = lp(hp(tramo, 500, 2), 3200, 2) * 1.6
+        f = np.ones(i1 - i0)
+        n = min(int(0.05 * SR), (i1 - i0) // 2)
+        f[:n], f[-n:] = np.linspace(0, 1, n), np.linspace(1, 0, n)
+        mix[:, i0:i1] = tramo * (1 - f) + radio * f
     mix = hp(mix, 28)
     # Dinámica por sección: se mide cada una con una ponderación parecida a la K de ebur128 (corta graves bajo 40 Hz,
     # realza ~4 dB arriba de 1,5 kHz) y se la lleva a su objetivo; dos pasadas, porque la saturación final mueve un poco

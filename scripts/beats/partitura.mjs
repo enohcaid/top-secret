@@ -19,6 +19,10 @@
 // después (estribillo más que verso, progresiones distintas, transiciones, originalidad) se le vuelve a preguntar a Gemma
 // con opciones cerradas — el código no corrige su música.
 // Las partituras aprobadas quedan en scripts/beats/partituras/<slug>.json: el control de originalidad compara contra ellas.
+// Variación dentro del tema (Juan, 2026-11-01: "el ser humano necesita cosas que lo estimulen permanentemente incluso
+// dentro de un mismo tema"): el verso 2 no repite la batería del 1 (y puede pasar el clap a 2 y 4), hay un cambio de beat
+// (otro kit, otra progresión, otros patrones) en una sección de la segunda mitad, el "silencio" (batería y 808 afuera en
+// el último compás) entra como transición, y la intro puede sonar filtrada (radio). Y la melodía no puede ser una escala recta.
 import fs from 'fs';
 import path from 'path';
 import { ROOT } from '../lib/env.mjs';
@@ -27,7 +31,7 @@ import { ollama } from '../lib/ia.mjs';
 export const DIR_PARTITURAS = path.join(ROOT, 'scripts/beats/partituras');
 const INSTR = ['campana', 'pluck', 'piano', 'lead', 'vox', 'cuerdas'], TEXT = ['pad', 'coro', 'cuerdas'];
 const NOMBRES = ['intro', 'verse', 'pre-chorus', 'chorus', 'bridge', 'outro'];
-const VARIAC = ['media', 'invertida', 'retrogrado', 'octava'], TRANSICIONES = ['corte', 'redoble', 'tapestop'];
+const VARIAC = ['media', 'invertida', 'retrogrado', 'octava'], TRANSICIONES = ['corte', 'redoble', 'tapestop', 'silencio'], CLAPS = ['medio', 'doble'];
 
 // ── Vocabulario del molde ────────────────────────────────────────────────────
 // progresiones menores (grados de la escala, un acorde por compás)
@@ -83,7 +87,14 @@ export const esquema = plan => obj({
   llamada: melodiaEsq(LLAMADAS), respuesta: melodiaEsq(RESPUESTAS),
   momento: obj({ seccion: { type: 'integer', enum: conMelodia(plan) }, variacion: { type: 'string', enum: VARIAC } }),
   transiciones: { type: 'array', items: { type: 'string', enum: TRANSICIONES }, minItems: coros(plan), maxItems: coros(plan) },
+  intro_radio: bool,
+  verso2: obj({ bombo: de(BOMBOS), hats: de(HATS), clap: { type: 'string', enum: CLAPS } }),
+  cambio: obj({ seccion: { type: 'integer', enum: paraCambio(plan) }, kit: de(KITS), progresion: de(PROGRESIONES), bombo: de(BOMBOS), hats: de(HATS), clap: { type: 'string', enum: CLAPS } }),
 });
+// el cambio de beat va en la segunda mitad: el puente, un estribillo que no sea el primero, o el outro
+const paraCambio = plan => { const primerCoro = plan.findIndex(p => p.nombre === 'chorus');
+  const r = plan.map((p, i) => (i > primerCoro && i >= plan.length / 2 && ['bridge', 'chorus', 'outro'].includes(p.nombre) ? i : null)).filter(x => x !== null);
+  return r.length ? r : [plan.length - 1]; };
 const coros = plan => plan.filter((p, i) => i > 0 && p.nombre === 'chorus').length;
 
 // Qué toca cada parte según su función
@@ -162,19 +173,30 @@ export function leer(j, { bpm, tonalidad, plan }) {
     P.baterias[`${k}_b`] = { ...P.baterias[k], hats: conFill(HATS[p.hats], p.fill) };
   }
   P.baterias.puente = { bombo: BOMBOS[j.puente.bombo], hats: HATS[j.puente.hats], abierto: ABIERTOS.nada };
+  P.baterias.verso2 = { bombo: BOMBOS[j.verso2.bombo], hats: HATS[j.verso2.hats], abierto: ABIERTOS[j.verso.abierto] };
+  P.baterias.verso2_b = { ...P.baterias.verso2, hats: conFill(HATS[j.verso2.hats], j.verso.fill) };
+  P.bajos.verso2 = aTokens(linea808(BOMBOS[j.verso2.bombo], j.verso.figura_808, false));
+  P.baterias.cambio = { bombo: BOMBOS[j.cambio.bombo], hats: HATS[j.cambio.hats], abierto: ABIERTOS.contratiempo };
+  P.bajos.cambio = aTokens(linea808(BOMBOS[j.cambio.bombo], j.estribillo.figura_808, true));
+  P.progresiones.cambio = PROGRESIONES[j.cambio.progresion];
+  P.kits = { cambio: { ...KITS[j.cambio.kit] } };
   armarSecciones(P, plan);
   return P;
 }
 export function armarSecciones(P, plan) {
   const j = P.molde;
-  let c = 0;
+  let c = 0, versos = 0;
   P.secciones = plan.map((p, i) => {
     const R = ROLES[p.nombre] || ROLES.verse, siguienteCoro = plan[i + 1]?.nombre === 'chorus';
-    return { nombre: p.nombre, compases: p.compases, acordes: R.acordes,
+    const S = { nombre: p.nombre, compases: p.compases, acordes: R.acordes,
       melodia: R.melodia ? 'llamada' : null, respuesta: R.respuesta ? 'respuesta' : null,
       variacion: j.momento?.seccion === i ? j.momento.variacion : 'normal',
       bajo: R.bajo || null, bateria: R.bateria || null, bateria_b: R.bateria_b || null, textura: !!R.textura, energia: R.energia,
       final: siguienteCoro ? (j.transiciones?.[c++] || 'corte') : 'nada' };
+    if (p.nombre === 'verse' && versos++ >= 1) Object.assign(S, { bateria: 'verso2', bateria_b: 'verso2_b', bajo: 'verso2', clap: j.verso2?.clap || 'medio' });
+    if (p.nombre === 'intro' && j.intro_radio) S.filtro = 'radio';
+    if (j.cambio?.seccion === i) Object.assign(S, { kit: 'cambio', acordes: 'cambio', bateria: 'cambio', bateria_b: null, bajo: 'cambio', clap: j.cambio.clap, energia: Math.max(R.energia, 4) });
+    return S;
   });
 }
 
@@ -198,6 +220,14 @@ export function criticar(P, { slug }) {
   if (j.progresion_estribillo === j.progresion_verso) mal('progresion_estribillo', 'the chorus uses the same progression as the verse');
   for (const t of TRANSICIONES) if ((j.transiciones || []).filter(x => x === t).length > 2) mal('transiciones', `"${t}" is used more than twice`);
   if (new Set(j.llamada.notas).size < 3) mal('llamada', 'the call melody uses fewer than 3 different notes');
+  // escala recta: 5 pasos seguidos de a un grado en la misma dirección (1 2 3 4 5 6) suena a ejercicio, no a melodía
+  const escala = n => { let run = 0, dir = 0; for (let i = 1; i < n.length; i++) { const d = n[i] - n[i - 1]; if (Math.abs(d) === 1 && d === dir) run++; else { run = Math.abs(d) === 1 ? 1 : 0; dir = d; } if (run >= 4) return true; } return false; };
+  if (escala(j.llamada.notas)) mal('llamada', 'the call melody is a straight scale run (step by step in one direction): a melody needs leaps, repeated notes and turns');
+  if (escala(j.respuesta.notas)) mal('respuesta', 'the answer melody is a straight scale run: it needs leaps, repeated notes and turns');
+  if (j.verso2.bombo === j.verso.bombo && j.verso2.hats === j.verso.hats && j.verso2.clap !== 'doble') mal('verso2', 'verse 2 drums are a copy of verse 1');
+  if (j.cambio.kit === j.kit) mal('cambio', 'the beat switch uses the same kit as the rest of the song');
+  if ([j.progresion_verso, j.progresion_estribillo].includes(j.cambio.progresion)) mal('cambio', 'the beat switch uses a progression the song already has');
+  if (j.cambio.bombo === j.estribillo.bombo && j.cambio.hats === j.estribillo.hats) mal('cambio', 'the beat switch drums are the same as the chorus');
   for (const a of anteriores(slug)) {
     if (a.motivos?.llamada && parecido(nums(P.motivos.llamada), nums(a.motivos.llamada)) > 0.7) mal('llamada', `the call melody is too similar to the one of the earlier song "${a.slug}"`);
     if (a.molde && a.molde.progresion_verso === j.progresion_verso && a.molde.progresion_estribillo === j.progresion_estribillo) mal('progresion_estribillo', `the same pair of progressions as the earlier song "${a.slug}"`);
@@ -240,8 +270,27 @@ export async function reintentar(P, fallas, tema, plan, log = () => {}) {
     j.transiciones = nuevas;
     log(`      transiciones: ${nuevas.join(', ')}`);
   }
+  if (partes.has('verso2')) {
+    const r = await preguntar(`${ctx}\nVerse 1 drums: kick "${j.verso.bombo}", hats "${j.verso.hats}". Verse 2 must feel different (a new pocket for the rapper): choose its kick and hats (not both the same as verse 1), and the clap: "medio" (on beat 3, half-time) or "doble" (on 2 and 4, feels twice as fast).\nKicks: ${Object.keys(BOMBOS).join(', ')}\nHats: ${Object.keys(HATS).join(', ')}\nAnswer JSON {"bombo": "...", "hats": "...", "clap": "..."}.`,
+      obj({ bombo: de(BOMBOS), hats: de(HATS), clap: { type: 'string', enum: CLAPS } }), 1.0);
+    j.verso2 = r;
+    log(`      verso 2: bombo ${r.bombo}, hats ${r.hats}, clap ${r.clap}`);
+  }
+  if (partes.has('cambio')) {
+    const kits = Object.keys(KITS).filter(k => k !== j.kit), progs = Object.keys(PROGRESIONES).filter(k => ![j.progresion_verso, j.progresion_estribillo].includes(k));
+    const r = await preguntar(`${ctx}\nThe BEAT SWITCH (one section of the second half that suddenly becomes another beat) was rejected: ${fallas.filter(f => f.parte === 'cambio').map(f => f.error).join('; ')}. The song uses kit "${j.kit}", progressions ${j.progresion_verso} / ${j.progresion_estribillo}, chorus drums ${j.estribillo.bombo} / ${j.estribillo.hats}. Choose a switch that sounds like a different beat.\nKits: ${kits.join(', ')}\nProgressions: ${progs.join(', ')}\nKicks: ${Object.keys(BOMBOS).join(', ')}\nHats: ${Object.keys(HATS).join(', ')}\nAnswer JSON {"kit": "...", "progresion": "...", "bombo": "...", "hats": "...", "clap": "medio|doble"}.`,
+      obj({ kit: { type: 'string', enum: kits }, progresion: { type: 'string', enum: progs }, bombo: de(BOMBOS), hats: de(HATS), clap: { type: 'string', enum: CLAPS } }), 1.0);
+    Object.assign(j.cambio, r);
+    log(`      cambio de beat: kit ${r.kit}, ${r.progresion}, ${r.bombo}/${r.hats}, clap ${r.clap}`);
+  }
+  if (partes.has('respuesta')) {
+    const r = await preguntar(`${ctx}\nYour answer melody (rhythm "${j.respuesta.ritmo}", degrees ${j.respuesta.notas.join(' ')}) was rejected: it is a straight scale run. Write 8 NEW scale degrees (1–7; 8 and 9 = 1 and 2 an octave up) with leaps, a repeated note and a turn. Answer JSON {"notas": [..8 numbers..]}.`,
+      obj({ notas: { type: 'array', items: grado, minItems: 8, maxItems: 8 } }), 1.0);
+    j.respuesta.notas = r.notas;
+    log(`      respuesta: ${r.notas.join(' ')}`);
+  }
   if (partes.has('llamada')) {
-    const r = await preguntar(`${ctx}\nYour call melody (rhythm "${j.llamada.ritmo}", scale degrees ${j.llamada.notas.join(' ')}) was rejected: ${fallas.filter(f => f.parte === 'llamada').map(f => f.error).join('; ')}. Write 8 NEW scale degrees (1–7; 8 and 9 = 1 and 2 an octave up) for the same rhythm: a dark line with a clear shape. Answer JSON {"notas": [..8 numbers..]}.`,
+    const r = await preguntar(`${ctx}\nYour call melody (rhythm "${j.llamada.ritmo}", scale degrees ${j.llamada.notas.join(' ')}) was rejected: ${fallas.filter(f => f.parte === 'llamada').map(f => f.error).join('; ')}. Write 8 NEW scale degrees (1–7; 8 and 9 = 1 and 2 an octave up) for the same rhythm: a line with a clear shape — leaps, a repeated note, a turn; never a straight scale. Answer JSON {"notas": [..8 numbers..]}.`,
       obj({ notas: { type: 'array', items: grado, minItems: 8, maxItems: 8 } }), 1.0);
     j.llamada.notas = r.notas;
     log(`      llamada: ${r.notas.join(' ')}`);
@@ -262,6 +311,8 @@ export function vocabulario() {
     `Call rhythms, 2 bars (o = a note, - = held, . = silence): ${lista(LLAMADAS)}`,
     `Answer rhythms (they fill the gaps of the call): ${lista(RESPUESTAS)}`,
     `Kit character: ${Object.keys(KITS).join(', ')}`,
+    `Transitions before a chorus: corte (stutter cut), redoble (snare roll), tapestop (the tape slows down), silencio (drums and 808 drop out for the last bar: the voice alone, then the chorus slams in)`,
+    `Clap: medio (on beat 3, half-time) or doble (on 2 and 4: same tempo, feels twice as fast)`,
   ].join('\n');
 }
 export function resumenAnteriores(slug) {
