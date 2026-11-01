@@ -540,6 +540,113 @@
       "generado": "2026-11-01T08:18:46.361Z",
       "letraFinal": "[intro - female]\nLights go down… and the room breathes low\nLights come up… and the quiet starts to show\n\n[verse - male rap]\nSpotlight quits and the house lights hum like a fridge at night\nUshers sweep up the confetti, cups and programs, row by row\nGaffer-tape X on the floorboard, the only mark I leave\nEverybody gets a ride home and I'm the one that don't know\nDressing room mirrors, got both burnt out on\nOn half the frame, same face I wore at noon\nNo grow to make you shine\nFolks out there got jobs and kids and they're doing fine\nI trade a slow decline for one stage to align\n\n[chorus - male & female]\nHouse lights on\nCounting empty seats with a roll\nThe roar used to be\nTake the years, take it all\nJust dim it down and bring the next night to me\n\n[verse - male rap]\nMissed my cousin's wedding, said I had a soundcheck at four\nMama's voicemails stacking up, a hundred left behind\nFridge is bare, the rent is late, but the setlist's defined\nCounting days between the shows, a memory enshrined\nNeighbors nod and ask me what I do these days\nI say I'm in the business, a truth I hide inside\nStage is eating up my years and I keep playing on\nAverage is the one thing I can't abide\n\n[chorus - male & female]\nHouse lights on\nCounting empty seats where the roar\nThe roar used to be\nTake the years, take it all\nJust dim it down and bring the next night to me\n\n[bridge - female]\nThe janitor hums on the boards for a bed\nHe's got a new body nose and he sleeps just well\nWhat if the dark was never a lift in behind\nAnd the man in the light was a story I tell\n\n[chorus - male & female]\nHouse lights on, I'm a man of code\nCounting empty seats where the Roy used to be\nTake the years, take the, take the sleep, take it home\nStim it down and bring the neck to me\nTech show started\nSame old fear\nAnd I still ask for more\n\n[outro - female]\nHouse lighting\nAnd the stage is bare\nHouse lights on\nMade for the darkest",
       "publicado": false
+    },
+    {
+      "id": "2026-11-01-2-local",
+      "motor": "local",
+      "fecha": "2026-11-01",
+      "slug": "borrowed-time",
+      "titulo": "Borrowed Time",
+      "angulo": "volver",
+      "energia": "flotante",
+      "casting": "grave_amenazante",
+      "concepto": "Es sobre regresar al lugar que te formó, no buscando el pasado, sino reconociendo la deuda que te debe al presente.",
+      "rasgo": "resiliencia",
+      "voz": "barítono grave, lento y amenazante",
+      "captionInstrumental": "Dark trap beat. 138 BPM. Spacious, dreamy pads layered with a simple, repeating piano motif. Heavy, sliding 808 sub bass, clean trap hats creating a floating, nostalgic atmosphere., airy, dreamy synths, floating, light drums",
+      "captionVoces": "solo male rapper, deep baritone voice, slow menacing delivery, confident, dark ad-libs, no female vocals",
+      "bpm": 142,
+      "tonalidad": "E minor",
+      "duracion": 143,
+      "estructura": [
+        "intro",
+        "verse",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 6.76,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 6.76,
+          "fin": 33.8,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 33.8,
+          "fin": 59.15,
+          "compases": 15
+        },
+        {
+          "nombre": "verse",
+          "inicio": 59.15,
+          "fin": 86.2,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 86.2,
+          "fin": 106.48,
+          "compases": 12
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 106.48,
+          "fin": 113.24,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 113.24,
+          "fin": 133.52,
+          "compases": 12
+        },
+        {
+          "nombre": "outro",
+          "inicio": 133.52,
+          "fin": 140.28,
+          "compases": 4
+        }
+      ],
+      "beat": "The call transforms into a reversed, octave-shifted echo during the bridge, creating a haunting, disorienting effect.",
+      "vueltasBeat": 1,
+      "instrumental": "partitura",
+      "historia": {
+        "quien": "I'm just someone who’s seen a few hard seasons and kept moving, like most people do.",
+        "verso1": "I'm standing on the corner where I used to wait for the bus, the streetlights buzzing, and the air smells just like it always did; it’s familiar, a little sad, but not unwelcome.",
+        "gancho": "Borrowed time, yeah.",
+        "estribillo": "Borrowed time means I wasn’t supposed to be here, thriving, but I am, and that's something to acknowledge, a weight and a grace.",
+        "verso2": "The rent keeps climbing, the phone doesn't ring as much as it used to, and the little promises I made to my mother feel heavier now; it’s not a disaster, just a pressure that builds slowly.",
+        "puente": "I won’t chase the ghost of who I was, or what I thought I’d be; I’ll pay the price for this borrowed time, and keep walking forward with the friend who stayed."
+      },
+      "letra": "[intro]\n(Hrrr…)\n(Yeah…)\n\n[verse 1 - male deep rap]\nStreetlights buzzin’ (yeah)\nWaitin' for the bus, remember?\nAir smells the same (no)\nA little sad, a fading ember\nCorner’s still here (again)\nFamiliar weight, a distant view\nUsed to dream bigger (I know)\nNow I’m movin’ on through.\n\n[chorus - male deep chant]\nBorrowed time, yeah\nBorrowed time, yeah\nI wasn’t supposed to be here\nBorrowed time, yeah\n\n[verse 2 - male deep rap]\nRent keep climbin’ (yeah)\nPhone don’t ring like it used to\nMomma’s promises (no)\nA burden, heavy and true\nNot a disaster (again)\nJust a pressure buildin' slow\nUsed to chase the money (I know)\nNow I’m watchin' shadows grow.\n\n[chorus - male deep chant]\nBorrowed time, yeah\nBorrowed time, yeah\nI wasn’t supposed to be here\nBorrowed time, yeah\n\n[verse 3 - male deep rap]\nDouble time, watch it spin (yeah)\nThe city’s breathin' down my neck\nRemember all the doubt (no)\nNow the quiet feels correct\nUsed to chase the shine (again)\nNow I’m searchin' for the core\nWalkin’ these streets alone (I know)\nKnowin' what I’m fightin’ for.\n\n[bridge - male spoken]\nI won’t chase the ghost\nOr what I thought I’d be\nI’ll pay the price\nAnd keep walking forward, you see.\n\n[chorus - male deep chant]\nBorrowed time, yeah\nBorrowed time, yeah\nI wasn’t supposed to be here\nBorrowed time, yeah\n\n[outro]\n(Hrrr…)\n(Yeah…)",
+      "letraPor": "local",
+      "avisosRima": [
+        "forbidden poetic words: ember — say it the way a person would",
+        "\"Now the quiet feels correct\" — la frase cierra con \"correct\", que no rima (por sonido) con el cierre anterior del esquema"
+      ],
+      "audio": "musica/thrive/borrowed-time.mp3?v=mvy0pjeu",
+      "generado": "2026-11-01T16:01:44.070Z",
+      "letraFinal": "[intro]\n(Hrrr…)\n(Yeah…)\n\n[verse 1 - male deep rap]\nStreetlights buzzin’ (yeah)\nWaitin' for the bus, remember?\nAir smells the same (no)\nA little sad, a fading ember\nCorner’s still here (again)\nFamiliar weight, a distant view\nUsed to dream bigger (I know)\nNow I’m movin’ on through.\n\n[chorus - male deep chant]\nBorrowed time, yeah\nBorrowed time, yeah\nI wasn’t supposed to be here\nBorrowed time, yeah\n\n[verse 2 - male deep rap]\nRent keep climbin’ (yeah)\nPhone don’t ring like it used to\nMomma’s promises (no)\nA burden, heavy and true\nNot a disaster (again)\nJust a pressure buildin' slow\nUsed to chase the money (I know)\nNow I’m watchin' shadows grow.\n\n[chorus - male deep chant]\nBorrowed time, yeah\nBorrowed time, yeah\nI wasn’t supposed to be here\nBorrowed time, yeah\n\n[verse 3 - male deep rap]\nDouble time, watch it spin (yeah)\nThe city’s breathin' down my neck\nRemember all the doubt (no)\nNow the quiet feels correct\nUsed to chase the shine (again)\nNow I’m searchin' for the core\nWalkin’ these streets alone (I know)\nKnowin' what I’m fightin’ for.\n\n[bridge - male spoken]\nI won’t chase the ghost\nOr what I thought I’d be\nI’ll pay the price\nAnd keep walking forward, you see.\n\n[chorus - male deep chant]\nBorrowed time, yeah\nBorrowed time, yeah\nI wasn’t supposed to be here\nBorrowed time, yeah\n\n[outro]\n(Hrrr…)\n(Yeah…)",
+      "tiempos": {
+        "concepto": 172,
+        "beat": 392,
+        "historia": 145,
+        "letra": 1047,
+        "voces": 1389,
+        "letraFinal": 0
+      },
+      "publicado": false
     }
   ]
 }
