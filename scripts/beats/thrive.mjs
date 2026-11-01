@@ -192,9 +192,10 @@ ${fb('concepto')}` : '');
       if (DEPORTE.test(t)) return 'palabra deportiva';
       if (CASTELLANO.test(t)) return 'castellano en título o sonido';
       if (/weeknd|lana|ariana|jennie|lily-rose|del rey|grande/i.test(t)) return 'nombra artistas reales en el sonido';
-      // Juan, 2026-10-27: el amor es abstracto (nunca una persona) y el género es trap de verdad
-      const persona = String(j.concepto).match(/(alguien|una persona|pareja|novi[oa]|amante|tu ex|el otro|la otra|ella|él)/i);
-      if (persona) return `el concepto habla de una persona ("${persona[0]}"): el amor de Thrive es abstracto, por algo que no es una persona`;
+      // Juan, 2026-10-27 (aclarado 2026-11-01: "hablar de lo que siento sin explicar lo que pasó"): el amor y el desamor
+      // entran como sentimiento, sin nombrar ni describir al otro ni contar la ruptura
+      const persona = String(j.concepto).match(/(pareja|novi[oa]|amante|tu ex|su ex|lo dejó|la dejó|ruptura|separaci[oó]n)/i);
+      if (persona) return `el concepto cuenta lo que pasó ("${persona[0]}"): en Thrive se dice lo que se siente, sin nombrar al otro ni explicar lo que pasó`;
       if (!/trap/i.test(j.caption_instrumental)) return 'el sonido no dice trap: tiene que ser trap de verdad';
       if (!/rap/i.test(j.caption_voces)) return 'las voces tienen que tener a un rapero liderando';
       if (reg.temas.some(x => x.titulo.toLowerCase() === String(j.titulo).toLowerCase())) return `título repetido "${j.titulo}"`;
@@ -380,7 +381,7 @@ function controlarVoces(letra) {
   if (total && ella / total > 0.38) return `la voz femenina canta ${ella} de ${total} versos: tiene que aparecer solo en partes concretas (hook, puente); el rapero lidera`;
   if (/\[verse[^\]]*female/i.test(letra) && !/\[verse[^\]]*\bmale/i.test(letra)) return 'los versos tienen que ser del rapero';
   const p = letra.match(/\b(baby|babe|girl|boy|my lover|lover|my ex|darling)\b/i);
-  if (p) return `"${p[0]}": el amor de Thrive es abstracto, no por una persona`;
+  if (p) return `"${p[0]}": en Thrive se dice lo que se siente sin nombrar al otro (Juan: "hablar de lo que siento sin explicar lo que pasó")`;
 }
 // Carril local: cómo se marcan las voces según el casting del tema (thrive-album.mjs), y el control correspondiente,
 // devuelto como corrección para Gemma (Juan, 2026-11-01: rechazar la letra entera sin decir por qué gastaba las vueltas)
@@ -396,9 +397,9 @@ async function vocesLocal(letra) {
   const conElla = tags.filter(t => /female|woman|girl/.test(t)), conEl = tags.filter(t => /\bmale\b/.test(t.replace(/female/g, '')));
   if (!C.ella && conElla.length) p.push(`there is NO female voice in this song: fix the tags ${conElla.map(t => `[${t}]`).join(', ')} (${C.tags})`);
   if (C.ella && !/male rapper/.test(C.tags) && conEl.length) p.push(`there is NO male voice in this song: fix the tags ${conEl.map(t => `[${t}]`).join(', ')} (${C.tags})`);
-  if (tema.casting === 'rapero_y_hook' || !tema.casting) { const v = controlarVoces(letra); if (v && !/abstracto/.test(v)) p.push(`${v} (${C.tags})`); }
+  if (tema.casting === 'rapero_y_hook' || !tema.casting) { const v = controlarVoces(letra); if (v && !/nombrar al otro/.test(v)) p.push(`${v} (${C.tags})`); }
   const amor = letra.match(/\b(baby|babe|girl|boy|my lover|lover|my ex|darling)\b/i);
-  if (amor) p.push(`"${amor[0]}": the love in this album is abstract, never a person — rewrite that line`);
+  if (amor) p.push(`"${amor[0]}": talk about what I FEEL, never explain what HAPPENED — say the feeling without naming or describing the other; rewrite that line`);
   const dep = letra.match(DEPORTE);
   if (dep) p.push(`"${dep[0]}": nothing about sport — rewrite that line`);
   return p;
@@ -452,10 +453,10 @@ Album: ${ALBUM}
 This song: "${tema.titulo}" — ${tema.angulo ? ANGULOS[tema.angulo]?.idea + '. ' : ''}${tema.concepto} (trait: ${tema.rasgo}).
 Rules:
 - It is ME talking (first person), about a situation ANYONE has lived: a listener must think "that is me". Plain, everyday details (a phone, rent, my mother's voice, the bus at 6 a.m., the friend who stayed) — never a name, a city, a job title, a year or an unusual plot.
-- The love is ABSTRACT — never a lover, an ex, "baby". Nothing about sport.
-- It moves: verse 1 is where I am, verse 2 is what changed or got worse, the bridge is what I decide.
+- FEEL IT, DON'T EXPLAIN IT (the artist: "talk about what I feel without explaining what happened"): each part is a feeling and how it sounds in my day, not a plot. Love and heartbreak are welcome, but never name or describe the other and never tell what happened. Nothing about sport.
+- It moves: verse 1 is how I feel now, verse 2 is how that feeling turned (worse, sharper, colder), the bridge is what I decide.
 Answer JSON, every value in English, plain words, 1–2 sentences each, in first person ("I"):
-{"quien": "who I am in one line, as anyone could be", "verso1": "where I am now (an everyday scene)", "gancho": "the hook phrase, 2 to 5 words, easy to shout, that the chorus repeats", "estribillo": "what the hook means to me", "verso2": "what changed or got worse", "puente": "what I realize or decide"}
+{"quien": "who I am in one line, as anyone could be", "verso1": "how I feel now and a small everyday detail of it", "gancho": "the hook phrase, 2 to 5 words, easy to shout, that the chorus repeats", "estribillo": "what the hook means to me", "verso2": "how the feeling turned", "puente": "what I realize or decide"}
 ${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2', 'puente'], temperatura: 0.85,
       validar: h => { const t = Object.values(h).join(' '), m = t.match(ESPECIFICO); if (m) return `"${m[0]}" makes it too specific: no names, cities, jobs, years or unusual plots — an everyday situation anyone has lived`;
         if (!/\b(I|I'm|my|me)\b/.test(`${h.quien} ${h.verso1}`)) return 'write it in first person ("I")'; } });

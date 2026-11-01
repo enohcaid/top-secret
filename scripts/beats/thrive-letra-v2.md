@@ -31,7 +31,7 @@ Contrast (lines written only for this brief, never reuse them):
 ## Who sings
 - {{TAGS}}. Mark EVERY section tag like that; never add a voice that is not listed.
 - Change the flow inside the song: one verse can switch to a faster double-time flow halfway, the chorus is a chant people can shout.
-- THE LOVE IS ABSTRACT: the song loves something that is not a person (see the concept). No lover, no ex, no "baby". If you say "you", it is that thing (the night, the city…).
+- FEEL IT, DON'T EXPLAIN IT (the artist: "talk about what I feel without explaining what happened"): love, heartbreak, anger, pride — say the feeling, not the events behind it. Never name or describe the other (no "baby", "girl", "my ex"), no breakup scene. "You" is fine if it is never described.
 - Nothing about sport. Intense is fine; explicit is not.
 
 ## Format

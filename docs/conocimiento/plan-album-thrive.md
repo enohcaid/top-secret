@@ -65,7 +65,7 @@ Están en `scripts/beats/thrive-album.mjs`. Cada tema toma un ángulo que no se 
 - El hook es de 2 a 5 palabras, para corear.
 - El flow cambia dentro del tema: un verso puede pasar a doble tiempo.
 - Los problemas (deporte, voces que no corresponden, "baby") ya no rechazan la letra entera: vuelven a Gemma como corrección. Antes se perdían 3 o 4 de las 5 vueltas.
-- Se mantiene la regla del 27/10: el amor es abstracto, nunca una persona.
+- La regla del 27/10, como la aclaró Juan el 1/11: "hablar de lo que siento sin explicar lo que pasó". El amor y el desamor entran como sentimiento, sin nombrar al otro ni contar la ruptura; antes se había entendido como "nunca por una persona".
 
 ### 5. Cómo se prueba
 Por ahora todo esto vive solo en el carril local, `thrive.mjs --local`: el proceso semanal de las 2:00 sigue con Claude y su brief de siempre. Si a Juan le gustan los resultados, se pasa el proceso semanal a este método.
