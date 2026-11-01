@@ -459,6 +459,87 @@
         "letraFinal": 0
       },
       "publicado": true
+    },
+    {
+      "fecha": "2026-11-01",
+      "slug": "house-lights",
+      "titulo": "House Lights",
+      "concepto": "Cuando se apagan los reflectores y se prenden las luces de la sala, él se queda solo frente al escenario vacío y no se banca volver a ser uno más, así que vive esperando la próxima función aunque el escenario le esté comiendo la vida.",
+      "rasgo": "miedo a ser común sin eso",
+      "voz": "dúo: ella abre sola en falsete lejano, él rapea filoso y con actitud, ella vuelve etérea en el estribillo y el cierre",
+      "captionInstrumental": "cinematic trap, half-time drums, clap on beat three, hard sliding 808 bass, rapid hi-hat rolls and triplets, staccato dark strings, haunting low choir, ominous brass stabs, sparse, menacing, wide reverb, tense silence, 140 BPM, B minor",
+      "captionVoces": "male rapper leads, gritty mid-low timbre, confident syncopated flow, aggressive cadence; female voice only on intro, hook and outro, airy haunting falsetto, distant, reverbed",
+      "bpm": 140,
+      "tonalidad": "B minor",
+      "duracion": 146,
+      "estructura": [
+        "intro",
+        "verse",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 13.714,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 13.714,
+          "fin": 41.143,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 41.143,
+          "fin": 54.857,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 54.857,
+          "fin": 82.286,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 82.286,
+          "fin": 96,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 96,
+          "fin": 109.714,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 109.714,
+          "fin": 130.286,
+          "compases": 12
+        },
+        {
+          "nombre": "outro",
+          "inicio": 130.286,
+          "fin": 144,
+          "compases": 8
+        }
+      ],
+      "beat": "el zumbido de las luces de la sala (armónicos de B2 con flicker de 60 Hz).",
+      "instrumental": "codigo",
+      "letra": "[intro - female]\nLights go down… and the room breathes low\nLights come up… and the quiet starts to show\n\n[verse - male rap]\nSpotlight quits and the house lights hum like a fridge at night\nUshers sweep up the confetti, cups and programs, row by row\nGaffer-tape X on the floorboard, the only mark I leave\nEverybody gets a ride home and I'm the one they don't know\nDressing room mirror's got bulbs burnt out on half the frame\nSame face I wore at noon, no roar to make it shine\nFolks out there got jobs and kids and they’re doing fine\nI’d trade a slow decline for one stage to align\n\n[chorus - male & female]\nHouse lights on, I'm a man in a coat\nCounting empty seats where the roar used to be\nTake the years, take the sleep, take it all\nJust dim it down and bring the next night to me\n\n[verse - male rap]\nMissed my cousin's wedding, said I had a soundcheck at four\nMama's voicemails stacking up, a hundred left behind\nFridge is bare, the rent is late, but the setlist's defined\nCounting days between the shows, a memory enshrined\nNeighbors nod and ask me what I do these days\nI say I'm in the business, a truth I hide inside\nStage is eating up my years and I keep playing on\nAverage is the one thing I can't abide\n\n[chorus - male & female]\nHouse lights on, I'm a man in a coat\nCounting empty seats where the roar used to be\nTake the years, take the sleep, take it all\nJust dim it down and bring the next night to me\n\n[bridge - female]\nThe janitor hums on the boards where I bled\nHe's got a name nobody knows, and he sleeps just well\nWhat if the dark was never what lifted me high\nAnd the man in the light was a story I tell\n\n[chorus - male & female]\nHouse lights on, I'm a man in a coat\nCounting empty seats where the roar used to be\nTake the years, take the sleep, take it all\nJust dim it down and bring the next night to me\nNext show's Friday, I'll be there before the door\nSame old fear, and I still ask for more\n\n[outro - female]\nHouse lights on… the stage is bare\nWait for the dark… he’ll still be there",
+      "letraPor": "claude",
+      "audio": "musica/thrive/house-lights.mp3?v=mvxk65zt",
+      "generado": "2026-11-01T08:18:46.361Z",
+      "letraFinal": "[intro - female]\nLights go down… and the room breathes low\nLights come up… and the quiet starts to show\n\n[verse - male rap]\nSpotlight quits and the house lights hum like a fridge at night\nUshers sweep up the confetti, cups and programs, row by row\nGaffer-tape X on the floorboard, the only mark I leave\nEverybody gets a ride home and I'm the one that don't know\nDressing room mirrors, got both burnt out on\nOn half the frame, same face I wore at noon\nNo grow to make you shine\nFolks out there got jobs and kids and they're doing fine\nI trade a slow decline for one stage to align\n\n[chorus - male & female]\nHouse lights on\nCounting empty seats with a roll\nThe roar used to be\nTake the years, take it all\nJust dim it down and bring the next night to me\n\n[verse - male rap]\nMissed my cousin's wedding, said I had a soundcheck at four\nMama's voicemails stacking up, a hundred left behind\nFridge is bare, the rent is late, but the setlist's defined\nCounting days between the shows, a memory enshrined\nNeighbors nod and ask me what I do these days\nI say I'm in the business, a truth I hide inside\nStage is eating up my years and I keep playing on\nAverage is the one thing I can't abide\n\n[chorus - male & female]\nHouse lights on\nCounting empty seats where the roar\nThe roar used to be\nTake the years, take it all\nJust dim it down and bring the next night to me\n\n[bridge - female]\nThe janitor hums on the boards for a bed\nHe's got a new body nose and he sleeps just well\nWhat if the dark was never a lift in behind\nAnd the man in the light was a story I tell\n\n[chorus - male & female]\nHouse lights on, I'm a man of code\nCounting empty seats where the Roy used to be\nTake the years, take the, take the sleep, take it home\nStim it down and bring the neck to me\nTech show started\nSame old fear\nAnd I still ask for more\n\n[outro - female]\nHouse lighting\nAnd the stage is bare\nHouse lights on\nMade for the darkest",
+      "publicado": false
     }
   ]
 }
