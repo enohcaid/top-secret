@@ -513,7 +513,15 @@ if (!tema.audio) {
     `src_audio = ${toml(INSTR)}`, `audio_cover_strength = 0.5`, `instrumental = false`,
     `caption = ${toml(`${tema.captionInstrumental}, ${tema.captionVoces}`)}`, `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`,
     `lyrics = ${toml(tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'))}`, `duration = ${Math.round(dur(INSTR))}`]);
-  const voces = cover() || (log('  el cover falló, segundo intento…'), cover());
+  // carril local: por tramos, para que la letra caiga en su sección y no se aplanen los cambios de beat (cantar-secciones.mjs)
+  let voces;
+  if (LOCAL && tema.secciones?.length && fs.existsSync(WAV)) {
+    const { cantarPorSecciones } = await import('./cantar-secciones.mjs');
+    const semilla = [...tema.slug].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 2147483647, 7);
+    const args = { wav: WAV, secciones: tema.secciones, letra: tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'), caption: `${tema.captionInstrumental}, ${tema.captionVoces}`,
+      bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log };
+    voces = cantarPorSecciones(args) || (log('  los tramos fallaron, segundo intento…'), cantarPorSecciones(args));
+  } else voces = cover() || (log('  el cover falló, segundo intento…'), cover());
   if (!voces) { log('ERROR: no salió la versión con voz. Se reintenta en la próxima corrida.'); process.exit(1); }
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);
   ff('-loglevel', 'error', '-y', '-i', voces, '-af', `loudnorm=I=-14:TP=-1:LRA=11,afade=t=out:st=${Math.max(0, d - 3).toFixed(2)}:d=3`, '-ar', '44100', '-b:a', '192k', final);
