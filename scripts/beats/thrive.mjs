@@ -413,6 +413,9 @@ function oficio(letra) {
   const norm = l => l.toLowerCase().replace(/\(.*?\)/g, '').replace(/[^a-z' ]/g, '').trim();
   const cl = [...new Set((letra.match(CLICHES) || []).map(w => w.toLowerCase()))];
   if (cl.length) p.push(`forbidden poetic words: ${cl.join(', ')} — say it the way a person would`);
+  // mostrar, no decir (Juan, 2026-11-01): los versos no nombran la emoción, muestran lo que la provoca
+  const dice = letra.split('\n').filter(l => /\b(I feel|I'm (so )?(sad|lonely|alone|empty|broken|angry|hurt|lost|scared|afraid|happy)|my heart (is|was|feels)|heartbroken|feel(ing)? (so )?(empty|numb|sad|lonely))\b/i.test(l));
+  if (dice.length > 1) p.push(`${dice.length} lines NAME the emotion instead of showing it (${dice.slice(0, 2).map(l => `"${l.trim()}"`).join(', ')}): show what carries it — an object, a sound, the body, a small action — like "two cups in the sink, I only used one"`);
   const lineas = letra.split('\n').map(l => l.trim()).filter(l => l && !/^\[/.test(l) && !/^\(.*\)$/.test(l));
   const apos = lineas.filter(l => /(^|,\s*)an?\s+[a-z']+\s+[a-z']+\s*[,.]?$/i.test(l.replace(/\(.*?\)/g, '').trim()));
   if (apos.length > 2) p.push(`${apos.length} lines pile up descriptions like "a cold dark place" (max 2 in the song): ${apos.slice(0, 3).map(l => `"${l}"`).join(', ')}`);
@@ -453,10 +456,11 @@ Album: ${ALBUM}
 This song: "${tema.titulo}" — ${tema.angulo ? ANGULOS[tema.angulo]?.idea + '. ' : ''}${tema.concepto} (trait: ${tema.rasgo}).
 Rules:
 - It is ME talking (first person), about a situation ANYONE has lived: a listener must think "that is me". Plain, everyday details (a phone, rent, my mother's voice, the bus at 6 a.m., the friend who stayed) — never a name, a city, a job title, a year or an unusual plot.
-- FEEL IT, DON'T EXPLAIN IT (the artist: "talk about what I feel without explaining what happened"): each part is a feeling and how it sounds in my day, not a plot. Love and heartbreak are welcome, but never name or describe the other and never tell what happened. Nothing about sport.
-- It moves: verse 1 is how I feel now, verse 2 is how that feeling turned (worse, sharper, colder), the bridge is what I decide.
+- FEEL IT, DON'T EXPLAIN IT (the artist: "talk about what I feel without explaining what happened"): each part is a feeling, not a plot. Love and heartbreak are welcome, but never name or describe the other and never tell what happened. Nothing about sport.
+- SHOW, DON'T TELL (the artist: "you don't have to say what I feel: use metaphors, things we see that make us feel that"): for each part, pick the IMAGES that carry the feeling — an object, a sound, a sensation in the body, a small action, or one metaphor — instead of naming the emotion.
+- It moves: verse 1 is the feeling now, verse 2 is how it turned (worse, sharper, colder), the bridge is what I decide.
 Answer JSON, every value in English, plain words, 1–2 sentences each, in first person ("I"):
-{"quien": "who I am in one line, as anyone could be", "verso1": "how I feel now and a small everyday detail of it", "gancho": "the hook phrase, 2 to 5 words, easy to shout, that the chorus repeats", "estribillo": "what the hook means to me", "verso2": "how the feeling turned", "puente": "what I realize or decide"}
+{"quien": "who I am in one line, as anyone could be", "verso1": "the feeling now, and 2 or 3 images that show it (objects, sounds, the body, an action)", "gancho": "the hook phrase, 2 to 5 words, easy to shout, that the chorus repeats", "estribillo": "what the hook means to me", "verso2": "how the feeling turned, and the images that show it now", "puente": "what I realize or decide"}
 ${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2', 'puente'], temperatura: 0.85,
       validar: h => { const t = Object.values(h).join(' '), m = t.match(ESPECIFICO); if (m) return `"${m[0]}" makes it too specific: no names, cities, jobs, years or unusual plots — an everyday situation anyone has lived`;
         if (!/\b(I|I'm|my|me)\b/.test(`${h.quien} ${h.verso1}`)) return 'write it in first person ("I")'; } });

@@ -31,7 +31,15 @@ Contrast (lines written only for this brief, never reuse them):
 ## Who sings
 - {{TAGS}}. Mark EVERY section tag like that; never add a voice that is not listed.
 - Change the flow inside the song: one verse can switch to a faster double-time flow halfway, the chorus is a chant people can shout.
-- FEEL IT, DON'T EXPLAIN IT (the artist: "talk about what I feel without explaining what happened"): love, heartbreak, anger, pride — say the feeling, not the events behind it. Never name or describe the other (no "baby", "girl", "my ex"), no breakup scene. "You" is fine if it is never described.
+- FEEL IT, DON'T EXPLAIN IT (the artist: "talk about what I feel without explaining what happened"): love, heartbreak, anger, pride — never the events behind it. Never name or describe the other (no "baby", "girl", "my ex"), no breakup scene. "You" is fine if it is never described.
+- SHOW, DON'T TELL (the artist, 2026-11-01: "you don't have to say what I feel: use metaphors, things we see that make us feel that"). The verses do NOT name the emotion ("I'm sad", "I feel empty"): they show the things that carry it — an object, a sound, the body, a small action — and the listener feels it. The chorus may say it once, in a short phrase.
+  - Senses: what I see, hear, smell, touch, taste; the body (heartbeat, breath, a tight jaw, cold hands); movement (pacing, driving with no destination).
+  - One metaphor carried through a whole verse is stronger than five different ones.
+  - Contrast (written only for this brief, never reuse them):
+    - telling, wrong: "I'm so lonely since it ended / my heart is broken and I'm sad"
+    - showing, right: "Two cups in the sink, I only used one / TV on all night just to hear a voice"
+    - telling, wrong: "I'm angry, they never believed in me"
+    - showing, right: "Jaw locked tight, I'm counting every no / Kept the letters, gonna frame them when I'm gold"
 - Nothing about sport. Intense is fine; explicit is not.
 
 ## Format
