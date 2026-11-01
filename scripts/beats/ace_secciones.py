@@ -36,9 +36,9 @@ for i, tr in enumerate(T['tramos']):
     params = GenerationParams(
         task_type='cover', src_audio=tr['src'], caption=T['caption'], lyrics=letra or '[instrumental]',
         instrumental=not letra, vocal_language='en', bpm=T['bpm'], keyscale=T['tonalidad'],
-        duration=tr['duracion'], audio_cover_strength=T['fuerza'], seed=T['semilla'], thinking=False,
+        duration=tr['duracion'], audio_cover_strength=tr.get('fuerza', T['fuerza']), seed=tr.get('semilla', T['semilla']), thinking=False,
         use_cot_metas=False, use_cot_caption=False, use_cot_lyrics=False)
-    config = GenerationConfig(batch_size=1, use_random_seed=False, seeds=[T['semilla']], audio_format='wav')
+    config = GenerationConfig(batch_size=1, use_random_seed=False, seeds=[tr.get('semilla', T['semilla'])], audio_format='wav')
     r = generate_music(dit, llm, params, config, save_dir=tmp)
     hechos = glob.glob(os.path.join(tmp, '*.wav'))
     if not r.success or not hechos:

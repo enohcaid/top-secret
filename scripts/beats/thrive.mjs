@@ -408,6 +408,11 @@ async function vocesLocal(letra) {
   if (dep) p.push(`"${dep[0]}": nothing about sport — rewrite that line`);
   return p;
 }
+// Cuántas líneas lleva cada sección (guía de ACE-Step: alinea las sílabas a los tiempos; un verso de 16 compases con
+// 8 líneas cortas lo obligaba a estirar o amontonar). Rap: una línea por compás; lo cantado: una cada dos.
+const lineasPara = s => s.nombre === 'verse' ? Math.min(16, s.compases) : ['intro', 'outro'].includes(s.nombre) ? 0 : Math.max(2, Math.round(s.compases / 2));
+const silabas = l => l.replace(/\(.*?\)/g, '').toLowerCase().split(/[^a-z']+/).filter(Boolean)
+  .reduce((n, w) => n + Math.max(1, (w.replace(/e$/, '').match(/[aeiouy]+/g) || []).length), 0);
 // Oficio de letra de trap (Juan, 2026-10-31: "hay que usar referencias de temas de trap real para aprender, a veces menos
 // es más"; carril local, thrive-letra-v2.md): hook como mantra, versos que suenan a alguien hablando, nada de dicción
 // poética. Las letras anteriores apilaban "…, a fragile grace, a hollow place". Devuelve problemas en inglés, para el modelo.
@@ -424,15 +429,20 @@ function oficio(letra) {
   const apos = lineas.filter(l => /(^|,\s*)an?\s+[a-z']+\s+[a-z']+\s*[,.]?$/i.test(l.replace(/\(.*?\)/g, '').trim()));
   if (apos.length > 2) p.push(`${apos.length} lines pile up descriptions like "a cold dark place" (max 2 in the song): ${apos.slice(0, 3).map(l => `"${l}"`).join(', ')}`);
   const partes = letra.split(/^\s*\[([^\]]+)\]\s*$/m);
-  for (let i = 1; i < partes.length; i += 2) {
+  const secs = tema.secciones || [];
+  for (let i = 1, k = 0; i < partes.length; i += 2, k++) {
     const tag = partes[i].toLowerCase(), ls = partes[i + 1].split('\n').map(l => l.trim()).filter(l => l && !/^\(.*\)$/.test(l));
+    const s = secs[k], meta = s ? lineasPara(s) : null, nombre = s ? `${s.nombre} (section ${k + 1})` : tag;
+    // líneas según los compases (±25%): con menos, ACE estira o mete relleno; con más, amontona y corta
+    if (meta === 0 && ls.length > 1) p.push(`${nombre} has no lyrics (instrumental): remove its ${ls.length} lines`);
+    if (meta && (ls.length < Math.floor(meta * 0.75) || ls.length > Math.ceil(meta * 1.25))) p.push(`${nombre} has ${ls.length} lines; it is ${s.compases} bars long, so write ${meta} lines`);
     if (/chorus|hook/.test(tag) && !/pre/.test(tag)) {
-      if (ls.length > 4) p.push(`a chorus has ${ls.length} lines (max 4)`);
       const distintas = new Set(ls.map(norm)).size;
       if (distintas > 2) p.push(`a chorus has ${distintas} different lines: the hook is a mantra, one short phrase repeated (max 2 different lines)`);
     }
-    if (/pre/.test(tag) && ls.length > 2) p.push(`the pre-chorus has ${ls.length} lines (max 2)`);
-    if (/verse/.test(tag)) { const largas = ls.filter(l => palabras(l) > 12); if (largas.length) p.push(`verse lines too long (max 12 words): "${largas[0]}"`); }
+    // sílabas parejas (guía de ACE: 6–10 por línea, sin saltos grandes entre una y otra)
+    const fuera = ls.filter(l => silabas(l) < 5 || silabas(l) > 12);
+    if (fuera.length > Math.max(1, ls.length / 4)) p.push(`${nombre}: ${fuera.length} lines out of 6–10 syllables (e.g. "${fuera[0]}" has ${silabas(fuera[0])}): keep every line 6–10 syllables, all about the same length`);
   }
   if ((letra.match(/\b(I|I'm|I've|I'll|I'd|me|my)\b/g) || []).length < 6) p.push('almost no first person: the verses must sound like someone talking ("I", "my")');
   return p;
@@ -478,7 +488,7 @@ ${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2',
     .replace('{{TITULO}}', tema.titulo).replace('{{CONCEPTO}}', tema.concepto).replace('{{RASGO}}', tema.rasgo).replace('{{CAPTION}}', tema.captionInstrumental)
     .replace('{{VOCES}}', tema.captionVoces).replace('{{TAGS}}', await tagsVoces()).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{DURACION}}', tema.duracion)
     .replace('{{COMPAS}}', compas.toFixed(2)).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
-    .replace('{{MAPA}}', secciones.map((s, i) => `${i + 1}. ${s.nombre !== '?' ? s.nombre + ' · ' : ''}${mmss(s.inicio)}–${mmss(s.fin)} · ${s.compases} bars`).join('\n'));
+    .replace('{{MAPA}}', secciones.map((s, i) => `${i + 1}. ${s.nombre !== '?' ? s.nombre + ' · ' : ''}${mmss(s.inicio)}–${mmss(s.fin)} · ${s.compases} bars${LOCAL ? ` → ${lineasPara(s) ? `exactly ${lineasPara(s)} lines` : 'no lyrics: tag it [Intro - instrumental] / [Outro - instrumental], at most one ad-lib line'}` : ''}`).join('\n'));
   let correcciones = fb('letra'), mejor = null;
   const t0 = Date.now();
   // Modelo local primero (Juan, 2026-10-27): 3 vueltas con Gemma corrigiendo rimas; si no rima, Claude Sonnet.

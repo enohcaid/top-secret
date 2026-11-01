@@ -18,8 +18,8 @@ Each verse is a moment of this, in order. It is ME talking about something anyon
 
 ## How real trap is written — LESS IS MORE (the artist, 2026-10-31)
 1. THE HOOK IS A MANTRA. One short phrase (3 to 6 words) that sticks, repeated: the chorus has at most 4 lines and at most 2 different ones. Shape: phrase / phrase / answer line / phrase. The title can be the phrase.
-2. VERSES SOUND LIKE SOMEONE TALKING. First person, present tense, plain words. At most one line per bar, 4 to 12 words each. Concrete details instead of abstractions: a time of night, an object, a street, a habit, a number, something someone said. One idea per line.
-3. SPACE. Pre-chorus: 2 lines. Bridge: 2 to 4 lines, the turn of the story. Intro and outro: nothing, ad-libs, or one line. Leave bars without words; the beat talks too.
+2. VERSES SOUND LIKE SOMEONE TALKING. First person, present tense, plain words. Write EXACTLY the number of lines the map above gives each section (rap = one line per bar). Every line 6 to 10 syllables, all about the same length: the singing model lines syllables up with the beat, so uneven lines come out rushed or stretched. Concrete details instead of abstractions: a time of night, an object, a street, a habit, a number, something someone said. One idea per line.
+3. SPACE. The bridge is the turn. Intro and outro are instrumental: tag them [Intro - instrumental] and [Outro - instrumental] with no lines (one ad-lib at most).
 4. AD-LIBS: short answers in parentheses at the end of some lines, sung by the other voice or doubled: (yeah), (no), (again), (I know). Use a few, not on every line.
 5. RHYME closes phrases and can be slant (same vowel sound). Repeating a word or a line on purpose is allowed: trap repeats. Flow beats perfect rhyme.
 6. NO POETIC DICTION. Forbidden words: fragile, hollow, fleeting, phantom, gilded, fractured, whisper, echo, ethereal, shimmering, velvet, siren, labyrinth, tapestry, desolate, embrace, solace, ember. Forbidden pattern: piling up descriptions like "…, a cold dark place", "a broken dream, a silent scream" (at most twice in the whole song). If a line sounds like a greeting card or a poem, rewrite it as something a person would actually say.
@@ -29,7 +29,7 @@ Contrast (lines written only for this brief, never reuse them):
 - talking, right: "Two a.m., I'm still not home / Told my brother I'd call, I didn't"
 
 ## Who sings
-- {{TAGS}}. Mark EVERY section tag like that; never add a voice that is not listed.
+- {{TAGS}}. Mark EVERY section tag like that, short (a section name + one or two words, never more); the voice itself is described elsewhere. Exactly one tag per section of the map, in the same order — no extra verse, no missing chorus.
 - Change the flow inside the song: one verse can switch to a faster double-time flow halfway, the chorus is a chant people can shout.
 - FEEL IT, DON'T EXPLAIN IT (the artist: "talk about what I feel without explaining what happened"): love, heartbreak, anger, pride — never the events behind it. Never name or describe the other (no "baby", "girl", "my ex"), no breakup scene. "You" is fine if it is never described.
 - SHOW, DON'T TELL (the artist, 2026-11-01: "you don't have to say what I feel: use metaphors, things we see that make us feel that"). The verses do NOT name the emotion ("I'm sad", "I feel empty"): they show the things that carry it — an object, a sound, the body, a small action — and the listener feels it. The chorus may say it once, in a short phrase.
