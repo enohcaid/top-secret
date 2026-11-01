@@ -127,7 +127,7 @@ ${fb('voces')}`,
       if (nueva) tema.captionVoces = nueva.replace(/^["']|["']$/g, '').trim();
     }
     borrar('audio', 'letraFinal', 'generado');
-    fs.rmSync(path.join(vieja, 'cover'), { recursive: true, force: true });
+    for (const c of ['cover', 'cover-2', 'cover-3']) fs.rmSync(path.join(vieja, c), { recursive: true, force: true });
     tema.version = v;
   }
   guardar();
@@ -519,18 +519,29 @@ if (!tema.audio) {
   log('Voces y pulido (cover sobre la instrumental)…');
   const t0 = Date.now();
   // la GTX 1070 a veces tira "CUDA error: illegal memory access" a mitad del cover (26/10): un segundo intento
-  const cover = () => aceStep('cover', [...comunes, `task_type = "cover"`, `thinking = true`,
-    `src_audio = ${toml(INSTR)}`, `audio_cover_strength = 0.5`, `instrumental = false`,
+  // carril local (Juan, 2026-11-01, "probemos con todo lo aprendido"): fuerza 0,65 (la guía de ACE: 0,5 = "reconocible
+  // pero transformado", 0,7–0,9 = respeta la estructura del original; a 0,5 corría la letra y aplanaba los cambios de beat)
+  const cover = (nombre = 'cover') => aceStep(nombre, [...comunes, `task_type = "cover"`, `thinking = true`,
+    `src_audio = ${toml(INSTR)}`, `audio_cover_strength = ${LOCAL ? 0.65 : 0.5}`, `instrumental = false`,
     `caption = ${toml(`${tema.captionInstrumental}, ${tema.captionVoces}`)}`, `bpm = ${tema.bpm}`, `keyscale = ${toml(tema.tonalidad)}`,
     `lyrics = ${toml(tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'))}`, `duration = ${Math.round(dur(INSTR))}`]);
-  // carril local: por tramos, para que la letra caiga en su sección y no se aplanen los cambios de beat (cantar-secciones.mjs)
   let voces;
   if (LOCAL && tema.secciones?.length && fs.existsSync(WAV)) {
-    const { cantarPorSecciones } = await import('./cantar-secciones.mjs');
-    const semilla = [...tema.slug].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 2147483647, 7);
-    const args = { wav: WAV, secciones: tema.secciones, letra: tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'), caption: `${tema.captionInstrumental}, ${tema.captionVoces}`,
-      bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log };
-    voces = cantarPorSecciones(args) || (log('  los tramos fallaron, segundo intento…'), cantarPorSecciones(args));
+    // el oído (oido.mjs) controla cada sección: letra cantada en su lugar, pulso del beat conservado, voz presente;
+    // si falla, otro cover (otra semilla) y queda el mejor
+    const { oirTema } = await import('./oido.mjs');
+    let mejor = null;
+    for (let k = 1; k <= 3; k++) {
+      const v = cover(k === 1 ? 'cover' : `cover-${k}`);
+      if (!v) { log(`  el cover ${k} falló`); continue; }
+      const o = oirTema({ instrumental: WAV, cantado: v, secciones: tema.secciones, letra: tema.letra, carpeta });
+      if (o.error) { log(`  oído: ${o.error}`); mejor = mejor || { v, o: { fallas: 99, puntaje: 0 } }; break; }
+      log(`  oído (cover ${k}): ${o.secciones.map(x => `${x.seccion} letra ${x.letra ?? '-'} beat ${x.beat}${x.fallas.length ? ' ✗' : ''}`).join(' · ')}`);
+      if (!mejor || o.fallas < mejor.o.fallas || (o.fallas === mejor.o.fallas && o.puntaje > mejor.o.puntaje)) mejor = { v, o };
+      if (!o.fallas) break;
+    }
+    voces = mejor?.v;
+    if (mejor?.o.secciones) { tema.oido = mejor.o; guardar(); }
   } else voces = cover() || (log('  el cover falló, segundo intento…'), cover());
   if (!voces) { log('ERROR: no salió la versión con voz. Se reintenta en la próxima corrida.'); process.exit(1); }
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);

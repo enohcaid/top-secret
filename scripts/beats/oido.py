@@ -1,5 +1,5 @@
 """El "oído" de Thrive (Juan, 2026-11-01: "las chances de que esto salga bien sin que puedas escuchar son bajísimas").
-No juzga el gusto: mide los errores objetivos de cada tramo cantado por ACE-Step contra lo que se le pidió.
+No juzga el gusto: mide los errores objetivos de cada sección del cover de ACE-Step contra lo que se le pidió (los cortes los arma oido.mjs).
 
   - letra: qué parte de las palabras escritas del tramo se oyen cantadas (Whisper). En "Borrowed Time" v1 el primer
     estribillo no se cantó y el último minuto fue "yeah, yeah": eso da cerca de 0.
@@ -49,7 +49,7 @@ for tr in T['tramos']:
     escrita = palabras(re.sub(r"\[[^\]]*\]|\(.*?\)", " ", tr['letra']))
     r = {'tramo': tr['salida'].replace('\\', '/').split('/')[-1]}
     if escrita:
-        oida = set(palabras(modelo.transcribe(out, language='en')['text']))
+        oida = set(palabras(modelo.transcribe(whisper.load_audio(tr.get('salida_letra', tr['salida'])), language='en')['text']))
         unicas = set(escrita)
         r['letra'] = round(len([w for w in unicas if w in oida]) / len(unicas), 2)
     r['beat'] = round((parecido(ataques(src, 30, 150), ataques(out, 30, 150)) + parecido(ataques(src, 5000, 7900), ataques(out, 5000, 7900))) / 2, 2)
