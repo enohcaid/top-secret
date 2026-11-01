@@ -398,6 +398,10 @@ async function vocesLocal(letra) {
   if (!C.ella && conElla.length) p.push(`there is NO female voice in this song: fix the tags ${conElla.map(t => `[${t}]`).join(', ')} (${C.tags})`);
   if (C.ella && !/male rapper/.test(C.tags) && conEl.length) p.push(`there is NO male voice in this song: fix the tags ${conEl.map(t => `[${t}]`).join(', ')} (${C.tags})`);
   if (tema.casting === 'rapero_y_hook' || !tema.casting) { const v = controlarVoces(letra); if (v && !/nombrar al otro/.test(v)) p.push(`${v} (${C.tags})`); }
+  // las secciones de la letra tienen que ser las del beat, en el mismo orden ("Borrowed Time" traía un verso 3 que el beat no tiene)
+  const seccion = t => /pre/.test(t) ? 'pre-chorus' : /chorus|hook/.test(t) ? 'chorus' : /verse/.test(t) ? 'verse' : /bridge/.test(t) ? 'bridge' : /intro/.test(t) ? 'intro' : /outro/.test(t) ? 'outro' : t;
+  const tiene = tags.map(seccion), debe = tema.estructura;
+  if (tiene.join() !== debe.join()) p.push(`the sections must be exactly the ones of the beat, in this order: ${debe.join(', ')} — yours are: ${tiene.join(', ')}`);
   const amor = letra.match(/\b(baby|babe|girl|boy|my lover|lover|my ex|darling)\b/i);
   if (amor) p.push(`"${amor[0]}": talk about what I FEEL, never explain what HAPPENED — say the feeling without naming or describing the other; rewrite that line`);
   const dep = letra.match(DEPORTE);
