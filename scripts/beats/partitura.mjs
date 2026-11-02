@@ -114,10 +114,21 @@ export function planCompases(estructura, compases) {
   let dif = compases - plan.reduce((a, s) => a + s.compases, 0);
   // para alargar, los versos primero; para acortar, se recorta desde el final (último estribillo, intro, pre) y los versos
   // quedan enteros: son los que cuentan la historia
-  // el estribillo crece último (2026-11-01: un mantra de 4 líneas en 12 compases obligaba a ACE a estirar o rellenar):
-  // primero versos (hasta 16), después puente, outro, intro y pre (hasta 8)
-  const orden = dif > 0 ? ['verse', 'bridge', 'outro', 'intro', 'pre-chorus', 'chorus'] : ['chorus', 'intro', 'pre-chorus', 'outro', 'bridge', 'chorus', 'verse'];
-  const tope = n => (dif > 0 && !['verse', 'chorus'].includes(n) ? 8 : 16);
+  // para alargar, por prioridad (2026-11-01: un mantra de 4 líneas en 12 compases obligaba a ACE a estirar o rellenar):
+  // versos hasta 16, después puente, outro, intro y pre hasta 8, y recién entonces los estribillos
+  if (dif > 0) {
+    for (const [tipo, tope] of [['verse', 16], ['bridge', 8], ['outro', 8], ['intro', 8], ['pre-chorus', 8], ['chorus', 16]]) {
+      for (let crece = true; crece && dif > 0;) {
+        crece = false;
+        for (const s of plan.filter(x => x.nombre === tipo)) {
+          const paso = Math.min(dif, 4, tope - s.compases);
+          if (paso > 0) { s.compases += paso; dif -= paso; crece = true; }
+        }
+      }
+    }
+  }
+  const orden = ['chorus', 'intro', 'pre-chorus', 'outro', 'bridge', 'chorus', 'verse'];
+  const tope = () => 16;
   for (let vuelta = 0; dif && vuelta < 60; vuelta++) {
     const candidatas = plan.filter(x => x.nombre === orden[vuelta % orden.length]);
     if (dif < 0) candidatas.reverse();
