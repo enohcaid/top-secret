@@ -288,9 +288,10 @@ client.on('ready', async () => {
 });
 
 // Comandos que Juan mandó mientras el bot estaba trabado o reiniciándose (2026-10-26: "+22:40 iago" se perdió).
-// Solo desde el último comando procesado hoy: en el primer arranque del día no se repite nada.
+// Desde el último comando procesado hoy; en el primer arranque del día, todos los de hoy (2026-11-02: la PC se
+// reinició, la tarea de las 10:00 no corrió sin sesión iniciada y el comando que Juan mandó antes de arrancar se perdía).
 async function comandosAtrasados() {
-  if (!st.ultimoComando) return;
+  if (!st.ultimoComando) st.ultimoComando = Math.floor(Date.parse(`${hoy()}T00:00:00-03:00`) / 1000);
   try {
     const msgs = await client.pupPage.evaluate((ids, desde) => ids.flatMap(id => {
       const chat = window.require('WAWebCollections').Chat.get(id);
