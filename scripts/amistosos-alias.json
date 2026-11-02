@@ -1,5 +1,5 @@
 {
-  "_comentario": "alias: como escriben al equipo → nombre oficial de VPN. nombre_sitio: nombre con el que se carga en el calendario (el que ya usa el sitio). extras: equipos que no están en 1ra/2da VPN pero juegan amistosos.",
+  "_comentario": "alias: como escriben al equipo → nombre oficial de VPN. nombre_sitio: nombre con el que se carga en el calendario (el que ya usa el sitio). extras: equipos que no están en 1ra/2da VPN pero juegan amistosos. escudos: escudo propio (sin fondo, en R2) que reemplaza al de VPN/EG, por nombre sin mayúsculas ni signos.",
   "alias": {
     "iacc": "Instituto Cantera",
     "i.a.c.c": "Instituto Cantera",
@@ -30,5 +30,8 @@
       "div": "otra",
       "logo": null
     }
-  ]
+  ],
+  "escudos": {
+    "yshfc": "https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-rivales/ysh-fc-vpn.webp"
+  }
 }

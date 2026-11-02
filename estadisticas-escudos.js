@@ -34,5 +34,5 @@ export const ESCUDOS = {
   "Temperley eSports": "https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2xb8ufrcFsK91qcsrN.png?alt=media&token=1&m=1791045825948",
   "United Mito": "https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQc3HN0-1ALKiuvvQK.png?alt=media&token=1&m=1781803881039",
   "Villa Dalmine eSports": "https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMusnJNuTqdPlqecqy.png?alt=media&token=1",
-  "Ysh FC": "https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2F7zxj%2Fteams%2F-OsMvxM6Umv8kNMPo0Xa.png?alt=media&token=1&m=1785718482709",
+  "Ysh FC": "https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-rivales/ysh-fc.webp",
 };

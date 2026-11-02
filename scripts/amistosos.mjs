@@ -163,7 +163,9 @@ function equipoEscrito(txt) {
 // ── Firestore: agregar el amistoso a calendario/estado.custom (arrayUnion atómico) ─────────
 function entradaAmistoso(p) {
   const f = { tipo: 'partido', date: st.fecha, time: p.slot, rival: nombreSitio(p.equipo.nombre), league: 'Amistoso', instancia: '', isHome: true };
-  if (p.equipo.logo) f.badge = p.equipo.logo;
+  // escudo propio sin fondo (amistosos-alias.json "escudos"): manda sobre el de VPN/EG (2026-11-02: YSH con fondo blanco)
+  const propio = (ALIAS.escudos || {})[p.equipo.nombre.toLowerCase().replace(/[^a-z0-9]/g, '')];
+  if (propio || p.equipo.logo) f.badge = propio || p.equipo.logo;
   return { mapValue: { fields: Object.fromEntries(Object.entries(f).map(([k, v]) => [k, typeof v === 'boolean' ? { booleanValue: v } : { stringValue: v }])) } };
 }
 // Horarios ya ocupados hoy: se leen TODOS los partidos del día con la misma lógica que la
