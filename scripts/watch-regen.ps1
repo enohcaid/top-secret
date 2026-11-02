@@ -147,7 +147,10 @@ try {
 Log "Reescribiendo la noticia (noticia-diaria.mjs --forzar)..."
 try {
     Push-Location $repoRoot
-    $out = & node scripts\noticia-diaria.mjs --forzar 2>&1 | Select-String '\[noticia\]'
+    # motivo: lo que Juan escribió al tocar "Rehacer" en aprobar.html (2026-11-02)
+    $motivoArgs = @()
+    if ($flag.motivo) { $motivoArgs = @('--motivo', [string]$flag.motivo) }
+    $out = & node scripts\noticia-diaria.mjs --forzar @motivoArgs 2>&1 | Select-String '\[noticia\]'
     Pop-Location
     Log "Noticia: $($out | Select-Object -Last 1)"
 } catch {
@@ -205,4 +208,6 @@ if (-not (Test-CDP)) {
 # cmd /c en vez de *>> : PowerShell 5.1 redirige a UTF-16 y mezclaba encodings
 # en el log; cmd escribe los bytes UTF-8 de node tal cual.
 cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
+# la nota rehecha vuelve a aprobar.html: su lote reemplaza al de la nota anterior (mismo id del día)
+cmd /c "node scripts\social\noticia-lote.mjs >> scripts\daily-images.log 2>&1"
 Log "Pipeline completo."

@@ -205,10 +205,17 @@
       ? `${esc(l.bajada || '')}${pend ? ` · ${pend} idea${pend > 1 ? 's' : ''} sin decidir` : ` · ${aprob} idea${aprob === 1 ? '' : 's'} aprobada${aprob === 1 ? '' : 's'}`}`
       : `${l.publicarA ? 'Sale ' + fechaHora(l.publicarA) : l.simulacro ? 'Simulacro: no se publica' : ''}${pend ? ` · ${pend} pieza${pend > 1 ? 's' : ''} sin decidir` : ` · ${aprob} aprobada${aprob === 1 ? '' : 's'}`}${errores ? ` · <b class="mal">${errores} con error</b>` : ''}`;
     const cerrado = plegado(l);
+    // Juan, 2026-11-02: descartar una propuesta entera, rehacer la noticia y cambiar la fecha de publicación
+    const salio = l.piezas.some(p => p.estado === 'publicado' || p.estado === 'publicando');
+    const vivas = l.piezas.some(p => p.decision !== 'descartada');
+    const fecha = !esGuion && l.publicarA && !salio
+      ? `<label class="fecha">Sale <input type="datetime-local" data-fecha value="${esc(new Date(l.publicarA).toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' }).slice(0, 16).replace(' ', 'T'))}"></label>` : '';
     return `<section class="lote${cerrado ? ' cerrado' : ''}" data-lote="${esc(l.id)}">
       <div class="lote-cab">
-        <div><h2>${esc(l.titulo)}</h2><div class="meta">${meta}</div></div>
+        <div><h2>${esc(l.titulo)}</h2><div class="meta">${meta}</div>${fecha}</div>
         <div class="acciones">
+          ${/^noticia-/.test(l.id) && !salio ? '<button data-rehacer>Rehacer</button>' : ''}
+          ${!salio && vivas ? '<button class="no" data-descartar-lote>Descartar propuesta</button>' : ''}
           ${pend ? `<button class="si" data-todo="aprobada">${esGuion ? 'Aprobar todas las ideas' : 'Aprobar todo lo pendiente'}</button>` : ''}
           <button class="plegar" data-plegar>${cerrado ? `Ver ${fila.length} ${esGuion ? 'ideas' : 'piezas'}` : 'Ocultar'}</button>
         </div>
@@ -270,7 +277,8 @@
     let cuerpo;
     if (pestana === 'aprobar') {
       const g = por.aprobar.filter(l => l.etapa === 'guion'), resto = por.aprobar.filter(l => l.etapa !== 'guion' && l.etapa !== 'musica').sort((a, b) => cuando(a) - cuando(b));
-      cuerpo = (g.length ? bloque('Ideas para la próxima semana', 'Primero se aprueba la idea; después se produce y vuelve acá para el visto bueno final.', g, '') : '')
+      cuerpo = '<div class="generar"><button data-generar>Generar noticia</button></div>'
+        + (g.length ? bloque('Ideas para la próxima semana', 'Primero se aprueba la idea; después se produce y vuelve acá para el visto bueno final.', g, '') : '')
         + bloque('Visto bueno final', 'Piezas ya producidas: revisalas, corregí el texto si hace falta y aprobalas.', resto, g.length ? 'No hay piezas producidas esperando.' : 'Nada para aprobar por ahora.');
     } else if (pestana === 'programadas') {
       const listas = por.programadas.filter(l => l.etapa !== 'guion' && !esMus(l)).sort((a, b) => cuando(a) - cuando(b));
@@ -345,6 +353,23 @@
       const t = art.querySelector('textarea'), ti = art.querySelector('input.titulo');
       return decidir(art.dataset.lote, [art.dataset.pieza], { decision: b.dataset.accion, texto: t.value, ...(ti ? { titulo: ti.value } : {}) });
     }
+    // Rehacer la noticia del día / generar una: la PC (watch-regen.ps1) la reescribe con el motivo y arma las imágenes
+    const rh = e.target.closest('button[data-rehacer], button[data-generar]');
+    if (rh) {
+      const motivo = window.prompt(rh.dataset.generar !== undefined ? '¿Sobre qué querés la noticia? (opcional)' : '¿Qué cambiarías? (opcional: por ejemplo "no un balance, venimos de dos resúmenes")', '');
+      if (motivo === null) return;
+      rh.disabled = true;
+      return api('/request-regen', { motivo: motivo.trim() })
+        .then(() => aviso('Pedido enviado: la nota nueva vuelve acá en unos 15 minutos'))
+        .catch(err => { rh.disabled = false; aviso(err.message); });
+    }
+    const dl = e.target.closest('button[data-descartar-lote]');
+    if (dl) {
+      const l = lotes.find(x => x.id === dl.closest('.lote').dataset.lote);
+      if (!window.confirm(`¿Descartar "${l.titulo}" entero? No se publica nada de este lote.`)) return;
+      const ids = l.piezas.filter(p => p.estado !== 'publicado' && p.estado !== 'publicando' && p.decision !== 'descartada').map(p => p.id);
+      return ids.length && decidir(l.id, ids, { decision: 'descartada' });
+    }
     const todo = e.target.closest('button[data-todo]');
     if (todo) {
       const sec = todo.closest('.lote'), l = lotes.find(x => x.id === sec.dataset.lote);
@@ -359,6 +384,10 @@
   });
   // El texto y el título corregidos se guardan al salir del cuadro.
   document.addEventListener('change', e => {
+    if (e.target.matches('input[data-fecha]') && e.target.value) {
+      const id = e.target.closest('.lote').dataset.lote;
+      return decidir(id, [], { publicarA: `${e.target.value}:00-03:00` }).then(pintar);
+    }
     const art = e.target.closest('.pieza');
     if (!art) return;
     if (e.target.tagName === 'TEXTAREA') decidir(art.dataset.lote, [art.dataset.pieza], { texto: e.target.value });

@@ -1070,8 +1070,11 @@ export default {
         const pin = (request.headers.get('Authorization') || '').replace('Bearer ', '').trim();
         if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
+        // motivo (opcional): lo que Juan escribió en aprobar.html al pedir "Rehacer" o "Generar noticia" (2026-11-02)
+        let motivo = '';
+        try { motivo = String((await request.json())?.motivo || '').slice(0, 1000); } catch(e) {}
         await fetch(FS_DRAFT, { method: 'DELETE' });
-        await env.TS_KV.put('regen_request', JSON.stringify({ requested: true, at: new Date().toISOString() }));
+        await env.TS_KV.put('regen_request', JSON.stringify({ requested: true, at: new Date().toISOString(), ...(motivo ? { motivo } : {}) }));
         return jsonResp({ ok: true });
       }
 
@@ -1288,12 +1291,18 @@ export default {
         if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         let body;
         try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
-        const { lote, piezas = [], decision, texto, titulo } = body || {};
+        const { lote, piezas = [], decision, texto, titulo, publicarA } = body || {};
         if (decision && !['aprobada', 'descartada', 'pendiente'].includes(decision)) return jsonResp({ error: 'Decisión inválida' }, 400);
         const data = (await env.TS_KV.get('aprobaciones', 'json')) || { lotes: [] };
         const l = data.lotes.find(x => x.id === lote);
         if (!l) return jsonResp({ error: 'No existe ese lote' }, 404);
         const ahora = new Date().toISOString();
+        // cambiar cuándo sale el lote (Juan, 2026-11-02: "tampoco puedo editar la fecha de publicación"), mientras nada salió
+        if (publicarA !== undefined) {
+          if (l.piezas.some(p => p.estado === 'publicado' || p.estado === 'publicando')) return jsonResp({ error: 'Ya salió algo de este lote: la fecha no se puede cambiar' }, 409);
+          if (isNaN(Date.parse(publicarA))) return jsonResp({ error: 'Fecha inválida' }, 400);
+          l.publicarA = new Date(publicarA).toISOString();
+        }
         for (const p of l.piezas.filter(p => piezas.includes(p.id))) {
           if (p.estado === 'publicado' || p.estado === 'publicando') continue;   // ya salió: no se toca
           if (decision) { p.decision = decision; p.decididoEn = ahora; }

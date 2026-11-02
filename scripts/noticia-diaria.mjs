@@ -28,6 +28,7 @@ import { buscarEquipo, norm } from './lib/equipos-match.mjs';
 loadEnv();
 const argv = process.argv.slice(2);
 const FORZAR = argv.includes('--forzar'), PRUEBA = argv.includes('--prueba');
+const MOTIVO = argv.includes('--motivo') ? String(argv[argv.indexOf('--motivo') + 1] || '').trim() : '';
 const FS = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/';
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const MEDIA = `${WORKER}/media/`;
@@ -66,6 +67,8 @@ const intentar = async (fn, def = null) => { try { return await fn(); } catch (e
 const draftDoc = await intentar(() => leerDoc('news/draft'));
 const draftHoy = draftDoc?.data ? JSON.parse(draftDoc.data) : null;
 const topicos = (await intentar(() => leerDoc('news/recent_topics')))?.entries || [];
+// la nota de hoy que se está rehaciendo (al pedir "Rehacer", el Worker ya borró el borrador: queda en recent_topics)
+const draftPrevio = draftHoy?.date === HOY ? draftHoy : topicos[0]?.date === HOY ? topicos[0] : null;
 if (!FORZAR && !PRUEBA) {
   // un borrador sin título (el 28/10 se guardó uno vacío del modelo local) no cuenta: se reescribe
   if (draftHoy?.date === HOY && draftHoy.title) { log(`Ya hay borrador de hoy: "${draftHoy.title}".`); process.exit(0); }
@@ -170,7 +173,14 @@ function feriado(f) {
 
 const LUGAR = { TUNEL: 'túnel', VESTUARIO: 'vestuario', ESTADIO_NOCHE: 'estadio / cancha de noche', ACCION_PARTIDO: 'acción en la cancha', CAMPANA_ESTUDIO: 'estudio', RETRATO_EDITORIAL: 'retrato' };
 const diaHoy = new Date(HOY + 'T12:00:00-03:00').getUTCDay();   // 0 domingo … 6 sábado
+// Lo que el club ya publicó en redes la última semana (Juan, 2026-11-02: la nota fue un balance justo después de dos
+// resúmenes quincenales): títulos de los lotes de aprobar.html con algo publicado en los últimos 7 días
+const { leerKV } = await import('./social/lib/aprobaciones.mjs');
+const publicadoEnRedes = ((await intentar(() => leerKV('aprobaciones', { lotes: [] })))?.lotes || [])
+  .filter(l => l.etapa !== 'musica' && Date.parse(l.publicarA || l.creado || 0) > Date.parse(sumar(HOY, -7)) && l.piezas?.some(p => p.estado === 'publicado'))
+  .map(l => `${(l.publicarA || l.creado || '').slice(0, 10)}: ${l.titulo}`);
 const DATOS = {
+  publicado_en_redes_ultimos_7_dias: publicadoEnRedes,
   hoy: HOY, dia: dia(HOY),
   prioridad: { resultado_obligatorio: jugadosRecientes, partidos_hoy: partidosHoy, feriado: feriado(HOY), es_domingo: diaHoy === 0 },
   partidos_de_la_temporada: partidos, proximos_partidos: fixture,
@@ -196,7 +206,9 @@ if (diaHoy === 6 && !jugadosRecientes.length && !partidosHoy.length && !FORZAR) 
 const reglasExtra = fs.readFileSync(path.join(ROOT, 'docs/conocimiento/reglas-noticia-diaria.md'), 'utf8').replace(/^# .*\n+/, '').replace(/^La noticia diaria la escribe[^\n]*\n+/m, '');
 const encargo = fs.readFileSync(path.join(ROOT, 'scripts/noticia-diaria-encargo.md'), 'utf8')
   .replace('{{HOY}}', HOY).replace('{{DIA}}', dia(HOY)).replace('{{REGLAS_EXTRA}}', reglasExtra).replace('{{SABADO}}', '')
-  .replace('{{DATOS}}', JSON.stringify(DATOS, null, 1));
+  .replace('{{DATOS}}', JSON.stringify(DATOS, null, 1))
+  // --motivo: lo que Juan pidió al tocar "Rehacer" en aprobar.html (watch-regen.ps1 lo pasa)
+  + (MOTIVO ? `\n\n## El editor rechazó la nota anterior de hoy y pide otra\n${MOTIVO}\nLa nota rechazada fue: "${draftPrevio?.title || ''}". Escribí una nota distinta: otro ángulo, otro título.\n` : '');
 
 // Controles: lo que antes el agente tenía que verificar a mano
 const exJugadores = [...new Set(SEED_MATCHES.flatMap(m => (m.players || []).map(p => p.matched)).filter(g => g && !PLANTEL.includes(g)))]
@@ -244,6 +256,9 @@ function controlar(n) {
   const parecido = topicos.slice(0, 5).find(t => t.date < HOY && ini(t.title) === ini(n.title));
   if (parecido) err.push(`el título empieza igual que el de ${parecido.date} ("${parecido.title}"): buscá otro enganche, con el rival y el dato que importa, sin "DOBLE FECHA"`);
   if (/^doble fecha/i.test(plano(n.title))) err.push('el título no puede arrancar con "DOBLE FECHA": ya se usó demasiado');
+  // 2026-11-02: un balance justo después de los resúmenes quincenales es "demasiado similar"
+  const resumen = publicadoEnRedes.find(t => /resumen|quincen|15 d[ií]as|balance|n[uú]meros|semana/i.test(t));
+  if (resumen && (n.angulo === 'BALANCE' || /balance|resumen|tras \w+ fechas/i.test(n.title))) err.push(`esta semana ya salió un resumen ("${resumen}"): hoy no va un balance ni un repaso de resultados; elegí otro ángulo`);
   if (['PREVIA', 'RESULTADO'].includes(n.angulo)) {
     const objetivo = (n.angulo === 'PREVIA' ? partidosHoy : jugadosRecientes).map(m => m.rival);
     const sinRival = objetivo.filter(r => { const w = norm(r).split(' ').filter(x => x.length > 2 && !['esports', 'esp'].includes(x)); return !w.some(x => norm(todo).includes(x)); });
