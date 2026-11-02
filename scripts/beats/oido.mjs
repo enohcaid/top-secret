@@ -32,9 +32,10 @@ export function oirTema({ instrumental, cantado, secciones, letra, carpeta }) {
     env: { ...process.env, PYTHONIOENCODING: 'utf-8', PATH: `${path.dirname(ffmpegPath)}${path.delimiter}${process.env.PATH}` } });
   const m = (r.stdout || '').match(/OIDO=(.+)/);
   if (!m) return { error: `el oído no respondió: ${(r.stderr || '').trim().split('\n').pop()}` };
+  // el beat no se controla en intro (radio) ni outro (fundido): dan pulso bajo siempre
   const secs = JSON.parse(m[1]).map((o, i) => {
     const t = tramos[i];
-    const fallas = [o.letra !== undefined && o.letra < UMBRAL.letra && `letra ${o.letra}`, !['intro', 'outro'].includes(t.nombre) && o.beat < UMBRAL.beat && `beat ${o.beat}`,   // intro (radio) y outro (fundido) dan pulso bajo siempre t.letra && o.voz < UMBRAL.voz && `voz ${o.voz}`].filter(Boolean);
+    const fallas = [o.letra !== undefined && o.letra < UMBRAL.letra && `letra ${o.letra}`, !['intro', 'outro'].includes(t.nombre) && o.beat < UMBRAL.beat && `beat ${o.beat}`, t.letra && o.voz < UMBRAL.voz && `voz ${o.voz}`].filter(Boolean);
     return { seccion: `${t.nombre} ${i + 1}`, letra: o.letra, beat: o.beat, voz: o.voz, fallas };
   });
   fs.rmSync(dir, { recursive: true, force: true });

@@ -422,6 +422,9 @@ function oficio(letra) {
   const norm = l => l.toLowerCase().replace(/\(.*?\)/g, '').replace(/[^a-z' ]/g, '').trim();
   const cl = [...new Set((letra.match(CLICHES) || []).map(w => w.toLowerCase()))];
   if (cl.length) p.push(`forbidden poetic words: ${cl.join(', ')} — say it the way a person would`);
+  // los ejemplos del brief son solo ejemplos ("Cold Comfort" los copió tal cual)
+  const copia = letra.split('\n').filter(l => /two cups in the sink|told my brother i'?d call|tv on all night|jaw locked tight|silent room, a fading glow/i.test(l));
+  if (copia.length) p.push(`these lines copy the examples of the brief: ${copia.map(l => `"${l.trim()}"`).join(', ')} — write your own images`);
   // mostrar, no decir (Juan, 2026-11-01): los versos no nombran la emoción, muestran lo que la provoca
   const dice = letra.split('\n').filter(l => /\b(I feel|I'm (so )?(sad|lonely|alone|empty|broken|angry|hurt|lost|scared|afraid|happy)|my heart (is|was|feels)|heartbroken|feel(ing)? (so )?(empty|numb|sad|lonely))\b/i.test(l));
   if (dice.length > 1) p.push(`${dice.length} lines NAME the emotion instead of showing it (${dice.slice(0, 2).map(l => `"${l.trim()}"`).join(', ')}): show what carries it — an object, a sound, the body, a small action — like "two cups in the sink, I only used one"`);
@@ -438,7 +441,7 @@ function oficio(letra) {
     if (meta && (ls.length < Math.floor(meta * 0.75) || ls.length > Math.ceil(meta * 1.25))) p.push(`${nombre} has ${ls.length} lines; it is ${s.compases} bars long, so write ${meta} lines`);
     if (/chorus|hook/.test(tag) && !/pre/.test(tag)) {
       const distintas = new Set(ls.map(norm)).size;
-      if (distintas > 2) p.push(`a chorus has ${distintas} different lines: the hook is a mantra, one short phrase repeated (max 2 different lines)`);
+      if (distintas > 3) p.push(`a chorus has ${distintas} different lines: the hook is a mantra, one short phrase repeated (max 3 different lines, the hook at least twice)`);
     }
     // sílabas parejas (guía de ACE: 6–10 por línea, sin saltos grandes entre una y otra)
     const fuera = ls.filter(l => silabas(l) < 5 || silabas(l) > 12);

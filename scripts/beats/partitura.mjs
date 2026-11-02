@@ -114,14 +114,17 @@ export function planCompases(estructura, compases) {
   let dif = compases - plan.reduce((a, s) => a + s.compases, 0);
   // para alargar, los versos primero; para acortar, se recorta desde el final (último estribillo, intro, pre) y los versos
   // quedan enteros: son los que cuentan la historia
-  const orden = dif > 0 ? ['verse', 'chorus'] : ['chorus', 'intro', 'pre-chorus', 'outro', 'bridge', 'chorus', 'verse'];
+  // el estribillo crece último (2026-11-01: un mantra de 4 líneas en 12 compases obligaba a ACE a estirar o rellenar):
+  // primero versos (hasta 16), después puente, outro, intro y pre (hasta 8)
+  const orden = dif > 0 ? ['verse', 'bridge', 'outro', 'intro', 'pre-chorus', 'chorus'] : ['chorus', 'intro', 'pre-chorus', 'outro', 'bridge', 'chorus', 'verse'];
+  const tope = n => (dif > 0 && !['verse', 'chorus'].includes(n) ? 8 : 16);
   for (let vuelta = 0; dif && vuelta < 60; vuelta++) {
     const candidatas = plan.filter(x => x.nombre === orden[vuelta % orden.length]);
     if (dif < 0) candidatas.reverse();
     const s = candidatas[Math.floor(vuelta / orden.length) % Math.max(1, candidatas.length)];
     if (!s) continue;
     const paso = Math.sign(dif) * Math.min(Math.abs(dif), dif > 0 ? 4 : 2);
-    if (s.compases + paso >= 2 && s.compases + paso <= 16) { s.compases += paso; dif -= paso; }
+    if (s.compases + paso >= 2 && s.compases + paso <= tope(s.nombre)) { s.compases += paso; dif -= paso; }
   }
   if (dif) plan.at(-1).compases = Math.max(1, plan.at(-1).compases + dif);
   return plan;
