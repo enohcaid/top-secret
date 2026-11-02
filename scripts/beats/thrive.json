@@ -647,6 +647,181 @@
         "letraFinal": 0
       },
       "publicado": false
+    },
+    {
+      "id": "2026-11-01-3-local",
+      "motor": "local",
+      "fecha": "2026-11-01",
+      "slug": "cold-comfort",
+      "titulo": "Cold Comfort",
+      "angulo": "precio",
+      "energia": "melancolia",
+      "casting": "rapero_veloz",
+      "concepto": "Esta canción observa cómo el éxito, al final, te hace pagar con el tiempo perdido y las relaciones rotas, recordándote que la victoria siempre tiene un costo.",
+      "rasgo": "desapego",
+      "voz": "rapero solo, flow rápido y entrecortado, áspero",
+      "captionInstrumental": "Dark trap beat, melancholic, slow tempo. Distorted piano chords, sliding 808, sparse trap hats, reverb-drenched pads, emotional, introspective., melodic and sad, piano or guitar-like, emotional",
+      "captionVoces": "solo male rapper, fast staccato triplet flow, raspy hungry voice, punchy ad-libs, no female vocals",
+      "bpm": 132,
+      "tonalidad": "A minor",
+      "duracion": 143,
+      "estructura": [
+        "intro",
+        "verse",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 7.27,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 7.27,
+          "fin": 36.36,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 36.36,
+          "fin": 58.18,
+          "compases": 12
+        },
+        {
+          "nombre": "verse",
+          "inicio": 58.18,
+          "fin": 81.82,
+          "compases": 13
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 81.82,
+          "fin": 103.64,
+          "compases": 12
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 103.64,
+          "fin": 110.91,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 110.91,
+          "fin": 132.73,
+          "compases": 12
+        },
+        {
+          "nombre": "outro",
+          "inicio": 132.73,
+          "fin": 140,
+          "compases": 4
+        }
+      ],
+      "beat": "The bridge features a reversed, granularized piano sample, creating a disorienting echo of the original melody.",
+      "vueltasBeat": 2,
+      "instrumental": "partitura",
+      "historia": {
+        "quien": "I'm just someone moving through, trying to find a solid place to stand.",
+        "verso1": "The silence of my phone is heavy, a constant reminder. I keep replaying my mother's voicemail, just to hear her voice. A dull ache sits behind my ribs.",
+        "gancho": "Ghosts in the light",
+        "estribillo": "It's about the shadows that follow success, the memories that cling to you when you thought you were leaving them behind.",
+        "verso2": "The bus window reflects a stranger I don’t recognize. The taste of dust coats my tongue. My hands are trembling, holding a chipped mug.",
+        "puente": "I'm not chasing anything anymore. Just finding a way to carry what’s left."
+      },
+      "letra": "[Intro - instrumental]\n\n[Verse 1 - rap]\nMy phone’s quiet, heavy in my hand, (yeah)\nA constant weight, I understand, (I know)\nReplaying my mother's voice, soft and low, (again)\nJust to hear a sound I needed to know, (no)\nA dull ache settles in my ribs,\nClock on the wall, the time still slips,\nI'm just moving, searching for a place,\nTrying to find a solid space.\nStreetlight spills, a yellow stain,\nTwo a.m. and the feeling remains,\nTold my brother I’d be there soon,\nThe quiet hum beneath the moon.\nThe window fogs, a breath released,\nAnother cigarette, a silent beast,\nCounting shadows, long and deep,\nLost hours falling, secrets to keep.\n\n[Chorus - chant]\nGhosts in the light, (yeah)\nGhosts in the light,\nIt’s the price you pay, (no)\nGhosts in the light.\n\n[Verse 2 - rap]\nThe bus reflects a face unknown,\nA stranger staring, standing alone, (again)\nDust on my tongue, a grainy feel,\nAnother mile, the loss is real.\nMy hands are shaking, holding tight,\nA chipped mug glowing in dim light,\nA folded letter, edges worn,\nA quiet thought, newly born.\nThe radio plays a distant song,\nA muffled murmur, drifting along,\nAnother town disappears from view,\nLeaving memories, old and new.\nDidn’t pack a bag, no words to say,\nJust walked away, another day.\nThe engine sighs, a weary hum,\nSpinning onward, feeling numb.\n\n[Chorus - chant]\nGhosts in the light, (yeah)\nGhosts in the light,\nIt’s the price you pay, (no)\nGhosts in the light.\n\n[Bridge - rap]\nI’m not chasing anything at all,\nJust finding a way to stand tall.\n\n[Chorus - chant]\nGhosts in the light, (yeah)\nGhosts in the light,\nIt’s the price you pay, (no)\nGhosts in the light.\n\n[Outro - instrumental]",
+      "letraPor": "local",
+      "avisosRima": [
+        "5 lines pile up descriptions like \"a cold dark place\" (max 2 in the song): \"Streetlight spills, a yellow stain,\", \"The window fogs, a breath released,\", \"Another cigarette, a silent beast,\"",
+        "chorus (section 3): 3 lines out of 6–10 syllables (e.g. \"Ghosts in the light, (yeah)\" has 4): keep every line 6–10 syllables, all about the same length",
+        "chorus (section 5): 3 lines out of 6–10 syllables (e.g. \"Ghosts in the light, (yeah)\" has 4): keep every line 6–10 syllables, all about the same length",
+        "chorus (section 7): 3 lines out of 6–10 syllables (e.g. \"Ghosts in the light, (yeah)\" has 4): keep every line 6–10 syllables, all about the same length"
+      ],
+      "oido": {
+        "secciones": [
+          {
+            "seccion": "intro 1",
+            "beat": 0.05,
+            "voz": 0.98,
+            "fallas": []
+          },
+          {
+            "seccion": "verse 2",
+            "letra": 0.41,
+            "beat": 0.39,
+            "voz": 3.47,
+            "fallas": [
+              "letra 0.41"
+            ]
+          },
+          {
+            "seccion": "chorus 3",
+            "letra": 0.83,
+            "beat": 0.36,
+            "voz": 2.96,
+            "fallas": []
+          },
+          {
+            "seccion": "verse 4",
+            "letra": 0.2,
+            "beat": 0.49,
+            "voz": 1.76,
+            "fallas": [
+              "letra 0.2"
+            ]
+          },
+          {
+            "seccion": "chorus 5",
+            "letra": 0.67,
+            "beat": 0.37,
+            "voz": 1.69,
+            "fallas": []
+          },
+          {
+            "seccion": "bridge 6",
+            "letra": 0.33,
+            "beat": 0.34,
+            "voz": 1.96,
+            "fallas": [
+              "letra 0.33",
+              "beat 0.34"
+            ]
+          },
+          {
+            "seccion": "chorus 7",
+            "letra": 0.17,
+            "beat": 0.35,
+            "voz": 2.9,
+            "fallas": [
+              "letra 0.17"
+            ]
+          },
+          {
+            "seccion": "outro 8",
+            "beat": 0.06,
+            "voz": 1.1,
+            "fallas": []
+          }
+        ],
+        "fallas": 5,
+        "puntaje": 0.736
+      },
+      "audio": "musica/thrive/cold-comfort.mp3?v=mvylriwb",
+      "generado": "2026-11-02T01:51:08.651Z",
+      "letraFinal": "[Intro - instrumental]\n\n[Verse 1 - rap]\nMy phone’s quiet, heavy in my hand, (yeah)\nA constant weight, I understand, (I know)\nReplaying my mother's voice, soft and low, (again)\nJust to hear a sound I needed to know, (no)\nA dull ache settles in my ribs,\nClock on the wall, the time still slips,\nI'm just moving, searching for a place,\nTrying to find a solid space.\nStreetlight spills, a yellow stain,\nTwo a.m. and the feeling remains,\nTold my brother I’d be there soon,\nThe quiet hum beneath the moon.\nThe window fogs, a breath released,\nAnother cigarette, a silent beast,\nCounting shadows, long and deep,\nLost hours falling, secrets to keep.\n\n[Chorus - chant]\nGhosts in the light, (yeah)\nGhosts in the light,\nIt’s the price you pay, (no)\nGhosts in the light.\n\n[Verse 2 - rap]\nThe bus reflects a face unknown,\nA stranger staring, standing alone, (again)\nDust on my tongue, a grainy feel,\nAnother mile, the loss is real.\nMy hands are shaking, holding tight,\nA chipped mug glowing in dim light,\nA folded letter, edges worn,\nA quiet thought, newly born.\nThe radio plays a distant song,\nA muffled murmur, drifting along,\nAnother town disappears from view,\nLeaving memories, old and new.\nDidn’t pack a bag, no words to say,\nJust walked away, another day.\nThe engine sighs, a weary hum,\nSpinning onward, feeling numb.\n\n[Chorus - chant]\nGhosts in the light, (yeah)\nGhosts in the light,\nIt’s the price you pay, (no)\nGhosts in the light.\n\n[Bridge - rap]\nI’m not chasing anything at all,\nJust finding a way to stand tall.\n\n[Chorus - chant]\nGhosts in the light, (yeah)\nGhosts in the light,\nIt’s the price you pay, (no)\nGhosts in the light.\n\n[Outro - instrumental]",
+      "tiempos": {
+        "letra": 1084,
+        "voces": 4937,
+        "letraFinal": 0
+      },
+      "publicado": false
     }
   ]
 }
