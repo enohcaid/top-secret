@@ -127,7 +127,7 @@ ${fb('voces')}`,
       if (nueva) tema.captionVoces = nueva.replace(/^["']|["']$/g, '').trim();
     }
     borrar('audio', 'letraFinal', 'generado');
-    for (const c of ['cover', 'cover-2', 'cover-3']) fs.rmSync(path.join(vieja, c), { recursive: true, force: true });
+    for (const c of ["cover", "cover-2", "cover-3", "voces"]) fs.rmSync(path.join(vieja, c), { recursive: true, force: true });
     tema.version = v;
   }
   guardar();
@@ -530,21 +530,17 @@ if (!tema.audio) {
     `lyrics = ${toml(tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'))}`, `duration = ${Math.round(dur(INSTR))}`]);
   let voces;
   if (LOCAL && tema.secciones?.length && fs.existsSync(WAV)) {
-    // el oído (oido.mjs) controla cada sección: letra cantada en su lugar, pulso del beat conservado, voz presente;
-    // si falla, otro cover (otra semilla) y queda el mejor
+    // Juan, 2026-11-01: "pasar primero el beat por ACE y después las voces en partes y anexarlas al beat" (voces-sobre-beat.mjs)
+    const { vocesSobreBeat } = await import('./voces-sobre-beat.mjs');
     const { oirTema } = await import('./oido.mjs');
-    let mejor = null;
-    for (let k = 1; k <= 3; k++) {
-      const v = cover(k === 1 ? 'cover' : `cover-${k}`);
-      if (!v) { log(`  el cover ${k} falló`); continue; }
-      const o = oirTema({ instrumental: WAV, cantado: v, secciones: tema.secciones, letra: tema.letra, carpeta });
-      if (o.error) { log(`  oído: ${o.error}`); mejor = mejor || { v, o: { fallas: 99, puntaje: 0 } }; break; }
-      log(`  oído (cover ${k}): ${o.secciones.map(x => `${x.seccion} letra ${x.letra ?? '-'} beat ${x.beat}${x.fallas.length ? ' ✗' : ''}`).join(' · ')}`);
-      if (!mejor || o.fallas < mejor.o.fallas || (o.fallas === mejor.o.fallas && o.puntaje > mejor.o.puntaje)) mejor = { v, o };
-      if (!o.fallas) break;
+    const semilla = [...tema.slug].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 2147483647, 7);
+    const r = vocesSobreBeat({ wav: WAV, secciones: tema.secciones, letra: tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'),
+      caption: `${tema.captionInstrumental}, ${tema.captionVoces}`, captionBeat: tema.captionInstrumental, bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log });
+    voces = r?.salida;
+    if (voces) {
+      const o = oirTema({ instrumental: WAV, cantado: voces, secciones: tema.secciones, letra: tema.letra, carpeta });
+      if (o.secciones) { log(`  oído (tema montado): ${o.secciones.map(x => `${x.seccion} letra ${x.letra ?? '-'} beat ${x.beat}`).join(' · ')}`); tema.oido = { ...o, letraPorTramo: r.letraPorTramo }; guardar(); }
     }
-    voces = mejor?.v;
-    if (mejor?.o.secciones) { tema.oido = mejor.o; guardar(); }
   } else voces = cover() || (log('  el cover falló, segundo intento…'), cover());
   if (!voces) { log('ERROR: no salió la versión con voz. Se reintenta en la próxima corrida.'); process.exit(1); }
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);
