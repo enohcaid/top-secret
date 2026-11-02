@@ -28,7 +28,7 @@ import { buscarEquipo, norm } from './lib/equipos-match.mjs';
 loadEnv();
 const argv = process.argv.slice(2);
 const FORZAR = argv.includes('--forzar'), PRUEBA = argv.includes('--prueba');
-const MOTIVO = argv.includes('--motivo') ? String(argv[argv.indexOf('--motivo') + 1] || '').trim() : '';
+const MOTIVO = (argv.includes('--motivo') ? String(argv[argv.indexOf('--motivo') + 1] || '') : process.env.NOTICIA_MOTIVO || '').trim();
 const FS = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/';
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const MEDIA = `${WORKER}/media/`;

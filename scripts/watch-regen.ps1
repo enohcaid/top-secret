@@ -147,10 +147,13 @@ try {
 Log "Reescribiendo la noticia (noticia-diaria.mjs --forzar)..."
 try {
     Push-Location $repoRoot
-    # motivo: lo que Juan escribió al tocar "Rehacer" en aprobar.html (2026-11-02)
-    $motivoArgs = @()
-    if ($flag.motivo) { $motivoArgs = @('--motivo', [string]$flag.motivo) }
-    $out = & node scripts\noticia-diaria.mjs --forzar @motivoArgs 2>&1 | Select-String '\[noticia\]'
+    # motivo: lo que Juan escribió al tocar "Rehacer" en aprobar.html (2026-11-02), por variable de entorno.
+    # cmd /c en vez de "& node ... 2>&1": PowerShell 5.1 convertía el aviso de Node en stderr en un error que cortaba
+    # todo (02/11: la nota nunca se reescribía)
+    $env:NOTICIA_MOTIVO = if ($flag.motivo) { [string]$flag.motivo } else { '' }
+    cmd /c "node scripts\noticia-diaria.mjs --forzar >> scripts\noticia-diaria.log 2>&1"
+    $env:NOTICIA_MOTIVO = ''
+    $out = Get-Content scripts\noticia-diaria.log -Tail 20 | Select-String '\[noticia\]'
     Pop-Location
     Log "Noticia: $($out | Select-Object -Last 1)"
 } catch {
