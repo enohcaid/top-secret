@@ -207,10 +207,18 @@ if (-not (Test-CDP)) {
     )
     Start-Sleep -Seconds 12
 }
+# Recién reiniciada la PC, Chrome tarda más en atender CDP (02/11: el generador se rindió al minuto): esperar hasta 3 min
+$cdpHasta = (Get-Date).AddMinutes(3)
+while (-not (Test-CDP) -and (Get-Date) -lt $cdpHasta) { Start-Sleep -Seconds 10 }
 
 # cmd /c en vez de *>> : PowerShell 5.1 redirige a UTF-16 y mezclaba encodings
-# en el log; cmd escribe los bytes UTF-8 de node tal cual.
+# en el log; cmd escribe los bytes UTF-8 de node tal cual. Un reintento si falla.
 cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
+if ($LASTEXITCODE -ne 0) {
+    Log "La generación de imágenes falló: un reintento en 1 minuto"
+    Start-Sleep -Seconds 60
+    cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
+}
 # la nota rehecha vuelve a aprobar.html: su lote reemplaza al de la nota anterior (mismo id del día)
 cmd /c "node scripts\social\noticia-lote.mjs >> scripts\daily-images.log 2>&1"
 Log "Pipeline completo."
