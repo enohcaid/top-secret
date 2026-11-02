@@ -58,6 +58,14 @@ try {
     await espera(1500);
     const link = await p.evaluate(() => [...document.querySelectorAll('a')].map(a => a.href).find(h => /youtube\.com\/shorts\/|youtu\.be\//.test(h)) || '');
     await shot('1');
+    // Esperar a que termine la SUBIDA antes de publicar y cerrar la pestaña: el video de la quincena (109 MB, 01/11)
+    // quedó trabado en "procesando" porque la pestaña se cerró a los 8 s, con la subida a la mitad
+    const t0 = Date.now();
+    for (let ultimo = ''; Date.now() - t0 < 30 * 60000; await espera(10000)) {
+      const estado = await p.evaluate(() => (document.querySelector('ytcp-video-upload-progress, .progress-label') || {}).textContent || '').catch(() => '');
+      if (estado.trim() !== ultimo) { ultimo = estado.trim(); console.log('subida:', ultimo.replace(/\s+/g, ' ').slice(0, 80)); }
+      if (!/\d+\s*%/.test(estado) || /complet|procesando|processing|checks|comprobaci/i.test(estado)) break;
+    }
     await p.locator('#done-button').click();
     await espera(8000);
     await shot('2');
