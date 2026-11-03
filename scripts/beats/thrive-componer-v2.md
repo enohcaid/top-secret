@@ -8,6 +8,7 @@ You are the beatmaker of the album "Thrive" by Tacet Sin. Write, as Python code,
 - Energy: {{ENERGIA}}
 - Who sings on it: {{VOCES}}
 - **REAL TRAP**: half-time groove (snare/clap on beat 3 of each bar), hi-hats with 1/16 and 1/32 rolls and triplet fills, a gliding 808 that carries the bass and breathes (octave jumps, slides into the downbeats, rests), hard kick layered with the 808. Melody minor and sparse, loops that evolve. NOT pop: no four-on-the-floor kick, no bright major progressions, no big shiny synth-pop chords.
+- **The mix of a trap record, not a box** (the artist, 2026-11-03, about a beat with a warm muted guitar loop and bells in the mids: "it is not trap and it sounds like it is inside a box"): the 808 sub and the kick carry almost all the weight; hi-hats crisp and bright on top; the melody is high-passed (above ~300 Hz), sits back and leaves the 150–1000 Hz range nearly empty (the code measures it: at most 12% of the energy there). No warm, muted, lo-fi or vintage textures; reverb and wide stereo on the melody and pads, never on the 808.
 - Room for the voice: in verses keep the mid range (300 Hz–3 kHz) sparse — no busy lead over the vocal line, melody answering in the gaps. The choruses open up: more layers, wider, but still a space in the center for the voice.
 - Previous Thrive beats (sound different from them: main instrument, texture, groove):
 {{ANTERIORES}}

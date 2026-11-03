@@ -172,6 +172,9 @@ if (!tema && NUEVO) {
       if (j.bpm < e.bpm[0] || j.bpm > e.bpm[1]) return `bpm ${j.bpm}: the angle "${j.angulo}" has energy ${ANGULOS[j.angulo].energia}, its tempo is ${e.bpm[0]}–${e.bpm[1]}`;
       if (!(j.estructura.filter(x => x === 'verse').length >= 2 && j.estructura.filter(x => x === 'chorus').length >= 2)) return 'the structure needs 2 verses and at least 2 choruses';
       if (!/trap/i.test(j.caption_instrumental)) return 'caption_instrumental must say trap';
+      // "Still Mine" (03/11): "warm muted guitar loop, plucky bells, playful" → "no es trap y suena adentro de una caja"
+      const blando = String(j.caption_instrumental).match(/\b(warm|muted|lo-?fi|vintage|dusty|acoustic|jazzy|soft|cozy|tender|playful|plucky)\b/i);
+      if (blando) return `caption_instrumental: "${blando[0]}" makes ACE sound soft and boxy, not trap — describe hard trap sound (808, hi-hats, dark melody)`;
       const t = `${j.titulo}\n${j.caption_instrumental}`;
       if (DEPORTE.test(t)) return 'no sport words';
       if (reg.temas.some(x => x.titulo.toLowerCase() === String(j.titulo).toLowerCase())) return `title "${j.titulo}" already exists`;
@@ -272,6 +275,12 @@ function controlarBeat(secciones) {
   }
   const pico = Number(((ff('-i', WAV, '-af', 'astats=metadata=0', '-f', 'null', '-').stderr.match(/Peak level dB:\s*(-?[\d.]+)/g) || []).pop() || 'Peak level dB: -1').match(/-?[\d.]+/)[0]);
   if (pico > -0.05) err.push(`satura (pico ${pico} dBFS): normalizar como el ejemplo`);
+  // medios cargados = "suena adentro de una caja" (Juan, 2026-11-03, sobre "Still Mine": 23% entre 150 y 1000 Hz;
+  // "Asphalt Ghosts", que sí sonaba a trap, 4,6%). ACE los empuja todavía más.
+  if (ALBUMV) {
+    const e = JSON.parse((spawnSync('python', ['-m', 'uv', 'run', '--no-project', '--with', 'numpy', '--with', 'soundfile', path.join(ROOT, 'scripts/beats/espectro.py'), WAV], { cwd: ROOT, encoding: 'utf8' }).stdout.match(/ESPECTRO=(\{.*\})/) || [, 'null'])[1]);
+    if (e && e.medios_bajos + e.medios > 12) err.push(`the mix is boxy: ${(e.medios_bajos + e.medios).toFixed(1)}% of the energy sits between 150 and 1000 Hz (max 12%; a trap beat that worked had 4.6%). The 808 and kick own the low end, the hats own the top; melody instruments high-passed above ~300 Hz and quieter, no warm mid-range loops, no pads filling the low mids`);
+  }
   return err;
 }
 // Local (2026-10-31): Gemma no escribe código, escribe la PARTITURA (partitura.mjs) y partitura.py la toca. Escribir
@@ -561,7 +570,8 @@ if (!tema.audio) {
     await liberar();
     const semilla = [...tema.slug].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 2147483647, 7);
     const r = vocesUnaPasada({ wav: WAV, secciones: tema.secciones, letra: tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'),
-      caption: `${tema.captionInstrumental}, ${tema.captionVoces}`, bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log });
+      // ancla de sonido fija (03/11, "no es trap y suena adentro de una caja"): ACE completa con lo que lee en la descripción
+      caption: `${tema.captionInstrumental}, hard-hitting trap drums, deep 808 sub bass, crisp bright hi-hats, wide stereo, clean modern trap mix, ${tema.captionVoces}`, bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log });
     voces = r?.salida;
     if (r?.o?.secciones) { tema.oido = r.o; guardar(); }
   } else voces = cover() || (log('  el cover falló, segundo intento…'), cover());

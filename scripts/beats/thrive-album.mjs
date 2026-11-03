@@ -30,11 +30,11 @@ export const ANGULOS = {
 export const ENERGIAS = {
   empuje:     { bpm: [142, 154], beat: 'driving and tense, busy hats, hard 808', kits: ['pesado', 'crudo'] },
   nocturna:   { bpm: [130, 140], beat: 'dark and spacious, slow-burning, sliding 808', kits: ['nocturno', 'hipnotico', 'frio'] },
-  rebote:     { bpm: [145, 156], beat: 'bouncy, playful, swung hats, 808 that jumps', kits: ['crudo', 'hipnotico', 'frio'] },
+  rebote:     { bpm: [145, 156], beat: 'bouncy trap, swung hi-hats, 808 that jumps', kits: ['crudo', 'hipnotico', 'frio'] },
   fiesta:     { bpm: [148, 160], beat: 'triumphant, brassy and bright, loud and confident', kits: ['pesado', 'crudo'] },
   furia:      { bpm: [155, 168], beat: 'aggressive rage energy, distorted 808, relentless hats', kits: ['crudo', 'pesado'] },
-  melancolia: { bpm: [128, 138], beat: 'melodic and sad, piano or guitar-like, emotional', kits: ['nocturno', 'frio', 'hipnotico'] },
-  flotante:   { bpm: [134, 146], beat: 'airy, dreamy synths, floating, light drums', kits: ['frio', 'hipnotico', 'nocturno'] },
+  melancolia: { bpm: [128, 138], beat: 'dark melodic trap, sad piano, emotional', kits: ['nocturno', 'frio', 'hipnotico'] },
+  flotante:   { bpm: [134, 146], beat: 'spacey trap, dreamy synths, floating hi-hats', kits: ['frio', 'hipnotico', 'nocturno'] },
 };
 
 // Casting de voces (Juan, 2026-11-01: "misma voz de rap, misma voz de la chica que SIEMPRE está"). Cada tema elige uno
