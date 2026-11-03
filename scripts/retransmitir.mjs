@@ -4,12 +4,12 @@
 //   enohcaid ──streamlink (http://127.0.0.1:8787)──▶ OBS (lienzo 3000×1920: versión horizontal + vertical, ver
 //            scripts/stream/obs-config.mjs) ──▶ MediaMTX (rtmp://127.0.0.1:1935/live/mix, local)
 //            ──ffmpeg (scripts/stream/salidas.mjs: recorta y codifica 720p30)──▶ topsecretfc + Kick + YouTube (+ Instagram vertical)
-// Si la cadena con overlay no levanta (OBS, MediaMTX), reenvía enohcaid directo sin gráficos para no dejar los canales
-// en negro. Con --sin-overlay va siempre directo. Al detectar el vivo publica (una vez por noche) la historia
+// Nunca se transmite sin overlay (Juan, 2026-11-03): si la cadena no levanta (OBS, MediaMTX), se baja y se vuelve a
+// armar entera hasta que salga; las redes esperan sin señal. Al detectar el vivo publica (una vez por noche) la historia
 // "EN VIVO" en Instagram (placa-envivo.mjs) y mantiene en fuentes/stream/estado.json el partido actual para la placa
 // del overlay (los goles los agrega vigia-vivo.mjs).
 //
-//   node scripts/retransmitir.mjs [--hasta HH:MM] [--sin-historia] [--sin-overlay] [--sin-instagram] [--ig-practica]
+//   node scripts/retransmitir.mjs [--hasta HH:MM] [--sin-historia] [--sin-instagram] [--ig-practica]
 //   (corta a esa hora ART; default 00:30). Instagram (versión vertical) va solo con overlay: ig-vivo.mjs crea el vivo en
 //   la web (Chrome CDP con la sesión de @fctopsecret), toma la clave y toca "Transmitir" cuando llega la señal.
 // Destinos en .env: TWITCH_STREAM_KEY (topsecretfc; TWITCH_RTMP_URL opcional), KICK_RTMP_URL + KICK_STREAM_KEY,
@@ -21,7 +21,7 @@ import { spawn, execFile, execFileSync } from 'child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { loadEnv } from './lib/env.mjs';
 import { conectarObs } from './stream/obs-ws.mjs';
-import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V, AUDIO_FILTRO } from './stream/salidas.mjs';
+import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V } from './stream/salidas.mjs';
 import { crearVivoIg } from './stream/ig-vivo.mjs';
 import { tituloDeNoche, partidosDe, ponerTitulos } from './stream/titulos-vivo.mjs';
 import { temporada, convocados, espacioGamer, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
@@ -73,7 +73,7 @@ if (!PRUEBA && E.YT_RTMP_URL && E.YT_STREAM_KEY) destinos.push({ nombre: 'YouTub
 const claves = [E.TWITCH_STREAM_KEY, E.KICK_STREAM_KEY, E.YT_STREAM_KEY].filter(Boolean);
 const ocultarClaves = t => claves.reduce((x, k) => x.split(k).join('***'), t).replace(/(\/rtmp\/)[^\s|'"]+/g, '$1***');   // + clave de Instagram
 if (!destinos.length) { log('No hay destinos en .env (TWITCH_STREAM_KEY, KICK_RTMP_URL/KICK_STREAM_KEY, YT_RTMP_URL/YT_STREAM_KEY).'); process.exit(1); }
-const conOverlay = !process.argv.includes('--sin-overlay') && fs.existsSync(path.join(OBS_DIR, 'obs64.exe')) && fs.existsSync(MTX);
+if (!fs.existsSync(path.join(OBS_DIR, 'obs64.exe')) || !fs.existsSync(MTX)) { log('Falta OBS o MediaMTX: sin overlay no se transmite.'); process.exit(1); }
 
 const i = process.argv.indexOf('--hasta');
 const [hh, mm] = (i > 0 ? process.argv[i + 1] : '00:30').split(':').map(Number);
@@ -140,7 +140,7 @@ function contarFinales() {
 }
 
 // ¿YouTube está realmente al aire? Entre el 8/10 y el 21/10 ninguna noche salió en YouTube y nadie se enteró: el envío
-// corría sin errores (y en modo directo el tee ignora los destinos caídos). Se mira la página pública /live del canal.
+// corría sin errores (el viejo modo directo, con tee, ignoraba los destinos caídos). Se mira la página pública /live del canal.
 const YT_CANAL = 'UCEKzzKDMMPri12Q3E9S7IVw';
 async function verificarYouTube() {
   try {
@@ -282,33 +282,19 @@ function lanzarVigia() {
   log(`Vigía lanzado sobre ${FUENTE}.`);
 }
 
-// Reenvía a todos los destinos: 'directo' = la PS5 por streamlink sin recodificar; 'overlay' = el lienzo de OBS desde
-// MediaMTX, recortado y codificado por salidas.mjs.
-function retransmitir(entrada) {
+// Codificador: el lienzo de OBS desde MediaMTX, recortado y codificado por salidas.mjs (los relevos lo suben a cada red).
+function retransmitir() {
   return new Promise(res => {
-    const directo = entrada === 'directo';
-    const sl = directo ? spawn('python', ['-m', 'streamlink', '--twitch-disable-ads', '--retry-open', '3', '-O', FUENTE, 'best'], { stdio: ['ignore', 'pipe', 'pipe'] }) : null;
-    const salidas = destinos.map(d => `[f=flv:onfail=ignore]${d.url}`).join('|');
-    const args = directo
-      // video sin recodificar; el audio sí, para normalizarlo igual que con overlay (AUDIO_FILTRO en salidas.mjs)
-      ? ['-hide_banner', '-loglevel', 'warning', '-i', 'pipe:0', '-map', '0:v', '-map', '0:a?', '-c:v', 'copy',
-        '-af', AUDIO_FILTRO, '-c:a', 'aac', '-b:a', '160k', '-ar', '48000',
-        '-tag:v', '7',                                       // Twitch entrega fMP4 (tag avc1): FLV necesita sus propios tags
-        '-f', 'tee', salidas]
-      : argsCodificador({ entrada: LOCAL, vertical: !process.argv.includes('--sin-instagram'), kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
-    const ff = spawn(ffmpegPath, args, { stdio: [directo ? 'pipe' : 'ignore', 'ignore', 'pipe'] });
-    if (sl) {
-      sl.stdout.pipe(ff.stdin); ff.stdin.on('error', () => {});
-      sl.stderr.on('data', d => { const t = String(d).trim(); if (/error|fail/i.test(t)) log('streamlink:', t.slice(0, 200)); });
-    }
+    const args = argsCodificador({ entrada: LOCAL, vertical: !process.argv.includes('--sin-instagram'), kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
+    const ff = spawn(ffmpegPath, args, { stdio: ['ignore', 'ignore', 'pipe'] });
     ff.stderr.on('data', d => { const t = String(d).trim(); if (t) log('ffmpeg:', ocultarClaves(t).slice(0, 200)); });
-    const fin = () => { sl?.kill(); ff.kill(); };
+    const fin = () => ff.kill();
     const reloj = setInterval(async () => {
       if (Date.now() > limite) { log('Hora límite: corto.'); return fin(); }
       // con overlay OBS sigue mandando aunque la PS5 corte (con la pausa encima): se corta recién pasada la gracia
-      if (!directo && !(await seguirSesion())) fin();
+      if (!(await seguirSesion())) fin();
     }, 30000);
-    ff.on('close', code => { clearInterval(reloj); sl?.kill(); res(code); });
+    ff.on('close', code => { clearInterval(reloj); res(code); });
   });
 }
 
@@ -362,7 +348,6 @@ function lanzarStreamlink() {
 // La fuente volvió después de una caída: streamlink nuevo (el anterior puede haber quedado colgado del vivo viejo)
 // y OBS reinicia la fuente 'Partido' para engancharlo. El codificador y los relevos no se tocan.
 async function reconectarFuente() {
-  if (!conOverlay) return;
   try { slOverlay?.kill(); } catch {}
   const i = procs.indexOf(slOverlay); if (i >= 0) procs.splice(i, 1);
   await espera(2000);
@@ -392,52 +377,50 @@ async function sesion() {
   await actualizarPartido();
   const partido = setInterval(actualizarPartido, 5 * 60000);
   const inicio = setInterval(() => { { const a = contarInicios(), b = contarFinales(); if (a || b) actualizarPartido(); } }, 15000);   // partido nuevo o terminado: placa y cierre al toque
-  if (conOverlay) await listaMusica();
+  await listaMusica();
   const audio = setInterval(audioSegunModo, 3000);
   try {
-    if (conOverlay) {
-      await levantarCadena();
-      // Instagram: vivo nuevo por sesión, con el partido de la noche como título; si falla, siguen las otras redes
-      let ig = null;
-      if (!process.argv.includes('--sin-instagram')) {
-        try {
-          const titulo = tituloDeNoche(partidos || []);   // el mismo título que Twitch/Kick/YouTube
-          ig = await crearVivoIg({ titulo, practica: PRUEBA || process.argv.includes('--ig-practica'), log });
-        } catch (e) { log('Instagram no disponible:', e.message.slice(0, 200)); }
-      }
-      // Un relevo por red desde MediaMTX local; el codificador (retransmitir('overlay')) solo escribe ahí
-      const rel = relevos([...destinos.map(d => ({ ...d, entrada: LOCAL_H })), ...(ig ? [{ nombre: 'Instagram', url: ig.url, entrada: LOCAL_V }] : [])]);
-      if (destinos.some(d => d.nombre === 'YouTube')) setTimeout(verificarYouTube, 90000);
-      let fallas = 0, igIntento = null;
-      while (Date.now() < limite && await seguirSesion()) {
-        const t0 = Date.now();
-        const corriendo = retransmitir('overlay');
-        if (ig && !igIntento) igIntento = ig.transmitir().catch(e => log('Instagram:', e.message.slice(0, 200)));   // una sola espera
-        const code = await corriendo;
-        if (Date.now() - t0 > 60000) {
-          fallas = 0; log(`Codificador con overlay cortado (ffmpeg ${code}): lo vuelvo a levantar.`);
-          continue;
-        }
-        if (++fallas >= 12) { log('La señal con overlay no aparece en MediaMTX: sigo sin overlay.'); break; }   // ~2 min
-        // OBS prueba conectarse a MediaMTX una sola vez: si falló (2026-11-02, "Connection failed -2"), se queda sin transmitir
-        const st = await obs('GetStreamStatus');
-        if (st && !st.outputActive) { log('OBS no está mandando a MediaMTX: se lo vuelvo a pedir.'); await obs('StartStream'); }
-        await espera(5000);
-      }
-      rel.parar();
-      if (ig) await ig.finalizar().catch(() => {});
-      await bajarCadena();
-      if (fallas < 12) return;
+    await levantarCadena();
+    // Instagram: vivo nuevo por sesión, con el partido de la noche como título; si falla, siguen las otras redes
+    let ig = null;
+    if (!process.argv.includes('--sin-instagram')) {
+      try {
+        const titulo = tituloDeNoche(partidos || []);   // el mismo título que Twitch/Kick/YouTube
+        ig = await crearVivoIg({ titulo, practica: PRUEBA || process.argv.includes('--ig-practica'), log });
+      } catch (e) { log('Instagram no disponible:', e.message.slice(0, 200)); }
     }
-    while (Date.now() < limite && (await enVivo()) !== false) {
-      const code = await retransmitir('directo');
-      log(`Retransmisión directa terminada (ffmpeg ${code}).`);
-      await espera(10000);
+    // Un relevo por red desde MediaMTX local; el codificador (retransmitir()) solo escribe ahí
+    const rel = relevos([...destinos.map(d => ({ ...d, entrada: LOCAL_H })), ...(ig ? [{ nombre: 'Instagram', url: ig.url, entrada: LOCAL_V }] : [])]);
+    if (destinos.some(d => d.nombre === 'YouTube')) setTimeout(verificarYouTube, 90000);
+    let fallas = 0, igIntento = null;
+    while (Date.now() < limite && await seguirSesion()) {
+      const t0 = Date.now();
+      const corriendo = retransmitir();
+      if (ig && !igIntento) igIntento = ig.transmitir().catch(e => log('Instagram:', e.message.slice(0, 200)));   // una sola espera
+      const code = await corriendo;
+      if (Date.now() - t0 > 60000) {
+        fallas = 0; log(`Codificador con overlay cortado (ffmpeg ${code}): lo vuelvo a levantar.`);
+        continue;
+      }
+      // Sin señal en MediaMTX ~2 min: se baja la cadena entera (OBS, MediaMTX, streamlink) y se vuelve a armar.
+      // Los relevos y el vivo de Instagram siguen esperando: se reenganchan solos cuando vuelve la señal.
+      if (++fallas >= 12) {
+        log('La señal con overlay no aparece en MediaMTX: rearmo la cadena (nunca se sale sin overlay).');
+        await bajarCadena(); await levantarCadena(); fallas = 0;
+        continue;
+      }
+      // OBS prueba conectarse a MediaMTX una sola vez: si falló (2026-11-02, "Connection failed -2"), se queda sin transmitir
+      const st = await obs('GetStreamStatus');
+      if (st && !st.outputActive) { log('OBS no está mandando a MediaMTX: se lo vuelvo a pedir.'); await obs('StartStream'); }
+      await espera(5000);
     }
+    rel.parar();
+    if (ig) await ig.finalizar().catch(() => {});
+    await bajarCadena();
   } finally { clearInterval(partido); clearInterval(inicio); clearInterval(audio); clearInterval(vigia); modoAudio = null; }
 }
 
-log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')}${conOverlay ? ' con overlay' : ' sin overlay'}. Esperando que alguna fuente esté en vivo (${FUENTES.map(f => f.url).join(', ')}) (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);
+log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')} con overlay. Esperando que alguna fuente esté en vivo (${FUENTES.map(f => f.url).join(', ')}) (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);
 process.on('SIGINT', async () => { await bajarCadena(); process.exit(0); });
 // Títulos de la noche en Twitch/Kick/YouTube antes de que arranque el vivo (titulos-vivo.mjs; Instagram lo pone al crear
 // su vivo). En segundo plano: si una red falla queda en el log y el vivo sigue igual.

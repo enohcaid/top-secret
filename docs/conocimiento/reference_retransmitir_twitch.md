@@ -5,7 +5,7 @@ metadata:
   type: reference
 ---
 
-> **Desde 2026-10-15 la PS5 transmite a Enohcaid** y `retransmitir.mjs` arma las 3 transmisiones oficiales (topsecretfc, Kick, YouTube) con overlay vía OBS + MediaMTX: ver [[project_overlay_vivo]]. Lo de abajo (streamlink → ffmpeg -c copy) sigue siendo el modo directo, que se usa como respaldo o con `--sin-overlay`.
+> **Desde 2026-10-15 la PS5 transmite a Enohcaid** y `retransmitir.mjs` arma las 3 transmisiones oficiales (topsecretfc, Kick, YouTube) con overlay vía OBS + MediaMTX: ver [[project_overlay_vivo]]. Lo de abajo (streamlink → ffmpeg -c copy) es historia: el modo directo se eliminó el 2026-11-03 (Juan: nunca más transmitir sin overlay).
 
 Juan transmite **directo desde la PS5 a Twitch** (twitch.tv/topsecretfc). La PS5 no puede transmitir a dos plataformas ni a Kick, así que la PC toma el vivo de Twitch y lo reenvía:
 
