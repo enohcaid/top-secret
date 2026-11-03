@@ -1034,6 +1034,207 @@
         "letraFinal": 0
       },
       "publicado": false
+    },
+    {
+      "id": "2026-11-03-album",
+      "metodo": "album",
+      "fecha": "2026-11-03",
+      "slug": "still-mine",
+      "titulo": "Still Mine",
+      "angulo": "los_mios",
+      "energia": "rebote",
+      "casting": "rapero_y_hook",
+      "concepto": "Cuando no tenías nada, siempre hubo alguien que seguía contestando tus llamadas, y hoy le debes más de lo que el dinero puede pagar.",
+      "rasgo": "Lealtad agradecida",
+      "voz": "rapero en los versos, ella solo en el estribillo",
+      "captionInstrumental": "Bouncy trap beat, swung hi-hats, jumping 808 bass, snappy half-time snare, plucky bells, warm muted guitar loop, playful and confident, drums dropping out before hooks, bouncy, playful, swung hats, 808 that jumps",
+      "captionVoces": "male rapper on the verses with a gritty flow, a female voice sings only the chorus hook, short and catchy",
+      "bpm": 150,
+      "tonalidad": "D minor",
+      "duracion": 142,
+      "estructura": [
+        "intro",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 6.4,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 6.4,
+          "fin": 32,
+          "compases": 16
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 32,
+          "fin": 38.4,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 38.4,
+          "fin": 51.2,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 51.2,
+          "fin": 76.8,
+          "compases": 16
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 76.8,
+          "fin": 83.2,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 83.2,
+          "fin": 96,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 96,
+          "fin": 115.2,
+          "compases": 12
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 115.2,
+          "fin": 128,
+          "compases": 8
+        },
+        {
+          "nombre": "outro",
+          "inicio": 128,
+          "fin": 140.8,
+          "compases": 8
+        }
+      ],
+      "beat": "Rebote con ternura: guitarra muteada que \"contesta\" con una campana en los huecos, y un 808 que salta de octava.",
+      "instrumental": "codigo",
+      "historia": {
+        "quien": "I'm just someone trying to get by, like everyone else.",
+        "verso1": "There's a dull ache behind my eyes, like a constant low hum. I keep checking my phone, even though it's quiet, and the taste of stale coffee lingers on my tongue.",
+        "gancho": "Still here, still mine.",
+        "estribillo": "It means they’re always a part of me, no matter what I go through, and I owe them everything.",
+        "verso2": "The shadows feel deeper now, a chill seeping into my bones. The silence on the line is heavier, a tightening in my chest, and I find myself staring at the 6 a.m. bus schedule.",
+        "puente": "I will pay it forward. Their loyalty is a debt I carry, a promise to keep the light on for someone else when their world goes dark."
+      },
+      "letra": "[Intro - instrumental]\n\n[Verse 1 - male rap]\nDull hum behind my eyes all day\nStale coffee sitting on my tongue (yeah)\nI check the phone, the screen is black\nCheck it again, nothing came back (again)\nThree a.m., the kitchen light stays on\nThumb on the glass like it's gonna ring\nBack then you picked up every time\nNow I just watch the minutes climb\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Verse 2 - male rap]\nShadows got longer on the wall\nCold crawling up inside my bones (no)\nThe line goes quiet, and it's worse\nChest pulled tight, I swallow, it hurts\nStaring at the six a.m. bus times\nFinger on the map, don't know where\nPockets empty, but my phone still lights (I know)\n'Cause you pick up, you're always there\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Bridge - male rap]\nI will pay it forward, that's my word\nYour loyalty's a debt I carry\nNot a weight, it's a promise I keep\nWhen their world goes dark, I won't sleep\nI'm the light left on, I'm the phone that rings\nFirst ring, I'm there, that's what the debt brings (I know)\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Outro - instrumental]",
+      "letraPor": "claude",
+      "oido": {
+        "secciones": [
+          {
+            "seccion": "intro 1",
+            "beat": 0.28,
+            "voz": 0.88,
+            "fallas": []
+          },
+          {
+            "seccion": "verse 2",
+            "letra": 0.41,
+            "beat": 0.18,
+            "voz": 1.84,
+            "fallas": [
+              "letra 0.41",
+              "beat 0.18"
+            ]
+          },
+          {
+            "seccion": "pre-chorus 3",
+            "letra": 1,
+            "beat": 0.19,
+            "voz": 1.86,
+            "fallas": [
+              "beat 0.19"
+            ]
+          },
+          {
+            "seccion": "chorus 4",
+            "letra": 0.88,
+            "beat": 0.2,
+            "voz": 1.46,
+            "fallas": [
+              "beat 0.2"
+            ]
+          },
+          {
+            "seccion": "verse 5",
+            "letra": 0.05,
+            "beat": 0.22,
+            "voz": 4.47,
+            "fallas": [
+              "letra 0.05",
+              "beat 0.22"
+            ]
+          },
+          {
+            "seccion": "pre-chorus 6",
+            "letra": 0.67,
+            "beat": 0.1,
+            "voz": 2.87,
+            "fallas": [
+              "beat 0.1"
+            ]
+          },
+          {
+            "seccion": "chorus 7",
+            "letra": 0.38,
+            "beat": 0.03,
+            "voz": 1.54,
+            "fallas": [
+              "letra 0.38",
+              "beat 0.03"
+            ]
+          },
+          {
+            "seccion": "bridge 8",
+            "letra": 0.58,
+            "beat": 0.15,
+            "voz": 1.84,
+            "fallas": [
+              "beat 0.15"
+            ]
+          },
+          {
+            "seccion": "chorus 9",
+            "letra": 0.62,
+            "beat": 0.02,
+            "voz": 1.5,
+            "fallas": [
+              "beat 0.02"
+            ]
+          },
+          {
+            "seccion": "outro 10",
+            "beat": 0.05,
+            "voz": 1.11,
+            "fallas": []
+          }
+        ],
+        "fallas": 11,
+        "puntaje": 0.716
+      },
+      "audio": "musica/thrive/still-mine.mp3?v=mw0oud6p",
+      "generado": "2026-11-03T12:52:52.417Z",
+      "letraFinal": "[Intro - instrumental]\n\n[Verse 1 - male rap]\nDull hum behind my eyes all day\nStale coffee sitting on my tongue (yeah)\nI check the phone, the screen is black\nCheck it again, nothing came back (again)\nThree a.m., the kitchen light stays on\nThumb on the glass like it's gonna ring\nBack then you picked up every time\nNow I just watch the minutes climb\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Verse 2 - male rap]\nShadows got longer on the wall\nCold crawling up inside my bones (no)\nThe line goes quiet, and it's worse\nChest pulled tight, I swallow, it hurts\nStaring at the six a.m. bus times\nFinger on the map, don't know where\nPockets empty, but my phone still lights (I know)\n'Cause you pick up, you're always there\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Bridge - male rap]\nI will pay it forward, that's my word\nYour loyalty's a debt I carry\nNot a weight, it's a promise I keep\nWhen their world goes dark, I won't sleep\nI'm the light left on, I'm the phone that rings\nFirst ring, I'm there, that's what the debt brings (I know)\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Outro - instrumental]",
+      "publicado": false
     }
   ]
 }
