@@ -945,8 +945,10 @@ async function ensureNormalQuality(page) {
 async function gotoProjectComposer(page, maxTries = 5) {
   for (let i = 1; i <= maxTries; i++) {
     await page.goto(PROJECT_URL, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
-    await page.waitForTimeout(3000);
-    const ok = await page.evaluate(() => !!document.querySelector('div[contenteditable="true"], p[data-placeholder]'));
+    // Esperar el composer en vez de 3 s fijos: el 2026-11-03 ChatGPT tardaba más y los 5 intentos fallaban con el
+    // composer apareciendo un momento después.
+    const ok = await page.locator('div[contenteditable="true"], p[data-placeholder]').first()
+      .waitFor({ state: 'attached', timeout: 20000 }).then(() => true, () => false);
     if (ok) return;
     if (i < maxTries) {
       console.log(`  Página del proyecto no cargó el composer (intento ${i}/${maxTries}) — reintentando...`);
