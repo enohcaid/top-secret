@@ -822,6 +822,218 @@
         "letraFinal": 0
       },
       "publicado": false
+    },
+    {
+      "id": "2026-11-01-4-local",
+      "motor": "local",
+      "fecha": "2026-11-01",
+      "slug": "empty-plate",
+      "titulo": "Empty Plate",
+      "angulo": "hambre",
+      "energia": "empuje",
+      "casting": "agudo_jugueton",
+      "concepto": "La canción narra la desesperación silenciosa de quien, tras años de esfuerzo, aún se enfrenta a la falta de oportunidades, cargando con la responsabilidad de cumplir promesas.",
+      "rasgo": "tenacidad",
+      "voz": "voz aguda y juguetona, cantos repetitivos tipo arenga",
+      "captionInstrumental": "Dark trap beat, 145 BPM. Driven, tense, urgent energy. Distorted keys, sliding 808, hard hats, crisp snares, echoing adlibs., driving and tense, busy hats, hard 808",
+      "captionVoces": "solo male vocalist, high-pitched playful voice, bouncy chant hooks, repetitive catchy phrases, energetic ad-libs, no female vocals",
+      "bpm": 148,
+      "tonalidad": "A minor",
+      "duracion": 142,
+      "estructura": [
+        "intro",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 9.73,
+          "compases": 6
+        },
+        {
+          "nombre": "verse",
+          "inicio": 9.73,
+          "fin": 35.68,
+          "compases": 16
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 35.68,
+          "fin": 42.16,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 42.16,
+          "fin": 55.14,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 55.14,
+          "fin": 81.08,
+          "compases": 16
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 81.08,
+          "fin": 87.57,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 87.57,
+          "fin": 100.54,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 100.54,
+          "fin": 113.51,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 113.51,
+          "fin": 126.49,
+          "compases": 8
+        },
+        {
+          "nombre": "outro",
+          "inicio": 126.49,
+          "fin": 139.46,
+          "compases": 8
+        }
+      ],
+      "beat": "During the bridge, the call melody is mirrored and played back at half speed, creating a haunting sense of reflection and regret.",
+      "vueltasBeat": 2,
+      "instrumental": "partitura",
+      "historia": {
+        "quien": "I'm just someone pushing through, like everyone else is, trying to make something real.",
+        "verso1": "The fridge hums, empty. My fingers trace the cold metal, a dull ache in my chest like a forgotten promise. The streetlights bleed through the window, painting the floor yellow – a sickly hope.",
+        "gancho": "Empty plate, still here.",
+        "estribillo": "It’s about the constant state of needing, of wanting more, and the quiet resignation that comes with it; a weight pressing down that never quite leaves.",
+        "verso2": "The bus coughs at six a.m., a mechanical groan that mimics my own weariness. The phone screen glows, reflecting a tired face, and the silence is a heavy blanket, suffocating the edges of what little I have left. A knot in my stomach tightens with each unanswered call.",
+        "puente": "I will stack these empty plates, make something new from the shards. This hunger will be the fuel, not the chain."
+      },
+      "letra": "[Intro - instrumental]\n\n[Verse 1 - rap]\nThe fridge hums, empty (yeah)\nCold metal, a dull ache in my chest\nStreetlights bleed yellow on the floor\nA promise lost, put to the test (no)\nThe bus coughs at six a.m.\nMy face reflected, tired and worn\nA knot tightens, deep inside\nSilence settles, heavy and torn\n\n[Pre-chorus - rap]\nJust pushing through, like everyone does\nTrying to build something that lasts\n\n[Chorus - chant]\nEmpty plate, still here\nEmpty plate, still here\nConstant need, it’s never gone\nEmpty plate, still here\n\n[Verse 2 - rap]\nThe fridge hums, empty (I know)\nCold metal, a weight I can’t shed\nThe bus coughs at six a.m.\nMy face reflected, filled with dread (yeah)\nA knot tightens, deep inside\nSilence settles, a heavy spread\nStreetlights bleed yellow on the floor\nA promise lost, I can’t ignore\n\n[Pre-chorus - rap]\nJust pushing through, like everyone does\nTrying to build something that lasts\n\n[Chorus - chant]\nEmpty plate, still here\nEmpty plate, still here\nConstant need, it’s never gone\nEmpty plate, still here\n\n[Bridge - rap]\nStack these plates, a brand new start\nThis hunger burns, a fiery heart\nBroken pieces, find their place\nFuel the fire, set a new pace (no)\n\n[Chorus - chant]\nEmpty plate, still here\nEmpty plate, still here\nConstant need, it’s never gone\nEmpty plate, still here\n\n[Outro - instrumental]",
+      "letraPor": "local",
+      "avisosRima": [
+        "almost no first person: the verses must sound like someone talking (\"I\", \"my\")",
+        "\"Trying to build something that lasts\" — la frase cierra con \"lasts\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"Trying to build something that lasts\" — la frase cierra con \"lasts\", que no rima (por sonido) con el cierre anterior del esquema"
+      ],
+      "oido": {
+        "secciones": [
+          {
+            "seccion": "intro 1",
+            "beat": 0.46,
+            "voz": 1.01,
+            "fallas": []
+          },
+          {
+            "seccion": "verse 2",
+            "letra": 0.76,
+            "beat": 0.03,
+            "voz": 4.08,
+            "fallas": [
+              "beat 0.03"
+            ]
+          },
+          {
+            "seccion": "pre-chorus 3",
+            "letra": 0.09,
+            "beat": 0.13,
+            "voz": 3.34,
+            "fallas": [
+              "letra 0.09",
+              "beat 0.13"
+            ]
+          },
+          {
+            "seccion": "chorus 4",
+            "letra": 0.56,
+            "beat": 0.05,
+            "voz": 2.39,
+            "fallas": [
+              "beat 0.05"
+            ]
+          },
+          {
+            "seccion": "verse 5",
+            "letra": 0.59,
+            "beat": 0.01,
+            "voz": 4.99,
+            "fallas": [
+              "beat 0.01"
+            ]
+          },
+          {
+            "seccion": "pre-chorus 6",
+            "letra": 0,
+            "beat": 0.12,
+            "voz": 3.66,
+            "fallas": [
+              "letra 0",
+              "beat 0.12"
+            ]
+          },
+          {
+            "seccion": "chorus 7",
+            "letra": 0.67,
+            "beat": 0.04,
+            "voz": 2.64,
+            "fallas": [
+              "beat 0.04"
+            ]
+          },
+          {
+            "seccion": "bridge 8",
+            "letra": 0.24,
+            "beat": 0.06,
+            "voz": 2.16,
+            "fallas": [
+              "letra 0.24",
+              "beat 0.06"
+            ]
+          },
+          {
+            "seccion": "chorus 9",
+            "letra": 0.67,
+            "beat": 0.03,
+            "voz": 1.88,
+            "fallas": [
+              "beat 0.03"
+            ]
+          },
+          {
+            "seccion": "outro 10",
+            "beat": 0.04,
+            "voz": 1.12,
+            "fallas": []
+          }
+        ],
+        "fallas": 11,
+        "puntaje": 0.544
+      },
+      "audio": "musica/thrive/empty-plate.mp3?v=mw0dvc6v",
+      "generado": "2026-11-03T07:45:42.007Z",
+      "letraFinal": "[Intro - instrumental]\n\n[Verse 1 - rap]\nThe fridge hums, empty (yeah)\nCold metal, a dull ache in my chest\nStreetlights bleed yellow on the floor\nA promise lost, put to the test (no)\nThe bus coughs at six a.m.\nMy face reflected, tired and worn\nA knot tightens, deep inside\nSilence settles, heavy and torn\n\n[Pre-chorus - rap]\nJust pushing through, like everyone does\nTrying to build something that lasts\n\n[Chorus - chant]\nEmpty plate, still here\nEmpty plate, still here\nConstant need, it’s never gone\nEmpty plate, still here\n\n[Verse 2 - rap]\nThe fridge hums, empty (I know)\nCold metal, a weight I can’t shed\nThe bus coughs at six a.m.\nMy face reflected, filled with dread (yeah)\nA knot tightens, deep inside\nSilence settles, a heavy spread\nStreetlights bleed yellow on the floor\nA promise lost, I can’t ignore\n\n[Pre-chorus - rap]\nJust pushing through, like everyone does\nTrying to build something that lasts\n\n[Chorus - chant]\nEmpty plate, still here\nEmpty plate, still here\nConstant need, it’s never gone\nEmpty plate, still here\n\n[Bridge - rap]\nStack these plates, a brand new start\nThis hunger burns, a fiery heart\nBroken pieces, find their place\nFuel the fire, set a new pace (no)\n\n[Chorus - chant]\nEmpty plate, still here\nEmpty plate, still here\nConstant need, it’s never gone\nEmpty plate, still here\n\n[Outro - instrumental]",
+      "tiempos": {
+        "letra": 1133,
+        "voces": 4845,
+        "letraFinal": 0
+      },
+      "publicado": false
     }
   ]
 }
