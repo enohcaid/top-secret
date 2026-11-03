@@ -419,6 +419,9 @@ async function sesion() {
           continue;
         }
         if (++fallas >= 12) { log('La señal con overlay no aparece en MediaMTX: sigo sin overlay.'); break; }   // ~2 min
+        // OBS prueba conectarse a MediaMTX una sola vez: si falló (2026-11-02, "Connection failed -2"), se queda sin transmitir
+        const st = await obs('GetStreamStatus');
+        if (st && !st.outputActive) { log('OBS no está mandando a MediaMTX: se lo vuelvo a pedir.'); await obs('StartStream'); }
         await espera(5000);
       }
       rel.parar();
