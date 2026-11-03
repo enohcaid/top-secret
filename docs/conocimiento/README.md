@@ -51,6 +51,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Estado y decisiones del proyecto
 
+- [project_avatares_3d](project_avatares_3d.md) — Avatares 3D animados del plantel: repo privado enohcaid/avatares-3d (Codex modela en PCJUAN, Claude revisa); arranca con Juan_Martinez4
 - [project_espacio_gamer](project_espacio_gamer.md) — Desde la T4 la liga 11x11 se llama "Espacio Gamer" (espaciogamer.cl); tabla vía Worker /eg-table; la clave interna sigue siendo 11x11/e11
 
 - [project_ronda_redes](project_ronda_redes.md) — Ronda de redes de las 14:00 (día después de jornada + sábados): carrusel/Reel/Short/TikTok/X/Facebook con datos reales; Juan aprueba en aprobar.html, la página única de aprobación
