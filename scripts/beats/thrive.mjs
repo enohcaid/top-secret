@@ -409,8 +409,10 @@ async function vocesLocal(letra) {
   return p;
 }
 // Cuántas líneas lleva cada sección (guía de ACE-Step: alinea las sílabas a los tiempos; un verso de 16 compases con
-// 8 líneas cortas lo obligaba a estirar o amontonar). Rap: una línea por compás; lo cantado: una cada dos.
-const lineasPara = s => s.nombre === 'verse' ? Math.min(16, s.compases) : ['intro', 'outro'].includes(s.nombre) ? 0 : Math.max(2, Math.round(s.compases / 2));
+// 8 líneas cortas lo obligaba a estirar o amontonar).
+// Una línea cada dos compases en todo (02/11: el oído midió que ACE pierde más de la mitad del rap de una línea por compás
+// y canta bien lo melódico y corto: estribillos y puente daban 0,7–1,0)
+const lineasPara = s => ['intro', 'outro'].includes(s.nombre) ? 0 : Math.max(2, Math.round(s.compases / 2));
 const silabas = l => l.replace(/\(.*?\)/g, '').toLowerCase().split(/[^a-z']+/).filter(Boolean)
   .reduce((n, w) => n + Math.max(1, (w.replace(/e$/, '').match(/[aeiouy]+/g) || []).length), 0);
 // Oficio de letra de trap (Juan, 2026-10-31: "hay que usar referencias de temas de trap real para aprender, a veces menos
@@ -530,17 +532,14 @@ if (!tema.audio) {
     `lyrics = ${toml(tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'))}`, `duration = ${Math.round(dur(INSTR))}`]);
   let voces;
   if (LOCAL && tema.secciones?.length && fs.existsSync(WAV)) {
-    // Juan, 2026-11-01: "pasar primero el beat por ACE y después las voces en partes y anexarlas al beat" (voces-sobre-beat.mjs)
-    const { vocesSobreBeat } = await import('./voces-sobre-beat.mjs');
-    const { oirTema } = await import('./oido.mjs');
+    // dos pasadas de ACE: el beat solo y después el tema entero cantado sobre ese beat pulido (voces-dos-pasadas.mjs)
+    const { vocesDosPasadas } = await import('./voces-dos-pasadas.mjs');
+    await liberar();   // Gemma fuera de la placa antes de ACE
     const semilla = [...tema.slug].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 2147483647, 7);
-    const r = vocesSobreBeat({ wav: WAV, secciones: tema.secciones, letra: tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'),
+    const r = vocesDosPasadas({ wav: WAV, secciones: tema.secciones, letra: tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'),
       caption: `${tema.captionInstrumental}, ${tema.captionVoces}`, captionBeat: tema.captionInstrumental, bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log });
     voces = r?.salida;
-    if (voces) {
-      const o = oirTema({ instrumental: WAV, cantado: voces, secciones: tema.secciones, letra: tema.letra, carpeta });
-      if (o.secciones) { log(`  oído (tema montado): ${o.secciones.map(x => `${x.seccion} letra ${x.letra ?? '-'} beat ${x.beat}`).join(' · ')}`); tema.oido = { ...o, letraPorTramo: r.letraPorTramo }; guardar(); }
-    }
+    if (r?.o?.secciones) { tema.oido = r.o; guardar(); }
   } else voces = cover() || (log('  el cover falló, segundo intento…'), cover());
   if (!voces) { log('ERROR: no salió la versión con voz. Se reintenta en la próxima corrida.'); process.exit(1); }
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);
