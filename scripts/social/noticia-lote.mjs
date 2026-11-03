@@ -3,7 +3,7 @@
 // noticia desde la misma página que todo lo demás). Lo corre run-daily-images.ps1 apenas el borrador tiene imágenes.
 // Arma un lote "noticia" con la nota del sitio (vista previa completa, título y cuerpo editables) y sus piezas para
 // redes (las mismas que armaba el paso "Publicar en redes": post e historia con título, link con vista previa, X)
-// y, desde 2026-10-22, el carrusel de fotos de TikTok.
+// y, desde 2026-10-22, las placas de TikTok (desde 2026-11-03 como video con un tema de The Shorts).
 // Sale apenas se aprueba (publicarA = ahora); publicar.mjs publica primero la nota y después las redes.
 //   node scripts/social/noticia-lote.mjs [--no-abrir]
 import { spawn } from 'child_process';
@@ -12,6 +12,8 @@ import path from 'path';
 import { putFile } from '../lib/r2.mjs';
 import { cargarNoticia, generarPiezas } from '../noticia-redes.mjs';
 import { leer, agregarLote, PAGINA } from './lib/aprobaciones.mjs';
+import { videoDeFotos } from './lib/render.mjs';
+import { elegirMusica, infoTema } from '../lib/musica.mjs';
 
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [noticia-lote] ${m}`);
@@ -30,13 +32,15 @@ else {
     await putFile(f, key);
     url[tipo] = `${WORKER}/media/${key}?v=${v}`;
   }
-  // Carrusel de TikTok (modo fotos, 2026-10-22): se publica desde los archivos locales; en R2 solo para la vista previa.
-  url.tiktok = [];
-  for (const [i, f] of piezas.tiktok.entries()) {
-    const key = `logos/noticias/redes/${n.id}-tiktok${i + 1}.jpg`;
-    await putFile(f, key);
-    url.tiktok.push(`${WORKER}/media/${key}?v=${v}`);
-  }
+  // TikTok: las placas del carrusel (2026-10-22) como video con un tema de The Shorts (Juan, 2026-11-03: toda
+  // publicación diaria suena con The Shorts; la biblioteca de TikTok no los tiene). Se publica desde el archivo local;
+  // en R2 solo para la vista previa.
+  const musica = await elegirMusica(`noticia-${n.id}-tiktok`);
+  const mp4 = path.resolve('fuentes/redes/noticias', `${n.id}-tiktok.mp4`);
+  await videoDeFotos(piezas.tiktok, mp4, { musica });
+  const keyTT = `logos/noticias/redes/${n.id}-tiktok.mp4`;
+  await putFile(mp4, keyTT);
+  url.tiktok = `${WORKER}/media/${keyTT}?v=${v}`;
   const link = `${WORKER}/og/${n.id}`;
   const sc = n.shareCaptions || {};
   // Imágenes extra (n.imagenesExtra: URLs públicas JPEG 4:5, p. ej. la placa del fixture): Instagram pasa a carrusel,
@@ -71,7 +75,7 @@ else {
       extra.length
         ? P({ id: 'x', red: 'x', formato: 'Post con imágenes', descripcion: 'Las imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: textoX, metodo: 'x-imagenes', local: { slides: [piezas.ig, ...extraLocal] } })
         : P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: textoX, metodo: 'x-texto' }),
-      P({ id: 'tiktok', red: 'tiktok', formato: 'Carrusel de fotos', descripcion: `${url.tiktok.length} placas · con un trap instrumental de TikTok (lo elige al publicar)`, media: url.tiktok.map(u => ({ tipo: 'imagen', url: u, vertical: true })), titulo: (n.tituloImagen || (n.title || '').split(/[:—|]/)[0]).trim().slice(0, 90), texto: sc.tiktok || sc.ig || n.excerpt || '', metodo: 'tiktok-fotos', local: { slides: piezas.tiktok } }),
+      P({ id: 'tiktok', red: 'tiktok', formato: 'Video de placas', descripcion: `${piezas.tiktok.length} placas · con "${infoTema(musica).titulo}" de The Shorts`, media: [{ tipo: 'video', url: url.tiktok, vertical: true }], texto: sc.tiktok || sc.ig || n.excerpt || '', musica: infoTema(musica).titulo, metodo: 'tiktok', local: { video: mp4 } }),
     ],
   });
   log(`Lote noticia-${n.id} listo para aprobar.`);

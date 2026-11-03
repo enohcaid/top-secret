@@ -55,6 +55,31 @@ export function dropDelTema(musica) {
   } catch { return null; }
 }
 
+// Fotos fijas → video vertical con fundidos, un tema de The Shorts y su tarjeta "Sonando ahora". Lo usa el carrusel de
+// TikTok de la noticia del día (Juan, 2026-11-03: toda publicación diaria suena con The Shorts, y la biblioteca de
+// sonidos de TikTok no los tiene, así que el carrusel de fotos sale como video).
+export async function videoDeFotos(fotos, salida, { musica, porFoto = 5, fundido = 0.5 }) {
+  fs.mkdirSync(path.dirname(salida), { recursive: true });
+  const { width: W, height: H } = TAM.story, m = fotos.length;
+  const total = m * porFoto - (m - 1) * fundido;
+  const args = ['-hide_banner', '-y'];
+  for (const f of fotos) args.push('-loop', '1', '-framerate', '30', '-t', String(porFoto), '-i', f);
+  args.push('-i', musica, ...(await rotuloEntrada(musica, W, H, total)));
+  let fil = fotos.map((_, i) => `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,fps=30,format=yuv420p[f${i}]`).join(';');
+  let prev = 'f0';
+  for (let i = 1; i < m; i++) { fil += `;[${prev}][f${i}]xfade=transition=fade:duration=${fundido}:offset=${(i * (porFoto - fundido)).toFixed(3)}[x${i}]`; prev = `x${i}`; }
+  fil += `;[${prev}][${m + 1}:v]overlay=0:0:eof_action=pass[v]`;
+  args.push('-filter_complex', fil, '-map', '[v]', '-map', `${m}:a`, '-t', total.toFixed(3),
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', '30',
+    '-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:d=0.3,afade=t=out:st=${(total - 1.2).toFixed(2)}:d=1.2`,
+    '-movflags', '+faststart', salida);
+  const ff = spawn(ffmpeg, args, { stdio: ['ignore', 'ignore', 'pipe'] });
+  let err = ''; ff.stderr.on('data', d => { err = (err + d).slice(-2000); });
+  const code = await new Promise(r => ff.on('close', r));
+  if (code !== 0) throw new Error('ffmpeg falló: ' + err);
+  return { salida, duracion: total };
+}
+
 // escenas: [{ n, dur }]; gancho: segundos de la pantalla de gancho al principio (0 = sin gancho).
 // fps 60 + desenfoque: se renderiza a 60 cuadros y se mezclan de a 2 (desenfoque de movimiento real) → 30 fps.
 // musicaDesde: segundo del tema en que arranca el audio (para que el drop caiga en el momento clave del video).
