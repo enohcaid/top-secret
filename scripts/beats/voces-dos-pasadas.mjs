@@ -35,13 +35,25 @@ export function vocesDosPasadas({ wav, secciones, letra, caption, captionBeat, b
     if (!ace(t)) return null;
     pausa();
   }
+  return cantar({ src: beat, wav, secciones, letra, caption, bpm, tonalidad, carpeta, semilla, fuerza: fuerzaVoz, intentos, log });
+}
+
+// Una sola pasada, como The Shorts (Juan, 2026-11-03: "armar un beat de trap con Claude y que ACE haga lo que pueda con
+// voz + beat"): ACE canta y pule nuestro beat a la vez. Fuerza 0,65 (a 0,5 corría la letra y aplanaba los cambios).
+export function vocesUnaPasada({ wav, secciones, letra, caption, bpm, tonalidad, carpeta, semilla, fuerza = 0.65, intentos = 2, log = console.log }) {
+  fs.mkdirSync(path.join(carpeta, 'voces'), { recursive: true });
+  return cantar({ src: wav, wav, secciones, letra, caption, bpm, tonalidad, carpeta, semilla, fuerza, intentos, log });
+}
+
+function cantar({ src, wav, secciones, letra, caption, bpm, tonalidad, carpeta, semilla, fuerza, intentos, log }) {
+  const dir = path.join(carpeta, 'voces'), dur = +secciones.at(-1).fin.toFixed(2);
   let mejor = null;
   for (let k = 1; k <= intentos; k++) {
     const salida = path.join(dir, `cantado-${k}.wav`);
     if (!fs.existsSync(salida)) {
-      log(`  2/2 ACE canta el tema entero sobre el beat pulido (intento ${k}, fuerza ${fuerzaVoz})…`);
+      log(`  ACE canta el tema entero (intento ${k}, fuerza ${fuerza})…`);
       const t = path.join(dir, `trabajo-voz-${k}.json`);
-      fs.writeFileSync(t, JSON.stringify({ caption, bpm, tonalidad, fuerza: fuerzaVoz, semilla: semilla + 7919 * (k - 1), tramos: [{ src: beat, letra, duracion: dur, salida }] }, null, 2));
+      fs.writeFileSync(t, JSON.stringify({ caption, bpm, tonalidad, fuerza, semilla: semilla + 7919 * (k - 1), tramos: [{ src, letra, duracion: dur, salida }] }, null, 2));
       if (!ace(t)) { log(`  el intento ${k} falló`); continue; }
     }
     const o = oirTema({ instrumental: wav, cantado: salida, secciones, letra, carpeta });

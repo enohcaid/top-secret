@@ -42,6 +42,11 @@ let ID = PARTE && PARTE !== '1' ? `${FECHA}-${PARTE}` : FECHA;
 // qué logra"). Entra a aprobar.html como cualquier demo, marcado `motor: 'local'`; sus revisiones también van con Gemma.
 let LOCAL = argv.includes('--local');
 if (LOCAL) ID += '-local';
+// --album (Juan, 2026-11-03, "lo que mejor funcionó es armar un beat de trap con Claude y que ACE haga lo que pueda con
+// voz + beat"): el esqueleto de The Shorts (beat por código de Claude + un cover de ACE) con lo aprendido en el carril
+// local: ángulo/casting/energía del álbum, historia, letra "menos es más" con sus controles y el oído eligiendo el cover.
+let ALBUMV = argv.includes('--album');
+if (ALBUMV) ID += '-album';
 const tiempos = {}, cron = (k, t0) => { tiempos[k] = (tiempos[k] || 0) + Math.round((Date.now() - t0) / 1000); };
 // --revisar <slug>: rehace las partes que Juan marcó "a mejorar" en aprobar.html, con su comentario (musica-aprobacion.mjs)
 const REVISAR = opt('--revisar', null);
@@ -66,12 +71,16 @@ if (REVISAR) {
   if (!tema?.revision) { log(`Nada que revisar en ${REVISAR}.`); process.exit(0); }
   ID = tema.id || tema.fecha;
   if (tema.motor === 'local') LOCAL = true;
+  if (tema.metodo === 'album') ALBUMV = true;
 } else if (SEGUIR) {
   if (!tema) { log(`No existe ${SEGUIR}.`); process.exit(1); }
   ID = tema.id || tema.fecha; delete tema.revision;
   if (tema.motor === 'local') LOCAL = true;
+  if (tema.metodo === 'album') ALBUMV = true;
 } else if (tema?.fijo || tema?.letraFinal) { log(`El tema ${ID} ya está terminado: "${tema.titulo}".`); process.exit(0); }
 if (LOCAL) process.env.IA_SOLO_LOCAL = '1';
+const NUEVO = LOCAL || ALBUMV;   // lo aprendido del álbum (concepto, historia, letra v2) vale para los dos
+const CLAUDE_PRIMERO = ALBUMV ? { orden: ['claude', 'local'], claudeModelo: 'sonnet' } : {};
 fs.mkdirSync(DIR, { recursive: true });
 // Una sola corrida a la vez (una prueba a mano y la tarea de las 2:00 se pisarían el mismo tema)
 const LOCK = path.join(DIR, '.corriendo');
@@ -136,7 +145,7 @@ ${fb('voces')}`,
 // ── 1. Concepto y sonido ─────────────────────────────────────────────────────
 // carril local (Juan, 2026-11-01): un concepto de álbum y cada tema desde un ángulo distinto; ángulo, voces y tempo se
 // eligen entre lo que no se usó en los temas recientes (thrive-album.mjs)
-if (!tema && LOCAL) {
+if (!tema && NUEVO) {
   const { ALBUM, ANGULOS, ENERGIAS, CASTING, opciones } = await import('./thrive-album.mjs');
   const op = opciones(reg.temas);
   const anteriores = reg.temas.slice(-12).map(t => `- "${t.titulo}" · ${t.angulo ? `angle ${t.angulo}, ` : ''}${t.rasgo} · ${t.bpm} BPM · voices: ${t.captionVoces} · beat: ${t.captionInstrumental}`).join('\n');
@@ -150,12 +159,16 @@ if (!tema && LOCAL) {
     casting: { type: 'string', enum: op.casting }, caption_instrumental: { type: 'string' },
     tonalidad: { type: 'string', pattern: '^[A-G][#b]? minor$' }, bpm: { type: 'integer', minimum: 128, maximum: 168 },
     estructura: { type: 'array', items: { type: 'string', enum: ['intro', 'verse', 'pre-chorus', 'chorus', 'bridge', 'outro'] }, minItems: 6, maxItems: 10 } } };
-  log('Concepto (álbum, carril local)…');
+  log(`Concepto (álbum, ${ALBUMV ? 'Claude' : 'carril local'})…`);
   const t0 = Date.now();
-  const j = await pedirJSON(encargo, { esquema: esq, temperatura: 0.95, claves: esq.required,
+  const j = await pedirJSON(encargo + (ALBUMV ? `\n\nAnswer ONLY with a JSON object with these keys: ${esq.required.join(', ')} (angulo one of: ${op.angulos.join(', ')}; casting one of: ${op.casting.join(', ')}; bpm an integer; estructura an array of section names).` : ''),
+    { esquema: esq, temperatura: 0.95, claves: esq.required, ...CLAUDE_PRIMERO,
     validar: j => {
       const e = ENERGIAS[ANGULOS[j.angulo]?.energia];
       if (!e) return `ángulo "${j.angulo}"`;
+      if (!op.casting.includes(j.casting)) return `casting "${j.casting}": one of ${op.casting.join(', ')}`;
+      if (!/^[A-G][#b]? minor$/.test(String(j.tonalidad).trim())) return `tonalidad "${j.tonalidad}": a minor key like "F# minor"`;
+      j.bpm = Math.round(Number(j.bpm));
       if (j.bpm < e.bpm[0] || j.bpm > e.bpm[1]) return `bpm ${j.bpm}: the angle "${j.angulo}" has energy ${ANGULOS[j.angulo].energia}, its tempo is ${e.bpm[0]}–${e.bpm[1]}`;
       if (!(j.estructura.filter(x => x === 'verse').length >= 2 && j.estructura.filter(x => x === 'chorus').length >= 2)) return 'the structure needs 2 verses and at least 2 choruses';
       if (!/trap/i.test(j.caption_instrumental)) return 'caption_instrumental must say trap';
@@ -167,7 +180,7 @@ if (!tema && LOCAL) {
     } });
   const slug = String(j.titulo).toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `thrive-${ID}`;
   const C = CASTING[j.casting], en = ANGULOS[j.angulo].energia;
-  tema = { ...(ID !== FECHA ? { id: ID } : {}), motor: 'local', fecha: FECHA, slug, titulo: j.titulo.trim(), angulo: j.angulo, energia: en, casting: j.casting,
+  tema = { ...(ID !== FECHA ? { id: ID } : {}), ...(LOCAL ? { motor: 'local' } : { metodo: 'album' }), fecha: FECHA, slug, titulo: j.titulo.trim(), angulo: j.angulo, energia: en, casting: j.casting,
     concepto: j.concepto.trim(), rasgo: j.rasgo.trim(), voz: C.voz, captionInstrumental: `${j.caption_instrumental.trim()}, ${ENERGIAS[en].beat}`, captionVoces: C.caption,
     bpm: j.bpm, tonalidad: j.tonalidad.trim(), duracion: 140, estructura: j.estructura };
   reg.temas.push(tema); guardar(); cron('concepto', t0);
@@ -316,7 +329,9 @@ if (!fs.existsSync(INSTR)) {
   const t0 = Date.now();
   const ejemplo = fs.readFileSync(path.join(ROOT, 'scripts/beats/temas/diario_2026_10_23_1.py'), 'utf8');
   const anteriores = reg.temas.filter(t => t !== tema && t.beat).slice(-10).map(t => `- "${t.titulo}": ${t.beat}`).join('\n') || '(none yet)';
-  const base = fs.readFileSync(path.join(ROOT, 'scripts/beats/thrive-componer.md'), 'utf8')
+  const { ENERGIAS, CASTING } = await import('./thrive-album.mjs');
+  const base = fs.readFileSync(path.join(ROOT, `scripts/beats/${ALBUMV ? 'thrive-componer-v2.md' : 'thrive-componer.md'}`), 'utf8')
+    .replace('{{VOCES}}', CASTING[tema.casting]?.caption || tema.captionVoces).replace('{{ENERGIA}}', tema.energia ? `${tema.energia}: ${ENERGIAS[tema.energia].beat}` : '')
     .replace('{{CONCEPTO}}', `"${tema.titulo}" — ${tema.concepto} (trait: ${tema.rasgo})`).replace('{{CAPTION}}', tema.captionInstrumental)
     .replace('{{ANTERIORES}}', anteriores).replace('{{REGLAS}}', fs.readFileSync(path.join(ROOT, 'docs/conocimiento/feedback_composicion_musical.md'), 'utf8').replace(/^---[\s\S]*?---\n/, ''))
     .replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{ESTRUCTURA}}', tema.estructura.join(', ')).replace('{{DURACION}}', tema.duracion)
@@ -386,7 +401,7 @@ function controlarVoces(letra) {
 // Carril local: cómo se marcan las voces según el casting del tema (thrive-album.mjs), y el control correspondiente,
 // devuelto como corrección para Gemma (Juan, 2026-11-01: rechazar la letra entera sin decir por qué gastaba las vueltas)
 async function tagsVoces() {
-  if (!LOCAL) return '';
+  if (!NUEVO) return '';
   const { CASTING } = await import('./thrive-album.mjs');
   return CASTING[tema.casting]?.tags || 'male rapper on every verse and the bridge, female ONLY in the chorus: [verse - male rap], [chorus - female sung], [bridge - male rap]';
 }
@@ -462,7 +477,7 @@ if (!tema.letra) {
   tema.duracion = Math.round(dur(INSTR)); guardar();
   // carril local: primero la historia y después la letra que la cuenta (Juan, 2026-10-31: "la letra no tiene sentido,
   // debe contarse algo"). Un modelo chico escribe mejor una letra con sentido si la trama ya está decidida.
-  if (LOCAL && !tema.historia) {
+  if (NUEVO && !tema.historia) {
     log('Historia de la letra…');
     const t0h = Date.now();
     // Juan, 2026-11-01: "letras que cuentan historias demasiado específicas y en contextos demasiado complejos, quien escuche
@@ -480,7 +495,7 @@ Rules:
 - It moves: verse 1 is the feeling now, verse 2 is how it turned (worse, sharper, colder), the bridge is what I decide.
 Answer JSON, every value in English, plain words, 1–2 sentences each, in first person ("I"):
 {"quien": "who I am in one line, as anyone could be", "verso1": "the feeling now, and 2 or 3 images that show it (objects, sounds, the body, an action)", "gancho": "the hook phrase, 2 to 5 words, easy to shout, that the chorus repeats", "estribillo": "what the hook means to me", "verso2": "how the feeling turned, and the images that show it now", "puente": "what I realize or decide"}
-${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2', 'puente'], temperatura: 0.85,
+${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2', 'puente'], temperatura: 0.85, ...CLAUDE_PRIMERO,
       validar: h => { const t = Object.values(h).join(' '), m = t.match(ESPECIFICO); if (m) return `"${m[0]}" makes it too specific: no names, cities, jobs, years or unusual plots — an everyday situation anyone has lived`;
         if (!/\b(I|I'm|my|me)\b/.test(`${h.quien} ${h.verso1}`)) return 'write it in first person ("I")'; } });
     guardar(); cron('historia', t0h);
@@ -488,12 +503,12 @@ ${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2',
   }
   const H = tema.historia;
   // carril local: encargo nuevo ("menos es más") a prueba antes de pasarlo al proceso semanal
-  const base = fs.readFileSync(path.join(ROOT, `scripts/beats/${LOCAL ? 'thrive-letra-v2.md' : 'thrive-letra.md'}`), 'utf8')
+  const base = fs.readFileSync(path.join(ROOT, `scripts/beats/${NUEVO ? 'thrive-letra-v2.md' : 'thrive-letra.md'}`), 'utf8')
     .replace('{{HISTORIA}}', H ? `- Narrator: ${H.quien}\n- Verse 1: ${H.verso1}\n- Chorus: ${H.estribillo} Hook phrase: "${H.gancho}"\n- Verse 2: ${H.verso2}\n- Bridge (the turn): ${H.puente}` : '')
     .replace('{{TITULO}}', tema.titulo).replace('{{CONCEPTO}}', tema.concepto).replace('{{RASGO}}', tema.rasgo).replace('{{CAPTION}}', tema.captionInstrumental)
     .replace('{{VOCES}}', tema.captionVoces).replace('{{TAGS}}', await tagsVoces()).replace('{{BPM}}', tema.bpm).replace('{{TONALIDAD}}', tema.tonalidad).replace('{{DURACION}}', tema.duracion)
     .replace('{{COMPAS}}', compas.toFixed(2)).replace('{{ESTRUCTURA}}', tema.estructura.join(', '))
-    .replace('{{MAPA}}', secciones.map((s, i) => `${i + 1}. ${s.nombre !== '?' ? s.nombre + ' · ' : ''}${mmss(s.inicio)}–${mmss(s.fin)} · ${s.compases} bars${LOCAL ? ` → ${lineasPara(s) ? `exactly ${lineasPara(s)} lines` : 'no lyrics: tag it [Intro - instrumental] / [Outro - instrumental], at most one ad-lib line'}` : ''}`).join('\n'));
+    .replace('{{MAPA}}', secciones.map((s, i) => `${i + 1}. ${s.nombre !== '?' ? s.nombre + ' · ' : ''}${mmss(s.inicio)}–${mmss(s.fin)} · ${s.compases} bars${NUEVO ? ` → ${lineasPara(s) ? `exactly ${lineasPara(s)} lines` : 'no lyrics: tag it [Intro - instrumental] / [Outro - instrumental], at most one ad-lib line'}` : ''}`).join('\n'));
   let correcciones = fb('letra'), mejor = null;
   const t0 = Date.now();
   // Modelo local primero (Juan, 2026-10-27): 3 vueltas con Gemma corrigiendo rimas; si no rima, Claude Sonnet.
@@ -501,17 +516,17 @@ ${fb('letra')}`, { claves: ['quien', 'verso1', 'gancho', 'estribillo', 'verso2',
     log(`Letra (vuelta ${i})…`);
     let letra;
     try {
-      letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: i <= 3 ? ['local', 'claude'] : ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
-        validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : CASTELLANO.test(x) ? 'castellano' : LOCAL ? null : DEPORTE.test(x) ? 'palabra deportiva' : controlarVoces(x) }))
+      letra = (await pedirTexto(base.replace('{{CORRECCIONES}}', correcciones), { orden: i <= 3 && !ALBUMV ? ['local', 'claude'] : ['claude', 'local'], claudeModelo: 'sonnet', temperatura: 0.8,   // letra con Sonnet (Juan, 2026-10-27: "solo importa que tenga rimas"; las controla rimas.py)
+        validar: x => !/\[(verse|chorus)[^\]]*\]/i.test(x) ? 'sin etiquetas de sección' : CASTELLANO.test(x) ? 'castellano' : NUEVO ? null : DEPORTE.test(x) ? 'palabra deportiva' : controlarVoces(x) }))
         .replace(/^```\w*\n?|```$/g, '').trim();
     } catch (e) { log(`  ${e.message}`); continue; }   // solo local no tiene respaldo: otra vuelta
     const r = rimas(letra);
-    const of = LOCAL ? [...oficio(letra), ...(await vocesLocal(letra))] : [];
+    const of = NUEVO ? [...oficio(letra), ...(await vocesLocal(letra))] : [];
     r.problemas = [...of, ...r.problemas]; r.ok = r.ok && !of.length;
     if (!mejor || r.problemas.length < mejor.r.problemas.length) mejor = { letra, r, motor: ultimoMotor };
     if (r.ok) break;
     log(`  a corregir: ${r.problemas.length}${of.length ? ` (oficio: ${of.map(x => x.split(':')[0]).join(' · ')})` : ''}`);
-    correcciones = `${fb('letra')}\n## Your previous version\n${letra}\n\n## ${LOCAL ? 'Fix exactly this (keep everything else)' : 'Fix these lines (they do not rhyme BY SOUND; keep everything else)'}\n- ${r.problemas.join('\n- ')}\n`;
+    correcciones = `${fb('letra')}\n## Your previous version\n${letra}\n\n## ${NUEVO ? 'Fix exactly this (keep everything else)' : 'Fix these lines (they do not rhyme BY SOUND; keep everything else)'}\n- ${r.problemas.join('\n- ')}\n`;
   }
   if (!mejor) { log('ERROR: no salió ninguna letra. Se reintenta en la próxima corrida.'); process.exit(1); }
   if (mejor.r.ok && mejor.motor === 'claude') guardarEjemplo('thrive-letra', base.replace('{{CORRECCIONES}}', ''), mejor.letra);
@@ -540,6 +555,15 @@ if (!tema.audio) {
       caption: `${tema.captionInstrumental}, ${tema.captionVoces}`, captionBeat: tema.captionInstrumental, bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log });
     voces = r?.salida;
     if (r?.o?.secciones) { tema.oido = r.o; guardar(); }
+  } else if (ALBUMV && tema.secciones?.length && fs.existsSync(WAV)) {
+    // una pasada de ACE sobre el beat de Claude, 2 semillas, queda la que el oído escucha mejor
+    const { vocesUnaPasada } = await import('./voces-dos-pasadas.mjs');
+    await liberar();
+    const semilla = [...tema.slug].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 2147483647, 7);
+    const r = vocesUnaPasada({ wav: WAV, secciones: tema.secciones, letra: tema.letra.replace(/[‘’]/g, "'").replace(/[“”]/g, '"'),
+      caption: `${tema.captionInstrumental}, ${tema.captionVoces}`, bpm: tema.bpm, tonalidad: tema.tonalidad, carpeta, semilla, log });
+    voces = r?.salida;
+    if (r?.o?.secciones) { tema.oido = r.o; guardar(); }
   } else voces = cover() || (log('  el cover falló, segundo intento…'), cover());
   if (!voces) { log('ERROR: no salió la versión con voz. Se reintenta en la próxima corrida.'); process.exit(1); }
   const final = path.join(DIR, `${tema.slug}.mp3`), d = dur(voces);
@@ -564,7 +588,7 @@ if (!tema.audio) {
 log('Letra final (Whisper)…');
 const t0Final = Date.now();
 // carril local: la letra escrita (la final de Gemma copiaba lo que Whisper oía mal: "a fractured musee", 31/10)
-if (LOCAL) { tema.letraFinal = tema.letra; log('  local: se publica la letra escrita'); }
+if (NUEVO) { tema.letraFinal = tema.letra; log('  se publica la letra escrita'); }
 else try { tema.letraFinal = await letraFinal(tema, path.join(DIR, `${tema.slug}.mp3`)); }
 catch (e) { log(`  no se pudo transcribir (${e.message}); se publica la letra escrita`); tema.letraFinal = tema.letra; tema.letraFinalFallo = true; }
 cron('letraFinal', t0Final);
