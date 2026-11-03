@@ -95,7 +95,12 @@ async function xConImagenes(texto, archivos) {
   try {
     await asegurarVentana(page);
     await page.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await espera(6000);
+    // X a veces tarda más de 15 s en armar el editor de la portada (el 2026-11-03 la noticia del día no salió en X por
+    // eso): esperarlo y, si no aparece, recargar una vez.
+    const caja = page.locator('[data-testid="tweetTextarea_0"]').first();
+    try { await caja.waitFor({ timeout: 45000 }); }
+    catch { await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 }); await caja.waitFor({ timeout: 45000 }); }
+    await espera(2000);
     await enfocar(page, '[data-testid="tweetTextarea_0"]');
     await page.keyboard.type(texto, { delay: 5 });
     if (archivos.length) await page.locator('input[data-testid="fileInput"]').first().setInputFiles(archivos);
