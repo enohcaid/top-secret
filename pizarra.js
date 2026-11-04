@@ -36,6 +36,25 @@ const FORMACIONES = {
 // Allá el arco propio está abajo (y 87) y el ataque arriba (y 14); acá cada equipo ocupa su mitad de cancha.
 const aCancha = ([x, y]) => ({ x: r3(.05 + (87 - y) / 73 * .42), y: x / 100, b: false });
 
+// Modos del equipo: reubican a los once de un 4-3-3 de la convocatoria, puesto por puesto.
+// CM = el líbero (tapón), RM/LM = medio derecho e izquierdo, CF = el 9, RW/LW = los extremos.
+const MODOS = {
+  defensa: FORMACIONES['4-3-3'],
+  ataque: { // 3-4-3: el líbero entre los centrales, los medios abiertos de laterales
+    GK: [50, 87],
+    CB1: [72, 68], CM: [50, 67], CB2: [28, 68],
+    RM: [85, 37], RB: [62, 44], LB: [38, 44], LM: [15, 37],
+    RW: [80, 14], CF: [50, 14], LW: [20, 14],
+  },
+  ultradef: { // 5-2-1-2: el líbero de tapón, el 9 de enganche, los extremos cerrados de delanteros
+    GK: [50, 87],
+    RB: [88, 62], CB1: [70, 68], CM: [50, 71], CB2: [30, 68], LB: [12, 62],
+    RM: [64, 48], LM: [36, 48],
+    CF: [50, 31],
+    RW: [64, 14], LW: [36, 14],
+  },
+};
+
 // Formación de respaldo, si la convocatoria está vacía o no se puede leer: el 3-5-2 con MCO del plan de juego.
 const XI = {
   Ivan_Cabj_La12: [.05, .5],
@@ -94,18 +113,29 @@ const posDe = f => {
   return f.def;
 };
 
-// Ubica al equipo según la convocatoria. Un puesto ocupado por alguien sin ficha (el "Prueba" de la
-// convocatoria) se muestra con una ficha genérica, para que la cancha tenga los mismos que allá.
-function aplicarEquipo(lineup) {
+// Ubica al equipo según la convocatoria y el modo. Un puesto ocupado por alguien sin ficha (el "Prueba" de
+// la convocatoria) se muestra con una ficha genérica, para que la cancha tenga los mismos que allá.
+// Espera a tener las dos lecturas: así quien entra no ve al equipo viajar del modo por defecto al vigente.
+let lineupActual;      // undefined hasta leer la convocatoria; null si no hay
+let modoLeido = false;
+let modo = 'defensa';
+let pintado = null;
+function aplicarEquipo() {
+  if (lineupActual === undefined || !modoLeido) return;
+  const lineup = lineupActual;
   const slots = (lineup && lineup.slots) || {};
   let formacion = lineup && lineup.formation;
   if (formacion === '3-5-2' && 'CM3' in slots) formacion = '3-1-4-2'; // misma corrección que convocatoria.html
   if (!FORMACIONES[formacion]) formacion = '4-3-3';
-  const puestos = FORMACIONES[formacion];
-  const ocupados = Object.keys(slots).filter(k => puestos[k] && slots[k]).sort();
+  const ocupados = Object.keys(slots).filter(k => FORMACIONES[formacion][k] && slots[k]).sort();
+  const conModos = formacion === '4-3-3' && ocupados.length > 0;
+  const puestos = conModos ? MODOS[modo] : FORMACIONES[formacion];
+  pintarModos(conModos);
   const nueva = ocupados.length ? JSON.stringify([formacion, ocupados.map(k => [k, slots[k]])]) : 'plan';
-  if (nueva === firma) return;
-  const primera = firma === null;
+  const clave = `${nueva}|${conModos ? modo : ''}`;
+  if (clave === pintado) return;
+  const primera = pintado === null;
+  pintado = clave;
   firma = nueva;
 
   fichas.filter(f => f.tipo === 'j').forEach(f => { f.def = EN_BANCO; });
@@ -139,6 +169,14 @@ function sacarFicha(f) {
   f.el.remove();
   fichas.splice(fichas.indexOf(f), 1);
   delete porId[f.id];
+}
+const botonesModo = [...document.querySelectorAll('.pz-modo')];
+function pintarModos(conModos) {
+  botonesModo.forEach(b => {
+    b.disabled = !conModos;
+    b.setAttribute('aria-pressed', String(conModos && b.dataset.modo === modo));
+  });
+  $('modos-nota').hidden = conModos;
 }
 
 // ── Geometría ────────────────────────────────────────────
@@ -303,17 +341,24 @@ function escuchar() {
     docFichas.onSnapshot(opts, snap => {
       estado.f = (snap.exists && snap.data().f) || {};
       if (arrastre) estado.f[arrastre.ficha.id] = arrastre.ultimo;
+      const m = snap.exists && snap.data().m;
+      modo = MODOS[m] ? m : 'defensa';
+      modoLeido = true;
+      aplicarEquipo();
       ubicarTodas();
       estadoRed(snap.metadata.fromCache ? 'con' : 'vivo');
-    }, e => { console.warn(e); estadoRed('off'); }),
+    }, e => { console.warn(e); estadoRed('off'); modoLeido = true; aplicarEquipo(); }),
     docTrazos.onSnapshot(opts, snap => {
       estado.t = (snap.exists && snap.data().t) || {};
       if (trazo) estado.t[trazo.id] = trazo.datos;
       dibujarTrazos();
     }, e => { console.warn(e); estadoRed('off'); }),
-    docEquipo.onSnapshot(snap => aplicarEquipo(snap.exists ? snap.data().lineup : null), e => {
+    docEquipo.onSnapshot(snap => {
+      lineupActual = (snap.exists && snap.data().lineup) || null;
+      aplicarEquipo();
+    }, e => {
       console.warn(e);
-      if (firma === null) aplicarEquipo(null);
+      if (lineupActual === undefined) { lineupActual = null; aplicarEquipo(); }
     }),
   ];
 }
@@ -468,8 +513,17 @@ conConfirmacion($('limpiar'), () => {
 conConfirmacion($('reset'), () => {
   estado.f = {};
   ubicarTodas();
-  if (docFichas) docFichas.set({ f: {} }).catch(fallo);
+  if (docFichas) docFichas.set({ f: {}, m: modo }).catch(fallo);
 });
+// Cambiar de modo reubica al equipo para todos: las movidas de jugadores se descartan; rivales y pelota quedan.
+botonesModo.forEach(b => b.addEventListener('click', () => {
+  modo = b.dataset.modo;
+  const jugadores = fichas.filter(f => f.tipo === 'j').map(f => f.id);
+  jugadores.forEach(id => { delete estado.f[id]; });
+  aplicarEquipo();
+  ubicarTodas();
+  if (docFichas) docFichas.set({ m: modo, f: Object.fromEntries(jugadores.map(id => [id, borrarCampo()])) }, { merge: true }).catch(fallo);
+}));
 
 // ── Arranque ─────────────────────────────────────────────
 new ResizeObserver(() => {
@@ -478,4 +532,4 @@ new ResizeObserver(() => {
   requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('quieto')));
 }).observe(area);
 medir();
-if (docFichas) escuchar(); else { estadoRed('off'); aplicarEquipo(null); }
+if (docFichas) escuchar(); else { estadoRed('off'); lineupActual = null; modoLeido = true; aplicarEquipo(); }

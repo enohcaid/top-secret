@@ -55,6 +55,17 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 .c-o{--trazo:var(--oro);} .c-b{--trazo:var(--tiza);} .c-r{--trazo:var(--rival);}
 .pz-color i{background:var(--trazo);}
 
+.pz-campo{flex:1;min-height:0;min-width:0;display:flex;gap:10px;}
+.pz-modos{flex:none;width:108px;display:flex;flex-direction:column;justify-content:center;gap:6px;}
+.pz-modo{display:flex;flex-direction:column;align-items:center;gap:1px;padding:10px 4px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:background-color .15s,border-color .15s,color .15s;}
+.pz-modo b{font:700 1.02rem/1.1 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;}
+.pz-modo small{font:600 .74rem/1.1 'Barlow',sans-serif;color:var(--mid);}
+.pz-modo:hover:not(:disabled):not([aria-pressed="true"]){background:var(--card2);}
+.pz-modo:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.pz-modo[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--bg);}
+.pz-modo[aria-pressed="true"] small{color:var(--bg);}
+.pz-modo:disabled{opacity:.45;cursor:not-allowed;}
+.pz-modos-nota{font-size:.72rem;line-height:1.25;color:var(--mid);text-align:center;}
 .pz-area{flex:1;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;}
 #stage{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;flex:none;}
 #stage[data-tool="mover"] .tk{cursor:grab;}
@@ -94,8 +105,19 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
   .pz-tools{width:100%;justify-content:space-between;}
   .pz-title h1{font-size:1.55rem;}
 }
+/* Celular parado: no hay lugar al costado, los modos van en una fila arriba de la cancha. */
+@media(max-width:760px) and (orientation:portrait){
+  .pz-campo{flex-direction:column;gap:6px;}
+  .pz-modos{width:auto;flex-direction:row;flex-wrap:wrap;}
+  .pz-modo{flex:1;padding:5px 4px;}
+  .pz-modos-nota{width:100%;}
+}
 /* Celular acostado: la barra pasa al costado para dejarle el alto a la cancha. */
 @media(max-height:500px) and (orientation:landscape){
+  .pz-group{flex-wrap:wrap;}
+  .pz-modos{width:76px;}
+  .pz-modo{padding:6px 2px;}
+  .pz-modo b{font-size:.86rem;}
   .pz{flex-direction:row;}
   .pz-bar{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;width:128px;overflow-y:auto;}
   .pz-title{margin:0;flex-wrap:wrap;gap:0 8px;}
@@ -130,15 +152,23 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
       </div>
     </div>
   </div>
-  <div class="pz-area" id="area">
-    <div id="stage" class="quieto" data-tool="mover">
-      <svg id="cancha" aria-hidden="true"></svg>
-      <svg id="trazos" aria-hidden="true"></svg>
-      <div id="banco"><span>Suplentes</span></div>
+  <div class="pz-campo">
+    <div class="pz-modos" role="group" aria-label="Modo del equipo">
+      <button class="pz-modo" type="button" data-modo="defensa" aria-pressed="true"><b>Defensa</b><small>4-3-3</small></button>
+      <button class="pz-modo" type="button" data-modo="ataque" aria-pressed="false"><b>Ataque</b><small>3-4-3</small></button>
+      <button class="pz-modo" type="button" data-modo="ultradef" aria-pressed="false"><b>Ultradef</b><small>5-2-1-2</small></button>
+      <p class="pz-modos-nota" id="modos-nota" hidden>Los modos necesitan un 4-3-3 en la convocatoria</p>
+    </div>
+    <div class="pz-area" id="area">
+      <div id="stage" class="quieto" data-tool="mover">
+        <svg id="cancha" aria-hidden="true"></svg>
+        <svg id="trazos" aria-hidden="true"></svg>
+        <div id="banco"><span>Suplentes</span></div>
+      </div>
     </div>
   </div>
 </main>
-<script type="module" src="pizarra.js?v=2"></script>
+<script type="module" src="pizarra.js?v=3"></script>
 <script src="layout.js?v=26"></script>
 </body>
 </html>
