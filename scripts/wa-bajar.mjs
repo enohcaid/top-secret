@@ -4,6 +4,7 @@
  * scripts/wa-enviar.mjs y scripts/amistosos.mjs: no correrlo con el bot de amistosos prendido).
  *
  *   node scripts/wa-bajar.mjs --de 59893798044 [--horas 24] [--dir fuentes/wa/recibidos]
+ *   node scripts/wa-bajar.mjs --de yo [--horas 3]     → lo que Juan se mandó a sí mismo ("Mensaje a mí mismo")
  *
  * Lista también los textos recibidos en ese lapso. Guarda cada archivo con fecha + nombre original.
  */
@@ -44,7 +45,8 @@ client.on('ready', async () => {
       console.log(lista.join('\n') || 'Nada.');
       await client.destroy(); process.exit();
     }
-    const id = await client.getNumberId(de.replace(/\D/g, ''));
+    const propio = de === 'yo';
+    const id = propio ? client.info.wid : await client.getNumberId(de.replace(/\D/g, ''));
     if (!id) throw new Error(`${de} no tiene WhatsApp`);
     // El contacto puede estar como @c.us y como @lid (getChatById rompe con @lid): se busca su chat
     // más reciente con cualquiera de los dos ids.
@@ -71,7 +73,7 @@ client.on('ready', async () => {
     for (const m of msgs) {
       const hora = new Date(m.t * 1000).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
       if (m.type === 'revoked') continue;
-      if (m.yo || m.type === 'chat') { console.log(`[${hora}] ${m.yo ? 'Juan' : 'recibido'} ${m.type}: ${m.body}`); continue; }
+      if ((m.yo && !propio) || m.type === 'chat') { console.log(`[${hora}] ${m.yo ? 'Juan' : 'recibido'} ${m.type}: ${m.body}`); continue; }
       // msg.downloadMedia() de whatsapp-web.js 1.34.7 no anda con la WhatsApp Web actual (2026-10-27):
       // se usa lo mismo que la rama main de GitHub (resolveMediaBlob): bajar y leer la caché en memoria.
       const media = await client.pupPage.evaluate(async (chatId, i, t) => {
