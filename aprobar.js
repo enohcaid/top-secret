@@ -248,8 +248,8 @@
   const finGuion = l => l.semanaHasta ? Date.parse(l.semanaHasta) + DIA
     : (m => m ? Date.parse(m[1] + 'T00:00:00-03:00') + 7 * DIA : Date.parse(l.creado) + 10 * DIA)(l.id.match(/(\d{4}-\d{2}-\d{2})$/));
   const estadoLote = l => {
-    if (l.etapa === 'musica') return l.estado === 'publicado' ? (Date.now() - Date.parse(l.creado) < 7 * DIA ? 'publicadas' : null)
-      : !l.estado && sinDecidir(l) ? 'aprobar' : 'programadas';
+    // Tema aprobado: sale de acá y queda en /music, álbum Thrive (Juan, 2026-11-04)
+    if (l.etapa === 'musica') return l.estado === 'publicado' ? null : !l.estado && sinDecidir(l) ? 'aprobar' : 'programadas';
     if (sinDecidir(l)) return 'aprobar';
     if (l.etapa === 'guion') return Date.now() < finGuion(l) && l.piezas.some(p => p.decision === 'aprobada') ? 'programadas' : null;
     if (l.piezas.some(p => p.decision === 'aprobada' && p.estado !== 'publicado')) return 'programadas';
@@ -287,9 +287,8 @@
         + (prod.length ? bloque('Ideas aprobadas, en producción', 'Se están produciendo; cuando estén listas vuelven a "Para aprobar".', prod, '') : '');
     } else if (pestana === 'demos') {
       const m = e => por[e].filter(esMus);
-      cuerpo = bloque('Demos para escuchar', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, se publica en /music.', m('aprobar'), 'No hay demos esperando.')
-        + (m('programadas').length ? bloque('En revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Demos para escuchar".', m('programadas'), '') : '')
-        + (m('publicadas').length ? bloque('Publicadas', 'Lo que salió en los últimos 7 días.', m('publicadas'), '') : '');
+      cuerpo = bloque('Demos para escuchar', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, sale de acá y queda en /music, en Thrive.', m('aprobar'), 'No hay demos esperando.')
+        + (m('programadas').length ? bloque('En revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Demos para escuchar".', m('programadas'), '') : '');
     } else {
       cuerpo = bloque('Publicadas', 'Lo que salió en los últimos 7 días.', por.publicadas.filter(l => !esMus(l)).sort((a, b) => cuando(b) - cuando(a)), 'Nada publicado en los últimos días.');
     }

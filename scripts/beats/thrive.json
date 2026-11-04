@@ -1047,11 +1047,11 @@
       "concepto": "Cuando no tenías nada, siempre hubo alguien que seguía contestando tus llamadas, y hoy le debes más de lo que el dinero puede pagar.",
       "rasgo": "Lealtad agradecida",
       "voz": "rapero en los versos, ella solo en el estribillo",
-      "captionInstrumental": "Bouncy dark trap beat, swung hi-hats, jumping 808 bass, snappy half-time snare, dark bell melody, drums dropping out before hooks",
+      "captionInstrumental": "Bouncy trap beat, swung hi-hats, jumping 808 bass, snappy half-time snare, plucky bells, warm muted guitar loop, playful and confident, drums dropping out before hooks, bouncy, playful, swung hats, 808 that jumps",
       "captionVoces": "male rapper on the verses with a gritty flow, a female voice sings only the chorus hook, short and catchy",
       "bpm": 150,
       "tonalidad": "D minor",
-      "duracion": 144,
+      "duracion": 142,
       "estructura": [
         "intro",
         "verse",
@@ -1064,6 +1064,70 @@
         "chorus",
         "outro"
       ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 6.4,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 6.4,
+          "fin": 32,
+          "compases": 16
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 32,
+          "fin": 38.4,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 38.4,
+          "fin": 51.2,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 51.2,
+          "fin": 76.8,
+          "compases": 16
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 76.8,
+          "fin": 83.2,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 83.2,
+          "fin": 96,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 96,
+          "fin": 115.2,
+          "compases": 12
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 115.2,
+          "fin": 128,
+          "compases": 8
+        },
+        {
+          "nombre": "outro",
+          "inicio": 128,
+          "fin": 140.8,
+          "compases": 8
+        }
+      ],
+      "beat": "Rebote con ternura: guitarra muteada que \"contesta\" con una campana en los huecos, y un 808 que salta de octava.",
+      "instrumental": "codigo",
       "historia": {
         "quien": "I'm just someone trying to get by, like everyone else.",
         "verso1": "There's a dull ache behind my eyes, like a constant low hum. I keep checking my phone, even though it's quiet, and the taste of stale coffee lingers on my tongue.",
@@ -1072,6 +1136,8 @@
         "verso2": "The shadows feel deeper now, a chill seeping into my bones. The silence on the line is heavier, a tightening in my chest, and I find myself staring at the 6 a.m. bus schedule.",
         "puente": "I will pay it forward. Their loyalty is a debt I carry, a promise to keep the light on for someone else when their world goes dark."
       },
+      "letra": "[Intro - instrumental]\n\n[Verse 1 - male rap]\nDull hum behind my eyes all day\nStale coffee sitting on my tongue (yeah)\nI check the phone, the screen is black\nCheck it again, nothing came back (again)\nThree a.m., the kitchen light stays on\nThumb on the glass like it's gonna ring\nBack then you picked up every time\nNow I just watch the minutes climb\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Verse 2 - male rap]\nShadows got longer on the wall\nCold crawling up inside my bones (no)\nThe line goes quiet, and it's worse\nChest pulled tight, I swallow, it hurts\nStaring at the six a.m. bus times\nFinger on the map, don't know where\nPockets empty, but my phone still lights (I know)\n'Cause you pick up, you're always there\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Bridge - male rap]\nI will pay it forward, that's my word\nYour loyalty's a debt I carry\nNot a weight, it's a promise I keep\nWhen their world goes dark, I won't sleep\nI'm the light left on, I'm the phone that rings\nFirst ring, I'm there, that's what the debt brings (I know)\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Outro - instrumental]",
+      "letraPor": "claude",
       "oido": {
         "secciones": [
           {
@@ -1165,77 +1231,10 @@
         "fallas": 11,
         "puntaje": 0.716
       },
-      "publicado": true,
-      "revision": {
-        "beat": "Juan: tiene cosas interesantes y un estribillo marcado (mantener eso), pero NO es trap y suena como si estuviera adentro de una caja: nada de guitarra muteada ni texturas cálidas en los medios; 808 y bombo dominan los graves, hats nítidos arriba, melodía oscura y filtrada por encima de 300 Hz."
-      },
-      "version": 2,
-      "secciones": [
-        {
-          "nombre": "intro",
-          "inicio": 0,
-          "fin": 6.4,
-          "compases": 4
-        },
-        {
-          "nombre": "verse",
-          "inicio": 6.4,
-          "fin": 32,
-          "compases": 16
-        },
-        {
-          "nombre": "pre-chorus",
-          "inicio": 32,
-          "fin": 38.4,
-          "compases": 4
-        },
-        {
-          "nombre": "chorus",
-          "inicio": 38.4,
-          "fin": 51.2,
-          "compases": 8
-        },
-        {
-          "nombre": "verse",
-          "inicio": 51.2,
-          "fin": 76.8,
-          "compases": 16
-        },
-        {
-          "nombre": "pre-chorus",
-          "inicio": 76.8,
-          "fin": 83.2,
-          "compases": 4
-        },
-        {
-          "nombre": "chorus",
-          "inicio": 83.2,
-          "fin": 96,
-          "compases": 8
-        },
-        {
-          "nombre": "bridge",
-          "inicio": 96,
-          "fin": 115.2,
-          "compases": 12
-        },
-        {
-          "nombre": "chorus",
-          "inicio": 115.2,
-          "fin": 128,
-          "compases": 8
-        },
-        {
-          "nombre": "outro",
-          "inicio": 128,
-          "fin": 140.8,
-          "compases": 8
-        }
-      ],
-      "beat": "la campana que llama y siempre recibe respuesta — cada frase tiene su eco",
-      "instrumental": "codigo",
-      "letra": "[Intro - instrumental]\n\n[Verse 1 - male rap]\nDull hum behind my eyes all day\nPhone face up, nothing to say\nI check it twice, then once again (again)\nStale coffee taste, been there since ten\nThumb on your name, I don't press call\nYou picked up when I had nothing at all\nEvery time, by the second ring\nThat's the one sound that means anything (yeah)\n\n[Pre-Chorus - male rap]\nNothing in my pockets then\nYou were the one who answered when\n\n[Chorus - female vocal]\nStill here, still mine, every time\nStill here, still mine, every time\nI owe you everything, you're still mine\nStill here, still mine, every time\n\n[Verse 2 - male rap]\nShadows crawl in deeper now\nCold gets in and it won't go down\nLine gone quiet, heavy as stone\nChest pulled tight, I'm breathing alone (no)\nStaring at the six a.m. bus times\nSame one I rode on my last dimes\nYou never asked me where I'd been\nJust said I'm up, come on in (I know)\n\n[Pre-Chorus - male rap]\nMoney can't cover this one\nCount it twice, it's still not done\n\n[Chorus - female vocal]\nStill here, still mine, every time\nStill here, still mine, every time\nI owe you everything, you're still mine\nStill here, still mine, every time\n\n[Bridge - male rap]\nI'll pay it forward, that's my word\nThat debt's the sweetest thing I've heard\nWhen someone's world goes dark and cold\nI'll be the one who's there to hold\nSecond ring, and I'll say it slow\nI'm here, you're mine, you know\n\n[Chorus - female vocal]\nStill here, still mine, every time\nStill here, still mine, every time\nI owe you everything, you're still mine\nStill here, still mine, every time\n\n[Outro - instrumental]",
-      "letraPor": "claude"
+      "audio": "musica/thrive/still-mine.mp3?v=mw0oud6p",
+      "generado": "2026-11-03T12:52:52.417Z",
+      "letraFinal": "[Intro - instrumental]\n\n[Verse 1 - male rap]\nDull hum behind my eyes all day\nStale coffee sitting on my tongue (yeah)\nI check the phone, the screen is black\nCheck it again, nothing came back (again)\nThree a.m., the kitchen light stays on\nThumb on the glass like it's gonna ring\nBack then you picked up every time\nNow I just watch the minutes climb\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Verse 2 - male rap]\nShadows got longer on the wall\nCold crawling up inside my bones (no)\nThe line goes quiet, and it's worse\nChest pulled tight, I swallow, it hurts\nStaring at the six a.m. bus times\nFinger on the map, don't know where\nPockets empty, but my phone still lights (I know)\n'Cause you pick up, you're always there\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Bridge - male rap]\nI will pay it forward, that's my word\nYour loyalty's a debt I carry\nNot a weight, it's a promise I keep\nWhen their world goes dark, I won't sleep\nI'm the light left on, I'm the phone that rings\nFirst ring, I'm there, that's what the debt brings (I know)\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Outro - instrumental]",
+      "publicado": true
     }
   ]
 }

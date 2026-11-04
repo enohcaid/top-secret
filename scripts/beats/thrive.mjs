@@ -30,6 +30,7 @@ import { pedirPartitura, leer, criticar, reintentar, guardarPartitura, planCompa
 import { armarCatalogo } from './catalogo.mjs';
 import { letraFinal } from './letra-final.mjs';
 import { mandarAAprobar } from './musica-aprobacion.mjs';
+import { leer as leerAprobaciones, guardarKV } from '../social/lib/aprobaciones.mjs';
 
 loadEnv();
 const argv = process.argv.slice(2);
@@ -140,6 +141,9 @@ ${fb('voces')}`,
     tema.version = v;
   }
   guardar();
+  // mientras se rehace, la demo anterior no se puede aprobar: aprobarla publicaba un tema ya sin audio ("Still Mine", 04/11)
+  const apr = await leerAprobaciones(), lote = apr.lotes.find(l => l.id === `musica-${REVISAR}`);
+  if (lote && !lote.estado) { lote.estado = 'revisando'; lote.revisandoDesde = new Date().toISOString(); await guardarKV('aprobaciones', apr); }
 }
 
 // ── 1. Concepto y sonido ─────────────────────────────────────────────────────
