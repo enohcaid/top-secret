@@ -53,7 +53,7 @@ const PLAYERS = [
   { key: 'nikileo527',       num: 10, idRefs: t4('nikileo527', true) },
   { key: 'pepolemmo2710',    num: 15, idRefs: t4('pepolemmo2710', true) },
   { key: 'NicoBJ_96',        num: 9,  idRefs: t4('NicoBJ_96', true) },
-  { key: 'davidelapaternal', num: 11, idRefs: t4('davidelapaternal'),
+  { key: 'davidelapaternal', num: 34, idRefs: t4('davidelapaternal'),
     lookNote: 'Rasgos del este asiático, piel clara, pelo negro lacio con flequillo que le cae sobre la frente, sin barba, contextura atlética, SIN anteojos, SIN tatuajes y SIN mangas térmicas. En la carta lleva el kit de otro club (LAFC, con "BMO" y adidas): NO va nada de ese uniforme.' },
 ];
 

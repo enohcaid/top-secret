@@ -7,7 +7,7 @@ const WORKER     = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const MEDIA_BASE = WORKER + '/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores o fotos editoriales
 // (duplas, nosotros, hero) — R2 las cachea un año en el navegador.
-const RENDER_V = '2026-09-30';
+const RENDER_V = '2026-11-04';
 const mediaUrl = p => MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (/^(Renders\/|logos\/duos\/|logos\/nosotros\/|logos\/hero-)/.test(p) ? '?v=' + RENDER_V : '');
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -831,7 +831,7 @@ function plataformaBadge(p) {
 /* ─── PATHS ─── */
 const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores (R2 los cachea un año en el navegador).
-const RENDER_V = '2026-09-30';
+const RENDER_V = '2026-11-04';
 function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (p.startsWith('Renders/') ? '?v=' + RENDER_V : ''); }
 function renderFolder(p) { return p.folderOverride || p.key; }
 function brazosPath(p)   { return mediaUrl(`Renders/${renderFolder(p)}/Brazos.png`); }

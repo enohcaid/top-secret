@@ -6,7 +6,7 @@ import { ESCUDOS } from './estadisticas-escudos.js?v=7';
 
 export const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: mismo valor que plantilla.html / convocatoria.html / index-home.js (R2 cachea un año).
-export const RENDER_V = '2026-09-30';
+export const RENDER_V = '2026-11-04';
 // Fotos grupales T4 en R2 logos/grupales/. Generadas con ChatGPT (scripts/grupales-chatgpt.mjs): el hero de
 // estadisticas.html usa "estudio-suelto"; las demás quedan para otros usos (noticias, redes, inicio). Las compuestas con los renders (scripts/fotos-grupales-t4.mjs) quedan de respaldo.
 export const GRUPALES_IA_T4 = {

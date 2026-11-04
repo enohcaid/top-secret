@@ -593,7 +593,7 @@ const PLAYERS = [
   { name:'nikileo527',       pos:'EI',  num:'', folder:'nikileo527'       },
   { name:'pepolemmo2710',    pos:'ED',  num:'', folder:'pepolemmo2710'    },
   { name:'NicoBJ_96',        pos:'DC',  num:'', folder:'NicoBJ_96'        },
-  { name:'davidelapaternal', pos:'MCI', num:11, folder:'davidelapaternal' },
+  { name:'davidelapaternal', pos:'MCI', num:34, folder:'davidelapaternal' },
   { name:'Prueba',          pos:'MCD', num:'', folder:null, isGuest:true },
 ];
 
@@ -1411,7 +1411,7 @@ function fmtEdit(name) {
 /* ─── PHOTO HELPERS ─── */
 const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores (R2 los cachea un año en el navegador).
-const RENDER_V = '2026-09-30';
+const RENDER_V = '2026-11-04';
 function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (p.startsWith('Renders/') ? '?v=' + RENDER_V : ''); }
 function brazosPath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Brazos.png`); }
 function frontePath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Frente.png`); }

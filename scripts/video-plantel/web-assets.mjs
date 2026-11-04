@@ -14,7 +14,7 @@ import sharp from 'sharp';
 import { ROSTER_T4 } from '../../roster.js';
 import { putFile } from '../lib/r2.mjs';
 
-export const VER = 'v1';
+export const VER = 'v2';
 export const SPRITE = { n: 22, cols: 6, fw: 480, fh: 854 };   // 22 cuadros = uno cada 2 de los 44 de la entrada
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')), '../..');
 const FR = path.join(ROOT, 'fuentes/video-plantel/Gesto4/frames');

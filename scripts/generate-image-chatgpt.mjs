@@ -290,7 +290,7 @@ const PLAYER_TRAITS = {
   'Lil_Dekuroko':     { dorsal: 22, desc: 'piel morena, pelo corto rizado rojo/borgoña, máscara de calavera blanca cubriendo nariz y boca' },
   'Lautavester7':     { dorsal: 7,  desc: 'piel oscura, pelo muy corto teñido azul claro, barba negra tupida, anteojos deportivos rojos espejados' },
   'NicoBJ_96':        { dorsal: 9,  desc: 'piel oscura, pelo corto rubio platinado, barba negra larga y tupida' },
-  'davidelapaternal': { dorsal: 11, desc: 'rasgos del este asiático, piel clara, pelo negro lacio con flequillo sobre la frente, sin barba, cara joven' },
+  'davidelapaternal': { dorsal: 34, desc: 'rasgos del este asiático, piel clara, pelo negro lacio con flequillo sobre la frente, sin barba, cara joven' },
 };
 
 // Dorsales vigentes desde Firestore (plantel/activo.numeros) — la misma fuente

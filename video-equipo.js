@@ -9,7 +9,7 @@
    Lee de convocatoria.html: lineup, captain, PLAYERS, FORMATIONS, SLOT_LABEL_ES, getTodayMatches, TODAY. */
 (function () {
   const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
-  const VER = 'v1';                                        // mismo VER que web-assets.mjs
+  const VER = 'v2';                                      // mismo VER que web-assets.mjs
   const SPRITE = { base: `${MEDIA}/video-equipo/${VER}/`, n: 22, cols: 6, fw: 480, fh: 854 };
   const ESCENA_JS = 'scripts/video-plantel/escena.js?v=4';
   const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5/+esm';
