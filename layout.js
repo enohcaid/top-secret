@@ -17,10 +17,11 @@
   // Menú agrupado. `url` del grupo = a dónde lleva el click; `items` = desplegable.
   const NAV = [
     { id: 'noticias', label: 'Noticias', url: 'noticias.html', match: ['noticias.html'] },
-    { id: 'miembros', label: 'Miembros', url: 'plantilla.html', match: ['plantilla.html', 'convocatoria.html', 'convo.html', 'plan-de-juego.html'], items: [
+    { id: 'miembros', label: 'Miembros', url: 'plantilla.html', match: ['plantilla.html', 'convocatoria.html', 'convo.html', 'plan-de-juego.html', 'pizarra.html'], items: [
       { label: 'Plantel',       desc: 'Fichas del plantel T4',          url: 'plantilla.html' },
       { label: 'Convocatoria',  desc: 'Disponibilidad y armado',        url: 'convocatoria.html?vista' },
       { label: 'Plan de juego', desc: 'Táctica del equipo',             url: 'plan-de-juego.html' },
+      { label: 'Pizarra',       desc: 'Marcar jugadas en vivo',         url: 'pizarra.html' },
     ]},
     { id: 'competencias', label: 'Competencias', url: 'posiciones.html', match: ['posiciones.html', 'calendario.html', 'estadisticas.html'], items: [
       { label: 'Posiciones',    desc: 'VPN · VPUG · Espacio Gamer',             url: 'posiciones.html' },
@@ -48,7 +49,9 @@
 
   window.TS_SOCIAL = SOCIAL; // la portada arma su sección "Redes" con esta misma lista
 
-  const currentFile = location.pathname.split('/').pop() || 'index.html';
+  // Las URLs sin extensión (topsecret.ar/pizarra) cuentan como su .html para marcar el menú activo.
+  const lastSeg = location.pathname.split('/').pop() || 'index.html';
+  const currentFile = lastSeg.includes('.') ? lastSeg : `${lastSeg}.html`;
 
   // Fuentes que usa la barra/menú, por si la página no las carga.
   [['Bebas+Neue', 'Bebas+Neue'], ['Barlow+Condensed', 'Barlow+Condensed:wght@700'], ['family=Barlow:', 'Barlow:wght@400;600;700;900']].forEach(([probe, fam]) => {

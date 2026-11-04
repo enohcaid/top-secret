@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Top Secret FC · Pizarra</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Top Secret FC">
+<meta property="og:title" content="Pizarra · Top Secret FC">
+<meta property="og:description" content="La pizarra del plantel, en vivo.">
+<meta property="og:url" content="https://topsecret.ar/pizarra">
+<link rel="icon" type="image/png" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png">
+<link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --bg:#0B0A07; --card:#16130B; --card2:#1D1910;
+  --gold:#C8A84B; --gold2:#E0C979;
+  --text:#F2EEE0; --mid:rgba(242,238,224,.5); --border:rgba(242,238,224,.1);
+  --win:#22C55E; --draw:#F59E0B; --loss:#EF4444;
+  /* La cancha y las marcas no cambian con el tema: son el objeto, no la interfaz. */
+  --pasto:#14251A; --pasto2:#172B1E; --cal:rgba(242,238,224,.42); --tiza:#F2EEE0; --oro:#E0C979;
+  --rival:#E5352B; --negro:#000; --ficha:#0B0A07;
+  --topbar:64px; --gutter:clamp(10px,2vw,28px);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;line-height:1.3;padding-top:var(--topbar);overflow:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased;}
+
+.pz{height:calc(100vh - var(--topbar));height:calc(100dvh - var(--topbar));display:flex;flex-direction:column;gap:8px;padding:8px var(--gutter) max(8px,env(safe-area-inset-bottom));}
+.pz-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;flex:none;}
+.pz-title{display:flex;align-items:baseline;gap:10px;margin-right:auto;}
+.pz-title h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.9rem;letter-spacing:.03em;line-height:1;}
+.pz-status{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);white-space:nowrap;}
+.pz-dot{width:7px;height:7px;border-radius:50%;background:var(--draw);}
+.pz-status[data-s="vivo"] .pz-dot{background:var(--win);animation:pz-pulso 1.8s ease-in-out infinite;}
+.pz-status[data-s="off"] .pz-dot{background:var(--loss);}
+@keyframes pz-pulso{50%{opacity:.35;}}
+
+.pz-tools{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;}
+.pz-group{display:flex;align-items:center;gap:3px;}
+.pz-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;min-width:38px;padding:0 10px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:7px;font:600 .84rem 'Barlow',sans-serif;cursor:pointer;white-space:nowrap;transition:background-color .15s,border-color .15s,color .15s;}
+.pz-btn svg{width:17px;height:17px;flex:none;}
+.pz-btn:hover{background:var(--card2);}
+.pz-btn:focus-visible,.pz-color:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.pz-btn[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--bg);}
+.pz-btn.seguro{border-color:var(--loss);color:var(--loss);}
+.pz-color{width:30px;height:30px;border-radius:50%;background:transparent;border:2px solid transparent;padding:3px;cursor:pointer;transition:border-color .15s;}
+.pz-color i{display:block;width:100%;height:100%;border-radius:50%;}
+.pz-color[aria-pressed="true"]{border-color:var(--text);}
+.c-o{--trazo:var(--oro);} .c-b{--trazo:var(--tiza);} .c-r{--trazo:var(--rival);}
+.pz-color i{background:var(--trazo);}
+
+.pz-area{flex:1;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;}
+#stage{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;flex:none;}
+#stage[data-tool="mover"] .tk{cursor:grab;}
+#stage[data-tool="mover"] .tk.drag{cursor:grabbing;}
+#stage[data-tool="lapiz"],#stage[data-tool="flecha"]{cursor:crosshair;}
+#stage[data-tool="goma"]{cursor:cell;}
+#cancha,#trazos{position:absolute;left:0;top:0;display:block;}
+#cancha{border-radius:6px;}
+#trazos{pointer-events:none;}
+#trazos .tr{fill:none;stroke:var(--trazo);stroke-linecap:round;stroke-linejoin:round;}
+#trazos .pu{fill:var(--trazo);}
+.g-pasto{fill:var(--pasto);} .g-franja{fill:var(--pasto2);}
+.g-cal{fill:none;stroke:var(--cal);stroke-width:.32;}
+.g-pto{fill:var(--cal);}
+
+#banco{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--border);border-radius:6px;}
+#banco span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);position:absolute;left:10px;top:4px;pointer-events:none;}
+
+.tk{position:absolute;left:0;top:0;width:var(--s);height:var(--s);will-change:transform;transition:transform .2s linear;touch-action:none;}
+#stage.quieto .tk,.tk.drag{transition:none;}
+.tk.drag{z-index:5;}
+.tk.j{border-radius:50%;background:var(--ficha);box-shadow:0 0 0 2px var(--gold),0 2px 7px rgba(0,0,0,.6);}
+.tk.j img{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;pointer-events:none;-webkit-user-drag:none;}
+.tk.j b{position:absolute;right:-5px;bottom:-4px;min-width:calc(var(--s)*.42);height:calc(var(--s)*.42);padding:0 2px;display:flex;align-items:center;justify-content:center;background:var(--ficha);color:var(--gold2);border:1px solid var(--gold);border-radius:99px;font:800 max(10px,calc(var(--s)*.28))/1 'Barlow Condensed',sans-serif;pointer-events:none;}
+.tk.r svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55));pointer-events:none;}
+.tk.r .bo{fill:var(--rival);stroke:var(--rival);stroke-width:7;stroke-linejoin:round;}
+.tk.r .si{fill:var(--negro);}
+.tk.b{width:calc(var(--s)*.5);height:calc(var(--s)*.5);z-index:4;}
+.tk.b svg{display:block;width:100%;height:100%;filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));pointer-events:none;}
+
+@media(max-width:760px){
+  .pz-btn span{display:none;}
+  .pz-btn{padding:0 8px;}
+  .pz-tools{width:100%;justify-content:space-between;}
+  .pz-title h1{font-size:1.55rem;}
+}
+/* Celular acostado: la barra pasa al costado para dejarle el alto a la cancha. */
+@media(max-height:500px) and (orientation:landscape){
+  .pz{flex-direction:row;}
+  .pz-bar{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;width:128px;overflow-y:auto;}
+  .pz-title{margin:0;flex-wrap:wrap;gap:0 8px;}
+  .pz-tools{width:100%;justify-content:flex-start;}
+  .pz-btn span{display:none;}
+}
+</style>
+</head>
+<body>
+<main class="pz">
+  <div class="pz-bar">
+    <div class="pz-title">
+      <h1>Pizarra</h1>
+      <span class="pz-status" id="status" data-s="con" role="status"><i class="pz-dot"></i><span id="status-txt">Conectando</span></span>
+    </div>
+    <div class="pz-tools" role="toolbar" aria-label="Herramientas de la pizarra">
+      <div class="pz-group">
+        <button class="pz-btn" type="button" data-tool="mover" aria-label="Mover fichas" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M12 3 9 6m3-3 3 3M12 21l-3-3m3 3 3-3M3 12l3-3m-3 3 3 3M21 12l-3-3m3 3-3 3"/></svg><span>Mover</span></button>
+        <button class="pz-btn" type="button" data-tool="lapiz" aria-label="Lápiz" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-5L16 4l4 4L9 19l-5 1zM14 6l4 4"/></svg><span>Lápiz</span></button>
+        <button class="pz-btn" type="button" data-tool="flecha" aria-label="Flecha" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M9 5h10v10"/></svg><span>Flecha</span></button>
+        <button class="pz-btn" type="button" data-tool="goma" aria-label="Goma: borra el trazo que toques" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20h12M8 20l-4-4a2 2 0 0 1 0-3l9-9a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-8 8M9 8l8 8"/></svg><span>Goma</span></button>
+      </div>
+      <div class="pz-group" aria-label="Color del trazo">
+        <button class="pz-color c-o" type="button" data-color="o" aria-label="Trazo dorado" aria-pressed="true"><i></i></button>
+        <button class="pz-color c-b" type="button" data-color="b" aria-label="Trazo blanco" aria-pressed="false"><i></i></button>
+        <button class="pz-color c-r" type="button" data-color="r" aria-label="Trazo rojo" aria-pressed="false"><i></i></button>
+      </div>
+      <div class="pz-group">
+        <button class="pz-btn" type="button" id="deshacer" aria-label="Deshacer mi último trazo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2"/></svg><span>Deshacer</span></button>
+        <button class="pz-btn" type="button" id="limpiar" aria-label="Borrar todos los trazos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg><span>Borrar trazos</span></button>
+        <button class="pz-btn" type="button" id="reset" aria-label="Volver las fichas a la formación base"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6M20 12a8 8 0 1 1-2.5-5.8L4 10"/></svg><span>Reacomodar</span></button>
+      </div>
+    </div>
+  </div>
+  <div class="pz-area" id="area">
+    <div id="stage" class="quieto" data-tool="mover">
+      <svg id="cancha" aria-hidden="true"></svg>
+      <svg id="trazos" aria-hidden="true"></svg>
+      <div id="banco"><span>Suplentes</span></div>
+    </div>
+  </div>
+</main>
+<script type="module" src="pizarra.js?v=1"></script>
+<script src="layout.js?v=26"></script>
+</body>
+</html>

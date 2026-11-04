@@ -44,6 +44,7 @@ Three layers:
 | `nosotros.html` | About page (editorial, Chelsea kit-launch style): proyecto, identidad, historia (season stats computed from `SEED_MATCHES`), escudo (variants + palette), equipaciones (titular/alternativa/arquero), redes. Images in R2 `logos/nosotros/` and `logos/duos/` |
 | `reclutamiento.html` | Recruitment form (posts to Worker `/notify-reclu`) |
 | `plan-de-juego.html` | Game plan: vault-door lock (combination `3557`, client-side only — cosmetic, not real security; remembered per tab in sessionStorage) then a scroll landing page for the **3-5-2 con MCO** (principles, roles, build-up, press, attack, block, marks per rival system, corners). Tactic diagrams are SVG drawn from data in `plan-de-juego.js` (`DIAGRAMS`, `RIVALS`) — edit positions/text there. Door image in R2 `logos/plan/boveda.webp`. The old PDF (T2, 4-3-3) stays in R2 but is no longer linked |
+| `pizarra.html` | Live shared tactics board at `topsecret.ar/pizarra` (Miembros menu; logic in `pizarra.js`): T4 squad as small circular face + number tokens (11 on the pitch in the 3-5-2 con MCO, rest on the bench strip), 11 red-rimmed black rival silhouettes, ball, pencil/arrow/eraser. No login: anyone with the link can edit. See `docs/conocimiento/reference_pizarra.md` |
 
 Every page loads `layout.js?v=N` at the end of `<body>` (redesign 2026-09-28, v=11):
 - **`layout.js`** injects the only navigation: a transparent top nav (gains blur/background on scroll) with the `Clean logo` (→ index), grouped menus in `NAV` — Noticias · **Miembros** (→ plantilla; dropdown Convocatoria, Plan de juego) · **Competencias** (→ posiciones; dropdown Calendario, Estadísticas) · **Nosotros** (→ `nosotros.html`; dropdown with its chapters + every social network, list in `SOCIAL`, also exposed as `window.TS_SOCIAL`) — plus "Sumate" (reclutamiento), visit counter and theme toggle. On ≤980px it becomes a full-screen menu. **No sidebars, no social bubbles, no bottom tab bar** (the user asked to remove them; `mobile-nav.js` was deleted). It also turns each interior page's `.page-header` into a hero card with a duo image (`PAGE_ART` map → R2 `logos/duos/*.webp`) and resets the old per-page sidebar offsets (`--sb-left/--sb-right`, body margins). New pages go into `NAV` (and its `match` list so the group highlights). Themes: `cls` default (black/gold), `t3`, `dark`, `light`.
@@ -94,6 +95,7 @@ Single source of truth for historical match data. ES module exporting `SEED_MATC
 | `news/draft` | daily-news pipeline | today's auto-generated article draft |
 | `news/image_style_history` | image generator | style rotation (avoid repeats) |
 | convocatoria/plantel/reclutamiento docs | convo, convocatoria, reclutamiento | lineup state, roster, applications |
+| `plantel/pizarra`, `plantel/pizarra-trazos` | pizarra | moved tokens (`f`) and strokes (`t`); empty = base formation |
 
 Pages use the Firebase compat SDK 10.12.0 (`convo`, `convocatoria`, `estadisticas`, `plantilla`, `reclutamiento`) or the modular ESM SDK (`calendario`). All Firestore reads have local fallbacks — the site must keep working read-only if Firestore is down.
 
