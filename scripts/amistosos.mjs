@@ -35,6 +35,7 @@
  *    (Firestore calendario/estado.custom, league 'Amistoso', con escudo) → sale en la convocatoria
  *    y en la formación exportada. Cualquier otra respuesta se la reenvía a Juan para que decida.
  */
+import os from 'os';
 import wweb from 'whatsapp-web.js';
 import QRCode from 'qrcode';
 import fs from 'fs';
@@ -91,7 +92,12 @@ const yaRechazo = (...claves) => claves.filter(Boolean).map(k => st.rechazaron[k
 let auto = AUTO || st.auto === true;
 // Una sola instancia (2026-10-21): dos bots con la misma sesión de WhatsApp se pisan. Si hay otro vivo, salgo.
 const LOCK = path.join(DIR, '.bot.lock');
-try { process.kill(+fs.readFileSync(LOCK, 'utf8'), 0); console.log(horaArt(), 'ya hay un bot de amistosos corriendo: salgo'); process.exit(0); } catch {}
+// Un candado anterior al último arranque de Windows es de un bot que murió con la PC: su PID puede ser ahora de otro
+// proceso (2026-11-04: TextInputHost.exe) y el bot no arrancaba en todo el día creyendo que ya había otro.
+try {
+  const previo = fs.statSync(LOCK).mtimeMs >= Date.now() - os.uptime() * 1000;
+  if (previo) { process.kill(+fs.readFileSync(LOCK, 'utf8'), 0); console.log(horaArt(), 'ya hay un bot de amistosos corriendo: salgo'); process.exit(0); }
+} catch {}
 fs.writeFileSync(LOCK, String(process.pid));
 process.on('exit', () => { try { if (fs.readFileSync(LOCK, 'utf8') === String(process.pid)) fs.rmSync(LOCK); } catch {} });
 // Pausa por WhatsApp: "apagar" duerme el bot hasta las 22:00; "desactivar" además deja este archivo,
