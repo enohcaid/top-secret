@@ -1,6 +1,8 @@
 // Pizarra en vivo (topsecret.ar/pizarra). Todo lo que se mueve o se dibuja se comparte por Firestore:
-//   plantel/pizarra         → f: { <id ficha>: {x, y, b} }   solo las fichas que alguien movió
-//   plantel/pizarra-trazos  → t: { <id trazo>: {c, k, p} }   c color, k 'l' lápiz | 'a' flecha, p [x,y,x,y…]
+//   plantel/pizarra         → f: { <id ficha>: {x, y, b, l} }   solo las fichas que alguien movió
+//   plantel/pizarra-trazos  → t: { <id trazo>: {c, k, p} }      c color, k 'l' lápiz | 'a' flecha, p [x,y,x,y…]
+// El equipo sale de la cancha de la convocatoria (convocatoria/state.lineup, solo lectura). La movida de un
+// jugador guarda en `l` la alineación para la que se hizo: si la convocatoria cambia, deja de valer.
 // Coordenadas en un marco único de cancha: x 0→1 de nuestro arco al rival, y 0→1 a lo ancho. La PC la
 // ve acostada y el celular parada (nuestro arco abajo): el giro se resuelve solo al dibujar (toPx/fromPx).
 import { ROSTER_T4 } from './roster.js';
@@ -21,7 +23,20 @@ const MAX_PUNTOS = 300;
 const PASO_MIN = 0.004;
 const ALTO_LARGO = 105, ALTO_ANCHO = 68;
 
-// Formación base: el 3-5-2 con MCO del plan de juego. Quien no está acá arranca en el banco.
+// Posiciones de FORMATIONS en convocatoria.html, [x, y] en %. Si se agrega una formación allá, agregarla acá.
+const FORMACIONES = {
+  '4-3-3': { GK: [50, 87], RB: [85, 63], CB1: [64, 66], CB2: [36, 66], LB: [15, 63], RM: [75, 37], CM: [50, 44], LM: [25, 37], RW: [80, 14], CF: [50, 14], LW: [20, 14] },
+  '4-4-2': { GK: [50, 87], RB: [85, 63], CB1: [64, 66], CB2: [36, 66], LB: [15, 63], RM: [80, 37], CM1: [60, 44], CM2: [40, 37], LM: [20, 37], ST1: [64, 14], ST2: [36, 14] },
+  '4-2-3-1': { GK: [50, 87], RB: [85, 63], CB1: [64, 66], CB2: [36, 66], LB: [15, 63], CDM1: [62, 49], CDM2: [38, 49], RAM: [78, 34], CAM: [50, 31], LAM: [22, 34], CF: [50, 14] },
+  '3-5-2': { GK: [50, 87], CB1: [72, 68], CB2: [50, 67], CB3: [28, 68], RM: [86, 40], CM1: [64, 48], CM2: [36, 48], LM: [14, 40], CAM: [50, 31], ST1: [64, 14], ST2: [36, 14] },
+  '3-1-4-2': { GK: [50, 87], CB1: [72, 68], CB2: [50, 67], CB3: [28, 68], RM: [85, 37], CM1: [67, 35], CM2: [50, 44], CM3: [33, 35], LM: [15, 37], ST1: [64, 14], ST2: [36, 14] },
+  '3-4-3': { GK: [50, 87], CB1: [72, 68], CB2: [50, 67], CB3: [28, 68], RM: [85, 37], CM1: [62, 44], CM2: [38, 44], LM: [15, 37], RW: [80, 14], CF: [50, 14], LW: [20, 14] },
+  '4-1-2-1-2': { GK: [50, 87], RB: [85, 63], CB1: [64, 66], CB2: [36, 66], LB: [15, 63], CDM: [50, 53], CM1: [72, 43], CM2: [28, 43], CAM: [50, 31], ST1: [64, 14], ST2: [36, 14] },
+};
+// Allá el arco propio está abajo (y 87) y el ataque arriba (y 14); acá cada equipo ocupa su mitad de cancha.
+const aCancha = ([x, y]) => ({ x: r3(.05 + (87 - y) / 73 * .42), y: x / 100, b: false });
+
+// Formación de respaldo, si la convocatoria está vacía o no se puede leer: el 3-5-2 con MCO del plan de juego.
 const XI = {
   Ivan_Cabj_La12: [.05, .5],
   rivarola90: [.19, .25], Alexisraies23: [.16, .5], Cabers14: [.19, .75],
@@ -42,6 +57,8 @@ const r3 = v => Math.round(v * 1000) / 1000;
 
 // ── Fichas ───────────────────────────────────────────────
 const fichas = [];
+const porId = {};
+const EN_BANCO = { x: .25, y: .5, b: true };
 function agregar(id, tipo, def, html, titulo) {
   const el = document.createElement('div');
   el.className = `tk ${tipo}`;
@@ -49,12 +66,12 @@ function agregar(id, tipo, def, html, titulo) {
   el.innerHTML = html;
   if (titulo) { el.title = titulo; el.setAttribute('aria-label', titulo); }
   stage.appendChild(el);
-  fichas.push({ id, tipo, def, el });
+  porId[id] = { id, tipo, def, el };
+  fichas.push(porId[id]);
 }
 ROSTER_T4.forEach(j => {
-  const xy = XI[j.key];
   const img = `<img alt="" draggable="false" src="${MEDIA}/logos/pizarra/caras/${encodeURIComponent(j.key)}.webp">`;
-  agregar(j.key, 'j', xy ? { x: xy[0], y: xy[1], b: false } : { x: .25, y: .5, b: true }, `${img}<b>${j.num}</b>`, `${j.key} · ${j.num}`);
+  agregar(j.key, 'j', EN_BANCO, `${img}<b>${j.num}</b>`, `${j.key} · ${j.num}`);
 });
 RIVAL.forEach(([x, y], i) => agregar(`r${i + 1}`, 'r', { x, y, b: false }, SILUETA, 'Rival'));
 agregar('pelota', 'b', { x: .5, y: .5, b: false }, PELOTA, 'Pelota');
@@ -62,19 +79,67 @@ fichas.forEach(f => {
   const img = f.el.querySelector('img');
   if (img) img.addEventListener('error', () => img.remove()); // sin cara queda el número sobre la ficha
 });
-const porId = Object.fromEntries(fichas.map(f => [f.id, f]));
 
 // ── Estado compartido ────────────────────────────────────
 const estado = { f: {}, t: {} };
 let arrastre = null;   // {ficha, pointerId, ultimo}
 let trazo = null;      // trazo que estoy dibujando
 const mios = [];       // ids de mis trazos, para Deshacer
+let firma = null;      // identifica la alineación vigente; null hasta leer la convocatoria
 
 const posDe = f => {
   const s = estado.f[f.id];
-  if (s && Number.isFinite(s.x) && Number.isFinite(s.y)) return { x: clamp(s.x), y: clamp(s.y), b: !!s.b && f.tipo === 'j' };
+  const vigente = s && (f.tipo !== 'j' || s.l === firma);
+  if (vigente && Number.isFinite(s.x) && Number.isFinite(s.y)) return { x: clamp(s.x), y: clamp(s.y), b: !!s.b && f.tipo === 'j' };
   return f.def;
 };
+
+// Ubica al equipo según la convocatoria. Un puesto ocupado por alguien sin ficha (el "Prueba" de la
+// convocatoria) se muestra con una ficha genérica, para que la cancha tenga los mismos que allá.
+function aplicarEquipo(lineup) {
+  const slots = (lineup && lineup.slots) || {};
+  let formacion = lineup && lineup.formation;
+  if (formacion === '3-5-2' && 'CM3' in slots) formacion = '3-1-4-2'; // misma corrección que convocatoria.html
+  if (!FORMACIONES[formacion]) formacion = '4-3-3';
+  const puestos = FORMACIONES[formacion];
+  const ocupados = Object.keys(slots).filter(k => puestos[k] && slots[k]).sort();
+  const nueva = ocupados.length ? JSON.stringify([formacion, ocupados.map(k => [k, slots[k]])]) : 'plan';
+  if (nueva === firma) return;
+  const primera = firma === null;
+  firma = nueva;
+
+  fichas.filter(f => f.tipo === 'j').forEach(f => { f.def = EN_BANCO; });
+  if (ocupados.length) {
+    const invitados = new Set();
+    ocupados.forEach(k => {
+      let f = porId[slots[k]];
+      if (!f || f.tipo !== 'j') {
+        const id = `inv-${k}`;
+        invitados.add(id);
+        if (!porId[id]) agregar(id, 'j inv', EN_BANCO, '<i>?</i>', slots[k]);
+        f = porId[id];
+        f.tipo = 'j';
+      }
+      f.def = aCancha(puestos[k]);
+    });
+    fichas.filter(f => f.id.startsWith('inv-') && !invitados.has(f.id)).forEach(sacarFicha);
+  } else {
+    fichas.filter(f => f.id.startsWith('inv-')).forEach(sacarFicha);
+    Object.entries(XI).forEach(([key, [x, y]]) => { if (porId[key]) porId[key].def = { x, y, b: false }; });
+  }
+  if (primera) {
+    stage.classList.add('quieto', 'listo'); // la primera vez aparecen en su lugar, sin viajar desde el banco
+    ubicarTodas();
+    requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('quieto')));
+  } else {
+    ubicarTodas();
+  }
+}
+function sacarFicha(f) {
+  f.el.remove();
+  fichas.splice(fichas.indexOf(f), 1);
+  delete porId[f.id];
+}
 
 // ── Geometría ────────────────────────────────────────────
 let G = { W: 0, H: 0, parada: false, s: 40, banco: 60 };
@@ -204,12 +269,13 @@ function borrarEn(px, py) {
 }
 
 // ── Firestore ────────────────────────────────────────────
-let docFichas = null, docTrazos = null, borrarCampo = null;
+let docFichas = null, docTrazos = null, docEquipo = null, borrarCampo = null;
 try {
   if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
   const db = firebase.firestore();
   docFichas = db.collection('plantel').doc('pizarra');
   docTrazos = db.collection('plantel').doc('pizarra-trazos');
+  docEquipo = db.collection('convocatoria').doc('state');
   borrarCampo = firebase.firestore.FieldValue.delete;
 } catch (e) { console.warn('[pizarra] Firebase no disponible:', e); }
 
@@ -220,7 +286,7 @@ function estadoRed(s) {
 }
 const fallo = e => { console.warn('[pizarra] no se pudo guardar:', e); estadoRed('off'); };
 
-const enviarFicha = (f, v) => docFichas && docFichas.set({ f: { [f.id]: { x: r3(v.x), y: r3(v.y), b: !!v.b } } }, { merge: true }).catch(fallo);
+const enviarFicha = (f, v) => docFichas && docFichas.set({ f: { [f.id]: { x: r3(v.x), y: r3(v.y), b: !!v.b, ...(v.l ? { l: v.l } : {}) } } }, { merge: true }).catch(fallo);
 const enviarTrazo = (id, t) => docTrazos && docTrazos.set({ t: { [id]: t } }, { merge: true }).catch(fallo);
 function borrarTrazo(id) {
   delete estado.t[id];
@@ -245,6 +311,10 @@ function escuchar() {
       if (trazo) estado.t[trazo.id] = trazo.datos;
       dibujarTrazos();
     }, e => { console.warn(e); estadoRed('off'); }),
+    docEquipo.onSnapshot(snap => aplicarEquipo(snap.exists ? snap.data().lineup : null), e => {
+      console.warn(e);
+      if (firma === null) aplicarEquipo(null);
+    }),
   ];
 }
 function dejarDeEscuchar() { bajas.forEach(b => b()); bajas = []; }
@@ -272,7 +342,7 @@ function moverFicha(f, px, py) {
   f.el.style.transform = `translate3d(${X - lado / 2}px,${Y - lado / 2}px,0)`;
   const enBanco = f.tipo === 'j' && Y > G.H;
   const [x, y] = fromPx(X, Math.min(Y, G.H));
-  return { x: clamp(x), y: clamp(y), b: enBanco };
+  return { x: clamp(x), y: clamp(y), b: enBanco, ...(f.tipo === 'j' ? { l: firma } : {}) };
 }
 
 stage.addEventListener('pointerdown', e => {
@@ -408,4 +478,4 @@ new ResizeObserver(() => {
   requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('quieto')));
 }).observe(area);
 medir();
-if (docFichas) escuchar(); else estadoRed('off');
+if (docFichas) escuchar(); else { estadoRed('off'); aplicarEquipo(null); }
