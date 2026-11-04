@@ -28,6 +28,7 @@ const POSES = {
   'Juanchyroman08':   'ajustándose el pañuelo de la cabeza con las dos manos, mirando hacia arriba',
   'kee_viin03':       'pateando la pelota de volea, suspendido en el aire, pierna extendida',
   'NicoBJ_96':        'con los brazos extendidos y las palmas hacia abajo pidiendo calma, festejo de goleador frío',
+  'davidelapaternal': 'pisando la pelota con la suela, cuerpo de tres cuartos, cabeza levantada buscando el pase y una mano abierta marcando hacia dónde tiene que ir la jugada',
 };
 
 const prompt = (pose) => `Te adjunto el render oficial aprobado de este jugador de Top Secret FC. Hacé EXACTAMENTE al mismo jugador (misma cara, pelo, barba, tono de piel, contextura, tatuajes y accesorios) con el MISMO kit idéntico del render (mismos colores, escudo, swoosh, dorsal, medias y botines), en esta pose única y dinámica: ${pose}.

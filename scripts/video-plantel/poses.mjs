@@ -33,6 +33,7 @@ export const GESTOS = {
   Lil_Dekuroko:     'una mano en el mentón en pose pensativa y la otra en la cintura (T3).',
   Lautavester7:     'levanta el puño cerrado bien alto por encima de la cabeza, brazo estirado, el otro brazo firme al costado (T3).',
   NicoBJ_96:        'señala directo a la cámara con el dedo índice de la mano derecha, brazo extendido hacia adelante, el otro en la cintura.',
+  davidelapaternal: 'con la mano derecha se corre el flequillo hacia un costado, media sonrisa, el otro brazo suelto y relajado, peso en una pierna.',
 };
 
 const FORMAT_BLOCK = 'Cuerpo entero de pies a cabeza, con margen de aire arriba y abajo, cámara frontal, encuadre de estudio tipo ficha de videojuego (tarjeta de jugador), formato vertical 1024x1536. Fondo PNG con canal alfa real, completamente transparente — cero viñeta, resplandor, aura de color o degradado. Iluminación de estudio limpia y uniforme. Nada de texto, títulos, marcos ni marcas de agua.';

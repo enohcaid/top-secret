@@ -23,7 +23,7 @@ const PLAYERS = [
   ['rivarola90', 2], ['Alexisraies23', 3], ['Cabers14', 5], ['Elianja20', 24], ['endiabladorojo66', 66],
   ['Huber236', 8], ['Guiidow', 20], ['nikileo527', 10], ['pepolemmo2710', 15], ['Juan_Martinez4', 6],
   ['RS32-DaniStone', 13], ['CipriMancini', 14], ['Lil_Dekuroko', 22], ['Lautavester7', 7],
-  ['Juanchyroman08', 18], ['kee_viin03', 21], ['NicoBJ_96', 9],
+  ['Juanchyroman08', 18], ['kee_viin03', 21], ['NicoBJ_96', 9], ['davidelapaternal', 11],
 ];
 
 const prompt = (key, num) => `Sos el diseñador de renders oficiales de Top Secret FC (club argentino de EA Sports FC Clubs Pro). Te adjunto el render aprobado de ${key} ("Frente4.png") con el kit titular negro. Necesito EXACTAMENTE el mismo render —misma persona, misma cara, pelo, barba, tono de piel, tatuajes, contextura, anteojos, mangas térmicas, guantes, cintas, botines, misma pose de frente con los brazos extendidos, mismo encuadre y tamaño— pero con el KIT ALTERNATIVO de la Temporada 4 en lugar del negro.
