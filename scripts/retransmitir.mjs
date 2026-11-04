@@ -25,6 +25,7 @@ import { argsCodificador, argsRelevo, LOCAL_H, LOCAL_V } from './stream/salidas.
 import { crearVivoIg } from './stream/ig-vivo.mjs';
 import { tituloDeNoche, partidosDe, ponerTitulos } from './stream/titulos-vivo.mjs';
 import { temporada, convocados, espacioGamer, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
+import { clasificarInicios, clasificarFinales } from './stream/conteo-noche.mjs';
 import { fuenteDe, anotarFuente, enVivo as fuenteEnVivo } from './lib/fuente-vivo.mjs';
 const listaMusica = () => prepararMusica(log);
 
@@ -110,6 +111,7 @@ const INICIOS = path.resolve(`fuentes/stream/inicios-${NOCHE}.json`);
 // rival (y el cierre). El id del aviso es su hora en ms: más de 6 h de antigüedad = de otra noche.
 const reciente = x => !(+x.id > 1e12) || Date.now() - +x.id < 6 * 3600e3;
 let inicios = []; try { inicios = JSON.parse(fs.readFileSync(INICIOS, 'utf8')); } catch {}
+const avisados = new Set();                                     // amistosos ya anotados en el log (se revisan en cada vuelta)
 function contarInicios() {
   let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
   // "enCurso": el vigía arrancó con un partido ya en juego; cuenta solo si esta noche todavía no se contó ninguno
@@ -117,8 +119,10 @@ function contarInicios() {
   // pausa mostraba como "próximo" al rival que ya se había jugado (2026-10-20, Sub 21).
   // Excepción: si el último partido contado ya terminó, el "enCurso" es uno nuevo (2026-10-21: se cayó la PS5, el vigía
   // se reinició con el partido 3 empezado y el overlay siguió mostrando al rival del 2).
-  const nuevos = (e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id) && reciente(x)
-    && (!x.enCurso || !inicios.length || finales.length >= inicios.length)).map(x => x.id);
+  if (!partidos) return false;                                  // sin la lista de la noche no se puede decidir: queda para la próxima vuelta
+  const { contar: nuevos, amistosos } = clasificarInicios((e.eventos || []).filter(x => x.tipo === 'inicioPartido' && !inicios.includes(x.id) && reciente(x)),
+    { inicios, finales, partidos, noche: NOCHE });
+  for (const id of amistosos) if (!avisados.has(id)) { avisados.add(id); log('Empezó un partido fuera de los registrados: amistoso, no se cuenta.'); }
   if (!nuevos.length) return false;
   inicios.push(...nuevos); fs.writeFileSync(INICIOS, JSON.stringify(inicios));
   log(`Empieza el partido ${inicios.length} de la noche${partidos?.[inicios.length - 1] ? ` (vs ${partidos[inicios.length - 1].rival})` : ''}.`);
@@ -131,7 +135,9 @@ const FINALES = path.resolve(`fuentes/stream/finales-${NOCHE}.json`);
 let finales = []; try { finales = JSON.parse(fs.readFileSync(FINALES, 'utf8')); } catch {}
 function contarFinales() {
   let e = {}; try { e = JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch {}
-  const nuevos = (e.eventos || []).filter(x => x.tipo === 'finPartido' && !finales.some(f => f.id === x.id) && reciente(x));
+  const { contar: nuevos, amistosos } = clasificarFinales((e.eventos || []).filter(x => x.tipo === 'finPartido' && !finales.some(f => f.id === x.id) && reciente(x)),
+    { inicios, finales });
+  for (const { id, marcador } of amistosos) if (!avisados.has(id)) { avisados.add(id); log(`Terminó un amistoso (${marcador}): no va a los resultados de la noche.`); }
   if (!nuevos.length) return false;
   finales.push(...nuevos.map(x => ({ id: x.id, rival: x.rival || '', escudo: x.escudo || '', marcador: x.marcador || '', resultado: x.resultado })));
   fs.writeFileSync(FINALES, JSON.stringify(finales));
@@ -370,6 +376,7 @@ async function bajarCadena() {
 async function sesion() {
   publicarHistoria();
   // Vivo nuevo: sin lado de barra ni eventos de una sesión anterior (los vuelve a escribir vigia-vivo.mjs)
+  try { partidos ||= partidosDe(NOCHE); } catch {}
   try { contarInicios(); contarFinales(); fs.rmSync(ESTADO, { force: true }); } catch {}   // antes, los avisos de partido nuevo pendientes
   caidaDesde = null; caidaFinal = false;
   lanzarVigia();
