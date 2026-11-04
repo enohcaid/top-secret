@@ -40,10 +40,10 @@ const aCancha = ([x, y]) => ({ x: r3(.05 + (87 - y) / 73 * .42), y: x / 100, b: 
 // CM = el líbero (tapón), RM/LM = medio derecho e izquierdo, CF = el 9, RW/LW = los extremos.
 const MODOS = {
   defensa: FORMACIONES['4-3-3'],
-  ataque: { // 3-4-3: el líbero entre los centrales, los medios abiertos de laterales
+  ataque: { // 3-4-3: el líbero entre los centrales, los laterales abiertos y los medios por dentro
     GK: [50, 87],
     CB1: [72, 68], CM: [50, 67], CB2: [28, 68],
-    RM: [85, 37], RB: [62, 44], LB: [38, 44], LM: [15, 37],
+    RB: [85, 37], RM: [62, 44], LM: [38, 44], LB: [15, 37],
     RW: [80, 14], CF: [50, 14], LW: [20, 14],
   },
   ultradef: { // 5-2-1-2: el líbero de tapón, el 9 de enganche, los extremos cerrados de delanteros
