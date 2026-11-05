@@ -17,7 +17,7 @@ Pedido de Juan (2026-11-05): publicar los temas de The Shorts en YouTube como ly
 - La firma se estampa después sobre el clip: la IA deforma el texto. Se usa la portada PNG sin firma.
 - Bajar los negros del clip (`colorlevels`): Canva levanta el grano y se notaba el corte con el fondo del panel de letra.
 
-**Letra (lo que más costó; Juan: "no condicen con lo que suena"):** `letraFinal` NO sirve de fuente: conserva versos escritos donde la transcripción falla, y varios temas tienen estrofas que Whisper no oye (*The Night Before* no da palabras hasta 0:32, *So Close* hasta 0:40; por confirmar de oído si ahí se canta o no). La regla es que en pantalla va solo lo que se oye:
+**Letra (lo que más costó; Juan: "no condicen con lo que suena"):** `letraFinal` NO sirve de fuente: conserva versos escritos donde la transcripción falla, y varios temas tienen estrofas que Whisper no oye (*The Night Before* no da palabras hasta 0:32, *So Close* hasta 0:40; Juan confirmó de oído el 2026-11-05 que antes de eso no se canta ninguna estrofa). La regla es que en pantalla va solo lo que se oye:
 - Dos transcripciones de la voz separada con Demucs: por ventanas sin pista (`palabras/`) y de corrido con la letra como pista (`palabras/corrido/`). Cada una pierde pasajes distintos.
 - Claude cruza las dos con la letra escrita; la letra escrita manda en la ortografía, las transcripciones en qué se canta y cuándo. El código rechaza versos sin nada oído en ese lugar. Resultado versionado: `scripts/beats/letras-tiempos.json`.
 - Probado y descartado: alineación forzada con stable-ts (amontona versos) y repartir versos no reconocidos sobre "tramos con voz" (Demucs toma melodías instrumentales como voz: los versos caían sobre partes sin canto).

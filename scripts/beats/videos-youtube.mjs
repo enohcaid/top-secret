@@ -151,14 +151,18 @@ async function tiempos(solo) {
       if (!Array.isArray(v) || v.length < 3) return 'muy pocas líneas';
       let prev = -0.01;
       for (const l of v) {
-        if (!l.texto || !(l.ini >= prev - 0.3 && l.fin > l.ini)) return `tiempos inválidos en "${l.texto}"`;
+        // un desfase chico se acomoda solo; un desorden grande es un verso mal ubicado
+        if (!l.texto || !(l.ini >= prev - 3)) return `tiempos inválidos en "${l.texto}"`;
+        l.ini = Math.max(l.ini, prev);
+        if (!(l.fin > l.ini + 0.3)) l.fin = l.ini + l.texto.split(/\s+/).length * 0.3;
         // cada verso tiene que tener algo oído en su lugar: si no, es un verso inventado
         if (!oidas.some(o => o.ini >= l.ini - 0.6 && o.ini <= l.fin)) return `"${l.texto}" (${l.ini}s) no tiene nada oído en ese lugar`;
         prev = l.fin;
       }
       L = v.map(l => ({ texto: l.texto.trim(), ini: +l.ini, fin: +l.fin })); return null;
     };
-    await pedirTexto(PEDIDO_LETRA(t, a, b), { orden: ['claude'], claudeModelo: 'sonnet', tarea: 'letra-video', validar });
+    for (let intento = 1; intento <= 3 && !L; intento++) await pedirTexto(PEDIDO_LETRA(t, a, b), { orden: ['claude'], claudeModelo: 'sonnet', tarea: 'letra-video', validar }).catch(() => {});
+    if (!L) { console.log(`FALLÓ ${t.slug}: queda sin letra, correrlo de nuevo`); continue; }
     for (let k = 0; k < L.length - 1; k++) L[k].fin = Math.min(L[k].fin, L[k + 1].ini);
     todo[t.slug] = { dosPasadas: true, lineas: L };
     fs.writeFileSync(TIEMPOS, JSON.stringify(todo, null, 1) + '\n');
