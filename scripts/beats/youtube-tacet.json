@@ -1,0 +1,81 @@
+{
+  "canal": "UC1tHhG-3UeEPK7iOmw23wHw",
+  "playlists": {
+    "1": "The Shorts, Vol. 1",
+    "2": "The Shorts, Vol. 2"
+  },
+  "videos": {
+    "the-night-before": {
+      "url": "https://youtu.be/QXBBfIORIyU",
+      "titulo": "The Night Before (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 1,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "cold-hands": {
+      "url": "https://youtu.be/GrcWapiiFOk",
+      "titulo": "Cold Hands (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 2,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "i-owe-you": {
+      "url": "https://youtu.be/JbTFR2cJf1w",
+      "titulo": "I Owe You (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 3,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "the-scar-remains": {
+      "url": "https://youtu.be/CszLZ0nPsSw",
+      "titulo": "The Scar Remains (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 4,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "five-minutes": {
+      "url": "https://youtu.be/0LZ4O7e1FE4",
+      "titulo": "Five Minutes (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 5,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "iron-sharpens-iron": {
+      "url": "https://youtu.be/omIf0wE4Vpc",
+      "titulo": "Iron Sharpens Iron (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 6,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "barefoot": {
+      "url": "https://youtu.be/zOb8f4ugicU",
+      "titulo": "Barefoot (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 7,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "empty-seat": {
+      "url": "https://youtu.be/5R0u7-H22gc",
+      "titulo": "Empty Seat (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 8,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    }
+  }
+}
