@@ -35,4 +35,6 @@ Calidad > cantidad: un turno sin pieza aprobada queda vacío. Cada video con su 
 
 **Pendiente:** formato "gol de la fecha" (los clips del vigía todavía no son confiables: del 8/10 no quedó ninguno), formatos para días sin partido, métricas por red (Instagram devuelve likes pero no alcance/vistas: al token le falta `instagram_manage_insights`), migrar el paso "Publicar en redes" de noticias a aprobar.html.
 
+**Guion del 9 al 22/11 (2026-11-05, Juan: no había nada viral para aprobar):** `piezas/guiones-2026-11-09.mjs`, 9 ideas para 6 turnos. Si deja de haber guiones nadie avisa: se escriben a mano, ninguna tarea los genera. Criterio con el único dato disponible, likes de IG: mejor POV (17), peor reacción y tier list en reel (0). `producir.mjs` sigue sin conectarse a watch-regen.ps1: aprobar una idea no la produce sola.
+
 **Contenido de resultados = sale al aprobarse (Juan, 2026-10-23):** un video o pieza sobre partidos recién jugados (la noche, un gol) no espera turno. Los lotes `tipo: 'viral'` sin `publicarA` van al próximo turno libre de martes/jueves/sábado 14:00: el video de la noche del 22/10 quedó agendado para el 3/11. Esas piezas se arman con `publicarA` = hora de creación (como la noticia del día), así publicar.mjs las saca apenas se aprueban.
