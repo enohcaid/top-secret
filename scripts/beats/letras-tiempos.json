@@ -1,0 +1,2493 @@
+{
+ "the-night-before": {
+  "dosPasadas": true,
+  "lineas": [
+   {
+    "texto": "Can't sleep, can't sleep, the night is too long",
+    "ini": 32.1,
+    "fin": 35.28
+   },
+   {
+    "texto": "heart beating loud like it knows the song",
+    "ini": 35.28,
+    "fin": 39
+   },
+   {
+    "texto": "tonight I'm awake, tomorrow I give it all",
+    "ini": 39,
+    "fin": 44.82
+   },
+   {
+    "texto": "Mama said rest but my mind's on the run",
+    "ini": 45.82,
+    "fin": 48.14
+   },
+   {
+    "texto": "I've been waiting for this since the day I begun",
+    "ini": 49.08,
+    "fin": 51.72
+   },
+   {
+    "texto": "so let the night be heavy, let the hours be slow",
+    "ini": 52.46,
+    "fin": 56.08
+   },
+   {
+    "texto": "I was born for the morning, and the morning",
+    "ini": 56.08,
+    "fin": 59.44
+   },
+   {
+    "texto": "Can't sleep, can't sleep",
+    "ini": 60.38,
+    "fin": 62.34
+   },
+   {
+    "texto": "heart beating loud like it knows",
+    "ini": 63.94,
+    "fin": 66.7
+   },
+   {
+    "texto": "when the sun comes up",
+    "ini": 66.7,
+    "fin": 69.7
+   },
+   {
+    "texto": "I'll be standing tall",
+    "ini": 71.44,
+    "fin": 73.82
+   },
+   {
+    "texto": "tonight I'm awake",
+    "ini": 74.94,
+    "fin": 76.9
+   },
+   {
+    "texto": "tomorrow I give it all",
+    "ini": 78.62,
+    "fin": 81.34
+   }
+  ]
+ },
+ "cold-hands": {
+  "lineas": [
+   {
+    "texto": "Eleven at night and the wind cuts deep",
+    "ini": 13.5,
+    "fin": 17.08,
+    "ubicadas": 3
+   },
+   {
+    "texto": "city's gone quiet, the whole world asleep",
+    "ini": 17.08,
+    "fin": 19.8,
+    "ubicadas": 0
+   },
+   {
+    "texto": "breath like smoke and my fingers are stone",
+    "ini": 20.54,
+    "fin": 23.98,
+    "ubicadas": 7
+   },
+   {
+    "texto": "but I never feel colder than when I'm alone",
+    "ini": 23.98,
+    "fin": 27.44,
+    "ubicadas": 9
+   },
+   {
+    "texto": "Streetlights flicker on the frozen ground",
+    "ini": 27.44,
+    "fin": 30.78,
+    "ubicadas": 6
+   },
+   {
+    "texto": "every step that I take is the only sound",
+    "ini": 30.78,
+    "fin": 34.62,
+    "ubicadas": 9
+   },
+   {
+    "texto": "they don't see the hours, they don't see the cost",
+    "ini": 34.85,
+    "fin": 37.9,
+    "ubicadas": 9
+   },
+   {
+    "texto": "Cold hands, warm heart, I keep moving on",
+    "ini": 38.5,
+    "fin": 41.6,
+    "ubicadas": 5
+   },
+   {
+    "texto": "fire in my chest till the night is gone",
+    "ini": 41.6,
+    "fin": 45.04,
+    "ubicadas": 8
+   },
+   {
+    "texto": "let the winter bite, let the frost come in",
+    "ini": 45.04,
+    "fin": 48.56,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I've been cold before and I'm still within",
+    "ini": 49.4,
+    "fin": 52,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Wrap it in a hoodie, keep the doubt outside",
+    "ini": 59.6,
+    "fin": 62.5,
+    "ubicadas": 8
+   },
+   {
+    "texto": "winter tried to break me but I learned to ride",
+    "ini": 62.5,
+    "fin": 66.16,
+    "ubicadas": 10
+   },
+   {
+    "texto": "every frozen morning made my backbone strong",
+    "ini": 66.16,
+    "fin": 69.42,
+    "ubicadas": 6
+   },
+   {
+    "texto": "I don't need the summer, I've been burning all along",
+    "ini": 69.42,
+    "fin": 73.32,
+    "ubicadas": 10
+   }
+  ],
+  "cobertura": 0.835,
+  "dudosos": 0
+ },
+ "i-owe-you": {
+  "lineas": [
+   {
+    "texto": "When I was falling you were holding the rope",
+    "ini": 0,
+    "fin": 9.8,
+    "ubicadas": 0
+   },
+   {
+    "texto": "when I lost my voice you were singing my hope",
+    "ini": 9.8,
+    "fin": 13.97,
+    "ubicadas": 0
+   },
+   {
+    "texto": "you never asked me for a single thing back",
+    "ini": 14.75,
+    "fin": 19.26,
+    "ubicadas": 0
+   },
+   {
+    "texto": "just stood by my side when my world went black",
+    "ini": 19.26,
+    "fin": 22.76,
+    "ubicadas": 10
+   },
+   {
+    "texto": "Now the tables turned and it's my time to pay",
+    "ini": 24.62,
+    "fin": 26.6,
+    "ubicadas": 9
+   },
+   {
+    "texto": "gonna carry your name every step of the way",
+    "ini": 27.66,
+    "fin": 30.78,
+    "ubicadas": 6
+   },
+   {
+    "texto": "I remember the nights when I had nothing to give",
+    "ini": 32.54,
+    "fin": 34.88,
+    "ubicadas": 4
+   },
+   {
+    "texto": "you showed me the reason, you showed me to live",
+    "ini": 34.88,
+    "fin": 39.04,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I owe you, I owe you, I won't forget",
+    "ini": 39.04,
+    "fin": 42.02,
+    "ubicadas": 8
+   },
+   {
+    "texto": "every single promise is a debt I'll get",
+    "ini": 42.9,
+    "fin": 45.46,
+    "ubicadas": 8
+   },
+   {
+    "texto": "paid back in full when the lights come on",
+    "ini": 45.46,
+    "fin": 48.26,
+    "ubicadas": 0
+   },
+   {
+    "texto": "so watch me now, I'm coming through",
+    "ini": 48.26,
+    "fin": 53.57,
+    "ubicadas": 0
+   },
+   {
+    "texto": "everything I've got, I'm giving to you",
+    "ini": 53.57,
+    "fin": 56.15,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I owe you, I won't forget",
+    "ini": 56.98,
+    "fin": 60.56,
+    "ubicadas": 5
+   },
+   {
+    "texto": "every single promise is a debt I'll get",
+    "ini": 61.05,
+    "fin": 64.84,
+    "ubicadas": 7
+   },
+   {
+    "texto": "paid back in full when the lights come on",
+    "ini": 65.7,
+    "fin": 69.18,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I owe you everything till the day is gone",
+    "ini": 69.18,
+    "fin": 76.96,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I owe you everything till the day is gone",
+    "ini": 76.96,
+    "fin": 86.1,
+    "ubicadas": 3
+   }
+  ],
+  "cobertura": 0.639,
+  "dudosos": 1
+ },
+ "the-scar-remains": {
+  "lineas": [
+   {
+    "texto": "Replay, replay, it's a loop in my head",
+    "ini": 22.95,
+    "fin": 26.24,
+    "ubicadas": 8
+   },
+   {
+    "texto": "every word that I swallowed, every word that I said",
+    "ini": 26.24,
+    "fin": 29.98,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I close my eyes and it's playing again",
+    "ini": 29.98,
+    "fin": 33.86,
+    "ubicadas": 8
+   },
+   {
+    "texto": "the moment I fell and I couldn't pretend",
+    "ini": 34.4,
+    "fin": 42.6,
+    "ubicadas": 0
+   },
+   {
+    "texto": "The scar remains, but so do I",
+    "ini": 42.6,
+    "fin": 45.78,
+    "ubicadas": 3
+   },
+   {
+    "texto": "I learned to stand when I wanted to cry",
+    "ini": 45.78,
+    "fin": 50.2,
+    "ubicadas": 9
+   },
+   {
+    "texto": "every night it burns, every day it fades",
+    "ini": 50.2,
+    "fin": 53.78,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I'm made of the fire that the loss has made",
+    "ini": 53.78,
+    "fin": 57.92,
+    "ubicadas": 9
+   },
+   {
+    "texto": "The scar remains, but so do I",
+    "ini": 64.44,
+    "fin": 68.36,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I learned to stand when I wanted to cry",
+    "ini": 68.36,
+    "fin": 71.98,
+    "ubicadas": 9
+   },
+   {
+    "texto": "every night it burns, every day it fades",
+    "ini": 71.98,
+    "fin": 76.08,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I'm made of the fire that the loss has made",
+    "ini": 76.08,
+    "fin": 79.68,
+    "ubicadas": 10
+   }
+  ],
+  "cobertura": 0.892,
+  "dudosos": 1
+ },
+ "five-minutes": {
+  "lineas": [
+   {
+    "texto": "Five more minutes and it's all on the line",
+    "ini": 14.15,
+    "fin": 17.34,
+    "ubicadas": 9
+   },
+   {
+    "texto": "every second is a mile, every heartbeat a sign",
+    "ini": 17.34,
+    "fin": 20.54,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I can feel them coming like a wave at the shore",
+    "ini": 20.54,
+    "fin": 23.56,
+    "ubicadas": 11
+   },
+   {
+    "texto": "holding on to the moment, I can't take any more",
+    "ini": 23.56,
+    "fin": 26.94,
+    "ubicadas": 10
+   },
+   {
+    "texto": "Hands on my knees and my lungs are on fire",
+    "ini": 27.28,
+    "fin": 30.2,
+    "ubicadas": 8
+   },
+   {
+    "texto": "every breath is a rope, every thought is a wire",
+    "ini": 30.85,
+    "fin": 32.02,
+    "ubicadas": 0
+   },
+   {
+    "texto": "look at the clock but the clock won't move",
+    "ini": 32.55,
+    "fin": 33.83,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I got nothing to win and everything to lose",
+    "ini": 33.83,
+    "fin": 37.42,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Hold on, hold on, don't let it slip, yeah",
+    "ini": 37.42,
+    "fin": 38.8,
+    "ubicadas": 0
+   },
+   {
+    "texto": "everything we built is on the tip",
+    "ini": 38.8,
+    "fin": 41.02,
+    "ubicadas": 4
+   },
+   {
+    "texto": "tighten the grip till the end of the line",
+    "ini": 41.38,
+    "fin": 44.06,
+    "ubicadas": 6
+   },
+   {
+    "texto": "then we breathe again and the summit is mine",
+    "ini": 44.06,
+    "fin": 47.04,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Hold on, hold on",
+    "ini": 49.1,
+    "fin": 50.42,
+    "ubicadas": 2
+   },
+   {
+    "texto": "whoa",
+    "ini": 53.05,
+    "fin": 53.32,
+    "ubicadas": 1
+   },
+   {
+    "texto": "Hold on, whoa",
+    "ini": 53.35,
+    "fin": 68.15,
+    "ubicadas": 0
+   }
+  ],
+  "cobertura": 0.689,
+  "dudosos": 2
+ },
+ "iron-sharpens-iron": {
+  "lineas": [
+   {
+    "texto": "Every day you're in front of me, standing like a wall",
+    "ini": 6.28,
+    "fin": 9.96,
+    "ubicadas": 6
+   },
+   {
+    "texto": "every time I push forward you don't let me fall",
+    "ini": 9.96,
+    "fin": 13.46,
+    "ubicadas": 10
+   },
+   {
+    "texto": "we don't say we're friends but we know it inside",
+    "ini": 13.46,
+    "fin": 16.92,
+    "ubicadas": 10
+   },
+   {
+    "texto": "you're the reason I'm better, the fire, the pride",
+    "ini": 16.92,
+    "fin": 20.72,
+    "ubicadas": 9
+   },
+   {
+    "texto": "Clash every morning till the bruises are blue",
+    "ini": 20.72,
+    "fin": 30.12,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I don't like your face but I'm grateful for you",
+    "ini": 30.45,
+    "fin": 33.56,
+    "ubicadas": 10
+   },
+   {
+    "texto": "'cause the easy days never taught me a thing",
+    "ini": 33.95,
+    "fin": 37.48,
+    "ubicadas": 9
+   },
+   {
+    "texto": "it's the fight with a rival that teaches you to swing",
+    "ini": 37.48,
+    "fin": 41,
+    "ubicadas": 11
+   },
+   {
+    "texto": "Iron sharpens iron, steel against steel",
+    "ini": 41.5,
+    "fin": 44.78,
+    "ubicadas": 4
+   },
+   {
+    "texto": "every time you push me I learn how to feel",
+    "ini": 44.78,
+    "fin": 47.72,
+    "ubicadas": 10
+   },
+   {
+    "texto": "you're the wall I hit and the wall I climb",
+    "ini": 47.72,
+    "fin": 51.32,
+    "ubicadas": 10
+   },
+   {
+    "texto": "rival till the end, but we rise every—",
+    "ini": 51.32,
+    "fin": 55.44,
+    "ubicadas": 6
+   }
+  ],
+  "cobertura": 0.92,
+  "dudosos": 0
+ },
+ "barefoot": {
+  "lineas": [
+   {
+    "texto": "Barefoot on the concrete, sun on my face",
+    "ini": 11.4,
+    "fin": 13.9,
+    "ubicadas": 0
+   },
+   {
+    "texto": "no rules, no teachers, just a dream and a place",
+    "ini": 13.9,
+    "fin": 19.09,
+    "ubicadas": 0
+   },
+   {
+    "texto": "cardboard and chalk drawing lines on the street",
+    "ini": 19.09,
+    "fin": 23.04,
+    "ubicadas": 0
+   },
+   {
+    "texto": "mama calling my name but I'm stuck to my feet",
+    "ini": 23.04,
+    "fin": 24.58,
+    "ubicadas": 0
+   },
+   {
+    "texto": "We didn't have much but we had it all",
+    "ini": 24.58,
+    "fin": 25.87,
+    "ubicadas": 0
+   },
+   {
+    "texto": "the laughter, the noise, the brick of the wall, the brick of the wall",
+    "ini": 25.87,
+    "fin": 28.16,
+    "ubicadas": 0
+   },
+   {
+    "texto": "no lights, no cameras, nobody to impress",
+    "ini": 28.16,
+    "fin": 31.86,
+    "ubicadas": 6
+   },
+   {
+    "texto": "just a kid chasing joy in a hand-me-down dress",
+    "ini": 31.86,
+    "fin": 38.38,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I never forget where I'm coming from",
+    "ini": 38.38,
+    "fin": 41.72,
+    "ubicadas": 7
+   },
+   {
+    "texto": "the dust on my feet, the beat of the drum",
+    "ini": 41.72,
+    "fin": 45.06,
+    "ubicadas": 10
+   },
+   {
+    "texto": "no matter how far, no matter how high",
+    "ini": 45.06,
+    "fin": 48.5,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Now the shoes got shine and the lights got bright",
+    "ini": 51.55,
+    "fin": 55.18,
+    "ubicadas": 10
+   },
+   {
+    "texto": "but I move like I'm back on that street at night",
+    "ini": 55.55,
+    "fin": 58.62,
+    "ubicadas": 11
+   },
+   {
+    "texto": "'cause the roots go deep and they hold me down",
+    "ini": 58.9,
+    "fin": 61.7,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I'm still that kid from the other side of town",
+    "ini": 61.7,
+    "fin": 65.32,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I'll never forget where I'm coming from",
+    "ini": 65.7,
+    "fin": 68.2,
+    "ubicadas": 7
+   }
+  ],
+  "cobertura": 0.723,
+  "dudosos": 1
+ },
+ "empty-seat": {
+  "lineas": [
+   {
+    "texto": "Every face in the room got somebody there",
+    "ini": 14.05,
+    "fin": 17.24,
+    "ubicadas": 4
+   },
+   {
+    "texto": "a mother, a brother, a name in the air",
+    "ini": 17.24,
+    "fin": 20.92,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I look to the side and there's nobody near",
+    "ini": 20.92,
+    "fin": 24.5,
+    "ubicadas": 9
+   },
+   {
+    "texto": "just an empty seat and the voice of my fear",
+    "ini": 24.5,
+    "fin": 28.22,
+    "ubicadas": 10
+   },
+   {
+    "texto": "Still I show up like the seat is full",
+    "ini": 28.22,
+    "fin": 31.8,
+    "ubicadas": 9
+   },
+   {
+    "texto": "like the silence is singing, like the quiet can pull",
+    "ini": 31.8,
+    "fin": 35.38,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I give it for the ones who were never around",
+    "ini": 35.38,
+    "fin": 39.06,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I give it for the love that I never found",
+    "ini": 39.06,
+    "fin": 42.74,
+    "ubicadas": 10
+   },
+   {
+    "texto": "Empty seat, empty seat, I still look your way",
+    "ini": 43.15,
+    "fin": 46.38,
+    "ubicadas": 7
+   },
+   {
+    "texto": "hoping one time you'll come and stay",
+    "ini": 46.38,
+    "fin": 49.96,
+    "ubicadas": 7
+   },
+   {
+    "texto": "if nobody's watching I'll shine anyway",
+    "ini": 49.96,
+    "fin": 53.66,
+    "ubicadas": 6
+   },
+   {
+    "texto": "for the empty seat",
+    "ini": 54.05,
+    "fin": 55.64,
+    "ubicadas": 4
+   },
+   {
+    "texto": "for the empty seat I give it all today",
+    "ini": 57.66,
+    "fin": 61.12,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Give it, give it all today",
+    "ini": 66.52,
+    "fin": 68.78,
+    "ubicadas": 5
+   },
+   {
+    "texto": "Give it, give it all today",
+    "ini": 73.12,
+    "fin": 76.02,
+    "ubicadas": 5
+   }
+  ],
+  "cobertura": 0.918,
+  "dudosos": 1
+ },
+ "silent-room": {
+  "lineas": [
+   {
+    "texto": "Nobody's talking, nobody looks up",
+    "ini": 0,
+    "fin": 17,
+    "ubicadas": 0
+   },
+   {
+    "texto": "we had it in our hands and we dropped the cup",
+    "ini": 17,
+    "fin": 21.9,
+    "ubicadas": 5
+   },
+   {
+    "texto": "the silence is louder than anything said",
+    "ini": 21.9,
+    "fin": 26.52,
+    "ubicadas": 7
+   },
+   {
+    "texto": "heavy like concrete, it sits in my head",
+    "ini": 27.26,
+    "fin": 30.94,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Shoes on the floor and the lights too bright",
+    "ini": 32.1,
+    "fin": 35.56,
+    "ubicadas": 8
+   },
+   {
+    "texto": "we were kings at the start, now we're ghosts of the night",
+    "ini": 35.56,
+    "fin": 39.84,
+    "ubicadas": 12
+   },
+   {
+    "texto": "I wanna say something but the words won't come",
+    "ini": 39.84,
+    "fin": 43.88,
+    "ubicadas": 9
+   },
+   {
+    "texto": "so I stare at the floor and my heart goes numb",
+    "ini": 43.88,
+    "fin": 48.26,
+    "ubicadas": 11
+   },
+   {
+    "texto": "Nobody breathes",
+    "ini": 49.4,
+    "fin": 50.84,
+    "ubicadas": 2
+   },
+   {
+    "texto": "we lost it all like autumn leaves",
+    "ini": 51.55,
+    "fin": 55.1,
+    "ubicadas": 7
+   },
+   {
+    "texto": "but tomorrow we rise",
+    "ini": 55.1,
+    "fin": 57.22,
+    "ubicadas": 4
+   },
+   {
+    "texto": "tomorrow we rise",
+    "ini": 57.22,
+    "fin": 59.38,
+    "ubicadas": 3
+   },
+   {
+    "texto": "from the ground where we fell",
+    "ini": 59.38,
+    "fin": 61.4,
+    "ubicadas": 6
+   },
+   {
+    "texto": "we'll be back, you can",
+    "ini": 61.4,
+    "fin": 65.1,
+    "ubicadas": 5
+   },
+   {
+    "texto": "Oh",
+    "ini": 65.45,
+    "fin": 66.3,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Oh",
+    "ini": 66.3,
+    "fin": 74.2,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Oh",
+    "ini": 74.2,
+    "fin": 83.6,
+    "ubicadas": 0
+   },
+   {
+    "texto": "You can tell",
+    "ini": 88.7,
+    "fin": 89.5,
+    "ubicadas": 3
+   }
+  ],
+  "cobertura": 0.876,
+  "dudosos": 4
+ },
+ "waiting-my-turn": {
+  "lineas": [
+   {
+    "texto": "I'm sitting on the side with my fire on hold",
+    "ini": 7.5,
+    "fin": 11,
+    "ubicadas": 7
+   },
+   {
+    "texto": "watching all the others while I'm burning gold",
+    "ini": 11.1,
+    "fin": 15.02,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I clap for my brothers but my heart wants in",
+    "ini": 15.95,
+    "fin": 19,
+    "ubicadas": 10
+   },
+   {
+    "texto": "patience is a battle that I'm learning to win",
+    "ini": 19,
+    "fin": 22.98,
+    "ubicadas": 9
+   },
+   {
+    "texto": "Every single minute is a test of my will",
+    "ini": 23.8,
+    "fin": 27,
+    "ubicadas": 9
+   },
+   {
+    "texto": "everybody's moving while I'm standing still",
+    "ini": 28.32,
+    "fin": 30.96,
+    "ubicadas": 5
+   },
+   {
+    "texto": "but I'm ready, I'm ready, just give me the sign",
+    "ini": 30.96,
+    "fin": 34.98,
+    "ubicadas": 8
+   },
+   {
+    "texto": "but I'm ready, oh, the second I'm called, I'll make it all mine",
+    "ini": 35,
+    "fin": 40.08,
+    "ubicadas": 11
+   },
+   {
+    "texto": "Waiting my turn, I'm learning to burn",
+    "ini": 40.08,
+    "fin": 41.3,
+    "ubicadas": 0
+   },
+   {
+    "texto": "slow like a fuse, I got nothing to lose",
+    "ini": 41.3,
+    "fin": 42.57,
+    "ubicadas": 0
+   },
+   {
+    "texto": "when the door swings open I won't hesitate",
+    "ini": 42.57,
+    "fin": 46.6,
+    "ubicadas": 0
+   },
+   {
+    "texto": "waiting my turn, it was worth the wait",
+    "ini": 46.6,
+    "fin": 48.35,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I won't hesitate",
+    "ini": 48.35,
+    "fin": 48.65,
+    "ubicadas": 0
+   },
+   {
+    "texto": "They don't see the hours I put in the dark",
+    "ini": 48.65,
+    "fin": 50.05,
+    "ubicadas": 0
+   },
+   {
+    "texto": "every quiet morning is a spark in my heart",
+    "ini": 50.05,
+    "fin": 52.01,
+    "ubicadas": 0
+   },
+   {
+    "texto": "so let me sit, let me watch, let me learn",
+    "ini": 52.25,
+    "fin": 54.05,
+    "ubicadas": 0
+   },
+   {
+    "texto": "the world's gonna see me when it's finally my turn",
+    "ini": 54.05,
+    "fin": 55.75,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Waiting my turn, I'm learning to burn",
+    "ini": 56.5,
+    "fin": 57.62,
+    "ubicadas": 0
+   },
+   {
+    "texto": "slow like a fuse, I got nothing to lose",
+    "ini": 58.4,
+    "fin": 59.6,
+    "ubicadas": 0
+   },
+   {
+    "texto": "when the door swings open I won't hesitate",
+    "ini": 59.6,
+    "fin": 85.7,
+    "ubicadas": 0
+   },
+   {
+    "texto": "waiting my turn, it was worth the wait",
+    "ini": 85.7,
+    "fin": 89.7,
+    "ubicadas": 0
+   },
+   {
+    "texto": "It was worth the wait",
+    "ini": 89.7,
+    "fin": 90.85,
+    "ubicadas": 0
+   }
+  ],
+  "cobertura": 0.565,
+  "dudosos": 4
+ },
+ "no-sound-came-out": {
+  "lineas": [
+   {
+    "texto": "The biggest moment of my life arrived",
+    "ini": 0,
+    "fin": 1.54,
+    "ubicadas": 0
+   },
+   {
+    "texto": "everybody screaming, everybody alive",
+    "ini": 1.54,
+    "fin": 4.89,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I opened my mouth but nothing came out",
+    "ini": 4.89,
+    "fin": 6.46,
+    "ubicadas": 0
+   },
+   {
+    "texto": "just a tear on my face and a silent shout",
+    "ini": 6.46,
+    "fin": 10,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Years of waiting in a single breath",
+    "ini": 10.6,
+    "fin": 12.01,
+    "ubicadas": 0
+   },
+   {
+    "texto": "all the doubt and the fear and the nights of stress",
+    "ini": 12.01,
+    "fin": 16.2,
+    "ubicadas": 0
+   },
+   {
+    "texto": "everything froze like a picture in time",
+    "ini": 16.2,
+    "fin": 18.15,
+    "ubicadas": 0
+   },
+   {
+    "texto": "no words were enough, no words could rhyme",
+    "ini": 18.15,
+    "fin": 20.45,
+    "ubicadas": 0
+   },
+   {
+    "texto": "No sound came out, but I felt it all",
+    "ini": 21.05,
+    "fin": 24.5,
+    "ubicadas": 0
+   },
+   {
+    "texto": "like thunder inside of a silent hall",
+    "ini": 24.5,
+    "fin": 26.55,
+    "ubicadas": 0
+   },
+   {
+    "texto": "sometimes the biggest things don't make a noise",
+    "ini": 26.55,
+    "fin": 28.46,
+    "ubicadas": 0
+   },
+   {
+    "texto": "sometimes the heart is the only voice",
+    "ini": 28.46,
+    "fin": 39.54,
+    "ubicadas": 0
+   },
+   {
+    "texto": "They asked me later how I felt that night",
+    "ini": 39.54,
+    "fin": 42.44,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I said it felt like flying",
+    "ini": 42.85,
+    "fin": 44.86,
+    "ubicadas": 6
+   },
+   {
+    "texto": "Some feelings are too big to say out loud",
+    "ini": 46.84,
+    "fin": 49.94,
+    "ubicadas": 9
+   },
+   {
+    "texto": "so I held it inside and I stood there proud",
+    "ini": 50.35,
+    "fin": 52.74,
+    "ubicadas": 0
+   },
+   {
+    "texto": "No sound came out, but I felt it all",
+    "ini": 53.45,
+    "fin": 54.76,
+    "ubicadas": 0
+   },
+   {
+    "texto": "like thunder inside of a silent hall",
+    "ini": 54.76,
+    "fin": 58.42,
+    "ubicadas": 7
+   },
+   {
+    "texto": "sometimes the biggest things don't make a noise",
+    "ini": 58.42,
+    "fin": 62.3,
+    "ubicadas": 8
+   },
+   {
+    "texto": "sometimes the heart is the only",
+    "ini": 62.3,
+    "fin": 64.94,
+    "ubicadas": 6
+   }
+  ],
+  "cobertura": 0.338,
+  "dudosos": 2
+ },
+ "after-everyone-left": {
+  "lineas": [
+   {
+    "texto": "Everybody's gone and the lights are low, uh",
+    "ini": 6.42,
+    "fin": 9.78,
+    "ubicadas": 8
+   },
+   {
+    "texto": "'cause I got further to go",
+    "ini": 11,
+    "fin": 12.66,
+    "ubicadas": 6
+   },
+   {
+    "texto": "the echo of my steps is my only friend",
+    "ini": 12.66,
+    "fin": 15.88,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I keep running it back till I reach the end",
+    "ini": 15.88,
+    "fin": 19.52,
+    "ubicadas": 10
+   },
+   {
+    "texto": "Nobody's clapping, nobody sees",
+    "ini": 19.52,
+    "fin": 22.58,
+    "ubicadas": 4
+   },
+   {
+    "texto": "the sweat and the burn in my aching knees",
+    "ini": 22.58,
+    "fin": 26.12,
+    "ubicadas": 9
+   },
+   {
+    "texto": "but the work in the dark is the work that stays",
+    "ini": 26.12,
+    "fin": 29.22,
+    "ubicadas": 11
+   },
+   {
+    "texto": "and it shows up later on the brightest days",
+    "ini": 29.22,
+    "fin": 33.04,
+    "ubicadas": 9
+   },
+   {
+    "texto": "working on the dream that was in my mind",
+    "ini": 36.18,
+    "fin": 39.48,
+    "ubicadas": 8
+   },
+   {
+    "texto": "working on the dream that was in my mind",
+    "ini": 39.48,
+    "fin": 42.8,
+    "ubicadas": 8
+   },
+   {
+    "texto": "no crowd, no cameras, just me and the night",
+    "ini": 43.05,
+    "fin": 45.94,
+    "ubicadas": 9
+   },
+   {
+    "texto": "after everyone left, I made it right",
+    "ini": 45.94,
+    "fin": 51.8,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Oh-oh-oh-oh",
+    "ini": 51.8,
+    "fin": 54.76,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Oh-oh-oh-oh",
+    "ini": 54.76,
+    "fin": 57.25,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Oh-oh-oh-oh-oh",
+    "ini": 57.25,
+    "fin": 60.8,
+    "ubicadas": 0
+   },
+   {
+    "texto": "They call it obsession",
+    "ini": 60.8,
+    "fin": 63.5,
+    "ubicadas": 0
+   },
+   {
+    "texto": "working on the dream that was in my mind",
+    "ini": 66.1,
+    "fin": 68.68,
+    "ubicadas": 6
+   },
+   {
+    "texto": "just me and the night",
+    "ini": 69.96,
+    "fin": 71.68,
+    "ubicadas": 5
+   },
+   {
+    "texto": "I made it right",
+    "ini": 71.68,
+    "fin": 74.8,
+    "ubicadas": 4
+   }
+  ],
+  "cobertura": 0.872,
+  "dudosos": 1
+ },
+ "coming-back": {
+  "lineas": [
+   {
+    "texto": "Months on the outside looking through glass",
+    "ini": 10.75,
+    "fin": 13.65,
+    "ubicadas": 0
+   },
+   {
+    "texto": "watching the days and the seasons pass",
+    "ini": 14.45,
+    "fin": 16.79,
+    "ubicadas": 0
+   },
+   {
+    "texto": "my body was broken but my spirit was not",
+    "ini": 16.79,
+    "fin": 20.16,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I kept the fire burning in the coldest spot",
+    "ini": 20.16,
+    "fin": 23.06,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Every step was a mountain, every morning a war",
+    "ini": 23.06,
+    "fin": 26.6,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I learned how to walk like I'd never before",
+    "ini": 26.85,
+    "fin": 31.52,
+    "ubicadas": 4
+   },
+   {
+    "texto": "the doubt in my head said it's over for you",
+    "ini": 32.2,
+    "fin": 35.18,
+    "ubicadas": 10
+   },
+   {
+    "texto": "every scar's a story, every tear a sign",
+    "ini": 36,
+    "fin": 39.1,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I'm coming back and the time is mine",
+    "ini": 39.6,
+    "fin": 42.66,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I'm coming back, I'm coming back",
+    "ini": 43.2,
+    "fin": 45.9,
+    "ubicadas": 6
+   },
+   {
+    "texto": "stronger than before, I'm on the track",
+    "ini": 46.35,
+    "fin": 49.46,
+    "ubicadas": 7
+   },
+   {
+    "texto": "every scar's a story, every tear a sign",
+    "ini": 50.15,
+    "fin": 53.72,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I'm coming back and the time is mine",
+    "ini": 53.95,
+    "fin": 57.32,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I'm coming back",
+    "ini": 71.28,
+    "fin": 72.82,
+    "ubicadas": 3
+   },
+   {
+    "texto": "I'm coming back",
+    "ini": 73.08,
+    "fin": 74.58,
+    "ubicadas": 3
+   },
+   {
+    "texto": "stronger than before",
+    "ini": 74.86,
+    "fin": 76.34,
+    "ubicadas": 3
+   },
+   {
+    "texto": "I'm on the track",
+    "ini": 76.64,
+    "fin": 78.18,
+    "ubicadas": 4
+   },
+   {
+    "texto": "every scar's a story",
+    "ini": 78.8,
+    "fin": 80.02,
+    "ubicadas": 4
+   },
+   {
+    "texto": "every tear a sign",
+    "ini": 80.32,
+    "fin": 81.84,
+    "ubicadas": 4
+   },
+   {
+    "texto": "I'm coming back",
+    "ini": 82.55,
+    "fin": 83.58,
+    "ubicadas": 3
+   },
+   {
+    "texto": "and the time is mine",
+    "ini": 83.78,
+    "fin": 85.48,
+    "ubicadas": 5
+   }
+  ],
+  "cobertura": 0.657,
+  "dudosos": 0
+ },
+ "ten-steps": {
+  "lineas": [
+   {
+    "texto": "Oh, yeah, yeah",
+    "ini": 0,
+    "fin": 3.28,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Ten steps alone and the world goes mute",
+    "ini": 3.28,
+    "fin": 11.12,
+    "ubicadas": 0
+   },
+   {
+    "texto": "every eye on me and my heart in pursuit",
+    "ini": 11.12,
+    "fin": 14.58,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I can hear my pulse like a drum in my ear",
+    "ini": 14.58,
+    "fin": 21.52,
+    "ubicadas": 11
+   },
+   {
+    "texto": "it's just me and the moment, it's just me and the fear",
+    "ini": 21.74,
+    "fin": 29.05,
+    "ubicadas": 12
+   },
+   {
+    "texto": "Walk slow, breathe low, keep the noise outside",
+    "ini": 29.05,
+    "fin": 32.46,
+    "ubicadas": 7
+   },
+   {
+    "texto": "there's nowhere to run and there's nowhere to hide",
+    "ini": 32.46,
+    "fin": 34.74,
+    "ubicadas": 0
+   },
+   {
+    "texto": "the whole night stops and it waits for me",
+    "ini": 34.74,
+    "fin": 36.64,
+    "ubicadas": 0
+   },
+   {
+    "texto": "one single decision and then I'll be free",
+    "ini": 36.64,
+    "fin": 40.78,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Ten steps, ten steps, I walk alone",
+    "ini": 40.78,
+    "fin": 44.08,
+    "ubicadas": 6
+   },
+   {
+    "texto": "heavy like the weight of a kingdom's throne",
+    "ini": 44.08,
+    "fin": 47.4,
+    "ubicadas": 8
+   },
+   {
+    "texto": "close my eyes, then I let it fly",
+    "ini": 48.6,
+    "fin": 51.7,
+    "ubicadas": 6
+   },
+   {
+    "texto": "ten steps to the truth",
+    "ini": 51.7,
+    "fin": 54.16,
+    "ubicadas": 2
+   },
+   {
+    "texto": "Win or lose, I walked the line",
+    "ini": 54.16,
+    "fin": 65.7,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I faced the moment and the moment was mine",
+    "ini": 65.7,
+    "fin": 69.64,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Close my eyes",
+    "ini": 69.64,
+    "fin": 71.82,
+    "ubicadas": 0
+   },
+   {
+    "texto": "ten steps to the truth",
+    "ini": 72.4,
+    "fin": 79.95,
+    "ubicadas": 0
+   },
+   {
+    "texto": "no reason to lie",
+    "ini": 79.95,
+    "fin": 81.62,
+    "ubicadas": 2
+   }
+  ],
+  "cobertura": 0.722,
+  "dudosos": 2
+ },
+ "first-time": {
+  "lineas": [
+   {
+    "texto": "First time in the light and my legs are shaking",
+    "ini": 14.9,
+    "fin": 18.08,
+    "ubicadas": 10
+   },
+   {
+    "texto": "every dream I had is the dream I'm making",
+    "ini": 18.08,
+    "fin": 21.4,
+    "ubicadas": 9
+   },
+   {
+    "texto": "lights in my eyes and my name in the air",
+    "ini": 21.4,
+    "fin": 24.9,
+    "ubicadas": 10
+   },
+   {
+    "texto": "couldn't believe it, I was finally there",
+    "ini": 24.9,
+    "fin": 28.26,
+    "ubicadas": 7
+   },
+   {
+    "texto": "Everything's fast and the world is loud",
+    "ini": 28.26,
+    "fin": 31.16,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I'm a kid with a heartbeat lost in the crowd",
+    "ini": 31.4,
+    "fin": 34.58,
+    "ubicadas": 10
+   },
+   {
+    "texto": "but the second it starts, all the fear goes away",
+    "ini": 34.78,
+    "fin": 37.66,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I was born for this, I was born for today",
+    "ini": 37.9,
+    "fin": 41.08,
+    "ubicadas": 9
+   },
+   {
+    "texto": "Years of practice for a single night",
+    "ini": 42.4,
+    "fin": 44.58,
+    "ubicadas": 5
+   },
+   {
+    "texto": "all the doubt and the fear turned into light",
+    "ini": 44.78,
+    "fin": 47.92,
+    "ubicadas": 9
+   },
+   {
+    "texto": "tell my younger self that he made it through",
+    "ini": 48.06,
+    "fin": 50.76,
+    "ubicadas": 9
+   },
+   {
+    "texto": "first time, but not the last, I promise you",
+    "ini": 51.7,
+    "fin": 54.18,
+    "ubicadas": 9
+   },
+   {
+    "texto": "First time, first time, I'll never forget",
+    "ini": 54.6,
+    "fin": 57.64,
+    "ubicadas": 7
+   },
+   {
+    "texto": "the feeling of fire, the taste of the sweat",
+    "ini": 57.64,
+    "fin": 61.08,
+    "ubicadas": 9
+   },
+   {
+    "texto": "remember the kid with a dream in his chest",
+    "ini": 61.4,
+    "fin": 64.62,
+    "ubicadas": 9
+   },
+   {
+    "texto": "first time, first time, I gave it my best",
+    "ini": 64.62,
+    "fin": 70.38,
+    "ubicadas": 9
+   }
+  ],
+  "cobertura": 0.979,
+  "dudosos": 0
+ },
+ "so-close": {
+  "dosPasadas": true,
+  "lineas": [
+   {
+    "texto": "Missing teaches more than winning ever could",
+    "ini": 39.78,
+    "fin": 43.34
+   },
+   {
+    "texto": "it showed me the bad and it showed me the good",
+    "ini": 43.34,
+    "fin": 47.22
+   },
+   {
+    "texto": "so I'll be back to take another shot",
+    "ini": 47.22,
+    "fin": 51.36
+   },
+   {
+    "texto": "'cause so close means I'm closer than I thought",
+    "ini": 51.52,
+    "fin": 55.27
+   },
+   {
+    "texto": "So close, so close, I could touch the sky",
+    "ini": 55.28,
+    "fin": 59.8
+   },
+   {
+    "texto": "so close, so close, but I watched it fly",
+    "ini": 59.82,
+    "fin": 63.77
+   },
+   {
+    "texto": "I'll carry this ache till I make it right",
+    "ini": 63.78,
+    "fin": 67.82
+   },
+   {
+    "texto": "I'll carry this ache till I make it right",
+    "ini": 70.58,
+    "fin": 75.55
+   },
+   {
+    "texto": "so close today",
+    "ini": 75.56,
+    "fin": 77.4
+   }
+  ]
+ },
+ "rain": {
+  "lineas": [
+   {
+    "texto": "Rain falling hard and the ground turned to mud",
+    "ini": 0.55,
+    "fin": 4.32,
+    "ubicadas": 0
+   },
+   {
+    "texto": "every step is heavy, every breath full of blood",
+    "ini": 4.32,
+    "fin": 8.42,
+    "ubicadas": 9
+   },
+   {
+    "texto": "clothes on my skin like a second weight",
+    "ini": 8.42,
+    "fin": 12.42,
+    "ubicadas": 8
+   },
+   {
+    "texto": "but the storm never told me to hesitate",
+    "ini": 12.42,
+    "fin": 16.5,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Lightning above and the thunder below",
+    "ini": 16.5,
+    "fin": 20.06,
+    "ubicadas": 6
+   },
+   {
+    "texto": "everybody's running but I'm moving slow",
+    "ini": 20.4,
+    "fin": 24.14,
+    "ubicadas": 6
+   },
+   {
+    "texto": "let it rain",
+    "ini": 24.14,
+    "fin": 26.5,
+    "ubicadas": 3
+   },
+   {
+    "texto": "storm in the sky but my soul is free",
+    "ini": 29.65,
+    "fin": 32.26,
+    "ubicadas": 9
+   },
+   {
+    "texto": "the wetter it gets, the harder I stay",
+    "ini": 32.26,
+    "fin": 36.62,
+    "ubicadas": 8
+   },
+   {
+    "texto": "let it rain",
+    "ini": 37.4,
+    "fin": 38.68,
+    "ubicadas": 3
+   },
+   {
+    "texto": "let it rain, let it rain",
+    "ini": 38.8,
+    "fin": 42.02,
+    "ubicadas": 6
+   },
+   {
+    "texto": "When it's dry and easy anyone can shine",
+    "ini": 42.02,
+    "fin": 50.64,
+    "ubicadas": 0
+   },
+   {
+    "texto": "but the rain shows who's got a fire inside",
+    "ini": 50.64,
+    "fin": 54.04,
+    "ubicadas": 0
+   },
+   {
+    "texto": "so I'll dance in the flood till the clouds go gray",
+    "ini": 54.04,
+    "fin": 58.02,
+    "ubicadas": 0
+   },
+   {
+    "texto": "and the sun comes out when I've had my say",
+    "ini": 58.45,
+    "fin": 62.3,
+    "ubicadas": 0
+   },
+   {
+    "texto": "storm in the sky but my soul is free",
+    "ini": 62.3,
+    "fin": 74.75,
+    "ubicadas": 0
+   },
+   {
+    "texto": "the wetter it gets, the harder I stay",
+    "ini": 74.75,
+    "fin": 86.7,
+    "ubicadas": 0
+   },
+   {
+    "texto": "let it rain",
+    "ini": 86.7,
+    "fin": 88.55,
+    "ubicadas": 0
+   }
+  ],
+  "cobertura": 0.729,
+  "dudosos": 4
+ },
+ "mud": {
+  "lineas": [
+   {
+    "texto": "Everybody wants the glory, nobody wants the grind",
+    "ini": 8.94,
+    "fin": 11.94,
+    "ubicadas": 5
+   },
+   {
+    "texto": "nobody wants the mornings when the frost bites the spine",
+    "ini": 13.3,
+    "fin": 16.44,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I've been on my knees in the mud and the rain",
+    "ini": 16.44,
+    "fin": 23.7,
+    "ubicadas": 4
+   },
+   {
+    "texto": "doing it again till it numbs the pain",
+    "ini": 23.7,
+    "fin": 25.55,
+    "ubicadas": 0
+   },
+   {
+    "texto": "The body says stop but the soul says more",
+    "ini": 25.55,
+    "fin": 28.88,
+    "ubicadas": 0
+   },
+   {
+    "texto": "every single rep is a knock on the door",
+    "ini": 28.88,
+    "fin": 31.44,
+    "ubicadas": 6
+   },
+   {
+    "texto": "nobody films the hours in the cold",
+    "ini": 32.7,
+    "fin": 34.68,
+    "ubicadas": 7
+   },
+   {
+    "texto": "but that's where the iron turns into gold",
+    "ini": 37.9,
+    "fin": 40.22,
+    "ubicadas": 8
+   },
+   {
+    "texto": "they see the shine but they don't see the blood",
+    "ini": 43.85,
+    "fin": 46.34,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I was built down here, here in the mud",
+    "ini": 48.3,
+    "fin": 52.16,
+    "ubicadas": 9
+   },
+   {
+    "texto": "So when you see me shining don't call it luck",
+    "ini": 52.9,
+    "fin": 55.22,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I was born in the dirt and I didn't get stuck",
+    "ini": 56.9,
+    "fin": 60.2,
+    "ubicadas": 11
+   },
+   {
+    "texto": "the weight I carried is the strength I own",
+    "ini": 61.52,
+    "fin": 64.2,
+    "ubicadas": 4
+   },
+   {
+    "texto": "and the mud I came from became my throne",
+    "ini": 65.82,
+    "fin": 69.26,
+    "ubicadas": 9
+   },
+   {
+    "texto": "So when you see me shining don't call it luck",
+    "ini": 70.68,
+    "fin": 74,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I was born in the dirt and I didn't get stuck",
+    "ini": 74.75,
+    "fin": 78.86,
+    "ubicadas": 8
+   },
+   {
+    "texto": "they see the shine but they don't see the blood",
+    "ini": 79.74,
+    "fin": 83.32,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I was built down here, here in the mud",
+    "ini": 83.6,
+    "fin": 87.72,
+    "ubicadas": 6
+   },
+   {
+    "texto": "don't see the blood",
+    "ini": 95.25,
+    "fin": 96.38,
+    "ubicadas": 4
+   }
+  ],
+  "cobertura": 0.738,
+  "dudosos": 0
+ },
+ "mirror": {
+  "lineas": [
+   {
+    "texto": "Standing at the mirror before the doors swing wide",
+    "ini": 6.3,
+    "fin": 10.92,
+    "ubicadas": 8
+   },
+   {
+    "texto": "face looking back with a storm inside",
+    "ini": 10.92,
+    "fin": 12.19,
+    "ubicadas": 0
+   },
+   {
+    "texto": "it's me, but it's not, there's a fire in my eyes",
+    "ini": 12.19,
+    "fin": 13.81,
+    "ubicadas": 0
+   },
+   {
+    "texto": "something waking up underneath the disguise",
+    "ini": 13.81,
+    "fin": 15.65,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Every breath I take, I'm a little less afraid",
+    "ini": 15.65,
+    "fin": 17.9,
+    "ubicadas": 0
+   },
+   {
+    "texto": "every second I stare, the old me starts to fade",
+    "ini": 17.9,
+    "fin": 19.82,
+    "ubicadas": 0
+   },
+   {
+    "texto": "the kid who was nervous is starting to go",
+    "ini": 19.82,
+    "fin": 21.22,
+    "ubicadas": 0
+   },
+   {
+    "texto": "and the one who remains is the one you don't know",
+    "ini": 21.6,
+    "fin": 23.95,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Mirror, mirror, who do you see",
+    "ini": 23.95,
+    "fin": 30.05,
+    "ubicadas": 0
+   },
+   {
+    "texto": "someone I'm becoming, someone set free",
+    "ini": 30.05,
+    "fin": 31.38,
+    "ubicadas": 0
+   },
+   {
+    "texto": "the glass can't hold what I'm about to be",
+    "ini": 31.38,
+    "fin": 41.25,
+    "ubicadas": 0
+   },
+   {
+    "texto": "mirror, mirror, that's not me",
+    "ini": 41.25,
+    "fin": 48.54,
+    "ubicadas": 0
+   },
+   {
+    "texto": "So I turn from the glass and I walk to the light",
+    "ini": 48.65,
+    "fin": 52.42,
+    "ubicadas": 12
+   },
+   {
+    "texto": "leave the old reflection in the hall tonight",
+    "ini": 53.65,
+    "fin": 56.34,
+    "ubicadas": 6
+   },
+   {
+    "texto": "whatever I was, I'm not anymore",
+    "ini": 56.85,
+    "fin": 60.72,
+    "ubicadas": 6
+   },
+   {
+    "texto": "I'm the storm that's waiting at the door",
+    "ini": 61.84,
+    "fin": 65.28,
+    "ubicadas": 7
+   },
+   {
+    "texto": "Mirror, mirror, who do you see",
+    "ini": 67.55,
+    "fin": 69.94,
+    "ubicadas": 5
+   },
+   {
+    "texto": "someone I'm becoming, someone set free",
+    "ini": 70.2,
+    "fin": 74.14,
+    "ubicadas": 6
+   },
+   {
+    "texto": "the glass can't hold what I'm about to be",
+    "ini": 74.14,
+    "fin": 78.7,
+    "ubicadas": 9
+   },
+   {
+    "texto": "oh, mirror, mirror, that's not me",
+    "ini": 80.16,
+    "fin": 82.28,
+    "ubicadas": 2
+   }
+  ],
+  "cobertura": 0.604,
+  "dudosos": 5
+ },
+ "shadow": {
+  "lineas": [
+   {
+    "texto": "I'm the one in the shadow while the star gets the shine",
+    "ini": 1.05,
+    "fin": 5.65,
+    "ubicadas": 0
+   },
+   {
+    "texto": "doing all the dirty work and I'm doing it fine",
+    "ini": 5.65,
+    "fin": 7.34,
+    "ubicadas": 0
+   },
+   {
+    "texto": "nobody sings my name when the lights come on",
+    "ini": 7.34,
+    "fin": 11.24,
+    "ubicadas": 0
+   },
+   {
+    "texto": "but without me there the whole show is gone",
+    "ini": 11.24,
+    "fin": 17.1,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I clean up the mess and I cover the gaps",
+    "ini": 17.1,
+    "fin": 18.77,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I'm the hand underneath every time someone claps",
+    "ini": 18.77,
+    "fin": 20.39,
+    "ubicadas": 0
+   },
+   {
+    "texto": "but the star knows the truth when the night is through",
+    "ini": 20.39,
+    "fin": 22.6,
+    "ubicadas": 0
+   },
+   {
+    "texto": "he looks over at me and he says thank you",
+    "ini": 23.3,
+    "fin": 27.1,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I'm the shadow, I'm the ground",
+    "ini": 27.1,
+    "fin": 29.16,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I'm the one who's always around",
+    "ini": 29.16,
+    "fin": 32.36,
+    "ubicadas": 3
+   },
+   {
+    "texto": "you don't see me but you feel me there",
+    "ini": 33.82,
+    "fin": 37.54,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I'm the shadow, I'm everywhere",
+    "ini": 37.54,
+    "fin": 41.86,
+    "ubicadas": 5
+   },
+   {
+    "texto": "you don't see me but you feel me there",
+    "ini": 41.86,
+    "fin": 49.54,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I'm the shadow, I'm everywhere",
+    "ini": 49.54,
+    "fin": 54.18,
+    "ubicadas": 5
+   },
+   {
+    "texto": "I'm everywhere, yeah",
+    "ini": 57.26,
+    "fin": 58.9,
+    "ubicadas": 2
+   },
+   {
+    "texto": "One day the light's gonna turn my way",
+    "ini": 61.06,
+    "fin": 63.48,
+    "ubicadas": 8
+   },
+   {
+    "texto": "and I'll step out the dark into the day",
+    "ini": 63.48,
+    "fin": 66.18,
+    "ubicadas": 9
+   },
+   {
+    "texto": "but if it never does, I'm fine",
+    "ini": 67,
+    "fin": 69.92,
+    "ubicadas": 7
+   },
+   {
+    "texto": "'cause the shadow's the reason the stars can shine",
+    "ini": 69.92,
+    "fin": 74.22,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I'm the shadow, I'm the ground",
+    "ini": 74.22,
+    "fin": 75.48,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I'm the one who's always around",
+    "ini": 75.48,
+    "fin": 78.46,
+    "ubicadas": 6
+   },
+   {
+    "texto": "you don't see me but you feel me there",
+    "ini": 78.8,
+    "fin": 82.56,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I'm the shadow",
+    "ini": 82.56,
+    "fin": 85.08,
+    "ubicadas": 3
+   },
+   {
+    "texto": "I'm the shadow",
+    "ini": 87.22,
+    "fin": 89.32,
+    "ubicadas": 3
+   },
+   {
+    "texto": "I'm the shadow, I'm everywhere",
+    "ini": 89.32,
+    "fin": 92.96,
+    "ubicadas": 5
+   }
+  ],
+  "cobertura": 0.572,
+  "dudosos": 4
+ },
+ "splinters": {
+  "lineas": [
+   {
+    "texto": "But I pick up the shards one piece at a time",
+    "ini": 10.2,
+    "fin": 15.29,
+    "ubicadas": 0
+   },
+   {
+    "texto": "every jagged edge is a line in my rhyme",
+    "ini": 15.29,
+    "fin": 19.49,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I know where it's weak, I know where it bends",
+    "ini": 20.15,
+    "fin": 25.08,
+    "ubicadas": 0
+   },
+   {
+    "texto": "and that's how the broken become the strong ends",
+    "ini": 25.08,
+    "fin": 29.98,
+    "ubicadas": 9
+   },
+   {
+    "texto": "Splinters on the ground, I put them back",
+    "ini": 32.7,
+    "fin": 35.54,
+    "ubicadas": 4
+   },
+   {
+    "texto": "now I know the places where I tend to crack",
+    "ini": 35.54,
+    "fin": 39.1,
+    "ubicadas": 5
+   },
+   {
+    "texto": "broke into pieces, rebuilt on my own",
+    "ini": 39.1,
+    "fin": 42.94,
+    "ubicadas": 6
+   },
+   {
+    "texto": "stronger in the places where the cracks have grown",
+    "ini": 46.75,
+    "fin": 49.78,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Fear's talking loud but it don't decide",
+    "ini": 50.45,
+    "fin": 53.55,
+    "ubicadas": 0
+   },
+   {
+    "texto": "I hold my head up and I swallow my pride",
+    "ini": 53.55,
+    "fin": 56.9,
+    "ubicadas": 0
+   },
+   {
+    "texto": "Splinters on the ground, I put them back",
+    "ini": 60.65,
+    "fin": 64.02,
+    "ubicadas": 8
+   },
+   {
+    "texto": "now I know the places where I tend to crack",
+    "ini": 64.4,
+    "fin": 67.54,
+    "ubicadas": 10
+   },
+   {
+    "texto": "broke into pieces, rebuilt on my own",
+    "ini": 67.54,
+    "fin": 71.04,
+    "ubicadas": 4
+   },
+   {
+    "texto": "stronger in the places where the cracks have grown",
+    "ini": 71.04,
+    "fin": 74.7,
+    "ubicadas": 9
+   }
+  ],
+  "cobertura": 0.597,
+  "dudosos": 2
+ },
+ "before-the-sun": {
+  "lineas": [
+   {
+    "texto": "Alarm goes off and it's still dark outside",
+    "ini": 0,
+    "fin": 2.82,
+    "ubicadas": 8
+   },
+   {
+    "texto": "the city's asleep but I'm on the ride",
+    "ini": 2.82,
+    "fin": 6.68,
+    "ubicadas": 8
+   },
+   {
+    "texto": "nobody asks if I slept or I bled",
+    "ini": 6.68,
+    "fin": 10.04,
+    "ubicadas": 8
+   },
+   {
+    "texto": "nobody sees all the doubt in my head",
+    "ini": 10.04,
+    "fin": 13.98,
+    "ubicadas": 8
+   },
+   {
+    "texto": "Cold hands wrapped around a cup that won't last",
+    "ini": 14.3,
+    "fin": 17.8,
+    "ubicadas": 9
+   },
+   {
+    "texto": "my face in the window of a bus going past",
+    "ini": 17.8,
+    "fin": 21.54,
+    "ubicadas": 10
+   },
+   {
+    "texto": "I carry the dreams of the ones back home",
+    "ini": 21.54,
+    "fin": 25.14,
+    "ubicadas": 9
+   },
+   {
+    "texto": "every step that I take is a step of my own, my own",
+    "ini": 25.14,
+    "fin": 29.75,
+    "ubicadas": 13
+   },
+   {
+    "texto": "Nobody sees it and I don't mind",
+    "ini": 29.75,
+    "fin": 32.62,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I keep on going when the night is blind",
+    "ini": 32.62,
+    "fin": 36.36,
+    "ubicadas": 9
+   },
+   {
+    "texto": "if my body says stop, I won't hear a thing",
+    "ini": 36.36,
+    "fin": 39.86,
+    "ubicadas": 10
+   },
+   {
+    "texto": "the morning knows all the weight I bring, yeah",
+    "ini": 39.86,
+    "fin": 44.52,
+    "ubicadas": 9
+   },
+   {
+    "texto": "Mama used to say the patient ones arrive",
+    "ini": 45.3,
+    "fin": 47.54,
+    "ubicadas": 8
+   },
+   {
+    "texto": "but the ones who keep walking are the ones who survive",
+    "ini": 47.54,
+    "fin": 51.08,
+    "ubicadas": 11
+   },
+   {
+    "texto": "no photo of the work that I do in the dark",
+    "ini": 51.08,
+    "fin": 54.4,
+    "ubicadas": 11
+   },
+   {
+    "texto": "but the sun finds me awake with a fire in my heart",
+    "ini": 54.4,
+    "fin": 58.68,
+    "ubicadas": 12
+   },
+   {
+    "texto": "Nobody sees it and I don't mind",
+    "ini": 59.75,
+    "fin": 62.6,
+    "ubicadas": 7
+   },
+   {
+    "texto": "I keep on going when the night is blind",
+    "ini": 62.6,
+    "fin": 66.34,
+    "ubicadas": 9
+   },
+   {
+    "texto": "if my body says stop, I won't hear a thing",
+    "ini": 66.7,
+    "fin": 69.88,
+    "ubicadas": 10
+   },
+   {
+    "texto": "the morning knows all the weight I bring",
+    "ini": 70.7,
+    "fin": 73.62,
+    "ubicadas": 8
+   },
+   {
+    "texto": "I keep on going when the night is blind",
+    "ini": 76.92,
+    "fin": 81.38,
+    "ubicadas": 9
+   },
+   {
+    "texto": "I won't hear a thing",
+    "ini": 83.12,
+    "fin": 84.92,
+    "ubicadas": 5
+   },
+   {
+    "texto": "the morning knows all the weight I bring",
+    "ini": 86.04,
+    "fin": 88.66,
+    "ubicadas": 6
+   }
+  ],
+  "cobertura": 0.99,
+  "dudosos": 0
+ },
+ "scar": {
+  "dosPasadas": true,
+  "lineas": [
+   {
+    "texto": "Your cup's still sitting on the edge of the sink",
+    "ini": 0,
+    "fin": 2.6
+   },
+   {
+    "texto": "your voice in the walls every time that I think",
+    "ini": 2.6,
+    "fin": 5.9
+   },
+   {
+    "texto": "I learned to close the door without a sound",
+    "ini": 5.96,
+    "fin": 9.5
+   },
+   {
+    "texto": "so the ache in my chest won't come back around",
+    "ini": 9.52,
+    "fin": 12.8
+   },
+   {
+    "texto": "They told me that time would fix it for free",
+    "ini": 12.82,
+    "fin": 16.62
+   },
+   {
+    "texto": "but time never came, so I went out to see",
+    "ini": 16.72,
+    "fin": 19.92
+   },
+   {
+    "texto": "I walked with the wound wide open and raw",
+    "ini": 20.1,
+    "fin": 23.5
+   },
+   {
+    "texto": "and every step forward was breaking the law",
+    "ini": 23.68,
+    "fin": 26.5
+   },
+   {
+    "texto": "Now I wear the scar and I wear it with pride",
+    "ini": 26.6,
+    "fin": 29.34
+   },
+   {
+    "texto": "it's the proof that I'm standing, the proof I survived",
+    "ini": 29.38,
+    "fin": 32.6
+   },
+   {
+    "texto": "what broke me apart is what made me strong",
+    "ini": 32.72,
+    "fin": 36.02
+   },
+   {
+    "texto": "tonight I'm still here and I'm moving along",
+    "ini": 36.04,
+    "fin": 39.42
+   },
+   {
+    "texto": "I don't hold a grudge, I just hold a picture",
+    "ini": 46.6,
+    "fin": 49.9
+   },
+   {
+    "texto": "the one that reminds me the pain was a teacher",
+    "ini": 50,
+    "fin": 53.3
+   },
+   {
+    "texto": "Don't hold a grudge, I just hold a picture",
+    "ini": 53.34,
+    "fin": 56.8
+   },
+   {
+    "texto": "the one that reminds me the pain was a teacher",
+    "ini": 56.86,
+    "fin": 60.2
+   },
+   {
+    "texto": "rain on the window like it was before",
+    "ini": 60.26,
+    "fin": 63.3
+   },
+   {
+    "texto": "but I'm not shaking, I'm not cold anymore",
+    "ini": 63.38,
+    "fin": 66.72
+   },
+   {
+    "texto": "I wear the scar and I wear it with pride",
+    "ini": 67.72,
+    "fin": 70.4
+   },
+   {
+    "texto": "it's the proof that I'm standing, the proof I survived",
+    "ini": 70.5,
+    "fin": 73.72
+   },
+   {
+    "texto": "what broke me apart is what made me strong",
+    "ini": 73.94,
+    "fin": 77.04
+   },
+   {
+    "texto": "tonight I'm still here and I'm moving along",
+    "ini": 77.14,
+    "fin": 80.56
+   }
+  ]
+ }
+}

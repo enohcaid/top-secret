@@ -254,6 +254,20 @@ export default {
         const key = decodeURIComponent(url.pathname.slice('/media/'.length));
         // `_fuentes/` guarda originales de trabajo (capturas, láminas de kits): no se publican.
         if (key.startsWith('_fuentes/')) return new Response('Not found', { status: 404, headers: CORS_HEADERS });
+        // Pedidos parciales (videos de /music): sin esto no se puede adelantar y Safari no reproduce. No pasan por la caché.
+        if (request.headers.has('Range')) {
+          const parte = await env.MEDIA_BUCKET.get(key, { range: request.headers });
+          if (!parte) return new Response('Not found', { status: 404, headers: CORS_HEADERS });
+          const headers = new Headers(CORS_HEADERS);
+          parte.writeHttpMetadata(headers);
+          headers.set('etag', parte.httpEtag);
+          headers.set('Accept-Ranges', 'bytes');
+          headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+          const { offset = 0, length = parte.size - offset } = parte.range || {};
+          headers.set('Content-Range', `bytes ${offset}-${offset + length - 1}/${parte.size}`);
+          headers.set('Content-Length', String(length));
+          return new Response(parte.body, { status: 206, headers });
+        }
         // Copia en la caché del borde de Cloudflare: la primera visita lee R2 (~250 ms), las
         // siguientes (de cualquier visitante en esa región) salen de la caché. La clave incluye
         // el ?v=, así que versionar una URL sigue sirviendo la imagen nueva al instante.
@@ -271,6 +285,7 @@ export default {
         obj.writeHttpMetadata(headers);
         headers.set('etag', obj.httpEtag);
         headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        headers.set('Accept-Ranges', 'bytes');
         const dl = url.searchParams.get('dl');
         if (dl) headers.set('Content-Disposition', `attachment; filename="${dl.replace(/"/g, '')}"`);
         const res = new Response(obj.body, { headers });

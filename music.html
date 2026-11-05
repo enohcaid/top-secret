@@ -86,6 +86,15 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
 .tema.con-letra .letra{display:block}
 .pend{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;color:var(--mid);text-transform:uppercase}
 .vacio{margin-top:40px;color:var(--mid)}
+/* apartado Videos: fila horizontal, para que no empuje los discos aunque crezca */
+.videos{margin-top:44px}
+.videos[hidden]{display:none}
+.videos-tit{font-weight:900;font-size:clamp(1.6rem,3.6vw,2.4rem);letter-spacing:-.03em;line-height:1;margin-top:8px}
+.videos-fila{display:flex;gap:16px;margin:18px calc(var(--gutter) * -1) 0;padding:0 var(--gutter) 12px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.video{flex:0 0 clamp(270px,44vw,470px);scroll-snap-align:start;min-width:0}
+.video video{display:block;width:100%;aspect-ratio:16/9;border-radius:14px;background:var(--card2);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.video-tit{margin-top:12px;font-weight:800;font-size:1.12rem;letter-spacing:-.01em;line-height:1.15}
+.video-meta{margin-top:5px;font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;color:var(--mid);text-transform:uppercase}
 @media (max-width:700px){
   .tema{grid-template-columns:52px 1fr;gap:14px;padding:18px}
   .play{width:52px;height:52px}
@@ -110,6 +119,11 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
     </div>
   </div>
   <p class="lead">El proyecto musical de Top Secret. Cada tema nace de algo que cualquiera vivió alguna vez: lo que nos empuja, lo que nos duele y lo que no podemos dejar de querer.</p>
+  <section class="videos" id="videos" hidden aria-labelledby="videos-tit">
+    <div class="album-tipo">Lyric videos</div>
+    <h2 class="videos-tit" id="videos-tit">Videos</h2>
+    <div class="videos-fila" id="videos-fila"></div>
+  </section>
   <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
 </div>
 <audio id="audio" preload="none"></audio>
@@ -249,6 +263,23 @@ fetch(CATALOGO + '?' + Date.now()).then(r => r.json()).then(c => {
   temas.sort((a, b) => orden(a) - orden(b) || (a.pista || 0) - (b.pista || 0));
   pintar();
 }).catch(() => { document.getElementById('lista').innerHTML = '<div class="vacio">No se pudo cargar la música. Probá de nuevo en un rato.</div>'; });
+
+// Apartado Videos (lista R2 musica/videos.json, la arma scripts/beats/videos-youtube.mjs publicar). Si no carga, no se muestra.
+fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/videos.json?' + Date.now()).then(r => r.ok ? r.json() : null).then(d => {
+  if (!d?.videos?.length) return;
+  document.getElementById('videos-fila').innerHTML = d.videos.map(v => `
+    <article class="video">
+      <video controls playsinline preload="none" poster="${esc(v.portada)}" src="${esc(v.video)}" aria-label="${esc(v.titulo)}, lyric video"></video>
+      <div class="video-tit">${esc(v.titulo)}</div>
+      <div class="video-meta">The Shorts · Vol. ${v.volumen} · ${mmss(v.duracion)}</div>
+    </article>`).join('');
+  document.getElementById('videos').hidden = false;
+}).catch(() => {});
+// suena una sola cosa a la vez: un video frena el tema y los otros videos, y un tema frena los videos
+document.addEventListener('play', e => {
+  if (e.target.tagName === 'VIDEO') { audio.pause(); document.querySelectorAll('video').forEach(v => { if (v !== e.target) v.pause(); }); }
+  else if (e.target === audio) document.querySelectorAll('video').forEach(v => v.pause());
+}, true);
 </script>
 <script src="layout.js?v=26"></script>
 </body>
