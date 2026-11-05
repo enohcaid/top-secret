@@ -6,6 +6,7 @@
 //   node scripts/beats/subir-youtube-tacet.mjs playlists
 //   node scripts/beats/subir-youtube-tacet.mjs subir <slug>… [--privado]   o   subir --todos   (saltea lo ya subido)
 //   node scripts/beats/subir-youtube-tacet.mjs terminar-borrador <slug>   → completa y publica un borrador ya subido de ese tema
+//   node scripts/beats/subir-youtube-tacet.mjs miniaturas                 → repone la miniatura propia en los videos ya publicados
 //   node scripts/beats/subir-youtube-tacet.mjs hacer-publico <slug>       → pasa a público una prueba privada ya verificada
 //
 // OJO: studio.youtube.com/channel/tacetsin redirige al canal del club. El canal de Tacet Sin es CANAL (abajo).
@@ -106,10 +107,11 @@ async function subir(t, { privado, deBorrador = false }) {
   const cajas = p.locator('ytcp-uploads-dialog #textbox');
   await cajas.nth(0).click(); await p.keyboard.press('Control+A'); await p.keyboard.press('Delete');
   await cajas.nth(0).type(titulo, { delay: 6 });
-  await cajas.nth(1).click(); await cajas.nth(1).type(descripcion, { delay: 1 });
+  await cajas.nth(1).click(); await p.keyboard.press('Control+A'); await p.keyboard.press('Delete');
+  await cajas.nth(1).type(descripcion, { delay: 1 });
   await espera(800);
   let miniatura = true;
-  try { await p.locator('input#file-loader').first().setInputFiles(base + '.jpg', { timeout: 15000 }); await espera(6000); }
+  try { await p.locator('input#file-loader').first().setInputFiles(base + '.jpg', { timeout: 15000 }); await espera(15000); }
   catch (e) { miniatura = false; console.log('  miniatura no subida:', e.message.split('\n')[0]); }
   // playlist del disco
   const dlg = p.locator('ytcp-uploads-dialog');
@@ -154,6 +156,23 @@ async function subir(t, { privado, deBorrador = false }) {
   console.log(`OK ${titulo} → ${url}`);
 }
 
+// Pone la miniatura propia en videos ya publicados (en la subida a veces queda el cuadro automático)
+async function miniaturas() {
+  const reg = leerReg();
+  for (const [slug, v] of Object.entries(reg.videos).sort((a, c) => a[1].pista - c[1].pista)) {
+    const id = /youtu\.be\/([\w-]{11})/.exec(v.url)[1];
+    const jpg = path.join(OUT, `vol-${v.volumen}`, `${String(v.pista).padStart(2, '0')}-${slug}.jpg`);
+    await p.goto(`https://studio.youtube.com/video/${id}/edit`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#textbox'); await espera(4000);
+    await p.locator('input#file-loader').first().setInputFiles(jpg, { timeout: 15000 });
+    await espera(12000);
+    const guardar = p.locator('ytcp-button#save:visible, button:visible', { hasText: /^\s*Save\s*$/ }).first();
+    await guardar.click(); await espera(6000);
+    await shot(`mini-${slug}`);
+    console.log('miniatura', slug);
+  }
+}
+
 async function hacerPublico(slug) {
   const reg = leerReg(), v = reg.videos[slug];
   if (!v) throw new Error('no está en el registro');
@@ -188,6 +207,7 @@ try {
     console.log(`listo: ${hechos} subidos en esta corrida, ${Object.keys(leerReg().videos).length} en total`);
   }
   else if (cmd === 'hacer-publico') await hacerPublico(argv[1]);
+  else if (cmd === 'miniaturas') await miniaturas();
   else if (cmd === 'terminar-borrador') { const r = leerReg(); delete r.videos[argv[1]]; guardarReg(r); await subir(temas().find(t => t.slug === argv[1]), { privado: false, deBorrador: true }); }
   else console.log('uso: playlists | subir <slug>…|--todos [--privado] | hacer-publico <slug>');
 } catch (e) {
