@@ -22,6 +22,8 @@ Pedido de Juan (2026-11-05): publicar los temas de The Shorts en YouTube como ly
 - Claude cruza las dos con la letra escrita; la letra escrita manda en la ortografía, las transcripciones en qué se canta y cuándo. El código rechaza versos sin nada oído en ese lugar. Resultado versionado: `scripts/beats/letras-tiempos.json`.
 - Probado y descartado: alineación forzada con stable-ts (amontona versos) y repartir versos no reconocidos sobre "tramos con voz" (Demucs toma melodías instrumentales como voz: los versos caían sobre partes sin canto).
 
-**Pendiente de Juan:** chequear los pilotos de oído (Claude no oye) antes de armar los otros 20; decidir si se corrige también la letra de `topsecret.ar/music`, que sale de `letraFinal`.
+**Letra oficial (2026-11-05, Juan):** estas letras son también las de `/music` y las de las descripciones de YouTube. `letras-web` las copia a `letraFinal` en `letras.json` con sus secciones y rearma el catálogo; `letraOida:true` evita que `letra-final.mjs` las pise. Para corregir una: editar `scripts/beats/letras-tiempos.json`, correr `letras-web`, `video <slug>` y `publicar <slug>`. Thrive sigue usando `letra-final.mjs` (conserva versos escritos donde la transcripción falla), así que puede tener el mismo problema.
+
+**Estado:** los 23 publicados en `/music`. Canal de YouTube: lo crea Juan; falta subir `vol-N/`. Clips de Canva respaldados en R2 `_fuentes/musica/youtube-canva/`. Claude no oye: la letra se chequea de oído por Juan.
 
 **Worker:** `/media` ahora atiende pedidos `Range` (206), necesarios para adelantar videos y para Safari.

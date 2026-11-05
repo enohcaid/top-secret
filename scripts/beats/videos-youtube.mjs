@@ -7,6 +7,7 @@
 //   node scripts/beats/videos-youtube.mjs tiempos [slug…]    → versos que se cantan de verdad con sus tiempos, desde lo oído por
 //                                                              Whisper (palabras-whisper.py) → scripts/beats/letras-tiempos.json
 //   node scripts/beats/videos-youtube.mjs video <slug>|--todos [--vol 1] → fuentes/musica/youtube/vol-N/NN-slug.{mp4,jpg,txt}
+//   node scripts/beats/videos-youtube.mjs letras-web         → esas letras pasan a ser las oficiales de /music (letraFinal + catálogo)
 //   node scripts/beats/videos-youtube.mjs publicar [slug…]   → sube a topsecret.ar/music (apartado Videos) los videos ya armados:
 //                                                              versión liviana 720p + portada a R2 musica/videos/ y lista musica/videos.json
 //
@@ -248,6 +249,31 @@ async function video(t, tiemposTodos) {
   console.log(`OK Vol.${t.volumen} ${base} (${dur.toFixed(1)} s, ${tt.lineas.length} versos)`);
 }
 
+// ── Letra oficial de cada tema (Juan, 2026-11-05) ───────────────────────────────────────────────────────────────────
+// La letra de los videos pasa a ser letraFinal en letras.json (la que muestra /music), con las etiquetas de sección de la
+// letra escrita para que se lea por estrofas. Correr después de corregir letras-tiempos.json.
+const palabras = s => new Set(s.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').split(/\s+/).filter(Boolean));
+const parecidoLinea = (a, b) => { const x = palabras(a), y = palabras(b); let n = 0; for (const w of x) if (y.has(w)) n++; return x.size >= 2 && n === x.size ? 0.9 : n / Math.max(x.size, y.size, 1); };   // una línea cantada a medias también es de esa sección
+function conSecciones(t, lineas) {
+  const escrita = []; let sec = 'verse';
+  for (const crudo of t.letra.split('\n')) { const l = crudo.trim(), m = /^\[(.+)\]$/.exec(l); if (m) sec = m[1]; else if (l) escrita.push({ sec, l }); }
+  const out = []; let actual = null, finPrevio = 0;
+  for (const v of lineas) {
+    const mejor = escrita.reduce((m, e) => { const p = parecidoLinea(v.texto, e.l); return p > m.p ? { p, sec: e.sec } : m; }, { p: 0.34, sec: actual || escrita[0]?.sec || 'verse' });
+    if (mejor.sec !== actual || v.ini - finPrevio > 4) { if (out.length) out.push(''); out.push(`[${mejor.sec}]`); actual = mejor.sec; }
+    out.push(v.texto); finPrevio = v.fin;
+  }
+  return out.join('\n');
+}
+async function letrasWeb() {
+  loadEnv();
+  const todos = JSON.parse(fs.readFileSync(LETRAS, 'utf8')), tt = JSON.parse(fs.readFileSync(TIEMPOS, 'utf8'));
+  for (const t of todos) { if (!tt[t.slug]?.dosPasadas) throw new Error(`sin letra: ${t.slug}`); t.letraFinal = conSecciones(t, tt[t.slug].lineas); t.letraOida = true; }
+  fs.writeFileSync(LETRAS, JSON.stringify(todos, null, 2) + '\n');
+  const { armarCatalogo } = await import('./catalogo.mjs');
+  await armarCatalogo();
+}
+
 // ── Apartado Videos de topsecret.ar/music ───────────────────────────────────────────────────────────────────────────
 const LISTA_WEB = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/videos.json';
 async function publicar(solo) {
@@ -281,6 +307,7 @@ const op = n => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : null);
 if (cmd === 'loops') { for (const v of op('--vol') ? [Number(op('--vol'))] : [1, 2]) await loop(v); }
 else if (cmd === 'tiempos') await tiempos(argv.slice(1));
 else if (cmd === 'publicar') await publicar(argv.slice(1));
+else if (cmd === 'letras-web') await letrasWeb();
 else if (cmd === 'video') {
   const tt = JSON.parse(fs.readFileSync(TIEMPOS, 'utf8')), todos = temas();
   const elegidos = argv.includes('--todos') ? todos.filter(t => !op('--vol') || t.volumen === Number(op('--vol'))) : todos.filter(t => t.slug === argv[1]);
