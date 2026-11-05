@@ -82,6 +82,7 @@ async function subir(t, { privado, deBorrador = false }) {
   const descripcion = resto.join('\n').trim();
   const malo = (titulo + '\n' + descripcion).match(PROHIBIDO);
   if (malo) throw new Error(`${t.slug}: el texto tiene "${malo[0]}"`);
+  if (!fs.existsSync(base + '-mini.jpg')) throw new Error(`${t.slug}: falta la miniatura (miniaturas-youtube.mjs)`);
   if (deBorrador) {
     // retoma un borrador ya subido de este mismo tema: no gasta cupo diario
     await p.goto(`https://studio.youtube.com/channel/${CANAL}/videos/upload`, { waitUntil: 'domcontentloaded' });
@@ -111,7 +112,7 @@ async function subir(t, { privado, deBorrador = false }) {
   await cajas.nth(1).type(descripcion, { delay: 1 });
   await espera(800);
   let miniatura = true;
-  try { await p.locator('input#file-loader').first().setInputFiles(base + '.jpg', { timeout: 15000 }); await espera(15000); }
+  try { await p.locator('input#file-loader').first().setInputFiles(base + '-mini.jpg', { timeout: 15000 }); await espera(15000); }
   catch (e) { miniatura = false; console.log('  miniatura no subida:', e.message.split('\n')[0]); }
   // playlist del disco
   const dlg = p.locator('ytcp-uploads-dialog');
@@ -161,7 +162,7 @@ async function miniaturas() {
   const reg = leerReg();
   for (const [slug, v] of Object.entries(reg.videos).sort((a, c) => a[1].pista - c[1].pista)) {
     const id = /youtu\.be\/([\w-]{11})/.exec(v.url)[1];
-    const jpg = path.join(OUT, `vol-${v.volumen}`, `${String(v.pista).padStart(2, '0')}-${slug}.jpg`);
+    const jpg = path.join(OUT, `vol-${v.volumen}`, `${String(v.pista).padStart(2, '0')}-${slug}-mini.jpg`);
     await p.goto(`https://studio.youtube.com/video/${id}/edit`, { waitUntil: 'domcontentloaded' });
     await p.waitForSelector('#textbox'); await espera(4000);
     await p.locator('input#file-loader').first().setInputFiles(jpg, { timeout: 15000 });
