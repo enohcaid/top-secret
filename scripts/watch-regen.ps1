@@ -83,6 +83,17 @@ try {
     Log "Error en publicacion de la ronda: $_"
 }
 
+# ── PASO P: ideas aprobadas en aprobar.html → se producen solas (Juan, 2026-11-05) ──
+# Sale enseguida si no hay ninguna (una lectura de KV); la producción corre aparte y escribe en scripts\produccion-redes.log.
+# Este paso NO puede redirigir a ese log: lo dejaría tomado y producir.mjs no podría abrirlo para lanzar la producción (EBUSY).
+try {
+    Push-Location $repoRoot
+    cmd /c "node scripts\social\producir.mjs >> scripts\ronda-redes.log 2>&1"
+    Pop-Location
+} catch {
+    Log "Error lanzando la produccion de ideas: $_"
+}
+
 # ── PASO M: demos de música revisadas en aprobar.html (todo bien → se publica; "a mejorar" → se rehace) ──
 # Sale enseguida si no hay decisiones nuevas (una lectura de KV). Log: scripts\thrive.log
 try {

@@ -12,6 +12,7 @@
 //   node scripts/social/producir.mjs --reintentar <lote> <idea> → volver a ponerla en la cola
 //   node scripts/social/producir.mjs --trabajar <lote> <idea>   → producirla ya, en primer plano
 //
+// No arranca lunes a jueves de 21:00 a 00:45 (vivo): lo aprobado en ese rato espera y empieza después.
 // Estados: produciendo · esperando (ChatGPT sin cupo: reintenta a las 3 h) · lista (lote nuevo para aprobar) ·
 // error (reintenta una vez a la hora; después queda para revisar) · manual.
 import fs from 'fs';
@@ -33,6 +34,11 @@ fs.mkdirSync(DIR, { recursive: true });
 const vivo = pid => { try { process.kill(pid, 0); return true; } catch { return false; } };
 const enCurso = () => { try { const pid = Number(fs.readFileSync(LOCK, 'utf8')); return pid && vivo(pid) ? pid : 0; } catch { return 0; } };
 const fechaDe = l => (l.id.match(/\d{4}-\d{2}-\d{2}/) || [new Date().toISOString().slice(0, 10)])[0];
+// No arrancar una producción (render y ChatGPT, pesados) cerca del vivo: lunes a jueves desde las 21:00 hasta las 00:45.
+function cercaDelVivo(d = new Date()) {
+  const min = d.getHours() * 60 + d.getMinutes(), dia = d.getDay();
+  return (dia >= 1 && dia <= 4 && min >= 21 * 60) || (dia >= 2 && dia <= 5 && min < 45);
+}
 
 // ¿Esta idea está para producir ahora?
 function toca(p, ahora) {
@@ -61,7 +67,7 @@ else if (modo === '--reanudar') { fs.rmSync(PAUSA, { force: true }); log('Reanud
 else if (modo === '--manual') { await actualizarPieza(loteId, ideaId, { produccion: { estado: 'manual', desde: new Date().toISOString() } }); log(`${loteId} · ${ideaId}: manual.`); }
 else if (modo === '--reintentar') { await actualizarPieza(loteId, ideaId, { produccion: null }); log(`${loteId} · ${ideaId}: de nuevo en la cola.`); }
 else if (modo === '--trabajar') await trabajar(loteId, ideaId);
-else if (!fs.existsSync(PAUSA) && !enCurso()) {
+else if (!fs.existsSync(PAUSA) && !enCurso() && !cercaDelVivo()) {
   // Modo watcher: barato (una lectura de KV) y sale enseguida; la producción corre aparte.
   const data = await leer();
   const sig = ideas(data).find(({ p }) => toca(p, Date.now()));
@@ -90,13 +96,23 @@ async function trabajar(loteId, ideaId) {
       COMENTARIOS: (p.texto || '').trim() || '(sin comentarios)', SCRIPT: `${fechaDe(l)}-${ideaId}`, CARPETA: `viral/${ideaId}`, LOTE_FINAL: loteFinal };
     for (const [k, v] of Object.entries(vars)) encargo = encargo.replaceAll(`{{${k}}}`, v);
 
-    const r = spawnSync(CLAUDE, ['-p', '--model', 'opus', '--output-format', 'json', '--permission-mode', 'acceptEdits', '--allowedTools', 'Bash Read Write Edit Glob Grep'], {
-      cwd: ROOT, input: encargo, encoding: 'utf8', timeout: 4 * HORA, maxBuffer: 64 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'),
+    // Modelo por nombre completo: el alias de este Claude Code puede apuntar a uno viejo (ver scripts/lib/ia.mjs).
+    const correr = () => spawnSync(CLAUDE, ['-p', '--model', 'claude-opus-5-5', '--output-format', 'json', '--permission-mode', 'acceptEdits', '--allowedTools', 'Bash Read Write Edit Glob Grep'], {
+      cwd: ROOT, input: encargo, encoding: 'utf8', timeout: 4 * HORA, maxBuffer: 64 * 1024 * 1024, shell: CLAUDE.endsWith('.cmd'), windowsHide: true,
     });
+    let r = correr();
+    // El claude.exe no se autoactualiza en modo -p (la noticia del 28/10 cayó por eso): se actualiza una vez y se reintenta.
+    if (/does not support this model|or newer is required|claude update/i.test(`${r.stdout || ''}${r.stderr || ''}`.slice(0, 2000))) {
+      log('Claude Code desactualizado: corriendo "claude update"…');
+      spawnSync(CLAUDE, ['update'], { encoding: 'utf8', timeout: 5 * 60000, shell: CLAUDE.endsWith('.cmd'), windowsHide: true });
+      r = correr();
+    }
     let fin;
     try {
       const res = JSON.parse(r.stdout).result || '';
-      fin = JSON.parse(res.slice(res.lastIndexOf('{"estado"'), res.lastIndexOf('}') + 1));
+      // Sin cupo, Claude "responde" igual con el aviso como texto: se espera como con ChatGPT, no gasta un reintento.
+      if (res.length < 400 && /usage limit|out of (extra )?usage|hit your limit|limit (will )?reset|rate limit/i.test(res)) fin = { estado: 'esperando-chatgpt', motivo: `Claude sin cupo: ${res.slice(0, 200)}` };
+      else fin = JSON.parse(res.slice(res.lastIndexOf('{"estado"'), res.lastIndexOf('}') + 1));
     } catch { fin = { estado: 'error', motivo: `Claude terminó sin respuesta válida (código ${r.status}${r.error ? ', ' + r.error.message : ''}): ${(r.stdout || r.stderr || '').slice(-300)}` }; }
 
     const ahora = Date.now(), base = { lote: loteFinal, hasta: new Date(ahora).toISOString() };
@@ -106,7 +122,7 @@ async function trabajar(loteId, ideaId) {
       spawnSync('cmd', ['/c', 'start', '', PAGINA], { stdio: 'ignore' });   // a Juan se le abre aprobar.html, como con los otros lotes
     } else if (fin.estado === 'esperando-chatgpt') {
       await actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'esperando', motivo: fin.motivo || 'ChatGPT sin cupo', reintentarDesde: new Date(ahora + 3 * HORA).toISOString() } });
-      log(`${ideaId}: ChatGPT sin cupo, reintenta en 3 h.`);
+      log(`${ideaId}: ${fin.motivo || 'ChatGPT sin cupo'}. Reintenta en 3 h.`);
     } else {
       const reintentos = (previo.reintentos || 0) + 1;
       await actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'error', motivo: String(fin.motivo || 'error').slice(0, 500), reintentos, reintentarDesde: new Date(ahora + HORA).toISOString() } });
