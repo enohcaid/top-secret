@@ -5,6 +5,7 @@
     "i.a.c.c": "Instituto Cantera",
     "cantera iacc": "Instituto Cantera",
     "iacc reserva": "Instituto Reserva",
+    "iacc senior": "Instituto Senior",
     "sub21": "SUB 21CF",
     "sub 21": "SUB 21CF",
     "infinix": "InfinitX",
@@ -17,7 +18,8 @@
     "sf drysdale": "SF Drysdale"
   },
   "nombre_sitio": {
-    "Instituto Cantera": "IACC Cantera"
+    "Instituto Cantera": "IACC Cantera",
+    "Instituto Senior": "IACC Senior"
   },
   "extras": [
     {

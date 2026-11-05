@@ -46,6 +46,7 @@ import { buscarEquipo as matchEquipo, buscarEquipoExacto } from './lib/equipos-m
 import { buscarEscudo } from './lib/escudos.mjs';
 import { leerPedido } from './lib/pedido-amistoso.mjs';
 import { equiposEG } from './lib/espacio-gamer.mjs';
+import { cambiarAmistoso } from './lib/amistoso-cambiar.mjs';
 
 const { Client, LocalAuth } = wweb;
 const PRUEBA = process.argv.includes('--prueba');
@@ -230,9 +231,13 @@ async function leerOcupadosDelSitio() {
   log('partidos del día:', partidos.map(p => p.time + ' ' + p.rival + ' ' + (p.league || '')).join(' | ') || 'ninguno');
 }
 
-async function cargarEnSitio(p) {
-  // Sin escudo en VPN (equipo de otra liga o corregido a mano): buscarlo en VPUG y 11x11.
+// Sin escudo en VPN (equipo de otra liga o corregido a mano): buscarlo en VPUG y 11x11.
+async function completarEscudo(p) {
   if (!p.equipo.logo) { const e = await buscarEscudo(p.equipo.nombre).catch(() => null); if (e) { p.equipo.logo = e.logo; log(`escudo de ${p.equipo.nombre} tomado de ${e.fuente}`); } }
+}
+
+async function cargarEnSitio(p) {
+  await completarEscudo(p);
   if (PRUEBA) { log('[prueba] no se carga en el sitio:', p.equipo.nombre, p.slot); return true; }
   const r = await fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents:commit', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -787,9 +792,30 @@ async function comando(body) {
     st.pedidos[id] = { autor: '', contacto: '', texto: body, manual: true, estado: 'nuevo', ts: Date.now(),
       equipo: eq };
     save();
+    const min = t => { const [h, mm] = t.split(':').map(Number); return h * 60 + mm; };
+    // Ya hay un amistoso a esa hora: el "+" de Juan cambia el rival (2026-11-04: InfinitX → IACC Senior,
+    // el bot lo rechazaba por horario ocupado). Un partido de liga no se toca: lo frena confirmar().
+    const p = st.pedidos[id];
+    p.slot = hora;
+    await completarEscudo(p);
+    const cambio = await cambiarAmistoso(FS_DOC, st.fecha, hora, entradaAmistoso(p), { escribir: !PRUEBA }).catch(e => ({ error: e.message }));
+    if (cambio.error) {
+      log('no pude cambiar el amistoso:', cambio.error);
+      p.estado = 'descartado'; save();
+      return avisar(`⚠️ No pude cambiar el amistoso de las ${hora}: ${cambio.error}. Mandalo de nuevo.`);
+    }
+    if (cambio.viejo !== undefined) {
+      const anterior = st.confirmados[hora];
+      for (const q of Object.values(st.pedidos)) if (q !== p && q.slot === hora && q.estado === 'confirmado') q.estado = 'descartado';
+      for (const s of Object.keys(st.confirmados)) if (anterior && st.confirmados[s] === anterior && Math.abs(min(s) - min(hora)) < 20) st.confirmados[s] = eq.nombre;
+      st.confirmados[hora] = eq.nombre;
+      p.estado = 'confirmado'; save();
+      log(`amistoso de las ${hora} cambiado: ${cambio.viejo} → ${nombreSitio(eq.nombre)}`);
+      await avisar(`🔁 *Amistoso cambiado*: a las *${hora}* ya no va ${cambio.viejo}, ahora es *${nombreSitio(eq.nombre)}*.${PRUEBA ? ' _(prueba: no se guardó)_' : ' Actualizado en el calendario y la convocatoria.'}`);
+      return reacomodar();
+    }
     await confirmar(id, hora);
     // Fuera de los horarios fijos: ocupa el horario fijo que quede a menos de 20 min.
-    const min = t => { const [h, mm] = t.split(':').map(Number); return h * 60 + mm; };
     for (const s of SLOTS) if (s !== hora && !st.confirmados[s] && Math.abs(min(s) - min(hora)) < 20) st.confirmados[s] = st.pedidos[id].equipo.nombre;
     save();
     return reacomodar();
