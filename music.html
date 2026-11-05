@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Top Secret FC">
 <meta property="og:title" content="Tacet Sin · Top Secret FC">
-<meta property="og:description" content="Tacet Sin, el proyecto musical de Top Secret FC: The Shorts y Thrive.">
+<meta property="og:description" content="Tacet Sin: The Shorts and Thrive.">
 <meta property="og:url" content="https://topsecret.ar/music">
 <link rel="icon" type="image/png" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png">
 <link rel="apple-touch-icon" href="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-180.png">
@@ -26,6 +26,10 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:Barlow,sans-serif;min-height:100vh}
+.barra-top{position:absolute;top:0;left:0;right:0;height:var(--topbar);display:flex;align-items:center;padding:0 var(--gutter)}
+.barra-top a{display:inline-flex;align-items:center;gap:10px;color:var(--text2);text-decoration:none;font-family:var(--mono);font-weight:700;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;transition:color .2s ease}
+.barra-top a:hover{color:var(--gold)}
+.barra-top img{width:26px;height:26px}
 .wrap{max-width:1100px;margin:0 auto;padding:calc(var(--topbar) + 56px) var(--gutter) 90px}
 .kicker{font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.24em;color:var(--gold)}
 h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spacing:-.04em;margin-top:14px}
@@ -109,25 +113,26 @@ h1{font-weight:900;font-size:clamp(3.2rem,9vw,6.4rem);line-height:.92;letter-spa
 </style>
 </head>
 <body>
+<nav class="barra-top" aria-label="Main"><a href="index.html"><img src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/rebrand/favicon-64.png" alt="" width="26" height="26">Top Secret FC</a></nav>
 <div class="wrap">
   <div class="kicker">TOP SECRET FC · MUSIC</div>
   <div class="artista">
     <img class="artista-foto" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/artista/perfil-web.webp" alt="Tacet Sin" width="600" height="600">
     <div>
-      <div class="artista-tipo">Artista</div>
+      <div class="artista-tipo">Artist</div>
       <h1 id="artista">Tacet Sin</h1>
     </div>
   </div>
-  <p class="lead">El proyecto musical de Top Secret. Cada tema nace de algo que cualquiera vivió alguna vez: lo que nos empuja, lo que nos duele y lo que no podemos dejar de querer.</p>
+  <p class="lead">The music project of Top Secret. Every song comes from something anyone has lived through: what drives us, what hurts us, and what we can't stop loving.</p>
   <section class="videos" id="videos" hidden aria-labelledby="videos-tit">
     <div class="album-tipo">Lyric videos</div>
     <h2 class="videos-tit" id="videos-tit">Videos</h2>
     <div class="videos-fila" id="videos-fila"></div>
   </section>
-  <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
+  <div class="lista" id="lista"><div class="vacio">Loading…</div></div>
 </div>
 <audio id="audio" preload="none"></audio>
-<div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Portada"><figure><img id="visor-img" alt=""><figcaption id="visor-txt"></figcaption></figure><button type="button" aria-label="Cerrar">×</button></div>
+<div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Cover"><figure><img id="visor-img" alt=""><figcaption id="visor-txt"></figcaption></figure><button type="button" aria-label="Close">×</button></div>
 <script>
 const CATALOGO = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/catalogo.json';
 const PLAY = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>';
@@ -137,15 +142,15 @@ const FLECHA = '<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor"
 let temas = [], albumes = [], actual = null, artista = 'Tacet Sin';
 const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 // etiquetas de sección: [verse], [chorus - male &amp; female]… (en Thrive dicen quién canta)
-const QUIEN = { 'male': 'él', 'female': 'ella', 'male & female': 'los dos', 'female & male': 'los dos', 'both': 'los dos' };
+const QUIEN = { 'male': 'him', 'female': 'her', 'male & female': 'both', 'female & male': 'both', 'both': 'both' };
 const letraHtml = l => esc(l).replace(/^\[(verse|chorus|intro|outro|pre-chorus|bridge)(?:\s*-\s*([^\]]+))?\][ \t]*\r?\n?/gim, (_, s, q) => {
   const quien = q && (QUIEN[q.replace(/&amp;/g, '&').trim().toLowerCase()] || q.trim());
   return `<span class="sec">${s.toUpperCase()}${quien ? ' · ' + quien.toUpperCase() : ''}</span>`;
 }).replace(/\n{2,}/g, '\n');
 // Solo se publica la versión final (con voz): las instrumentales dejaron de estar disponibles (Juan, 2026-10-26)
 const fuente = t => t.voz;
-const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-const fechaLarga = f => { const [y, m, d] = f.split('-').map(Number); return `${d} de ${MESES[m - 1]} de ${y}`; };
+const MESES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const fechaLarga = f => { const [y, m, d] = f.split('-').map(Number); return `${MESES[m - 1]} ${d}, ${y}`; };
 const claveAlbum = al => al.id + (al.volumen ? '-' + al.volumen : '');
 // álbumes abiertos: preferencia de cada visitante (si el navegador no deja guardar, arrancan cerrados)
 const abiertos = new Set((() => { try { return JSON.parse(localStorage.getItem('music-abiertos') || '[]'); } catch { return []; } })());
@@ -154,15 +159,15 @@ const guardarAbiertos = () => { try { localStorage.setItem('music-abiertos', JSO
 const mmss = s => s ? `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}` : '';
 const temaHtml = t => `
     <div class="tema" id="t-${t.slug}">
-      <button class="play" aria-label="Reproducir ${esc(t.titulo)}" data-play="${t.slug}"${t.voz ? '' : ' disabled title="Audio en camino"'}>${PLAY}</button>
+      <button class="play" aria-label="Play ${esc(t.titulo)}" data-play="${t.slug}"${t.voz ? '' : ' disabled title="Audio coming soon"'}>${PLAY}</button>
       <div class="info">
         <div class="titulo"><span class="pista">${String(t.pista || '').padStart(2, '0')}</span>${esc(t.titulo)}</div>
         <div class="meta">${[t.fecha, t.bpm && `<b>${t.bpm}</b> BPM`, t.tonalidad, mmss(t.duracion)].filter(Boolean).join(' · ')}</div>
-        <div class="concepto">${esc(t.concepto)}</div>
+        ${t.concepto ? `<div class="concepto">${esc(t.concepto)}</div>` : ''}
       </div>
       <div class="acciones">
-        ${t.voz ? '' : '<span class="pend">Audio en camino</span>'}
-        ${t.letra ? `<button class="chip" data-letra="${t.slug}">Letra</button>` : ''}
+        ${t.voz ? '' : '<span class="pend">Audio coming soon</span>'}
+        ${t.letra ? `<button class="chip" data-letra="${t.slug}">Lyrics</button>` : ''}
       </div>
       <div class="barra" data-barra="${t.slug}"><i></i></div>
       ${t.letra ? `<div class="letra">${letraHtml(t.letra)}</div>` : ''}
@@ -170,18 +175,18 @@ const temaHtml = t => `
 
 function pintar() {
   const lista = document.getElementById('lista');
-  if (!temas.length) { lista.innerHTML = '<div class="vacio">Pronto.</div>'; return; }
+  if (!temas.length) { lista.innerHTML = '<div class="vacio">Coming soon.</div>'; return; }
   lista.innerHTML = albumes.map(al => {
     const ts = temasDe(al), clave = claveAlbum(al);
     const vol = al.volumen ? `<small>Vol. ${al.volumen}</small>` : '';
-    const meta = [al.lanzamiento && `Lanzamiento ${fechaLarga(al.lanzamiento)}`, ts.length ? `${ts.length} tema${ts.length > 1 ? 's' : ''}` : 'El primer tema llega esta noche'].filter(Boolean).join(' · ');
+    const meta = [al.lanzamiento && `Released ${fechaLarga(al.lanzamiento)}`, ts.length ? `${ts.length} track${ts.length > 1 ? 's' : ''}` : 'First track arrives tonight'].filter(Boolean).join(' · ');
     return `
     <section class="album${abiertos.has(clave) ? ' abierto' : ''}" id="a-${clave}">
       <div class="album-cab">
-        <button class="tapa" data-tapa="${esc(al.portada)}" data-titulo="${esc(al.titulo + (al.volumen ? ' · Vol. ' + al.volumen : ''))}" aria-label="Ver la portada de ${esc(al.titulo)} en grande" style="background-image:url('${esc(al.portada)}')"></button>
+        <button class="tapa" data-tapa="${esc(al.portada)}" data-titulo="${esc(al.titulo + (al.volumen ? ' · Vol. ' + al.volumen : ''))}" aria-label="View the ${esc(al.titulo)} cover larger" style="background-image:url('${esc(al.portada)}')"></button>
         <button class="album-toggle" data-album="${clave}" aria-expanded="${abiertos.has(clave)}" aria-controls="temas-${clave}">
           <span>
-            <span class="album-tipo">Álbum · ${esc(artista)}</span>
+            <span class="album-tipo">Album · ${esc(artista)}</span>
             <span class="album-titulo" role="heading" aria-level="2">${esc(al.titulo)}${vol}</span>
             <span class="album-desc">${esc(al.descripcion)}</span>
             <span class="album-meta">${meta}</span>
@@ -198,7 +203,7 @@ let tapaOrigen = null;
 function verTapa(b) {
   tapaOrigen = b;
   document.getElementById('visor-img').src = b.dataset.tapa;
-  document.getElementById('visor-img').alt = 'Portada de ' + b.dataset.titulo;
+  document.getElementById('visor-img').alt = b.dataset.titulo + ' cover';
   document.getElementById('visor-txt').textContent = artista + ' · ' + b.dataset.titulo;
   document.getElementById('visor').classList.add('on');
   document.querySelector('#visor button').focus();
@@ -252,7 +257,7 @@ document.addEventListener('click', e => {
 });
 
 fetch(CATALOGO + '?' + Date.now()).then(r => r.json()).then(c => {
-  albumes = c.albumes || [{ id: null, titulo: 'Temas', descripcion: '' }];
+  albumes = c.albumes || [{ id: null, titulo: 'Tracks', descripcion: '' }];
   artista = c.artista || artista;
   temas = (c.temas || []).map(t => c.albumes ? t : { ...t, album: null });
   // discos por orden de lanzamiento (la fecha del primer tema de cada uno); uno sin temas todavía va al final
@@ -262,7 +267,7 @@ fetch(CATALOGO + '?' + Date.now()).then(r => r.json()).then(c => {
   const orden = t => albumes.findIndex(a => a.id === t.album && (a.volumen == null || a.volumen === t.volumen));
   temas.sort((a, b) => orden(a) - orden(b) || (a.pista || 0) - (b.pista || 0));
   pintar();
-}).catch(() => { document.getElementById('lista').innerHTML = '<div class="vacio">No se pudo cargar la música. Probá de nuevo en un rato.</div>'; });
+}).catch(() => { document.getElementById('lista').innerHTML = '<div class="vacio">The music could not be loaded. Please try again later.</div>'; });
 
 // Apartado Videos (lista R2 musica/videos.json, la arma scripts/beats/videos-youtube.mjs publicar). Si no carga, no se muestra.
 fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/media/musica/videos.json?' + Date.now()).then(r => r.ok ? r.json() : null).then(d => {
@@ -281,6 +286,5 @@ document.addEventListener('play', e => {
   else if (e.target === audio) document.querySelectorAll('video').forEach(v => v.pause());
 }, true);
 </script>
-<script src="layout.js?v=26"></script>
 </body>
 </html>
