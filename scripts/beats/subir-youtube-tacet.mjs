@@ -5,6 +5,7 @@
 //
 //   node scripts/beats/subir-youtube-tacet.mjs playlists
 //   node scripts/beats/subir-youtube-tacet.mjs subir <slug>… [--privado]   o   subir --todos   (saltea lo ya subido)
+//   node scripts/beats/subir-youtube-tacet.mjs terminar-borrador <slug>   → completa y publica un borrador ya subido de ese tema
 //   node scripts/beats/subir-youtube-tacet.mjs hacer-publico <slug>       → pasa a público una prueba privada ya verificada
 //
 // OJO: studio.youtube.com/channel/tacetsin redirige al canal del club. El canal de Tacet Sin es CANAL (abajo).
@@ -64,8 +65,8 @@ async function crearPlaylists() {
     await d.locator('#textbox').nth(1).click(); await d.locator('#textbox').nth(1).type(PLAYLISTS[v].descripcion, { delay: 4 });
     await espera(500);
     // viene en "Date published (newest)": el disco se vería al revés
-    // (no hay "Manual" al crearla; se suben en orden de pista, así que "oldest" es el orden del disco)
-    await elegir(d, 'Default video order', /Date published \(oldest\)/);
+    // (al crearla no hay "Manual"; se agregan en orden de pista, así que "Date added (oldest)" es el orden del disco)
+    await elegir(d, 'Default video order', /Date added \(oldest\)/);
     await shot(`playlist-${v}`);
     await d.locator('#create-button').click();
     await espera(6000);
@@ -74,16 +75,32 @@ async function crearPlaylists() {
   }
 }
 
-async function subir(t, { privado }) {
+async function subir(t, { privado, deBorrador = false }) {
   const base = path.join(OUT, `vol-${t.volumen}`, `${String(t.pista).padStart(2, '0')}-${t.slug}`);
   const [titulo, ...resto] = fs.readFileSync(base + '.txt', 'utf8').split('\n');
   const descripcion = resto.join('\n').trim();
   const malo = (titulo + '\n' + descripcion).match(PROHIBIDO);
   if (malo) throw new Error(`${t.slug}: el texto tiene "${malo[0]}"`);
-  await p.goto(`https://studio.youtube.com/channel/${CANAL}/videos/upload?d=ud`, { waitUntil: 'domcontentloaded' });
-  await espera(7000); await verificarCanal();
-  await cargarArchivos(p.locator('input[type=file]').first(), base + '.mp4', { timeout: 10 * 60000 });
-  await espera(12000);
+  if (deBorrador) {
+    // retoma un borrador ya subido de este mismo tema: no gasta cupo diario
+    await p.goto(`https://studio.youtube.com/channel/${CANAL}/videos/upload`, { waitUntil: 'domcontentloaded' });
+    await espera(8000); await verificarCanal();
+    // innerText (no textContent): todas las filas tienen "Edit draft" oculto, solo el borrador lo muestra
+    const abierto = await p.evaluate(tit => {
+      const fila = [...document.querySelectorAll('ytcp-video-row')].find(r => r.innerText.includes(tit) && /\bDraft\b/.test(r.innerText));
+      if (!fila) return false;
+      const x = [...fila.querySelectorAll('ytcp-button, button, a')].find(n => n.innerText?.trim() === 'Edit draft');
+      if (!x) return false;
+      x.click(); return true;
+    }, titulo);
+    if (!abierto) throw new Error(`no hay borrador de ${titulo}`);
+    await espera(9000);
+  } else {
+    await p.goto(`https://studio.youtube.com/channel/${CANAL}/videos/upload?d=ud`, { waitUntil: 'domcontentloaded' });
+    await espera(7000); await verificarCanal();
+    await cargarArchivos(p.locator('input[type=file]').first(), base + '.mp4', { timeout: 10 * 60000 });
+    await espera(12000);
+  }
   const aviso = await p.locator('body').innerText();
   if (/daily upload limit|reached.*limit/i.test(aviso)) throw new Error('LIMITE: YouTube cortó por el límite diario de subidas');
   const cajas = p.locator('ytcp-uploads-dialog #textbox');
@@ -171,6 +188,7 @@ try {
     console.log(`listo: ${hechos} subidos en esta corrida, ${Object.keys(leerReg().videos).length} en total`);
   }
   else if (cmd === 'hacer-publico') await hacerPublico(argv[1]);
+  else if (cmd === 'terminar-borrador') { const r = leerReg(); delete r.videos[argv[1]]; guardarReg(r); await subir(temas().find(t => t.slug === argv[1]), { privado: false, deBorrador: true }); }
   else console.log('uso: playlists | subir <slug>…|--todos [--privado] | hacer-publico <slug>');
 } catch (e) {
   await shot('error');

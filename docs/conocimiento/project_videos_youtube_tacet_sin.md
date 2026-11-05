@@ -27,3 +27,5 @@ Pedido de Juan (2026-11-05): publicar los temas de The Shorts en YouTube como ly
 **Estado:** los 23 publicados en `/music`. Canal de YouTube: lo crea Juan; falta subir `vol-N/`. Clips de Canva respaldados en R2 `_fuentes/musica/youtube-canva/`. Claude no oye: la letra se chequea de oído por Juan.
 
 **Worker:** `/media` ahora atiende pedidos `Range` (206), necesarios para adelantar videos y para Safari.
+
+**Perfiles de Tacet Sin (Juan, 2026-11-05):** solo en inglés, ni una palabra en español, y sin mencionar IA en títulos, descripciones ni playlists. Una playlist por disco, con las letras en las descripciones. El campo "AI use" de YouTube Studio es otra cosa: YouTube pide responder Sí para música generada con IA que sea el foco del video; no responder No sin decisión de Juan.

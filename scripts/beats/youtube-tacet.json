@@ -5,15 +5,6 @@
     "2": "The Shorts, Vol. 2"
   },
   "videos": {
-    "the-night-before": {
-      "url": "https://youtu.be/QXBBfIORIyU",
-      "titulo": "The Night Before (Lyrics) - Tacet Sin",
-      "volumen": 1,
-      "pista": 1,
-      "visibilidad": "public",
-      "miniatura": true,
-      "ai": "yes"
-    },
     "cold-hands": {
       "url": "https://youtu.be/GrcWapiiFOk",
       "titulo": "Cold Hands (Lyrics) - Tacet Sin",
@@ -73,6 +64,15 @@
       "titulo": "Empty Seat (Lyrics) - Tacet Sin",
       "volumen": 1,
       "pista": 8,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "the-night-before": {
+      "url": "https://youtu.be/3uDFLKOOI40",
+      "titulo": "The Night Before (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 1,
       "visibilidad": "public",
       "miniatura": true,
       "ai": "yes"
