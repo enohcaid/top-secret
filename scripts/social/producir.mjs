@@ -79,6 +79,15 @@ else if (!fs.existsSync(PAUSA) && !enCurso() && !cercaDelVivo()) {
   }
 }
 
+async function conReintento(fn, veces = 3) {
+  for (let i = 1; ; i++) {
+    try { return await fn(); } catch (e) {
+      if (i >= veces) throw e;
+      await new Promise(r => setTimeout(r, 3000 * i));
+    }
+  }
+}
+
 async function trabajar(loteId, ideaId) {
   if (enCurso() && enCurso() !== process.pid) return log('Ya hay una producción en curso.');
   fs.writeFileSync(LOCK, String(process.pid));
@@ -95,6 +104,8 @@ async function trabajar(loteId, ideaId) {
     const vars = { LOTE: loteId, IDEA: ideaId, GUION: JSON.stringify({ formato: p.formato, ...p.guion }, null, 2),
       COMENTARIOS: (p.texto || '').trim() || '(sin comentarios)', SCRIPT: `${fechaDe(l)}-${ideaId}`, CARPETA: `viral/${ideaId}`, LOTE_FINAL: loteFinal };
     for (const [k, v] of Object.entries(vars)) encargo = encargo.replaceAll(`{{${k}}}`, v);
+    if (fs.existsSync(path.join(ROOT, `scripts/social/piezas/${vars.SCRIPT}.mjs`)))
+      encargo += `\n\n## Ya hubo un intento anterior\nExisten scripts/social/piezas/${vars.SCRIPT}.mjs y fuentes/redes/${vars.CARPETA}/. Retomá desde ahí lo que esté bien, sin rehacerlo ni gastar imágenes de nuevo.\n`;
 
     // Modelo por nombre completo: el alias de este Claude Code puede apuntar a uno viejo (ver scripts/lib/ia.mjs).
     const correr = () => spawnSync(CLAUDE, ['-p', '--model', 'claude-opus-5-5', '--output-format', 'json', '--permission-mode', 'acceptEdits', '--allowedTools', 'Bash Read Write Edit Glob Grep'], {
@@ -109,23 +120,30 @@ async function trabajar(loteId, ideaId) {
     }
     let fin;
     try {
-      const res = JSON.parse(r.stdout).result || '';
-      // Sin cupo, Claude "responde" igual con el aviso como texto: se espera como con ChatGPT, no gasta un reintento.
-      if (res.length < 400 && /usage limit|out of (extra )?usage|hit your limit|limit (will )?reset|rate limit/i.test(res)) fin = { estado: 'esperando-chatgpt', motivo: `Claude sin cupo: ${res.slice(0, 200)}` };
+      const j = JSON.parse(r.stdout), res = j.result || '';
+      // Sin cupo, Claude "responde" igual con el aviso como texto ("You've hit your 5-hour limit", 2026-11-06): se espera
+      // como con ChatGPT, no gasta un reintento.
+      if (j.api_error_status === 429 || (res.length < 400 && /usage limit|out of (extra )?usage|hit your .*limit|limit (will )?reset|rate limit/i.test(res))) fin = { estado: 'esperando-chatgpt', motivo: `Claude sin cupo: ${res.slice(0, 200)}` };
       else fin = JSON.parse(res.slice(res.lastIndexOf('{"estado"'), res.lastIndexOf('}') + 1));
-    } catch { fin = { estado: 'error', motivo: `Claude terminó sin respuesta válida (código ${r.status}${r.error ? ', ' + r.error.message : ''}): ${(r.stdout || r.stderr || '').slice(-300)}` }; }
+    } catch {
+      fin = { estado: 'error', motivo: r.error?.code === 'ETIMEDOUT' ? 'Pasaron las 4 horas sin terminar'
+        : `Claude terminó sin respuesta válida (código ${r.status}${r.error ? ', ' + r.error.message : ''}): ${(r.stdout || r.stderr || '').slice(-300)}` };
+    }
 
+    // spawnSync bloquea horas y la conexión que quedó abierta vence: el primer fetch de después falla con "fetch failed"
+    // y pisaba como error una pieza ya producida (2026-11-06, 5 ideas). Se reintenta, y lo que manda es que el lote exista.
     const ahora = Date.now(), base = { lote: loteFinal, hasta: new Date(ahora).toISOString() };
+    if (fin.estado !== 'lista' && (await conReintento(leer)).lotes.some(x => x.id === loteFinal)) fin = { estado: 'lista', resumen: 'El lote quedó cargado aunque el proceso no terminó de responder.' };
     if (fin.estado === 'lista') {
-      await actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'lista', resumen: fin.resumen || '' } });
+      await conReintento(() => actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'lista', resumen: fin.resumen || '' } }));
       log(`${ideaId}: lista → ${loteFinal}. ${fin.resumen || ''}`);
       spawnSync('cmd', ['/c', 'start', '', PAGINA], { stdio: 'ignore' });   // a Juan se le abre aprobar.html, como con los otros lotes
     } else if (fin.estado === 'esperando-chatgpt') {
-      await actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'esperando', motivo: fin.motivo || 'ChatGPT sin cupo', reintentarDesde: new Date(ahora + 3 * HORA).toISOString() } });
+      await conReintento(() => actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'esperando', motivo: fin.motivo || 'ChatGPT sin cupo', reintentarDesde: new Date(ahora + 3 * HORA).toISOString() } }));
       log(`${ideaId}: ${fin.motivo || 'ChatGPT sin cupo'}. Reintenta en 3 h.`);
     } else {
       const reintentos = (previo.reintentos || 0) + 1;
-      await actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'error', motivo: String(fin.motivo || 'error').slice(0, 500), reintentos, reintentarDesde: new Date(ahora + HORA).toISOString() } });
+      await conReintento(() => actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'error', motivo: String(fin.motivo || 'error').slice(0, 500), reintentos, reintentarDesde: new Date(ahora + HORA).toISOString() } }));
       log(`${ideaId}: ERROR (${reintentos}/2) ${fin.motivo}`);
     }
   } catch (e) {

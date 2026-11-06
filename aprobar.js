@@ -173,6 +173,9 @@
   // Cada lote es una cabecera + UNA fila horizontal de tarjetas (antes: una grilla por red, la página se hacía
   // eterna). Los lotes ya decididos arrancan plegados; el usuario puede abrir/cerrar cualquiera y se recuerda.
   const sinDecidir = l => l.piezas.filter(p => !p.decision || p.decision === 'pendiente').length;
+  // En un guion solo se ve lo que todavía necesita algo: ni lo descartado ni lo ya producido, que sigue en su propio
+  // lote (Juan, 2026-11-06).
+  const ideaVisible = p => p.decision !== 'descartada' && p.produccion?.estado !== 'lista';
   const abiertos = new Set(), cerrados = new Set();
   const plegado = l => cerrados.has(l.id) || (!abiertos.has(l.id) && !sinDecidir(l) && !l.piezas.some(p => p.estado === 'error'));
   function lote(l) {
@@ -196,7 +199,7 @@
       : Object.keys(REDES).flatMap(r => l.piezas.filter(p => p.red === r))
           .concat(l.piezas.filter(p => !REDES[p.red]));
     // Lo descartado va al final de la fila, para que lo que importa quede a la vista.
-    const fila = [...orden.filter(p => p.decision !== 'descartada'), ...orden.filter(p => p.decision === 'descartada')];
+    const fila = esGuion ? orden.filter(ideaVisible) : [...orden.filter(p => p.decision !== 'descartada'), ...orden.filter(p => p.decision === 'descartada')];
     const celda = p => esGuion ? `<div class="celda">${guion(l, p)}</div>`
       : `<div class="celda"><div class="red-tag"><span class="punto" style="background:${REDES[p.red]?.color || 'var(--mid)'}"></span>${esc(REDES[p.red]?.nombre || p.red)}</div>${pieza(l, p)}</div>`;
     const errores = l.piezas.filter(p => p.estado === 'error').length;
@@ -251,7 +254,8 @@
     // Tema aprobado: sale de acá y queda en /music, álbum Thrive (Juan, 2026-11-04)
     if (l.etapa === 'musica') return l.estado === 'publicado' ? null : !l.estado && sinDecidir(l) ? 'aprobar' : 'programadas';
     if (sinDecidir(l)) return 'aprobar';
-    if (l.etapa === 'guion') return Date.now() < finGuion(l) && l.piezas.some(p => p.decision === 'aprobada') ? 'programadas' : null;
+    if (l.etapa === 'guion') return Date.now() < finGuion(l) && l.piezas.some(ideaVisible) ? 'programadas' : null;
+    if (l.piezas.every(p => p.decision === 'descartada')) return null;   // propuesta descartada entera: no es "publicada"
     if (l.piezas.some(p => p.decision === 'aprobada' && p.estado !== 'publicado')) return 'programadas';
     return Date.now() - Date.parse(l.publicarA || l.creado) < 7 * DIA ? 'publicadas' : null;
   };
