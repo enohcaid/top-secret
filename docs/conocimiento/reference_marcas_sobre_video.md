@@ -13,4 +13,4 @@ Técnica de "El movimiento que nadie vio" (2026-11-06). Anillos, flechas y estel
 - **Colores:** el blanco del rival se puede confundir con las líneas de la cancha cuando el jugador las cruza, y el mean-shift se queda con la línea. No pasó en esta jugada, pero mirarlo si la pista salta. Oscuro sobre verde no tiene ese problema (la sombra queda afuera con `G - R < 16`).
 - **Elegir la jugada:** mirar a resolución completa antes de decidir qué se afirma. El marcador del HUD y las etiquetas del juego confirman autor y momento. El marcador se actualiza más de un segundo después de que la red se mueve: el gol se ubica por la red. El partido puede no estar todavía en `seed_matches.js`: se dice solo lo que se ve.
 - **Encuadre vertical:** ventana de 405x720 sobre el 1280x720 (zoom 2,667 o más), con los cuadros en disco al doble y `unsharp`. El HUD queda bajo franjas esmeriladas, como en [[reference_borrar_pelota]].
-- **Cámara lenta:** se mezclan los dos cuadros vecinos con alfa: a 0,5x sobre fuente de 60 fps no se nota el salto.
+- **Cámara lenta:** se mezclan los dos cuadros vecinos con alfa, para suavizar el salto a 0,5x sobre fuente de 60 fps.
