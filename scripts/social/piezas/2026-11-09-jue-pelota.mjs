@@ -261,7 +261,7 @@ await putFile(mp4, 'social/viral/pelota.mp4');
 const uVid = `${MEDIA}/social/viral/pelota.mp4?v=${Date.now().toString(36)}`;
 const uPortada = await subirPortada(jpg, 'social/viral/pelota-portada.jpg');
 const GOLEADORES = RONDAS.map(r => r.gt);
-const desc = `${Math.round(total)} s · sin voz (se juega leyendo, como pide el guion) · tres jugadas reales del vivo del 22/10 en Espacio Gamer: la pelota, su sombra, la etiqueta con el nombre y la marca amarilla del juego se borraron cuadro por cuadro; en la revelación la imagen arranca desde ese mismo cuadro hasta el gol · cuenta real de ${(5 * T.tick).toFixed(1)} s al pulso · el video fuente no tiene audio: efectos sintetizados · música: ${tema.titulo}.`;
+const desc = `${Math.round(total)} s · sin voz (se juega leyendo, como pide el guion) · tres jugadas reales del vivo del 22/10 en Espacio Gamer: la pelota, su sombra, la etiqueta con el nombre y la marca amarilla del juego se borraron del cuadro congelado (clon de pasto, sin IA); en la revelación la imagen arranca desde ese mismo cuadro hasta el gol · cuenta real de ${(5 * T.tick).toFixed(1)} s al pulso · el video fuente no tiene audio: efectos sintetizados · música: ${tema.titulo}.`;
 const pieza = o => ({ decision: 'pendiente', protagonistas: GOLEADORES, descripcion: desc, musica: tema.titulo, media: [{ tipo: 'video', url: uVid, vertical: true }], local: { video: mp4 }, portada: { url: uPortada, local: jpg }, ...o });
 const lote = {
   id: ID, tipo: 'viral', creado: new Date().toISOString(), idea: { lote: 'viral-guiones-2026-11-09', pieza: 'jue-pelota' },
