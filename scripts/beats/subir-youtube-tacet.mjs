@@ -8,6 +8,7 @@
 //   node scripts/beats/subir-youtube-tacet.mjs terminar-borrador <slug>   → completa y publica un borrador ya subido de ese tema
 //   node scripts/beats/subir-youtube-tacet.mjs miniaturas                 → repone la miniatura propia en los videos ya publicados
 //   node scripts/beats/subir-youtube-tacet.mjs hacer-publico <slug>       → pasa a público una prueba privada ya verificada
+//   node scripts/beats/subir-youtube-tacet.mjs agregar-generales          → suma los ya publicados a The Shorts (Complete) y All Songs
 //
 // OJO: studio.youtube.com/channel/tacetsin redirige al canal del club. El canal de Tacet Sin es CANAL (abajo).
 // Registro versionado: scripts/beats/youtube-tacet.json. Si YouTube corta por el límite diario, se vuelve a correr y sigue.
@@ -24,7 +25,12 @@ const SHOTS = path.join(OUT, 'capturas'); fs.mkdirSync(SHOTS, { recursive: true 
 const PLAYLISTS = {
   1: { titulo: 'The Shorts, Vol. 1', descripcion: 'Tacet Sin. Short songs, each one a moment: the night before something big, the effort nobody sees, the wound that takes its time to close.\n\nLyric videos.' },
   2: { titulo: 'The Shorts, Vol. 2', descripcion: 'Tacet Sin. The second part: later, deeper.\n\nLyric videos.' },
+  // Juan, 2026-11-06: además de una por volumen, el disco entero y toda la música del canal. Cada video entra en estas dos también.
+  shorts: { titulo: 'The Shorts (Complete)', descripcion: 'Tacet Sin. The Shorts in full, Vol. 1 and Vol. 2, track by track.\n\nLyric videos.' },
+  todo: { titulo: 'Tacet Sin: All Songs', descripcion: 'Every Tacet Sin song in one place.\n\nLyric videos.' },
 };
+const GENERALES = ['shorts', 'todo'];
+const orden = (a, c) => a.volumen - c.volumen || a.pista - c.pista;
 const SHORTS_VOL1 = 12;
 const temas = () => JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/beats/letras.json'), 'utf8')).map((t, i) => ({ slug: t.slug, titulo: t.titulo, volumen: i < SHORTS_VOL1 ? 1 : 2, pista: i < SHORTS_VOL1 ? i + 1 : i - SHORTS_VOL1 + 1 }));
 const leerReg = () => (fs.existsSync(REG) ? JSON.parse(fs.readFileSync(REG, 'utf8')) : { canal: CANAL, playlists: {}, videos: {} });
@@ -53,7 +59,9 @@ const verificarCanal = async () => {
 
 async function crearPlaylists() {
   const reg = leerReg();
-  for (const v of [1, 2]) {
+  for (const v of Object.keys(PLAYLISTS)) {
+    const malo = (PLAYLISTS[v].titulo + '\n' + PLAYLISTS[v].descripcion).match(PROHIBIDO);
+    if (malo) throw new Error(`${v}: el texto tiene "${malo[0]}"`);
     if (reg.playlists[v]) { console.log('ya existe', PLAYLISTS[v].titulo); continue; }
     await p.goto(`https://studio.youtube.com/channel/${CANAL}/content/playlists`, { waitUntil: 'domcontentloaded' });
     await espera(7000); await verificarCanal();
@@ -128,8 +136,10 @@ async function subir(t, { privado, deBorrador = false }) {
   await dlg.locator('ytcp-video-metadata-playlists ytcp-dropdown-trigger, ytcp-dropdown-trigger:visible').filter({ hasText: /^\s*(Playlists\s*)?Select\s*$/ }).first().click();
   await espera(1800);
   const lista = p.locator('ytcp-playlist-dialog:visible, tp-yt-paper-dialog:visible').last();
-  await lista.locator('ytcp-checkbox-group, ul, *').getByText(PLAYLISTS[t.volumen].titulo, { exact: true }).first().click();
-  await espera(800);
+  for (const k of [t.volumen, ...GENERALES]) {
+    await lista.locator('ytcp-checkbox-group, ul, *').getByText(PLAYLISTS[k].titulo, { exact: true }).first().click();
+    await espera(800);
+  }
   await lista.locator('ytcp-button:visible, button:visible', { hasText: /^\s*Done\s*$/ }).first().click();
   await espera(1200);
   await p.locator('tp-yt-paper-radio-button[name="VIDEO_MADE_FOR_KIDS_NOT_MFK"]').click();
@@ -161,7 +171,7 @@ async function subir(t, { privado, deBorrador = false }) {
   await espera(7000);
   await shot(`${t.slug}-fin`);
   const reg = leerReg();
-  reg.videos[t.slug] = { url, titulo, volumen: t.volumen, pista: t.pista, visibilidad: privado ? 'private' : 'public', miniatura, ai: 'yes' };
+  reg.videos[t.slug] = { url, titulo, volumen: t.volumen, pista: t.pista, visibilidad: privado ? 'private' : 'public', miniatura, ai: 'yes', generales: true };
   guardarReg(reg);
   console.log(`OK ${titulo} → ${url}`);
 }
@@ -182,6 +192,30 @@ async function miniaturas() {
     await shot(`mini-${slug}`);
     v.miniatura = true; guardarReg(reg);
     console.log('miniatura', slug);
+  }
+}
+
+// Suma a las playlists generales los videos ya publicados, de a uno y en orden de pista: "Date added (oldest)" es el orden del disco.
+async function agregarGenerales() {
+  const reg = leerReg();
+  for (const [slug, v] of Object.entries(reg.videos).filter(([, v]) => !v.generales).sort((a, c) => orden(a[1], c[1]))) {
+    const id = /youtu\.be\/([\w-]{11})/.exec(v.url)[1];
+    await p.goto(`https://studio.youtube.com/video/${id}/edit`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#textbox'); await espera(5000);
+    await p.locator('ytcp-video-metadata-playlists ytcp-dropdown-trigger').first().click();
+    await espera(2000);
+    const lista = p.locator('ytcp-playlist-dialog:visible, tp-yt-paper-dialog:visible').last();
+    for (const k of GENERALES) {
+      await lista.getByText(PLAYLISTS[k].titulo, { exact: true }).first().click();
+      await espera(800);
+    }
+    await lista.locator('ytcp-button:visible, button:visible', { hasText: /^\s*Done\s*$/ }).first().click();
+    await espera(1500);
+    await p.locator('ytcp-button#save:visible, button:visible', { hasText: /^\s*Save\s*$/ }).first().click();
+    await espera(6000);
+    await shot(`generales-${slug}`);
+    v.generales = true; guardarReg(reg);
+    console.log('agregado', v.volumen, v.pista, slug);
   }
 }
 
@@ -218,6 +252,7 @@ try {
     }
     console.log(`listo: ${hechos} subidos en esta corrida, ${Object.keys(leerReg().videos).length} en total`);
   }
+  else if (cmd === 'agregar-generales') await agregarGenerales();
   else if (cmd === 'hacer-publico') await hacerPublico(argv[1]);
   else if (cmd === 'miniaturas') await miniaturas();
   else if (cmd === 'terminar-borrador') { const r = leerReg(); delete r.videos[argv[1]]; guardarReg(r); await subir(temas().find(t => t.slug === argv[1]), { privado: false, deBorrador: true }); }

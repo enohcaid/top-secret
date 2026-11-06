@@ -2,7 +2,9 @@
   "canal": "UC1tHhG-3UeEPK7iOmw23wHw",
   "playlists": {
     "1": "The Shorts, Vol. 1",
-    "2": "The Shorts, Vol. 2"
+    "2": "The Shorts, Vol. 2",
+    "shorts": "The Shorts (Complete)",
+    "todo": "Tacet Sin: All Songs"
   },
   "videos": {
     "cold-hands": {
@@ -12,7 +14,8 @@
       "pista": 2,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "i-owe-you": {
       "url": "https://youtu.be/JbTFR2cJf1w",
@@ -21,7 +24,8 @@
       "pista": 3,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "the-scar-remains": {
       "url": "https://youtu.be/CszLZ0nPsSw",
@@ -30,7 +34,8 @@
       "pista": 4,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "five-minutes": {
       "url": "https://youtu.be/0LZ4O7e1FE4",
@@ -39,7 +44,8 @@
       "pista": 5,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "iron-sharpens-iron": {
       "url": "https://youtu.be/omIf0wE4Vpc",
@@ -48,7 +54,8 @@
       "pista": 6,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "barefoot": {
       "url": "https://youtu.be/zOb8f4ugicU",
@@ -57,7 +64,8 @@
       "pista": 7,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "empty-seat": {
       "url": "https://youtu.be/5R0u7-H22gc",
@@ -66,7 +74,8 @@
       "pista": 8,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "the-night-before": {
       "url": "https://youtu.be/3uDFLKOOI40",
@@ -75,7 +84,8 @@
       "pista": 1,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "silent-room": {
       "url": "https://youtu.be/tfOfZ0VGLAQ",
@@ -84,7 +94,8 @@
       "pista": 9,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "waiting-my-turn": {
       "url": "https://youtu.be/L_DqmYv8XNc",
@@ -93,7 +104,8 @@
       "pista": 10,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "no-sound-came-out": {
       "url": "https://youtu.be/lzC5n0-vLI8",
@@ -102,7 +114,8 @@
       "pista": 11,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "after-everyone-left": {
       "url": "https://youtu.be/HsNWRT0QmG4",
@@ -111,7 +124,8 @@
       "pista": 12,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "coming-back": {
       "url": "https://youtu.be/pp0eAWnFW28",
@@ -120,7 +134,8 @@
       "pista": 1,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "ten-steps": {
       "url": "https://youtu.be/DrNegAUVH0A",
@@ -129,7 +144,8 @@
       "pista": 2,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "first-time": {
       "url": "https://youtu.be/gyyyYCiazW0",
@@ -138,7 +154,8 @@
       "pista": 3,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "so-close": {
       "url": "https://youtu.be/Hq1kzfWlvuE",
@@ -147,7 +164,8 @@
       "pista": 4,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "rain": {
       "url": "https://youtu.be/CV2Nb8IG84I",
@@ -156,7 +174,8 @@
       "pista": 5,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     },
     "mud": {
       "url": "https://youtu.be/fDq7k__Uuy8",
@@ -165,7 +184,8 @@
       "pista": 6,
       "visibilidad": "public",
       "miniatura": true,
-      "ai": "yes"
+      "ai": "yes",
+      "generales": true
     }
   }
 }
