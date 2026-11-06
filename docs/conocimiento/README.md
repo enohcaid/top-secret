@@ -92,6 +92,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_publicar_redes](reference_publicar_redes.md) — Cómo se publica en YouTube/X/TikTok desde el Chrome CDP; Instagram/Facebook pendientes
 - [reference_pizarra](reference_pizarra.md) — Pizarra en vivo (topsecret.ar/pizarra): estado en plantel/pizarra*, sin login, límites de escritura y qué hacer cuando cambia el plantel
 - [reference_camara_celular](reference_camara_celular.md) — Anuncios gigantes imposibles "filmados con el celular": qué pedirle a ChatGPT y a Canva, y qué poner por código encima (mano, foco, lente, ruido, sonido de ciudad)
+- [reference_borrar_pelota](reference_borrar_pelota.md) — Quitar la pelota de un cuadro real del vivo sin IA: qué más la delata (sombra, etiqueta, marca amarilla), de dónde sale el pasto y cómo tapar el HUD sin barras
 - [reference_capas_personajes](reference_capas_personajes.md) — Separar una foto de ChatGPT en capas sin Canva (rembg + fondo reconstruido + texto entre capas), personajes inventados y cuánto dura la voz
 - [reference_renders_folder](reference_renders_folder.md) — Estructura y propósito de las carpetas en Renders/ — qué borrar y qué conservar
 - [reference_topsecret_daily_news_routine](reference_topsecret_daily_news_routine.md) — How to find and edit the cloud routine that writes Top Secret FC's daily news draft

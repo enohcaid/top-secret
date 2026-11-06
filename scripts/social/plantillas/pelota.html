@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "¿Dónde está la pelota?": cuadro real congelado y sin la pelota, cuatro círculos y cuenta regresiva; en la revelación la
+     pelota vuelve (fundido del cuadro borrado al original) y la imagen arranca desde ese mismo cuadro hasta el gol.
+     Escenas: 0 gancho · 1..N rondas · N+1 cierre. Todo sale de t (determinístico); las coordenadas de las jugadas están en
+     píxeles del video original (1280x720) y los cuadros en disco van al doble. Franja de arriba libre: rótulo del tema. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4;--loss:#e5484d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+canvas{position:absolute;inset:0;width:1080px;height:1920px}
+/* Sin barras de cine: la imagen sigue arriba y abajo, esmerilada; tapa el HUD del juego (marcador, radar, nombres) sin negro plano */
+#arriba{position:absolute;left:0;right:0;top:0;height:330px;backdrop-filter:blur(20px) brightness(.5);-webkit-mask-image:linear-gradient(180deg,#000 66%,transparent)}
+#abajo{position:absolute;left:0;right:0;bottom:0;height:640px;backdrop-filter:blur(24px) brightness(.42);-webkit-mask-image:linear-gradient(0deg,#000 82%,transparent)}
+#ronda{position:absolute;left:60px;top:176px;display:flex;align-items:baseline;gap:22px;font-family:'Bebas Neue';font-size:66px;letter-spacing:.02em}
+#ronda b{font-weight:400;color:var(--gold2)}
+#ronda i{font-style:normal;font:800 38px 'Barlow Condensed';letter-spacing:.14em;color:var(--gold2)}
+#pista{position:absolute;left:60px;right:60px;top:1352px;text-align:center;font:800 72px/1.05 'Barlow Condensed';letter-spacing:.01em;color:var(--text)}
+#cuenta{position:absolute;left:0;right:0;top:1432px;text-align:center;font-family:'Bebas Neue';font-size:240px;line-height:1;color:var(--text);will-change:transform}
+#era{position:absolute;left:0;right:0;top:1410px;text-align:center;font-family:'Bebas Neue';font-size:215px;line-height:1;color:var(--gold2);will-change:transform}
+#placa{position:absolute;left:0;right:0;top:1270px;height:480px;will-change:transform,opacity}
+#placa img{position:absolute;left:18px;bottom:34px;height:470px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.65))}
+#placa .gol{position:absolute;left:372px;top:122px;font-family:'Bebas Neue';font-size:92px;line-height:1;color:var(--gold2)}
+#placa .gt{position:absolute;left:372px;top:208px;right:40px;font:800 72px/1 'Barlow Condensed';color:var(--text);white-space:nowrap}
+#placa .li{position:absolute;left:372px;top:290px;right:60px;font:700 38px/1.22 Barlow;color:var(--text);opacity:.9}
+#titulo{position:absolute;left:0;right:0;top:760px;text-align:center;will-change:transform,opacity}
+#titulo .a{font-family:'Bebas Neue';font-size:300px;line-height:.92;color:var(--text);text-shadow:0 10px 60px rgba(0,0,0,.75)}
+#titulo .b{font:800 58px/1 'Barlow Condensed';letter-spacing:.22em;color:var(--gold2);text-shadow:0 4px 24px rgba(0,0,0,.8)}
+#g1,#g2{position:absolute;left:60px;right:60px;text-align:center;font-family:'Bebas Neue';line-height:.96;will-change:transform,opacity}
+#g1{top:990px;font-size:178px;color:var(--text);text-shadow:0 8px 50px rgba(0,0,0,.7)}
+#g2{top:1350px;font-size:118px;color:var(--gold2)}
+#destello{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#cierre{position:absolute;inset:0;display:none;background:rgba(5,5,5,.5)}
+#c1{position:absolute;left:40px;right:40px;top:290px;text-align:center;font-family:'Bebas Neue';font-size:178px;line-height:.95;will-change:transform,opacity}
+#fotos{position:absolute;left:60px;right:60px;top:690px;display:flex;gap:24px}
+.foto{position:relative;flex:1;height:520px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 2px rgba(230,207,133,.75);will-change:transform,opacity}
+.foto canvas{position:absolute;inset:0;width:100%;height:100%}
+.foto b{position:absolute;left:0;right:0;bottom:0;padding:48px 0 12px;text-align:center;font-family:'Bebas Neue';font-weight:400;font-size:90px;line-height:1;color:var(--gold2);background:linear-gradient(0deg,rgba(5,5,5,.9),rgba(5,5,5,0))}
+#c2{position:absolute;left:70px;right:70px;top:1250px;text-align:center;font:800 84px/1.06 'Barlow Condensed';color:var(--text);will-change:transform,opacity}
+#esc{position:absolute;left:50%;top:1470px;height:180px;margin-left:-81px;will-change:transform,opacity}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <canvas id="cancha" width="1080" height="1920"></canvas>
+  <canvas id="marcas" width="1080" height="1920"></canvas>
+  <div id="arriba"></div><div id="abajo"></div>
+  <div id="ronda"><span>RONDA <b id="nr"></b> DE 3</span><i id="nv"></i></div>
+  <div id="pista"></div><div id="cuenta"></div><div id="era"></div>
+  <div id="placa"><img id="pimg"><div class="gol">GOL</div><div class="gt" id="pgt"></div><div class="li" id="pli"></div></div>
+  <div id="titulo"><div class="a"></div><div class="b"></div></div>
+  <div id="g1"></div><div id="g2"></div>
+  <div id="cierre"><div id="c1"></div><div id="fotos"></div><div id="c2"></div><img id="esc"></div>
+  <div id="destello"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eIO = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const W = 1080, H = 1920;
+const cancha = $('#cancha').getContext('2d'), marcas = $('#marcas').getContext('2d');
+cancha.imageSmoothingQuality = 'high';
+let D, cache = new Map();
+
+async function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const i = new Image(); i.src = src; await i.decode();
+  if (cache.size > 12) cache.delete(cache.keys().next().value);
+  cache.set(src, i);
+  return i;
+}
+// Interpola una tabla [[x, a, b…], …], suave entre puntos
+function tabla(k, x, col = 1) {
+  if (x <= k[0][0]) return k[0][col];
+  for (let i = 1; i < k.length; i++) if (x <= k[i][0]) return lerp(k[i - 1][col], k[i][col], eIO((x - k[i - 1][0]) / (k[i][0] - k[i - 1][0])));
+  return k[k.length - 1][col];
+}
+function tablaLineal(k, x) {
+  if (x <= k[0][0]) return k[0][1];
+  for (let i = 1; i < k.length; i++) if (x <= k[i][0]) return lerp(k[i - 1][1], k[i][1], (x - k[i - 1][0]) / (k[i][0] - k[i - 1][0]));
+  return k[k.length - 1][1];
+}
+
+// cam = { cx, cy, s, tx, ty }: s = píxeles de pantalla por píxel de video
+function ventana(cam) {
+  const w = W / cam.s, h = H / cam.s;
+  return { x: clamp(cam.cx - w / 2, 0, 1280 - w), y: clamp(cam.cy - h / 2, 0, 720 - h), w, h };
+}
+const aPantalla = (v, x, y) => [(x - v.x) * W / v.w, (y - v.y) * H / v.h];
+
+function dibujar(foto, cam, { encima = null, alfa = 0, desenfoque = 0, oscuro = 1 } = {}) {
+  const v = ventana(cam);
+  cancha.save();
+  cancha.filter = `${desenfoque > .2 ? `blur(${desenfoque.toFixed(1)}px) ` : ''}brightness(${oscuro})`;
+  cancha.drawImage(foto, v.x * 2, v.y * 2, v.w * 2, v.h * 2, cam.tx || 0, cam.ty || 0, W, H);
+  if (encima && alfa > 0) { cancha.globalAlpha = alfa; cancha.drawImage(encima, v.x * 2, v.y * 2, v.w * 2, v.h * 2, cam.tx || 0, cam.ty || 0, W, H); }
+  cancha.restore();
+  return v;
+}
+
+function anillo(v, m, r, letra, { aparece = 1, apagado = 0, bien = 0, latido = 0, giro = 0 }) {
+  if (aparece <= 0) return;
+  const [x, y] = aPantalla(v, m[0], m[1]), k = W / v.w, R = r * k * (1 + latido * .06) * eOut(aparece) * (1 - apagado * .25);
+  const a = aparece > 1 ? 1 : clamp(aparece * 2), c = marcas;
+  c.save();
+  c.globalAlpha = a * (1 - apagado * .82);
+  c.translate(x, y);
+  if (bien > 0) { c.fillStyle = `rgba(230,207,133,${.14 * bien})`; c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); }
+  c.lineWidth = 11; c.strokeStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.arc(0, 0, R, 0, 7); c.stroke();
+  c.lineWidth = 6; c.strokeStyle = bien > .5 ? '#E6CF85' : '#fff';
+  c.save(); c.rotate(giro); c.setLineDash(bien > .5 ? [] : [R * .36, R * .13]); c.beginPath(); c.arc(0, 0, R, 0, 7); c.stroke(); c.restore();
+  // Letra afuera del círculo, para que no tape lo que hay adentro
+  const lx = -R * .74, ly = -R * .74, lr = 36 * eOut(aparece);
+  c.fillStyle = bien > .5 ? '#E6CF85' : '#fff';
+  c.beginPath(); c.arc(lx, ly, lr, 0, 7); c.fill();
+  c.fillStyle = '#050505'; c.font = "60px 'Bebas Neue'"; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(letra, lx, ly + 3);
+  c.restore();
+}
+
+function onda(v, b, p, col = '#E6CF85', max = 340) {
+  if (p <= 0 || p >= 1) return;
+  const [x, y] = aPantalla(v, b[0], b[1]), c = marcas;
+  c.save(); c.globalAlpha = 1 - p; c.lineWidth = 12 * (1 - p) + 1; c.strokeStyle = col;
+  c.beginPath(); c.arc(x, y, 18 + eOut(p) * max, 0, 7); c.stroke(); c.restore();
+}
+
+function mostrarTexto(el, on) { el.style.display = on ? '' : 'none'; }
+function ocultarTodo() {
+  for (const s of ['#ronda', '#pista', '#cuenta', '#era', '#placa', '#titulo', '#g1', '#g2', '#cierre']) $(s).style.display = 'none';
+  $('#destello').style.opacity = 0;
+  $('#abajo').style.transform = '';
+  marcas.clearRect(0, 0, W, H);
+}
+const golpe = (el, t, en, de = 1.5, dur = .24) => { const p = eOut((t - en) / dur); el.style.transform = `scale(${lerp(de, 1, p)})`; el.style.opacity = clamp((t - en) / .07); };
+
+async function pintar(datos) {
+  D = datos;
+  $('#esc').src = D.escudo;
+  $('#c1').innerHTML = D.cierre[0]; $('#c2').innerHTML = D.cierre[1];
+  $('#g1').innerHTML = D.gancho[0]; $('#g2').innerHTML = D.gancho[1];
+  await document.fonts.ready;
+  await Promise.all(["60px 'Bebas Neue'", "800 62px 'Barlow Condensed'", "700 36px Barlow"].map(f => document.fonts.load(f)));
+  // Fichas del cierre: la jugada borrada de cada ronda, recortada alrededor de la pelota, con la respuesta
+  const f = $('#fotos');
+  for (const r of D.rondas) {
+    const d = document.createElement('div'); d.className = 'foto';
+    const c = document.createElement('canvas'); c.width = 620; c.height = 1040; d.appendChild(c);
+    const b = document.createElement('b'); b.textContent = r.ok; d.appendChild(b);
+    f.appendChild(d);
+    const o = await img(r.original), sw = 140, sh = sw * 1040 / 620;
+    const sx = clamp(r.pelota[0] - sw / 2, 0, 1280 - sw), sy = clamp(r.pelota[1] - sh / 2, 0, 720 - sh);
+    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+    x.drawImage(o, sx * 2, sy * 2, sw * 2, sh * 2, 0, 0, 620, 1040);
+    const px = (r.pelota[0] - sx) * 620 / sw, py = (r.pelota[1] - sy) * 1040 / sh;
+    x.lineWidth = 7; x.strokeStyle = '#E6CF85'; x.beginPath(); x.arc(px, py, 60, 0, 7); x.stroke();
+  }
+  return D.rondas.length + 2;
+}
+
+async function gancho(t) {
+  const h = D.hook, orig = await img(h.original), bor = await img(h.borrada);
+  const borrar = D.T.hookBorra, alfa = clamp((t - borrar) / .1);
+  const cam = { cx: h.base[0], cy: h.base[1], s: 3 + t * .03 };
+  const sac = borrar <= t && t < borrar + .2 ? Math.sin((t - borrar) * 90) * 14 : 0;
+  cam.tx = sac;
+  const v = dibujar(orig, cam, { encima: bor, alfa });
+  const r0 = clamp((t - .15) / .3);
+  const [x, y] = aPantalla(v, h.pelota[0], h.pelota[1]);
+  if (t < borrar + .22) {
+    const cierra = clamp((t - borrar) / .22), R = lerp(120, 12, cierra) * eOut(r0);
+    marcas.save(); marcas.globalAlpha = 1 - cierra * .7; marcas.lineWidth = 8; marcas.strokeStyle = '#E6CF85';
+    marcas.beginPath(); marcas.arc(x, y, R, 0, 7); marcas.stroke(); marcas.restore();
+  }
+  onda(v, h.pelota, (t - borrar) / .5, '#fff', 280);
+  $('#destello').style.opacity = clamp(1 - (t - borrar) / .12) * (t >= borrar ? .55 : 0);
+  $('#g1').style.display = ''; golpe($('#g1'), t, .05, 1.4);
+  $('#g2').style.display = t > borrar + .1 ? '' : 'none'; golpe($('#g2'), t, borrar + .1, 1.25);
+}
+
+async function ronda(n, t, o) {
+  const r = D.rondas[n - 1], T = D.T, tk = T.tick;
+  const finTit = T.titulo, finCue = finTit + 5 * tk, finRev = finCue + T.revela;
+  const bor = await img(r.borrada), orig = await img(r.original);
+  const b = r.pelota;
+  const anilloDe = (m, i) => ({ m, letra: 'ABCD'[i], r: r.radio });
+
+  if (t < finRev) {
+    const u = (t - finTit) / tk;   // en ticks
+    const base = [...r.base, 3], f1 = [...r.foco[0], 3.7], f2 = [...r.foco[1], 3.7];
+    const mov = [[0, ...base], [1.05, ...base], [1.5, ...f1], [2.45, f1[0] + 4, f1[1] + 2, 3.8], [2.9, ...f2], [3.75, f2[0] - 4, f2[1], 3.8], [4.2, ...base], [9, ...base]];
+    const cam = { cx: tabla(mov, u, 1), cy: tabla(mov, u, 2), s: tabla(mov, u, 3) };
+    // Entrada de la ronda: la cámara llega de costado, con desenfoque
+    const llega = 1 - eOut(t / .34);
+    cam.tx = (n % 2 ? -1 : 1) * llega * 1300;
+    const fotoAlfa = clamp((t - finCue) / .1);
+    const revela = t >= finCue;
+    const sacude = revela && t < finCue + .22 ? Math.sin((t - finCue) * 70) * 12 * (1 - (t - finCue) / .22) : 0;
+    cam.ty = sacude;
+    const v = dibujar(bor, cam, { encima: orig, alfa: fotoAlfa, desenfoque: llega * 26 });
+    const compas = u >= 0 ? (t - finTit) : -1;
+    r.anillos.forEach((m, i) => {
+      const a = anilloDe(m, i), esOk = a.letra === r.ok, pr = clamp((t - finCue) / .3);
+      anillo(v, m, a.r, a.letra, {
+        aparece: compas < 0 ? 0 : clamp((compas - i * .1) / .24) * 1.0001,
+        apagado: esOk ? 0 : pr,
+        bien: esOk ? pr : 0,
+        latido: u > 3 && !revela ? Math.max(0, 1 - ((u % 1) / .4)) : 0,
+        giro: t * .5 * (i % 2 ? 1 : -1),
+      });
+    });
+    onda(v, b, (t - finCue - .04) / .6);
+    onda(v, b, (t - finCue - .2) / .7, '#fff');
+    $('#destello').style.opacity = revela ? clamp(1 - (t - finCue) / .13) * .5 : 0;
+    if (o?.sinTexto) return;
+    $('#ronda').style.display = 'flex'; $('#nr').textContent = n; $('#nv').textContent = r.nivel;
+    $('#ronda').style.opacity = clamp(t / .1);
+    const ti = $('#titulo');
+    ti.style.display = t < finTit ? '' : 'none';
+    if (t < finTit) {
+      ti.querySelector('.a').textContent = `RONDA ${n}`; ti.querySelector('.b').textContent = r.nivel;
+      const sale = clamp((t - (finTit - .14)) / .14);
+      ti.style.transform = `scale(${lerp(1.5, 1, eOut((t - .1) / .22)) * (1 + sale * .4)})`;
+      ti.style.opacity = clamp((t - .1) / .07) * (1 - sale);
+    }
+    if (u >= 0 && !revela) {
+      const n5 = 5 - Math.floor(u), f = u % 1, cu = $('#cuenta');
+      cu.style.display = ''; cu.textContent = Math.max(1, n5);
+      cu.style.color = n5 <= 2 ? '#E6CF85' : '#F7F2E4';
+      cu.style.transform = `scale(${1 + .28 * Math.max(0, 1 - f / .28)})`;
+      const pi = $('#pista');
+      pi.style.display = ''; pi.textContent = u < 1.05 ? D.pregunta : u < 2.7 ? r.pistas[0] : u < 4.1 ? r.pistas[1] : D.pregunta;
+      const cambio = [0, 1.05, 2.7, 4.1].reduce((s, x) => u >= x ? x : s, 0);
+      pi.style.opacity = clamp((u - cambio) * tk / .12);
+    }
+    if (revela) { const e = $('#era'); e.style.display = ''; e.textContent = `ERA LA ${r.ok}`; golpe(e, t, finCue, 1.5); }
+    return;
+  }
+
+  // La jugada, desde el mismo cuadro congelado
+  const tau = t - finRev, seg = tablaLineal(r.mapa, tau);
+  const num = Math.min(r.ultimo, r.f0 + Math.round(seg * 60));
+  const foto = await img(`${r.dir}/${String(num).padStart(4, '0')}.jpg`);
+  const cam = { cx: tabla(r.cam, seg, 1), cy: lerp(380, 360, eOut(tau / .5)), s: lerp(3, 2.667, eOut(tau / .5)) };
+  const g = t - finRev - r.golEn;
+  cam.ty = g > 0 && g < .25 ? Math.sin(g * 60) * 10 * (1 - g / .25) : 0;
+  dibujar(foto, cam);
+  // El esmerilado de abajo se achica mientras corre la jugada y vuelve con la placa del gol
+  $('#abajo').style.transform = `translateY(${320 * eOut((tau - .1) / .4) * (1 - eOut((g - .02) / .25))}px)`;
+  $('#destello').style.opacity = g > 0 ? clamp(1 - g / .14) * .32 : 0;
+  if (o?.sinTexto) return;
+  $('#ronda').style.display = 'flex'; $('#nr').textContent = n; $('#nv').textContent = r.nivel;
+  const pl = $('#placa');
+  if (g > .08) {
+    pl.style.display = '';
+    const p = eOut((g - .08) / .3);
+    pl.style.transform = `translateY(${(1 - p) * 260}px)`; pl.style.opacity = clamp((g - .08) / .1);
+    if ($('#pimg').getAttribute('src') !== r.render) { $('#pimg').src = r.render; await $('#pimg').decode().catch(() => {}); }
+    $('#pgt').textContent = r.gt; $('#pli').innerHTML = r.linea;
+  }
+}
+
+function cierre(t) {
+  const c = $('#cierre'); c.style.display = 'block';
+  const entra = (el, en, de) => { const p = eOut((t - en) / .3); el.style.opacity = clamp((t - en) / .1); el.style.transform = `translateY(${(1 - p) * de}px)`; };
+  entra($('#c1'), .05, 40);
+  [...document.querySelectorAll('.foto')].forEach((f, i) => entra(f, .28 + i * .16, 70));
+  entra($('#c2'), .95, 30);
+  entra($('#esc'), 1.2, 20);
+}
+
+async function mostrar(n, t, o) {
+  ocultarTodo();
+  if (n === 0) return gancho(t);
+  if (n <= D.rondas.length) return ronda(n, t, o);
+  // Fondo del cierre: la tijera congelada, oscura, acercándose despacio
+  const r = D.rondas[D.rondas.length - 1], f = await img(r.borrada);
+  dibujar(f, { cx: r.base[0], cy: r.base[1], s: 3 + t * .04 }, { desenfoque: 8, oscuro: .6 });
+  cierre(t);
+}
+</script>
+</body>
+</html>
