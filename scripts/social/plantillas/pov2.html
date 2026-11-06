@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "POV: se te cae el internet en la final": el video dentro del video. La tele de la foto recibe una jugada real por
+     homografía (matrix3d) y las fallas (saltos, bloques, desgarro, píxeles) se dibujan por código al pulso del tema.
+     Un solo tramo: mostrar(0, t); todo sale de t (determinístico). Franja de arriba libre: rótulo del tema. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4;--loss:#e5484d;--win:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;will-change:transform}
+#mundo>*{position:absolute;left:0;top:0}
+#foto,#clip{width:1080px;height:1920px}
+#manos{width:1080px;height:1920px;-webkit-mask-image:linear-gradient(180deg,transparent 1105px,#000 1185px)}
+#tele{width:1280px;height:720px;transform-origin:0 0}
+#brillo{width:1280px;height:720px;transform-origin:0 0;background:linear-gradient(118deg,rgba(255,255,255,.07),rgba(255,255,255,0) 34%,rgba(255,255,255,0) 72%,rgba(255,255,255,.035));pointer-events:none}
+#luz{inset:0;width:1080px;height:1920px;mix-blend-mode:screen;pointer-events:none}
+#sombra{inset:0;width:1080px;height:1920px;background:#000;pointer-events:none}
+#vineta{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 44%,rgba(0,0,0,.58) 100%);pointer-events:none}
+#grano{position:absolute;inset:0;width:1080px;height:1920px;opacity:.09;mix-blend-mode:overlay;pointer-events:none}
+#negro{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+.txt{position:absolute;left:50px;right:50px;text-align:center;font-family:'Bebas Neue';line-height:.96;color:var(--text);text-shadow:0 6px 34px rgba(0,0,0,.92),0 2px 6px rgba(0,0,0,.9);will-change:transform,opacity;display:none}
+.txt b{font-weight:400;color:var(--gold2)}
+.txt.grito{color:var(--loss)}
+#reloj{position:absolute;left:0;right:0;top:236px;text-align:center;display:none;text-shadow:0 6px 30px rgba(0,0,0,.9)}
+#reloj .h{font-family:'Bebas Neue';font-size:190px;line-height:.92;color:var(--text);font-variant-numeric:tabular-nums}
+#reloj .e{font:800 54px 'Barlow Condensed';letter-spacing:.16em;color:var(--text)}
+#chat{position:absolute;left:70px;right:70px;top:1436px;display:none;align-items:center;gap:26px;padding:24px 34px;border-radius:20px;background:rgba(10,10,10,.8);box-shadow:0 0 0 2px rgba(230,207,133,.4)}
+#chat .o{display:flex;align-items:center;gap:6px;height:64px}
+#chat .o i{display:block;width:9px;background:var(--gold2);border-radius:5px}
+#chat .q{font:800 30px 'Barlow Condensed';letter-spacing:.14em;color:var(--gold2)}
+#chat .f{font:800 66px/1 'Barlow Condensed';color:var(--text);white-space:nowrap}
+#fin{position:absolute;left:60px;right:60px;top:1130px;text-align:center;display:none}
+#fin .a{font:800 88px/1.08 'Barlow Condensed';color:var(--text);text-shadow:0 5px 30px rgba(0,0,0,.95);will-change:transform,opacity}
+#fin .a b{font-weight:800;color:var(--gold2)}
+#fin img{height:150px;margin-top:40px;will-change:transform,opacity}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="mundo">
+    <img id="foto">
+    <canvas id="clip" width="1080" height="1920"></canvas>
+    <canvas id="manos" width="1080" height="1920"></canvas>
+    <canvas id="tele" width="1280" height="720"></canvas>
+    <div id="brillo"></div>
+    <div id="luz"></div>
+    <div id="sombra"></div>
+  </div>
+  <div id="vineta"></div>
+  <canvas id="grano" width="540" height="960"></canvas>
+  <div id="reloj"><div class="h"></div><div class="e"></div></div>
+  <div class="txt" id="t1"></div>
+  <div id="chat"><div class="o"></div><div><div class="q">CHAT DE VOZ · EQUIPO</div><div class="f"></div></div></div>
+  <div id="fin"><div class="a"></div><img id="esc"></div>
+  <div id="negro"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eIO = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const tele = $('#tele').getContext('2d'), clipC = $('#clip').getContext('2d'), manos = $('#manos').getContext('2d'), granoC = $('#grano').getContext('2d');
+const tmp = document.createElement('canvas'); tmp.width = 1280; tmp.height = 720; const tmpC = tmp.getContext('2d');
+const chico = document.createElement('canvas'); const chicoC = chico.getContext('2d');
+let D, cache = new Map();
+
+// Azar reproducible: mismo cuadro, mismo resultado
+const azar = (a, b = 0) => { let x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); };
+
+async function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const i = new Image(); i.src = src; await i.decode();
+  if (cache.size > 40) cache.delete(cache.keys().next().value);
+  cache.set(src, i);
+  return i;
+}
+const n4 = n => String(n).padStart(4, '0');
+
+// Homografía: del rectángulo w×h de la tele a los 4 rincones medidos en la foto (TL, TR, BR, BL)
+function matriz(w, h, q) {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3, dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  const d = dx1 * dy2 - dx2 * dy1, g = (dx3 * dy2 - dx2 * dy3) / d, k = (dx1 * dy3 - dx3 * dy1) / d;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + k * x3, c = x0, e = y1 - y0 + g * y1, f = y3 - y0 + k * y3, i = y0;
+  return `matrix3d(${a / w},${e / w},0,${g / w},${b / h},${f / h},0,${k / h},0,0,1,0,${c},${i},0,1)`;
+}
+function ponerTele(q) { const m = matriz(1280, 720, q); $('#tele').style.transform = m; $('#brillo').style.transform = m; }
+
+// ── La jugada: recorte que sigue al delantero, sin ningún dato del HUD real ──
+function ventana(k) {
+  const K = D.camJugada;
+  let a = K[0], b = K[K.length - 1];
+  for (let i = 1; i < K.length; i++) if (k <= K[i][0]) { a = K[i - 1]; b = K[i]; break; }
+  const p = b[0] === a[0] ? 1 : eIO((k - a[0]) / (b[0] - a[0]));
+  const w = lerp(a[3], b[3], p), h = w * 9 / 16;
+  return [lerp(a[1], b[1], p) - w / 2, lerp(a[2], b[2], p) - h / 2, w, h];
+}
+async function cuadroJugada(k, c = tele) {
+  const f = await img(`${D.partido}/${n4(Math.round(clamp(k, 1, D.partidoN)))}.jpg`);
+  const [x, y, w, h] = ventana(k);
+  c.imageSmoothingQuality = 'high';
+  c.drawImage(f, x, y, w, h, 0, 0, 1280, 720);
+}
+// Marcador propio: lo único que dice el partido de la tele
+function marcador(c, min, gl, gv) {
+  c.save();
+  c.fillStyle = 'rgba(8,8,8,.86)'; c.fillRect(44, 36, 338, 76);
+  c.fillStyle = '#E6CF85'; c.fillRect(44, 36, 8, 76);
+  c.font = "60px 'Bebas Neue'"; c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.fillStyle = '#F7F2E4'; c.fillText(`TOP ${gl}-${gv} RIV`, 68, 77);
+  c.fillStyle = '#F7F2E4'; c.fillRect(392, 36, 92, 76);
+  c.fillStyle = '#050505'; c.textAlign = 'center'; c.fillText(min, 438, 77);
+  c.restore();
+}
+// Fallas: una por pulso, cada vez peor. "nivel" va de 0 a 1.
+function bloques(c, viejo, semilla, cuanto) {
+  const G = 40;
+  for (let y = 0; y < 18; y++) for (let x = 0; x < 32; x++) {
+    // los bloques vienen de a manchones, como un cuadro de video que no llegó entero
+    const m = azar(Math.floor(x / 4) + semilla, Math.floor(y / 3));
+    if (m > cuanto) continue;
+    const dx = Math.round((azar(x, semilla) - .5) * 9) * G * (m < cuanto * .5 ? 3 : 1), dy = Math.round((azar(y, semilla + 3) - .5) * 5) * G;
+    c.drawImage(viejo, x * G + dx, y * G + dy, G, G, x * G, y * G, G, G);
+    const col = azar(x * 3 + 1, y * 5 + semilla);
+    if (col < .1) { c.fillStyle = col < .05 ? 'rgba(232,40,190,.42)' : 'rgba(40,235,170,.36)'; c.fillRect(x * G, y * G, G, G); }
+  }
+}
+function desgarro(c, semilla, cuanto) {
+  tmpC.drawImage(c.canvas, 0, 0);
+  let y = 0, i = 0;
+  while (y < 720) {
+    const h = 6 + azar(i, semilla) * 70, dx = azar(i, semilla + 9) < cuanto ? (azar(i, semilla + 5) - .5) * 240 * cuanto : 0;
+    c.drawImage(tmp, 0, y, 1280, h, dx, y, 1280, h);
+    y += h; i++;
+  }
+}
+function pixeles(c, semilla, cuanto) {
+  const lado = Math.round(lerp(16, 44, cuanto));
+  chico.width = 1280 / lado | 0; chico.height = 720 / lado | 0;
+  chicoC.imageSmoothingEnabled = false; chicoC.drawImage(c.canvas, 0, 0, chico.width, chico.height);
+  c.save(); c.imageSmoothingEnabled = false;
+  for (let i = 0; i < 6; i++) {
+    const x = azar(i, semilla) * 1100 | 0, y = azar(i, semilla + 2) * 560 | 0, w = 160 + azar(i, semilla + 4) * 620 * cuanto, h = 80 + azar(i, semilla + 6) * 320 * cuanto;
+    c.drawImage(chico, x / lado, y / lado, w / lado, h / lado, x, y, w, h);
+  }
+  c.restore();
+}
+function cromatico(c, d, a) {
+  tmpC.globalCompositeOperation = 'source-over'; tmpC.drawImage(c.canvas, 0, 0);
+  tmpC.globalCompositeOperation = 'multiply'; tmpC.fillStyle = '#ff0000'; tmpC.fillRect(0, 0, 1280, 720); tmpC.globalCompositeOperation = 'source-over';
+  c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = a; c.drawImage(tmp, d, 0); c.restore();
+}
+function circulito(c, t, alfa) {
+  c.save(); c.globalAlpha = alfa; c.translate(640, 360);
+  c.lineCap = 'round'; c.lineWidth = 15;
+  c.strokeStyle = 'rgba(255,255,255,.2)'; c.beginPath(); c.arc(0, 0, 66, 0, 7); c.stroke();
+  c.strokeStyle = '#fff'; c.rotate(t * 5.2); c.beginPath(); c.arc(0, 0, 66, 0, 1.9); c.stroke();
+  c.restore();
+}
+function señal(c, alfa) {   // ícono de conexión caída, arriba a la derecha de la tele
+  c.save(); c.globalAlpha = alfa; c.translate(1176, 74);
+  c.fillStyle = 'rgba(8,8,8,.8)'; c.fillRect(-58, -40, 116, 80);
+  c.fillStyle = '#e5484d'; [0, 1, 2, 3].forEach(i => { c.globalAlpha = alfa * (i < 1 ? 1 : .28); c.fillRect(-36 + i * 20, 22 - (i + 1) * 12, 13, (i + 1) * 12); });
+  c.restore();
+}
+async function pantallaFinal(c, t) {
+  await cuadroJugada(D.kFreeze, c);
+  c.save();
+  c.fillStyle = 'rgba(5,5,5,.8)'; c.fillRect(0, 0, 1280, 720);
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillStyle = '#E6CF85'; c.font = "88px 'Bebas Neue'"; c.fillText(D.final.titulo, 640, 150);
+  c.fillStyle = '#F7F2E4'; c.font = "300px 'Bebas Neue'"; c.fillText(D.final.marcador, 640, 390);
+  c.fillStyle = '#e5484d'; c.font = "96px 'Bebas Neue'"; c.fillText(D.final.abajo, 640, 620);
+  c.restore();
+}
+
+// El estado de la tele en cada momento
+async function pintarTele(t) {
+  const T = D.T;
+  if (t < T.falla) {   // corre normal, un poco lenta: es el mano a mano
+    const k = lerp(D.k0, D.kFalla, t / T.falla);
+    await cuadroJugada(k);
+    marcador(tele, D.min, 1, 1);
+    return 1;
+  }
+  if (t < T.pasillo) {
+    const tau = t - T.falla, N = D.pulsosFalla, b = Math.floor(tau / D.B), f = (tau % D.B) / D.B, nivel = clamp(b / (N - 3));
+    // La imagen avanza a los saltos y queda clavada en el mano a mano
+    const kk = Math.min(D.kFreeze, D.kFalla + (b + 1) * (D.kFreeze - D.kFalla) / Math.max(1, N - 3));
+    const trabada = kk >= D.kFreeze;
+    const k = trabada ? D.kFreeze : kk + Math.floor(f * 3) * 2;
+    await cuadroJugada(k);
+    marcador(tele, D.min, 1, 1);
+    const pega = Math.exp(-f * 4);   // la falla golpea en el pulso y se va apagando
+    if (!trabada || f < .35) {
+      tmpC.globalCompositeOperation = 'source-over'; await cuadroJugada(Math.max(1, k - 60), tmpC);
+      bloques(tele, tmp, b * 7 + (f > .5 ? 3 : 0), lerp(.3, .62, nivel) * (.5 + .5 * pega));
+      if (b % 2 || nivel > .5) pixeles(tele, b * 3 + 1, nivel * pega + .15);
+      desgarro(tele, b * 5 + Math.floor(f * 4), (.2 + nivel * .6) * pega);
+      cromatico(tele, 8 + nivel * 18 * pega, .34 * pega);
+    }
+    const hastaSpin = T.falla + (N - 3) * D.B;
+    const osc = clamp((t - hastaSpin) / (D.B * .7));
+    if (osc > 0) { tele.fillStyle = `rgba(0,0,0,${(D.paraPortada ? .12 : .55) * osc})`; tele.fillRect(0, 0, 1280, 720); }
+    circulito(tele, t, osc);
+    señal(tele, clamp((tau - D.B) / .08) * (Math.floor(t * 3.2) % 2 ? 1 : .5));
+    return 1 - .6 * osc;
+  }
+  if (t < T.vuelta) return 0;    // no se ve
+  const tau = t - T.vuelta;
+  tele.fillStyle = '#000'; tele.fillRect(0, 0, 1280, 720);
+  if (tau < .22) return 0;       // sigue negra un instante
+  if (tau < D.B * 2) {           // vuelve la imagen a los tirones
+    const p = (tau - .22) / (D.B * 2 - .22);
+    await pantallaFinal(tele, tau);
+    await cuadroJugada(D.kFreeze, tmpC);
+    bloques(tele, tmp, Math.floor(tau * 12), lerp(.5, .05, p));
+    pixeles(tele, Math.floor(tau * 12), 1 - p);
+    desgarro(tele, Math.floor(tau * 24), .7 * (1 - p));
+    return .3 + .5 * p;
+  }
+  await pantallaFinal(tele, tau);
+  return .8;
+}
+
+function hombro(t) {   // pulso de mano: sumas de senos, nada al azar
+  const a = Math.sin(t * 1.3) * 4 + Math.sin(t * 2.9 + 1) * 2.2 + Math.sin(t * 7.1) * .8;
+  const b = Math.sin(t * 1.7 + 2) * 3.4 + Math.sin(t * 3.7) * 1.8 + Math.sin(t * 8.3 + 1) * .7;
+  return [a, b];
+}
+function ponerCamara(z, x, y, sx = 0, sy = 0) {
+  const X = clamp(x + sx, 1080 * (1 - z), 0), Y = clamp(y + sy, 1920 * (1 - z), 0);
+  $('#mundo').style.transform = `translate(${X.toFixed(2)}px,${Y.toFixed(2)}px) scale(${z.toFixed(4)})`;
+}
+async function cuadroClip(ctx, c, seg, velocidad, pingpong) {
+  let n = Math.round(seg * velocidad * 30);
+  if (pingpong) { const m = c.n - 1; n = n % (2 * m); n = n > m ? 2 * m - n : n; }
+  const f = await img(`${c.dir}/${n4(clamp(n + 1, 1, c.n))}.jpg`);
+  ctx.drawImage(f, 0, 0, 1080, 1920);
+  return clamp(n, 0, c.n - 1);
+}
+
+function textos(t) {
+  const el = $('#t1'); el.style.display = 'none';
+  for (const x of D.textos) if (t >= x.desde && t < x.hasta) {
+    el.style.display = 'block'; el.innerHTML = x.html; el.className = 'txt' + (x.grito ? ' grito' : '');
+    el.style.top = x.y + 'px'; el.style.fontSize = x.tam + 'px';
+    const p = eOut((t - x.desde) / .16);
+    el.style.transform = `scale(${lerp(x.de || 1.3, 1, p)})`; el.style.opacity = clamp((t - x.desde) / .05);
+    break;
+  }
+}
+function reloj(t) {
+  const T = D.T, r = $('#reloj');
+  if (t < T.pasillo || t >= T.vuelta) { r.style.display = 'none'; return; }
+  r.style.display = 'block';
+  const seg = lerp(D.relojDe, D.relojA, clamp((t - T.pasillo) / (T.vuelta - T.pasillo)));
+  const m = Math.floor(seg / 60), s = Math.floor(seg % 60);
+  r.querySelector('.h').textContent = m >= 90 ? `90+${m - 89}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+  r.querySelector('.e').textContent = 'EL PARTIDO SIGUE';
+}
+function chat(t) {
+  const c = $('#chat');
+  c.style.display = 'none';
+  for (const x of D.chat) if (t >= x.desde && t < x.hasta) {
+    c.style.display = 'flex';
+    const u = t - x.desde, cae = x.cortes.reduce((s, q) => s || (u >= q[0] && u < q[1]), false);
+    c.querySelector('.f').textContent = x.linea.filter(q => u >= q[0]).map(q => q[1]).join('');
+    c.style.opacity = cae ? .45 : 1;
+    [...c.querySelectorAll('.o i')].forEach((b, i) => {
+      const h = cae ? 6 : 10 + 50 * Math.abs(Math.sin(t * 19 + i * 1.7)) * azar(i, Math.floor(t * 14));
+      b.style.height = h + 'px'; b.style.background = cae ? '#e5484d' : '#E6CF85';
+    });
+    break;
+  }
+}
+function grano(t) {
+  const s = Math.floor(t * 30), W = 540, H = 960;
+  const d = granoC.createImageData(W, H);
+  for (let i = 0; i < d.data.length; i += 4) {
+    const v = ((i * 7919 + s * 104729) ^ (i >>> 3) * 31) % 255;
+    d.data[i] = d.data[i + 1] = d.data[i + 2] = v < 0 ? -v : v; d.data[i + 3] = 255;
+  }
+  granoC.putImageData(d, 0, 0);
+}
+
+async function pintar(datos) {
+  D = datos;
+  $('#esc').src = D.escudo;
+  $('#fin .a').innerHTML = D.cierre;
+  $('#chat .o').innerHTML = '<i></i>'.repeat(7);
+  await document.fonts.ready;
+  await Promise.all(["88px 'Bebas Neue'", "800 62px 'Barlow Condensed'", "800 30px 'Barlow Condensed'"].map(f => document.fonts.load(f)));
+  await Promise.all([D.sillon, D.vuelta].map(img));
+  return 1;
+}
+
+function escenaFoto(src, q) {
+  const f = $('#foto');
+  if (f.getAttribute('src') !== src) { f.src = src; }
+  $('#clip').style.display = 'none'; $('#manos').style.display = 'none'; $('#tele').style.display = ''; $('#brillo').style.display = ''; f.style.display = '';
+  ponerTele(q);
+}
+function luzDeTele(q, fuerza, color) {
+  const cx = (q[0][0] + q[2][0]) / 2, cy = (q[0][1] + q[2][1]) / 2;
+  const l = $('#luz');
+  l.style.display = 'block';
+  l.style.background = `radial-gradient(ellipse 720px 980px at ${cx}px ${cy + 90}px, ${color} 0%, rgba(0,0,0,0) 72%)`;
+  l.style.opacity = fuerza;
+}
+
+// Pasa a verde una mancha de luz roja del clip, con el borde difuminado para que no se note el recorte
+const mancha = document.createElement('canvas'); mancha.width = 200; mancha.height = 200; const manchaC = mancha.getContext('2d');
+function tinte(x, y, rx, ry, alfa, brillo) {
+  const W = mancha.width, H = mancha.height;
+  manchaC.globalCompositeOperation = 'source-over'; manchaC.clearRect(0, 0, W, H);
+  manchaC.filter = `hue-rotate(125deg) saturate(1.4) brightness(${brillo})`;
+  manchaC.drawImage($('#clip'), x - rx, y - ry, rx * 2, ry * 2, 0, 0, W, H);
+  manchaC.filter = 'none';
+  const g = manchaC.createRadialGradient(W / 2, H / 2, W * .18, W / 2, H / 2, W / 2);
+  g.addColorStop(0, '#000'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  manchaC.globalCompositeOperation = 'destination-in'; manchaC.fillStyle = g; manchaC.fillRect(0, 0, W, H);
+  clipC.save(); clipC.globalAlpha = alfa; clipC.drawImage(mancha, x - rx, y - ry, rx * 2, ry * 2); clipC.restore();
+}
+
+async function mostrar(n, t, o = {}) {
+  const T = D.T;
+  const [hx, hy] = hombro(t);
+  $('#negro').style.opacity = 0;
+  $('#fin').style.display = 'none';
+  $('#luz').style.display = 'none';
+  let s = 0;
+
+  if (t < T.pasillo) {
+    // ── Sillón: la cámara se acerca a la tele, hasta que el mano a mano llena el cuadro ──
+    escenaFoto(D.sillon, D.quadSillon);
+    const brillo = await pintarTele(t);
+    $('#manos').style.display = '';
+    await cuadroClip(manos, D.clipSillon, t, .9, true);
+    const p = eIO(t / T.falla), z = lerp(1.04, 1.42, p);
+    const X = lerp(-20, 540 - 696 * 1.42, p), Y = lerp(-40, 0, p);
+    let sx = hx, sy = hy;
+    if (t >= T.falla) {   // cada pulso de falla pega en el cuerpo: se inclina hacia la tele
+      const tau = t - T.falla, f = (tau % D.B) / D.B;
+      sx += Math.sin(f * 30) * 11 * Math.exp(-f * 5); sy += Math.cos(f * 26) * 9 * Math.exp(-f * 5);
+    }
+    ponerCamara(z, X, Y, sx, sy);
+    luzDeTele(D.quadSillon, .34 * brillo, '#7fc98a');
+    s = lerp(.18, .42, p);
+  } else if (t < T.router) {
+    // ── Pasillo: corrida ──
+    const tau = t - T.pasillo;
+    $('#foto').style.display = 'none'; $('#tele').style.display = 'none'; $('#brillo').style.display = 'none'; $('#manos').style.display = 'none';
+    $('#clip').style.display = '';
+    await cuadroClip(clipC, D.clipPasillo, tau, 1.1, false);
+    const paso = Math.abs(Math.sin(tau * Math.PI / D.B)) * 16;
+    const w = (1 - eOut(tau / .16)) * -760;   // barrido de entrada
+    ponerCamara(1.14, -75 + w, -130, hx * 2 + Math.sin(tau * 6) * 16, hy * 2 + paso);
+  } else if (t < T.vuelta) {
+    // ── Router: el cable y la cuenta. Las luces pasan de rojo a verde de a una ──
+    const tau = t - T.router;
+    $('#foto').style.display = 'none'; $('#tele').style.display = 'none'; $('#brillo').style.display = 'none'; $('#manos').style.display = 'none';
+    $('#clip').style.display = '';
+    const cl = D.clipRouter, idx = await cuadroClip(clipC, cl, tau, .32, true);
+    // Hue-rotate solo en cada luz, siguiendo el centro rojo medido en cada cuadro del clip
+    const lx = cl.luces[idx][0] + D.ledDx, ly = cl.luces[idx][1] + D.ledBaja;
+    for (let i = 0; i < 5; i++) {
+      const v = clamp((t - D.luzVerde[i]) / .1);
+      if (v <= 0) continue;
+      const x = lx + (i - 2) * D.ledPaso;
+      tinte(x, ly, 24, 24, v, 1.25);
+      tinte(x, ly + D.ledReflejo, 34, 50, v * (i === 4 ? .45 : .95), 1);
+    }
+    const w = (1 - eOut(tau / .14)) * 760;
+    const paso = D.conteo.reduce((a, q) => a + (t >= q && t < q + .12 ? 1 : 0), 0);
+    ponerCamara(1.08, -40 + w, -60, hx * 1.2, hy * 1.2 + paso * 8);
+  } else {
+    // ── Vuelta: desde la puerta. Vuelve la imagen justo para ver la pantalla final ──
+    const tau = t - T.vuelta;
+    escenaFoto(D.vuelta, D.quadVuelta);
+    const brillo = await pintarTele(t);
+    const w = (1 - eOut(tau / .14)) * -760;
+    const pz = eIO(tau / (D.B * 5)), z = lerp(1.05, 1.7, pz);
+    ponerCamara(z, lerp(-40, 540 - 730 * 1.7, pz) + w, lerp(-50, 735 - 515 * 1.7, pz), hx * .9, hy * .9);
+    luzDeTele(D.quadVuelta, .24 * brillo, '#b9b2a0');
+    s = lerp(.1, .3, pz);
+    if (t >= T.cierre) {
+      const c = t - T.cierre, fin = $('#fin'), a = $('#fin .a'), e = $('#esc');
+      fin.style.display = 'block';
+      a.style.opacity = clamp(c / .1); a.style.transform = `translateY(${(1 - eOut(c / .32)) * 30}px)`;
+      e.style.opacity = clamp((c - .55) / .15); e.style.transform = `translateY(${(1 - eOut((c - .55) / .3)) * 20}px)`;
+    }
+  }
+  $('#sombra').style.opacity = D.paraPortada ? s * .4 : s;
+  if (!o.sinTexto) { textos(t); reloj(t); chat(t); }
+  else { $('#t1').style.display = 'none'; $('#reloj').style.display = 'none'; $('#chat').style.display = 'none'; $('#fin').style.display = 'none'; }
+  grano(t);
+}
+</script>
+</body>
+</html>

@@ -11,10 +11,11 @@ import { ROOT } from '../../lib/env.mjs';
 
 export const QUIETOS = 'Las personas posan inmóviles como estatuas, con la boca cerrada.';
 
-export function animar(img, movimiento) {
+// quietos: false → sin la frase de QUIETOS, para los clips en que lo que se tiene que mover es justamente la persona.
+export function animar(img, movimiento, { quietos = true } = {}) {
   const mp4 = img.replace(/\.\w+$/, '.mp4');
   if (fs.existsSync(mp4)) return mp4;
-  const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts/canva-imagen-a-video.mjs'), img, '--prompt', `${movimiento} ${QUIETOS}`, '--out', mp4],
+  const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts/canva-imagen-a-video.mjs'), img, '--prompt', quietos ? `${movimiento} ${QUIETOS}` : movimiento, '--out', mp4],
     { cwd: ROOT, encoding: 'utf8', timeout: 45 * 60000 });
   if (!fs.existsSync(mp4)) throw new Error(`Canva no generó el clip de ${path.basename(img)}: ${(r.stdout + r.stderr).trim().split('\n').slice(-2).join(' ')}`);
   return mp4;
