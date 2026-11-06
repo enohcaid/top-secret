@@ -368,7 +368,7 @@ const lote = {
     P({ id: 'ig-reel', red: 'instagram', formato: 'Reel · POV se corta internet', metodo: 'ig-reel',
       texto: `Minuto 88, mano a mano, y se traba.\n\nLa jugada de la tele es real, de ${JUGADOR}. El corte, por suerte, no.\n\n¿A quién le pasó justo ahí? Mandáselo.\n\n#TopSecretFC #ProClubs #EAFC` }),
     P({ id: 'tiktok', red: 'tiktok', formato: 'Video · POV se corta internet', metodo: 'tiktok',
-      texto: `POV: solo al arco y aparece el circulito. Todos conocemos a uno que le pasó justo ahí. Mandáselo. La jugada es de ${JUGADOR}. #TopSecretFC #ProClubs #EAFC #pov` }),
+      texto: `POV: solo al arco y aparece el circulito. Todos conocemos a uno que le pasó justo ahí. Mandáselo. La jugada es real, de ${JUGADOR}; el corte, actuado. #TopSecretFC #ProClubs #EAFC #pov` }),
     P({ id: 'yt-short', red: 'youtube', formato: 'Short · POV se corta internet', metodo: 'youtube',
       titulo: 'POV: se te corta internet en el minuto 88 | Pro Clubs EA FC',
       texto: `Mano a mano, empate, y la imagen se traba. La jugada de la tele es real, de ${JUGADOR}; el corte es actuado. #Shorts #ProClubs #EAFC` }),
