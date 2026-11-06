@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "El movimiento que nadie vio": análisis estilo TV sobre un gol real. Las marcas siguen a los jugadores y quedan pegadas al
+     pasto: salen de lib/seguir.py (homografía de cada cuadro a la referencia + pie de cada jugador sobre el pasto), nada dibujado
+     a ojo. Coordenadas en píxeles del video original (1280x720); los cuadros en disco van al doble. Una sola escena de video
+     (mostrar(0, t)); en formato post, mostrar(n, 99) es la placa n del carrusel. Franja de arriba libre: rótulo del tema. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4;--loss:#e5484d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+#lienzo.post{height:1350px}
+canvas{position:absolute;left:0;top:0}
+/* Tapan el HUD del juego sin barras negras planas */
+#arriba{position:absolute;left:0;right:0;top:0;height:330px;backdrop-filter:blur(20px) brightness(.48);-webkit-mask-image:linear-gradient(180deg,#000 76%,transparent)}
+#abajo{position:absolute;left:0;right:0;bottom:0;height:470px;backdrop-filter:blur(22px) brightness(.42);-webkit-mask-image:linear-gradient(0deg,#000 78%,transparent)}
+#kicker{position:absolute;left:60px;top:196px;font:800 40px 'Barlow Condensed';letter-spacing:.14em;color:var(--gold2)}
+#sub{position:absolute;left:56px;right:56px;top:1385px;text-align:center;font:800 76px/1.08 'Barlow Condensed';color:rgba(247,242,228,.34);text-shadow:0 4px 26px rgba(0,0,0,.85)}
+#sub.grande{top:1290px;font:400 112px/.98 'Bebas Neue';letter-spacing:.005em}
+#sub b{font-weight:inherit;color:var(--text)}
+#sub b.ya{color:var(--gold2)}
+#destello{position:absolute;inset:0;background:#fff;opacity:0}
+#rebobina{position:absolute;left:0;right:0;top:820px;text-align:center;font:400 170px/1 'Bebas Neue';color:var(--text);text-shadow:0 6px 40px rgba(0,0,0,.8)}
+#gol{position:absolute;left:60px;top:300px;will-change:transform,opacity}
+#gol .a{font:400 92px/1 'Bebas Neue';color:var(--gold2)}
+#gol .b{font:800 66px/1 'Barlow Condensed';color:var(--text)}
+#cierre{position:absolute;left:60px;right:60px;top:300px;text-align:center}
+#cierre .a{font:400 176px/.94 'Bebas Neue';color:var(--text);text-shadow:0 8px 50px rgba(0,0,0,.8)}
+#cierre .b{margin-top:34px;font:800 62px/1.06 'Barlow Condensed';color:var(--gold2)}
+#cierre img{display:block;height:130px;margin:30px auto 0}
+/* Carrusel */
+#placa{position:absolute;left:62px;right:62px;bottom:64px}
+#placa .a{font:400 124px/.95 'Bebas Neue';color:var(--text);text-shadow:0 6px 34px rgba(0,0,0,.85)}
+#placa .b{margin-top:16px;font:800 58px/1.08 'Barlow Condensed';color:var(--text);text-shadow:0 4px 24px rgba(0,0,0,.9)}
+#placa em{font-style:normal;color:var(--gold2)}
+#placa img{position:absolute;right:0;top:-104px;height:112px}
+#num{position:absolute;right:62px;top:56px;font:800 40px 'Barlow Condensed';letter-spacing:.1em;color:var(--gold2)}
+#titulo{position:absolute;left:62px;top:56px;font:800 40px 'Barlow Condensed';letter-spacing:.14em;color:var(--gold2)}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <canvas id="cancha"></canvas>
+  <canvas id="marcas"></canvas>
+  <div id="arriba"></div><div id="abajo"></div>
+  <div id="kicker"></div><div id="titulo"></div><div id="num"></div>
+  <div id="sub"></div><div id="rebobina">◀◀</div>
+  <div id="gol"><div class="a">GOL</div><div class="b"></div></div>
+  <div id="cierre"><div class="a"></div><div class="b"></div><img id="esc"></div>
+  <div id="placa"><img id="esc2"><div class="a"></div><div class="b"></div></div>
+  <div id="destello"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eIO = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const W = 1080;
+let H = 1920, D, HI = [], cache = new Map();
+const cancha = $('#cancha').getContext('2d'), marcas = $('#marcas').getContext('2d');
+const sombra = document.createElement('canvas'), somb = sombra.getContext('2d');
+
+async function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const i = new Image(); i.src = src; await i.decode();
+  if (cache.size > 14) cache.delete(cache.keys().next().value);
+  cache.set(src, i);
+  return i;
+}
+const invertir = ([a, b, c, d, e, f, g, k, i]) => { const A = e * i - f * k, B = c * k - b * i, C = b * f - c * e, E = f * g - d * i, F = a * i - c * g, G = c * d - a * f, X = d * k - e * g, Y = b * g - a * k, Z = a * e - b * d; return [A, B, C, E, F, G, X, Y, Z].map(v => v / Z); };
+// Del pasto (cuadro de referencia) al cuadro f, que puede ser fraccionario
+function delPasto(f, [x, y]) {
+  const i = clamp(Math.floor(f), 0, D.n - 1), j = Math.min(D.n - 1, i + 1), u = f - i, A = HI[i], B = HI[j];
+  const h = A.map((v, k) => lerp(v, B[k], u)), w = h[6] * x + h[7] * y + h[8];
+  return [(h[0] * x + h[1] * y + h[2]) / w, (h[3] * x + h[4] * y + h[5]) / w];
+}
+function pasto(id, f) {
+  const p = D.pistas[id], i = clamp(Math.floor(f), 0, D.n - 1), j = Math.min(D.n - 1, i + 1), u = f - i;
+  return [lerp(p[i][0], p[j][0], u), lerp(p[i][1], p[j][1], u)];
+}
+const pie = (id, f) => delPasto(f, pasto(id, f));
+
+function tablaTiempo(t) {
+  const m = D.mapa;
+  if (t <= m[0][0]) return m[0][1];
+  for (let i = 1; i < m.length; i++) if (t <= m[i][0]) return lerp(m[i - 1][1], m[i][1], (t - m[i - 1][0]) / Math.max(1e-6, m[i][0] - m[i - 1][0]));
+  return m[m.length - 1][1];
+}
+// Cámara: centro = suma ponderada de los pies de los jugadores + corrimiento, en coordenadas del cuadro actual
+function camaraKey(k, f) {
+  const [n, a, s] = [pie('nueve', f), pie('defensor', f), pie('siete', f)];
+  return { cx: k.n * n[0] + k.d * a[0] + k.s * s[0] + k.dx, cy: k.n * n[1] + k.d * a[1] + k.s * s[1] + k.dy, s: k.z };
+}
+function camara(t, f) {
+  const c = D.cam;
+  let i = c.findIndex(k => k.t >= t);
+  if (i < 0) i = c.length - 1;
+  if (i === 0) return camaraKey(c[0], f);
+  const a = camaraKey(c[i - 1], f), b = camaraKey(c[i], f), u = eIO((t - c[i - 1].t) / Math.max(1e-6, c[i].t - c[i - 1].t));
+  return { cx: lerp(a.cx, b.cx, u), cy: lerp(a.cy, b.cy, u), s: lerp(a.s, b.s, u) };
+}
+function ventana(cam) {
+  const w = W / cam.s, h = H / cam.s;
+  return { x: clamp(cam.cx - w / 2, 0, 1280 - w), y: clamp(cam.cy - h / 2, 0, 720 - h), w, h, k: cam.s };
+}
+const aPantalla = (v, [x, y]) => [(x - v.x) * v.k, (y - v.y) * v.k];
+
+async function cuadro(f) {
+  const i = clamp(Math.floor(f), 0, D.n - 1), u = f - i;
+  const a = await img(`${D.dir}/${String(i + 1).padStart(4, '0')}.jpg`);
+  const b = u > .04 && i + 1 < D.n ? await img(`${D.dir}/${String(i + 2).padStart(4, '0')}.jpg`) : null;
+  return { a, b, u };
+}
+function pintarCuadro(ctx, c, v, tx = 0) {
+  ctx.drawImage(c.a, v.x * 2, v.y * 2, v.w * 2, v.h * 2, tx, 0, W, H);
+  if (c.b) { ctx.globalAlpha = c.u; ctx.drawImage(c.b, v.x * 2, v.y * 2, v.w * 2, v.h * 2, tx, 0, W, H); ctx.globalAlpha = 1; }
+}
+// Se apaga todo menos los focos: copia gris y oscura del cuadro, con agujeros de borde suave
+function apagar(c, v, luz, focos) {
+  if (luz <= 0) return;
+  somb.globalCompositeOperation = 'source-over';
+  somb.filter = 'grayscale(.82) brightness(.27)';
+  pintarCuadro(somb, c, v);
+  somb.filter = 'none';
+  somb.globalCompositeOperation = 'destination-out';
+  for (const q of focos) {
+    if (q.a <= 0) continue;
+    const [x, y] = aPantalla(v, q.p), r = q.r * v.k;
+    const g = somb.createRadialGradient(0, 0, r * .55, 0, 0, r);
+    g.addColorStop(0, `rgba(0,0,0,${q.a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+    somb.save(); somb.translate(x, y); somb.scale(q.ex || 1, q.ey || 1); somb.fillStyle = g;
+    somb.beginPath(); somb.arc(0, 0, r, 0, 7); somb.fill(); somb.restore();
+  }
+  cancha.globalAlpha = luz; cancha.drawImage(sombra, 0, 0); cancha.globalAlpha = 1;
+}
+
+const c = marcas;
+// Anillo acostado sobre el pasto
+function anillo(v, p, col, r, giro, a = 1) {
+  if (a <= 0) return;
+  const [x, y] = aPantalla(v, p), R = r * v.k;
+  c.save(); c.globalAlpha = a; c.translate(x, y); c.scale(1, .42);
+  c.fillStyle = col + '33'; c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill();
+  c.lineWidth = 12; c.strokeStyle = 'rgba(0,0,0,.38)'; c.beginPath(); c.arc(0, 0, R, 0, 7); c.stroke();
+  c.lineWidth = 7; c.strokeStyle = col; c.rotate(giro); c.setLineDash([R * .62, R * .22]); c.beginPath(); c.arc(0, 0, R, 0, 7); c.stroke();
+  c.restore();
+}
+// Línea sobre el pasto por la trayectoria real de un jugador, del cuadro f0 al f1. prog recorta el final; cola = se desvanece hacia atrás.
+function trazo(v, f, id, f0, f1, col, { prog = 1, cola = false, a = 1, ancho = 9, punta = false } = {}) {
+  if (a <= 0 || f1 - f0 < 1 || prog <= 0) return;
+  const hasta = f0 + (f1 - f0) * clamp(prog), pts = [];
+  for (let q = f0; q < hasta; q += 2) pts.push(aPantalla(v, delPasto(f, pasto(id, q))));
+  pts.push(aPantalla(v, delPasto(f, pasto(id, hasta))));
+  if (pts.length < 2) return;
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+  const [xa, ya] = pts[0], [xb, yb] = pts[pts.length - 1];
+  const estilo = () => { if (!cola) return col; const g = c.createLinearGradient(xa, ya, xb, yb); g.addColorStop(0, col + '00'); g.addColorStop(1, col); return g; };
+  const camino = () => { c.beginPath(); pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); };
+  c.globalAlpha = a * (cola ? .55 : .5); c.strokeStyle = cola ? 'rgba(0,0,0,.25)' : 'rgba(0,0,0,.45)'; c.lineWidth = ancho + 7; camino();
+  c.globalAlpha = a; c.strokeStyle = estilo(); c.lineWidth = ancho; camino();
+  if (punta) {
+    const n = pts.length, [px, py] = pts[Math.max(0, n - 4)], [x, y] = pts[n - 1], an = Math.atan2(y - py, x - px), L = ancho * 3.6;
+    c.fillStyle = col; c.translate(x, y); c.rotate(an); c.beginPath(); c.moveTo(L * .6, 0); c.lineTo(-L * .55, L * .62); c.lineTo(-L * .55, -L * .62); c.closePath(); c.fill();
+  }
+  c.restore();
+}
+function etiqueta(v, p, txt, col, { dx = 0, dy = -110, a = 1, oscuro = true } = {}) {
+  if (a <= 0) return;
+  const [x, y] = aPantalla(v, p);
+  c.save(); c.globalAlpha = a; c.font = "800 50px 'Barlow Condensed'";
+  const w = c.measureText(txt).width + 40, h = 66;
+  // La etiqueta no se sale de la pantalla
+  const cx = clamp(x + dx, w / 2 + 24, W - w / 2 - 24), cy = y + dy;
+  c.strokeStyle = col; c.lineWidth = 3; c.beginPath(); c.moveTo(x, y + (dy < 0 ? -24 : 16)); c.lineTo(cx, cy + (dy < 0 ? h / 2 : -h / 2)); c.stroke();
+  c.fillStyle = col; c.beginPath(); c.roundRect(cx - w / 2, cy - h / 2, w, h, 12); c.fill();
+  c.fillStyle = oscuro ? '#0b0b0c' : '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(txt, cx, cy + 3);
+  c.restore();
+}
+// El hilo entre el nueve y el defensor que se va con él
+function hilo(v, a, b, op) {
+  if (op <= 0) return;
+  const [x0, y0] = aPantalla(v, a), [x1, y1] = aPantalla(v, b);
+  c.save(); c.globalAlpha = op; c.lineWidth = 5; c.strokeStyle = '#e5484d'; c.setLineDash([14, 12]);
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.restore();
+}
+// Pasillo libre sobre el pasto: una cuña que se abre del que lleva la pelota hacia el arquero y sigue hasta salir de cuadro
+function pasillo(v, de, ha, ab, op) {
+  if (op <= 0) return;
+  const [x0, y0] = aPantalla(v, de), [x1, y1] = aPantalla(v, ha);
+  const an = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0) * ab, ax = Math.cos(an + 1.57), ay = Math.sin(an + 1.57);
+  const fx = x0 + Math.cos(an) * L, fy = y0 + Math.sin(an) * L, sep = L * .17;
+  const g = c.createLinearGradient(x0, y0, fx, fy); g.addColorStop(0, 'rgba(230,207,133,.6)'); g.addColorStop(1, 'rgba(230,207,133,.16)');
+  c.save(); c.globalAlpha = op; c.fillStyle = g;
+  c.beginPath(); c.moveTo(x0 + ax * 9, y0 + ay * 9); c.lineTo(fx + ax * sep, fy + ay * sep); c.lineTo(fx - ax * sep, fy - ay * sep); c.lineTo(x0 - ax * 9, y0 - ay * 9); c.closePath(); c.fill();
+  c.restore();
+}
+
+async function pintar(datos, formato = 'story') {
+  D = datos; H = formato === 'post' ? 1350 : 1920;
+  D.formato = formato;
+  HI = D.H.map(invertir);
+  $('#lienzo').className = formato;
+  for (const cv of [$('#cancha'), $('#marcas'), sombra]) { cv.width = W; cv.height = H; }
+  for (const x of [cancha, somb]) x.imageSmoothingQuality = 'high';
+  $('#esc').src = D.escudo; $('#esc2').src = D.escudo;
+  $('#kicker').textContent = D.kicker; $('#titulo').textContent = D.kicker;
+  $('#gol .b').textContent = D.goleador;
+  $('#cierre .a').innerHTML = D.cierre[0]; $('#cierre .b').innerHTML = D.cierre[1];
+  await document.fonts.ready;
+  await Promise.all(["800 50px 'Barlow Condensed'", "400 120px 'Bebas Neue'"].map(f => document.fonts.load(f)));
+  return D.placas ? D.placas.length : 1;
+}
+function ocultar() {
+  for (const s of ['#rebobina', '#gol', '#cierre', '#placa', '#titulo', '#num', '#kicker', '#sub']) $(s).style.display = 'none';
+  $('#destello').style.opacity = 0;
+  marcas.clearRect(0, 0, W, H);
+}
+const entra = (el, t, en, de = 30, dur = .3) => { const p = eOut((t - en) / dur); el.style.transform = `translateY(${(1 - p) * de}px)`; el.style.opacity = clamp((t - en) / .1); };
+
+let fraseActual = -1;
+function subtitulos(t) {
+  const el = $('#sub');
+  const i = D.frases.findIndex(q => t >= q.en - .05 && t < q.fin);
+  if (i < 0) { el.style.display = 'none'; return; }
+  const q = D.frases[i];
+  el.style.display = '';
+  el.className = q.grande ? 'grande' : '';
+  if (fraseActual !== i) {
+    el.innerHTML = q.palabras.map(p => `<b>${p.w}</b>`).join(' ');
+    fraseActual = i;
+  }
+  [...el.children].forEach((s, k) => { const p = q.palabras[k]; s.style.fontWeight = ''; s.className = t >= p.t && t < p.t + Math.max(p.d, .18) ? 'ya' : ''; s.style.color = t >= p.t ? '' : 'rgba(247,242,228,.34)'; });
+}
+
+async function mostrar(n, t, o = {}) {
+  ocultar();
+  if (D.formato === 'post') return placa(n);
+  const T = D.T, f = tablaTiempo(t), cam = camara(t, f), v = ventana(cam);
+  const fr = await cuadro(f);
+  const sacude = (en, dur, am) => t >= en && t < en + dur ? Math.sin((t - en) * 70) * am * (1 - (t - en) / dur) : 0;
+  const tx = sacude(T.c, .2, 12) + sacude(T.e, .2, 12) + sacude(T.gol, .25, 14) + sacude(T.fin, .2, 10);
+  pintarCuadro(cancha, fr, v, tx);
+  // ── Luz: sube en cada cuadro congelado y baja cuando la jugada vuelve a correr ──
+  const sube = (a, dur = .22) => eIO((t - a) / dur), baja = (a, dur = .35) => 1 - eIO((t - a) / dur);
+  const luz = t < T.c ? 0 : t < T.f ? Math.min(sube(T.c), 1) * (t > T.d + .9 && t < T.e ? .72 : 1) : t < T.fin ? baja(T.f) : sube(T.fin);
+  const pN = pie('nueve', f), pD = pie('defensor', f), pS = pie('siete', f);
+  const cuerpo = (p, alto = 22) => [p[0], p[1] - alto];
+  const focos = [];
+  const fPelota = t >= T.c && t < T.cNueve + .3 ? clamp(1 - (t - T.cNueve) / .3) : 0;
+  focos.push({ p: cuerpo(pN), r: 56, a: 1 });
+  if (fPelota > 0) focos.push({ p: D.pelota, r: 44, a: fPelota });
+  if (t >= T.d) focos.push({ p: cuerpo(pD), r: 50, a: clamp((t - T.d - .2) / .4) * (t < T.f ? 1 : baja(T.f)) });
+  if (t >= T.d + 1.2) focos.push({ p: cuerpo(pS), r: t >= T.e ? 92 : 60, a: clamp((t - T.d - 1.2) / .5) * (t < T.f ? 1 : baja(T.f)) });
+  apagar(fr, v, luz, focos);
+  if (t >= T.b && t < T.c) $('#rebobina').style.display = '';
+
+  // ── Marcas ──
+  const fEnd = D.fFin1, giro = t * .9;
+  if (t >= T.c) {
+    const apN = clamp((t - T.c - .05) / .25);
+    if (fPelota > 0) { anillo(v, [D.pelota[0], D.pelota[1] + 4], '#F7F2E4', 14, giro, fPelota * apN); etiqueta(v, D.pelota, 'LA PELOTA', '#F7F2E4', { dy: -90, a: fPelota * apN }); }
+    // Flechas: la trayectoria REAL que falta recorrer; atrás queda la estela de lo ya corrido
+    if (t >= T.d && t < T.f + .4) {
+      const dib = eOut((t - T.d - .05) / .9);
+      const off = t > T.f ? baja(T.f, .4) : 1;
+      trazo(v, f, 'nueve', Math.max(D.fC, f), fEnd, '#E6CF85', { prog: dib, punta: true, ancho: 10, a: off });
+      trazo(v, f, 'defensor', Math.max(D.fC, f), fEnd, '#e5484d', { prog: clamp((t - T.d - .35) / .9), punta: true, ancho: 8, a: off });
+      if (t >= T.d + 1.2) trazo(v, f, 'siete', Math.max(D.fC, f), fEnd, '#F7F2E4', { prog: clamp((t - T.d - 1.2) / .7), punta: true, ancho: 6, a: off * .85 });
+    }
+    if (t >= T.d) {
+      trazo(v, f, 'nueve', Math.max(0, D.fC - 60), f, '#E6CF85', { cola: true, ancho: 8 });
+      trazo(v, f, 'defensor', Math.max(0, D.fC - 60), f, '#e5484d', { cola: true, ancho: 6, a: t < T.f ? clamp((t - T.d - .3) / .4) : baja(T.f) });
+    }
+    if (t >= T.e && t < T.f + .4) pasillo(v, pS, D.arco, 1, sube(T.e + .1, .45) * (t > T.f ? baja(T.f, .4) : 1));
+    if (t >= T.d && t < T.f + .3) hilo(v, cuerpo(pN, 10), cuerpo(pD, 10), clamp((t - T.d - .8) / .4) * (t > T.f ? baja(T.f, .3) : 1));
+    if (t >= T.d && t < T.f + .4) anillo(v, pD, '#e5484d', 20, -giro, clamp((t - T.d - .2) / .3) * (t > T.f ? baja(T.f, .4) : 1));
+    if (t >= T.d + 1.2 && t < T.f + .4) anillo(v, pS, '#F7F2E4', 20, giro, clamp((t - T.d - 1.2) / .3) * (t > T.f ? baja(T.f, .4) : 1));
+    anillo(v, pN, '#E6CF85', 24, giro, apN);
+    // Etiquetas (gamertag en pantalla; en la voz van por el número)
+    // Al costado: abajo está el subtítulo y arriba el defensor
+    etiqueta(v, pN, D.nueve, '#E6CF85', { dy: t >= T.fin ? 96 : -34, dx: t >= T.fin ? 0 : -215, a: clamp((t - T.cNueve) / .25) });
+    if (t >= T.d + .25 && t < T.f + .3) etiqueta(v, pD, 'UN DEFENSOR', '#e5484d', { dy: -92, dx: -150, oscuro: false, a: clamp((t - T.d - .3) / .25) * (t > T.f ? baja(T.f, .3) : 1) });
+    if (t >= T.d + 1.2 && t < T.f + .3) etiqueta(v, pS, D.siete, '#F7F2E4', { dy: -128, dx: 30, a: clamp((t - T.d - 1.3) / .25) * (t > T.f ? baja(T.f, .3) : 1) });
+  }
+  // ── Efectos ──
+  $('#destello').style.opacity = Math.max(t >= T.gol ? clamp(1 - (t - T.gol) / .16) * .34 : 0, t >= T.c ? clamp(1 - (t - T.c) / .1) * .25 : 0, t >= T.a2 && t < T.a2 + .2 ? clamp(1 - (t - T.a2) / .16) * .34 : 0);
+  if (o.sinTexto) return;
+  $('#kicker').style.display = t < T.g ? '' : 'none'; $('#kicker').style.opacity = clamp(t / .15);
+  if (t >= T.gol + .05 && t < T.fin) { const g = $('#gol'); g.style.display = ''; entra(g, t, T.gol + .05); }
+  subtitulos(t);
+  if (t >= T.g) {
+    const ci = $('#cierre'); ci.style.display = '';
+    const dentro = t - T.g;
+    entra(ci.children[0], dentro, .05); entra(ci.children[1], dentro, .4); entra(ci.children[2], dentro, .6, 20);
+    $('#sub').style.display = 'none';
+  }
+}
+
+// ── Carrusel: la misma jugada, con las mismas marcas, en placas ──
+async function placa(n) {
+  const q = D.placas[n], f = q.f, v = ventana({ cx: q.cx, cy: q.cy, s: q.s }), fr = await cuadro(f);
+  pintarCuadro(cancha, fr, v);
+  const pN = pie('nueve', f), pD = pie('defensor', f), pS = pie('siete', f), cuerpo = (p, a = 22) => [p[0], p[1] - a];
+  const focos = [{ p: cuerpo(pN), r: 56, a: 1 }];
+  if (q.pelota) focos.push({ p: D.pelota, r: 46, a: 1 });
+  if (q.defensor) focos.push({ p: cuerpo(pD), r: 50, a: 1 });
+  if (q.siete) focos.push({ p: cuerpo(pS), r: 92, a: 1 });
+  apagar(fr, v, 1, focos);
+  if (q.pelota) { anillo(v, [D.pelota[0], D.pelota[1] + 4], '#F7F2E4', 14, 0); etiqueta(v, D.pelota, 'LA PELOTA', '#F7F2E4', { dy: -88 }); }
+  if (q.flechas) {
+    trazo(v, f, 'nueve', f, q.flechas, '#E6CF85', { punta: true, ancho: 8 });
+    trazo(v, f, 'defensor', f, q.flechas, '#e5484d', { punta: true, ancho: 7 });
+  }
+  if (q.estela) {
+    trazo(v, f, 'nueve', D.fC, f, '#E6CF85', { cola: true, ancho: 7 });
+    trazo(v, f, 'defensor', D.fC, f, '#e5484d', { cola: true, ancho: 6 });
+  }
+  if (q.pasillo) pasillo(v, pS, D.arco, 1, 1);
+  if (q.defensor) { hilo(v, cuerpo(pN, 10), cuerpo(pD, 10), 1); anillo(v, pD, '#e5484d', 20, 0); etiqueta(v, pD, 'UN DEFENSOR', '#e5484d', { dy: -80, dx: -110, oscuro: false }); }
+  if (q.siete) { anillo(v, pS, '#F7F2E4', 20, 0); etiqueta(v, pS, D.siete, '#F7F2E4', { dy: -125, dx: 20 }); }
+  anillo(v, pN, '#E6CF85', 24, 0);
+  etiqueta(v, pN, D.nueve, '#E6CF85', { dy: q.dyNueve || -90, dx: q.dxNueve || 0 });
+  $('#titulo').style.display = ''; $('#num').style.display = ''; $('#num').textContent = `${n + 1}/${D.placas.length}`;
+  const pl = $('#placa'); pl.style.display = '';
+  pl.children[1].innerHTML = q.a; pl.children[2].innerHTML = q.b;
+  pl.children[1].style.display = q.a ? '' : 'none';
+  $('#esc2').style.display = q.escudo ? '' : 'none';
+}
+</script>
+</body>
+</html>

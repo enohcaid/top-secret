@@ -93,6 +93,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [reference_pizarra](reference_pizarra.md) — Pizarra en vivo (topsecret.ar/pizarra): estado en plantel/pizarra*, sin login, límites de escritura y qué hacer cuando cambia el plantel
 - [reference_camara_celular](reference_camara_celular.md) — Anuncios gigantes imposibles "filmados con el celular": qué pedirle a ChatGPT y a Canva, y qué poner por código encima (mano, foco, lente, ruido, sonido de ciudad)
 - [reference_borrar_pelota](reference_borrar_pelota.md) — Quitar la pelota de un cuadro real del vivo sin IA: qué más la delata (sombra, etiqueta, marca amarilla), de dónde sale el pasto y cómo tapar el HUD sin barras
+- [reference_marcas_sobre_video](reference_marcas_sobre_video.md) — Dibujos que siguen a los jugadores sobre video real, estilo análisis de TV: seguimiento de cámara y jugadores sin opencv (lib/seguir.py) y cómo verificarlo
 - [reference_capas_personajes](reference_capas_personajes.md) — Separar una foto de ChatGPT en capas sin Canva (rembg + fondo reconstruido + texto entre capas), personajes inventados y cuánto dura la voz
 - [reference_tele_en_escena](reference_tele_en_escena.md) — Video dentro del video: una jugada en la tele de una foto de ChatGPT, fallas de imagen por código y trampas de Canva
 - [reference_renders_folder](reference_renders_folder.md) — Estructura y propósito de las carpetas en Renders/ — qué borrar y qué conservar
