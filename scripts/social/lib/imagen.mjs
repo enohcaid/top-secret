@@ -23,6 +23,8 @@ async function pagina() {
   const ctx = browser.contexts()[0];
   const page = ctx.pages().find(p => p.url().includes('chatgpt.com')) || await ctx.newPage();
   page.setDefaultTimeout(120000);
+  // En segundo plano Chrome no termina de montar la imagen generada y el detector espera los 25 min (2026-11-06)
+  await page.bringToFront();
   sesion = { browser, page };
   return page;
 }

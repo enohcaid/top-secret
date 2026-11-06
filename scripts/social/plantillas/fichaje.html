@@ -1,0 +1,128 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=block" rel="stylesheet">
+<style>html,body{margin:0;background:#000}#lienzo{display:block;width:1080px;height:1920px}</style></head>
+<body><canvas id="lienzo" width="1080" height="1920"></canvas>
+<script>
+// Anuncio de un fichaje: la camiseta nueva en el vestuario, de golpe el dorsal, la salida a la cancha y el nombre.
+// Cortes al pulso. Cada corte: destello dorado, barrido de luz y temblor. Todo es función de t.
+const W = 1080, H = 1920, ORO = '#e9c67a';
+const c = document.getElementById('lienzo'), x = c.getContext('2d');
+let D, ruido = [], img = {}, polvo = [];
+const sat = v => Math.max(0, Math.min(1, v));
+const sale = v => 1 - Math.pow(1 - sat(v), 3);
+const golpeE = v => { v = sat(v); return 1 - Math.pow(1 - v, 5); };
+const carga = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+function azar(s) { return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
+async function pintar(d) {
+  D = d;
+  await Promise.all(["700 190px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "500 30px 'Barlow Condensed'"].map(f => document.fonts.load(f)));
+  await document.fonts.ready;
+  for (let k = 0; k < 3; k++) {
+    const n = document.createElement('canvas'); n.width = 540; n.height = 960;
+    const g = n.getContext('2d'), id = g.createImageData(540, 960), q = azar(13 + k);
+    for (let i = 0; i < id.data.length; i += 4) { const v = q() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+    g.putImageData(id, 0, 0); ruido.push(n);
+  }
+  const r = azar(99); polvo = Array.from({ length: 70 }, () => ({ x: r() * W, y: r() * H, v: 12 + r() * 40, t: 1 + r() * 3.2, f: r() * 6 }));
+  img.pose = await carga(d.pose); img.escudo = await carga(d.escudo);
+  img.foto = await carga(d.foto);
+  return 1;
+}
+let cache = {};
+async function cuadro(id, t) {
+  const k = D.clips[id], n = Math.max(1, Math.min(k.n, Math.floor(t * 30) + 1)), src = `${k.dir}/${String(n).padStart(4, '0')}.jpg`;
+  if (cache[id]?.src !== src) cache[id] = { src, im: await carga(src) };
+  return cache[id].im;
+}
+function llena(im, e = 1, fx = .5, fy = .5, dx = 0, dy = 0) {
+  if (!im) return;
+  const k = Math.max(W / im.naturalWidth, H / im.naturalHeight) * e, w = im.naturalWidth * k, h = im.naturalHeight * k;
+  x.drawImage(im, (W - w) * fx + dx, (H - h) * fy + dy, w, h);
+}
+function texto(s, px, y, { peso = 700, color = '#fff', alfa = 1, sep = 0, ancho = 0, trazo = 0, xc = W / 2, esc = 1 } = {}) {
+  if (alfa <= 0) return;
+  x.save(); x.globalAlpha = alfa; x.fillStyle = color; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = `${peso} ${px}px 'Barlow Condensed'`; x.letterSpacing = `${sep}px`;
+  if (ancho) { const m = x.measureText(s).width; if (m > ancho) { px = px * ancho / m; x.font = `${peso} ${px}px 'Barlow Condensed'`; } }
+  x.shadowColor = 'rgba(0,0,0,.85)'; x.shadowBlur = 28;
+  x.translate(xc + sep / 2, y); x.scale(esc, esc);
+  if (trazo) { x.strokeStyle = color; x.lineWidth = trazo; x.strokeText(s, 0, 0); } else x.fillText(s, 0, 0);
+  x.restore();
+}
+function degradado(a, b, alfa, invertido = false) {
+  const g = x.createLinearGradient(0, a, 0, b); g.addColorStop(invertido ? 1 : 0, 'rgba(4,3,2,0)'); g.addColorStop(invertido ? 0 : 1, `rgba(4,3,2,${alfa})`);
+  x.globalAlpha = 1; x.fillStyle = g; x.fillRect(0, a, W, b - a);
+}
+function polvillo(t, alfa) {
+  x.save(); x.globalCompositeOperation = 'screen';
+  for (const p of polvo) { const y = (p.y - t * p.v + H) % H, b = .35 + .65 * Math.abs(Math.sin(t * .9 + p.f)); x.globalAlpha = alfa * b * .55; x.fillStyle = '#ffd48a'; x.beginPath(); x.arc((p.x + Math.sin(t * .5 + p.f) * 22 + W) % W, y, p.t, 0, 7); x.fill(); }
+  x.restore();
+}
+// El corte: destello, barrido diagonal de luz dorada
+function corte(u) {
+  if (u < 0 || u > .55) return;
+  x.save(); x.globalCompositeOperation = 'screen';
+  const f = Math.exp(-u * 9); x.fillStyle = `rgba(255,216,150,${f * .85})`; x.fillRect(0, 0, W, H);
+  const p = sale(u / .42), bx = -500 + p * (W + 1000), g = x.createLinearGradient(bx - 260, 0, bx + 260, 0);
+  g.addColorStop(0, 'rgba(255,190,90,0)'); g.addColorStop(.5, `rgba(255,214,140,${.7 * (1 - p * .5)})`); g.addColorStop(1, 'rgba(255,190,90,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H); x.restore();
+}
+const tiembla = (u, f = 14) => u < 0 ? [0, 0] : [Math.sin(u * 93) * f * Math.exp(-u * 8), Math.cos(u * 71) * f * Math.exp(-u * 8)];
+
+async function mostrar(n, t, o = {}) {
+  const T = D.T;
+  x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.fillStyle = '#040302'; x.fillRect(0, 0, W, H);
+  if (t < T.golpe34 + T.dorsal) {
+    // 1. La camiseta nueva. En el golpe, de cerca, el 34
+    const hit = t - T.golpe34, im = await cuadro('espalda', t * .8);
+    const z = hit < 0 ? 1.02 + t * .012 : 1.75 + .1 * sale(hit / T.dorsal) + .22 * Math.exp(-hit * 6), [dx, dy] = tiembla(hit);
+    llena(im, z, .5, hit < 0 ? .5 : .23, dx, dy);
+    polvillo(t, hit < 0 ? .8 : .5);
+    degradado(0, 620, .75, true);
+    const a = sat((t - .35) / .4) * (1 - sat((t - T.golpe34 + .25) / .25));
+    texto('El vestuario tiene', 86, 320, { alfa: a, ancho: 960 });
+    texto('una camiseta nueva.', 86, 420, { alfa: sat((t - 1) / .4) * (1 - sat((t - T.golpe34 + .25) / .25)), color: ORO, ancho: 960 });
+    corte(hit);
+  } else if (t < T.pase) {
+    // 2. Sale a la cancha
+    const u = t - T.golpe34 - T.dorsal, [dx, dy] = tiembla(u);
+    llena(await cuadro('cancha', u * .9), 1.03 + u * .01, .5, .5, dx, dy);
+    polvillo(t, .6);
+    degradado(1220, 1700, .88);
+    texto('MEDIOCAMPISTA', 124, 1470, { alfa: sat(u / .25), ancho: 960, sep: 1, esc: 1 + .12 * Math.exp(-u * 7) });
+    texto('Lleva el 34.', 66, 1548, { peso: 600, color: ORO, alfa: sat((u - .45) / .3) });
+    corte(u);
+  } else if (t < T.pose) {
+    // 3. La cara y el nombre
+    const u = t - T.pase, [dx, dy] = tiembla(u);
+    llena(await cuadro('retrato', u), 1.04 + u * .012, .5, .42, dx, dy);
+    polvillo(t, .55);
+    degradado(1180, 1680, .9);
+    const g = golpeE((u - T.beat) / .28);
+    texto('NUEVO FICHAJE', 56, 1320, { peso: 600, sep: 8, color: ORO, alfa: sat(u / .3) });
+    texto(D.gt, 150, 1450, { ancho: 980, alfa: g, esc: 1.45 - .45 * g });
+    corte(u); corte(u - T.beat);
+  } else {
+    // 4. La pose propia, con su número detrás
+    const u = t - T.pose, [dx, dy] = tiembla(u);
+    const r = x.createRadialGradient(W / 2, 760, 80, W / 2, 760, 980); r.addColorStop(0, '#5a3f12'); r.addColorStop(.42, '#1c1408'); r.addColorStop(1, '#040302'); x.fillStyle = r; x.fillRect(0, 0, W, H);
+    x.save(); x.translate(W / 2, 760); x.rotate(u * .05); x.globalCompositeOperation = 'screen';
+    for (let i = 0; i < 12; i++) { x.rotate(Math.PI / 6); const g = x.createLinearGradient(0, 0, 0, -1300); g.addColorStop(0, 'rgba(255,205,120,.16)'); g.addColorStop(1, 'rgba(255,205,120,0)'); x.fillStyle = g; x.beginPath(); x.moveTo(-26, 0); x.lineTo(26, 0); x.lineTo(120, -1300); x.lineTo(-120, -1300); x.fill(); }
+    x.restore();
+    texto('34', 1120, 1120, { color: ORO, alfa: .2 * sat(u / .3), trazo: 5 });
+    polvillo(t, .9);
+    if (img.pose) { const a = 1190, k = a / img.pose.naturalHeight, w = img.pose.naturalWidth * k, e = 1.06 - .06 * sale(u / .5), mw = Math.min(1, 1040 / w); x.drawImage(img.pose, (W - w * mw * e) / 2 + dx - 30, 180 + (a - a * mw * e) + dy, w * mw * e, a * mw * e); }
+    degradado(1200, 1520, .92);
+    x.fillStyle = 'rgba(4,3,2,.92)'; x.fillRect(0, 1520, W, H - 1520);
+    texto(D.gt, 140, 1450, { ancho: 980, alfa: sat(u / .2) });
+    texto('Bienvenido a Top Secret.', 62, 1538, { peso: 600, color: ORO, alfa: sat((u - .5) / .3) });
+    const a = sat((u - .9) / .3); if (a > 0 && img.escudo) { x.globalAlpha = a; x.drawImage(img.escudo, W / 2 - 34, 1570, 68, 68 * img.escudo.naturalHeight / img.escudo.naturalWidth); x.globalAlpha = 1; }
+    corte(u);
+  }
+  x.save(); x.globalCompositeOperation = 'overlay'; x.globalAlpha = .09;
+  x.drawImage(ruido[Math.floor(t * 24) % 3], -(Math.floor(t * 24) * 37 % 40), 0, W + 40, H); x.restore();
+  const f = sat((t - T.fin + .3) / .3); if (f > 0) { x.fillStyle = `rgba(0,0,0,${f})`; x.fillRect(0, 0, W, H); }
+}
+</script></body></html>

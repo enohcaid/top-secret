@@ -131,6 +131,8 @@ try {
   const ESPERA_MIN = +(process.env.CANVA_ESPERA_MIN || 5), REINTENTOS = +(process.env.CANVA_REINTENTOS || 6);
   let src = null;
   for (let intento = 1; intento <= REINTENTOS && !src; intento++) {
+    // En segundo plano la cuenta regresiva de Canva se congela y el botón nunca se habilita (2026-11-06)
+    await page.bringToFront();
     const btn = page.locator('button:visible', { hasText: 'Generar video de 5 segundos' }).first();
     if (await btn.isEnabled().catch(() => false)) await btn.click();
     log('generando', PROMPT ? '(personalizado)' : '(inteligente)', intento > 1 ? `— intento ${intento}` : '');
