@@ -114,6 +114,15 @@ async function subir(t, { privado, deBorrador = false }) {
   let miniatura = true;
   try { await p.locator('input#file-loader').first().setInputFiles(base + '-mini.jpg', { timeout: 15000 }); await espera(15000); }
   catch (e) { miniatura = false; console.log('  miniatura no subida:', e.message.split('\n')[0]); }
+  // Tope diario de miniaturas propias: YouTube pide una verificación que es del dueño del canal. Se sigue sin miniatura
+  // y queda miniatura:false en el registro, para ponerla después con el comando miniaturas.
+  const verificacion = p.locator('tp-yt-paper-dialog:visible, ytcp-dialog:visible, [role=dialog]:visible').filter({ hasText: 'One-time verification needed' }).last();
+  if (await verificacion.count()) {
+    await verificacion.getByRole('button', { name: 'Cancel' }).click();
+    await espera(1500);
+    miniatura = false;
+    console.log('  miniatura pendiente: tope diario de YouTube');
+  }
   // playlist del disco
   const dlg = p.locator('ytcp-uploads-dialog');
   await dlg.locator('ytcp-video-metadata-playlists ytcp-dropdown-trigger, ytcp-dropdown-trigger:visible').filter({ hasText: /^\s*(Playlists\s*)?Select\s*$/ }).first().click();
@@ -157,19 +166,21 @@ async function subir(t, { privado, deBorrador = false }) {
   console.log(`OK ${titulo} → ${url}`);
 }
 
-// Pone la miniatura propia en videos ya publicados (en la subida a veces queda el cuadro automático)
+// Pone las miniaturas pendientes (miniatura:false en el registro) en videos ya publicados. Frena si YouTube llegó al tope diario.
 async function miniaturas() {
   const reg = leerReg();
-  for (const [slug, v] of Object.entries(reg.videos).sort((a, c) => a[1].pista - c[1].pista)) {
+  for (const [slug, v] of Object.entries(reg.videos).filter(([, v]) => !v.miniatura).sort((a, c) => a[1].volumen - c[1].volumen || a[1].pista - c[1].pista)) {
     const id = /youtu\.be\/([\w-]{11})/.exec(v.url)[1];
     const jpg = path.join(OUT, `vol-${v.volumen}`, `${String(v.pista).padStart(2, '0')}-${slug}-mini.jpg`);
     await p.goto(`https://studio.youtube.com/video/${id}/edit`, { waitUntil: 'domcontentloaded' });
     await p.waitForSelector('#textbox'); await espera(4000);
     await p.locator('input#file-loader').first().setInputFiles(jpg, { timeout: 15000 });
     await espera(12000);
+    if (await p.getByText('One-time verification needed').count()) { console.log('tope diario de miniaturas: quedan pendientes desde', slug); return; }
     const guardar = p.locator('ytcp-button#save:visible, button:visible', { hasText: /^\s*Save\s*$/ }).first();
     await guardar.click(); await espera(6000);
     await shot(`mini-${slug}`);
+    v.miniatura = true; guardarReg(reg);
     console.log('miniatura', slug);
   }
 }
@@ -213,7 +224,7 @@ try {
   else console.log('uso: playlists | subir <slug>…|--todos [--privado] | hacer-publico <slug>');
 } catch (e) {
   await shot('error');
-  console.error('ERROR:', e.message.split('\n')[0]);
+  console.error('ERROR:', e.message.split('\n').slice(0, 3).join(' | '));
   process.exitCode = 1;
 } finally {
   await p.close().catch(() => {});

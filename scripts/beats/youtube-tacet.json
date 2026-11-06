@@ -76,6 +76,96 @@
       "visibilidad": "public",
       "miniatura": true,
       "ai": "yes"
+    },
+    "silent-room": {
+      "url": "https://youtu.be/tfOfZ0VGLAQ",
+      "titulo": "Silent Room (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 9,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "waiting-my-turn": {
+      "url": "https://youtu.be/L_DqmYv8XNc",
+      "titulo": "Waiting My Turn (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 10,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "no-sound-came-out": {
+      "url": "https://youtu.be/lzC5n0-vLI8",
+      "titulo": "No Sound Came Out (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 11,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "after-everyone-left": {
+      "url": "https://youtu.be/HsNWRT0QmG4",
+      "titulo": "After Everyone Left (Lyrics) - Tacet Sin",
+      "volumen": 1,
+      "pista": 12,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "coming-back": {
+      "url": "https://youtu.be/pp0eAWnFW28",
+      "titulo": "Coming Back (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 1,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "ten-steps": {
+      "url": "https://youtu.be/DrNegAUVH0A",
+      "titulo": "Ten Steps (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 2,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "first-time": {
+      "url": "https://youtu.be/gyyyYCiazW0",
+      "titulo": "First Time (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 3,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "so-close": {
+      "url": "https://youtu.be/Hq1kzfWlvuE",
+      "titulo": "So Close (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 4,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "rain": {
+      "url": "https://youtu.be/CV2Nb8IG84I",
+      "titulo": "Rain (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 5,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
+    },
+    "mud": {
+      "url": "https://youtu.be/fDq7k__Uuy8",
+      "titulo": "Mud (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 6,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes"
     }
   }
 }
