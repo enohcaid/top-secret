@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "Los 6 compañeros": presentación de reparto de película. La foto se abre en capas (fondo / nombre / personaje
+     recortado), el nombre entra de golpe ENTRE las capas y en el remate el cuadro se congela con contorno dorado.
+     Escenas: 0 gancho · 1..6 personajes · 7 cierre. pintar(D, 'story'|'post') / mostrar(n, t) determinístico;
+     en 'post' (carrusel) mostrar(n, 99) deja el estado final, sin transiciones. Franja de arriba libre: rótulo del tema. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070605;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4;--text2:rgba(247,242,228,.72)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+.story #lienzo{width:1080px;height:1920px}
+.post #lienzo{width:1080px;height:1350px}
+.esc{position:absolute;inset:0;display:none;overflow:hidden;will-change:transform}
+.esc.ver{display:block}
+
+/* ── Capas del personaje ── */
+.capa{position:absolute;left:0;width:1080px;height:1920px;object-fit:cover;transform-origin:50% 45%}
+.velo{position:absolute;inset:0;pointer-events:none}
+.velo.abajo{background:linear-gradient(transparent 60%,rgba(5,4,3,.74) 71%,rgba(5,4,3,.96) 100%)}
+.velo.oro{background:#C9A84C;mix-blend-mode:color;opacity:0}
+.nombre{position:absolute;left:0;right:0;text-align:center;font-family:'Bebas Neue';line-height:.84;color:var(--gold2);text-shadow:0 10px 50px rgba(0,0,0,.65);transform-origin:50% 60%;will-change:transform,filter}
+.nombre small{display:block;font:800 62px/1 'Barlow Condensed';letter-spacing:.3em;margin-bottom:8px;margin-right:-.3em;color:var(--text);text-transform:uppercase}
+.credito{position:absolute;left:0;right:0;text-align:center;font:800 32px/1 'Barlow Condensed';letter-spacing:.34em;text-transform:uppercase;color:var(--text);text-shadow:0 2px 14px #000}
+.numero{color:var(--gold)}
+.texto{position:absolute;left:64px;right:64px}
+.rasgo{font:700 62px/1.12 Barlow;text-shadow:0 3px 22px #000}
+.rasgo span,.remate span{display:inline-block;margin-right:.26em;will-change:transform}
+.remate{margin-top:24px;font:400 112px/.94 'Bebas Neue';color:var(--gold2);text-shadow:0 4px 26px #000}
+.sello{position:absolute;right:48px;bottom:44px;height:74px;opacity:.9}
+.pie{z-index:9;position:absolute;left:64px;right:64px;bottom:42px;display:flex;justify-content:space-between;align-items:center;font:800 26px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;color:var(--text2)}
+.pie img{height:62px}
+.pie b{color:var(--gold)}
+
+/* ── Gancho y cierre: el reparto completo ── */
+.fondo-reparto{position:absolute;inset:0;background:radial-gradient(90% 46% at 50% 72%,rgba(201,168,76,.26),transparent 70%),linear-gradient(#050403,#0c0a06)}
+.fig{position:absolute;bottom:0;transform-origin:50% 100%;will-change:transform,filter}
+.frase{position:absolute;left:50px;right:50px;text-align:center;font:400 150px/.9 'Bebas Neue';will-change:transform,filter}
+.frase em{font-style:normal;color:var(--gold2)}
+.frase.chica{font:800 62px/1.1 'Barlow Condensed';letter-spacing:.04em}
+.frase.chica b{color:var(--gold2)}
+
+/* ── Texturas y transiciones ── */
+#grano{position:absolute;inset:-200px;opacity:.11;mix-blend-mode:overlay;pointer-events:none;z-index:40}
+#luz{position:absolute;top:-30%;bottom:-30%;width:16%;background:rgba(255,236,180,.5);filter:blur(60px);transform:skewX(-14deg);mix-blend-mode:screen;z-index:30;display:none;pointer-events:none}
+#fogon{position:absolute;inset:0;background:#FFF3CF;mix-blend-mode:screen;z-index:45;opacity:0;pointer-events:none}
+#velotr{position:absolute;inset:0;z-index:46;pointer-events:none}
+#velotr i{position:absolute;display:block}
+.chispa{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--gold2);filter:blur(1px);will-change:transform,opacity}
+</style>
+</head>
+<body>
+<div id="lienzo"></div>
+<script>
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const fase = (t, a, d) => clamp((t - a) / d);
+const eOut = p => 1 - Math.pow(1 - p, 3);
+const eExp = p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);
+const eBack = p => { const c = 1.9; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const azar = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const palabras = s => s.trim().split(/\s+/).map(w => `<span>${w}</span>`).join('');
+
+let D, F, ESC = [], ALTO = 1920;
+const TRANS = ['barrido', 'franjas', 'zoom', 'glitch', 'tajo', 'fogonazo', 'franjas'];   // la del corte n → n+1
+const DT = 0.26;
+
+function figuras(lista, disp) {
+  return lista.map((r, i) => {
+    const d = disp[i];
+    return `<img class="fig" data-i="${i}" src="${r.tight}" style="height:${d.h}px;left:${d.x}px;z-index:${d.z};bottom:${d.b || 0}px">`;
+  }).join('');
+}
+
+function pintar(datos, formato) {
+  D = datos; F = formato || 'story'; ALTO = F === 'post' ? 1350 : 1920;
+  document.body.className = F;
+  const L = document.getElementById('lienzo');
+  const post = F === 'post';
+  const total = D.reparto.length + 2;
+  const pie = i => post ? `<div class="velo" style="z-index:8;background:linear-gradient(transparent 86%,rgba(5,4,3,.92))"></div><div class="pie"><span>Top Secret FC</span><span><b>${String(i + 1).padStart(2, '0')}</b> / ${String(total).padStart(2, '0')}</span></div>` : '';
+  let h = '';
+
+  // Gancho (en el carrusel: portada)
+  h += `<section class="esc" data-tipo="gancho"><div class="fondo-reparto"></div>
+    <div class="grupo">${figuras(D.reparto, post ? D.dispPost : D.disp)}</div>
+    <div class="velo" style="background:linear-gradient(rgba(5,4,3,.92) ${post ? 30 : 34}%,transparent ${post ? 62 : 58}%)"></div>
+    ${post
+      ? `<div class="frase" style="top:96px;font-size:172px"><em>Los 6</em> compañeros</div>
+         <div class="frase chica" style="top:424px">que tenés en Clubs Pro.<br>Si no encontrás al tuyo, <b>sos vos.</b></div>`
+      : `<div class="frase chica f1" style="top:240px">En tu equipo de Clubs Pro</div>
+         <div class="frase f2" style="top:326px;font-size:176px">hay uno de<br>estos <em>seis</em></div>
+         <div class="frase chica f3" style="top:240px">Y si no lo encontrás,</div>
+         <div class="frase f4" style="top:310px;font-size:330px"><em>sos vos</em></div>`}
+    ${pie(0)}</section>`;
+
+  // Un personaje por escena
+  D.reparto.forEach((r, i) => {
+    const y = post ? r.yPost : r.y;
+    h += `<section class="esc" data-tipo="personaje" data-i="${i}">
+      <img class="capa fondo" src="${r.fondo}" style="top:${y}px">
+      <div class="velo oro"></div>
+      <div class="credito" style="top:${post ? 66 : 214}px">${r.credito} <span class="numero">· ${i + 1}/6</span></div>
+      <div class="nombre" style="top:${post ? 118 : 268}px;font-size:${r.tam}px;padding-left:${r.sangria || 0}px">${r.nombre[0] ? `<small style="margin-bottom:${r.aireNombre || 8}px">${r.nombre[0]}</small>` : ''}${r.nombre[1]}</div>
+      <img class="capa recorte" src="${r.recorte}" style="top:${y}px">
+      <div class="velo abajo"></div>
+      <div class="texto" style="bottom:${post ? 118 : 300}px">
+        <div class="rasgo">${palabras(r.rasgo)}</div>
+        <div class="remate">${palabras(r.remate)}</div>
+      </div>
+      ${pie(i + 1)}</section>`;
+  });
+
+  // Cierre
+  h += `<section class="esc" data-tipo="cierre"><div class="fondo-reparto"></div>
+    <div class="grupo">${figuras(D.reparto, post ? D.dispPost : D.disp)}</div>
+    <div class="velo" style="background:linear-gradient(rgba(5,4,3,.92) ${post ? 30 : 34}%,transparent ${post ? 60 : 56}%)"></div>
+    <div class="frase c1" style="top:${post ? 70 : 240}px;font-size:${post ? 190 : 250}px">¿Cuál sos <em>vos?</em></div>
+    <div class="frase chica c2" style="top:${post ? 430 : 730}px">Mandáselo al de tu equipo.</div>
+    ${post ? pie(total - 1) : `<img class="sello" src="${D.escudo}" style="left:50%;right:auto;bottom:330px;height:110px;margin-left:-50px">`}</section>`;
+
+  L.innerHTML = h + `<canvas id="grano" width="1480" height="2320"></canvas><div id="luz"></div><div id="fogon"></div><div id="velotr"></div>`;
+  ESC = [...L.querySelectorAll('.esc')];
+  // Chispas, delante de cada personaje
+  ESC.forEach((e, n) => {
+    if (e.dataset.tipo !== 'personaje') return;
+    for (let k = 0; k < 26; k++) { const c = document.createElement('div'); c.className = 'chispa'; c.dataset.k = n * 100 + k; e.appendChild(c); }
+  });
+  const c = document.getElementById('grano'), x = c.getContext('2d'), im = x.createImageData(c.width, c.height);
+  for (let i = 0; i < im.data.length; i += 4) { const v = azar(i * 0.37) * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+  x.putImageData(im, 0, 0);
+  return ESC.length;
+}
+
+function animarPersonaje(e, n, t) {
+  const r = D.reparto[+e.dataset.i], dur = D.tiempos[n].dur, T = D.tiempos[n];
+  const fondo = e.querySelector('.fondo'), rec = e.querySelector('.recorte'), nom = e.querySelector('.nombre');
+  const cred = e.querySelector('.credito'), oro = e.querySelector('.velo.oro'), abajo = e.querySelector('.velo.abajo');
+  const y0 = F === 'post' ? r.bajaPost : r.baja;
+  const tf = Math.min(t, T.remate);                // en el remate el cuadro se congela
+  const abre = eExp(fase(t, 0.12, 0.5));           // la foto se abre en capas
+  const conge = fase(t, T.remate, 0.12);
+  const deriva = tf / Math.max(dur, 1);
+  fondo.style.transform = `scale(${1.04 + 0.1 * deriva}) translate(${-14 * deriva}px,${-10 * abre}px)`;
+  fondo.style.filter = `blur(${abre * 15}px) brightness(${1 - abre * 0.36 + conge * 0.04}) saturate(${1 + abre * 0.2 - conge * 0.5})`;
+  oro.style.opacity = conge * 0.8;
+  rec.style.transform = `translateY(${y0 * abre}px) scale(${1 + abre * 0.07 + 0.045 * deriva + conge * 0.018}) translateX(${10 * deriva}px)`;
+  const g = 3 + conge * 3, oroC = `rgba(230,207,133,${conge})`;
+  rec.style.filter = conge > 0
+    ? `drop-shadow(${g}px 0 0 ${oroC}) drop-shadow(-${g}px 0 0 ${oroC}) drop-shadow(0 ${g}px 0 ${oroC}) drop-shadow(0 -${g}px 0 ${oroC}) contrast(1.1)`
+    : `drop-shadow(0 ${30 * abre}px ${50 * abre}px rgba(0,0,0,.7))`;
+  // Nombre: entra de golpe entre las dos capas, con temblor
+  const pN = fase(t, T.nombre, 0.2), golpe = fase(t, T.nombre + 0.14, 0.32);
+  const temblor = golpe > 0 && golpe < 1 ? (1 - golpe) * 16 : 0;
+  nom.style.opacity = pN > 0 ? 1 : 0;
+  nom.style.transform = `translate(${temblor * Math.sin(t * 90)}px,${temblor * Math.cos(t * 73)}px) scale(${2.5 - 1.5 * eOut(pN) + 0.035 * deriva})`;
+  nom.style.filter = `blur(${(1 - pN) * 22}px)`;
+  cred.style.opacity = fase(t, T.nombre + 0.15, 0.25);
+  cred.style.letterSpacing = `${0.34 + (1 - eOut(fase(t, T.nombre + 0.15, 0.6))) * 0.2}em`;
+  abajo.style.opacity = fase(t, T.rasgo - 0.3, 0.4);
+  e.querySelectorAll('.rasgo span').forEach((s, i) => {
+    const p = eOut(fase(t, T.rasgo + (T.pR?.[i] ?? i * 0.13), 0.2));
+    s.style.opacity = p; s.style.transform = `translateY(${(1 - p) * 34}px)`;
+  });
+  e.querySelectorAll('.remate span').forEach((s, i) => {
+    const p = fase(t, T.remate + (T.pM?.[i] ?? i * 0.13), 0.17);
+    s.style.opacity = p > 0 ? 1 : 0; s.style.transform = `scale(${p >= 1 ? 1 : 1.9 - 0.9 * eBack(p)})`;
+  });
+  // Chispas que suben por delante y se quedan quietas en el cuadro congelado
+  e.querySelectorAll('.chispa').forEach(c => {
+    const k = +c.dataset.k, vel = 50 + azar(k) * 110;
+    const y = ALTO + 40 - ((azar(k + 3) * ALTO + tf * vel) % (ALTO + 80)), x = azar(k + 7) * 1080 + Math.sin(tf * 1.4 + k) * 24;
+    const s = 0.5 + azar(k + 11) * 1.7;
+    c.style.transform = `translate(${x}px,${y}px) scale(${s})`;
+    c.style.opacity = (0.25 + azar(k + 13) * 0.6) * abre;
+  });
+}
+
+function colocarGrupo(e, cb) {
+  e.querySelectorAll('.fig').forEach(f => cb(f, +f.dataset.i));
+}
+
+function animarGancho(e, n, t) {
+  if (F === 'post') {
+    colocarGrupo(e, f => { f.style.transform = 'none'; f.style.filter = 'none'; f.style.opacity = 1; });
+    return;
+  }
+  const T = D.tiempos[0];
+  // Se encienden de a uno al decir "seis"; en "sos vos" se apagan y queda un solo foco sobre el del medio
+  colocarGrupo(e, (f, i) => {
+    const lit = eExp(fase(t, T.seis + i * 0.09, 0.14));
+    const apaga = fase(t, T.sos - 0.08, 0.12);
+    const destacado = i === D.destacado;
+    const luz = destacado ? lit : lit * (1 - apaga * 0.92);
+    f.style.filter = `brightness(${0.03 + luz * 0.97}) ${lit < 1 ? 'contrast(1.2)' : ''}`;
+    const entra = eOut(fase(t, 0.05 + i * 0.04, 0.5));
+    const zoomSos = destacado ? 1 + eExp(fase(t, T.sos, 0.3)) * 0.14 : 1;
+    f.style.transform = `translateY(${(1 - entra) * 120 + (1 - Math.min(lit, 1)) * 6}px) scale(${(1 + (t / T.dur) * 0.03) * zoomSos})`;
+  });
+  const vis = (el, a, b) => {
+    const p = eOut(fase(t, a, 0.2)), q = b == null ? 0 : fase(t, b, 0.1);
+    el.style.opacity = p * (1 - q);
+    el.style.transform = `scale(${1.5 - 0.5 * p}) translateY(${q * -30}px)`;
+    el.style.filter = `blur(${(1 - p) * 12}px)`;
+  };
+  vis(e.querySelector('.f1'), 0.02, T.si - 0.12);
+  vis(e.querySelector('.f2'), T.hay, T.si - 0.12);
+  vis(e.querySelector('.f3'), T.si, null);
+  const p4 = fase(t, T.sos, 0.16), g = fase(t, T.sos + 0.1, 0.3), f4 = e.querySelector('.f4');
+  f4.style.opacity = p4 > 0 ? 1 : 0;
+  f4.style.transform = `translate(${(g > 0 && g < 1 ? (1 - g) * 14 * Math.sin(t * 90) : 0)}px,0) scale(${2.4 - 1.4 * eOut(p4)})`;
+  f4.style.filter = `blur(${(1 - p4) * 20}px)`;
+}
+
+function animarCierre(e, n, t) {
+  const T = D.tiempos[n] || { dur: 99 };
+  colocarGrupo(e, (f, i) => {
+    const p = F === 'post' ? 1 : eOut(fase(t, 0.03 + i * 0.05, 0.5));
+    f.style.transform = `translateY(${(1 - p) * 300}px) scale(${1 + (F === 'post' ? 0 : t / T.dur * 0.035)})`;
+    f.style.opacity = p > 0 ? 1 : 0;
+    f.style.filter = 'none';
+  });
+  const c1 = e.querySelector('.c1'), c2 = e.querySelector('.c2'), s = e.querySelector('.sello');
+  const p1 = F === 'post' ? 1 : fase(t, 0.05, 0.2), p2 = F === 'post' ? 1 : eOut(fase(t, T.manda ?? 1.2, 0.3));
+  c1.style.opacity = p1 > 0 ? 1 : 0;
+  c1.style.transform = `scale(${2.1 - 1.1 * eOut(p1)})`;
+  c1.style.filter = `blur(${(1 - p1) * 18}px)`;
+  c2.style.opacity = p2;
+  c2.style.transform = `translateY(${(1 - p2) * 40}px)`;
+  if (s && F !== 'post') s.style.opacity = fase(t, (T.manda ?? 1.2) + 0.4, 0.4);
+}
+
+// Transición del corte: mitad de salida en la escena que termina, mitad de entrada en la que arranca.
+function transicion(e, n, t, dur) {
+  const V = document.getElementById('velotr'), fog = document.getElementById('fogon');
+  V.innerHTML = ''; fog.style.opacity = 0; e.style.transform = ''; e.style.filter = '';
+  const sale = t > dur - DT, entra = t < DT;
+  if (!sale && !entra) return;
+  const tipo = sale ? TRANS[n] : TRANS[n - 1];
+  if (!tipo) return;
+  const p = sale ? fase(t, dur - DT, DT) : 1 - fase(t, 0, DT);   // 0 = lejos del corte · 1 = en el corte
+  const q = p * p, s = sale ? 1 : -1;
+  if (tipo === 'barrido') { e.style.transform = `translateX(${-s * q * 760}px)`; e.style.filter = `blur(${q * 36}px)`; }
+  if (tipo === 'zoom') { e.style.transform = `scale(${sale ? 1 + q * 1.9 : 1 + q * 0.5})`; e.style.filter = `blur(${q * 30}px)`; fog.style.opacity = q * 0.9; }
+  if (tipo === 'fogonazo') { fog.style.opacity = q; e.style.filter = `brightness(${1 + q * 1.5})`; }
+  if (tipo === 'franjas') {
+    for (let i = 0; i < 8; i++) {
+      const b = document.createElement('i'), alt = ALTO / 8;
+      b.style.cssText = `top:${i * alt}px;height:${alt + 2}px;left:0;right:0;background:${i % 2 ? '#C9A84C' : '#070605'};transform-origin:${(i % 2) === (sale ? 0 : 1) ? 'left' : 'right'};transform:scaleX(${clamp(p * 1.25 - i * 0.025)})`;
+      V.appendChild(b);
+    }
+  }
+  if (tipo === 'tajo') {
+    const b = document.createElement('i'), m = 100 - p * 100;
+    b.style.cssText = `inset:0;background:#070605;clip-path:polygon(${sale ? `${m * 1.5 - 40}% 0,140% 0,140% 100%,${m * 1.5 - 70}% 100%` : `-40% 0,${140 - m * 1.5}% 0,${110 - m * 1.5}% 100%,-40% 100%`})`;
+    V.appendChild(b);
+    e.style.transform = `translateX(${-s * q * 180}px)`;
+  }
+  if (tipo === 'glitch') {
+    const f = Math.floor(t * 30);
+    e.style.transform = `translate(${(azar(f) - 0.5) * 120 * q}px,${(azar(f + 9) - 0.5) * 40 * q}px)`;
+    e.style.filter = `saturate(${1 + q * 2}) contrast(${1 + q * 0.7})`;
+    for (let i = 0; i < 14; i++) {
+      const b = document.createElement('i');
+      b.style.cssText = `top:${azar(f + i * 3) * ALTO}px;height:${12 + azar(f + i) * 90}px;left:${(azar(f + i * 5) - 0.5) * 300}px;width:${500 + azar(f + i * 7) * 900}px;background:${['#17e6ff', '#ff2a55', '#E6CF85'][i % 3]};mix-blend-mode:screen;opacity:${p}`;
+      V.appendChild(b);
+    }
+  }
+}
+
+function mostrar(n, t) {
+  ESC.forEach((e, i) => e.classList.toggle('ver', i === n));
+  const e = ESC[n], tipo = e.dataset.tipo;
+  if (tipo === 'gancho') animarGancho(e, n, t);
+  else if (tipo === 'personaje') animarPersonaje(e, n, t);
+  else animarCierre(e, n, t);
+  if (F !== 'post') transicion(e, n, t, D.tiempos[n].dur);
+  // Grano que cambia cada dos cuadros
+  const g = document.getElementById('grano'), f = Math.floor(t * 15) + n * 40;
+  g.style.transform = `translate(${-azar(f) * 190}px,${-azar(f + 1) * 190}px)`;
+  // Barrido de luz al entrar el nombre
+  const luz = document.getElementById('luz'), T = D.tiempos?.[n];
+  if (F !== 'post' && tipo === 'personaje' && t > T.nombre && t < T.nombre + 0.7) {
+    luz.style.display = 'block';
+    luz.style.left = `${-50 + fase(t, T.nombre, 0.7) * 170}%`;
+  } else luz.style.display = 'none';
+}
+</script>
+</body>
+</html>
