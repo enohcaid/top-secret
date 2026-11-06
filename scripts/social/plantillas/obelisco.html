@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "La camiseta gigante en el Obelisco": tomas imposibles que parecen filmadas con un celular desde la vereda.
+     Lo de celular va encima del clip y sale solo de t (determinístico): mano que tiembla + paso del que camina, foco que
+     busca al arrancar cada toma, exposición automática que respira, reflejo de lente que se mueve con la cámara, ruido
+     de sensor. Escenas: 0..N-1 tomas · N remate (negro + "Todavía no." + escudo). Franja de arriba libre: rótulo del tema. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+#cam{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform,filter}
+#clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#sol{position:absolute;width:900px;height:900px;margin:-450px 0 0 -450px;background:radial-gradient(closest-side,rgba(255,252,240,1) 0%,rgba(255,250,232,.96) 22%,rgba(255,238,200,.42) 40%,rgba(255,226,170,.12) 62%,transparent 82%);mix-blend-mode:screen;pointer-events:none}
+.fantasma{position:absolute;border-radius:50%;mix-blend-mode:screen;pointer-events:none}
+#vineta{position:absolute;inset:0;background:radial-gradient(82% 70% at 50% 50%,transparent 62%,rgba(0,0,0,.26) 100%);pointer-events:none}
+#grano{position:absolute;inset:0;width:100%;height:100%;opacity:.16;mix-blend-mode:overlay;pointer-events:none}
+/* Subtítulo de quien subió el video, no un título de marca */
+#gancho{position:absolute;left:70px;right:70px;text-align:center;font:800 76px/1.08 Barlow;letter-spacing:-.01em;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.9),0 0 30px rgba(0,0,0,.6);transform-origin:50% 50%}
+#tag{position:absolute;right:70px;font:800 54px/1 Barlow;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.9),0 0 24px rgba(0,0,0,.6)}
+#tag b{color:var(--gold2);font-weight:800}
+#remate{position:absolute;inset:0;display:none;background:#000;text-align:center}
+#r1,#r2{position:absolute;left:0;right:0;font-family:'Bebas Neue';will-change:transform,opacity}
+#r1{top:700px;font-size:190px;line-height:1;color:var(--text)}
+#r2{top:880px;font-size:118px;line-height:1;color:var(--gold2)}
+#esc{position:absolute;left:50%;top:1100px;height:230px;margin-left:-104px;will-change:transform,opacity}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="cam"><img id="clip"></div>
+  <div id="sol"></div><div id="f1" class="fantasma"></div><div id="f2" class="fantasma"></div>
+  <div id="vineta"></div>
+  <canvas id="grano" width="540" height="960"></canvas>
+  <div id="gancho"></div>
+  <div id="tag"></div>
+  <div id="remate"><div id="r1"></div><div id="r2"></div><img id="esc"></div>
+</div>
+<script>
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const $ = s => document.querySelector(s);
+let D;
+
+// Mano: sumas de senos de frecuencias que no se repiten + el paso del que camina. Misma t, mismo cuadro.
+function mano(t, s, fuerza) {
+  const o = (f, fase) => Math.sin(t * f + s * 7.13 + fase);
+  return {
+    x: fuerza * (9 * o(1.3, 0) + 5 * o(2.9, 1.1) + 2.2 * o(7.7, 2.3) + 1.1 * o(17.3, .4)),
+    y: fuerza * (8 * o(1.1, 3.1) + 4.5 * o(3.3, .7) + 2 * o(8.9, 4.1) + 5 * Math.abs(o(5.2, 1.7))),
+    r: fuerza * (.22 * o(.9, 5.2) + .1 * o(3.7, 2.1) + .04 * o(11.3, .2)),
+  };
+}
+
+function ruido(cuadro) {
+  const c = $('#grano'), x = c.getContext('2d'), im = x.createImageData(c.width, c.height);
+  let h = (cuadro * 2654435761) >>> 0 || 1;
+  for (let i = 0; i < im.data.length; i += 4) {
+    h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0;
+    const v = 128 + ((h & 255) - 128) * .9;
+    im.data[i] = v; im.data[i + 1] = v; im.data[i + 2] = v; im.data[i + 3] = 255;
+  }
+  x.putImageData(im, 0, 0);
+}
+
+const cuadroClip = (e, t) => e.clip ? `${e.clip.dir}/${String(Math.min(e.clip.n, 1 + (e.desde ?? 9) + Math.floor(t * 30 * (e.vel || 1)))).padStart(4, '0')}.jpg` : e.foto;
+
+function pintar(datos) {
+  D = datos;
+  $('#gancho').innerHTML = D.gancho.texto; $('#gancho').style.top = D.gancho.y + 'px';
+  $('#r1').textContent = D.remate[0]; $('#r2').textContent = D.remate[1];
+  $('#esc').src = D.escudo;
+  // Los fantasmas de la lente del celular: chicos, verdosos, opuestos al sol
+  Object.assign($('#f1').style, { width: '150px', height: '150px', background: 'radial-gradient(closest-side,rgba(150,255,190,.0) 55%,rgba(150,255,190,.14) 88%,transparent)' });
+  Object.assign($('#f2').style, { width: '62px', height: '62px', background: 'radial-gradient(closest-side,rgba(255,200,130,.20),transparent)' });
+  return D.tomas.length + 1;
+}
+
+async function mostrar(n, t) {
+  const fin = n >= D.tomas.length;
+  $('#remate').style.display = fin ? 'block' : 'none';
+  if (fin) {
+    const [a, b, c] = D.tiemposRemate;
+    const entra = (s, en, de) => { const p = eOut((t - en) / .32); s.style.opacity = clamp((t - en) / .16); s.style.transform = `translateY(${(1 - p) * de}px)`; };
+    entra($('#r1'), a, 26); entra($('#r2'), b, 22); entra($('#esc'), c, 16);
+    $('#gancho').style.display = 'none'; $('#tag').style.display = 'none';
+    $('#sol').style.display = 'none'; $('#f1').style.display = 'none'; $('#f2').style.display = 'none';
+    $('#grano').style.opacity = .1;
+    ruido(Math.round(t * 60) + 90000);
+    return;
+  }
+  const e = D.tomas[n], s = n + 1;
+  const clip = $('#clip'), src = cuadroClip(e, t);
+  if (clip.getAttribute('src') !== src) { clip.setAttribute('src', src); await clip.decode().catch(() => {}); }
+
+  const m = mano(t, s, e.fuerza ?? 1);
+  // Al arrancar la toma la cámara todavía se está acomodando: el encuadre llega de un costado y el foco busca
+  const lleg = 1 - eOut(t / .34);
+  const [z0, z1] = e.zoom || [1.07, 1.1];
+  const avance = clamp(t / e.dur);
+  const z = z0 + (z1 - z0) * (e.ease ? eOut(avance) : avance) + lleg * .025;
+  const off = e.desde0 || [(s % 2 ? 1 : -1) * 34, 22];
+  const foco = (e.sinFoco ? 0 : clamp((.2 - t) / .2) * 3) + (e.foco && t > e.foco[0] && t < e.foco[0] + .3 ? Math.sin((t - e.foco[0]) / .3 * Math.PI) * e.foco[1] : 0);
+  const expo = 1 + .022 * Math.sin(t * 1.9 + s) + .012 * Math.sin(t * 4.3 + s * 2) + clamp((.32 - t) / .32) * .16;
+  const cam = $('#cam');
+  cam.style.transformOrigin = e.origen || '50% 50%';
+  cam.style.transform = `translate(${m.x + lleg * off[0]}px,${m.y + lleg * off[1]}px) rotate(${m.r + (e.torcido || 0)}deg) scale(${z})`;
+  cam.style.filter = `brightness(${expo.toFixed(3)})${foco > .05 ? ` blur(${foco.toFixed(2)}px)` : ''}`;
+
+  // Reflejos: se mueven con la cámara; los fantasmas, al revés y más rápido
+  const hay = !!e.sol;
+  for (const id of ['#sol', '#f1', '#f2']) $(id).style.display = hay ? 'block' : 'none';
+  if (hay) {
+    const dx = m.x * 2.2, dy = m.y * 2.2, [sx, sy] = e.sol;
+    Object.assign($('#sol').style, { left: `${sx + dx}px`, top: `${sy + dy}px`, opacity: e.solFuerza ?? .7 });
+    const gx = 1080 - sx - dx * 2.6, gy = 1920 - sy - dy * 2.6;
+    Object.assign($('#f1').style, { left: `${gx * .62 + 205 - 75}px`, top: `${gy * .62 + 365 - 75}px`, opacity: .4 });
+    Object.assign($('#f2').style, { left: `${gx * .86 + 75 - 31}px`, top: `${gy * .86 + 134 - 31}px`, opacity: .5 });
+  }
+
+  $('#grano').style.opacity = e.noche ? .16 : .09;
+  ruido(Math.round(t * 60) + n * 1000);
+
+  const g = $('#gancho');
+  g.style.display = n === 0 && t < D.gancho.hasta ? 'block' : 'none';
+  g.style.opacity = clamp((D.gancho.hasta - t) / .12);
+  const tag = $('#tag');
+  tag.style.display = e.tag && t > .25 ? 'block' : 'none';
+  if (e.tag) { tag.innerHTML = e.tag; tag.style.top = (e.tagY || 1480) + 'px'; tag.style.opacity = clamp((t - .25) / .15); }
+}
+</script>
+</body>
+</html>
