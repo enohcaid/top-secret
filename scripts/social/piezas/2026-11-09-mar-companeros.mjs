@@ -13,6 +13,7 @@
 //     --cuadros         además, cuadros clave en fuentes/redes/viral/mar-companeros/cuadros, sin renderizar el video
 //     --sin-lote        renderiza todo pero no sube ni carga el lote
 //     --sin-render      reusa el video y las placas ya renderizados: sube y carga el lote
+//     --solo-placas     reusa el video, rehace las placas del carrusel: sube y carga el lote
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
@@ -51,7 +52,7 @@ Calidad de cine: luz dirigida y con carácter, textura real de piel y tela, gran
 SIN TEXTO en la imagen: ni títulos, ni carteles, ni marcadores, ni letras en ningún objeto, ni watermarks.`;
 
 const REPARTO = [
-  { id: 'megafono', credito: 'Protagonizada por', nombre: ['El','Megáfono'], tam: 245, sangria: 230, aireNombre: 40, baja: 135, yPost: -210, bajaPost: 175, rasgo: 'Pide la pelota a los gritos por audio.', remate: 'Cuando le llega, no hay más equipo.', voz: 'El Megáfono. Pide la pelota a los gritos por audio. Cuando le llega, no hay más equipo.', marcaRasgo: 'Pide', marcaRemate: 'Cuando',
+  { id: 'megafono', credito: 'Protagonizada por', nombre: ['El','Megáfono'], tam: 245, sangria: 230, aireNombre: 40, baja: 135, yPost: -210, bajaPost: 265, rasgo: 'Pide la pelota a los gritos por audio.', remate: 'Cuando le llega, no hay más equipo.', voz: 'El Megáfono. Pide la pelota a los gritos por audio. Cuando le llega, no hay más equipo.', marcaRasgo: 'Pide', marcaRemate: 'Cuando',
     escena: 'Cancha de fútbol de noche, llovizna fina que brilla a contraluz. Un flaco de unos treinta años con barba corta y auriculares gamer con micrófono grita con toda su alma al micrófono: boca bien abierta, cuello tenso, un brazo en alto reclamando. Con el otro brazo aprieta una pelota de fútbol contra la cadera, como quien no piensa soltarla. Luz fría azulada de reflectores desde atrás y un acento dorado de costado.' },
   { id: 'nueve', credito: 'Con', nombre: ['El','Nueve'], tam: 400, baja: 150, yPost: -210, bajaPost: 110, rasgo: 'Central hasta el minuto 90. Después, de nueve.', remate: '¿El contragolpe? Que corran otros.', voz: 'El Nueve. Central hasta el minuto noventa, después de nueve, y el contragolpe que lo corran otros.', marcaRasgo: 'Central', marcaRemate: 'contragolpe',
     escena: 'Área rival de un estadio de noche, justo antes de un córner, reflectores rojizos y humo de bengalas lejos, tribuna repleta y fuera de foco. Un defensor central enorme, pelado, de unos treinta y cinco años, con auriculares gamer con micrófono, las medias bajas y la camiseta embarrada, parado solo con los brazos bien abiertos, mirando hacia arriba con cara de "este lo hago yo", dueño del lugar. Lleva una cinta dorada de capitán sin letras.' },
@@ -220,7 +221,7 @@ const ID = 'viral-mar-companeros-2026-11-09';
 const musica = await elegirMusica(ID);
 const tema = infoTema(musica).titulo;
 const base = path.join(DIR, 'companeros-sin-voz.mp4'), conVoz = path.join(DIR, 'companeros-voz.mp4'), mp4 = path.join(DIR, 'companeros.mp4'), jpg = path.join(DIR, 'companeros-portada.jpg');
-if (!flag('--sin-render')) {
+if (!flag('--sin-render') && !flag('--solo-placas')) {
 log(`Render (${total.toFixed(1)} s, ${tema})…`);
 await video('companeros.html', datos, base, { escenas: tiempos.map((x, n) => ({ n, dur: x.dur })), fps: 60, desenfoque: true, musica });
 let t0 = 0;
@@ -231,6 +232,7 @@ await portada({ imagen: imgs.megafono, kicker: 'EL REPARTO', titulo: 'Uno de est
 conPortada(conVoz, jpg, mp4);
 await carrusel('companeros.html', datos, DIR, 'companeros-placa');
 }
+if (flag('--solo-placas')) await carrusel('companeros.html', datos, DIR, 'companeros-placa');
 const slides = tiempos.map((_, i) => path.join(DIR, `companeros-placa-${i + 1}.jpg`));
 if (flag('--sin-lote')) { log('Listo (sin lote): ' + mp4); process.exit(0); }
 
