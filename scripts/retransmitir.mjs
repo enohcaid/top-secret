@@ -27,6 +27,7 @@ import { tituloDeNoche, partidosDe, ponerTitulos } from './stream/titulos-vivo.m
 import { temporada, convocados, espacioGamer, listaMusica as prepararMusica } from './stream/datos-vivo.mjs';
 import { clasificarInicios, clasificarFinales } from './stream/conteo-noche.mjs';
 import { fuenteDe, anotarFuente, enVivo as fuenteEnVivo } from './lib/fuente-vivo.mjs';
+import { vigilarSalud } from './stream/salud-vivo.mjs';
 const listaMusica = () => prepararMusica(log);
 
 loadEnv();
@@ -221,7 +222,11 @@ function marcarSinSenal(v) {
   } catch {}
 }
 // true = seguir con la sesión (fuente en el aire, o caída hace menos de GRACIA_SIN_SENAL); false = terminarla
-async function seguirSesion() {
+// Una sola evaluación a la vez: la llaman el reloj del codificador y el bucle de la sesión. Si se pisaban, una ponía
+// caidaDesde en null mientras la otra esperaba y "ahora - null" daba "lleva 15 min caído" (2026-11-05, corte en falso).
+let evaluacionEnCurso = null;
+function seguirSesion() { return evaluacionEnCurso ||= evaluarSesion().finally(() => { evaluacionEnCurso = null; }); }
+async function evaluarSesion() {
   const vivo = await enVivo();
   if (vivo === null) return true;                               // sin respuesta de Twitch: no se sabe, se sigue
   if (vivo) {
@@ -289,9 +294,9 @@ function lanzarVigia() {
 }
 
 // Codificador: el lienzo de OBS desde MediaMTX, recortado y codificado por salidas.mjs (los relevos lo suben a cada red).
-function retransmitir() {
+function retransmitir(vertical) {
   return new Promise(res => {
-    const args = argsCodificador({ entrada: LOCAL, vertical: !process.argv.includes('--sin-instagram'), kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
+    const args = argsCodificador({ entrada: LOCAL, vertical, kbps: KBPS, entradaArgs: ['-rw_timeout', '15000000'] });
     const ff = spawn(ffmpegPath, args, { stdio: ['ignore', 'ignore', 'pipe'] });
     ff.stderr.on('data', d => { const t = String(d).trim(); if (t) log('ffmpeg:', ocultarClaves(t).slice(0, 200)); });
     const fin = () => ff.kill();
@@ -334,14 +339,31 @@ async function levantarCadena() {
   lanzarStreamlink();
   await espera(3000);
   if (await obs('GetVersion')) await obs('StartStream');          // OBS ya abierto
-  else {
-    // Sin las marcas de .sentinel OBS no cree que el cierre anterior fue un error (si no, se queda esperando en un diálogo)
-    const sentinel = path.join(E.APPDATA, 'obs-studio', '.sentinel');
-    if (fs.existsSync(sentinel)) for (const f of fs.readdirSync(sentinel)) fs.rmSync(path.join(sentinel, f), { force: true });
-    spawn(path.join(OBS_DIR, 'obs64.exe'), ['--profile', 'TopSecret', '--collection', 'TopSecret', '--startstreaming',
-    '--minimize-to-tray', '--disable-shutdown-check', '--disable-updater'], { cwd: OBS_DIR, detached: true, stdio: 'ignore' }).unref();
-  }
+  else abrirObs();
   log('Cadena con overlay levantada (MediaMTX + streamlink + OBS).');
+}
+function abrirObs() {
+  // Sin las marcas de .sentinel OBS no cree que el cierre anterior fue un error (si no, se queda esperando en un diálogo)
+  const sentinel = path.join(E.APPDATA, 'obs-studio', '.sentinel');
+  if (fs.existsSync(sentinel)) for (const f of fs.readdirSync(sentinel)) fs.rmSync(path.join(sentinel, f), { force: true });
+  // --multi: tras matar un OBS colgado, el aviso "OBS ya se está ejecutando" dejaba al nuevo trabado (2026-11-05).
+  // Antes de llegar acá ya se comprobó que no hay otro abierto (GetVersion o reiniciarObs).
+  spawn(path.join(OBS_DIR, 'obs64.exe'), ['--profile', 'TopSecret', '--collection', 'TopSecret', '--startstreaming', '--multi',
+    '--minimize-to-tray', '--disable-shutdown-check', '--disable-updater'], { cwd: OBS_DIR, detached: true, stdio: 'ignore' }).unref();
+}
+const obsAbierto = () => /obs64\.exe|obs-browser-page\.exe/i.test(execFileSync('tasklist', { encoding: 'utf8' }));
+// OBS colgado (proceso abierto, sin mandar nada): se cierra a la fuerza y se abre otro. MediaMTX, streamlink, el
+// codificador y los relevos no se tocan: se reenganchan solos cuando vuelve la señal.
+async function reiniciarObs() {
+  for (const imagen of ['obs64.exe', 'obs-browser-page.exe']) { try { execFileSync('taskkill', ['/F', '/T', '/IM', imagen], { stdio: 'ignore' }); } catch {} }
+  for (let i = 0; i < 15 && obsAbierto(); i++) await espera(1000);
+  await espera(2000);
+  abrirObs();
+}
+let rearmando = false;
+async function rearmarCadena() {
+  rearmando = true;
+  try { await bajarCadena(); await levantarCadena(); } finally { rearmando = false; }
 }
 // streamlink sirve la PS5 por http://127.0.0.1:8787 a la fuente 'Partido' de OBS
 let slOverlay = null;
@@ -386,8 +408,10 @@ async function sesion() {
   const inicio = setInterval(() => { { const a = contarInicios(), b = contarFinales(); if (a || b) actualizarPartido(); } }, 15000);   // partido nuevo o terminado: placa y cierre al toque
   await listaMusica();
   const audio = setInterval(audioSegunModo, 3000);
+  let salud = null;
   try {
     await levantarCadena();
+    salud = vigilarSalud({ obs, reiniciarObs, rearmar: rearmarCadena, ocupado: () => rearmando, log });
     // Instagram: vivo nuevo por sesión, con el partido de la noche como título; si falla, siguen las otras redes
     let ig = null;
     if (!process.argv.includes('--sin-instagram')) {
@@ -402,7 +426,7 @@ async function sesion() {
     let fallas = 0, igIntento = null;
     while (Date.now() < limite && await seguirSesion()) {
       const t0 = Date.now();
-      const corriendo = retransmitir();
+      const corriendo = retransmitir(!!ig);                       // sin Instagram no se gasta CPU en codificar la vertical
       if (ig && !igIntento) igIntento = ig.transmitir().catch(e => log('Instagram:', e.message.slice(0, 200)));   // una sola espera
       const code = await corriendo;
       if (Date.now() - t0 > 60000) {
@@ -413,7 +437,7 @@ async function sesion() {
       // Los relevos y el vivo de Instagram siguen esperando: se reenganchan solos cuando vuelve la señal.
       if (++fallas >= 12) {
         log('La señal con overlay no aparece en MediaMTX: rearmo la cadena (nunca se sale sin overlay).');
-        await bajarCadena(); await levantarCadena(); fallas = 0;
+        await rearmarCadena(); fallas = 0;
         continue;
       }
       // OBS prueba conectarse a MediaMTX una sola vez: si falló (2026-11-02, "Connection failed -2"), se queda sin transmitir
@@ -423,8 +447,10 @@ async function sesion() {
     }
     rel.parar();
     if (ig) await ig.finalizar().catch(() => {});
+    rearmando = true;                                             // que la salud no reinicie OBS mientras se baja
     await bajarCadena();
-  } finally { clearInterval(partido); clearInterval(inicio); clearInterval(audio); clearInterval(vigia); modoAudio = null; }
+    rearmando = false;
+  } finally { await salud?.parar().catch(() => {}); clearInterval(partido); clearInterval(inicio); clearInterval(audio); clearInterval(vigia); modoAudio = null; }
 }
 
 log(`Retransmisor listo → ${destinos.map(d => d.nombre).join(' + ')} con overlay. Esperando que alguna fuente esté en vivo (${FUENTES.map(f => f.url).join(', ')}) (hasta las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}).`);

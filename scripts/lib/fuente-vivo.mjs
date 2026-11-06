@@ -37,7 +37,7 @@ export function anotarFuente(f) {
 // ¿Está en vivo? → { id } | false | null (sin respuesta: no se sabe). Sin bloquear el proceso.
 export async function enVivo(f) {
   if (f.tipo === 'youtube') return new Promise(ok => execFile('python', ['-m', 'streamlink', '--json', f.url], { timeout: 40000 }, (e, out) => {
-    try { const j = JSON.parse(out); ok(Object.keys(j.streams || {}).length ? { id: j.metadata?.id || 'yt' } : false); } catch { ok(e?.killed ? null : false); }
+    try { const j = JSON.parse(out); ok(Object.keys(j.streams || {}).length ? { id: j.metadata?.id || 'yt' } : false); } catch { ok(null); }   // streamlink no contestó (timeout, sin memoria): no se sabe, no es "se cayó"
   }));
   try {
     const r = await fetch('https://gql.twitch.tv/gql', { method: 'POST', signal: AbortSignal.timeout(10000), headers: { 'Client-ID': GQL_ID },

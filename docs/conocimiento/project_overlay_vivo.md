@@ -114,6 +114,16 @@ OBS arrancó con `--startstreaming` 16 s después de MediaMTX, la conexión a `r
 Prueba del arreglo (2026-11-03, `--prueba --fuente caseoh_ --sin-instagram`): el mismo fallo se repitió (a los 6 s de lanzarlo MediaMTX todavía no escuchaba en 1935) y el reintento lo resolvió en 10 s, salida con overlay. Y desde ese día ya no existe el pase a directo (ver arriba).
 **Ojo con las pruebas pasada la medianoche:** la prueba reescribe `inicios-/finales-<hoy>.json` con los avisos que quedaron en `estado.json` de la noche anterior: borrar esos dos archivos después, o la noche siguiente arranca contando partidos de más.
 
+## Noche del 2026-11-05: OBS colgado y monitor de salud
+Las redes estuvieron 5 min sin imagen (23:32–23:37): OBS quedó colgado con el proceso abierto (`Reconnecting` → `Video stopped` en su log, sin crash ni reporte) con la PC casi sin memoria (`ollama app` ocupaba ~4 GB sin modelos cargados). Como MediaMTX y el codificador seguían vivos, nada lo detectaba. Al reabrirlo a mano quedó trabado en el diálogo "OBS ya se está ejecutando".
+
+- **`scripts/stream/salud-vivo.mjs` (corre en cada sesión):** cada 15 s mira OBS por websocket. Sin respuesta, reconectando, sin transmitir o sin frames/bytes nuevos 3 veces seguidas (45 s) → reinicia **solo OBS** (`reiniciarObs()`; MediaMTX, streamlink, codificador y relevos se reenganchan solos). Tres reinicios en 10 min → rearma la cadena. Con menos de 1500 MB disponibles o más de 3% de frames perdidos en un minuto → anota los procesos que más memoria usan, cierra Ollama si no tiene modelos cargados (se reabre al terminar la sesión) y sube la prioridad de OBS y ffmpeg.
+- **Dónde mirar:** `fuentes/redes/salud-vivo.log` (una línea por minuto: fps, frames perdidos, CPU, memoria, errores nuevos del log de OBS) y `retransmitir.log` (`Salud: …`: arranque, medidas tomadas y balance de la sesión).
+- **`--multi` al abrir OBS:** evita el diálogo trabado; `reiniciarObs()` comprueba antes que no quede otro abierto.
+- **Corte en falso "lleva 15 min caído":** `seguirSesion()` se llamaba en paralelo y una llamada ponía `caidaDesde` en null mientras otra esperaba; `Date.now() - null` daba una caída enorme. Ahora corre una evaluación a la vez. Además, si streamlink no contesta (YouTube) es "no se sabe", no "se cayó".
+- **La vertical solo se codifica si Instagram está al aire** (antes se codificaba igual, gastando CPU, cuando Instagram fallaba).
+- **Prueba (2026-11-06, `--prueba --fuente zackrawrr --sin-instagram --sin-titulos --sin-historia`):** congelar OBS con `NtSuspendProcess` → detectado a los 40 s y señal de vuelta unos 10 s después.
+
 ## Pendientes para corregir
 
 - **Charlas: los jugadores miran para el lado opuesto (Juan, vivo del 2026-11-04).** Cuando dos jugadores hablan en el modo pausa, quedan mirando hacia afuera en vez de mirarse. Sin corregir ni diagnosticar todavía. Pista: `pj()` en `overlay-pausa.js` asume que todos los clips `habla`/`escucha` miran a la derecha y espeja solo al de la derecha, pero los prompts de `clip-jugador.mjs` dicen "hacia un costado" sin indicar cuál, así que el lado puede variar por clip. Revisar la dirección real de cada clip. No aplicar el arreglo con un vivo en curso.
