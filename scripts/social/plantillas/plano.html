@@ -1,0 +1,442 @@
+<!doctype html>
+<!-- "Una pelota, todo el plantel, sin cortes": plano secuencia en bucle. Escena 3D propia en WebGL2 (sin librerías): el plantel
+     en capas a distinta profundidad sobre un circuito cerrado, cámara continua, foco real por distancia, piso mojado con reflejos
+     y bloom. Todo es función periódica de t (armónicos enteros de T): el último cuadro empalma con el primero.
+     pintar(datos) carga las texturas; mostrar(0, t) dibuja un cuadro. -->
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600&family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Bebas+Neue&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; background: #000; }
+  #lienzo { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  canvas { position: absolute; left: 0; top: 0; }
+</style>
+<div id="lienzo"><canvas id="gl" width="1080" height="1920"></canvas><canvas id="rot" width="1080" height="1920"></canvas></div>
+<script src="../../../rotulo-tema.js"></script>
+<script>
+const W = 1080, H = 1920, TAU = Math.PI * 2;
+const gl = document.getElementById('gl').getContext('webgl2', { preserveDrawingBuffer: true, antialias: false, alpha: false });
+gl.getExtension('EXT_color_buffer_float');
+
+// ── Álgebra ──
+const v = {
+  sum: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], res: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+  esc: (a, s) => [a[0] * s, a[1] * s, a[2] * s], len: a => Math.hypot(a[0], a[1], a[2]), nor: a => v.esc(a, 1 / (v.len(a) || 1)),
+  dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+  cruz: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+  mix: (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t],
+};
+const perspectiva = (fov, as, n, f) => { const c = 1 / Math.tan(fov / 2); return [c / as, 0, 0, 0, 0, c, 0, 0, 0, 0, (f + n) / (n - f), -1, 0, 0, 2 * f * n / (n - f), 0]; };
+function mirar(ojo, a, arriba) {
+  const z = v.nor(v.res(ojo, a)), x = v.nor(v.cruz(arriba, z)), y = v.cruz(z, x);
+  return [x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -v.dot(x, ojo), -v.dot(y, ojo), -v.dot(z, ojo), 1];
+}
+function mult(a, b) { const o = new Array(16); for (let c = 0; c < 4; c++) for (let f = 0; f < 4; f++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + f] * b[c * 4 + k]; o[c * 4 + f] = s; } return o; }
+function invertir(m) {
+  const r = new Array(16), [a, b, c, d, e, f, g, h, i, j, k, l, n, o, p, q] = m;
+  const s0 = a * f - b * e, s1 = a * g - c * e, s2 = a * h - d * e, s3 = b * g - c * f, s4 = b * h - d * f, s5 = c * h - d * g;
+  const c5 = k * q - l * p, c4 = j * q - l * o, c3 = j * p - k * o, c2 = i * q - l * n, c1 = i * p - k * n, c0 = i * o - j * n;
+  const det = 1 / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
+  r[0] = (f * c5 - g * c4 + h * c3) * det; r[1] = (-b * c5 + c * c4 - d * c3) * det; r[2] = (o * s5 - p * s4 + q * s3) * det; r[3] = (-j * s5 + k * s4 - l * s3) * det;
+  r[4] = (-e * c5 + g * c2 - h * c1) * det; r[5] = (a * c5 - c * c2 + d * c1) * det; r[6] = (-n * s5 + p * s2 - q * s1) * det; r[7] = (i * s5 - k * s2 + l * s1) * det;
+  r[8] = (e * c4 - f * c2 + h * c0) * det; r[9] = (-a * c4 + b * c2 - d * c0) * det; r[10] = (n * s4 - o * s2 + q * s0) * det; r[11] = (-i * s4 + j * s2 - l * s0) * det;
+  r[12] = (-e * c3 + f * c1 - g * c0) * det; r[13] = (a * c3 - b * c1 + c * c0) * det; r[14] = (-n * s3 + o * s1 - p * s0) * det; r[15] = (i * s3 - j * s1 + k * s0) * det;
+  return r;
+}
+const paso = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+
+// ── Shaders ──
+const VS_Q = `#version 300 es
+uniform mat4 VP; uniform vec3 C, R, U; uniform vec2 A; out vec2 uv;
+void main(){ vec2 p = vec2(float(gl_VertexID & 1), float((gl_VertexID >> 1) & 1)); uv = vec2(p.x, 1. - p.y);
+  gl_Position = VP * vec4(C + R * (p.x - A.x) + U * (p.y - A.y), 1.); }`;
+const VS_F = `#version 300 es
+out vec2 uv; void main(){ vec2 p = vec2(float(gl_VertexID & 1), float((gl_VertexID >> 1) & 1)); uv = p; gl_Position = vec4(p * 2. - 1., 0., 1.); }`;
+const FS_Q = `#version 300 es
+precision highp float; in vec2 uv; out vec4 o;
+uniform sampler2D T; uniform int modo; uniform vec3 tinte; uniform float alfa, coc, niebla, luz; uniform mat3 Rot; uniform vec2 rimDir;
+const vec3 ORO = vec3(1., .72, .28);
+vec4 lin(vec4 c){ return vec4(pow(c.rgb / max(c.a, .002), vec3(2.2)) * c.a, c.a); }
+vec4 foco(vec2 p, float r){
+  if (r < .0008) return texture(T, p);
+  float lod = log2(max(1., r * float(textureSize(T, 0).y) * .6)); vec4 s = vec4(0.);
+  for (int i = 0; i < 14; i++){ float a = float(i) * 2.39996, q = sqrt((float(i) + .5) / 14.); s += textureLod(T, p + r * q * vec2(cos(a), sin(a) * float(textureSize(T, 0).x) / float(textureSize(T, 0).y)), lod); }
+  return s / 14.;
+}
+void main(){
+  if (modo == 0){ // jugador: foco por distancia, luz de contorno dorada, cuerpo más oscuro abajo
+    vec4 c = lin(foco(uv, coc)); if (c.a < .003) discard;
+    float bor = c.a - foco(uv + rimDir, coc).a;
+    float alto = mix(.72, 1.06, smoothstep(1., .25, uv.y));
+    vec3 col = c.rgb * tinte * alto;
+    col += ORO * max(bor, 0.) * (.012 + .04 * luz);
+    col = mix(vec3(.012, .01, .009) * c.a, col, niebla);
+    o = vec4(col, c.a) * alfa;
+  } else if (modo == 1){ // texto y escudo emisivos
+    vec4 c = lin(foco(uv, coc)); o = vec4(mix(vec3(.01) * c.a, c.rgb * tinte, niebla), c.a) * alfa;
+  } else if (modo == 2){ // desenfoque de lente / chispa: disco suave aditivo, un poco más brillante en el borde
+    float d = length(uv * 2. - 1.); float a = smoothstep(1., .86, d) * (.72 + .28 * smoothstep(.45, .92, d));
+    o = vec4(tinte * a * alfa, 0.);
+  } else if (modo == 3){ // cono de luz
+    float e = abs(uv.x * 2. - 1.); float a = pow(1. - e, 2.2) * pow(1. - uv.y, .7) * smoothstep(0., .25, uv.y);
+    o = vec4(tinte * a * alfa, 0.);
+  } else if (modo == 4){ // pelota: esfera negra con paneles dorados
+    vec2 q = uv * 2. - 1.; q.y = -q.y; float r2 = dot(q, q); if (r2 > 1.) discard;
+    vec3 n = vec3(q, sqrt(1. - r2)); vec3 p = Rot * n;
+    const float g = 1.618034; vec3 ic[6] = vec3[6](vec3(0., 1., g), vec3(0., 1., -g), vec3(1., g, 0.), vec3(1., -g, 0.), vec3(g, 0., 1.), vec3(g, 0., -1.));
+    float m = 0.; for (int i = 0; i < 6; i++) m = max(m, abs(dot(p, normalize(ic[i]))));
+    float pan = smoothstep(.885, .895, m), cos2 = smoothstep(.70, .715, m) - smoothstep(.73, .745, m);
+    vec3 alb = mix(vec3(.018), vec3(.95, .68, .24), pan); alb += vec3(.7, .5, .18) * cos2 * .8;
+    vec3 l = normalize(vec3(-.4, .75, .55)), hv = normalize(l + vec3(0., 0., 1.));
+    float dif = max(dot(n, l), 0.), spe = pow(max(dot(n, hv), 0.), 48.);
+    vec3 col = alb * (.16 + 1.25 * dif) + vec3(1., .9, .7) * spe * .9 + ORO * pow(1. - n.z, 3.) * .55;
+    o = vec4(col, smoothstep(1., .96, r2)) * alfa; o.rgb *= smoothstep(1., .96, r2);
+  } else { // anillo del toque
+    float d = length(uv * 2. - 1.); float a = smoothstep(.86, .95, d) * smoothstep(1., .97, d);
+    o = vec4(tinte * a * alfa, 0.);
+  }
+}`;
+const FS_PISO = `#version 300 es
+precision highp float; in vec2 uv; out vec4 o;
+uniform mat4 IVP; uniform vec3 Cam; uniform int cielo; uniform vec3 Pj[18]; uniform float Lz[18];
+float h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float ruido(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f); return mix(mix(h21(i), h21(i + vec2(1, 0)), f.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), f.x), f.y); }
+void main(){
+  vec4 w = IVP * vec4(uv * 2. - 1., 1., 1.); vec3 dir = normalize(w.xyz / w.w - Cam);
+  if (cielo == 1){
+    float y = dir.y; vec3 c = mix(vec3(.014, .009, .004), vec3(.0016, .0015, .002), smoothstep(-.02, .3, y));
+    c += vec3(.16, .095, .03) * exp(-abs(y) * 26.) * .3;
+    o = vec4(c, 1.); return;
+  }
+  if (dir.y >= -.0005) discard;
+  float s = -Cam.y / dir.y; vec3 p = Cam + dir * s; vec2 xz = p.xz;
+  vec3 col = vec3(.006, .0055, .005); float sombra = 1.;
+  for (int i = 0; i < 18; i++){
+    float d = length(xz - Pj[i].xz);
+    col += vec3(1., .68, .27) * exp(-d * d / (3.6 + 4. * Lz[i])) * (.004 + .075 * Lz[i]);
+    sombra *= 1. - .85 * exp(-d * d / .16);
+  }
+  float rug = ruido(xz * 1.3) * .6 + ruido(xz * 5.1) * .4;
+  col *= (.75 + .5 * rug) * sombra;
+  float fres = pow(1. - clamp(-dir.y, 0., 1.), 3.);
+  float a = clamp(.86 - .42 * fres - .16 * rug, .3, .95);          // lo que no tapa, deja ver el reflejo
+  float lejos = exp(-s * .028); col = mix(vec3(.011, .0068, .003), col, lejos);
+  o = vec4(col * a + vec3(.005, .0033, .0016) * fres, a);
+}`;
+const FS_BRILLO = `#version 300 es
+precision highp float; in vec2 uv; out vec4 o; uniform sampler2D T; uniform vec2 dirB; uniform int umbral;
+void main(){ vec3 c = vec3(0.); float w[5] = float[5](.227, .194, .121, .054, .016);
+  c = texture(T, uv).rgb * w[0]; for (int i = 1; i < 5; i++){ c += (texture(T, uv + dirB * float(i)).rgb + texture(T, uv - dirB * float(i)).rgb) * w[i]; }
+  if (umbral == 1) c = max(c - 1.05, 0.); o = vec4(c, 1.); }`;
+const FS_FINAL = `#version 300 es
+precision highp float; in vec2 uv; out vec4 o; uniform sampler2D E, B1, B2, B3; uniform float sem;
+float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + sem) * 43758.5453); }
+vec3 aces(vec3 x){ return clamp(x * (2.51 * x + .03) / (x * (2.43 * x + .59) + .14), 0., 1.); }
+void main(){
+  vec2 c = uv - .5; float d = dot(c, c); vec2 ab = c * d * .012;
+  vec3 col = vec3(texture(E, uv + ab).r, texture(E, uv).g, texture(E, uv - ab).b);
+  col += texture(B1, uv).rgb * .4 + texture(B2, uv).rgb * .38 + texture(B3, uv).rgb * .4;
+  col *= 1.12 * (1. - smoothstep(.18, .78, d * 1.05) * .62);
+  col = aces(col);
+  col = mix(col, col * vec3(1.03, .985, .92), .6);
+  col = pow(col, vec3(1. / 2.2));
+  col += (h(uv * vec2(1080., 1920.)) - .5) * .028;
+  o = vec4(col, 1.);
+}`;
+function prog(vs, fs) {
+  const p = gl.createProgram();
+  for (const [t, s] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) {
+    const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    gl.attachShader(p, sh);
+  }
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const u = {}; for (let i = 0, n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS); i < n; i++) { const nm = gl.getActiveUniform(p, i).name.replace('[0]', ''); u[nm] = gl.getUniformLocation(p, nm); }
+  return { p, u };
+}
+const Q = prog(VS_Q, FS_Q), PISO = prog(VS_F, FS_PISO), BRILLO = prog(VS_F, FS_BRILLO), FINAL = prog(VS_F, FS_FINAL);
+gl.bindVertexArray(gl.createVertexArray());
+
+function fbo(w, h) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+  for (const [k, x] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, x);
+  const f = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+  return { f, t, w, h };
+}
+const ESC = fbo(W, H), PIR = [2, 4, 8].map(k => [fbo(W / k | 0, H / k | 0), fbo(W / k | 0, H / k | 0)]);
+
+function textura(fuente) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, fuente);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+const cargar = src => new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => mal(new Error('imagen: ' + String(src).slice(0, 80))); i.src = src; });
+
+// Texto en una textura: se dibuja una sola vez y vive en el mundo, a su propia profundidad.
+function textoTex(lineas, ancho, alto) {
+  const c = document.createElement('canvas'); c.width = ancho; c.height = alto;
+  const x = c.getContext('2d'); x.textAlign = 'center'; x.textBaseline = 'middle';
+  for (const l of lineas) {
+    let px = l.px; x.font = `${l.peso} ${px}px ${l.fam}`;
+    if ('letterSpacing' in x) x.letterSpacing = (l.esp || 0) + 'px';
+    while (x.measureText(l.txt).width > ancho * .96 && px > 10) { px -= 2; x.font = `${l.peso} ${px}px ${l.fam}`; }
+    x.shadowColor = l.sombra || 'rgba(0,0,0,.65)'; x.shadowBlur = l.blur ?? 18;
+    if (l.borde) { x.lineWidth = l.borde; x.strokeStyle = l.col; x.strokeText(l.txt, ancho / 2, l.y); }
+    else {
+      if (l.col === 'oro') { const g = x.createLinearGradient(0, l.y - l.px * .36, 0, l.y + l.px * .36); g.addColorStop(0, '#f2cf7c'); g.addColorStop(.5, '#c29434'); g.addColorStop(1, '#5e4312'); x.fillStyle = g; }
+      else x.fillStyle = l.col;
+      x.fillText(l.txt, ancho / 2, l.y);
+    }
+  }
+  return textura(c);
+}
+
+// ── Estado de la escena ──
+let D, N, T, P, T0, PJ = [], texEscudo, ganchos = [], tema, imgTema, cuPos = new Float32Array(54), cuLz = new Float32Array(18);
+const FOV = 46 * Math.PI / 180, ASP = W / H;
+const w = (n, t, f = 0) => Math.sin(TAU * n * t / T + f);
+
+async function pintar(d) {
+  D = d; T = d.T; N = d.jugadores.length; P = T / N; T0 = d.t0;
+  await document.fonts.ready;
+  await Promise.all(["400 200px 'Bebas Neue'", "800 120px 'Barlow Condensed'", "italic 800 120px 'Barlow Condensed'", "700 18px 'Barlow Condensed'", "600 25px 'Barlow'"].map(f => document.fonts.load(f, 'ABC0123')));
+  PJ = await Promise.all(d.jugadores.map(async (j, i) => {
+    const img = await cargar(j.img);
+    const th = -TAU * i / N, Rm = 14 + 2.4 * Math.cos(3 * th), R = Rm + (i % 2 ? .55 : -.55);
+    const hb = img.height / (1 + 2 * j.mg), pb = j.mg * hb, wb = img.width - 2 * pb;
+    return { ...j, i, tex: textura(img), ar: wb / hb, fx: img.width / wb, fy: img.height / hb, ay: pb / img.height, pos: [R * Math.cos(th), 0, R * Math.sin(th)], medio: [Rm * Math.cos(th), 0, Rm * Math.sin(th)],
+      gt: textoTex([{ txt: j.gt, px: 150, peso: 'italic 800', fam: "'Barlow Condensed'", col: '#fff', y: 92, esp: 2, blur: 22 }], 1100, 190),
+      num: textoTex([{ txt: j.num, px: 520, peso: '400', fam: "'Bebas Neue'", col: 'oro', y: 300, blur: 0, sombra: 'transparent' }], 640, 560) };
+  }));
+  texEscudo = textura(await cargar(d.escudo));
+  ganchos = d.ganchos.map(g => ({ ...g, tex: textoTex(g.lineas.map((txt, k) => ({ txt, px: g.px, peso: '400', fam: "'Bebas Neue'", col: g.col || '#fff', y: (k + .5) * g.px * 1.02 + 12, esp: 3, blur: 28 })), 1400, Math.ceil(g.lineas.length * g.px * 1.02 + 24)),
+    ar: 1400 / Math.ceil(g.lineas.length * g.px * 1.02 + 24) }));
+  if (d.tema) { tema = d.tema; imgTema = new Image(); await new Promise(r => { imgTema.onload = imgTema.onerror = r; imgTema.src = d.tema.portada || ''; if (!d.tema.portada) r(); }); }
+  return 1;
+}
+
+// ── Circuito: Catmull-Rom periódica por los pies de los jugadores ──
+function ring(s) {
+  const i = Math.floor(s), f = s - i, g = k => PJ[((i + k) % N + N) % N].medio;
+  const a = g(-1), b = g(0), c = g(1), e = g(2), o = [0, 0, 0];
+  for (let q = 0; q < 3; q++) o[q] = .5 * (2 * b[q] + (c[q] - a[q]) * f + (2 * a[q] - 5 * b[q] + 4 * c[q] - e[q]) * f * f + (3 * b[q] - a[q] - 3 * c[q] + e[q]) * f * f * f);
+  return o;
+}
+const avance = t => (t - T0) / P;
+// Recorrido de la pelota sin los detalles de cada pose: lo que mira la cámara
+function pelotaGuia(t) {
+  const k = avance(t), i = ((Math.floor(k) % N) + N) % N, f = k - Math.floor(k);
+  const a = PJ[i].pos, b = PJ[(i + 1) % N].pos;
+  if (f < D.pop) { const s = f / D.pop; return [a[0], 1.4 + 4 * D.alturaPop * s * (1 - s), a[2]]; }
+  const s = (f - D.pop) / (1 - D.pop), alt = D.altura[0] + (D.altura[1] - D.altura[0]) * hash(i + 3);
+  return [a[0] + (b[0] - a[0]) * s, 1.4 + 4 * alt * s * (1 - s), a[2] + (b[2] - a[2]) * s];
+}
+function camara(t) {
+  const c = D.camara, k = avance(t);
+  const sc = k + c.lag + c.dolly * w(5, t, .7);                    // se acerca y se aleja sin cortar el avance
+  const base = ring(sc - c.atras), adelante = ring(sc + c.adelante);
+  const afuera = v.nor([base[0], 0, base[2]]);
+  const lat = c.lat + c.latA * w(2, t, 1.1) + c.latB * w(7, t);    // gira alrededor de la línea de pases, por los dos lados
+  const y = c.h + c.hA * w(3, t, 2.1) + c.hB * w(11, t);
+  const ojo = [base[0] + afuera[0] * lat, y, base[2] + afuera[2] * lat];
+  // La cámara sigue a la pelota, suavizada para que el toque no sea un golpe de cámara
+  let b = [0, 0, 0]; for (let q = -8; q <= 8; q++) b = v.sum(b, v.esc(pelotaGuia(t + q * .075), 1 / 17));
+  const tang = v.nor(v.res(adelante, base)), lado = [tang[2], 0, -tang[0]], mira = c.mira * w(3, t, .9);
+  const a = [adelante[0] + (b[0] - adelante[0]) * c.sigue + lado[0] * mira, c.ly + c.lyA * w(4, t, .4) + (b[1] - 1.3) * c.sigueY, adelante[2] + (b[2] - adelante[2]) * c.sigue + lado[2] * mira];
+  const roll = c.roll * w(2, t, .3) + c.roll * .35 * w(9, t, 1.7);
+  const ad = v.nor(v.res(a, ojo)), der = v.nor(v.cruz(ad, [0, 1, 0]));
+  const arriba = v.nor(v.sum(v.esc(der, Math.sin(roll)), v.esc([0, 1, 0], Math.cos(roll))));
+  return { ojo, a, arriba, ad };
+}
+// Cuánto tiempo falta/pasó para el toque de un jugador (periódico)
+const delta = (t, i) => { let d = (t - (T0 + i * P)) % T; if (d > T / 2) d -= T; if (d < -T / 2) d += T; return d; };
+function ejes(j, ojo) {
+  const a = v.nor([ojo[0] - j.pos[0], 0, ojo[2] - j.pos[2]]);       // el jugador de cara a la cámara
+  return { der: [a[2], 0, -a[0]], frente: a };
+}
+function dims(j) { const h = j.alto, an = h * j.ar; return { h, an }; }
+function toque(j, ojo) {
+  const { der } = ejes(j, ojo), { h, an } = dims(j);
+  return v.sum(v.sum(j.pos, v.esc(der, (j.cu - .5) * an)), [0, j.y0 + (1 - j.cv) * h, 0]);
+}
+function pelota(t) {
+  const k = avance(t), i = ((Math.floor(k) % N) + N) % N, f = k - Math.floor(k), ojo = camara(t).ojo;
+  const a = PJ[i], c0 = toque(a, ojo), pop = D.pop, r = .11;
+  if (f < pop) { const s = f / pop; return v.sum(c0, [0, 4 * D.alturaPop * s * (1 - s), 0]); }
+  const b = PJ[(i + 1) % N], c1 = toque(b, ojo), s = (f - pop) / (1 - pop);
+  const alt = D.altura[0] + (D.altura[1] - D.altura[0]) * hash(i + 3);
+  return v.sum(v.mix(c0, c1, s), [0, 4 * alt * s * (1 - s), 0]);
+}
+
+// ── Dibujo ──
+let VP, CAM, DER, ARR, ADE, foco;
+function pxCoc(dist) { return D.apertura * Math.abs(1 / Math.max(dist, .3) - 1 / foco); }
+function quad(u) {
+  gl.uniform3fv(Q.u.C, u.C); gl.uniform3fv(Q.u.R, u.R); gl.uniform3fv(Q.u.U, u.U); gl.uniform2fv(Q.u.A, u.A || [.5, .5]);
+  gl.uniform1i(Q.u.modo, u.modo); gl.uniform3fv(Q.u.tinte, u.tinte || [1, 1, 1]); gl.uniform1f(Q.u.alfa, u.alfa ?? 1);
+  gl.uniform1f(Q.u.coc, u.coc || 0); gl.uniform1f(Q.u.niebla, u.niebla ?? 1); gl.uniform1f(Q.u.luz, u.luz || 0);
+  if (u.rimDir) gl.uniform2fv(Q.u.rimDir, u.rimDir); if (u.Rot) gl.uniformMatrix3fv(Q.u.Rot, false, u.Rot);
+  if (u.tex) { gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, u.tex); }
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+const nieblaDe = d => Math.exp(-Math.max(0, d - 6) * .034);
+function disco(pos, r, tinte, alfa, lista) {                         // disco visto de frente, agrandado por el foco
+  const d = v.len(v.res(pos, CAM)); const prof = v.dot(v.res(pos, CAM), ADE); if (prof < .2) return;
+  const metrosPx = 2 * prof * Math.tan(FOV / 2) / H, rr = r + pxCoc(prof) * metrosPx * .5;
+  const a = alfa * (r / rr) * (r / rr) * nieblaDe(d);
+  lista.push({ d: prof, q: { modo: 2, C: pos, R: v.esc(DER, rr * 2), U: v.esc(ARR, rr * 2), tinte, alfa: Math.min(a, 1) } });
+}
+// Corrimiento lateral (en metros) para que algo de cierto ancho, centrado en p, entre entero en pantalla
+function adentro(p, ancho) {
+  const pr = v.dot(v.res(p, CAM), ADE), lat = v.dot(v.res(p, CAM), DER), mitad = pr * Math.tan(FOV / 2) * ASP - ancho / 2 - .04;
+  return mitad <= 0 ? -lat : Math.max(-mitad, Math.min(mitad, lat)) - lat;
+}
+function escena(t, sinTexto, giroCam) {
+  const cam = camara(t);
+  if (giroCam) { cam.a = v.sum(cam.a, v.esc(v.nor(v.cruz(cam.ad, [0, 1, 0])), giroCam)); cam.ad = v.nor(v.res(cam.a, cam.ojo)); }   // encuadre propio para la foto de portada
+  CAM = cam.ojo; ADE = cam.ad;
+  const V = mirar(cam.ojo, cam.a, cam.arriba), PR = perspectiva(FOV, ASP, .1, 300);
+  VP = mult(PR, V); DER = [V[0], V[4], V[8]]; ARR = [V[1], V[5], V[9]];
+  const bola = pelota(t);
+  { // El foco está en el que toca y pasa al siguiente mientras viaja la pelota
+    const k = avance(t), i = ((Math.floor(k) % N) + N) % N, sg = paso(.38, .82, k - Math.floor(k));
+    const pr = j => Math.max(2.4, v.dot(v.res(j.pos, CAM), ADE));
+    foco = pr(PJ[i]) + (pr(PJ[(i + 1) % N]) - pr(PJ[i])) * sg;
+  }
+  const luces = PJ.map(j => { const d = delta(t, j.i) / P; return Math.exp(-d * d * 1.5); });
+  gl.bindFramebuffer(gl.FRAMEBUFFER, ESC.f); gl.viewport(0, 0, W, H); gl.disable(gl.BLEND);
+  // Cielo
+  const IVP = invertir(VP);
+  gl.useProgram(PISO.p); gl.uniformMatrix4fv(PISO.u.IVP, false, IVP); gl.uniform3fv(PISO.u.Cam, CAM); gl.uniform1i(PISO.u.cielo, 1);
+  PJ.forEach((j, i) => { cuPos.set(j.pos, i * 3); cuLz[i] = luces[i]; });
+  gl.uniform3fv(PISO.u.Pj, cuPos); gl.uniform1fv(PISO.u.Lz, cuLz);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  gl.useProgram(Q.p); gl.uniformMatrix4fv(Q.u.VP, false, VP);
+  gl.uniform1i(Q.u.T, 0);
+
+  // Fondo lejano: escudo enorme, columnas de luz, aro de focos, polvo
+  const fondo = [];
+  { const d = v.dot(v.res([0, 11, 0], CAM), ADE);
+    if (d > 0) { const a = v.nor([CAM[0], 0, CAM[2]]), r = [a[2], 0, -a[0]], s = 15;
+      fondo.push({ d, q: { modo: 1, tex: texEscudo, C: [0, 11, 0], R: v.esc(r, s * .9), U: [0, s, 0], tinte: [.14, .095, .035], alfa: .9, coc: .035, niebla: 1 } }); } }
+  for (let i = 0; i < 28; i++) {
+    const th = TAU * i / 28 + .1, R = 42 + 6 * hash(i), p = [R * Math.cos(th), 13, R * Math.sin(th)];
+    const a = v.nor([CAM[0] - p[0], 0, CAM[2] - p[2]]), d = v.dot(v.res(p, CAM), ADE);
+    if (d > 0) fondo.push({ d, q: { modo: 3, C: p, R: [a[2] * 5, 0, -a[0] * 5], U: [0, 30, 0], tinte: [.5, .32, .11], alfa: .05 + .07 * hash(i + 40) * (.6 + .4 * w(3 + (i % 3), t, i)) } });
+    disco([R * .94 * Math.cos(th), 25, R * .94 * Math.sin(th)], .5, [2.6, 1.9, .9], .8, fondo);
+  }
+  for (let i = 0; i < D.polvo; i++) {
+    const th = TAU * hash(i), R = 3 + 28 * hash(i + 100), y = .2 + 7 * hash(i + 200);
+    const p = [R * Math.cos(th + .05 * w(1 + i % 2, t, i)), y + .35 * w(2 + i % 3, t, i * 2), R * Math.sin(th + .05 * w(1 + i % 2, t, i * 3))];
+    disco(p, .018 + .03 * hash(i + 300), [1.8, 1.25, .55], .42 * (.6 + .4 * w(5 + i % 4, t, i)), fondo);
+  }
+  fondo.sort((a, b) => b.d - a.d).forEach(o => quad(o.q));
+
+  // Lo que se refleja en el piso, invertido
+  const obj = [];
+  for (const j of PJ) {
+    const pr = v.dot(v.res(j.pos, CAM), ADE); if (pr < .7) continue;
+    obj.push({ j, pr });
+  }
+  obj.sort((a, b) => b.pr - a.pr);
+  for (const { j, pr } of obj) {
+    const { der } = ejes(j, CAM), { h, an } = dims(j), lz = luces[j.i];
+    if (j.y0 > .6) continue;
+    quad({ modo: 0, tex: j.tex, C: [j.pos[0], -j.y0, j.pos[2]], R: v.esc(der, an * j.fx), U: [0, -h * j.fy, 0], tinte: [.6 + .8 * lz, .55 + .72 * lz, .5 + .62 * lz], alfa: .4, coc: Math.min(.03, .01 + pxCoc(pr) / (h / (2 * pr * Math.tan(FOV / 2)) * H)), niebla: nieblaDe(pr), rimDir: [0, 0], A: [.5, j.ay] });
+  }
+  // Piso
+  gl.useProgram(PISO.p); gl.uniform1i(PISO.u.cielo, 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.useProgram(Q.p);
+
+  // Plano principal, de atrás para adelante
+  const lista = [];
+  for (const { j, pr } of obj) {
+    const { der, frente } = ejes(j, CAM), { h, an } = dims(j), lz = luces[j.i], dt = delta(t, j.i), sigue_ = paso(.25 * P, .5 * P, dt), cerca = 1 + (paso(1.5, 3.1, pr) - 1) * sigue_;
+    if (cerca <= .002) continue;
+    const pxPorMetro = H / (2 * pr * Math.tan(FOV / 2));
+    const empuje = dt >= 0 ? Math.exp(-dt * 7) * .045 : 0;                // el toque lo mueve apenas
+    const ang = empuje * (j.cu > .5 ? -1 : 1) + .012 * w(2 + j.i % 3, t, j.i);
+    const R2 = [der[0] * Math.cos(ang), Math.sin(ang), der[2] * Math.cos(ang)], U2 = [-der[0] * Math.sin(ang), Math.cos(ang), -der[2] * Math.sin(ang)];
+    const respira = 1 + .006 * w(9 + j.i % 4, t, j.i);
+    const coc = pxCoc(pr) / (h * pxPorMetro);
+    const base = v.sum(j.pos, [0, j.y0, 0]);
+    // Cono de luz sobre cada uno: sube cuando le llega la pelota
+    lista.push({ d: pr + .4, q: { modo: 3, C: v.sum(j.pos, [0, 6.2, 0]), R: v.esc(der, 3.4 + lz), U: [0, 12.4, 0], tinte: [.95, .65, .27], alfa: (.012 + .13 * lz) * nieblaDe(pr) * cerca } });
+    lista.push({ d: pr, q: { modo: 0, tex: j.tex, C: base, R: v.esc(R2, an * j.fx), U: v.esc(U2, h * j.fy * respira), A: [.5, j.ay], tinte: [.5 + 1.15 * lz, .47 + 1.08 * lz, .43 + .98 * lz], coc: Math.min(.05, coc), niebla: nieblaDe(pr), luz: lz, rimDir: [-.006, .004], alfa: cerca } });
+    // Dorsal detrás del jugador y gamertag sobre la cabeza: entran con la pelota
+    if (!sinTexto) {
+      const entra = paso(-.42 * P, -.16 * P, dt) * (1 - paso(.5 * P, .74 * P, dt));
+      if (entra > .002) {
+        const sale = 1 - paso(0, .9, entra);
+        const cn = v.sum(j.pos, v.sum(v.esc(frente, -.85), [0, h * .58 + j.y0, 0]));
+        const sn = (2.5 + sale * .5); const prn = pr + .85;
+        lista.push({ d: prn, q: { modo: 1, tex: j.num, C: cn, R: v.esc(der, sn * 640 / 560), U: [0, sn, 0], tinte: [.62, .6, .56], alfa: entra * .95 * cerca, coc: Math.min(.03, pxCoc(prn) / (sn * pxPorMetro)) } });
+        const ancho = 1.75, alto = ancho * 190 / 1100, cg0 = v.sum(j.pos, v.sum(v.esc(frente, .05), [0, h + j.y0 + .2 + (j.cv < .06 && j.cu > .2 && j.cu < .8 ? .22 : 0) + sale * -.12, 0])), cg = v.sum(cg0, v.esc(DER, adentro(cg0, ancho)));
+        lista.push({ d: pr - .05, q: { modo: 1, tex: j.gt, C: cg, R: v.esc(der, ancho), U: [0, alto, 0], alfa: entra * cerca, coc: Math.min(.012, pxCoc(pr) / (alto * pxPorMetro) * .18) } });
+      }
+    }
+    // Toque: anillo + chispas
+    if (dt >= 0 && dt < .55) {
+      const c = toque(j, CAM), e = dt / .55, s = .14 + .62 * Math.pow(e, .6);
+      lista.push({ d: pr - .1, q: { modo: 5, C: c, R: v.esc(DER, s), U: v.esc(ARR, s), tinte: [1.5, 1.05, .45], alfa: .7 * (1 - e) * (1 - e) } });
+      for (let q = 0; q < 16; q++) {
+        const az = TAU * hash(j.i * 31 + q), ve = 1 + 3 * hash(q + j.i), su = 1.6 * hash(q * 7 + 2);
+        const p = v.sum(c, [Math.cos(az) * ve * dt, (su - 3.4 * dt) * dt * 2 + .2 * dt, Math.sin(az) * ve * dt]);
+        disco(p, .014, [3.8, 2.7, 1.2], (1 - e), lista);
+      }
+    }
+  }
+  // Frases del gancho: paradas en el mundo, la cámara pasa por al lado (sin aparecer ni desaparecer en pantalla)
+  if (!sinTexto) for (const g of ganchos) {
+    const baseG = ring(g.s + N * 100), a = v.nor(v.res([CAM[0], 0, CAM[2]], [baseG[0], 0, baseG[2]])), der = [a[2], 0, -a[0]];
+    // Cada frase existe solo cerca de su lugar en el circuito: desde el otro lado se vería de costado
+    let ds = (avance(t) - g.s) % N; if (ds > N / 2) ds -= N; if (ds < -N / 2) ds += N;
+    const aparece = paso(g.entra, g.entra + .45, ds) * (1 - paso(1.7, 2.1, ds)); if (aparece <= .002) continue;
+    const C0 = v.sum(baseG, [0, g.y, 0]), pr = v.dot(v.res(C0, CAM), ADE); if (pr < .6) continue;
+    const C = v.sum(C0, v.esc(DER, adentro(C0, g.ancho)));
+    const hg = g.ancho / g.ar, pxM = H / (2 * pr * Math.tan(FOV / 2));
+    lista.push({ d: pr, q: { modo: 1, tex: g.tex, C, R: v.esc(der, g.ancho), U: [0, hg, 0], coc: Math.min(.05, pxCoc(pr) * (g.nitida ? .15 : 1) / (hg * pxM)), alfa: aparece * paso(1.2, 2.6, pr), niebla: 1 } });
+  }
+  // Pelota y estela
+  const prB = v.dot(v.res(bola, CAM), ADE);
+  for (let q = 15; q >= 1; q--) { const p = pelota(t - q * .016), n = lista.length; disco(p, .07 * (1 - q / 18), [1.4, 1, .42], .16 * (1 - q / 16) * Math.min(1, v.len(v.res(p, bola)) / .5), lista); if (lista[n]) lista[n].d = prB + .01; }
+  const giro = TAU * D.vueltasPelota * t / T, ca = Math.cos(giro), sa = Math.sin(giro), cb = Math.cos(giro * .37), sb = Math.sin(giro * .37);
+  const Rt = [ca, sa * sb, -sa * cb, 0, cb, sb, sa, -ca * sb, ca * cb];
+  if (prB > .3) lista.push({ d: prB - .02, q: { modo: 4, C: bola, R: v.esc(DER, .24), U: v.esc(ARR, .24), Rot: Rt } });
+  lista.sort((a, b) => b.d - a.d).forEach(o => quad(o.q));
+
+  // Bloom y salida
+  gl.disable(gl.BLEND); gl.useProgram(BRILLO.p); gl.activeTexture(gl.TEXTURE0); gl.uniform1i(BRILLO.u.T, 0);
+  let fuente = ESC.t;
+  PIR.forEach(([a, b], n) => {
+    gl.viewport(0, 0, a.w, a.h);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, a.f); gl.bindTexture(gl.TEXTURE_2D, fuente); gl.uniform1i(BRILLO.u.umbral, n === 0 ? 1 : 0); gl.uniform2f(BRILLO.u.dirB, 1.4 / a.w, 0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, b.f); gl.bindTexture(gl.TEXTURE_2D, a.t); gl.uniform1i(BRILLO.u.umbral, 0); gl.uniform2f(BRILLO.u.dirB, 0, 1.4 / a.h); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    fuente = b.t;
+  });
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, W, H); gl.useProgram(FINAL.p);
+  [ESC.t, PIR[0][1].t, PIR[1][1].t, PIR[2][1].t].forEach((tx, k) => { gl.activeTexture(gl.TEXTURE0 + k); gl.bindTexture(gl.TEXTURE_2D, tx); });
+  gl.uniform1i(FINAL.u.E, 0); gl.uniform1i(FINAL.u.B1, 1); gl.uniform1i(FINAL.u.B2, 2); gl.uniform1i(FINAL.u.B3, 3);
+  gl.uniform1f(FINAL.u.sem, (Math.round(t * 60) % 240) * .137);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.activeTexture(gl.TEXTURE0);
+}
+
+const rot = document.getElementById('rot').getContext('2d');
+function mostrar(n, t, opciones) {
+  const tt = ((t % T) + T) % T;
+  escena(tt, opciones && opciones.sinTexto, opciones && opciones.giro);
+  rot.clearRect(0, 0, W, 300);
+  // Tarjeta "Sonando ahora" sin entrada ni barra de progreso: las dos delatarían dónde empieza el video.
+  if (tema && !(opciones && opciones.sinTexto)) TSRotuloTema.dibujar(rot, W, H, 5 + tt, tema, imgTema && imgTema.width ? imgTema : null, 0);
+}
+</script>
