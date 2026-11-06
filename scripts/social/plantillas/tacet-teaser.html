@@ -1,0 +1,158 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Cormorant+Garamond:ital,wght@1,500&display=block" rel="stylesheet">
+<style>html,body{margin:0;background:#000}#lienzo{display:block;width:1080px;height:1920px}</style></head>
+<body><canvas id="lienzo" width="1080" height="1920"></canvas>
+<script>
+// Teasers de la presentación de Tacet Sin: no dicen el nombre. Cuatro modos, cada uno con su idea visual, misma materia que
+// la pieza "Tacet" (franjas, larga exposición, grano). Todo es función de t. Datos en D, desde 2026-11-06-tacet-hype.mjs.
+const W = 1080, H = 1920, N = 23;
+const c = document.getElementById('lienzo'), x = c.getContext('2d');
+let D, tiras = [], ruido = [], img = {};
+const sat = v => Math.max(0, Math.min(1, v));
+const suave = v => { v = sat(v); return v * v * (3 - 2 * v); };
+const sale = v => 1 - Math.pow(1 - sat(v), 3);
+const tramo = (t, a, b, ent = .4, sal = .4) => sat((t - a) / ent) * sat((b - t) / sal);
+const carga = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+function azar(s) { return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
+async function pintar(d) {
+  D = d;
+  await Promise.all(["700 190px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "500 30px 'Barlow Condensed'", "italic 500 170px 'Cormorant Garamond'"].map(f => document.fonts.load(f)));
+  await document.fonts.ready;
+  const r = azar(d.semilla || 23), anchos = Array.from({ length: N }, () => 18 + r() * 54);
+  const hueco = 7, escala = (W - 56 - hueco * (N - 1)) / anchos.reduce((a, b) => a + b, 0);
+  let px = 28;
+  tiras = anchos.map(a => { const w = a * escala, o = { x: px, w, dy: (r() - .5) * 260 }; px += w + hueco; return o; });
+  for (let k = 0; k < 3; k++) {
+    const n = document.createElement('canvas'); n.width = 540; n.height = 960;
+    const g = n.getContext('2d'), id = g.createImageData(540, 960), q = azar(91 + k);
+    for (let i = 0; i < id.data.length; i += 4) { const v = q() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+    g.putImageData(id, 0, 0); ruido.push(n);
+  }
+  const lote = async l => { const o = []; for (let i = 0; i < l.length; i += 24) o.push(...await Promise.all(l.slice(i, i + 24).map(carga))); return o; };
+  img.cuadros = await lote(d.cuadros || []);
+  img.disco = await lote(d.disco || []);
+  img.temas = await lote(d.temas || []);
+  img.escudo = await carga(d.escudo);
+  return 1;
+}
+
+const banda = (t, i) => { const f = t * 30, a = Math.floor(f), u = f - a, b = D.bandas, p = b[Math.min(a, b.length - 1)], q = b[Math.min(a + 1, b.length - 1)]; return p[i] * (1 - u) + q[i] * u; };
+const vaiven = (l, t) => { const n = l.length, k = Math.floor(t * 30) % (2 * n - 2); return l[k < n ? k : 2 * n - 2 - k]; };
+
+function texto(s, px, y, { peso = 600, fam = "'Barlow Condensed'", color = '#fff', alfa = 1, sep = 0, it = false, escalaY = 1 } = {}) {
+  if (alfa <= 0) return;
+  x.save(); x.globalAlpha = alfa; x.fillStyle = color; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = `${it ? 'italic ' : ''}${peso} ${px}px ${fam}`; x.letterSpacing = `${sep}px`;
+  x.shadowColor = 'rgba(0,0,0,.8)'; x.shadowBlur = 26;
+  x.translate(W / 2 + sep / 2, y); x.scale(1, escalaY); x.fillText(s, 0, 0); x.restore();
+}
+function sombra(a, b, alfa) {
+  if (alfa <= 0) return;
+  const g = x.createLinearGradient(0, a - 130, 0, b + 130);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.3, `rgba(0,0,0,${alfa})`); g.addColorStop(.7, `rgba(0,0,0,${alfa})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.globalAlpha = 1; x.fillStyle = g; x.fillRect(0, a - 130, W, b - a + 260);
+}
+function letra(t, y, px, op = 1) {
+  for (const l of D.letra) { const a = tramo(t, l.ini, Math.max(l.fin, l.ini + .9) + .1, .14, .2); if (a > 0) texto(l.texto, px, y, { peso: 500, color: '#f2e6cc', alfa: a * op, sep: .5 }); }
+}
+// Recorte vertical de una imagen como si llenara la pantalla
+function tira(im, o, y, h, a) {
+  if (!im) return;
+  const iw = im.naturalWidth, ih = im.naturalHeight, e = Math.max(W / iw, H / ih), ox = (W - iw * e) / 2, oy = (H - ih * e) / 2;
+  x.globalAlpha = a; x.drawImage(im, (o.x - ox) / e, (y - oy) / e, o.w / e, h / e, o.x, y, o.w, h); x.globalAlpha = 1;
+}
+const llena = im => { if (!im) return; const iw = im.naturalWidth, ih = im.naturalHeight, e = Math.max(W / iw, H / ih); x.drawImage(im, (W - iw * e) / 2, (H - ih * e) / 2, iw * e, ih * e); };
+
+// 1. Se abre de a poco desde el centro, como algo que aparece detrás
+function suena(t, F) {
+  const im = vaiven(img.cuadros, t);
+  for (let i = 0; i < N; i++) {
+    const o = tiras[i], ab = sale((t - Math.abs(i - 11) * .3) / .7); if (ab <= 0) continue;
+    const b = banda(t, i), h = H * ab * (.22 + .78 * b);
+    tira(im, o, H / 2 - h / 2 + o.dy * ab, h, .78 + .22 * b);
+  }
+  const a1 = tramo(t, .9, 5.3), a2 = sat((t - 5.6) / .5);
+  sombra(800, 1090, .62 * Math.max(a1, a2));
+  texto('Algo suena', 104, 900, { peso: 700, sep: 2, alfa: a1 });
+  texto('detrás de nuestros videos.', 62, 990, { peso: 600, sep: .5, alfa: tramo(t, 1.5, 5.3) });
+  texto('Mañana le ponemos nombre.', 72, 950, { peso: 600, sep: .5, alfa: a2 });
+  letra(t, 1150, 40, 1 - a2);
+}
+// 2. Espejo: el lado reflejado no coincide del todo
+function espejo(t, F) {
+  const im = vaiven(img.disco, t); if (!im) return;
+  const z = 1920 * (1.06 - .06 * sat(t / 9)), ox = (W - z) / 2, oy = (H - z) / 2;
+  x.save(); x.beginPath(); x.rect(0, 0, W / 2, H); x.clip(); x.drawImage(im, ox, oy, z, z); x.restore();
+  x.save(); x.beginPath(); x.rect(W / 2, 0, W / 2, H); x.clip(); x.translate(W, 0); x.scale(-1, 1); x.filter = `brightness(${1.15 + .5 * banda(t, 4)}) contrast(1.1) blur(${1 + 2 * banda(t, 9)}px)`; x.drawImage(im, ox, oy + 26 * Math.sin(t * .8), z, z); x.restore();
+  x.filter = 'none';
+  // máscara: las franjas se abren con el sonido
+  x.fillStyle = '#040302';
+  for (let i = 0; i < N; i++) { const o = tiras[i], b = banda(t, i), ab = sale(t / .9), h = H * ab * (.52 + .48 * b); x.fillRect(o.x - 7, 0, 7, H); x.fillRect(o.x, 0, o.w, H / 2 - h / 2); x.fillRect(o.x, H / 2 + h / 2, o.w, H / 2 - h / 2); }
+  x.fillStyle = 'rgba(180,215,255,.5)'; x.fillRect(W / 2 - .75, 0, 1.5, H);
+  const q = sat((t - 6.1) / .5);
+  sombra(780, 1120, .58);
+  for (const l of D.letra) {
+    const a = tramo(t, l.ini, Math.max(l.fin, l.ini + 1) + .05, .14, .2) * (1 - q); if (a <= 0) continue;
+    const tam = l.texto.length > 36 ? 54 : l.texto.length > 26 ? 66 : 96;
+    texto(l.texto, tam, 950, { peso: 700, sep: 1, alfa: a });
+    texto(l.texto, tam, 985, { peso: 700, sep: 1, alfa: a * .22, escalaY: -1 });
+  }
+  texto('¿De dónde te suena?', 104, 950, { peso: 700, sep: 1, alfa: q });
+  texto('¿De dónde te suena?', 104, 985, { peso: 700, sep: 1, alfa: q * .22, escalaY: -1 });
+}
+// 3. Un 23 enorme hecho con las franjas de los 23 temas
+function veintitres(t, F) {
+  const of = document.createElement('canvas'); of.width = W; of.height = H; const g = of.getContext('2d'), m = W / N;
+  const ent = i => sale((t - .15 - i * .07) / .45);
+  for (let i = 0; i < N; i++) {
+    const im = img.temas[i]; if (!im) continue;
+    const e = ent(i); if (e <= 0) continue;
+    const b = banda(t, i), iw = im.naturalWidth, ih = im.naturalHeight, s = H / ih, sw = (m - 3) / s, sx = ((i + .5) / N) * (iw - sw);
+    g.globalAlpha = (.72 + .28 * b) * e;
+    g.filter = `brightness(${(i < 12 ? 2.1 : 1.3) + .95 * b})`;
+    g.drawImage(im, sx, 0, sw, ih, i * m + 1.5, -(1 - e) * 180 * (i % 2 ? 1 : -1), m - 3, H);
+  }
+  g.filter = 'none'; g.globalAlpha = 1; g.globalCompositeOperation = 'destination-in';
+  g.font = "700 1040px 'Barlow Condensed'"; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff'; g.fillText('23', W / 2, 860);
+  x.drawImage(of, 0, 0);
+  // un hilo de luz que respira alrededor del número
+  x.save(); x.globalAlpha = .12 + .2 * banda(t, 11); x.lineWidth = 1.5; x.strokeStyle = '#e9c67a'; x.font = "700 1040px 'Barlow Condensed'"; x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('23', W / 2, 860); x.restore();
+  texto('temas. Un solo nombre.', 74, 1340, { peso: 600, sep: 1, alfa: sat((t - 2) / .5) });
+  texto('Hoy, 20:00', 118, 1490, { peso: 700, sep: 2, color: '#e9c67a', alfa: sat((t - 4) / .5) });
+  letra(t, 1590, 38, .92);
+}
+// 4. La franja que espera al costado, hasta que le toca
+function costado(t, F) {
+  const T = D.T, cl = vaiven(img.cuadros, t), di = vaiven(img.disco, t);
+  const apaga = 1 - .72 * suave((t - 3) / 3.2), abre = suave((t - T.estalla) / .85);
+  for (let i = 0; i < N - 1; i++) {
+    const o = { x: 28 + i * 39, w: 32 }, b = banda(t, i), h = H * (.28 + .5 * b) * (1 - abre);
+    tira(cl, o, H / 2 - h / 2, h, (.3 + .25 * b) * apaga);
+  }
+  const sube = .42 + .58 * sat(t / T.estalla), b0 = banda(t, 11), w = 34 + (W + 80 - 34) * abre, cx = 992 + (W / 2 - 992) * abre;
+  const hh = H * Math.min(1, (.42 + .4 * sube + .2 * b0) + abre);
+  x.save(); x.shadowColor = 'rgba(255,175,70,.9)'; x.shadowBlur = 30 + 70 * sube * b0;
+  x.fillStyle = 'rgba(255,190,110,.18)'; x.fillRect(cx - w / 2, H / 2 - hh / 2, w, hh); x.restore();
+  if (di) { const o = { x: cx - w / 2, w }; x.filter = `brightness(${1 + 1.1 * sube * (1 - abre)})`; tira(di, o, H / 2 - hh / 2, hh, 1); x.filter = 'none'; }
+  if (abre <= 0) letra(t, 1370, 42, 1);
+  const a = sat((t - T.estalla - .55) / .45);
+  sombra(780, 1090, .52 * a);
+  texto('Hoy, 20:00', 196, 950, { peso: 700, sep: 3, alfa: a });
+  texto('Deja de sonar de fondo.', 66, 1050, { peso: 600, sep: 1, color: '#f2e6cc', alfa: sat((t - T.estalla - 1) / .45) });
+}
+
+const MODOS = { suena, espejo, veintitres, costado };
+function mostrar(n, t, o = {}) {
+  x.globalAlpha = 1; x.filter = 'none'; x.globalCompositeOperation = 'source-over'; x.fillStyle = '#040302'; x.fillRect(0, 0, W, H);
+  MODOS[D.modo](t, D);
+  const fin = D.T.fin;
+  if (t > fin - 2.2 || D.modo === 'veintitres') { const a = sat((t - (D.modo === 'veintitres' ? 4.4 : fin - 2.2)) / .5); if (a > 0 && img.escudo) { x.globalAlpha = a; const e = 70; x.drawImage(img.escudo, W / 2 - e / 2, 1660 - 30, e, e * img.escudo.naturalHeight / img.escudo.naturalWidth); x.globalAlpha = 1; } }
+  x.save(); x.globalCompositeOperation = 'overlay'; x.globalAlpha = .13;
+  x.drawImage(ruido[Math.floor(t * 24) % 3], -(Math.floor(t * 24) * 37 % 40), 0, W + 40, H); x.restore();
+  const v = x.createRadialGradient(W / 2, H / 2, 620, W / 2, H / 2, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.5)');
+  x.globalAlpha = 1; x.fillStyle = v; x.fillRect(0, 0, W, H);
+  const f = sat((t - fin + .3) / .3); if (f > 0) { x.fillStyle = `rgba(0,0,0,${f})`; x.fillRect(0, 0, W, H); }
+}
+</script></body></html>

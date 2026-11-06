@@ -1,0 +1,182 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=block" rel="stylesheet">
+<style>html,body{margin:0;background:#000}#lienzo{display:block;width:1080px;height:1920px}</style></head>
+<body><canvas id="lienzo" width="1080" height="1920"></canvas>
+<script>
+// Expectativa de Tacet Sin con la gente de Top Secret: goles reales con su goleador ("noches") y el plantel entero al pulso
+// ("plantel"). Sin decir el nombre del artista. Las franjas del disco quedan detrás, movidas por el espectro real.
+const W = 1080, H = 1920, N = 23, ORO = '#e9c67a';
+const c = document.getElementById('lienzo'), x = c.getContext('2d');
+let D, tiras = [], ruido = [], img = {};
+const sat = v => Math.max(0, Math.min(1, v));
+const sale = v => 1 - Math.pow(1 - sat(v), 3);
+const tramo = (t, a, b, ent = .3, sal = .3) => sat((t - a) / ent) * sat((b - t) / sal);
+const carga = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+function azar(s) { return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
+async function pintar(d) {
+  D = d;
+  await Promise.all(["700 190px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "500 30px 'Barlow Condensed'"].map(f => document.fonts.load(f)));
+  await document.fonts.ready;
+  const r = azar(31), anchos = Array.from({ length: N }, () => 18 + r() * 54);
+  const hueco = 7, escala = (W - 56 - hueco * (N - 1)) / anchos.reduce((a, b) => a + b, 0);
+  let px = 28;
+  tiras = anchos.map(a => { const w = a * escala, o = { x: px, w, dy: (r() - .5) * 220 }; px += w + hueco; return o; });
+  for (let k = 0; k < 3; k++) {
+    const n = document.createElement('canvas'); n.width = 540; n.height = 960;
+    const g = n.getContext('2d'), id = g.createImageData(540, 960), q = azar(55 + k);
+    for (let i = 0; i < id.data.length; i += 4) { const v = q() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+    g.putImageData(id, 0, 0); ruido.push(n);
+  }
+  const lote = async l => { const o = []; for (let i = 0; i < l.length; i += 24) o.push(...await Promise.all(l.slice(i, i + 24).map(carga))); return o; };
+  img.disco = await lote(d.disco);
+  img.escudo = await carga(d.escudo);
+  img.poses = {}; for (const [k, v] of Object.entries(d.poses)) img.poses[k] = await carga(v);
+  return 1;
+}
+
+const banda = (t, i) => { const f = t * 30, a = Math.floor(f), u = f - a, b = D.bandas, p = b[Math.min(a, b.length - 1)], q = b[Math.min(a + 1, b.length - 1)]; return p[i] * (1 - u) + q[i] * u; };
+const vaiven = (l, t) => { const n = l.length, k = Math.floor(t * 30) % (2 * n - 2); return l[k < n ? k : 2 * n - 2 - k]; };
+
+function texto(s, px, y, { peso = 700, color = '#fff', alfa = 1, sep = 0, ancho = 0, trazo = 0 } = {}) {
+  if (alfa <= 0) return;
+  x.save(); x.globalAlpha = alfa; x.fillStyle = color; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  x.font = `${peso} ${px}px 'Barlow Condensed'`; x.letterSpacing = `${sep}px`;
+  if (ancho) { const m = x.measureText(s).width; if (m > ancho) { px = px * ancho / m; x.font = `${peso} ${px}px 'Barlow Condensed'`; } }
+  x.shadowColor = 'rgba(0,0,0,.8)'; x.shadowBlur = 26;
+  if (trazo) { x.strokeStyle = color; x.lineWidth = trazo; x.strokeText(s, W / 2 + sep / 2, y); } else x.fillText(s, W / 2 + sep / 2, y);
+  x.restore();
+}
+function sombra(a, b, alfa) {
+  if (alfa <= 0) return;
+  const g = x.createLinearGradient(0, a - 130, 0, b + 130);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.3, `rgba(0,0,0,${alfa})`); g.addColorStop(.7, `rgba(0,0,0,${alfa})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.globalAlpha = 1; x.fillStyle = g; x.fillRect(0, a - 130, W, b - a + 260);
+}
+// El disco, a través de las franjas: lo que está detrás de todo
+function franjas(t, alfa = 1, abre = 1, piso = .3) {
+  const im = vaiven(img.disco, t); if (!im) return;
+  const e = 1920 / im.naturalHeight, ox = (W - im.naturalWidth * e) / 2;
+  for (let i = 0; i < N; i++) {
+    const o = tiras[i], b = banda(t, i), h = H * abre * (piso + (1 - piso) * b), y = H / 2 - h / 2 + o.dy * abre;
+    x.globalAlpha = alfa * (.6 + .4 * b);
+    x.drawImage(im, (o.x - ox) / e, y / e, o.w / e, h / e, o.x, y, o.w, h);
+  }
+  x.globalAlpha = 1;
+}
+// Una pose se arma en franjas que entran alternadas de arriba y de abajo
+function poseEnFranjas(p, u, cx, arriba, alto, fuerza = 1) {
+  if (!p) return;
+  const e = alto / p.naturalHeight, w = p.naturalWidth * e, n = 15, an = w / n;
+  for (let i = 0; i < n; i++) {
+    const v = sale((u - i * .012) / (.2 * fuerza)); if (v <= 0) continue;
+    const dy = (1 - v) * 260 * (i % 2 ? 1 : -1);
+    x.globalAlpha = v;
+    x.drawImage(p, i / n * p.naturalWidth, 0, p.naturalWidth / n + 1, p.naturalHeight, cx - w / 2 + i * an, arriba + dy, an + 1, alto);
+  }
+  x.globalAlpha = 1;
+}
+function escudo(a, y = 1500, e = 70) { if (a <= 0 || !img.escudo) return; x.globalAlpha = a; x.drawImage(img.escudo, W / 2 - e / 2, y, e, e * img.escudo.naturalHeight / img.escudo.naturalWidth); x.globalAlpha = 1; }
+
+const interp = (tabla, v) => { for (let i = 1; i < tabla.length; i++) if (v <= tabla[i][0]) { const [a, p] = tabla[i - 1], [b, q] = tabla[i]; return p + (q - p) * (v - a) / (b - a || 1); } return tabla.at(-1)[1]; };
+const cuadro = (g, seg) => `${g.dir}/${String(Math.max(1, Math.min(g.ultimo, Math.round(seg * 60) + g.f0))).padStart(4, '0')}.jpg`;
+let cache = { src: '', im: null };
+async function frame(src) { if (cache.src !== src) cache = { src, im: await carga(src) }; return cache.im; }
+
+// ── Las noches: el gol real a pantalla completa y, después, su goleador ──
+async function noches(t, o) {
+  const T = D.T;
+  if (t < T.intro) {
+    franjas(t, .9, sale(t / .7));
+    sombra(800, 1040, .62);
+    texto('Las noches de Top Secret', 88, 900, { alfa: sat((t - .25) / .35), ancho: 960 });
+    texto('tienen música.', 112, 1020, { alfa: sat((t - .85) / .3), color: ORO });
+    return;
+  }
+  let u = t - T.intro;
+  for (const g of D.goles) {
+    if (u < g.durJugada) {
+      const sc = interp(g.mapa, u), im = await frame(cuadro(g, sc));
+      if (im) {
+        const golu = u - g.golEn, punch = golu > 0 ? 1 + .1 * Math.exp(-golu * 3.4) : 1, tiembla = golu > 0 ? 12 * Math.exp(-golu * 8) : 0;
+        const CH = 555, CW = CH * 9 / 16 / punch, ch = CH / punch, cx = Math.max(CW / 2, Math.min(1280 - CW / 2, interp(g.cam, sc)));
+        x.save(); x.filter = 'contrast(1.14) saturate(.74) brightness(.92)';
+        x.drawImage(im, (cx - CW / 2) * 2, (92 + (CH - ch) / 2) * 2, CW * 2, ch * 2, Math.sin(t * 91) * tiembla, Math.cos(t * 77) * tiembla, W, H);
+        x.restore();
+      }
+      const v = x.createLinearGradient(0, 1250, 0, H); v.addColorStop(0, 'rgba(4,3,2,0)'); v.addColorStop(1, 'rgba(4,3,2,.92)'); x.fillStyle = v; x.fillRect(0, 1250, W, H - 1250);
+      for (let i = 0; i < N; i++) { const a = tiras[i], b = banda(t, i), h = 34 + 190 * b; x.fillStyle = `rgba(233,198,122,${.3 + .45 * b})`; x.fillRect(a.x, H - h, a.w, h); }
+      // apertura en franjas
+      const ab = sale(u / .38); if (ab < 1) { x.fillStyle = '#040302'; for (let i = 0; i < N; i++) { const a = tiras[i], ha = H / 2 * (1 - ab); x.fillRect(a.x - 8, 0, a.w + 16, ha); x.fillRect(a.x - 8, H - ha, a.w + 16, ha); } }
+      if (u > g.golEn) { const fl = Math.exp(-(u - g.golEn) * 5.5); x.fillStyle = `rgba(255,232,180,${fl * .7})`; x.fillRect(0, 0, W, H); }
+      return;
+    }
+    u -= g.durJugada;
+    if (u < g.durHeroe) {
+      franjas(t, .85, 1, .55);
+      const f = x.createLinearGradient(0, 1000, 0, 1500); f.addColorStop(0, 'rgba(4,3,2,0)'); f.addColorStop(1, 'rgba(4,3,2,.9)'); x.fillStyle = f; x.fillRect(0, 1000, W, H - 1000);
+      poseEnFranjas(img.poses[g.gt], u, W / 2, 200 - u * 6, 1130);
+      texto(g.gt, 124, 1395, { ancho: 980, alfa: sat((u - .12) / .16) });
+      texto(g.linea, 50, 1470, { peso: 600, color: ORO, alfa: sat((u - .26) / .18), sep: .5 });
+      const fl = Math.exp(-u * 8); x.fillStyle = `rgba(255,232,180,${fl * .55})`; x.fillRect(0, 0, W, H);
+      return;
+    }
+    u -= g.durHeroe;
+  }
+  franjas(t, .92, 1, .45);
+  sombra(800, 1080, .62);
+  const a1 = tramo(u, .05, T.cierre * .48), a2 = sat((u - T.cierre * .5) / .3);
+  texto('¿Ya sabés de quién es?', 92, 960, { alfa: a1, ancho: 960 });
+  texto('Mañana, 20:00', 128, 930, { alfa: a2 });
+  texto('Le ponemos nombre.', 70, 1030, { peso: 600, color: ORO, alfa: sat((u - T.cierre * .58) / .3) });
+  escudo(a2);
+}
+
+// ── 18 jugadores: uno por golpe de música ──
+function plantel(t, o) {
+  const T = D.T, J = D.jugadores;
+  if (t < T.intro) {
+    franjas(t, .9, sale(t / .6), .4);
+    sombra(830, 1040, .6);
+    texto('18 jugadores.', 128, 985, { alfa: sat((t - .2) / .3) });
+    return;
+  }
+  const u = t - T.intro, i = Math.floor(u / T.porJug);
+  if (i < J.length) {
+    const j = J[i], v = u - i * T.porJug, arquero = j.arquero;
+    franjas(t, .72, 1, .55);
+    texto(String(j.n), 980, 960, { color: arquero ? '#ff8a3c' : ORO, alfa: .17, trazo: 4 });
+    const f = x.createLinearGradient(0, 1050, 0, 1500); f.addColorStop(0, 'rgba(4,3,2,0)'); f.addColorStop(1, 'rgba(4,3,2,.9)'); x.fillStyle = f; x.fillRect(0, 1050, W, H - 1050);
+    poseEnFranjas(img.poses[j.gt], v, W / 2, 205 + (1 - sale(v / T.porJug)) * 14, 1160, .75);
+    texto(j.gt, 124, 1450, { ancho: 980, alfa: sat(v / .1) });
+    const fl = Math.exp(-v * 11); x.fillStyle = `rgba(255,232,180,${fl * .28})`; x.fillRect(0, 0, W, H);
+    return;
+  }
+  // Todos juntos
+  const w = u - J.length * T.porJug;
+  franjas(t, .55, 1, .5);
+  const cols = 6, filas = 3, cw = W / cols, fh = 365, y0 = 190;
+  J.forEach((j, k) => {
+    const p = img.poses[j.gt]; if (!p) return;
+    const e = sale((w - k * .025) / .28); if (e <= 0) return;
+    const al = fh * 1.04, an = al * p.naturalWidth / p.naturalHeight, ajuste = Math.min(1, cw * 1.28 / an), cx = (k % cols + .5) * cw, top = y0 + Math.floor(k / cols) * fh + (1 - e) * 80;
+    x.globalAlpha = e; x.drawImage(p, cx - an * ajuste / 2, top + al * (1 - ajuste), an * ajuste, al * ajuste); x.globalAlpha = 1;
+  });
+  const v = x.createLinearGradient(0, 1300, 0, 1680); v.addColorStop(0, 'rgba(4,3,2,0)'); v.addColorStop(.3, 'rgba(4,3,2,.9)'); v.addColorStop(1, 'rgba(4,3,2,.9)'); x.fillStyle = v; x.fillRect(0, 1300, W, 380);
+  const a1 = tramo(w, .25, T.cierre * .5), a2 = sat((w - T.cierre * .52) / .25);
+  texto('Un mismo sonido.', 104, 1460, { alfa: a1 });
+  texto('Hoy, 20:00', 132, 1450, { alfa: a2, color: ORO });
+  texto('Le ponemos nombre.', 58, 1530, { peso: 600, alfa: sat((w - T.cierre * .6) / .25) });
+}
+
+async function mostrar(n, t, o = {}) {
+  x.globalAlpha = 1; x.filter = 'none'; x.globalCompositeOperation = 'source-over'; x.fillStyle = '#040302'; x.fillRect(0, 0, W, H);
+  if (D.modo === 'noches') await noches(t, o); else plantel(t, o);
+  x.filter = 'none'; x.save(); x.globalCompositeOperation = 'overlay'; x.globalAlpha = .11;
+  x.drawImage(ruido[Math.floor(t * 24) % 3], -(Math.floor(t * 24) * 37 % 40), 0, W + 40, H); x.restore();
+  const v = x.createRadialGradient(W / 2, H / 2, 680, W / 2, H / 2, 1280); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.42)');
+  x.globalAlpha = 1; x.fillStyle = v; x.fillRect(0, 0, W, H);
+  const f = sat((t - D.T.fin + .25) / .25); if (f > 0) { x.fillStyle = `rgba(0,0,0,${f})`; x.fillRect(0, 0, W, H); }
+}
+</script></body></html>

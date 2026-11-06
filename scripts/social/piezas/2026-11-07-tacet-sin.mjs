@@ -24,6 +24,7 @@ import { putFile, getFile } from '../../lib/r2.mjs';
 import { elegirMusica, infoTema } from '../../lib/musica.mjs';
 import { video, archivo } from '../lib/render.mjs';
 import { conPortada, subirPortada } from '../lib/portada.mjs';
+import { espectro } from '../lib/espectro.mjs';
 import { agregarLote } from '../lib/aprobaciones.mjs';
 import { revisarPieza } from '../../../revisar-textos.js';
 
@@ -69,33 +70,7 @@ if (tema.slug !== 'no-sound-came-out') throw new Error('tema inesperado: ' + tem
 const lineas = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/beats/letras-tiempos.json'), 'utf8'))[tema.slug].lineas
   .map(l => ({ texto: l.texto, ini: l.ini - DESDE_TEMA, fin: l.fin - DESDE_TEMA })).filter(l => l.ini >= ROMPE - .1);
 
-// ── Espectro real del tema, 30 valores por segundo y por franja ──
-function espectro(seg, desde) {
-  const SR = 22050, N = 2048;
-  const r = spawnSync(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-ss', String(desde), '-t', String(seg + .2), '-i', musica, '-ac', '1', '-ar', String(SR), '-f', 's16le', '-'], { maxBuffer: 256 * 1024 * 1024 });
-  const pcm = new Int16Array(r.stdout.buffer, r.stdout.byteOffset, r.stdout.length >> 1);
-  const cortes = Array.from({ length: 24 }, (_, i) => 70 * Math.pow(9000 / 70, i / 23));
-  const crudo = [];
-  for (let f = 0; f < Math.round(seg * 30); f++) {
-    const c = Math.round(f / 30 * SR), re = new Float64Array(N), im = new Float64Array(N);
-    for (let i = 0; i < N; i++) re[i] = (pcm[c + i] || 0) * (.5 - .5 * Math.cos(2 * Math.PI * i / (N - 1)));
-    for (let i = 0, j = 0; i < N; i++) { if (i < j) { [re[i], re[j]] = [re[j], re[i]]; } let m = N >> 1; while (m >= 1 && j & m) { j ^= m; m >>= 1; } j |= m; }
-    for (let l = 2; l <= N; l <<= 1) { const a = -2 * Math.PI / l; for (let i = 0; i < N; i += l) for (let k = 0; k < l / 2; k++) { const w = a * k, wr = Math.cos(w), wi = Math.sin(w), p = i + k, q = p + l / 2, tr = wr * re[q] - wi * im[q], ti = wr * im[q] + wi * re[q]; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; } }
-    crudo.push(cortes.slice(0, 23).map((d, b) => {
-      const a = Math.max(1, Math.floor(d * N / SR)), z = Math.max(a + 1, Math.ceil(cortes[b + 1] * N / SR));
-      let s = 0; for (let k = a; k < z; k++) s += Math.hypot(re[k], im[k]);
-      return Math.log10(1 + s / (z - a));
-    }));
-  }
-  // Cada banda se normaliza contra sí misma y sube rápido y baja lento, como un vúmetro. Después se mezclan: no queda una rampa grave→agudo.
-  const lim = Array.from({ length: 23 }, (_, b) => { const v = crudo.map(f => f[b]).sort((x, y) => x - y); return [v[Math.floor(v.length * .15)], v[Math.floor(v.length * .98)]]; });
-  const prev = new Array(23).fill(0), mezcla = Array.from({ length: 23 }, (_, i) => i * 10 % 23);
-  return crudo.map(f => {
-    f.forEach((v, b) => { const n = Math.max(0, Math.min(1, (v - lim[b][0]) / (lim[b][1] - lim[b][0] || 1))); prev[b] = n > prev[b] ? prev[b] + (n - prev[b]) * .7 : prev[b] * .88 + n * .12; });
-    return mezcla.map(b => +prev[b].toFixed(3));
-  });
-}
-const bandas = espectro(T.fin - T.suena, T.suena + DESDE_TEMA);
+const bandas = espectro(musica, T.fin - T.suena, T.suena + DESDE_TEMA);
 
 const datos = {
   T, tema: tema.titulo, bandas, letra: lineas, clips, disco: discoF, temas,
