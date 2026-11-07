@@ -4,7 +4,7 @@ description: Cómo se genera el .dst de bordado del logo Clean (scripts/bordado)
 type: reference
 ---
 
-**Archivo:** `bordado/clean-dorado-80mm.dst` (70,6 × 79,8 mm, un solo color, unas 5.400 puntadas) y su vista previa. Hecho el 2026-11-07 tomando de referencia un `corazon15mm.DST` que pasó Juan.
+**Archivo:** `bordado/clean-dorado-80mm.dst` (70,6 × 79,8 mm, un solo color, unas 5.400 puntadas) y su vista previa. Hecho el 2026-11-07 tomando de referencia un `corazon15mm.DST` que pasó Juan. Por decisión de Juan, la carpeta `bordado/` queda solo local (en `.gitignore`, no se publica en el sitio): en otra PC se regenera con los comandos de abajo.
 
 **Regenerar en otro tamaño o densidad:**
 
