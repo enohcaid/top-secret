@@ -171,7 +171,8 @@ function feriado(f) {
   return null;
 }
 
-const LUGAR = { TUNEL: 'túnel', VESTUARIO: 'vestuario', ESTADIO_NOCHE: 'estadio / cancha de noche', ACCION_PARTIDO: 'acción en la cancha', CAMPANA_ESTUDIO: 'estudio', RETRATO_EDITORIAL: 'retrato' };
+const LUGAR = { TUNEL: 'túnel', VESTUARIO: 'vestuario', ESTADIO_NOCHE: 'estadio / cancha de noche', ACCION_PARTIDO: 'acción en la cancha', CAMPANA_ESTUDIO: 'estudio', RETRATO_EDITORIAL: 'retrato',
+  BANCO: 'banco de suplentes', ENTRENAMIENTO: 'entrenamiento de día', LLUVIA: 'cancha bajo la lluvia', ATARDECER: 'cancha al atardecer', PRECALENTAMIENTO: 'precalentamiento', TRIBUNA_VACIA: 'estadio vacío' };
 const diaHoy = new Date(HOY + 'T12:00:00-03:00').getUTCDay();   // 0 domingo … 6 sábado
 // Lo que el club ya publicó en redes la última semana (Juan, 2026-11-02: la nota fue un balance justo después de dos
 // resúmenes quincenales): títulos de los lotes de aprobar.html con algo publicado en los últimos 7 días
@@ -193,7 +194,7 @@ const DATOS = {
   tomas_recientes: estilos.filter(e => e.toma).slice(0, 3).map(e => e.toma),
   // Juan, 2026-10-27: "si noto algo repetido ya no sirve" (el 26 y el 27 salió el equipo en el túnel). Lugar de la foto
   // de cada día reciente + la escena que se pidió: la de hoy tiene que ser otra cosa.
-  escenas_recientes: estilos.filter(e => e.date >= sumar(HOY, -7) && e.date < HOY).map(e => `${e.date}: ${LUGAR[e.style] || e.style}`),
+  escenas_recientes: estilos.filter(e => e.date >= sumar(HOY, -7) && e.date < HOY).map(e => `${e.date}: ${LUGAR[e.style] || e.style}${e.n ? `, ${e.n} jugador${e.n === 1 ? '' : 'es'}` : ''}${e.plano ? `, cámara ${e.plano}` : ''}`),
   imagenes_recientes: topicos.filter(t => t.escena && t.date < HOY).slice(0, 5).map(t => `${t.date}: ${t.escena}`),
   premio_ultimos_30_dias: premios.filter(w => w.date >= sumar(HOY, -30)).map(w => w.player),
   futbol_externo: futbolExterno,
@@ -246,7 +247,7 @@ function controlar(n) {
   }
   if (/\p{Extended_Pictographic}/u.test(textos.join(''))) err.push('emojis en el cuerpo');
   if (plano(n.imageBrief).length > 300) err.push(`imageBrief de ${plano(n.imageBrief).length} caracteres (máximo 300)`);
-  if (!/cancha de noche|estadio|t[úu]nel|vestuario|estudio/i.test(n.imageBrief)) err.push('el imageBrief no nombra el lugar (cancha de noche, estadio, túnel, vestuario o estudio)');
+  if (!/cancha de noche|estadio|t[úu]nel|vestuario|estudio|banco|entrenamiento|lluvia|atardecer|precalentamiento/i.test(n.imageBrief)) err.push('el imageBrief no nombra el lugar (cancha de noche, estadio, túnel, vestuario, estudio, banco de suplentes, entrenamiento, lluvia, atardecer, precalentamiento o estadio vacío)');
   if (n.toma && !TOMAS.includes(n.toma)) err.push(`toma "${n.toma}" no existe`);
   const estiloHoy = styleFromBrief({ imageBrief: n.imageBrief })?.id;
   const usados = estilos.filter(e => e.date >= sumar(HOY, -3) && e.date < HOY).map(e => e.style);

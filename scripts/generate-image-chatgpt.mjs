@@ -231,7 +231,83 @@ const IMAGE_STYLES = [
     label: 'Campaña — Vestuario',
     palette: 'vestuario oscuro de madera y metal, luz cálida puntual, acento DORADO',
     prompt: 'Foto íntima en el vestuario: el/los jugador(es) sentados o de pie junto a los casilleros, camisetas colgadas, luz cálida puntual, momento de concentración o charla de equipo.' },
+  // Lugares y luces nuevos (Juan, 2026-11-07: "siempre 5 jugadores en 5 fondos rotativos, sin vida").
+  { id: 'BANCO',
+    label: 'Campaña — Banco de suplentes',
+    palette: 'costado de la cancha de noche, techo acrílico del banco, reflectores detrás, césped verde oscuro, acento DORADO',
+    prompt: 'Foto desde el banco de suplentes / la línea de cal: butacas del banco, techo transparente, la cancha iluminada detrás, jugadores que miran el partido, se paran, se abrazan o esperan para entrar.' },
+  { id: 'ENTRENAMIENTO',
+    label: 'Campaña — Entrenamiento de día',
+    palette: 'luz de día natural, cielo abierto, césped verde vivo, conos y vallitas, acento DORADO mínimo',
+    prompt: 'Foto de entrenamiento en el predio, de día: rondo, ejercicio con conos, charla en ronda, risas entre compañeros; luz natural, nada de reflectores.' },
+  { id: 'LLUVIA',
+    label: 'Campaña — Noche de lluvia',
+    palette: 'noche, lluvia visible a contraluz de los reflectores, césped mojado con reflejos, gotas en la piel y el kit, acento DORADO en el contraluz',
+    prompt: 'Foto en la cancha bajo la lluvia de noche: gotas recortadas por el contraluz de los reflectores, charcos y reflejos en el césped, pelo y camisetas mojadas, épica de partido difícil.' },
+  { id: 'ATARDECER',
+    label: 'Campaña — Hora dorada',
+    palette: 'atardecer, sol bajo y rasante, cielo naranja y violeta, sombras largas sobre el césped, acento DORADO natural',
+    prompt: 'Foto en la cancha al atardecer: sol bajo que entra rasante, sombras larguísimas, halo dorado en el pelo y los hombros, estadio a medio llenar.' },
+  { id: 'PRECALENTAMIENTO',
+    label: 'Campaña — Precalentamiento',
+    palette: 'estadio llenándose antes del partido, reflectores recién encendidos, último resto de luz del cielo, acento DORADO',
+    prompt: 'Foto del precalentamiento: jugadores trotando, estirando, haciendo pases cortos o saltos, el estadio llenándose detrás, energía de los minutos previos.' },
+  { id: 'TRIBUNA_VACIA',
+    label: 'Campaña — Estadio vacío',
+    palette: 'tribunas vacías de butacas, parte de los reflectores apagados, luz fría y lateral, silencio, acento DORADO mínimo',
+    prompt: 'Foto en el estadio vacío después del partido o de noche tarde: butacas vacías, la mitad de las luces apagadas, jugadores sentados en el césped o caminando solos, clima de reflexión.' },
 ];
+
+// Cámara del día (Juan, 2026-11-07): antes el encuadre era siempre el mismo (plano general a la altura
+// de los ojos, regla del 29/10) y las fotos salían planas. Ahora se rota la toma como el gesto, y cada
+// una dice qué lente, desde dónde y qué hay delante y detrás. `n` = cantidad de jugadores que le sienta.
+const PLANOS = [
+  { id: 'TELE_TRIBUNA',    n: [1, 3], desc: 'teleobjetivo 200mm desde la tribuna o el costado: fondo comprimido y muy desenfocado, una red, una baranda o cabezas fuera de foco cruzando el borde inferior del cuadro' },
+  { id: 'BAJO_CESPED',     n: [1, 4], desc: 'cámara baja casi a ras del piso (contrapicado suave), gran angular 24mm, el césped o el piso desenfocado en primer plano y los reflectores o el techo detrás de los jugadores' },
+  { id: 'ENTRE_JUGADORES', n: [3, 5], desc: '35mm documental desde adentro del grupo: la espalda o el hombro de un jugador, desenfocado, ocupa un costado del primer plano; el protagonista nítido en el medio; los demás más atrás' },
+  { id: 'ESPALDA',         n: [2, 4], desc: 'desde atrás y por sobre los hombros de los jugadores, mirando lo mismo que ellos (la cancha, la tribuna, la salida del túnel); caras de perfil o girando hacia cámara' },
+  { id: 'MEDIO_CERCANO',   n: [1, 2], desc: 'plano medio cercano, de la cintura para arriba, 85mm f/1.8: fondo totalmente desenfocado con bokeh de luces, la expresión de la cara es el centro de la foto' },
+  { id: 'GENERAL_ABIERTO', n: [3, 5], desc: 'plano general abierto con gran angular: los jugadores ocupan poco del cuadro y el lugar cuenta la historia (estadio enorme, túnel larguísimo), con un objeto cercano en primer plano (banderín, red, pelota, bolso)' },
+  { id: 'DETALLE_FONDO',   n: [2, 4], desc: 'detalle nítido en primer plano (botines atándose, manos que se chocan, guantes, la pelota bajo el pie) y los jugadores enteros detrás, un poco desenfocados pero reconocibles' },
+  { id: 'PICADO_SUAVE',    n: [3, 5], desc: 'picado suave desde 3 o 4 metros de altura (como desde la primera bandeja): jugadores en ronda o en diagonal, sombras largas en el piso, nada de foto cenital' },
+  { id: 'CAMARA_EN_MANO',  n: [2, 4], desc: 'cámara en mano siguiendo el movimiento: leve barrido en el fondo y en brazos y piernas, el protagonista nítido, encuadre levemente imperfecto de instante robado' },
+];
+const PLANO_REPEAT_WINDOW = 4;
+
+// Cantidad de jugadores según la toma que eligió la nota (antes eran siempre 5).
+const CANTIDAD_POR_TOMA = {
+  FIGURA_RETRATO: [1, 1], ACCION_GOL: [1, 2], FESTEJO_GOL: [2, 4], PITAZO_FINAL: [2, 4],
+  SALUDO_HINCHADA: [3, 5], TUNEL_VUELTA: [3, 5], VESTUARIO_FESTEJO: [4, 5],
+};
+const MAX_EN_FOTO = 5;
+const azar = arr => arr[Math.floor(Math.random() * arr.length)];
+
+function rangoCantidad(draft = {}, nProtagonistas = 1) {
+  const brief = (draft.imageBrief || '').toLowerCase();
+  let [lo, hi] = CANTIDAD_POR_TOMA[draft.toma]
+    || (/derrota|ca[ií]da|consuel|cabizbaj|bronca/.test(brief) ? [1, 3]
+      : /retrato|primer plano/.test(brief) ? [1, 2]
+      : [1, MAX_EN_FOTO]);
+  lo = Math.min(MAX_EN_FOTO, Math.max(lo, nProtagonistas, 1));
+  hi = Math.min(MAX_EN_FOTO, Math.max(hi, lo));
+  return [lo, hi];
+}
+
+// Elige cámara y cantidad de jugadores, rotando contra los últimos días (campos `plano` y `n` del historial).
+function pickPlano(history, draft = {}, nProtagonistas = 1) {
+  const [lo, hi] = rangoCantidad(draft, nProtagonistas);
+  const recientes = new Set(history.filter(h => h.plano).slice(0, PLANO_REPEAT_WINDOW).map(h => h.plano));
+  const encaja = p => p.n[0] <= hi && p.n[1] >= lo;
+  const compatibles = PLANOS.filter(encaja);
+  const frescos = compatibles.filter(p => !recientes.has(p.id));
+  const plano = azar(frescos.length ? frescos : compatibles.length ? compatibles : PLANOS);
+  const desde = Math.max(lo, plano.n[0]), hasta = Math.min(hi, plano.n[1]);
+  const opciones = [];
+  for (let k = Math.min(desde, hasta); k <= Math.max(desde, hasta); k++) opciones.push(k);
+  const ultimo = history.find(h => h.n)?.n;
+  const sinRepetir = opciones.filter(k => k !== ultimo);
+  return { plano, n: azar(sinRepetir.length ? sinRepetir : opciones) };
+}
 
 // Bloque de identidad visual constante — se inyecta en TODOS los prompts de generación.
 function brandFormatBlock() {
@@ -335,6 +411,8 @@ async function fetchStyleHistory() {
       date:  v.mapValue.fields.date.stringValue,
       gesto: v.mapValue.fields.gesto?.stringValue || null,
       toma:  v.mapValue.fields.toma?.stringValue || null,
+      plano: v.mapValue.fields.plano?.stringValue || null,
+      n:     v.mapValue.fields.n?.integerValue != null ? Number(v.mapValue.fields.n.integerValue) : null,
     }));
   } catch { return []; }
 }
@@ -344,13 +422,13 @@ async function fetchStyleHistory() {
 // cae al pool completo (la rotación anti-repetición siempre manda).
 const STYLE_AFFINITY = [
   { match: (d, t) => /victoria|triunfo|goleada|ganamos|campe[oó]n|ascenso/.test(t),
-    styles: ['ESTADIO_NOCHE', 'ACCION_PARTIDO', 'VESTUARIO'] },
+    styles: ['ESTADIO_NOCHE', 'ACCION_PARTIDO', 'VESTUARIO', 'LLUVIA', 'ATARDECER', 'BANCO'] },
   { match: (d, t) => /derrota|perdimos|ca[ií]da|golpe/.test(t),
-    styles: ['VESTUARIO', 'TUNEL', 'RETRATO_EDITORIAL'] },
+    styles: ['VESTUARIO', 'TUNEL', 'RETRATO_EDITORIAL', 'TRIBUNA_VACIA', 'LLUVIA'] },
   { match: (d, t) => /entrevista|mano a mano|nos cont[oó]/.test(t) || (d.category || '') === 'Entrevista',
-    styles: ['RETRATO_EDITORIAL', 'CAMPANA_ESTUDIO', 'VESTUARIO'] },
+    styles: ['RETRATO_EDITORIAL', 'CAMPANA_ESTUDIO', 'VESTUARIO', 'ENTRENAMIENTO'] },
   { match: (d, t) => /previa|esta noche|hoy juega|se juega hoy/.test(t),
-    styles: ['TUNEL', 'ESTADIO_NOCHE'] },
+    styles: ['TUNEL', 'ESTADIO_NOCHE', 'PRECALENTAMIENTO', 'VESTUARIO'] },
   { match: (d, t) => (d.category || '') === 'Institución' || /kits?|indumentaria|camiseta|marca|aniversario/.test(t),
     styles: ['CAMPANA_ESTUDIO', 'RETRATO_EDITORIAL'] },
 ]
@@ -363,6 +441,12 @@ const STYLE_FROM_BRIEF = [
   { re: /estudio/,                                             style: 'CAMPANA_ESTUDIO' },
   { re: /t[uú]nel/,                                            style: 'TUNEL' },
   { re: /vestuario|casilleros/,                                style: 'VESTUARIO' },
+  { re: /banco de suplentes|\bbanco\b|suplentes/,              style: 'BANCO' },
+  { re: /entrenamiento|pr[aá]ctica|predio/,                    style: 'ENTRENAMIENTO' },
+  { re: /lluvia|llueve|bajo el agua/,                          style: 'LLUVIA' },
+  { re: /atardecer|hora dorada|sol bajo/,                      style: 'ATARDECER' },
+  { re: /precalentamiento|entrada en calor/,                   style: 'PRECALENTAMIENTO' },
+  { re: /estadio vac[ií]o|tribunas? vac[ií]as?/,               style: 'TRIBUNA_VACIA' },
   { re: /(festej|celebr|gol|remate|corr|abraz|euforia|en juego|jugada|disput)/, style: 'ACCION_PARTIDO', also: /cancha|c[eé]sped|estadio|reflector|partido/ },
   { re: /cancha|c[eé]sped|estadio|reflector|tribuna/,          style: 'ESTADIO_NOCHE' },
   { re: /retrato|primer plano|plano cercano/,                  style: 'RETRATO_EDITORIAL' },
@@ -394,13 +478,15 @@ function pickStyle(history, draft = {}) {
 
 // `toma`: qué foto de prensa eligió la rutina para la nota (FESTEJO_GOL, PITAZO_FINAL, VESTUARIO_FESTEJO…,
 // campo `toma` del draft). Se guarda acá para que la rutina no repita la misma toma en victorias seguidas.
-async function saveStyleHistory(styleId, date, history, gestoId = null, toma = null) {
-  const updated = [{ style: styleId, date, gesto: gestoId, toma }, ...history].slice(0, 10);
+async function saveStyleHistory(styleId, date, history, gestoId = null, toma = null, plano = null, n = null) {
+  const updated = [{ style: styleId, date, gesto: gestoId, toma, plano, n }, ...history].slice(0, 10);
   const values = updated.map(e => ({ mapValue: { fields: {
     style: { stringValue: e.style },
     date:  { stringValue: e.date  },
     ...(e.gesto ? { gesto: { stringValue: e.gesto } } : {}),
     ...(e.toma  ? { toma:  { stringValue: e.toma  } } : {}),
+    ...(e.plano ? { plano: { stringValue: e.plano } } : {}),
+    ...(e.n     ? { n:     { integerValue: String(e.n) } } : {}),
   }}}));
   await fetch(FIRESTORE_STYLE_HISTORY, {
     method: 'PATCH',
@@ -465,15 +551,13 @@ function selectFeaturedPlayers(allMentioned, featuredHistory, draft = {}) {
 // escena, ChatGPT inventaba jugadores genéricos que no son del club. Ahora esos compañeros son
 // jugadores REALES con render adjunto (los que hace más que no salen; nunca arqueros, que irían de
 // naranja en un festejo de campo). Si el brief no pide compañeros, en la escena no hay nadie más.
-const MAX_TEAMMATES = 2;
-const FOTO_JUGADORES = 5;
-function selectTeammates(featured, featuredHistory, draft = {}, mentionedInNote = []) {
-  const brief = (typeof draft.imageBrief === 'string' ? draft.imageBrief : '').toLowerCase();
-  // Juan, 2026-10-29: "siempre hay 5 jugadores en la foto" — se completa siempre hasta FOTO_JUGADORES.
+// Juan, 2026-10-29 pidió "siempre 5 jugadores"; el 2026-11-07 lo dio vuelta ("no puede ser que siempre
+// haya 5 jugadores"): ahora se completa hasta `total`, que sale de pickPlano() (1 a 5 según la toma).
+function selectTeammates(featured, featuredHistory, draft = {}, mentionedInNote = [], total = featured.length) {
   const lastFeatured = new Map();
   featuredHistory.forEach((e, i) => { if (!lastFeatured.has(e.player)) lastFeatured.set(e.player, i); });
   const recency = p => lastFeatured.has(p) ? lastFeatured.get(p) : Infinity;
-  const slots = Math.max(0, FOTO_JUGADORES - featured.length);
+  const slots = Math.max(0, total - featured.length);
   // Primero los otros jugadores que nombra la nota; después, los que hace más que no salen.
   const pool = PLAYERS_WITH_RENDERS.filter(p => !featured.includes(p) && !GOALKEEPERS.includes(p));
   const inNote = pool.filter(p => mentionedInNote.includes(p));
@@ -654,10 +738,12 @@ function buildScene(draft, mentionedPlayers) {
   };
 }
 
-function buildPrompt(draft, mentionedPlayers, style, kit, correction = null, teammates = [], gesto = null) {
+function buildPrompt(draft, mentionedPlayers, style, kit, correction = null, teammates = [], gesto = null, plano = null) {
   const { scene, action } = buildScene(draft, mentionedPlayers);
   const isSeleccion = /^selecc/i.test(draft.category || '');
   const everyone = [...mentionedPlayers, ...teammates];
+  const toma = plano || PLANOS[0];
+  const cuantos = everyone.length;
 
   const playerBlock = mentionedPlayers.length > 0
     ? `JUGADORES MENCIONADOS EN ESTA NOTICIA (son nuestros jugadores):
@@ -691,12 +777,15 @@ ${brandFormatBlock()}
 
 ═══ LA ESCENA (lo más importante) ═══
 ${scene}
-⚠️ Esta escena sale de la noticia y MANDA: respetá el lugar, la acción, la emoción y cuántos jugadores aparecen. Tiene que ser una foto con VIDA — gente haciendo algo, expresiones reales, cuerpo en movimiento o en tensión — no una pose quieta de catálogo, salvo que la escena pida explícitamente un retrato.
+⚠️ Esta escena sale de la noticia y MANDA en el lugar, la acción y la emoción (cuántos jugadores aparecen y desde dónde se saca la foto lo fija CÁMARA DE HOY, abajo). Tiene que ser una foto con VIDA — gente haciendo algo, expresiones reales, cuerpo en movimiento o en tensión — no una pose quieta de catálogo, salvo que la escena pida explícitamente un retrato.
 ${playerBlock}
 
-═══ REGLAS FIJAS DE LA FOTO (Juan, 2026-10-29) ═══
-- Aparecen EXACTAMENTE ${FOTO_JUGADORES} jugadores del club (los de la lista de arriba), ni más ni menos, todos enteros y reconocibles.
-- Encuadre fijo: plano general a plano entero, cámara a la altura de los ojos, toda la escena y los ${FOTO_JUGADORES} jugadores de cuerpo entero a la vista. PROHIBIDO el zoom, el primer plano, el plano detalle, el picado, el contrapicado, la vista aérea, el ángulo holandés o cualquier punto de vista inusual.
+═══ CÁMARA DE HOY (cambia todos los días — es lo que hace que esta foto no se parezca a las anteriores) ═══
+- Aparece${cuantos === 1 ? '' : 'n'} EXACTAMENTE ${cuantos} jugador${cuantos === 1 ? '' : 'es'} del club (los de la lista de arriba), ni más ni menos, reconocible${cuantos === 1 ? '' : 's'}.
+- Toma: ${toma.desc}.
+- PROFUNDIDAD OBLIGATORIA: la foto tiene tres planos — algo cerca de la cámara (desenfocado o en detalle), los jugadores, y un fondo que se aleja. Profundidad de campo real de lente, luz que modela los volúmenes (contraluz, luz lateral, rebotes), aire y atmósfera entre los planos.
+- Los jugadores a distintas distancias de la cámara y haciendo cosas distintas entre sí, nunca todos a la misma altura.
+- PROHIBIDO: la fila de jugadores parados uno al lado del otro frente a un fondo plano (foto de equipo, "como soldados"), todos mirando a cámara a la vez, la vista cenital desde arriba y el ángulo torcido exagerado.
 - Pelota: UNA sola en toda la imagen, o ninguna. Jamás dos pelotas.
 
 ═══ LUZ Y TRATAMIENTO ═══
@@ -1414,8 +1503,15 @@ async function main() {
 
   const allMentioned    = [...new Set([...extractMentionedPlayers(draft), ...PLAYERS_WITH_RENDERS.filter(p => (draft.imageBrief || '').includes(p))])];
   const featuredHistory = await fetchFeaturedHistory();
-  const mentioned       = selectFeaturedPlayers(allMentioned, featuredHistory, draft);
-  const teammates       = mentioned.length ? selectTeammates(mentioned, featuredHistory, draft, allMentioned) : [];
+  const styleHistory    = await fetchStyleHistory();
+  let   mentioned       = selectFeaturedPlayers(allMentioned, featuredHistory, draft);
+  // Cámara y cantidad de jugadores del día (rotan contra el historial). Sin brief, los protagonistas de la
+  // rotación se recortan a la cantidad elegida; con brief, los que nombra la nota siempre entran.
+  const briefNombra     = (draft.imageBrief || '').trim().length > 10;
+  const { plano: chosenPlano, n: enFoto } = pickPlano(styleHistory, draft, briefNombra ? mentioned.length : 1);
+  if (!briefNombra) mentioned = mentioned.slice(0, enFoto);
+  const teammates       = mentioned.length ? selectTeammates(mentioned, featuredHistory, draft, allMentioned, enFoto) : [];
+  if (mentioned.length) console.log(`Cámara del día: ${chosenPlano.id} · ${mentioned.length + teammates.length} jugador(es) en la foto`);
   if (teammates.length) console.log('Compañeros de fondo (renders reales):', teammates.join(', '));
   if (mentioned.length > 0) {
     console.log('Jugadores mencionados con renders:', allMentioned.join(', '));
@@ -1448,7 +1544,6 @@ async function main() {
 
   const dateStr      = draft.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
   const fileSlug     = (draft.id || dateStr).replace(/[^a-zA-Z0-9_-]/g, '-');
-  const styleHistory = await fetchStyleHistory();
   const chosenStyle  = pickStyle(styleHistory, draft);
   const kitHistory   = await fetchKitHistory();
   const chosenKit    = pickKitColor(kitHistory);
@@ -1500,7 +1595,7 @@ async function main() {
             page, draft, 'post', followUp, sendOpts
           ));
         } else {
-          const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction, teammates, chosenGesto);
+          const postPrompt = buildPrompt(draft, mentioned, chosenStyle, chosenKit, correction, teammates, chosenGesto, chosenPlano);
           // Referencias visuales adjuntas al mensaje: escudo Clean dorado + renders T4 de los
           // jugadores mencionados con el kit del día (el render ya tiene puesto el uniforme).
           // Sin jugadores: se adjunta el render de Juan_Martinez4 solo como referencia del kit.
@@ -1587,7 +1682,7 @@ async function main() {
       try { await stampCrest(path.join(OUTPUT_DIR, f), { fresh: true }); } catch (e) { console.warn('  No se pudo estampar el escudo en', f, e.message); }
     }
     await updateDraft(draft, lastPostFile, storyFile);
-    await saveStyleHistory(chosenStyle.id, dateStr, styleHistory, chosenGesto?.id, typeof draft.toma === 'string' ? draft.toma : null);
+    await saveStyleHistory(chosenStyle.id, dateStr, styleHistory, chosenGesto?.id, typeof draft.toma === 'string' ? draft.toma : null, mentioned.length ? chosenPlano.id : null, mentioned.length ? mentioned.length + teammates.length : null);
     await saveKitHistory(chosenKit.id, dateStr, kitHistory);
     if (mentioned.length > 0) await saveFeaturedHistory([...mentioned, ...teammates], dateStr, featuredHistory);
     await uploadImagesToR2(lastPostFile, storyFile);
@@ -1644,6 +1739,8 @@ export {
   buildPrompt,
   selectTeammates,
   pickGesto,
+  pickPlano,
+  PLANOS,
   buildScene,
   brandFormatBlock,
   playerIdentityLine,

@@ -70,3 +70,12 @@ La portada del 08/10 (NicoBJ_96) repitió la del 06/10 (nikileo527): de rodillas
 
 **8. Renders con escudo defectuoso**
 `Renders/NicoBJ_96/Gesto4.png` salió de ChatGPT con un escudo inventado (caja/casco amarillo) en camiseta y short; se emparchó con el Clean logo Dorado (original en `Renders/_descartes-gesto4/NicoBJ_96-escudo-mal.png`). `logos/noticias/plantel-t4/<gt>.webp` = recorte 1080×1350 desde y=120 de la base dorada de `fuentes/video-plantel/Gesto4/<gt>.png`, a 720×900. Al generar poses nuevas, mirar el escudo de cerca antes de usarlas.
+
+**9. Siempre 5 jugadores, mismo encuadre, sin profundidad (2026-11-07) — reemplaza la regla del 29/10**
+Juan: "no puede ser que siempre haya 5 jugadores en 5 fondos rotativos, con el mismo enfoque de cámaras, sin profundidad, sin vida". La regla del 2026-10-29 (exactamente 5 jugadores, plano general a la altura de los ojos, prohibidos primer plano/picado/contrapicado) queda **anulada**.
+
+**How to apply** (ya en `scripts/generate-image-chatgpt.mjs`):
+- `pickPlano()` elige la cámara del día de `PLANOS` (tele desde la tribuna, a ras del césped, entre jugadores, de espaldas, plano medio 85mm, general abierto, detalle en primer plano, picado suave, cámara en mano) sin repetir las últimas 4, y la cantidad de jugadores (1 a 5) según la `toma` de la nota (`CANTIDAD_POR_TOMA`), distinta de la del día anterior. Se guardan `plano` y `n` en `news/image_style_history`; la nota diaria los ve en `escenas_recientes`.
+- El prompt exige tres planos de profundidad (algo cerca de cámara, jugadores, fondo) y prohíbe la fila de jugadores frente a un fondo plano.
+- Lugares nuevos además de los 6 de siempre: banco de suplentes, entrenamiento de día, lluvia, atardecer, precalentamiento, estadio vacío (regex en `STYLE_FROM_BRIEF`, `LUGAR` y validador en `noticia-diaria.mjs`, lista en `noticia-diaria-encargo.md`). Un lugar nuevo tiene que entrar en los cuatro lados.
+- El encargo ya no pide 5 jugadores: la nota nombra 1 a 3 protagonistas y el sistema completa.
