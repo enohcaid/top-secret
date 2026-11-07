@@ -73,6 +73,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Referencias técnicas
 
+- [reference_bordado_dst](reference_bordado_dst.md) — Archivo .dst de bordado del logo Clean: cómo regenerarlo, formato DST, límite de tamaño y decisiones
 - [reference_beats_propios](reference_beats_propios.md) — Beats compuestos por código (historia: el tema del día pasó a Thrive el 2026-10-26) + herramientas de composición
 - [reference_ia_local](reference_ia_local.md) — IA de texto de las tareas automáticas (scripts/lib/ia.mjs): Claude en una llamada liviana (~1K tokens de contexto en vez de ~47K) + Ollama local de respaldo; comparación de modelos 2026-10-26 y por qué lo público sigue en Claude
 - [project_thrive](project_thrive.md) — Álbum Thrive: un tema con voz por noche a las 2:00 (scripts/beats/thrive.mjs), amor que no siempre hace bien, 2:30–3:30; The Shorts = los 23 temas anteriores en 2 volúmenes; /music por álbumes
