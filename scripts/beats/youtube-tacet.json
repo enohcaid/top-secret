@@ -186,6 +186,56 @@
       "miniatura": true,
       "ai": "yes",
       "generales": true
+    },
+    "mirror": {
+      "url": "https://youtu.be/tpK3PS-xEHo",
+      "titulo": "Mirror (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 7,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes",
+      "generales": true
+    },
+    "shadow": {
+      "url": "https://youtu.be/Zg8bUQQHmIg",
+      "titulo": "Shadow (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 8,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes",
+      "generales": true
+    },
+    "splinters": {
+      "url": "https://youtu.be/_B6CpzUKkYk",
+      "titulo": "Splinters (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 9,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes",
+      "generales": true
+    },
+    "before-the-sun": {
+      "url": "https://youtu.be/_xJSZT717vg",
+      "titulo": "Before the Sun (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 10,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes",
+      "generales": true
+    },
+    "scar": {
+      "url": "https://youtu.be/si3HltwuWsw",
+      "titulo": "Scar (Lyrics) - Tacet Sin",
+      "volumen": 2,
+      "pista": 11,
+      "visibilidad": "public",
+      "miniatura": true,
+      "ai": "yes",
+      "generales": true
     }
   }
 }
