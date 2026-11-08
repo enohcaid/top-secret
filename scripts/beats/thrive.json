@@ -1235,6 +1235,86 @@
       "generado": "2026-11-03T12:52:52.417Z",
       "letraFinal": "[Intro - instrumental]\n\n[Verse 1 - male rap]\nDull hum behind my eyes all day\nStale coffee sitting on my tongue (yeah)\nI check the phone, the screen is black\nCheck it again, nothing came back (again)\nThree a.m., the kitchen light stays on\nThumb on the glass like it's gonna ring\nBack then you picked up every time\nNow I just watch the minutes climb\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Verse 2 - male rap]\nShadows got longer on the wall\nCold crawling up inside my bones (no)\nThe line goes quiet, and it's worse\nChest pulled tight, I swallow, it hurts\nStaring at the six a.m. bus times\nFinger on the map, don't know where\nPockets empty, but my phone still lights (I know)\n'Cause you pick up, you're always there\n\n[Pre-Chorus - male rap]\nEvery time I called, you answered\nEvery single time, you answered\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Bridge - male rap]\nI will pay it forward, that's my word\nYour loyalty's a debt I carry\nNot a weight, it's a promise I keep\nWhen their world goes dark, I won't sleep\nI'm the light left on, I'm the phone that rings\nFirst ring, I'm there, that's what the debt brings (I know)\n\n[Chorus - female vocal]\nStill here, still mine, still here, still mine\nStill here, still mine, still here, still mine\nI owe you everything, every time\nStill here, still mine, still here, still mine\n\n[Outro - instrumental]",
       "publicado": true
+    },
+    {
+      "fecha": "2026-11-08",
+      "slug": "last-time-again",
+      "titulo": "Last Time Again",
+      "concepto": "Alguien que se jura que esta es la última vez y vuelve a caer en la noche que lo consume, con el alivio y la vergüenza mezclados en el mismo trago.",
+      "rasgo": "abstinencia y recaída",
+      "voz": "dúo: él rapea grave y rasposo, inquieto; ella solo en el estribillo y el puente, aireada y fantasmal en falsete",
+      "captionInstrumental": "dark trap, hypnotic trap, breathy minor-key flute melody, eerie music box accents, half-time drums, clap on beat three, distorted sliding 808 bass, skittering hi-hat rolls and triplets, foggy reverb, sparse, nocturnal, seductive, menacing, 136 BPM, C# minor",
+      "captionVoces": "male rapper leads, low gravelly voice, restless syncopated flow, half-spoken confessions; female voice only on hook and bridge, airy haunting falsetto, slow, reverb-drenched whispered doubles",
+      "bpm": 136,
+      "tonalidad": "C# minor",
+      "duracion": 143,
+      "estructura": [
+        "intro",
+        "verse",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "chorus"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 14.12,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 14.12,
+          "fin": 42.35,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 42.35,
+          "fin": 56.47,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 56.47,
+          "fin": 84.71,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 84.71,
+          "fin": 98.82,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 98.82,
+          "fin": 112.94,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 112.94,
+          "fin": 134.12,
+          "compases": 12
+        },
+        {
+          "nombre": "outro",
+          "inicio": 134.12,
+          "fin": 141.18,
+          "compases": 4
+        }
+      ],
+      "beat": "la flauta que se desafina al exhalar. Cada repeticion de la llamada pierde",
+      "instrumental": "codigo",
+      "letra": "[intro]\n\n[verse - male rap]\nDropped the key down the storm drain, watched it disappear\nHung my coat by the door, told the hallway I'm clean\nSun still up, I'm a statue, both hands flat on the table\nThen the streetlights hum on and my shoes know the scene\nTen past eleven, the stairwell breathes slow\nThumb keeps turning a key that isn't there\nDown the block, one window glowing like a held-out hand\nAnd the stool by the glass still warm, still bare\n\n[chorus - female]\nLast time, last time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[verse - male rap]\nDoor swings easy, oiled like it's been waiting all along\nWarm air on my face like a hand on my neck\nFirst sip slides down and my shoulders come off the hook\nMirror past the bottles, I don't check\nRelief and the sting in the same glass, no ice\nCount the dawn in the dregs while the cab light goes pale\nReceipt in my pocket folded small as a lie\nTomorrow I'll swear it again, and fail\n\n[chorus - male]\nLast time, last time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[bridge - female]\nGray light slips thin under the door\nI fold it like a shirt\nPut it in the drawer with the others\nStill smells like the night, still smells like hurt\n\n[chorus - male]\nLast time, last time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[chorus - female]\nLast time, last time, the dark said \"I know\"\nLast time again, here I go\n\n[outro - male]\nLast time. Yeah. Last time again.",
+      "letraPor": "claude",
+      "audio": "musica/thrive/last-time-again.mp3?v=mw7lffwl",
+      "generado": "2026-11-08T08:51:40.485Z",
+      "letraFinal": "[intro]\n\n[verse - male rap]\nDropped the key down the storm drain, watched it disappear\nHung my coat by the door, told the hallway I'm clean\nSun still up, I'm a statue, both hands flat on the table\nThen the streetlights hum on and my shoes know the scene\nTen past eleven, the stairwell breathes slow\nThumb keeps turning the key that isn't there\nDown the block, one window\nBlowing like a hell\nThe hand in the stool by the glass\nStill warm, still there\n\n[chorus - female]\nLast time\nLast time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[verse - male rap]\nDoor swings easy\nLike it's been waiting all along\nWarm air on my face like a hand on that\nFirst shift slides down\nAnd my shoulders come off the hook\nMirror plastic bottles\nI don't share\nRelief in the sten\nSing of the word\nOh, would it like a\nPut it in the drawer with the eye\n\n[chorus - male]\nLast time\nLast time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[bridge - female]\nGray light slips thin under the door\nI fold it like a shirt\nPut it in the drawer with the others\nStill smells like a\nStill smells like hurt\n\n[chorus - male]\nLast time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[chorus - female]\nLast time, the dark said \"I know\"\nLast time again, here I go\n\n[outro - male]\nLast time\nYeah\nYeah\nLast time\nYeah",
+      "publicado": false
     }
   ]
 }
