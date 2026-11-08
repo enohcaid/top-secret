@@ -13,7 +13,7 @@ Asphalt Ghosts le gustó, pero si todos se hacen igual, el oyente los mete en la
 | Referente | Qué tomar | Cómo lo hacemos acá |
 |---|---|---|
 | Metro Boomin | Espacio y contención: la batería manda; el bombo y el 808 forman un solo golpe; capas oscuras y cinematográficas; cambios de beat | Sidechain y 808 sobre el bombo (ya estaba). Ahora también el **cambio de beat** en la segunda mitad |
-| Travis Scott ("Sicko Mode") | "Tres temas en uno": dos cambios de beat bruscos, no graduales | `cambio`: una sección con otro kit, otra progresión y otra batería |
+| Travis Scott ("Sicko Mode") | "Tres temas en uno": dos cambios de beat bruscos, no graduales | ~~`cambio`: una sección con otro kit, otra progresión y otra batería~~ — **descartado el 2026-11-08** (Juan: las variaciones van dentro de la estructura, con el material del tema) |
 | Lex Luger / Southside (808 Mafia) | Orquestal y oscuro: metales, cuerdas, 808 enormes, hats rápidos | Kits `pesado`/`crudo` y textura de cuerdas para la energía *fiesta* y *furia* |
 | Pi'erre Bourne (Playboi Carti) | Sintes aireados y luminosos de videojuego, mínimo y repetitivo, 808 que rebota | Energía *flotante* y *rebote*; casting `agudo_jugueton` |
 | Mike WiLL Made-It / Murda Beatz | Rebote: espacio, bombo sincopado, groove bailable | Energía *rebote* (145–156) |
@@ -54,7 +54,7 @@ Están en `scripts/beats/thrive-album.mjs`. Cada tema toma un ángulo que no se 
 
 ### 3. Variación dentro del tema (intérprete y molde de Gemma)
 - El verso 2 no copia la batería del 1, y puede pasar el clap a 2 y 4: el mismo tempo se siente al doble.
-- Un **cambio de beat** en la segunda mitad (puente, un estribillo posterior o el outro): otro kit, otra progresión, otra batería.
+- ~~Un **cambio de beat** en la segunda mitad: otro kit, otra progresión, otra batería.~~ **Reemplazado el 2026-11-08:** un **desarrollo** en la segunda mitad con el material del propio tema (mismo kit, la progresión del verso o del estribillo, otra batería, la llamada transformada). Juan: "se tiene que respetar la estructura de la canción; las variaciones tienen que estar dentro de la estructura y formar parte de la canción". El código además rechaza un beat cuyas secciones no coinciden con la estructura planeada. Regla completa en [[feedback_composicion_musical]].
 - Transición **silencio**: la batería y el 808 salen en el último compás y entra la voz sola antes del estribillo.
 - Intro **radio**: filtrada, y después abre el beat.
 - La melodía no puede ser una escala recta: tiene que tener saltos, una nota repetida y un giro. Gemma eligió escalas en Asphalt Ghosts, Flicker y Still Here.

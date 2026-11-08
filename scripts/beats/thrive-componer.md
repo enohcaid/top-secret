@@ -12,6 +12,13 @@ You are the beatmaker of the album "Thrive" by Tacet Sin. Write, as Python code,
 - Previous Thrive beats (sound different from them: main instrument, texture, groove):
 {{ANTERIORES}}
 
+## Variation inside the structure (the artist, 2026-11-08)
+"Respect the structure of the song; variations must be inside the structure and be part of the song, never completely different from what the song has been doing."
+- The sections come exactly in the planned order (below); SECCIONES lists exactly those, nothing added, nothing missing.
+- ONE musical world for the whole song: the same key, the verse progression and the chorus progression (re-voiced, inverted or with another harmonic rhythm is fine; a new progression is not), the same drum kit sounds and the same lead instruments. No beat switch into "another song", no instrument that has not been heard before.
+- Every chorus is recognisably the same chorus; verse 2 keeps verse 1's groove with changes (another hat or 808 rhythm with the same sounds, one layer added or removed).
+- Variation comes from arrangement: density, register (the call an octave up/down, at half speed, mirrored), drop-outs before a chorus, clap moving to 2 and 4, a counter-melody played by an instrument already in the song. The bridge is the song stripped down (e.g. the chorus progression without kick, the call at half speed), not a new beat. Make the changes big in density and register so the singing model does not flatten them.
+
 ## The artist's rules for composing (they override everything)
 {{REGLAS}}
 

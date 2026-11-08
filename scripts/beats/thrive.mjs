@@ -270,6 +270,9 @@ function controlarBeat(secciones) {
   const err = [], d = dur(WAV);
   if (Math.abs(d - tema.duracion) > 12) err.push(`dura ${Math.round(d)} s y tiene que durar ${tema.duracion} s (±8)`);
   if (!secciones.length || !secciones.some(s => s.nombre === 'chorus')) err.push('SECCIONES no declara ningún chorus');
+  // respetar la estructura (Juan, 2026-11-08): "Last Time Again" planeó 7 secciones y el beat agregó un outro
+  const nombres = secciones.map(s => s.nombre).join(', '), plan = (tema.estructura || []).join(', ');
+  if (plan && nombres !== plan) err.push(`SECCIONES declara [${nombres}] y la estructura planeada es [${plan}]: mismas secciones, mismo orden, sin agregar ni sacar`);
   const med = secciones.map(s => ({ ...s, l: lufs(WAV, s.inicio, Math.max(s.inicio + 1, s.fin)) }));
   const coro = Math.max(...med.filter(s => s.nombre === 'chorus').map(s => s.l));
   for (const s of med) {

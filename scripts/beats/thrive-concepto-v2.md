@@ -16,7 +16,7 @@ The tempo comes from the angle's energy (the drums are half-time, so 140 BPM fee
 ## What makes a song of this album good (the artist, 2026-11-01)
 - RELATABLE: the listener has to see their own life in it. Universal situations in plain words. No exotic plot, no named city, no job title, no year, no sci-fi.
 - NOT REPETITIVE: this song must not sound like the previous ones (below). Different energy, different voices, different colour.
-- ALIVE: it changes inside itself: the beat switches, the drums drop out before a chorus, the second verse is not a copy of the first.
+- ALIVE: it changes inside itself, always with its own material (never a switch into another beat): the drums drop out before a chorus, the second verse is not a copy of the first, the bridge strips the chorus down.
 - It is TRAP: 808s, hi-hats, half-time snare. Never pop, never synth-pop.
 
 ## Previous songs (do not repeat their title, their mood or their sound)

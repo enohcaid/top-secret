@@ -20,8 +20,8 @@
 // con opciones cerradas — el código no corrige su música.
 // Las partituras aprobadas quedan en scripts/beats/partituras/<slug>.json: el control de originalidad compara contra ellas.
 // Variación dentro del tema (Juan, 2026-11-01: "el ser humano necesita cosas que lo estimulen permanentemente incluso
-// dentro de un mismo tema"): el verso 2 no repite la batería del 1 (y puede pasar el clap a 2 y 4), hay un cambio de beat
-// (otro kit, otra progresión, otros patrones) en una sección de la segunda mitad, el "silencio" (batería y 808 afuera en
+// dentro de un mismo tema"): el verso 2 no repite la batería del 1 (y puede pasar el clap a 2 y 4), hay un desarrollo en
+// una sección de la segunda mitad (desde 2026-11-08 con el material del tema: mismo kit, progresión del verso o del estribillo, otra batería), el "silencio" (batería y 808 afuera en
 // el último compás) entra como transición, y la intro puede sonar filtrada (radio). Y la melodía no puede ser una escala recta.
 import fs from 'fs';
 import path from 'path';
@@ -192,8 +192,11 @@ export function leer(j, { bpm, tonalidad, plan }) {
   P.bajos.verso2 = aTokens(linea808(BOMBOS[j.verso2.bombo], j.verso.figura_808, false));
   P.baterias.cambio = { bombo: BOMBOS[j.cambio.bombo], hats: HATS[j.cambio.hats], abierto: ABIERTOS.contratiempo };
   P.bajos.cambio = aTokens(linea808(BOMBOS[j.cambio.bombo], j.estribillo.figura_808, true));
-  P.progresiones.cambio = PROGRESIONES[j.cambio.progresion];
-  P.kits = { cambio: { ...KITS[j.cambio.kit] } };
+  // el desarrollo de la segunda mitad usa el material del tema (Juan, 2026-11-08: "las variaciones tienen que estar dentro
+  // de la estructura y formar parte de la canción"): mismo kit y la progresión del verso o la del estribillo, nunca una nueva
+  const propias = [j.progresion_verso, j.progresion_estribillo];
+  P.progresiones.cambio = PROGRESIONES[propias.includes(j.cambio.progresion) ? j.cambio.progresion : j.progresion_estribillo];
+  P.kits = { cambio: { ...KITS[j.kit] } };
   armarSecciones(P, plan);
   return P;
 }
@@ -239,9 +242,8 @@ export function criticar(P, { slug }) {
   if (escala(j.llamada.notas)) mal('llamada', 'the call melody is a straight scale run (step by step in one direction): a melody needs leaps, repeated notes and turns');
   if (escala(j.respuesta.notas)) mal('respuesta', 'the answer melody is a straight scale run: it needs leaps, repeated notes and turns');
   if (j.verso2.bombo === j.verso.bombo && j.verso2.hats === j.verso.hats && j.verso2.clap !== 'doble') mal('verso2', 'verse 2 drums are a copy of verse 1');
-  if (j.cambio.kit === j.kit) mal('cambio', 'the beat switch uses the same kit as the rest of the song');
-  if ([j.progresion_verso, j.progresion_estribillo].includes(j.cambio.progresion)) mal('cambio', 'the beat switch uses a progression the song already has');
-  if (j.cambio.bombo === j.estribillo.bombo && j.cambio.hats === j.estribillo.hats) mal('cambio', 'the beat switch drums are the same as the chorus');
+  if (![j.progresion_verso, j.progresion_estribillo].includes(j.cambio.progresion)) mal('cambio', 'the second-half development brings in a new progression: it must reuse the verse or the chorus progression (variations stay inside the song)');
+  if (j.cambio.bombo === j.estribillo.bombo && j.cambio.hats === j.estribillo.hats && j.cambio.clap !== 'doble') mal('cambio', 'the second-half development has the same drums as the chorus: change the kick/hat pattern or move the clap to 2 and 4');
   for (const a of anteriores(slug)) {
     if (a.motivos?.llamada && parecido(nums(P.motivos.llamada), nums(a.motivos.llamada)) > 0.7) mal('llamada', `the call melody is too similar to the one of the earlier song "${a.slug}"`);
     if (a.molde && a.molde.progresion_verso === j.progresion_verso && a.molde.progresion_estribillo === j.progresion_estribillo) mal('progresion_estribillo', `the same pair of progressions as the earlier song "${a.slug}"`);
@@ -291,8 +293,8 @@ export async function reintentar(P, fallas, tema, plan, log = () => {}) {
     log(`      verso 2: bombo ${r.bombo}, hats ${r.hats}, clap ${r.clap}`);
   }
   if (partes.has('cambio')) {
-    const kits = Object.keys(KITS).filter(k => k !== j.kit), progs = Object.keys(PROGRESIONES).filter(k => ![j.progresion_verso, j.progresion_estribillo].includes(k));
-    const r = await preguntar(`${ctx}\nThe BEAT SWITCH (one section of the second half that suddenly becomes another beat) was rejected: ${fallas.filter(f => f.parte === 'cambio').map(f => f.error).join('; ')}. The song uses kit "${j.kit}", progressions ${j.progresion_verso} / ${j.progresion_estribillo}, chorus drums ${j.estribillo.bombo} / ${j.estribillo.hats}. Choose a switch that sounds like a different beat.\nKits: ${kits.join(', ')}\nProgressions: ${progs.join(', ')}\nKicks: ${Object.keys(BOMBOS).join(', ')}\nHats: ${Object.keys(HATS).join(', ')}\nAnswer JSON {"kit": "...", "progresion": "...", "bombo": "...", "hats": "...", "clap": "medio|doble"}.`,
+    const kits = [j.kit], progs = [...new Set([j.progresion_verso, j.progresion_estribillo])];
+    const r = await preguntar(`${ctx}\nThe SECOND-HALF DEVELOPMENT (one section of the second half that transforms the song with its own material: same kit, the verse or chorus progression, new drum pattern) was rejected: ${fallas.filter(f => f.parte === 'cambio').map(f => f.error).join('; ')}. The song uses kit "${j.kit}", progressions ${j.progresion_verso} / ${j.progresion_estribillo}, chorus drums ${j.estribillo.bombo} / ${j.estribillo.hats}. Choose a development that is clearly noticeable but still the same song.\nKits: ${kits.join(', ')}\nProgressions: ${progs.join(', ')}\nKicks: ${Object.keys(BOMBOS).join(', ')}\nHats: ${Object.keys(HATS).join(', ')}\nAnswer JSON {"kit": "...", "progresion": "...", "bombo": "...", "hats": "...", "clap": "medio|doble"}.`,
       obj({ kit: { type: 'string', enum: kits }, progresion: { type: 'string', enum: progs }, bombo: de(BOMBOS), hats: de(HATS), clap: { type: 'string', enum: CLAPS } }), 1.0);
     Object.assign(j.cambio, r);
     log(`      cambio de beat: kit ${r.kit}, ${r.progresion}, ${r.bombo}/${r.hats}, clap ${r.clap}`);
