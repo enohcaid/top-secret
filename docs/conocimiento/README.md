@@ -8,6 +8,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 - [feedback_no_repetir](feedback_no_repetir.md) — Juan 2026-10-27: no repetir conceptos, lugares ni composiciones en poco tiempo (dos noticias seguidas con el equipo en el túnel); cada proceso recibe lo reciente y lo controla con código
 - [feedback_contenido_visual_motion](feedback_contenido_visual_motion.md) — Regla de Juan: el contenido de redes se tiene que ver de otro nivel; videos con motion design sincronizado a la música (60 fps, desenfoque); el club se comunica por audio, no por chat
+- [feedback_no_publicar_music](feedback_no_publicar_music.md) — 2026-11-07: nunca poner topsecret.ar/music en nada publicado; para mandar a escuchar, el canal youtube.com/@tacetsin
 - [feedback_musica_the_shorts](feedback_musica_the_shorts.md) — Desde 2026-10-28 toda la música (videos, video del equipo, pausa del vivo) son los temas cantados de The Shorts de Tacet Sin; rotan sin repetir los últimos 8; rótulo en pantalla + crédito en el texto; nada de Anno Domini
 - [feedback_11x11_two_schedule_sources](feedback_11x11_two_schedule_sources.md) — 11x11 (and other) fixture dates in top-secret live in TWO separate places that must both be edited to actually change what the site shows
 - [feedback_always_push](feedback_always_push.md) — User wants every git commit in top-secret pushed to main immediately, no confirmation needed

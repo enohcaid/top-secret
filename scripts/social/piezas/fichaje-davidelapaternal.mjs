@@ -122,7 +122,7 @@ const lote = {
   ],
 };
 let avisos = 0;
-for (const p of lote.piezas) for (const r of revisarPieza({ ...p, texto: p.texto && p.musica ? `${p.texto}\n\nMúsica: "${p.musica}" — Tacet Sin (The Shorts) · topsecret.ar/music` : p.texto }, lote)) { avisos++; log(`  aviso ${p.id}: ${r.msg}`); }
+for (const p of lote.piezas) for (const r of revisarPieza({ ...p, texto: p.texto && p.musica ? `${p.texto}\n\nMúsica: "${p.musica}" — Tacet Sin (The Shorts)` : p.texto }, lote)) { avisos++; log(`  aviso ${p.id}: ${r.msg}`); }
 if (avisos) throw new Error(`${avisos} avisos del revisor: corregir antes de cargar el lote.`);
 await agregarLote(lote);
 log('Lote cargado: ' + lote.id);

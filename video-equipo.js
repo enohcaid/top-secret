@@ -112,7 +112,7 @@
     }
     return t;
   }
-  const creditoTexto = t => `Música: "${t.titulo}" — Tacet Sin (The Shorts) · topsecret.ar/music`;
+  const creditoTexto = t => `Música: "${t.titulo}" — Tacet Sin (The Shorts)`;
 
   async function musica(durS, tema) {
     if (!window.AudioEncoder || !tema) return null;

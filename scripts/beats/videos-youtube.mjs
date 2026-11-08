@@ -229,7 +229,7 @@ function correr(args, cwd) { const r = spawnSync(ffmpeg, args, { cwd, encoding: 
 function descripcion(t, tt) {
   // la misma letra que se ve en el video; una pausa larga separa estrofas
   const letra = tt.lineas.map((l, i) => (i && l.ini - tt.lineas[i - 1].fin > 3 ? '\n' : '') + l.texto).join('\n');
-  return `${t.titulo} (Lyrics) - Tacet Sin\n\n"${t.titulo}" — Tacet Sin\nThe Shorts, Vol. ${t.volumen} · Track ${t.pista}\n\nFull album: https://topsecret.ar/music\n\nLYRICS\n\n${letra}\n\n#TacetSin #TheShorts #${t.titulo.replace(/[^A-Za-z0-9]/g, '')}\n`;
+  return `${t.titulo} (Lyrics) - Tacet Sin\n\n"${t.titulo}" — Tacet Sin\nThe Shorts, Vol. ${t.volumen} · Track ${t.pista}\n\nLYRICS\n\n${letra}\n\n#TacetSin #TheShorts #${t.titulo.replace(/[^A-Za-z0-9]/g, '')}\n`;
 }
 
 async function video(t, tiemposTodos) {

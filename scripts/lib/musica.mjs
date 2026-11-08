@@ -53,7 +53,7 @@ export function infoTema(ruta) {
   try { const t = lista().find(x => x.slug === slug); if (t) return t; } catch {}
   return { slug, titulo: slug, volumen: null };
 }
-export const creditoTexto = titulo => `Música: "${titulo}" — ${ARTISTA} (The Shorts) · topsecret.ar/music`;
+export const creditoTexto = titulo => `Música: "${titulo}" — ${ARTISTA} (The Shorts)`;
 
 // Tarjeta "Sonando ahora" (rotulo-tema.js en la raíz, la misma que dibuja video-equipo.js en el navegador): queda
 // todo el video en la franja de arriba. Cuadros PNG transparentes de esa franja (ancho del video), a 30 fps, dibujados
