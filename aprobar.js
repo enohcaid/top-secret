@@ -181,6 +181,9 @@
   // Tema descartado (Juan, 2026-11-09): se ve como en /music, solo reproducción y letra
   const letraDescarte = t => esc(String(t || '').replace(/^Historia:[^\n]*\n\n/, ''))
     .replace(/^\[([^\]]+)\][ \t]*\n?/gm, (_, s) => `<span class="sec">${s}</span>`).replace(/\n{2,}/g, '\n');
+  let tapaOrigen = null;
+  const cerrarTapa = () => { document.getElementById('visor').classList.remove('on'); tapaOrigen?.focus(); };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarTapa(); });
   const letrasAbiertas = new Set();   // la página se redibuja cada 20 s: la letra abierta tiene que seguir abierta
   function descarte(l, i) {
     const letra = l.piezas.find(p => p.id === 'letra')?.detalle || '';
@@ -313,7 +316,7 @@
       const m = e => por[e].filter(esMus);
       cuerpo = bloque('Demos para escuchar', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, sale de acá y queda en /music, en Thrive. Si no tiene arreglo, "Descartar tema" lo guarda en Discards, abajo.', m('aprobar'), 'No hay demos esperando.')
         + (m('programadas').length ? bloque('En revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Demos para escuchar".', m('programadas'), '') : '')
-        + (m('descartes').length ? `<div class="discards-cab"><img src="${WORKER}/media/musica/portadas/discards.webp?v=1" alt="Portada de Discards" onerror="this.remove()"><div>`
+        + (m('descartes').length ? `<div class="discards-cab"><button class="tapa" data-tapa="${WORKER}/media/musica/portadas/discards.webp?v=1" aria-label="Ver la portada de Discards más grande" style="background-image:url('${WORKER}/media/musica/portadas/discards.webp?v=1')"></button><div>`
           + '<h2 class="seccion">Discards</h2><p class="seccion-sub">Temas descartados: no se rehacen ni se publican. Quedan acá para un futuro disco de descartes.</p>'
           + `</div></div>${m('descartes').map(lote).join('')}` : '');
     } else {
@@ -389,6 +392,10 @@
         .then(() => aviso('Pedido enviado: la nota nueva vuelve acá en unos 15 minutos'))
         .catch(err => { rh.disabled = false; aviso(err.message); });
     }
+    // portada en grande, como en /music: clic en la tapa; se cierra con clic, Esc o la ×
+    const tp = e.target.closest('[data-tapa]');
+    if (tp) { tapaOrigen = tp; document.getElementById('visor-img').src = tp.dataset.tapa; document.getElementById('visor').classList.add('on'); document.querySelector('#visor button').focus(); return; }
+    if (e.target.closest('#visor')) return cerrarTapa();
     const dlt = e.target.closest('button[data-d-letra]');
     if (dlt) {
       const el = dlt.closest('.d-tema'), on = el.classList.toggle('con-letra');
