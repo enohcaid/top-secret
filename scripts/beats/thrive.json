@@ -1033,7 +1033,8 @@
         "voces": 4845,
         "letraFinal": 0
       },
-      "publicado": false
+      "publicado": false,
+      "descartado": true
     },
     {
       "id": "2026-11-03-album",
