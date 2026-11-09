@@ -107,8 +107,9 @@ client.on('ready', async () => {
         return el ? (el.closest('li,[role=button],[role=menuitem]') || el) : null;
       });
       if (!item.asElement()) {
-        const opciones = await p.evaluate(() => [...document.querySelectorAll('[role=menuitem], [role=application] li, li')]
-          .map(e => (e.innerText || '').trim()).filter(Boolean).slice(0, 15));
+        const opciones = await p.evaluate(() => [...document.querySelectorAll('[role=menuitem], [role=application] li, li, [role=button]')]
+          .map(e => (e.getAttribute('aria-label') || e.innerText || '').trim()).filter(Boolean).slice(0, 25));
+        await p.screenshot({ path: path.join(ROOT, 'fuentes', 'wa-enviar-sin-menu.png') }).catch(() => {});
         throw new Error(`no encontré "Fotos y videos" en el menú Adjuntar (opciones: ${opciones.join(' | ') || 'ninguna'})`);
       }
       const [selector] = await Promise.all([p.waitForFileChooser({ timeout: 15000 }), item.asElement().click()]);
