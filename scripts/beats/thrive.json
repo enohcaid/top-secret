@@ -127,7 +127,8 @@
       "tiempos": {
         "voces": 1586,
         "letraFinal": 0
-      }
+      },
+      "descartado": true
     },
     {
       "id": "2026-10-27-2",
