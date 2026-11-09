@@ -275,6 +275,8 @@ function controlarBeat(secciones) {
   // respetar la estructura (Juan, 2026-11-08): "Last Time Again" planeó 7 secciones y el beat agregó un outro
   const nombres = secciones.map(s => s.nombre).join(', '), plan = (tema.estructura || []).join(', ');
   if (plan && nombres !== plan) err.push(`SECCIONES declara [${nombres}] y la estructura planeada es [${plan}]: mismas secciones, mismo orden, sin agregar ni sacar`);
+  // estribillos de 4 compases ("Crimson Tide", 08/11) pasan antes de asentarse
+  for (const x of secciones) if (['chorus', 'verse'].includes(x.nombre) && x.compases < 8) err.push(`la sección ${x.nombre} de ${mmss(x.inicio)} tiene ${x.compases} compases: versos y estribillos van de 8 como mínimo`);
   const med = secciones.map(s => ({ ...s, l: lufs(WAV, s.inicio, Math.max(s.inicio + 1, s.fin)) }));
   const coro = Math.max(...med.filter(s => s.nombre === 'chorus').map(s => s.l));
   for (const s of med) {

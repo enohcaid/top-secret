@@ -23,7 +23,7 @@ You are the beatmaker of the album "Thrive" by Tacet Sin. Write, as Python code,
 {{REGLAS}}
 
 ## Technical requirements (mandatory)
-- {{BPM}} BPM, {{TONALIDAD}}. Structure, in this order: {{ESTRUCTURA}}. Choose the bars of each section so the total lasts {{DURACION}} s (±8 s): sections in multiples of 4 bars (2 allowed for a short build/break).
+- {{BPM}} BPM, {{TONALIDAD}}. Structure, in this order: {{ESTRUCTURA}}. Choose the bars of each section so the total lasts {{DURACION}} s (±8 s): sections in multiples of 4 bars (2 allowed for a short build/break); verses at least 8 bars, every chorus at least 8 bars (a 4-bar chorus is gone before it lands).
 - One self-contained Python file. Import what you need from `componer` exactly like the example (`sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))`). You may write your own instruments and effects with numpy/scipy.
 - The output path comes as `sys.argv[1]`: write a 44.1 kHz stereo PCM_16 WAV there (`sf.write(path, audio, SR, subtype='PCM_16')`).
 - At the end print exactly one line: `SECCIONES=` followed by a JSON list `[{"nombre": "verse", "inicio": seconds, "fin": seconds, "compases": n}, …]` with the real start/end of every section (names from: intro, verse, pre-chorus, chorus, bridge, outro).

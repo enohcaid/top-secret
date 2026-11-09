@@ -16,7 +16,7 @@ The duet references are about MOOD and the male/female dynamic, not genre: four 
 {{ANTERIORES}}
 
 ## Answer: ONLY a valid JSON object
-- "titulo": song title in English, 1 to 4 words
+- "titulo": song title in English, 1 to 4 words — original: not the name of a well-known film, team, brand or famous song (e.g. "Crimson Tide" was rejected)
 - "concepto": ONE sentence in Spanish (rioplatense) with the human situation of the song, for the music page
 - "rasgo": the psychological trait, in Spanish, 2 to 6 words
 - "caption_instrumental": the sound of the INSTRUMENTAL for ACE-Step, English, comma-separated tags, max ~40 words: it must start with a trap genre (dark trap, melodic trap, cinematic trap, emo trap…) and name the 808 and the hats. No voices.
