@@ -109,11 +109,55 @@ button:disabled{opacity:.4;cursor:default}
 .seccion{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:34px;letter-spacing:.03em;margin:8px 0 4px}
 .seccion-sub{color:var(--mid);font-size:14px;margin:0 0 18px}
 .seccion+.vacio,.seccion-sub+.vacio{margin-bottom:40px}
-/* Discards: temas descartados, con la portada del futuro disco (Juan, 2026-11-09) */
-.discards-cab{display:flex;gap:18px;align-items:center;margin-top:28px}
-.discards-cab .tapa{width:112px;height:112px;flex:none;border:0;padding:0;border-radius:12px;background:var(--card2) center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.45);cursor:zoom-in;transition:transform .2s ease}
-.discards-cab .tapa:hover{transform:scale(1.03)}
-.discards-cab .tapa:focus-visible{outline:2px solid var(--gold);outline-offset:6px}
+/* Discards (aprobar-discards.js): igual que un álbum de /music */
+.dz-album{border-top:1px solid var(--border);padding-top:28px;margin-top:36px}
+.dz-cab{display:grid;grid-template-columns:clamp(140px,22vw,220px) 1fr;gap:clamp(18px,3vw,34px);align-items:end}
+.dz-tapa{aspect-ratio:1;width:100%;border:0;padding:0;border-radius:14px;background:var(--card2) center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.45);cursor:zoom-in;transition:transform .2s ease}
+.dz-tapa:hover{transform:scale(1.02)}
+.dz-toggle{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end;width:100%;background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.dz-toggle > span:first-child > span{display:block}
+.dz-toggle:focus-visible,.dz-tapa:focus-visible{outline:2px solid var(--gold);outline-offset:6px;border-radius:14px}
+.dz-tipo{font:700 12px 'Barlow Condensed',sans-serif;letter-spacing:.24em;color:var(--gold);text-transform:uppercase}
+.dz-nombre{font-weight:900;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:.95;letter-spacing:-.035em;margin-top:8px}
+.dz-desc{margin-top:12px;color:var(--text2);line-height:1.5;max-width:560px}
+.dz-cuenta{margin-top:10px;font:600 12px 'Barlow Condensed',sans-serif;letter-spacing:.14em;color:var(--mid);text-transform:uppercase}
+.dz-flecha{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;color:var(--text2);align-self:center;transition:transform .25s ease,border-color .2s ease,color .2s ease}
+.dz-flecha svg{width:18px;height:18px}
+.dz-toggle:hover .dz-flecha{border-color:var(--gold);color:var(--gold)}
+.dz-album.abierto .dz-flecha{transform:rotate(180deg)}
+.dz-temas{display:none;flex-direction:column;gap:12px}
+.dz-album.abierto .dz-temas{display:flex;margin-top:22px}
+.dz-tema{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:22px 24px;display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:center;transition:border-color .2s ease,background-color .2s ease}
+.dz-tema.sonando{border-color:rgba(201,168,76,.55);background:var(--card2)}
+.dz-play{width:64px;height:64px;border-radius:50%;border:0;background:var(--gold);color:#0B0A07;display:grid;place-items:center;cursor:pointer;transition:transform .15s ease}
+.dz-play:hover{transform:scale(1.06)}
+.dz-play[disabled]{opacity:.3;cursor:default;transform:none}
+.dz-play svg{width:24px;height:24px}
+.dz-info{min-width:0}
+.dz-titulo{font-weight:900;font-size:1.6rem;letter-spacing:-.02em;line-height:1.05}
+.dz-pista{font:700 15px 'Barlow Condensed',sans-serif;color:var(--mid);margin-right:10px}
+.dz-meta{margin-top:6px;font:600 12px 'Barlow Condensed',sans-serif;letter-spacing:.14em;color:var(--mid);text-transform:uppercase}
+.dz-meta b{color:var(--gold2);font-weight:700}
+.dz-acciones{display:flex;gap:8px;justify-content:flex-end}
+.dz-chip{border:1px solid var(--border);background:transparent;color:var(--text2);font:700 12px 'Barlow Condensed',sans-serif;letter-spacing:.16em;padding:9px 14px;border-radius:999px;cursor:pointer;text-transform:uppercase;transition:border-color .2s ease,color .2s ease}
+.dz-chip:hover,.dz-chip.on{border-color:var(--gold);color:var(--gold)}
+.dz-barra{grid-column:1/-1;height:4px;border-radius:4px;background:rgba(242,238,224,.08);overflow:hidden;cursor:pointer;display:none}
+.dz-tema.sonando .dz-barra{display:block}
+.dz-barra i{display:block;height:100%;width:0;background:var(--gold)}
+.dz-letra{grid-column:1/-1;display:none;white-space:pre-line;font-size:1.02rem;line-height:1.7;color:var(--text);padding:6px 0 4px 84px;columns:2 300px;column-gap:40px}
+.dz-letra .sec{font:700 11px 'Barlow Condensed',sans-serif;letter-spacing:.22em;color:var(--gold);display:block;margin-top:14px;break-after:avoid;text-transform:uppercase}
+.dz-tema.con-letra .dz-letra{display:block}
+@media (max-width:700px){
+  .dz-tema{grid-template-columns:52px 1fr;gap:14px;padding:18px}
+  .dz-play{width:52px;height:52px}
+  .dz-acciones{grid-column:1/-1;justify-content:flex-start}
+  .dz-letra{padding-left:0;columns:1}
+  .dz-titulo{font-size:1.35rem}
+  .dz-cab{grid-template-columns:96px 1fr;gap:14px;align-items:center}
+  .dz-toggle{align-items:center}
+  .dz-desc{display:none}
+  .dz-flecha{width:36px;height:36px}
+}
 /* portada en grande (igual que /music) */
 .visor{position:fixed;inset:0;z-index:2000;background:rgba(5,4,2,.92);display:none;place-items:center;padding:24px;cursor:zoom-out}
 .visor.on{display:grid}
@@ -188,7 +232,8 @@ button:disabled{opacity:.4;cursor:default}
 </div>
 <div class="aviso" id="aviso"></div>
 <div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Portada"><figure><img id="visor-img" alt="Portada de Discards"><figcaption>Tacet Sin · Discards</figcaption></figure><button type="button" aria-label="Cerrar">×</button></div>
-<script src="aprobar.js?v=19"></script>
+<script src="aprobar-discards.js?v=1"></script>
+<script src="aprobar.js?v=20"></script>
 <script src="layout.js?v=26"></script>
 </body>
 </html>
