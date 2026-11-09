@@ -69,3 +69,8 @@ Están en `scripts/beats/thrive-album.mjs`. Cada tema toma un ángulo que no se 
 
 ### 5. Cómo se prueba
 Por ahora todo esto vive solo en el carril local, `thrive.mjs --local`: el proceso semanal de las 2:00 sigue con Claude y su brief de siempre. Si a Juan le gustan los resultados, se pasa el proceso semanal a este método.
+
+## Próximo paso (Juan, 2026-11-09, después de "Where I End")
+"ACE no está respetando nada" (descartó el tema). La próxima vez se prueban dos caminos:
+1. **Trabajar con lo que produce ACE**: aceptar su salida como materia prima y producir encima nosotros (cortar, reordenar, reforzar 808/batería por código).
+2. **Que ACE obedezca con órdenes más cortas**: pedidos chicos (por sección o una sola cosa por pasada) y después producir nosotros el resultado.
