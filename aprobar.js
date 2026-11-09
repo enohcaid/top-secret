@@ -182,7 +182,7 @@
     const pend = sinDecidir(l), esGuion = l.etapa === 'guion';
     if (l.etapa === 'musica') {
       const cerrado = plegado(l);
-      const meta = `${esc(l.bajada || '')}${l.estado === 'descartado' ? ' · descartado: está en Discards, en /music' : l.descartar ? ' · descartando: pasa a Discards, en /music' : l.estado === 'revisando' ? ' · rehaciendo lo marcado: vuelve como versión nueva' : l.estado === 'publicado' ? ' · aprobado y publicado en /music' : pend ? ` · ${pend} parte${pend > 1 ? 's' : ''} sin revisar` : ' · procesando tu revisión'}`;
+      const meta = `${esc(l.bajada || '')}${l.estado === 'descartado' ? ' · descartado: no se publica' : l.descartar ? ' · descartando…' : l.estado === 'revisando' ? ' · rehaciendo lo marcado: vuelve como versión nueva' : l.estado === 'publicado' ? ' · aprobado y publicado en /music' : pend ? ` · ${pend} parte${pend > 1 ? 's' : ''} sin revisar` : ' · procesando tu revisión'}`;
       return `<section class="lote musica${cerrado ? ' cerrado' : ''}" data-lote="${esc(l.id)}">
         <div class="lote-cab">
           <div><h2>${esc(l.titulo)}</h2><div class="meta">${meta}</div>
@@ -253,8 +253,8 @@
     : (m => m ? Date.parse(m[1] + 'T00:00:00-03:00') + 7 * DIA : Date.parse(l.creado) + 10 * DIA)(l.id.match(/(\d{4}-\d{2}-\d{2})$/));
   const estadoLote = l => {
     // Tema aprobado: sale de acá y queda en /music, álbum Thrive (Juan, 2026-11-04)
-    // Tema descartado (Juan, 2026-11-09): sale de acá y queda en /music, álbum Discards ("en el futuro, un disco de los descartes")
-    if (l.etapa === 'musica') return ['publicado', 'descartado'].includes(l.estado) ? null : l.descartar ? 'programadas' : !l.estado && sinDecidir(l) ? 'aprobar' : 'programadas';
+    // Tema descartado (Juan, 2026-11-09): queda en Demos, sección Discards, hasta que Juan dé la orden ("en el futuro, un disco de los descartes")
+    if (l.etapa === 'musica') return l.estado === 'publicado' ? null : l.estado === 'descartado' || l.descartar ? 'descartes' : !l.estado && sinDecidir(l) ? 'aprobar' : 'programadas';
     if (sinDecidir(l)) return 'aprobar';
     if (l.etapa === 'guion') return Date.now() < finGuion(l) && l.piezas.some(ideaVisible) ? 'programadas' : null;
     if (l.piezas.every(p => p.decision === 'descartada')) return null;   // propuesta descartada entera: no es "publicada"
@@ -273,7 +273,7 @@
     return `<h2 class="seccion">${titulo}</h2>${sub ? `<p class="seccion-sub">${sub}</p>` : ''}${ls.length ? ls.map(lote).join('') : `<div class="vacio">${vacio}</div>`}`;
   }
   function pintar() {
-    const por = { aprobar: [], programadas: [], publicadas: [] };
+    const por = { aprobar: [], programadas: [], publicadas: [], descartes: [] };
     lotes.forEach(l => { const e = estadoLote(l); if (e) por[e].push(l); });
     if (!PESTANAS.some(x => x.id === pestana)) pestana = 'aprobar';
     const esMus = l => l.etapa === 'musica';
@@ -293,8 +293,9 @@
         + (prod.length ? bloque('Ideas aprobadas, en producción', 'Se están produciendo; cuando estén listas vuelven a "Para aprobar".', prod, '') : '');
     } else if (pestana === 'demos') {
       const m = e => por[e].filter(esMus);
-      cuerpo = bloque('Demos para escuchar', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, sale de acá y queda en /music, en Thrive. Si no tiene arreglo, "Descartar tema" lo manda al álbum Discards.', m('aprobar'), 'No hay demos esperando.')
-        + (m('programadas').length ? bloque('En revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Demos para escuchar".', m('programadas'), '') : '');
+      cuerpo = bloque('Demos para escuchar', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, sale de acá y queda en /music, en Thrive. Si no tiene arreglo, "Descartar tema" lo guarda en Discards, abajo.', m('aprobar'), 'No hay demos esperando.')
+        + (m('programadas').length ? bloque('En revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Demos para escuchar".', m('programadas'), '') : '')
+        + (m('descartes').length ? bloque('Discards', 'Temas descartados: no se rehacen ni se publican. Quedan acá para un futuro disco de descartes.', m('descartes'), '') : '');
     } else {
       cuerpo = bloque('Publicadas', 'Lo que salió en los últimos 7 días.', por.publicadas.filter(l => !esMus(l)).sort((a, b) => cuando(b) - cuando(a)), 'Nada publicado en los últimos días.');
     }
@@ -371,7 +372,7 @@
     const dt = e.target.closest('button[data-descartar-tema]');
     if (dt) {
       const l = lotes.find(x => x.id === dt.closest('.lote').dataset.lote);
-      if (!window.confirm(`¿Descartar "${l.tema?.titulo || l.titulo}"? No se rehace: pasa al álbum Discards de /music.`)) return;
+      if (!window.confirm(`¿Descartar "${l.tema?.titulo || l.titulo}"? No se rehace ni se publica: queda en Discards, acá en aprobar.`)) return;
       dt.disabled = true;
       return api('/aprobaciones/decidir', { lote: l.id, piezas: [], descartarTema: true })
         .then(({ lote: n }) => { lotes = lotes.map(x => x.id === n.id ? n : x); pintar(); aviso('Descartado: pasa a Discards'); })

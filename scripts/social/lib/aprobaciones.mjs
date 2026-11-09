@@ -28,7 +28,11 @@ export async function agregarLote(lote) {
     if (p.musica && typeof p.texto === 'string' && !p.texto.includes(p.musica)) p.texto = `${p.texto.trimEnd()}\n\n${creditoTexto(p.musica)}`;
   }
   const data = await leer();
-  data.lotes = [lote, ...data.lotes.filter(l => l.id !== lote.id)].slice(0, 40);
+  // los temas descartados (sección Discards) no se podan: quedan hasta que Juan dé la orden (2026-11-09)
+  const guardar = l => l.etapa === 'musica' && (l.estado === 'descartado' || l.descartar);
+  const resto = [lote, ...data.lotes.filter(l => l.id !== lote.id)];
+  const fijos = resto.filter(l => l !== lote && guardar(l));
+  data.lotes = [...resto.filter(l => !fijos.includes(l)).slice(0, 40), ...fijos];
   await guardarKV('aprobaciones', data);
 }
 

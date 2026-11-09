@@ -1318,7 +1318,7 @@ export default {
           if (isNaN(Date.parse(publicarA))) return jsonResp({ error: 'Fecha inválida' }, 400);
           l.publicarA = new Date(publicarA).toISOString();
         }
-        // descartar un tema de Thrive entero (Juan, 2026-11-09): la PC lo pasa al álbum Discards de /music
+        // descartar un tema de Thrive entero (Juan, 2026-11-09): la PC lo marca y queda en aprobar, sección Discards (no va a /music)
         if (descartarTema && l.etapa === 'musica' && !l.estado) l.descartar = ahora;
         for (const p of l.piezas.filter(p => piezas.includes(p.id))) {
           if (p.estado === 'publicado' || p.estado === 'publicando') continue;   // ya salió: no se toca
