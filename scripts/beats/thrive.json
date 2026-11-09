@@ -646,7 +646,8 @@
         "voces": 1389,
         "letraFinal": 0
       },
-      "publicado": false
+      "publicado": false,
+      "descartado": true
     },
     {
       "id": "2026-11-01-3-local",
