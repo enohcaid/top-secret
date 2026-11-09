@@ -821,7 +821,8 @@
         "voces": 4937,
         "letraFinal": 0
       },
-      "publicado": false
+      "publicado": false,
+      "descartado": true
     },
     {
       "id": "2026-11-01-4-local",
