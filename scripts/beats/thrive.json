@@ -1411,6 +1411,80 @@
       "generado": "2026-11-09T00:58:55.645Z",
       "letraFinal": "[intro]\n(instrumental only)\n\n[verse - male rap]\nDust motes dance in a fading ray\nThe scent of rain on a vacant chair\nA hollow echo\nYesterday\nA gilded cage, a silent snare\n\n[pre-chorus - female]\nCrimson bleeding, slow and deep\nA promise whispered\nSecrets to keep\n\n[chorus - female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[verse - male rap]\nTwo chipped teacups, porcelain cold\nA photograph bleached, a memory frayed\nStories unspoken, never told\nThe weight of what’s lost, a debt unpaid\n\n[pre-chorus - female]\nCrimson bleeding, slow and deep\nA promise whispered\nSecrets to keep\n\n[chorus - male & female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[bridge - female]\nThis bitter bloom, a phantom hue\nClinging to the shadows, known and true\n\n[chorus - male & female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[outro]\n(instrumental fades with female ad-libs: \"space…grace…lost…\")",
       "publicado": false
+    },
+    {
+      "fecha": "2026-11-09",
+      "slug": "where-i-end",
+      "titulo": "Where I End",
+      "concepto": "Ya no sé dónde termino yo y dónde empieza eso que amo: me fundí tanto en la noche, en su ritmo y en su fiebre, que si la suelto tengo miedo de que no quede nadie para soltarla.",
+      "rasgo": "fusión de identidad",
+      "voz": "dúo: ella abre el intro y vuelve en el estribillo, aireada y fantasmal; él rapea los versos, grave y rasposo, con flow pausado y amenazante",
+      "captionInstrumental": "dark trap, hypnotic trap, haunting detuned harp arpeggios, half-time drums, clap on beat three, deep gliding 808 bass, rattling hi-hat rolls and triplets, low cello drones, tape hiss, cavernous reverb, sparse, menacing, seductive, nocturnal, 144 BPM, G# minor",
+      "captionVoces": "male rapper leads, low raspy voice, steady menacing flow, close-mic intimate cadence; female voice only on intro and hook, airy, breathy, haunting, reverb-soaked whisper-singing",
+      "bpm": 144,
+      "tonalidad": "G# minor",
+      "duracion": 143,
+      "estructura": [
+        "intro",
+        "verse",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "chorus"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 6.67,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 6.67,
+          "fin": 33.33,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 33.33,
+          "fin": 53.33,
+          "compases": 12
+        },
+        {
+          "nombre": "verse",
+          "inicio": 53.33,
+          "fin": 80,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 80,
+          "fin": 100,
+          "compases": 12
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 100,
+          "fin": 113.33,
+          "compases": 8
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 113.33,
+          "fin": 140,
+          "compases": 16
+        }
+      ],
+      "beat": "dark trap, hypnotic trap, haunting detuned harp arpeggios, half-time drums, clap on beat three, deep gliding 808 bass, rattling hi-hat rolls and triplets, low cello drones, tape hiss, cavernous reverb, sparse, menacing, seductive, nocturnal, 144 BPM, G# minor",
+      "instrumental": "codigo",
+      "letra": "[intro - female]\nDust motes fall, a silver grace\nLost in the dark, a fading trace\n\n[verse - male rap]\nConcrete bloom, a fractured sign\nStatic whispers in the wire\nShadows lengthen, intertwine\nA hollow echo, burning higher\nPulse beneath the fractured stone\nMelting edges, blurred and deep\nA silent claim, a space I’ve known\nSecrets that the darkness keep\nPressure builds, a velvet strain\nNo horizon, just the gray\nLost reflections in the rain\nWhere yesterday becomes today\n\n[chorus - female]\nWhere I end, you begin\nA tangled thread, a blurred skin\n\n[verse - male rap]\nTwo cups sit, the porcelain cold\nA vacant room, a muted plea\nThe weight of stories yet untold\nA fragile ghost stares back at me\nThe air hangs heavy, thick and low\nA mirrored gaze, a shifting form\nThe embers glow, a crimson flow\nSheltered from the coming storm\nThis resonance, a binding plea\nA fevered dream, a stolen sigh\nThe ghost of you surrounding me\nBeneath a bruised and fading sky\n\n[chorus - male & female]\nWhere I end, you begin\nA tangled thread, a blurred skin\n\n[bridge - female]\nA single breath, a silent plea\nLost in the current, wild and free\n\n[chorus - female]\nWhere I end, you begin\nA tangled thread, a blurred skin\n\n[chorus - male & female]\nWhere I end, you begin\nA tangled thread, a blurred skin",
+      "letraPor": "local",
+      "audio": "musica/thrive/where-i-end.mp3?v=mw8tzg5a",
+      "generado": "2026-11-09T05:38:57.022Z",
+      "letraFinal": "[intro - female]\nDust motes fall, a silver grace\nLost in the dark, a fading trace\n\n[verse - male rap]\nConcrete bloom, a fractured sign\nStatic whispers in the wire\nShadows lengthen, intertwine\nA hollow echo, burning higher\nPulse beneath the fractured stone\nMelting edges, blurred and deep\nA silent claim of space unknown, secrets that the darkness keep\n\n[chorus - female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[verse - male rap]\nTwo cups of porcelain coal, a vacant room, a muted plea\nThe weight of stories untold\nA fragile ghost stares back at me\nThis resonance a blinding plea\nA fever dream a stolen sigh\nThe ghost of you surrounding me\nBeneath a bruised and fading sky\n\n[chorus - male & female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[bridge - female]\nA single breath, a silent plea\nLost in the current, wild and free\n\n[chorus - female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[chorus - male & female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[outro - female]\nOh yeah, you begin\nThe tangled thread of the skin",
+      "publicado": false
     }
   ]
 }
