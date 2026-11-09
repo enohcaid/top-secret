@@ -29,13 +29,16 @@ Album "The Shorts — Volume 1": a collection of short songs, each one a brief, 
 Album "The Shorts — Volume 2", the companion of Volume 1 (same visual language: narrow fragments of long-exposure light re-assembled out of order on a near-black background with film grain) but colder and later in the night: the strips are deep ink blue, steel and a single thin line of pale silver; a few strips are slightly torn at the edges like paper, as if the moments had been handled many times. Mood: memory, distance, rain on a window at 3 a.m. without showing any of those things literally.`,
   thrive: `${COMUN}
 Album "Thrive": songs about love, passion, surrender and sacrifice — loving something that does not always do us good, and growing anyway. Visual idea: a single bloom of deep crimson ink spreading in dark water, its edges turning into fine dark strands that wrap around it like thorns made of the same ink — beautiful and wounding at the same time; one small area where the red becomes warm, almost glowing, like something still alive inside. Palette: black, oxblood, crimson, a whisper of warm rose light. Macro photography feel, high detail, lots of negative space around the bloom, slightly off-center.`,
+  // Discards (Juan, 2026-11-09): los temas descartados de Thrive; el mismo mundo que la tapa de Thrive, pero lo que quedó afuera
+  discards: `${COMUN}
+Album "Discards": the songs that did not make the album — set aside, but kept. Visual idea, sibling of the Thrive cover (crimson ink in dark water) but after the fact: torn and crumpled strips of heavy paper stained with dried oxblood-crimson ink, lying in a loose pile on a dark matte surface, softly lit from one side; a few strips half-curled, edges frayed, one fragment still holding a vivid wet red stain as if something in it is still alive. Palette: charcoal black, dried oxblood, faded rust, a single vivid crimson accent, paper ivory in the shadows. Still-life photography feel, high detail, lots of negative space, slightly off-center.`,
 };
 
 // Firma de la tapa (Juan, 2026-10-26): el logo del artista (Tacet Sin = el Clean logo de Top Secret, blanco y chico)
 // abajo a la derecha, y el artista y el disco abajo a la izquierda, chicos y translúcidos para no tapar la imagen.
 // Se estampa sobre el original sin texto (fuentes/musica/portadas/<id>.png) → R2 musica/portadas/<id>.webp.
 // Al volver a publicar una tapa, subir el ?v= de su URL en scripts/beats/catalogo.mjs (R2 tiene caché de un año).
-const TEXTOS = { 'the-shorts-1': ['The Shorts', 'Vol. 1'], 'the-shorts-2': ['The Shorts', 'Vol. 2'], thrive: ['Thrive', null] };
+const TEXTOS = { 'the-shorts-1': ['The Shorts', 'Vol. 1'], 'the-shorts-2': ['The Shorts', 'Vol. 2'], thrive: ['Thrive', null], discards: ['Discards', null] };
 const ARTISTA = 'Tacet Sin';
 // El texto se dibuja en el navegador (Barlow Condensed, la tipografía del sitio) y se recorta con fondo transparente
 async function firma(id, alto) {

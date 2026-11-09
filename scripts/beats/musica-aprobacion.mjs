@@ -3,6 +3,7 @@
 // el error y yo reviso qué genera y qué hay que mejorar"). Cada tema de Thrive entra como DEMO, no se publica solo:
 // una tarjeta por parte (concepto, beat, letra, voces) con quién la hizo, el reproductor y un cuadro de comentarios.
 //   · Todo "Está bien"         → se publica en topsecret.ar/music.
+//   · "Descartar tema"         → no se rehace: pasa al álbum Discards de /music (Juan, 2026-11-09).
 //   · Alguna parte "A mejorar" → thrive.mjs --revisar rehace esa parte con el comentario (letra y voces: Gemma
 //                                primero; beat: Claude Sonnet) y vuelve como versión siguiente.
 // Cada decisión, con su comentario, queda en fuentes/ia/dataset/musica-feedback.jsonl para entrenar el modelo local.
@@ -62,6 +63,19 @@ export async function procesar() {
   const data = await leer();
   let cambio = false;
   for (const l of data.lotes.filter(l => l.etapa === 'musica' && !l.estado)) {
+    // "Descartar tema" (Juan, 2026-11-09): no se rehace, pasa al álbum Discards de /music
+    if (l.descartar) {
+      const reg = leerReg(), t = reg.temas.find(x => x.slug === l.tema.slug);
+      if (!t) continue;
+      Object.assign(t, { descartado: true, publicado: false }); delete t.revision; guardarReg(reg);
+      guardarEjemplo('musica-feedback', JSON.stringify({ tema: t.slug, version: t.version || 1, parte: 'tema' }), JSON.stringify({ decision: 'descartado', comentario: l.piezas.map(p => p.texto).filter(Boolean).join(' · ') }));
+      await armarCatalogo({ log });
+      git('add', 'scripts/beats/thrive.json'); git('commit', '-m', `feat: Thrive — "${t.titulo}" descartado, pasa a Discards
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`); git('push', '-q');
+      l.estado = 'descartado'; cambio = true; log(`"${t.titulo}" descartado: álbum Discards en topsecret.ar/music`);
+      continue;
+    }
     if (l.piezas.some(p => !p.decision || p.decision === 'pendiente')) continue;
     const reg = leerReg(), t = reg.temas.find(x => x.slug === l.tema.slug);
     if (!t) continue;
@@ -91,7 +105,7 @@ if (process.argv[1] && import.meta.url === `file:///${process.argv[1].replace(/\
   if (i > 0) {
     const reg = leerReg(), t = reg.temas.find(x => x.slug === process.argv[i + 1]);
     if (!t?.audio) { console.error('No existe ese tema o no tiene audio.'); process.exit(1); }
-    t.publicado = false; guardarReg(reg);
+    t.publicado = false; delete t.descartado; guardarReg(reg);
     await armarCatalogo({ log });
     await mandarAAprobar(t);
   } else await procesar();

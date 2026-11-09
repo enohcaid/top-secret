@@ -25,6 +25,10 @@ export const ALBUMES = [
     descripcion: 'Short songs, each one a moment: the night before something big, the effort nobody sees, the wound that takes its time to close.' },
   { id: 'the-shorts', volumen: 2, titulo: 'The Shorts', portada: MEDIA + 'musica/portadas/the-shorts-2.webp?v=5',
     descripcion: 'The second part: later, deeper.' },
+  // Discards (Juan, 2026-11-09): los temas de Thrive descartados en aprobar.html; "en el futuro, un disco de los descartes".
+  // Solo aparece cuando tiene al menos un tema.
+  { id: 'discards', titulo: 'Discards', portada: MEDIA + 'musica/portadas/discards.webp?v=1',
+    descripcion: 'The songs that did not make it. Left on the floor, kept anyway.' },
 ];
 
 async function conReintentos(fn, intentos = 4) {
@@ -52,9 +56,14 @@ export async function armarCatalogo({ log = console.log } = {}) {
     lista.push({ slug: t.slug, titulo: t.titulo, album: 'thrive', pista: i + 1, fecha: t.fecha, concepto: en[t.slug] || null,
       bpm: t.bpm, tonalidad: t.tonalidad, duracion: t.duracion, letra: t.letraFinal || t.letra, voz: MEDIA + t.audio });
   }
+  const descartes = thrive.filter(t => t.audio && t.descartado === true);
+  for (const [i, t] of descartes.entries())
+    lista.push({ slug: t.slug, titulo: t.titulo, album: 'discards', pista: i + 1, fecha: t.fecha, concepto: en[t.slug] || null,
+      bpm: t.bpm, tonalidad: t.tonalidad, duracion: t.duracion, letra: t.letraFinal || t.letra, voz: MEDIA + t.audio });
+  const albumes = ALBUMES.filter(a => a.id !== 'discards' || descartes.length);
   const f = path.join(DIR, 'catalogo.json');
   fs.mkdirSync(DIR, { recursive: true });
-  fs.writeFileSync(f, JSON.stringify({ actualizado: new Date().toISOString(), artista: ARTISTA, albumes: ALBUMES, temas: lista }, null, 1));
+  fs.writeFileSync(f, JSON.stringify({ actualizado: new Date().toISOString(), artista: ARTISTA, albumes, temas: lista }, null, 1));
   await conReintentos(() => putFile(f, 'musica/catalogo.json'));
-  log(`catálogo: ${lista.length} temas (${lista.filter(x => x.album === 'thrive').length} en Thrive, ${lista.filter(x => x.voz).length} con voz)`);
+  log(`catálogo: ${lista.length} temas (${lista.filter(x => x.album === 'thrive').length} en Thrive, ${descartes.length} en Discards, ${lista.filter(x => x.voz).length} con voz)`);
 }

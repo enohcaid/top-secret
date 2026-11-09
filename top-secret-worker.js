@@ -1306,7 +1306,7 @@ export default {
         if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         let body;
         try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
-        const { lote, piezas = [], decision, texto, titulo, publicarA } = body || {};
+        const { lote, piezas = [], decision, texto, titulo, publicarA, descartarTema } = body || {};
         if (decision && !['aprobada', 'descartada', 'pendiente'].includes(decision)) return jsonResp({ error: 'Decisión inválida' }, 400);
         const data = (await env.TS_KV.get('aprobaciones', 'json')) || { lotes: [] };
         const l = data.lotes.find(x => x.id === lote);
@@ -1318,6 +1318,8 @@ export default {
           if (isNaN(Date.parse(publicarA))) return jsonResp({ error: 'Fecha inválida' }, 400);
           l.publicarA = new Date(publicarA).toISOString();
         }
+        // descartar un tema de Thrive entero (Juan, 2026-11-09): la PC lo pasa al álbum Discards de /music
+        if (descartarTema && l.etapa === 'musica' && !l.estado) l.descartar = ahora;
         for (const p of l.piezas.filter(p => piezas.includes(p.id))) {
           if (p.estado === 'publicado' || p.estado === 'publicando') continue;   // ya salió: no se toca
           if (decision) { p.decision = decision; p.decididoEn = ahora; }
