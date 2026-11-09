@@ -109,6 +109,11 @@ button:disabled{opacity:.4;cursor:default}
 .seccion{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:34px;letter-spacing:.03em;margin:8px 0 4px}
 .seccion-sub{color:var(--mid);font-size:14px;margin:0 0 18px}
 .seccion+.vacio,.seccion-sub+.vacio{margin-bottom:40px}
+/* Discards: temas descartados, con la portada del futuro disco (Juan, 2026-11-09) */
+.discards-cab{display:flex;gap:18px;align-items:center;margin-top:28px}
+.discards-cab img{width:112px;height:112px;object-fit:cover;border-radius:10px;border:1px solid var(--border);flex:none}
+.discards-cab .seccion-sub{margin-bottom:0}
+.discards-cab+.lote{margin-top:18px}
 .cuando{font:800 13px 'Barlow Condensed',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
 .redes-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .redes-chips span{font-size:12px;font-weight:700;border:1px solid var(--border);border-radius:999px;padding:2px 9px;color:var(--text2)}
@@ -162,7 +167,7 @@ button:disabled{opacity:.4;cursor:default}
   <div id="lotes"></div>
 </div>
 <div class="aviso" id="aviso"></div>
-<script src="aprobar.js?v=16"></script>
+<script src="aprobar.js?v=17"></script>
 <script src="layout.js?v=26"></script>
 </body>
 </html>

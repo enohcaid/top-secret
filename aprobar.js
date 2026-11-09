@@ -295,7 +295,9 @@
       const m = e => por[e].filter(esMus);
       cuerpo = bloque('Demos para escuchar', 'Demos de Thrive: escuchalas, marcá cada parte y contá qué mejorar. Lo marcado "a mejorar" se rehace con tu comentario; cuando todo está bien, sale de acá y queda en /music, en Thrive. Si no tiene arreglo, "Descartar tema" lo guarda en Discards, abajo.', m('aprobar'), 'No hay demos esperando.')
         + (m('programadas').length ? bloque('En revisión', 'Rehaciéndose con tus comentarios; la versión nueva vuelve a "Demos para escuchar".', m('programadas'), '') : '')
-        + (m('descartes').length ? bloque('Discards', 'Temas descartados: no se rehacen ni se publican. Quedan acá para un futuro disco de descartes.', m('descartes'), '') : '');
+        + (m('descartes').length ? `<div class="discards-cab"><img src="${WORKER}/media/musica/portadas/discards.webp?v=1" alt="Portada de Discards" onerror="this.remove()"><div>`
+          + '<h2 class="seccion">Discards</h2><p class="seccion-sub">Temas descartados: no se rehacen ni se publican. Quedan acá para un futuro disco de descartes.</p>'
+          + `</div></div>${m('descartes').map(lote).join('')}` : '');
     } else {
       cuerpo = bloque('Publicadas', 'Lo que salió en los últimos 7 días.', por.publicadas.filter(l => !esMus(l)).sort((a, b) => cuando(b) - cuando(a)), 'Nada publicado en los últimos días.');
     }
