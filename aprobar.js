@@ -178,8 +178,26 @@
   const ideaVisible = p => p.decision !== 'descartada' && p.produccion?.estado !== 'lista';
   const abiertos = new Set(), cerrados = new Set();
   const plegado = l => cerrados.has(l.id) || (!abiertos.has(l.id) && !sinDecidir(l) && !l.piezas.some(p => p.estado === 'error'));
-  function lote(l) {
+  // Tema descartado (Juan, 2026-11-09): se ve como en /music, solo reproducción y letra
+  const letraDescarte = t => esc(String(t || '').replace(/^Historia:[^\n]*\n\n/, ''))
+    .replace(/^\[([^\]]+)\][ \t]*\n?/gm, (_, s) => `<span class="sec">${s}</span>`).replace(/\n{2,}/g, '\n');
+  const letrasAbiertas = new Set();   // la página se redibuja cada 20 s: la letra abierta tiene que seguir abierta
+  function descarte(l, i) {
+    const letra = l.piezas.find(p => p.id === 'letra')?.detalle || '';
+    const abierta = letrasAbiertas.has(l.id);
+    return `<div class="d-tema${abierta ? ' con-letra' : ''}" data-lote="${esc(l.id)}">
+      <div class="d-cab">
+        <div class="d-titulo"><span class="d-pista">${String((i || 0) + 1).padStart(2, '0')}</span>${esc(l.tema?.titulo || l.titulo)}</div>
+        ${letra ? `<button class="d-chip${abierta ? ' on' : ''}" data-d-letra>Letra</button>` : ''}
+      </div>
+      ${l.tema?.audio ? `<audio controls preload="none" src="${esc(l.tema.audio)}"></audio>` : ''}
+      ${l.descartar && !l.estado ? '<div class="d-meta">Pasando a Discards…</div>' : ''}
+      ${letra ? `<div class="d-letra">${letraDescarte(letra)}</div>` : ''}
+    </div>`;
+  }
+  function lote(l, i) {
     const pend = sinDecidir(l), esGuion = l.etapa === 'guion';
+    if (l.etapa === 'musica' && (l.estado === 'descartado' || l.descartar)) return descarte(l, i);
     if (l.etapa === 'musica') {
       const cerrado = plegado(l);
       const meta = `${esc(l.bajada || '')}${l.estado === 'descartado' ? ' · descartado: no se publica' : l.descartar ? ' · descartando…' : l.estado === 'revisando' ? ' · rehaciendo lo marcado: vuelve como versión nueva' : l.estado === 'publicado' ? ' · aprobado y publicado en /music' : pend ? ` · ${pend} parte${pend > 1 ? 's' : ''} sin revisar` : ' · procesando tu revisión'}`;
@@ -370,6 +388,13 @@
       return api('/request-regen', { motivo: motivo.trim() })
         .then(() => aviso('Pedido enviado: la nota nueva vuelve acá en unos 15 minutos'))
         .catch(err => { rh.disabled = false; aviso(err.message); });
+    }
+    const dlt = e.target.closest('button[data-d-letra]');
+    if (dlt) {
+      const el = dlt.closest('.d-tema'), on = el.classList.toggle('con-letra');
+      dlt.classList.toggle('on', on);
+      on ? letrasAbiertas.add(el.dataset.lote) : letrasAbiertas.delete(el.dataset.lote);
+      return;
     }
     const dt = e.target.closest('button[data-descartar-tema]');
     if (dt) {
