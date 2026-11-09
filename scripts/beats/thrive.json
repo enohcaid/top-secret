@@ -1315,6 +1315,102 @@
       "generado": "2026-11-08T08:51:40.485Z",
       "letraFinal": "[intro]\n\n[verse - male rap]\nDropped the key down the storm drain, watched it disappear\nHung my coat by the door, told the hallway I'm clean\nSun still up, I'm a statue, both hands flat on the table\nThen the streetlights hum on and my shoes know the scene\nTen past eleven, the stairwell breathes slow\nThumb keeps turning the key that isn't there\nDown the block, one window\nBlowing like a hell\nThe hand in the stool by the glass\nStill warm, still there\n\n[chorus - female]\nLast time\nLast time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[verse - male rap]\nDoor swings easy\nLike it's been waiting all along\nWarm air on my face like a hand on that\nFirst shift slides down\nAnd my shoulders come off the hook\nMirror plastic bottles\nI don't share\nRelief in the sten\nSing of the word\nOh, would it like a\nPut it in the drawer with the eye\n\n[chorus - male]\nLast time\nLast time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[bridge - female]\nGray light slips thin under the door\nI fold it like a shirt\nPut it in the drawer with the others\nStill smells like a\nStill smells like hurt\n\n[chorus - male]\nLast time, I said it to the dark\nLast time, and the dark said \"I know\"\nWarm in my throat, cold in my chest\nLast time again, here I go\n\n[chorus - female]\nLast time, the dark said \"I know\"\nLast time again, here I go\n\n[outro - male]\nLast time\nYeah\nYeah\nLast time\nYeah",
       "publicado": false
+    },
+    {
+      "id": "2026-11-08-2",
+      "fecha": "2026-11-08",
+      "slug": "crimson-tide",
+      "titulo": "Crimson Tide",
+      "concepto": "Se aferra a la promesa de algo más, incluso cuando el sabor se torna amargo y la marea lo arrastra.",
+      "rasgo": "Gusto de lo familiar, aunque dañino",
+      "voz": "dúo: él profundo y con flow oscuro, ella etérea y fantasmal en armonías",
+      "captionInstrumental": "dark trap, cinematic trap, gliding 808 bass, crisp trap hi-hats with triplets, haunting bells, reverse reverb, evolving textures, spacious, sparse, slow build",
+      "captionVoces": "Male rapper: deep, textured, brooding flow. Female voice: airy, ethereal, layered harmonies, haunting ad-libs.",
+      "bpm": 74,
+      "tonalidad": "E minor",
+      "duracion": 145,
+      "estructura": [
+        "intro",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "verse",
+        "pre-chorus",
+        "chorus",
+        "bridge",
+        "chorus",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 12.97,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 12.97,
+          "fin": 38.92,
+          "compases": 8
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 38.92,
+          "fin": 45.41,
+          "compases": 2
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 45.41,
+          "fin": 58.38,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 58.38,
+          "fin": 84.32,
+          "compases": 8
+        },
+        {
+          "nombre": "pre-chorus",
+          "inicio": 84.32,
+          "fin": 90.81,
+          "compases": 2
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 90.81,
+          "fin": 103.78,
+          "compases": 4
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 103.78,
+          "fin": 116.76,
+          "compases": 4
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 116.76,
+          "fin": 129.73,
+          "compases": 4
+        },
+        {
+          "nombre": "outro",
+          "inicio": 129.73,
+          "fin": 142.7,
+          "compases": 4
+        }
+      ],
+      "beat": "\"la llamada\" (motivo de campana) es la marea. En el verso solo responde en los",
+      "instrumental": "codigo",
+      "letra": "[intro]\n(instrumental only)\n\n[verse - male rap]\nDust motes dance in a fading ray\nThe scent of rain on a vacant chair\nA hollow echo of yesterday\nThis gilded cage, a silent snare\n\n[pre-chorus - female]\nCrimson bleeding, slow and deep\nA promise whispered, secrets to keep\n\n[chorus - female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[verse - male rap]\nTwo chipped teacups, porcelain cold\nA photograph bleached, a memory frayed\nStories unspoken, never told\nThe weight of what’s lost, a debt unpaid\n\n[pre-chorus - female]\nCrimson bleeding, slow and deep\nA promise whispered, secrets to keep\n\n[chorus - male & female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[bridge - female]\nThis bitter bloom, a phantom hue\nClinging to the shadows, known and true\n\n[chorus - male & female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[outro]\n(instrumental fades with female ad-libs: \"space…grace…lost…\")",
+      "letraPor": "local",
+      "audio": "musica/thrive/crimson-tide.mp3?v=mw8jzc4d",
+      "generado": "2026-11-09T00:58:55.645Z",
+      "letraFinal": "[intro]\n(instrumental only)\n\n[verse - male rap]\nDust motes dance in a fading ray\nThe scent of rain on a vacant chair\nA hollow echo\nYesterday\nA gilded cage, a silent snare\n\n[pre-chorus - female]\nCrimson bleeding, slow and deep\nA promise whispered\nSecrets to keep\n\n[chorus - female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[verse - male rap]\nTwo chipped teacups, porcelain cold\nA photograph bleached, a memory frayed\nStories unspoken, never told\nThe weight of what’s lost, a debt unpaid\n\n[pre-chorus - female]\nCrimson bleeding, slow and deep\nA promise whispered\nSecrets to keep\n\n[chorus - male & female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[bridge - female]\nThis bitter bloom, a phantom hue\nClinging to the shadows, known and true\n\n[chorus - male & female]\nStillness calls, a fragile grace\nLost in the undertow, a vacant space\n\n[outro]\n(instrumental fades with female ad-libs: \"space…grace…lost…\")",
+      "publicado": false
     }
   ]
 }
