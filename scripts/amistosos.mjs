@@ -64,7 +64,7 @@ const PIDE = /(amistos|busc|disponib|libre|rival|jugar|partido|\bhoy\b|\bx\s*1\b
 const SI = /(^|[^\p{L}])(dale+|(s[ií]+)+|ok+|oka|okey|de una|va|vamos|listo|joya|perfecto|confirm\p{L}*|hecho|obvio|genial|buen[ií]simo|claro|seguro|anotado)(?!\p{L})|👍|🤝|✅|💪|👌|🔥/iu;
 const NO = /(^|[^\p{L}])((no+)+|nop|imposible|ocupad\p{L}*|ya (tengo|tenemos|tienen|consegu[ií]\p{L}*|cerr[eé]\p{L}*|cerramos|arregl[eé]\p{L}*|arreglamos|estamos|est[aá] (cubierto|completo|lleno))|consegu[ií]\p{L}* (rival|equipo|otro)|completos?|cubiertos?|otro d[ií]a|mañana|no podemos)(?!\p{L})|❌|👎/iu;
 const DUDA = /d[eé]j[aá]me|te (aviso|confirmo|digo|escribo)|pregunt|consult|(^|[^\p{L}])veo(?!\p{L})|a ver|despu[eé]s|en un rato|m[aá]s tarde|ahora vemos|no s[eé]|capaz|quiz[aá]s|tal vez|\?/iu;
-const LIGAS = [[2119, 6409, 'Primera'], [2127, 6410, 'Segunda']];
+const LIGAS = [[2119, 6446, 'Primera'], [2127, 6447, 'Segunda']];
 const FS_DOC = 'projects/top-secret-fc/databases/(default)/documents/calendario/estado';
 const TZ = 'America/Argentina/Buenos_Aires';
 
@@ -131,7 +131,7 @@ const nombreSitio = n => (ALIAS.nombre_sitio || {})[n] || n;
 async function cargarEquipos() {
   const out = [];
   for (const [liga, temporada, div] of LIGAS) {
-    const r = await fetch(`https://www.virtualpronetwork.com/api/leagues/${liga}/table?season=${temporada}&community_id=1`);
+    const r = await fetch(`https://virtualpronetwork.com/api/leagues/${liga}/table?season=${temporada}&community_id=1`);
     const j = await r.json();
     const rows = Array.isArray(j) ? j : (Object.values(j).find(Array.isArray) || []);
     for (const t of rows) {

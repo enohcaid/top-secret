@@ -3,8 +3,8 @@ import { buscarEquipo } from './lib/equipos-match.mjs';
 import fs from 'fs';
 const A = JSON.parse(fs.readFileSync('scripts/amistosos-alias.json', 'utf8'));
 const eq = [];
-for (const [l, s, d] of [[2119, 6409, 'Primera'], [2127, 6410, 'Segunda']]) {
-  const j = await (await fetch(`https://www.virtualpronetwork.com/api/leagues/${l}/table?season=${s}&community_id=1`)).json();
+for (const [l, s, d] of [[2119, 6446, 'Primera'], [2127, 6447, 'Segunda']]) {
+  const j = await (await fetch(`https://virtualpronetwork.com/api/leagues/${l}/table?season=${s}&community_id=1`)).json();
   (Array.isArray(j) ? j : Object.values(j).find(Array.isArray)).forEach(t => eq.push({ nombre: ((t.team || t).name || '').trim(), div: d }));
 }
 eq.push(...A.extras);

@@ -2,7 +2,7 @@
 // y 11x11 (VirtualProGaming). Tolera nombres mal escritos (usa equipos-match).
 import { buscarEquipo } from './equipos-match.mjs';
 
-const VPN = [[2119, 6409], [2127, 6410]];                         // actualizar temporadas cuando cambien
+const VPN = [[2119, 6446], [2127, 6447]];                         // actualizar temporadas cuando cambien
 const COPAFACIL = ['-fthh5@pg59', '-fthh5@7zxj'];                 // torneos VPUG (ver CLAUDE.md, CopáFácil)
 const VPG = ['CHALLENGERS-T4'];                                   // torneos 11x11
 const VPG_LOGO = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
@@ -13,7 +13,7 @@ export async function cargarEscudos() {
   const out = [];
   const tryJson = async u => { try { const r = await fetch(u); return r.ok ? await r.json() : null; } catch { return null; } };
   for (const [l, s] of VPN) {
-    const j = await tryJson(`https://www.virtualpronetwork.com/api/leagues/${l}/table?season=${s}&community_id=1`);
+    const j = await tryJson(`https://virtualpronetwork.com/api/leagues/${l}/table?season=${s}&community_id=1`);
     const rows = j ? (Array.isArray(j) ? j : Object.values(j).find(Array.isArray) || []) : [];
     rows.forEach(t => { const x = t.team || t; if (x.name && x.logoUrl) out.push({ nombre: x.name.trim(), logo: x.logoUrl, fuente: 'VPN' }); });
   }

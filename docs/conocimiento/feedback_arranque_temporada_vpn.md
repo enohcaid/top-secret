@@ -16,7 +16,7 @@ Cuando el usuario pasa el link del fixture de VPN (`virtualpronetwork.com/web/ap
 
 **2. Verificar/actualizar `top-secret-worker.js`**
 - Los endpoints `/vpn-results`, `/vpn-fixtures` y `/vpn-table` tienen **hardcodeado** `LEAGUE_ID` (y `/vpn-table` además un `season=<id>` en la URL). Si el club cambió de división entre temporadas (pasó: 1ra↔2da), estos quedan apuntando a la liga/temporada vieja y los tres endpoints devuelven datos stale o vacíos — rompe calendario, convocatoria y posiciones sin ningún error visible.
-- Para encontrar el `LEAGUE_ID`/`season id` correctos: `curl` directo a `https://www.virtualpronetwork.com/api/teams/28524/fixtures` y `.../results` (sin pasar por el Worker), leer `matchSeason.id_league`, `matchSeason.number` (número de temporada visible, ej. 10) y `matchSeason.id` (el id interno que usa `/vpn-table?season=<id>`).
+- Para encontrar el `LEAGUE_ID`/`season id` correctos: `curl` directo a `https://virtualpronetwork.com/api/teams/28524/fixtures` y `.../results` (sin pasar por el Worker), leer `matchSeason.id_league`, `matchSeason.number` (número de temporada visible, ej. 10) y `matchSeason.id` (el id interno que usa `/vpn-table?season=<id>`).
 - Actualizar los 3 lugares en el Worker y redesplegar (ver [[reference_cloudflare_y_r2]]). Verificar con curl directo a los 3 endpoints del Worker que ya devuelven datos correctos (fixtures count > 0, table trae los equipos de la liga correcta).
 
 **3. Cargar el fixture en Firestore (NO en `RAW` de calendario.html)**
@@ -62,3 +62,10 @@ Cuando el usuario pasa el link del fixture de VPN (`virtualpronetwork.com/web/ap
 - VPN T3 reusa `VPN_URL`/`normVPN` (el mismo endpoint que ya se corrigió en el punto 2).
 - **Bug real que salió de este build**: el endpoint `/vpn-table` del Worker es UNO SOLO — antes lo usaban tanto la pestaña T2 (temporada finalizada, debía mostrar la tabla final congelada) como la nueva T3. Al apuntar `/vpn-table` a la temporada actual (punto 2), la pestaña T2 empezó a mostrar en vivo los datos de T3. Fix: temporadas finalizadas (T1 y ahora T2) NO deben depender de fetch en vivo — hay que hardcodear su tabla final como array estático (`VPN_T2_DATA`, mismo patrón que `VPN_T1_DATA`) y dejar el fetch en vivo (`VPN_URL`) exclusivamente para la pestaña de la temporada en curso. Revisar esto cada vez que se reutilice un endpoint del Worker entre una temporada vieja y una nueva.
 - Si VPUG no tiene fuente de datos en vivo confirmada para la temporada nueva (pasó en T3: `/vpug-table` seguía devolviendo el evento viejo de CopaFacil, `-fthh5@pg59`, con partidos jugados de T2), no inventar/reusar ese endpoint viejo — dejar placeholder "Próximamente" en esa pestaña específica hasta tener el event key nuevo confirmado.
+
+
+**Cambios de VPN (2026-11-09, arranque T11):**
+- La API pasó de `www.virtualpronetwork.com/api` a **`virtualpronetwork.com/api`** (la vieja redirige con 301; ya se cambió en el Worker y en `amistosos.mjs`, `amistosos-test-nombres.mjs`, `lib/escudos.mjs`).
+- Los escudos ya no están en `/api/media/images/teamlogos/` (404): la tabla trae `team.logoSmallUrl`/`logoUrl` completos en `media.virtualpronetwork.com/teamlogos/`. `posiciones.html` y `calendario.html` usan esos campos.
+- `/vpn-table` del Worker ya no tiene la temporada fija: la toma de `/api/leagues/2127` (`seasons[].active`). T11: 2da División = 6447, 1ra = 6446. Top Secret sigue en 2da (liga 2127).
+- Las temporadas de los scripts del bot de amistosos (`LIGAS`, `VPN` en escudos.mjs) siguen siendo fijas: actualizarlas en cada temporada.

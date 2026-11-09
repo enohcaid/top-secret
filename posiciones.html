@@ -740,12 +740,13 @@ const E11_DATA = [
 
 /* ── NORMALIZERS ── */
 function normVPN(raw) {
-  const LOGO_BASE = 'https://www.virtualpronetwork.com/api/media/images/teamlogos/';
+  // Escudos: la API trae la URL completa (media.virtualpronetwork.com); la ruta vieja /api/media/... da 404 desde 2026-11.
+  const LOGO_BASE = 'https://media.virtualpronetwork.com/teamlogos/';
   return raw
     .map(e => ({
       name: e.team.name,
       abbr: e.team.short_name || e.team.name.slice(0,3).toUpperCase(),
-      logo: e.team.logo1 ? LOGO_BASE + e.team.logo1 : (e.team.logo ? LOGO_BASE + e.team.logo : null),
+      logo: e.team.logoSmallUrl || e.team.logoUrl || (e.team.logo1 ? LOGO_BASE + e.team.logo1 : (e.team.logo ? LOGO_BASE + e.team.logo : null)),
       gp: e.gp, w: e.gw, d: e.gt, l: e.gl, gf: e.gf, gc: e.gc, gd: e.gd, pts: e.pts,
       us: /top.?secret/i.test(e.team.name)
     }))

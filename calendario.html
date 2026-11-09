@@ -1550,13 +1550,13 @@ async function fetchVpnBadges(){
     if(!r.ok){ console.warn('[VPN Badges] proxy error', r.status); return; }
     const raw = await r.json();
     if(!Array.isArray(raw) || !raw.length){ console.warn('[VPN Badges] unexpected format', typeof raw); return; }
-    const LOGO_BASE = 'https://www.virtualpronetwork.com/api/media/images/teamlogos/';
+    const LOGO_BASE = 'https://media.virtualpronetwork.com/teamlogos/';   // la ruta vieja /api/media/... da 404 desde 2026-11
     function logoUrl(v){ if(!v) return null; return v.startsWith('http') ? v : LOGO_BASE + v; }
     function cache(name, hash){ if(name && hash){ const u = logoUrl(hash); if(u) _vpnBadgeCache[name] = u; } }
     raw.forEach(e => {
       if(!e) return;
       // Extract from standings entry
-      if(e.team){ cache(e.team.name, e.team.logo1 || e.team.logo); }
+      if(e.team){ cache(e.team.name, e.team.logoSmallUrl || e.team.logoUrl || e.team.logo1 || e.team.logo); }
       // Also extract from each match's homeTeam / awayTeam for extra coverage
       if(Array.isArray(e.matches)){
         e.matches.forEach(match => {
