@@ -239,7 +239,8 @@
       "tiempos": {
         "voces": 1089,
         "letraFinal": 0
-      }
+      },
+      "descartado": true
     },
     {
       "id": "2026-10-31-local",
