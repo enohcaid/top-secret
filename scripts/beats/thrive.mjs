@@ -204,7 +204,9 @@ ${fb('concepto')}` : '');
   const j = await pedirJSON(encargo, { orden: ['claude', 'local'], tarea: 'thrive-concepto', temperatura: 0.9,
     claves: ['titulo', 'concepto', 'rasgo', 'caption_instrumental', 'caption_voces', 'voz', 'tonalidad', 'estructura'],
     validar: j => {
-      if (!(j.bpm >= 70 && j.bpm <= 140)) return `bpm ${j.bpm}`;
+      // nunca debajo de 128 (plan del álbum, 2026-11-01): el clap va en el 3 y 74 se siente a 37. Hasta el 08/11 aceptaba 70–140
+      // y rechazaba el 154 de Claude, así que "Crimson Tide" cayó en Gemma a 74 BPM
+      if (!(j.bpm >= 128 && j.bpm <= 168)) return `bpm ${j.bpm}: between 130 and 160 (half-time trap, never below 128)`;
       if (!(j.duracion >= 120 && j.duracion <= 150)) return `duración ${j.duracion} (va entre 120 y 150 s)`;
       if (!/^[A-G][#b]? (major|minor)$/.test(String(j.tonalidad).trim())) return `tonalidad "${j.tonalidad}"`;
       if (!Array.isArray(j.estructura) || !j.estructura.includes('chorus')) return 'estructura sin estribillo';

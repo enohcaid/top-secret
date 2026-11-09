@@ -22,7 +22,7 @@ The duet references are about MOOD and the male/female dynamic, not genre: four 
 - "caption_instrumental": the sound of the INSTRUMENTAL for ACE-Step, English, comma-separated tags, max ~40 words: it must start with a trap genre (dark trap, melodic trap, cinematic trap, emo trap…) and name the 808 and the hats. No voices.
 - "caption_voces": the VOCALS for ACE-Step, English, max ~25 words: a male rapper leading (flow, timbre), a female voice only on the hook/bridge (timbre, how she sings)
 - "voz": short Spanish description of the duet (e.g. "dúo: él grave y susurrado, ella aireada en falsete")
-- "bpm": integer between 130 and 160 (trap half-time feel) or between 65 and 80
+- "bpm": integer between 130 and 160 (trap half-time feel: the clap is on beat 3, so 140 feels like 70; never below 128)
 - "tonalidad": key in this exact format: "D minor", "F# minor", "Bb major"…
 - "duracion": integer seconds between 120 and 150 (the artist, 2026-10-31: songs last 2:00 to 2:30)
 - "estructura": the planned sections in order, as a list of strings from: "intro", "verse", "pre-chorus", "chorus", "bridge", "outro". Short song, few and clearly different parts (typical: intro, verse, chorus, verse, chorus, bridge, chorus)
