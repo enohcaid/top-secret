@@ -279,12 +279,17 @@ async function main() {
   let ultimoMarcador = -1e9, inicioMarcador = 0, partidos = 0;
   let filaTop = null, rival = '', archivoPartido = '', recortePartido = false;
   // ¿En qué fila del marcador está TOP? (el OCR lee bien las siglas ampliadas, no las cifras)
+  // El OCR suele pegar el logo de FC a la fila de arriba ("V TOP @ O", 2026-11-09): antes se exigía que la línea
+  // empezara con TOP y la lectura fallaba entera (sin fila de TOP ni siglas). Ahora se buscan palabras sueltas.
+  let siglasBloque = '', reintentosBloque = 0;
+  const SIGLAS = /\b(?=[A-Z0-9]*[A-Z])[A-Z0-9]{3}\b/;
   const leerEquipos = async png => {
-    const lineas = ((await ocr.leer(png)).lines || []).filter(l => /^[A-Z0-9]{3}/.test(l.text) && l.y < 130);
-    const top = lineas.find(l => /^TOP/.test(l.text));
+    const lineas = ((await ocr.leer(png)).lines || []).filter(l => l.y < 130 && !/\d{1,2}\s*:\s*\d/.test(l.text));
+    const top = lineas.find(l => /\bTOP\b/.test(l.text));
     if (!top) return false;
     filaTop = top.y < 65 ? 0 : 1;
-    rival = lineas.find(l => l !== top)?.text.slice(0, 3) || rival;
+    const siglas = (lineas.filter(l => l !== top).map(l => (l.text.match(SIGLAS) || [])[0]).find(Boolean) || '').replace(/0/g, 'O');
+    if (siglas) { siglasBloque = siglas; rival = siglas; revisarRival(siglas); }
     return true;
   };
   // Lado de nuestra barra de abajo (lib/lado-barra.mjs): OCR de los nombres cada 2 s mientras hay partido
@@ -327,7 +332,45 @@ async function main() {
     }
     golesPendientes = [];
   };
+  // Cambio de rival = partido nuevo, aunque la pausa entre partidos sea corta o el anterior no haya cerrado.
+  // 2026-11-09: Comunicaciones Cantera terminó antes del 89' sin reporte (no hubo "fin") y Ysh Fc arrancó 2:34 después
+  // (el umbral era 3 min): el overlay siguió con Comunicaciones, el 2-0 a Ysh quedó a su nombre y todo se corrió uno.
+  // Las siglas (COM → YSH → HYT) se leían bien; ahora se usan. Hacen falta ≥ 2 letras distintas (un error de OCR en una
+  // letra no inventa un partido). Ida y vuelta contra el mismo rival sigue dependiendo de la pausa de 3 min.
+  let siglasPartido = '', partidoCerrado = false, inicioAvisadoBloque = -1, sinCierre = false;
+  const descartarSinCierre = seg => {
+    if (!sinCierre) return; sinCierre = false;
+    if (golesF || golesC || golesPendientes.length) console.log(`[${hms(seg)}] el partido anterior (${golesF}-${golesC}) quedó sin cierre`);
+    golesF = golesC = 0; golesPartido = []; golesPendientes = []; golFila[0] = golFila[1] = 0;
+  };
+  const revisarRival = siglas => {
+    if (!/^[A-Z0-9]{3}$/.test(siglas)) return;
+    if (!siglasPartido) { siglasPartido = siglas; return; }
+    if ([...siglas].filter((c, i) => c !== siglasPartido[i]).length < 2) return;
+    const seg = Math.max(t - 1, 0), antes = siglasPartido;
+    siglasPartido = siglas;
+    // ¿Este bloque de marcador ya se tomó como partido nuevo (pausa ≥ 3 min)? Entonces el anterior ya cerró o quedó
+    // "sin cierre" (sinCierre): solo falta cerrarlo en ese caso. Si no, el cambio de rival es lo único que lo delata.
+    const yaEsNuevo = inicioPendiente !== null || inicioAvisadoBloque === inicioMarcador;
+    const cerrarAnterior = yaEsNuevo ? sinCierre : !partidoCerrado;
+    console.log(`[${hms(seg)}] cambió el rival (${antes} → ${siglas})${yaEsNuevo ? '' : ': partido nuevo'}`);
+    log('cambioRival', { seg, hora: hms(seg), antes, ahora: siglas });
+    if (cerrarAnterior) {
+      // los goles de este bloque son del partido nuevo; los anteriores, del que se cierra
+      const nuevos = golesPendientes.filter(p => p.ts >= inicioMarcador);
+      golesPendientes = golesPendientes.filter(p => p.ts < inicioMarcador);
+      for (const p of nuevos) if (p.fila === 0 || p.fila === 1) golFila[p.fila]--;
+      finDePartido(seg, `cambio de rival ${antes} → ${siglas}, último minuto ${ultimoMinuto}'`);
+      golesPendientes = nuevos; for (const p of nuevos) if (p.fila === 0 || p.fila === 1) golFila[p.fila]++;
+      partidoCerrado = false; huboPartido = true;
+    }
+    sinCierre = false;
+    // inicio del nuevo: se confirma con 60 s de marcador desde que apareció este bloque (como un arranque normal)
+    if (!yaEsNuevo) inicioPendiente = inicioMarcador;
+    resolverPendientes();
+  };
   const finDePartido = (seg, por) => {
+    partidoCerrado = true;
     resolverPendientes();
     let resultado, marcador = `${golesF}-${golesC}`;
     if (golesPendientes.length) {
@@ -373,24 +416,25 @@ async function main() {
       // Con el vigía recién arrancado (< 3 min mirando) no se avisa: podría ser un partido ya empezado.
       if (seg - ultimoMarcador >= INICIO_PARTIDO && seg >= INICIO_PARTIDO) {
         inicioPendiente = seg;
-        // el anterior se cortó sin reporte antes del 85': sus goles no pasan al partido nuevo
-        if (huboPartido && (golesF || golesC || golesPendientes.length)) { console.log(`[${hms(seg)}] el partido anterior (${golesF}-${golesC}) quedó sin cierre`); golesF = golesC = 0; golesPartido = []; golesPendientes = []; golFila[0] = golFila[1] = 0; ultimoMinuto = -1; }
+        // el anterior se cortó sin reporte antes del 85': si el rival cambió, revisarRival() lo cierra con sus goles;
+        // si no (mismo rival, partido que se rejuega), sus goles no pasan al nuevo (descartarSinCierre)
+        if (huboPartido && !partidoCerrado) sinCierre = true;
       }
       // Vigía recién arrancado con un partido ya en juego (el vivo empezó tarde, 2026-10-20): se avisa como "en curso";
       // retransmitir.mjs lo cuenta solo si esa noche todavía no contó ninguno (un reinicio del vigía no lo duplica).
-      else if (!vodId && ultimoMarcador < 0 && seg < INICIO_PARTIDO) { avisarOverlay('inicioPartido', { enCurso: true }); console.log(`[${hms(seg)}] partido ya en curso al arrancar`); }
+      else if (!vodId && ultimoMarcador < 0 && seg < INICIO_PARTIDO) { avisarOverlay('inicioPartido', { enCurso: true }); inicioAvisadoBloque = seg; console.log(`[${hms(seg)}] partido ya en curso al arrancar`); }
       if (seg - ultimoMarcador > AUSENCIA_PARTIDO) {
         // vuelve el marcador tras un rato largo: arranca (o sigue tras el entretiempo) un partido
         det.reiniciar(); partidos++; inicioMarcador = seg; recortePartido = false; huboPartido = true;
         const nombre = `partido-${String(partidos).padStart(2, '0')}-${hms(seg).replace(/:/g, '')}`;
-        filaTop = null;
+        filaTop = null; siglasBloque = ''; reintentosBloque = 0;
         archivoPartido = path.join(OUT, 'goles', `${nombre}-marcador.png`);
         log('partido', { n: partidos, seg, hora: hms(seg) });
         console.log(`[${hms(seg)}] marcador en pantalla (partido/tiempo #${partidos})`);
       }
       ultimoMarcador = seg;
       if (inicioPendiente !== null && seg - inicioPendiente >= 60) {
-        inicioPendiente = null;
+        inicioPendiente = null; inicioAvisadoBloque = inicioMarcador; partidoCerrado = false; descartarSinCierre(seg);
         if (!vodId) avisarOverlay('inicioPartido');
         console.log(`[${hms(seg)}] empieza un partido nuevo (60 s de marcador)`);
       }
@@ -412,8 +456,9 @@ async function main() {
           log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival });
           console.log(`[${hms(seg)}]   TOP ${filaTop ? 'visitante' : 'local'} vs ${rival}`);
         }
-      } else if (recortePartido && filaTop === null && seg % 10 === 7) {
-        // no se pudo leer al arranque: se reintenta cada 10 s (antes solo al haber un gol, y los anteriores quedaban sin lado)
+      } else if (recortePartido && (filaTop === null || !siglasBloque) && seg % 10 === 7 && reintentosBloque++ < 30) {
+        // no se pudo leer al arranque (fila de TOP o siglas del rival): se reintenta cada 10 s, hasta 5 min (antes solo
+        // al haber un gol, y los anteriores quedaban sin lado)
         const f = path.join(OUT, 'tmp', `equipos-${seg}.png`);
         await img().extract(SB_RECORTE).resize(450).png().toFile(f);
         if (await leerEquipos(f)) { log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival }); console.log(`[${hms(seg)}]   TOP ${filaTop ? 'visitante' : 'local'} vs ${rival} (reintento)`); }
@@ -421,6 +466,7 @@ async function main() {
         resolverPendientes();
       }
       if (ev && seg - inicioMarcador >= 5) {
+        descartarSinCierre(seg);   // gol del partido nuevo antes de saber si cambió el rival: el anterior queda sin cierre
         goles++;
         const ts = ev.seg, nombre = `gol-${String(goles).padStart(2, '0')}-${hms(ts).replace(/:/g, '')}`;
         const pngGol = path.join(OUT, 'goles', `${nombre}-marcador.png`);

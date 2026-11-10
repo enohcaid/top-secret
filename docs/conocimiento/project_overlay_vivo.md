@@ -124,6 +124,14 @@ Las redes estuvieron 5 min sin imagen (23:32–23:37): OBS quedó colgado con el
 - **La vertical solo se codifica si Instagram está al aire** (antes se codificaba igual, gastando CPU, cuando Instagram fallaba).
 - **Prueba (2026-11-06, `--prueba --fuente zackrawrr --sin-instagram --sin-titulos --sin-historia`):** congelar OBS con `NtSuspendProcess` → detectado a los 40 s y señal de vuelta unos 10 s después.
 
+## Noche del 2026-11-09: resultados y partidos corridos, YouTube caído
+
+- **1-1 anunciado como VICTORIA 1-0:** el gol del rival llegó antes de saber en qué fila del marcador está TOP (`aFavor:null`) y nunca se sumaba. Ahora esos goles quedan pendientes y se resuelven al leer la fila; si al final sigue sin saberse, solo se afirma empate (mismos cambios por fila) o se manda `resultado:null`.
+- **Partidos corridos uno:** Comunicaciones Cantera terminó antes del 89' sin reporte (no hubo `fin`) e Ysh Fc arrancó 2:34 después (el umbral de partido nuevo es 3 min sin marcador): el overlay siguió con Comunicaciones, el 2-0 a Ysh quedó a su nombre y Hacha Reserva pasó por Ysh. **Arreglo:** el vigía usa las siglas del rival del marcador; un bloque de marcador con otras siglas (≥ 2 letras distintas) es partido nuevo: cierra el anterior si quedó abierto (con sus goles) y avisa el inicio a los 60 s. Ida y vuelta contra el mismo rival sigue dependiendo de la pausa de 3 min.
+- **Las siglas casi nunca se leían:** el OCR de Windows pega el logo de FC a la fila de arriba ("V TOP @ O") y `leerEquipos` exigía que la línea empezara con TOP. Ahora busca palabras sueltas, y reintenta cada 10 s (hasta 5 min) mientras falte la fila o las siglas.
+- **Probado** con `--archivo` sobre el VOD del YouTube de Dani (`yt-dlp -f 299`; el 720p 298 recién terminado el vivo bajaba vacío): COM → (cierre) → YSH 2-0 → HYT, sin falsos cierres.
+- **YouTube no salió al aire en la segunda sesión** (también 26/10 y 2/11: siempre al reabrir el vivo enseguida de un corte, con YouTube todavía cerrando la transmisión anterior). `retransmitir.mjs` ahora lo mira cada 2 min toda la sesión (`vigilarYouTube`) y con 2 chequeos negativos seguidos corta solo el relevo de YouTube, espera 45 s y reconecta.
+
 ## Pendientes para corregir
 
 - **Charlas: los jugadores miran para el lado opuesto (Juan, vivo del 2026-11-04).** Cuando dos jugadores hablan en el modo pausa, quedan mirando hacia afuera en vez de mirarse. Sin corregir ni diagnosticar todavía. Pista: `pj()` en `overlay-pausa.js` asume que todos los clips `habla`/`escucha` miran a la derecha y espeja solo al de la derecha, pero los prompts de `clip-jugador.mjs` dicen "hacia un costado" sin indicar cuál, así que el lado puede variar por clip. Revisar la dirección real de cada clip. No aplicar el arreglo con un vivo en curso.
