@@ -14,6 +14,7 @@ Desde 2026-11-10 VPUG tiene web propia: **https://vpug-liga.onrender.com** (Reac
 - Con token (sesión de usuario): `/partidos?temporadaId=&divisionId=` (fixture por jornada, con goles cuando se juega), `/partidos/{id}`, `/clubes/{id}`, `/eliminatorias?...`.
 - Sin CORS para topsecret.ar → todo lo que use el sitio pasa por el Worker.
 - Nombres de club = los de EA, cortados a 15 caracteres ("Arg de Merlo eS"). Escudos en Supabase (`nkqjsmxxmrodientlnlh.supabase.co`, agregado a `FETCH_ALLOWED_DOMAINS` del `/img-proxy`).
+- Varios escudos vienen con fondo opaco (cuadro negro, blanco, crema): se sacan con `python scripts/escudo-sin-fondo.py <in> <out.webp> [relleno|rembg] [tol] [hexfondo]` (relleno = fondos lisos; rembg = textura/degradé o fondo parecido al escudo), se suben a R2 `logos/escudos/vpug/` y se apuntan en los mapas de escudos + `SIN_FONDO` (por id de club) del Worker. Revisar cada uno sobre fondo oscuro y claro antes de subir.
 
 **Token:** Juan inició sesión con su cuenta en el Chrome del pipeline (CDP 9222, `scripts/.chrome-profile/`); el token queda en el `localStorage` de `vpug-liga.onrender.com` (clave `token`). Para re-bajar el fixture (reprogramaciones, `aplazado`) leerlo de ahí con Playwright `connectOverCDP`; **no guardarlo en archivos ni en `.env`**.
 

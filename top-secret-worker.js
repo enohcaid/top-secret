@@ -657,8 +657,11 @@ export default {
             if ((t.filas || []).some(f => f.club && f.club.id === 107)) { tabla = t; break; }
             if (div === 1) tabla = t;
           }
+          // Escudos que la liga subió con fondo opaco → versión sin fondo en R2 (scripts/escudo-sin-fondo.py), por id de club
+          const SIN_FONDO = { 158: 'monotributistas', 171: 'comunicaciones', 175: 'iacc-reserva', 127: 'moron-esp', 120: 'ysh-fc', 144: 'atletico-moneiro', 147: 'deportivo-murra' };
+          const escudo = c => SIN_FONDO[c.id] ? `${url.origin}/media/logos/escudos/vpug/${SIN_FONDO[c.id]}.webp` : (c.escudo || null);
           const teams = (tabla.filas || []).map(f => ({
-            pos: f.posicion, name: f.club.nombre, logo: f.club.escudo || null, zona: f.zona || null,
+            pos: f.posicion, name: f.club.nombre, logo: escudo(f.club), zona: f.zona || null,
             gp: f.pj, w: f.g, d: f.e, l: f.p, gf: f.gf, gc: f.gc, gd: f.dg, pts: f.pts,
           }));
           const out = { temporada: tabla.temporada?.nombre || null, division: tabla.division?.nombre || null,
