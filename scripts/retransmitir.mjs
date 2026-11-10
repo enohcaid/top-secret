@@ -149,12 +149,12 @@ function contarFinales() {
 // ¿YouTube está realmente al aire? Entre el 8/10 y el 21/10 ninguna noche salió en YouTube y nadie se enteró: el envío
 // corría sin errores (el viejo modo directo, con tee, ignoraba los destinos caídos). Se mira la página pública /live del canal.
 const YT_CANAL = 'UCEKzzKDMMPri12Q3E9S7IVw';
-async function verificarYouTube() {
+// true / false, o null si no se pudo consultar. La usa vigilarYouTube() (más abajo), que reconecta el relevo si no sale.
+async function youTubeAlAire() {
   try {
     const html = await (await fetch(`https://www.youtube.com/channel/${YT_CANAL}/live`, { headers: { 'Accept-Language': 'es' }, signal: AbortSignal.timeout(20000) })).text();
-    if (/"isLiveNow":true|"isLive":true/.test(html)) log('YouTube: al aire (verificado en la página del canal).');
-    else log('⚠ YouTube NO está al aire aunque se le está enviando señal: revisar Studio (visibilidad, clave, avisos de la cuenta).');
-  } catch (e) { log('YouTube: no pude verificar si está al aire:', e.message.slice(0, 120)); }
+    return /"isLiveNow":true|"isLive":true/.test(html);
+  } catch (e) { log('YouTube: no pude verificar si está al aire:', e.message.slice(0, 120)); return null; }
 }
 
 // Próximo partido después de esta noche (para el cierre): el primer día con partidos en los próximos 14.
@@ -317,10 +317,11 @@ function relevos(lista) {
   const lanzar = d => {
     if (parado) return;
     const t0 = Date.now(); let ultimo = '';
-    const p = spawn(ffmpegPath, argsRelevo(d.entrada, d.url), { stdio: ['ignore', 'ignore', 'pipe'] }); vivos.add(p);
+    const p = spawn(ffmpegPath, argsRelevo(d.entrada, d.url), { stdio: ['ignore', 'ignore', 'pipe'] }); vivos.add(p); d.proc = p;
     p.stderr.on('data', x => { const t = String(x).trim(); if (t) ultimo = ocultarClaves(t).replace(/s+/g, ' ').slice(0, 160); });
     p.on('close', code => {
       vivos.delete(p); if (parado) return;
+      if (d.pausa) { const ms = d.pausa; d.pausa = 0; d.fallas = 0; setTimeout(() => lanzar(d), ms); return; }   // reinicio pedido (reiniciar())
       const duro = Date.now() - t0;
       if (duro > 30000) { d.fallas = 0; log(`${d.nombre}: relevo cortado tras ${Math.round(duro / 1000)} s (ffmpeg ${code}), lo reconecto. ${ultimo}`); }
       else if (++d.fallas % 10 === 0) log(`${d.nombre}: el relevo no logra conectar (${d.fallas} intentos). ${ultimo}`);
@@ -328,7 +329,35 @@ function relevos(lista) {
     });
   };
   lista.forEach(d => { d.fallas = 0; lanzar(d); });
-  return { parar() { parado = true; for (const p of vivos) p.kill(); } };
+  return {
+    parar() { parado = true; for (const p of vivos) p.kill(); },
+    // Corta el relevo de una red y lo vuelve a conectar pasados `pausaMs` (las demás redes no se enteran)
+    reiniciar(nombre, pausaMs) { const d = lista.find(x => x.nombre === nombre); if (!d?.proc || parado) return false; d.pausa = pausaMs; d.proc.kill(); return true; },
+  };
+}
+
+// YouTube recibe la señal pero no siempre sale al aire: las 3 veces (26/10, 2/11 y 9/11) fue al reabrir el vivo
+// enseguida de un corte, con YouTube todavía cerrando la transmisión anterior (clave reutilizable, inicio/detención
+// automáticos). Antes solo había un chequeo a los 90 s que dejaba un aviso en el log. Ahora se mira cada 2 min toda
+// la sesión; con 2 chequeos seguidos sin estar al aire se corta solo el relevo de YouTube, se espera 45 s a que suelte
+// la conexión vieja y se reconecta. Así hasta que salga (avisando en el log cada intento).
+function vigilarYouTube(rel) {
+  let negativos = 0, intentos = 0, alAire = null;
+  const chequeo = async () => {
+    const vivo = await youTubeAlAire();
+    if (vivo === null) return;                                   // no se pudo consultar: no se sabe, no se toca nada
+    if (vivo) {
+      if (alAire !== true) log(intentos ? `YouTube: al aire tras ${intentos} reconexión(es) del relevo.` : 'YouTube: al aire (verificado en la página del canal).');
+      alAire = true; negativos = 0; intentos = 0; return;
+    }
+    alAire = false;
+    if (++negativos < 2) { log('YouTube: no figura al aire, lo vuelvo a mirar en 2 min.'); return; }
+    negativos = 0; intentos++;
+    if (rel.reiniciar('YouTube', 45000)) log(`⚠ YouTube NO está al aire aunque se le manda señal: reconecto su relevo en 45 s (intento ${intentos}).${intentos >= 3 ? ' Si sigue igual, revisar Studio (visibilidad, clave, avisos de la cuenta).' : ''}`);
+  };
+  const t = setInterval(chequeo, 120000);
+  const t0 = setTimeout(chequeo, 90000);
+  return { parar() { clearInterval(t); clearTimeout(t0); } };
 }
 
 // ── Cadena con overlay: MediaMTX + streamlink como servidor http + OBS ──
@@ -422,7 +451,7 @@ async function sesion() {
     }
     // Un relevo por red desde MediaMTX local; el codificador (retransmitir()) solo escribe ahí
     const rel = relevos([...destinos.map(d => ({ ...d, entrada: LOCAL_H })), ...(ig ? [{ nombre: 'Instagram', url: ig.url, entrada: LOCAL_V }] : [])]);
-    if (destinos.some(d => d.nombre === 'YouTube')) setTimeout(verificarYouTube, 90000);
+    const yt = destinos.some(d => d.nombre === 'YouTube') ? vigilarYouTube(rel) : null;
     let fallas = 0, igIntento = null;
     while (Date.now() < limite && await seguirSesion()) {
       const t0 = Date.now();
@@ -445,6 +474,7 @@ async function sesion() {
       if (st && !st.outputActive) { log('OBS no está mandando a MediaMTX: se lo vuelvo a pedir.'); await obs('StartStream'); }
       await espera(5000);
     }
+    yt?.parar();
     rel.parar();
     if (ig) await ig.finalizar().catch(() => {});
     rearmando = true;                                             // que la salud no reinicie OBS mientras se baja
