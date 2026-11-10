@@ -237,6 +237,7 @@ const FETCH_ALLOWED_DOMAINS = [
   'start.gg',
   'faceit.com',
   'firebasestorage.googleapis.com',
+  'nkqjsmxxmrodientlnlh.supabase.co',   // escudos de la web de VPUG (vpug-liga, desde 2026-11-10)
 ];
 
 export default {
@@ -635,6 +636,39 @@ export default {
         });
         teams.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
         return jsonResp(teams);
+      }
+
+      // ── VPUG PRIMERA (/vpug-table-primera) ────
+      // Desde 2026-11-10 VPUG tiene web propia (vpug-liga.onrender.com, dejó CopáFácil). /v1/tabla es pública
+      // pero sin CORS, por eso pasa por acá. Temporada = la EN_CURSO de /v1/temporadas; división = la que tiene a
+      // TOP Secret (club 107), si no Primera (1). Onrender tarda en despertar: timeout y, si falla, la última
+      // tabla buena guardada en KV. Misma forma que /vpug-table-t4 (+ pos y zona).
+      if (url.pathname === '/vpug-table-primera' && request.method === 'GET') {
+        const API = 'https://vpug-liga-api.onrender.com/v1';
+        const KV_KEY = 'vpug_primera_tabla';
+        const get = p => fetch(API + p, { signal: AbortSignal.timeout(25000), cf: { cacheTtl: 300, cacheEverything: true } })
+          .then(r => r.ok ? r.json() : Promise.reject(new Error(`${p} ${r.status}`)));
+        try {
+          const temps = await get('/temporadas').catch(() => []);
+          const temp = (temps || []).find(t => t.estado === 'EN_CURSO') || { id: 7 };
+          let tabla = null;
+          for (const div of [1, 2, 3, 4]) {
+            const t = await get(`/tabla?temporadaId=${temp.id}&divisionId=${div}`);
+            if ((t.filas || []).some(f => f.club && f.club.id === 107)) { tabla = t; break; }
+            if (div === 1) tabla = t;
+          }
+          const teams = (tabla.filas || []).map(f => ({
+            pos: f.posicion, name: f.club.nombre, logo: f.club.escudo || null, zona: f.zona || null,
+            gp: f.pj, w: f.g, d: f.e, l: f.p, gf: f.gf, gc: f.gc, gd: f.dg, pts: f.pts,
+          }));
+          const out = { temporada: tabla.temporada?.nombre || null, division: tabla.division?.nombre || null,
+            jornadasJugadas: tabla.jornadasJugadas ?? null, jornadasTotales: tabla.jornadasTotales ?? null, teams };
+          if (env.TS_KV && teams.length) ctx.waitUntil(env.TS_KV.put(KV_KEY, JSON.stringify(out)));
+          return jsonResp(out);
+        } catch (e) {
+          const cache = env.TS_KV ? await env.TS_KV.get(KV_KEY, 'json').catch(() => null) : null;
+          return jsonResp(cache ? { ...cache, cache: true } : { error: String(e.message || e), fallback: true, teams: [] });
+        }
       }
 
       // ── VPUG API PROXY T4 (/vpug-table-t4) ────

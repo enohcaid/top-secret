@@ -499,13 +499,16 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
       <button class="tab"        data-league="vpug" onclick="switchTab('vpug','t4',this)">VPUG</button>
     </div>
 
-    <!-- VPUG T4 — Liga Pretemporada VPUG (FC-27), grupo de TOP Secret -->
+    <!-- VPUG T4 — Primera División (web propia de la liga, desde 2026-11-10) + historial de la Copa de Pretemporada -->
     <div class="tab-pane" id="t4-pane-vpug">
-      <div class="preseason">
+      <div class="group-header">Primera División VPUG</div>
+      <div class="table-wrap"><table class="standings-table" id="t4-vpug-primera-table" style="display:none"></table></div>
+      <div class="zone-legend" id="t4-vpug-primera-zonas" hidden></div>
+      <div class="preseason" id="t4-vpug-primera-prox">
         <div>
           <div class="preseason-kicker">Temporada 4 · VPUG</div>
-          <div class="preseason-title">Arranca el lunes 9 de noviembre</div>
-          <p class="preseason-sub">La temporada de VPUG empieza el <strong>9 de noviembre</strong>. Mientras tanto, así nos fue en la Copa de Pretemporada: terminamos segundos en el Grupo D y pasamos a los playoffs de la Fase Oro.</p>
+          <div class="preseason-title">Primera División</div>
+          <p class="preseason-sub">18 equipos y 17 fechas, del 10 de noviembre al 8 de diciembre. La tabla aparece acá apenas la liga la publique.</p>
         </div>
       </div>
       <div id="t4-vpug-playoffs-wrap" hidden>
@@ -598,6 +601,7 @@ const VPN_URL  = WORKER_BASE + '/vpn-table';
 const VPUG_URL = WORKER_BASE + '/vpug-table';
 const VPUG_T3_URL = WORKER_BASE + '/vpug-table-t3';
 const VPUG_T4_URL = WORKER_BASE + '/vpug-table-t4?group=D';
+const VPUG_PRIMERA_URL = WORKER_BASE + '/vpug-table-primera'; // Primera División VPUG (vpug-liga) desde 2026-11-10
 const EG_T4_URL = WORKER_BASE + '/eg-table'; // Espacio Gamer (ex 11x11) desde la T4
 const E11_GROUPS_URL_T2 = 'https://api.virtualprogaming.com/public/tournaments/challengers-t3/groups/';
 const E11_GROUPS_URL_T3 = 'https://api.virtualprogaming.com/public/tournaments/CHALLENGERS-T4/groups/?season=1';
@@ -957,6 +961,32 @@ async function fetchT4VPUG() {
   }
 }
 
+/* ── FETCH & RENDER T4 VPUG — PRIMERA DIVISIÓN (vpug-liga, desde 2026-11-10) ── */
+// Formato que informa la liga (/v1/tabla): 1° a 8° playoff, los últimos 3 descienden.
+function zonasPrimera(n) {
+  return [
+    { desde: 1,     hasta: 8, color: 'var(--z-po)',   nombre: '1° a 8° · Playoff' },
+    { desde: n - 2, hasta: n, color: 'var(--z-desc)', nombre: `${n - 2}° a ${n}° · Descenso` },
+  ];
+}
+// Sin fallback hardcodeado: si el Worker falla (y no tiene la última tabla en KV) queda el aviso.
+async function fetchT4VPUGPrimera() {
+  try {
+    const r = await fetch(VPUG_PRIMERA_URL);
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    const data = normVPUG(Array.isArray(raw.teams) ? raw.teams : []);
+    if (!data.length) throw new Error('empty');
+    const zonas = zonasPrimera(data.length);
+    document.getElementById('t4-vpug-primera-prox').style.display = 'none';
+    renderTable('t4-vpug-primera-table', data, 'var(--vpug)', zonas);
+    const ley = document.getElementById('t4-vpug-primera-zonas');
+    ley.innerHTML = zonas.map(z => `<div class="zl-item"><span class="zone-dot" style="background:${z.color}"></span>${z.nombre}</div>`).join('');
+    ley.hidden = false;
+    gsap.to('#t4-vpug-primera-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+  } catch(e) { /* queda el aviso */ }
+}
+
 /* ── FETCH & RENDER T4 ESPACIO GAMER (ex 11x11) ── */
 // Reglamento de Challengers (Juan, 2026-10-28): 1° asciende directo, 2°–9° playoff, 17°–18° promoción, 19°–20° descienden
 // (también arma la leyenda de la página y la de la placa para compartir)
@@ -1118,6 +1148,7 @@ fetchT3VPN();
 fetchT3E11();
 fetchT3VPUG();
 fetchT4VPUG();
+fetchT4VPUGPrimera();
 fetchT4EG();
 
 

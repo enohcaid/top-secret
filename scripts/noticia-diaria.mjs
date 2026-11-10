@@ -117,8 +117,9 @@ const tablaVPN = await intentar(async () => (await (await fetch(`${WORKER}/vpn-t
   .map((t, i) => ({ nombre: (t.team?.name || '').trim(), pos: i + 1, pj: t.gp, g: t.gw, e: t.gt, p: t.gl, gf: t.gf, gc: t.gc, pts: t.pts,
     ultimos: (t.matches || []).filter(m => m.gteam1 != null && m.gteam2 != null).slice(-5).map(m => (m.team1 === t.tid ? m.gteam1 - m.gteam2 : m.gteam2 - m.gteam1))
       .map(d => d > 0 ? 'G' : d < 0 ? 'P' : 'E').join('') })), []);
-const tablaVPUG = await intentar(async () => (await (await fetch(`${WORKER}/vpug-table-t4`, { signal: AbortSignal.timeout(30000) })).json())
-  .map(t => ({ nombre: t.name, grupo: t.group || null, pj: t.gp, g: t.w, e: t.d, p: t.l, gf: t.gf, gc: t.gc, pts: t.pts })), []);
+// VPUG: Primera División (vpug-liga) desde 2026-11-10; onrender puede tardar en despertar
+const tablaVPUG = await intentar(async () => ((await (await fetch(`${WORKER}/vpug-table-primera`, { signal: AbortSignal.timeout(60000) })).json()).teams || [])
+  .map(t => ({ pos: t.pos, nombre: t.name, grupo: t.group || null, pj: t.gp, g: t.w, e: t.d, p: t.l, gf: t.gf, gc: t.gc, pts: t.pts })), []);
 const TABLAS = { 'Espacio Gamer': (tablaEG || []).map(t => ({ ...t, nombre: t.equipo })), VPN: tablaVPN, VPUG: tablaVPUG };
 function fichaRival(liga, rival) {
   const eq = TABLAS[liga] || [];

@@ -6,7 +6,7 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 import { ROOT } from '../../lib/env.mjs';
 
-export const TEMPORADA = { id: 'T4', desde: '2026-10-05', torneo: 'Liga Pretemporada VPUG', liga: 'VPUG', schedule: 'VPUG_T4_SCHEDULE', badges: 'VPUG_T4_BADGES' };
+export const TEMPORADA = { id: 'T4', desde: '2026-10-05', torneo: 'Primera División VPUG', liga: 'VPUG', schedule: 'VPUG_T4_SCHEDULE', badges: 'VPUG_T4_BADGES' };
 
 export const hoyART = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
 export const diaSemana = f => new Date(f + 'T12:00:00-03:00').toLocaleDateString('es-AR', { weekday: 'long', timeZone: 'America/Argentina/Buenos_Aires' });

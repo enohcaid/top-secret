@@ -232,7 +232,8 @@ $('social-grid').innerHTML = (window.TS_SOCIAL || []).map(s => `
   load('vpn', WORKER + '/vpn-table', raw => (Array.isArray(raw) ? raw : []).map(e => ({
     name: e.team?.name || '', gp: e.gp || 0, w: e.gw || 0, d: e.gt || 0, l: e.gl || 0,
     gf: e.gf ?? null, gc: e.gc ?? null, gd: e.gd ?? null, pts: e.pts || 0 })));
-  load('vpug', WORKER + '/vpug-table-t4?group=D', raw => (Array.isArray(raw) ? raw : []).map(e => ({
+  // VPUG: Primera División (web propia de la liga, vpug-liga) desde 2026-11-10
+  load('vpug', WORKER + '/vpug-table-primera', raw => (Array.isArray(raw?.teams) ? raw.teams : []).map(e => ({
     name: e.name || '', gp: e.gp || 0, w: e.w || 0, d: e.d || 0, l: e.l || 0,
     gf: e.gf ?? null, gc: e.gc ?? null, gd: e.gd ?? null, pts: e.pts || 0 })));
   // Espacio Gamer (ex 11x11 desde la T4): CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA
