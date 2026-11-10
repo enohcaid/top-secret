@@ -479,7 +479,7 @@ export default {
         const TS_ID     = 28524;
         const LEAGUE_ID = 2127; // Liga Argentina 2da División T3 — auto-detects latest season
 
-        const vpnResp = await fetch('https://www.virtualpronetwork.com/api/teams/28524/results', {
+        const vpnResp = await fetch('https://virtualpronetwork.com/api/teams/28524/results', {
           headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
           cf: { cacheTtl: 300, cacheEverything: true },
         });
@@ -525,7 +525,7 @@ export default {
         const TS_ID     = 28524;
         const LEAGUE_ID = 2127; // Liga Argentina 2da División T3
 
-        const vpnResp = await fetch('https://www.virtualpronetwork.com/api/teams/28524/fixtures', {
+        const vpnResp = await fetch('https://virtualpronetwork.com/api/teams/28524/fixtures', {
           headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
           cf: { cacheTtl: 300, cacheEverything: true },
         });
@@ -572,7 +572,15 @@ export default {
 
       // ── VPN API PROXY (/vpn-table) ────────────
       if (url.pathname === '/vpn-table' && request.method === 'GET') {
-        const vpnResp = await fetch('https://www.virtualpronetwork.com/api/leagues/2127/table?season=6410&community_id=1');
+        // Temporada activa de la liga 2127 (2da División): se toma sola de /api/leagues/2127 (seasons[].active);
+        // si falla, la última conocida (T11 = 6447, 2026-11-09). VPN mudó la API de www. a virtualpronetwork.com.
+        let vpnSeason = 6447;
+        try {
+          const lg = await (await fetch('https://virtualpronetwork.com/api/leagues/2127')).json();
+          const act = ((lg.data || lg).seasons || []).find(x => x.active);
+          if (act && act.id) vpnSeason = act.id;
+        } catch (_) {}
+        const vpnResp = await fetch(`https://virtualpronetwork.com/api/leagues/2127/table?season=${vpnSeason}&community_id=1`);
         const data = await vpnResp.json();
         return jsonResp(data);
       }
