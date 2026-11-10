@@ -204,6 +204,24 @@
       "titulo": "Barefoot",
       "video": "historia-tacet-canal-2026-11-07",
       "fecha": "2026-11-07"
+    },
+    {
+      "tema": "empty-seat",
+      "titulo": "Empty Seat",
+      "video": "noticia-auto-2026-11-08-tiktok",
+      "fecha": "2026-11-08"
+    },
+    {
+      "tema": "splinters",
+      "titulo": "Splinters",
+      "video": "noticia-auto-2026-11-09-tiktok",
+      "fecha": "2026-11-09"
+    },
+    {
+      "tema": "scar",
+      "titulo": "Scar",
+      "video": "merch-gorra-001",
+      "fecha": "2026-11-10"
     }
   ]
 }

@@ -71,6 +71,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [project_vpug_t4_pretemporada](project_vpug_t4_pretemporada.md) — Liga Pretemporada VPUG (FC-27), Grupo D, arrancó 2026-10-05 — lunes y miércoles 23:00 y 23:30
 - [project_vpug_t6_temporada_regular](project_vpug_t6_temporada_regular.md) — Estado del fixture de la temporada regular VPUG T6 (Primera División) cargado en el sitio — fechas proyectadas, no confirmadas partido a partido
 - [project_youtube_canal_oficial_tsfc](project_youtube_canal_oficial_tsfc.md) — Top Secret FC lanzó su canal oficial de YouTube (@TOPSecretFC) el 2026-08-09 — contenido de video del club, reportes de partido incluidos
+- [project_merch_gorra](project_merch_gorra.md) — Primer merch (gorra, 2026-11-10): teaser con la modelo oculta (tramos revisados + gradación "solo dorado"), réplicas de producto con ChatGPT/Canva, sin datos comerciales todavía
 
 ## Referencias técnicas
 

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Reel del primer producto de merch (la gorra) — scripts/social/piezas/merch-gorra.mjs. Vertical 1080x1920, línea de
+     tiempo continua: mostrar(0, t) dibuja el segundo t (determinístico; async: espera a que los cuadros estén decodificados).
+     Actos (segundos en D.T, alineados a compases de 140 BPM con el golpe del tema en D.T.hit):
+       intro (expediente) · origen (la máquina bordando, metraje real "solo dorado") · sujeto (capucha) · HIT (la réplica,
+       destello + onda + partículas) · bóveda · evidencia (frente real, cámara de vigilancia) · coro (ángulos a pulso) ·
+       drop · cierre (escudo + sello CLASIFICADO + próximamente).
+     Imagen en canvas (#cv): portadas a pantalla, ventanas, franjas, RGB, glitch, barrido de luz. Textos en el DOM. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050403;--gold:#C9A84C;--gold2:#F1DC97;--gold3:#FFF6D8;--text:#F4EFE0;--text2:rgba(244,239,224,.62)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+#escena{position:absolute;inset:0;will-change:transform}
+#cv{position:absolute;inset:0;width:1080px;height:1920px}
+#rayos{position:absolute;left:50%;top:46%;width:3200px;height:3200px;margin:-1600px 0 0 -1600px;opacity:0;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(241,220,151,.20) 0deg 4deg,transparent 4deg 13deg);
+  -webkit-mask:radial-gradient(closest-side,#000 6%,transparent 70%);mix-blend-mode:screen}
+#vig{position:absolute;inset:0;background:radial-gradient(115% 75% at 50% 48%,transparent 42%,rgba(0,0,0,.82) 100%);pointer-events:none}
+#grano{position:absolute;inset:0;width:100%;height:100%;opacity:.09;mix-blend-mode:overlay;pointer-events:none;image-rendering:pixelated}
+#lineas{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.35) 0 2px,transparent 2px 5px)}
+#flash{position:absolute;inset:0;background:var(--gold3);opacity:0;pointer-events:none;mix-blend-mode:screen}
+
+/* textos */
+.t{position:absolute;left:0;right:0;text-align:center;opacity:0;will-change:transform,opacity,filter;white-space:nowrap}
+.k{font:700 30px 'JetBrains Mono';letter-spacing:.34em;color:var(--gold)}
+.big{font:400 230px/.86 'Bebas Neue';letter-spacing:.01em;color:var(--text)}
+.big.oro{background:linear-gradient(100deg,var(--gold) 0%,var(--gold) 38%,var(--gold3) 50%,var(--gold) 62%,var(--gold) 100%);background-size:320% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 18px 50px rgba(201,168,76,.35))}
+.mid{font:900 96px/1 Barlow;letter-spacing:-.01em;text-transform:uppercase}
+.mid b{color:var(--gold);font-weight:900}
+.sub{font:700 34px 'Barlow Condensed';letter-spacing:.42em;color:var(--text2);text-transform:uppercase}
+
+/* expediente (intro) */
+#exp{position:absolute;left:96px;right:96px;top:760px;font:500 34px/1.7 'JetBrains Mono';color:var(--gold);letter-spacing:.06em;opacity:0}
+#exp .cur{display:inline-block;width:20px;height:38px;background:var(--gold);vertical-align:-6px;margin-left:6px}
+#exp .dim{color:rgba(201,168,76,.5)}
+
+/* HUD de vigilancia */
+#hud{position:absolute;inset:0;pointer-events:none;opacity:0}
+#hud .esq{position:absolute;width:70px;height:70px;border-color:var(--gold);border-style:solid;border-width:0}
+#hud .rec{position:absolute;display:flex;align-items:center;gap:14px;font:700 26px 'JetBrains Mono';letter-spacing:.2em;color:var(--text)}
+#hud .rec i{width:18px;height:18px;border-radius:50%;background:#E5484D;box-shadow:0 0 18px #E5484D}
+#hud .tc{position:absolute;font:500 24px 'JetBrains Mono';letter-spacing:.14em;color:var(--text2)}
+#hud .tag{position:absolute;font:700 24px 'JetBrains Mono';letter-spacing:.24em;color:#0B0A07;background:var(--gold);padding:8px 14px}
+
+/* cierre */
+#logo{position:absolute;left:50%;top:560px;width:520px;margin-left:-260px;opacity:0;filter:drop-shadow(0 0 60px rgba(201,168,76,.45))}
+#sello{position:absolute;left:50%;top:1330px;transform:translateX(-50%);opacity:0;padding:14px 34px;border:6px solid var(--gold);border-radius:10px;
+  font:400 104px/1 'Bebas Neue';letter-spacing:.12em;color:var(--gold);white-space:nowrap}
+#sello::after{content:'';position:absolute;inset:6px;border:2px solid rgba(201,168,76,.55);border-radius:4px}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="escena">
+    <canvas id="cv" width="1080" height="1920"></canvas>
+    <div id="rayos"></div>
+    <img id="logo" alt="">
+    <div id="hud">
+      <div class="esq" id="e1"></div><div class="esq" id="e2"></div><div class="esq" id="e3"></div><div class="esq" id="e4"></div>
+      <div class="rec" id="rec"><i></i><span>REC</span></div>
+      <div class="tc" id="tc"></div>
+      <div class="tag" id="tag"></div>
+    </div>
+    <div id="exp"></div>
+    <div class="t k" id="k1"></div>
+    <div class="t big" id="b1"></div>
+    <div class="t mid" id="m1"></div>
+    <div class="t sub" id="s1"></div>
+    <div id="sello">CLASIFICADO</div>
+  </div>
+  <div id="lineas"></div>
+  <canvas id="grano" width="360" height="640"></canvas>
+  <div id="vig"></div>
+  <div id="flash"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const W = 1080, H = 1920;
+const cv = $('#cv'), cx = cv.getContext('2d');
+const off = Object.assign(document.createElement('canvas'), { width: W, height: H }), ox = off.getContext('2d');
+const tR = Object.assign(document.createElement('canvas'), { width: W, height: H }), rx = tR.getContext('2d');
+const tC = Object.assign(document.createElement('canvas'), { width: W, height: H }), ccx = tC.getContext('2d');
+let D = null;
+
+// ── utilidades ──
+const cl = (v, a, b) => Math.min(b, Math.max(a, v));
+const lin = (t, a, b) => cl((t - a) / (b - a), 0, 1);
+const eOut = u => 1 - Math.pow(1 - u, 3);
+const eExpo = u => u >= 1 ? 1 : 1 - Math.pow(2, -10 * u);
+const eIO = u => u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+function rnd(seed) { let s = seed >>> 0 || 1; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
+const hash = n => { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+
+// ── imágenes: caché de <img> por src, decodificadas ──
+const cache = new Map();
+function img(src) {
+  let e = cache.get(src);
+  if (!e) { e = new Image(); e.src = src; cache.set(src, e); if (cache.size > 160) cache.delete(cache.keys().next().value); }
+  return e;
+}
+async function listo(src) { const e = img(src); if (!e.complete || !e.naturalWidth) { try { await e.decode(); } catch {} } return e; }
+// cuadro de un clip: {dir, n, quieta} y segundo local lt (velocidad v)
+// c.desde: segundo del clip desde el que se usa (descarta un tramo que no sirve); pasado el final queda el último cuadro
+const cuadro = (c, lt, v = 1) => c.quieta ? `${c.dir}/0001.jpg` : `${c.dir}/${String(cl(Math.floor(((c.desde || 0) + lt * v) * 30) + 1, 1, c.n)).padStart(4, '0')}.jpg`;
+
+// dibuja la imagen cubriendo el rectángulo (x,y,w,h) con zoom z, foco (fx,fy en 0-1) y desplazamiento (dx,dy)
+function cubrir(ctx, im, x, y, w, h, { z = 1, fx = .5, fy = .5, dx = 0, dy = 0, alpha = 1, filtro = 'none' } = {}) {
+  if (!im || !im.naturalWidth) return;
+  const s = Math.max(w / im.naturalWidth, h / im.naturalHeight) * z;
+  const iw = im.naturalWidth * s, ih = im.naturalHeight * s;
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  ctx.globalAlpha = alpha; ctx.filter = filtro;
+  ctx.drawImage(im, x + (w - iw) * fx + dx, y + (h - ih) * fy + dy, iw, ih);
+  ctx.restore();
+}
+
+// ── efectos de postproceso sobre el canvas ──
+function rgb(px) {
+  if (px < .5) return;
+  ox.clearRect(0, 0, W, H); ox.drawImage(cv, 0, 0);
+  for (const [ctx, col] of [[rx, '#ff0000'], [ccx, '#00ffff']]) {
+    ctx.globalCompositeOperation = 'source-over'; ctx.clearRect(0, 0, W, H); ctx.drawImage(off, 0, 0);
+    ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = col; ctx.fillRect(0, 0, W, H);
+  }
+  cx.save(); cx.fillStyle = '#000'; cx.fillRect(0, 0, W, H); cx.globalCompositeOperation = 'lighter';
+  cx.drawImage(tR, px, 0); cx.drawImage(tC, -px, 0); cx.restore();
+}
+function glitch(seed, amp, bandas = 9) {
+  if (amp < 1) return;
+  ox.clearRect(0, 0, W, H); ox.drawImage(cv, 0, 0);
+  const r = rnd(seed);
+  for (let i = 0; i < bandas; i++) {
+    const y = r() * H, h = 12 + r() * 120, d = (r() - .5) * 2 * amp;
+    cx.drawImage(off, 0, y, W, h, d, y, W, h);
+  }
+}
+// barrido de luz diagonal (u: 0→1 cruza la pantalla)
+function barrido(u, fuerza = .55, ancho = 260) {
+  if (u <= 0 || u >= 1) return;
+  const x = -600 + u * (W + 1200);
+  cx.save(); cx.globalCompositeOperation = 'screen';
+  const g = cx.createLinearGradient(x - ancho, 0, x + ancho, 300);
+  g.addColorStop(0, 'rgba(255,240,200,0)'); g.addColorStop(.5, `rgba(255,236,190,${fuerza})`); g.addColorStop(1, 'rgba(255,240,200,0)');
+  cx.fillStyle = g; cx.fillRect(0, 0, W, H); cx.restore();
+}
+// onda expansiva dorada desde (x,y)
+function onda(u, x = W / 2, y = H * .46) {
+  if (u <= 0 || u >= 1) return;
+  cx.save(); cx.globalCompositeOperation = 'screen';
+  for (const [k, a] of [[1, .9], [.72, .5]]) {
+    const r = eOut(u) * 1500 * k;
+    cx.strokeStyle = `rgba(241,220,151,${(1 - u) * a})`; cx.lineWidth = 60 * (1 - u) + 4;
+    cx.beginPath(); cx.arc(x, y, r, 0, Math.PI * 2); cx.stroke();
+  }
+  cx.restore();
+}
+// partículas doradas (sprite precalculado). modo 'estallido' desde el centro, 'polvo' flotando, 'converge' hacia el centro
+const sprite = (() => {
+  const c = Object.assign(document.createElement('canvas'), { width: 64, height: 64 }), g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,246,216,1)'); gr.addColorStop(.25, 'rgba(241,220,151,.85)'); gr.addColorStop(1, 'rgba(201,168,76,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c;
+})();
+function particulas(modo, u, n = 160, seed = 7, cxp = W / 2, cyp = H * .46) {
+  const r = rnd(seed);
+  cx.save(); cx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < n; i++) {
+    const a = r() * Math.PI * 2, v = .25 + r() * .75, tam = 6 + r() * 26, fase = r();
+    let x, y, al;
+    if (modo === 'estallido') {
+      const d = eOut(u) * (300 + v * 1100);
+      x = cxp + Math.cos(a) * d; y = cyp + Math.sin(a) * d + u * u * 260 * v; al = (1 - u) * (.4 + .6 * v);
+    } else if (modo === 'converge') {
+      const d = (1 - eIO(u)) * (500 + v * 900);
+      x = cxp + Math.cos(a + u * 1.5) * d; y = cyp + Math.sin(a + u * 1.5) * d; al = Math.sin(Math.PI * cl(u * 1.1, 0, 1)) * (.35 + .65 * v);
+    } else {                                                                                   // polvo
+      x = (r() * W + Math.sin(u * 2 + fase * 6) * 40) % W; y = ((r() * H - u * 120 * v) % H + H) % H;
+      al = .25 + .5 * Math.abs(Math.sin(u * 3 + fase * 9));
+    }
+    cx.globalAlpha = cl(al, 0, 1);
+    cx.drawImage(sprite, x - tam / 2, y - tam / 2, tam, tam);
+  }
+  cx.restore();
+}
+
+// ── grano (precalculado, se desplaza por cuadro) ──
+const gr = $('#grano').getContext('2d');
+const ruido = (() => { const c = Object.assign(document.createElement('canvas'), { width: 720, height: 1280 }), g = c.getContext('2d'), d = g.createImageData(720, 1280), r = rnd(99);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c; })();
+
+// ── textos ──
+function txt(el, html, { top, op = 1, esc = 1, blur = 0, dx = 0, dy = 0, ls = null, pos = null }) {
+  const e = $(el);
+  if (e._h !== html) { e.innerHTML = html; e._h = html; }
+  e.style.top = top + 'px'; e.style.opacity = op;
+  e.style.transform = `translate(${dx}px,${dy}px) scale(${esc})`;
+  e.style.filter = blur > .2 ? `blur(${blur}px)` : (e.classList.contains('oro') ? 'drop-shadow(0 18px 50px rgba(201,168,76,.35))' : 'none');
+  if (ls !== null) e.style.letterSpacing = ls;
+  if (pos !== null) e.style.backgroundPosition = pos;
+}
+const ocultar = (...ids) => ids.forEach(i => { $(i).style.opacity = 0; });
+// golpe tipográfico: entra grande y desenfocado, se asienta en 0,35 s; sale en fade
+function golpe(el, html, t, t0, t1, top, { desde = 1.7, salida = .18, oro = false } = {}) {
+  const e = $(el); e.classList.toggle('oro', oro);
+  if (t < t0 || t > t1) { e.style.opacity = 0; return; }
+  const u = eExpo(lin(t, t0, t0 + .35)), o = lin(t, t0, t0 + .08) * (1 - lin(t, t1 - salida, t1));
+  txt(el, html, { top, op: o, esc: desde + (1 - desde) * u, blur: (1 - u) * 22, pos: `${100 - lin(t, t0, t1) * 100}% 0` });
+}
+
+// ── HUD ──
+function hud(op, caja, { tag = '', t = 0 } = {}) {
+  $('#hud').style.opacity = op; if (op <= 0) return;
+  const [x, y, w, h] = caja, L = 6;
+  const pos = [[x - 18, y - 18, 'Top', 'Left'], [x + w - 52, y - 18, 'Top', 'Right'], [x - 18, y + h - 52, 'Bottom', 'Left'], [x + w - 52, y + h - 52, 'Bottom', 'Right']];
+  pos.forEach(([px, py, a, b], i) => { const e = $('#e' + (i + 1)); e.style.left = px + 'px'; e.style.top = py + 'px'; e.style.borderWidth = '0'; e.style['border' + a + 'Width'] = L + 'px'; e.style['border' + b + 'Width'] = L + 'px'; });
+  const rec = $('#rec'); rec.style.left = (x + 4) + 'px'; rec.style.top = (y - 70) + 'px'; rec.querySelector('i').style.opacity = Math.floor(t * 2) % 2 ? .25 : 1;
+  const tc = $('#tc'); tc.style.left = (x + 4) + 'px'; tc.style.top = (y + h + 34) + 'px';
+  const s = 3 * 3600 + 2 * 60 + 7 + t; tc.textContent = `CAM 03 · 10/11/2026 · ${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(Math.floor(s) % 60).padStart(2, '0')}:${String(Math.floor((s % 1) * 30)).padStart(2, '0')}`;
+  const tg = $('#tag'); tg.textContent = tag; tg.style.display = tag ? 'block' : 'none'; tg.style.right = (W - x - w + 4) + 'px'; tg.style.top = (y - 74) + 'px';
+}
+
+function pintar(datos) {
+  D = datos;
+  $('#logo').src = D.logo;
+  // precargar los primeros cuadros de cada clip
+  for (const c of Object.values(D.clips)) img(cuadro(c, 0));
+  return 1;
+}
+
+// ── la línea de tiempo ──
+async function mostrar(n, t = 0) {
+  const T = D.T, B = D.beat, BAR = 4 * B;
+  const C = D.clips;
+  // reseteos por cuadro
+  cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = '#050403'; cx.fillRect(0, 0, W, H);
+  ocultar('#k1', '#b1', '#m1', '#s1', '#exp', '#logo', '#sello');
+  $('#rayos').style.opacity = 0; $('#lineas').style.opacity = 0; $('#flash').style.opacity = 0; hud(0, [0, 0, 0, 0]);
+  let shake = 0, rgbPx = 0, glAmp = 0, flash = 0;
+  // pulso: 0 en cada tiempo, decae (para golpes visuales a ritmo)
+  const pulso = (() => { const ph = ((t - T.hit) % B + B) % B; return Math.exp(-ph * 9); })();
+  const enTiempo = (a, b) => t >= a && t < b;
+
+  // ═══ INTRO 0 → origen: expediente que se tipea + ranura que se abre sobre la aguja ═══
+  if (t < T.origen) {
+    const lineas = ['ARCHIVO N.º 001', 'ESTADO: <span class="dim">CLASIFICADO</span>', 'CONTENIDO: <span class="dim">██████</span>'];
+    const total = lineas.join('').replace(/<[^>]+>/g, '').length, c = Math.floor(lin(t, .15, T.ranura - .1) * total);
+    let k = 0, html = '';
+    for (const l of lineas) { const plano = l.replace(/<[^>]+>/g, ''); const vis = cl(c - k, 0, plano.length); k += plano.length;
+      if (vis <= 0) break; html += (vis >= plano.length ? l : plano.slice(0, vis)) + (vis >= plano.length ? '<br>' : ''); }
+    const parpadeo = Math.floor(t * 3) % 2 === 0;
+    const sube = eIO(lin(t, T.ranura, T.origen)) * 520;
+    const ex = $('#exp'); ex.innerHTML = html + (parpadeo ? '<span class="cur"></span>' : ''); ex.style.opacity = 1 - lin(t, T.origen - .3, T.origen); ex.style.transform = `translateY(${-sube}px)`;
+    // ranura horizontal que se abre: la aguja bordando (metraje real)
+    const u = eIO(lin(t, T.ranura, T.origen));
+    if (t >= T.ranura) {
+      const h = 6 + u * 1180, y = H * .56 - h / 2;
+      const im = await listo(cuadro(C.macro1, t - T.ranura));
+      cubrir(cx, im, 0, y, W, h, { z: 1.25 - u * .15, fy: .35 });
+      cx.fillStyle = `rgba(241,220,151,${(1 - u) * .9})`; cx.fillRect(0, y - 2, W, 3); cx.fillRect(0, y + h - 1, W, 3);
+    }
+    $('#lineas').style.opacity = .5;
+  }
+
+  // ═══ ORIGEN 1: aguja a pantalla completa + "HECHO / A PUNTADA" ═══
+  else if (t < T.franjas) {
+    const lt = t - T.ranura, u = lin(t, T.origen, T.franjas);
+    const im = await listo(cuadro(C.macro1, lt));
+    cubrir(cx, im, 0, 0, W, H, { z: 1.1 + u * .08, fy: .32 });
+    golpe('#m1', 'HECHO', t, T.origen, T.franjas, 1180, { desde: 1.9 });
+    golpe('#b1', 'A PUNTADA', t, T.origen + 2 * B, T.franjas, 1290, { oro: true });
+    shake = pulso * 6; rgbPx = pulso * 10;
+    $('#lineas').style.opacity = .25;
+  }
+
+  // ═══ ORIGEN 2: la máquina en 3 franjas desfasadas ═══
+  else if (t < T.macro) {
+    const lt = t - T.franjas, u = lin(t, T.franjas, T.macro);
+    const anchos = [W / 3, W / 3, W / 3];
+    for (let i = 0; i < 3; i++) {
+      const entra = eExpo(lin(t, T.franjas + i * B * .5, T.franjas + i * B * .5 + .45));
+      const x = i * W / 3, dy = (1 - entra) * (i % 2 ? -1 : 1) * 1400;
+      const clip = i === 1 ? C.cabezal : C.maquina;
+      const im = await listo(cuadro(clip, lt + i * .9));
+      cubrir(cx, im, x + 4, 0 + dy, anchos[i] - 8, H, { z: 1.08 + .04 * Math.sin(u * 3 + i), fx: [.35, .5, .62][i], fy: .18 });
+    }
+    // separadores dorados
+    cx.fillStyle = 'rgba(201,168,76,.9)'; cx.fillRect(W / 3 - 2, 0, 4, H); cx.fillRect(2 * W / 3 - 2, 0, 4, H);
+    golpe('#m1', 'HECHO EN <b>SECRETO</b>', t, T.franjas + B, T.macro, 1500, { desde: 1.5 });
+    glAmp = pulso * 60; shake = pulso * 5;
+  }
+
+  // ═══ ORIGEN 3: macro del hilo dorado, empuje lento + barrido ═══
+  else if (t < T.sujeto) {
+    const lt = t - T.macro, u = lin(t, T.macro, T.sujeto);
+    const im = await listo(cuadro(C.macro2, lt * 1.6));
+    cubrir(cx, im, 0, 0, W, H, { z: 1.15 + u * .2, fy: .45, fx: .58 });
+    barrido(lin(t, T.macro + .2, T.sujeto - .1), .45);
+    golpe('#m1', 'HILO <b>DORADO</b>', t, T.macro + .05, T.sujeto, 1420, { desde: 1.5 });
+    golpe('#s1', 'SOBRE NEGRO ABSOLUTO', t, T.macro + 2 * B, T.sujeto, 1540, { desde: 1.2 });
+    rgbPx = pulso * 6;
+  }
+
+  // ═══ SUJETO: capucha cerrada en ventana de vigilancia; estroboscopio hasta el golpe ═══
+  else if (t < T.hit) {
+    const lt = t - T.sujeto, u = lin(t, T.sujeto, T.hit);
+    const im = await listo(cuadro(C.capucha, lt * 1.2));
+    cubrir(cx, im, 0, 0, W, H, { z: 1.3, filtro: 'blur(40px) brightness(.35)' });
+    const caja = [140, 470, 800, 1000];
+    const z = 1.02 + u * .25;
+    cubrir(cx, im, ...caja, { z, fy: .4 });
+    hud(1, caja, { tag: 'SUJETO: DESCONOCIDO', t: lt });
+    $('#lineas').style.opacity = .55;
+    // estroboscopio en los últimos 2 tiempos (corcheas → semicorcheas)
+    const fin = T.hit - t;
+    if (fin < 2 * B) { const paso = fin < B ? B / 4 : B / 2; const ph = (fin % paso) / paso; flash = ph > .7 ? .55 : 0; glAmp = 80 * (1 - fin / (2 * B)); }
+    shake = u * u * 14;
+    golpe('#m1', '¿QUIÉN SE <b>ESCONDE</b>?', t, T.sujeto + B, T.hit - B * .5, 1590, { desde: 1.3, salida: .1 });
+  }
+
+  // ═══ HIT: la gorra (réplica animada) + destello + onda + estallido de partículas + rayos ═══
+  else if (t < T.boveda) {
+    const lt = t - T.hit, u = lin(t, T.hit, T.boveda);
+    const im = await listo(cuadro(C.heroe, lt));
+    const z = 1.22 - eExpo(lin(lt, 0, .6)) * .2 + u * .05;
+    cubrir(cx, im, 0, 0, W, H, { z, fy: .55 });
+    particulas('polvo', lt * .5, 70, 3);
+    onda(lin(lt, 0, 1.1));
+    particulas('estallido', lin(lt, 0, 1.8), 190, 11);
+    barrido(lin(lt, .9, 2.0), .5);
+    flash = Math.max(0, 1 - lt / .35) * .95;
+    $('#rayos').style.opacity = Math.max(0, .9 - lt * .45); $('#rayos').style.transform = `rotate(${lt * 14}deg) scale(${1 + lt * .1})`;
+    rgbPx = Math.max(0, 18 - lt * 40); shake = Math.max(0, 22 - lt * 50) + pulso * 4;
+    golpe('#k1', 'TOP SECRET FC · MERCH', t, T.hit + .12, T.boveda, 300, { desde: 1.2 });
+    golpe('#b1', 'OBJETO 001', t, T.hit + 2 * B, T.boveda, 1440, { desde: 2.2, oro: true });
+  }
+
+  // ═══ BÓVEDA: la réplica entre láseres + HUD de escaneo ═══
+  else if (t < T.evidencia) {
+    const lt = t - T.boveda, u = lin(t, T.boveda, T.evidencia);
+    const im = await listo(cuadro(C.boveda, lt));
+    cubrir(cx, im, 0, 0, W, H, { z: 1.08 + u * .08, fy: .5 });
+    // línea de escaneo que baja
+    const ys = 300 + eIO(lin(lt, .1, 1.5)) * 1300;
+    cx.save(); cx.globalCompositeOperation = 'screen'; const g = cx.createLinearGradient(0, ys - 90, 0, ys + 4);
+    g.addColorStop(0, 'rgba(241,220,151,0)'); g.addColorStop(1, 'rgba(241,220,151,.55)'); cx.fillStyle = g; cx.fillRect(0, ys - 90, W, 94); cx.restore();
+    hud(lin(lt, 0, .2), [170, 640, 740, 640], { tag: 'ESCANEANDO', t: lt + 4 });
+    golpe('#m1', 'ACCESO <b>RESTRINGIDO</b>', t, T.boveda + B, T.evidencia, 1480, { desde: 1.4 });
+    if (lt < .12) glAmp = 70; rgbPx = pulso * 6;
+  }
+
+  // ═══ EVIDENCIA: el frente real (cámara de vigilancia, solo dorado) ═══
+  else if (t < T.coro) {
+    const lt = t - T.evidencia, u = lin(t, T.evidencia, T.coro);
+    const im = await listo(cuadro(C.frente, lt + 1.2));
+    cubrir(cx, im, 0, 0, W, H, { z: 1.35, filtro: 'blur(46px) brightness(.4)' });
+    const caja = [120, 420, 840, 955];
+    cubrir(cx, im, ...caja, { z: 1.24 + u * .1, fx: .52, fy: .4 });
+    hud(1, caja, { tag: 'EVIDENCIA REAL', t: lt + 9 });
+    $('#lineas').style.opacity = .45;
+    golpe('#m1', 'EXISTE.', t, T.evidencia + B, T.coro, 1520, { desde: 1.6 });
+    if (lt < .1) { glAmp = 90; rgbPx = 14; }
+  }
+
+  // ═══ CORO: ángulos a pulso ═══
+  else if (t < T.rafaga) {
+    const lt = t - T.coro, k = Math.floor(lt / BAR), ltb = lt - k * BAR;
+    const entra = eExpo(lin(ltb, 0, .4));
+    if (k === 0) {                                                                            // perfil: gira hacia el frente
+      const im = await listo(cuadro(C.perfil, ltb));
+      cubrir(cx, im, 0, 0, W, H, { z: 1.1 - entra * .06, dx: (1 - entra) * 260 });
+      barrido(lin(ltb, .3, 1.5), .5);
+      golpe('#k1', 'ÁNGULO 01 · PERFIL', t, T.coro + .05, T.coro + BAR, 300, { desde: 1.15 });
+    } else if (k === 1) {                                                                     // trasera: TOP SECRET
+      const im = await listo(cuadro(C.trasera, ltb));
+      cubrir(cx, im, 0, 0, W, H, { z: 1.12 - entra * .08, dy: (1 - entra) * -200 });
+      barrido(lin(ltb, .2, 1.3), .6, 200);
+      golpe('#k1', 'ÁNGULO 02 · ESPALDA', t, T.coro + BAR + .05, T.coro + 2 * BAR, 300, { desde: 1.15 });
+      // TOP SECRET que se abre letra por letra (tracking)
+      const a = lin(ltb, .25, 1.0);
+      txt('#b1', 'TOP SECRET', { top: 1460, op: lin(ltb, .25, .4) * (1 - lin(ltb, BAR - .15, BAR)), esc: 1, ls: `${.6 - eOut(a) * .58}em`, blur: (1 - eOut(a)) * 12 });
+      $('#b1').classList.add('oro');
+    } else {                                                                                  // pantalla partida: tira real | macro réplica
+      const im1 = await listo(cuadro(C.tira, ltb * 1.1)), im2 = await listo(cuadro(C.macro, ltb));
+      const corte = H / 2 + Math.sin(ltb * 2) * 30;
+      cubrir(cx, im2, 0, corte, W, H - corte, { z: 1.1, dy: (1 - entra) * 500 });
+      cubrir(cx, im1, 0, 0, W, corte, { z: 1.05, fy: .42, dy: (1 - entra) * -500 });
+      cx.fillStyle = 'rgba(201,168,76,.95)'; cx.fillRect(0, corte - 3, W * entra, 6);
+      golpe('#k1', 'REAL', t, T.coro + 2 * BAR + .1, T.rafaga, 250, { desde: 1.1 });
+      golpe('#s1', 'DETALLE · BORDADO DORADO', t, T.coro + 2 * BAR + B, T.rafaga, 1800, { desde: 1.1 });
+    }
+    if (ltb < .1) { glAmp = 70; rgbPx = 16; flash = .25; }
+    shake = pulso * 5;
+  }
+
+  // ═══ RÁFAGA: un ángulo por tiempo (8 tiempos), con zoom de paso y glitch ═══
+  else if (t < T.drop) {
+    const lt = t - T.rafaga, k = Math.floor(lt / B), ltb = lt - k * B;
+    const orden = ['heroe', 'perfil', 'trasera', 'boveda', 'macro', 'frente', 'heroe', 'trasera'];
+    const c = C[orden[k % orden.length]];
+    const im = await listo(cuadro(c, 1.5 + ltb + k * .3));
+    const pz = 1 + (1 - eExpo(lin(ltb, 0, .25))) * .35;
+    cubrir(cx, im, 0, 0, W, H, { z: 1.08 * pz, fy: .5, filtro: ltb < .05 ? 'brightness(1.8)' : 'none' });
+    golpe('#b1', `${String(k + 1).padStart(2, '0')}`, t, T.rafaga + k * B, T.rafaga + (k + 1) * B, 1500, { desde: 1.6, salida: .05, oro: true });
+    golpe('#k1', 'DESDE TODOS LOS ÁNGULOS', t, T.rafaga, T.drop, 300, { desde: 1.1 });
+    glAmp = Math.exp(-ltb * 14) * 90; rgbPx = Math.exp(-ltb * 10) * 18; shake = Math.exp(-ltb * 10) * 10;
+  }
+
+  // ═══ DROP: la máquina en franjas horizontales + PRIMER DROP ═══
+  else if (t < T.cierre) {
+    const lt = t - T.drop, u = lin(t, T.drop, T.cierre);
+    const n = 5, h = H / n;
+    for (let i = 0; i < n; i++) {
+      const entra = eExpo(lin(lt, i * .06, i * .06 + .5));
+      const clip = [C.maquina, C.macro2, C.cabezal, C.macro1, C.maquina][i];
+      const im = await listo(cuadro(clip, lt + i * 1.3));
+      cubrir(cx, im, (1 - entra) * (i % 2 ? W : -W), i * h + 3, W, h - 6, { z: 1.15, fy: .45 });
+    }
+    golpe('#b1', 'PRIMER DROP', t, T.drop + B, T.cierre, 820, { desde: 2, oro: true });
+    golpe('#s1', 'MERCHANDISING OFICIAL', t, T.drop + 2 * B, T.cierre, 1010, { desde: 1.2 });
+    glAmp = pulso * 50; shake = pulso * 6;
+    cx.fillStyle = `rgba(5,4,3,${.35 + u * .3})`; cx.fillRect(0, 0, W, H);
+  }
+
+  // ═══ CIERRE: escudo que se revela con partículas, sello CLASIFICADO, próximamente ═══
+  else {
+    const lt = t - T.cierre;
+    particulas('converge', lin(lt, 0, 1.6), 150, 23, W / 2, 830);
+    particulas('polvo', lt * .4, 60, 5);
+    const lg = $('#logo'), ul = eExpo(lin(lt, .9, 1.6));
+    lg.style.opacity = lin(lt, .9, 1.1);
+    lg.style.transform = `scale(${1.25 - ul * .25})`;
+    lg.style.webkitMaskImage = `linear-gradient(0deg,#000 ${ul * 100}%,transparent ${ul * 100 + 12}%)`;
+    if (lt > .9 && lt < 1.2) flash = (1.2 - lt) * 1.4;
+    barrido(lin(lt, 1.7, 2.8), .35);
+    golpe('#k1', 'LA GORRA · OBJETO 001', t, T.cierre + 1.5, D.fin, 1180, { desde: 1.15, salida: .4 });
+    // sello
+    const s = $('#sello'), us = eExpo(lin(t, T.sello, T.sello + .22));
+    if (t >= T.sello) { s.style.opacity = lin(t, T.sello, T.sello + .05) * (1 - lin(t, D.fin - .4, D.fin)); s.style.transform = `translateX(-50%) rotate(-7deg) scale(${2.4 - us * 1.4})`; }
+    if (t >= T.sello && t < T.sello + .3) shake = (T.sello + .3 - t) * 70;
+    golpe('#m1', 'PRÓXIMAMENTE', t, T.final, D.fin, 1560, { desde: 1.4, salida: .4 });
+    golpe('#s1', 'TOPSECRET.AR', t, T.final + B, D.fin, 1690, { desde: 1.1, salida: .4 });
+    const fade = lin(t, D.fin - .5, D.fin);
+    $('#logo').style.opacity = parseFloat(lg.style.opacity) * (1 - fade);
+  }
+
+  // postproceso
+  rgb(rgbPx); glitch(Math.floor(t * 30) * 7 + 1, glAmp);
+  $('#flash').style.opacity = cl(flash, 0, 1);
+  const r = rnd(Math.floor(t * 30) + 3);
+  $('#escena').style.transform = shake > .3 ? `translate(${(r() - .5) * shake * 2}px,${(r() - .5) * shake * 2}px)` : 'none';
+  gr.drawImage(ruido, -Math.floor(r() * 360), -Math.floor(r() * 640));
+  await new Promise(requestAnimationFrame);
+}
+</script>
+</body>
+</html>
