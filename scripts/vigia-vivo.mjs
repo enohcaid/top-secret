@@ -311,14 +311,36 @@ async function main() {
   // Goles del partido en curso (nuestros y del rival) con minuto y marcador, para el contexto de las repeticiones
   let golesPartido = [];
   let tramo = null;   // grabación actual: prefijo de sus segmentos y en qué segundo del vigía empezó (cambia al reconectar)
+  // Goles detectados antes de saber en qué fila está TOP (aFavor null). 2026-11-09 vs IACC Cantera: el 1-1 del rival
+  // quedó "¿de quién?", nunca se sumó, y al final el 1-1 salió como VICTORIA 1-0. Ahora se guardan y se resuelven en
+  // cuanto se lee la fila de TOP; y si al final sigue sin saberse, no se anuncia un ganador inventado.
+  let golesPendientes = [];
+  const golFila = [0, 0];
+  const resolverPendientes = () => {
+    if (filaTop === null || !golesPendientes.length) return;
+    for (const p of golesPendientes) {
+      const aFavor = p.fila === filaTop;
+      if (aFavor) golesF++; else golesC++;
+      log('golResuelto', { n: p.n, hora: hms(p.ts), fila: p.fila, aFavor });
+      console.log(`[${hms(p.ts)}] cambio de marcador #${p.n} resuelto: ${aFavor ? 'GOL DE TOP' : 'gol en contra'} (${golesF}-${golesC})`);
+      golesPartido.push({ aFavor, minuto: p.minuto, gf: golesF, gc: golesC, meta: { id: `${id}-gol${String(p.n).padStart(2, '0')}`, contexto: null } });
+    }
+    golesPendientes = [];
+  };
   const finDePartido = (seg, por) => {
-    const resultado = golesF > golesC ? 'victoria' : golesF < golesC ? 'derrota' : 'empate';
-    if (!vodId) avisarOverlay('finPartido', { resultado, marcador: `${golesF}-${golesC}` });   // marcador: nuestros goles primero
-    console.log(`[${hms(seg)}] fin de partido (${golesF}-${golesC} según los goles contados, ${por}): ${resultado}`);
-    log('fin', { seg, hora: hms(seg), resultado, marcador: `${golesF}-${golesC}`, por });
+    resolverPendientes();
+    let resultado, marcador = `${golesF}-${golesC}`;
+    if (golesPendientes.length) {
+      // sigue sin saberse de quién son: solo se puede afirmar el empate (misma cantidad de cambios en cada fila)
+      resultado = golFila[0] === golFila[1] ? 'empate' : null;
+      marcador = resultado ? `${golFila[0]}-${golFila[1]}` : '';
+    } else resultado = golesF > golesC ? 'victoria' : golesF < golesC ? 'derrota' : 'empate';
+    if (!vodId) avisarOverlay('finPartido', { resultado, marcador });   // marcador: nuestros goles primero
+    console.log(`[${hms(seg)}] fin de partido (${marcador || '?'} según los goles contados, ${por}): ${resultado || 'sin determinar'}`);
+    log('fin', { seg, hora: hms(seg), resultado, marcador, por });
     for (const g of golesPartido.filter(g => g.aFavor)) g.meta.contexto = contextoGol(g, golesPartido, resultado);
     if (!vodId && golesPartido.some(g => g.aFavor)) editarEstado(e => { for (const r of e.repeticiones || []) { const g = golesPartido.find(x => x.meta.id === r.id); if (g) r.contexto = g.meta.contexto; } });
-    huboPartido = false; golesF = golesC = 0; ultimoMinuto = -1; golesPartido = [];
+    huboPartido = false; golesF = golesC = 0; ultimoMinuto = -1; golesPartido = []; golesPendientes = []; golFila[0] = golFila[1] = 0;
   };
   const leerMinuto = async raw => {
     const f = path.join(OUT, 'tmp', `reloj-${t}.png`);
@@ -352,7 +374,7 @@ async function main() {
       if (seg - ultimoMarcador >= INICIO_PARTIDO && seg >= INICIO_PARTIDO) {
         inicioPendiente = seg;
         // el anterior se cortó sin reporte antes del 85': sus goles no pasan al partido nuevo
-        if (huboPartido && (golesF || golesC)) { console.log(`[${hms(seg)}] el partido anterior (${golesF}-${golesC}) quedó sin cierre`); golesF = golesC = 0; golesPartido = []; ultimoMinuto = -1; }
+        if (huboPartido && (golesF || golesC || golesPendientes.length)) { console.log(`[${hms(seg)}] el partido anterior (${golesF}-${golesC}) quedó sin cierre`); golesF = golesC = 0; golesPartido = []; golesPendientes = []; golFila[0] = golFila[1] = 0; ultimoMinuto = -1; }
       }
       // Vigía recién arrancado con un partido ya en juego (el vivo empezó tarde, 2026-10-20): se avisa como "en curso";
       // retransmitir.mjs lo cuenta solo si esa noche todavía no contó ninguno (un reinicio del vigía no lo duplica).
@@ -390,6 +412,13 @@ async function main() {
           log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival });
           console.log(`[${hms(seg)}]   TOP ${filaTop ? 'visitante' : 'local'} vs ${rival}`);
         }
+      } else if (recortePartido && filaTop === null && seg % 10 === 7) {
+        // no se pudo leer al arranque: se reintenta cada 10 s (antes solo al haber un gol, y los anteriores quedaban sin lado)
+        const f = path.join(OUT, 'tmp', `equipos-${seg}.png`);
+        await img().extract(SB_RECORTE).resize(450).png().toFile(f);
+        if (await leerEquipos(f)) { log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival }); console.log(`[${hms(seg)}]   TOP ${filaTop ? 'visitante' : 'local'} vs ${rival} (reintento)`); }
+        try { unlinkSync(f); } catch {}
+        resolverPendientes();
       }
       if (ev && seg - inicioMarcador >= 5) {
         goles++;
@@ -398,7 +427,10 @@ async function main() {
         await img().extract(SB_RECORTE).resize(450).png().toFile(pngGol);
         if (filaTop === null && await leerEquipos(pngGol))   // reintento si al arranque no se leyó
           log('equipos', { n: partidos, seg, hora: hms(seg), filaTop, rival });
+        resolverPendientes();   // goles anteriores que quedaron sin lado
         const aFavor = filaTop === null ? null : ev.fila === filaTop;
+        if (ev.fila === 0 || ev.fila === 1) golFila[ev.fila]++;
+        if (aFavor === null) golesPendientes.push({ n: goles, ts, fila: ev.fila, minuto: ultimoMinuto });
         await img().jpeg({ quality: 88 }).toFile(path.join(OUT, 'goles', `${nombre}.jpg`));
         log('gol', { n: goles, seg: ts, hora: hms(ts), fila: ev.fila, aFavor, rival });
         if (aFavor === true) golesF++; else if (aFavor === false) golesC++;
