@@ -1057,10 +1057,36 @@ const E11_T3_SCHEDULE = [
   {date:'2026-08-27',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
   {date:'2026-08-27',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:false},
 ];
+// Los partidos cargados en el calendario (Espacio Gamer, VPN, amistosos) viven en Firestore calendario/estado.custom.
+// El primer onSnapshot tarda 2-3 s (handshake del canal en vivo del SDK) y la tarjeta de hoy salía sin ellos
+// (Juan, 2026-11-10). Para que aparezcan enseguida: (1) lo último visto en este navegador, al instante;
+// (2) el mismo doc por la API REST (~0,5 s); (3) el onSnapshot de siempre, que manda y mantiene en vivo.
+const CAL_CUSTOM_LS = 'conv_cal_custom';
+let _calSnapLlego = false;
+try { const c = JSON.parse(localStorage.getItem(CAL_CUSTOM_LS) || 'null'); if (Array.isArray(c)) calCustom = c; } catch (_) {}
+function _setCalCustom(c) {
+  calCustom = Array.isArray(c) ? c : [];
+  try { localStorage.setItem(CAL_CUSTOM_LS, JSON.stringify(calCustom)); } catch (_) {}
+  renderTodayMatchesPanel();
+}
+// Valor REST de Firestore ({stringValue}, {mapValue:{fields}}, ...) → JS plano
+function _fsVal(v) {
+  if (!v) return null;
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(_fsVal);
+  if ('mapValue' in v) { const o = {}; for (const [k, x] of Object.entries(v.mapValue.fields || {})) o[k] = _fsVal(x); return o; }
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('doubleValue' in v) return v.doubleValue;
+  if ('nullValue' in v) return null;
+  return v.stringValue ?? v.booleanValue ?? v.timestampValue ?? null;
+}
+fetch(`https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/calendario/estado?mask.fieldPaths=custom`)
+  .then(r => r.ok ? r.json() : Promise.reject(r.status))
+  .then(d => { if (!_calSnapLlego) _setCalCustom(_fsVal(d.fields?.custom) || []); })
+  .catch(() => {});
 if (CAL_DOC_CONV) {
   CAL_DOC_CONV.onSnapshot(snap => {
-    if (snap.exists) calCustom = snap.data().custom || [];
-    renderTodayMatchesPanel();
+    _calSnapLlego = true;
+    _setCalCustom(snap.exists ? (snap.data().custom || []) : []);
   }, () => {});
 }
 fetch('https://top-secret-proxy.juan-c-m-1985.workers.dev/vpn-fixtures')
