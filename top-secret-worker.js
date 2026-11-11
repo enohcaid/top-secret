@@ -553,11 +553,13 @@ export default {
           .map(m => {
             const isHome   = m.team1 === TS_ID;
             const rival    = isHome ? m.awayTeam : m.homeTeam;
-            const rawDt    = new Date(m.date);
+            // la API da UTC → hora argentina (UTC-3, sin horario de verano); si no, el partido de las
+            // 23:00 aparece al día siguiente a las 02:00 y convocatoria no lo muestra "hoy"
+            const artDt    = new Date(new Date(m.date).getTime() - 3 * 3600e3);
             return {
               id:     m.id,
-              date:   rawDt.toISOString().slice(0, 10),
-              time:   rawDt.toISOString().slice(11, 16),
+              date:   artDt.toISOString().slice(0, 10),
+              time:   artDt.toISOString().slice(11, 16),
               rival:  rival.name || rival.short_name,
               badge:  rival.logoUrl || null,
               isHome,
