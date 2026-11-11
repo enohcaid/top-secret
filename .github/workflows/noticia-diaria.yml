@@ -35,13 +35,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - name: Dependencias
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
           PUPPETEER_SKIP_DOWNLOAD: '1'
         run: |
-          npm ci --ignore-scripts --no-audit --no-fund
+          npm install --ignore-scripts --no-audit --no-fund   # sin package-lock en el repo (está en .gitignore)
           npm install -g @anthropic-ai/claude-code --no-audit --no-fund
       - name: Escribir la nota
         env:
