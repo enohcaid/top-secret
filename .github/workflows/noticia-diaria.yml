@@ -1,0 +1,70 @@
+# Noticia diaria en la nube (híbrido, 2026-11-11). La escribe scripts/noticia-diaria.mjs, igual que antes en la PC.
+# La dispara el Worker (scheduled → despacharNoticia): 06:00, 06:30, 07:30, 09:00 y 12:00 ART (si ya hay nota de hoy
+# termina enseguida) y apenas se pide "Rehacer"/"Generar noticia" en el sitio (forzar + motivo).
+# Las imágenes siguen en la PC (Chrome con ChatGPT): watch-regen.ps1 ve un borrador de hoy sin imágenes y las genera.
+# Secretos: CLAUDE_CODE_OAUTH_TOKEN (claude setup-token, suscripción de Juan) + CF_EMAIL/CF_API_KEY/CF_ACCOUNT_ID/
+# KV_NAMESPACE_ID (ya cargados para deploy-worker.yml). El repo es público: el log no tiene que imprimir nada privado.
+name: Noticia diaria
+
+on:
+  workflow_dispatch:
+    inputs:
+      forzar:
+        description: Reescribir aunque ya haya nota de hoy
+        type: boolean
+        default: false
+      motivo:
+        description: Lo que se pidió al rehacer la nota
+        type: string
+        default: ''
+      prueba:
+        description: Solo prueba (deja la nota en un artifact, no toca Firestore)
+        type: boolean
+        default: false
+
+concurrency:
+  group: noticia-diaria
+  cancel-in-progress: false
+
+jobs:
+  escribir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Dependencias
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+          PUPPETEER_SKIP_DOWNLOAD: '1'
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm install -g @anthropic-ai/claude-code --no-audit --no-fund
+      - name: Escribir la nota
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          CF_EMAIL: ${{ secrets.CF_EMAIL }}
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          KV_NAMESPACE_ID: ${{ secrets.KV_NAMESPACE_ID }}
+          NOTICIA_MOTIVO: ${{ inputs.motivo }}
+          FORZAR: ${{ inputs.forzar }}
+          PRUEBA: ${{ inputs.prueba }}
+        run: |
+          ARGS=""
+          if [ "$FORZAR" = "true" ]; then ARGS="$ARGS --forzar"; fi
+          if [ "$PRUEBA" = "true" ]; then ARGS="$ARGS --prueba"; fi
+          node scripts/noticia-diaria.mjs $ARGS
+      - name: Pedido de rehacer atendido
+        if: success() && inputs.forzar && !inputs.prueba
+        run: curl -fsS -X DELETE https://top-secret-proxy.juan-c-m-1985.workers.dev/regen-flag
+      - name: Nota de prueba
+        if: inputs.prueba
+        uses: actions/upload-artifact@v4
+        with:
+          name: noticia-prueba
+          path: pruebas/noticia-diaria.json
+          retention-days: 3

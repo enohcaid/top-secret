@@ -16,7 +16,10 @@
 //    el modelo local. Si después de todo quedan avisos, la nota se guarda igual con `avisos` (Juan la revisa antes de
 //    publicar): sin nota no queda ningún día.
 // 4. Guarda news/draft y actualiza recent_topics, featured_players_history, injury_cover_stories y
-//    player_of_week_history. Tarea "TopSecretFC-NoticiaDiaria" (06:00, reintentos 06:30, 07:30 y 09:00). Log: scripts/noticia-diaria.log
+//    player_of_week_history.
+// Dónde corre (desde 2026-11-11): en la nube, .github/workflows/noticia-diaria.yml, disparado por el Worker a las 06:00,
+// 06:30, 07:30, 09:00 y 12:00 ART y al pedir "Rehacer". Ahí no hay modelo local: si Claude falla, reintenta el próximo
+// horario. En la PC se puede seguir corriendo a mano (log: scripts/noticia-diaria.log).
 import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
@@ -327,8 +330,9 @@ log(`✓ Borrador de hoy: "${n.title}" (${n.angulo}, ${motor === 'claude' ? 'Cla
 
 // Imágenes: la tarea de las 06:10 espera el borrador hasta las 06:55. Si la nota salió después (un reintento), se lanzan
 // acá. Con --forzar no: el botón "regenerar" (watch-regen.ps1) genera las imágenes él mismo.
+// En la nube (GitHub Actions, desde 2026-11-11) tampoco: la PC ve el borrador sin imágenes y las genera (watch-regen.ps1).
 const ahora = new Date().toLocaleTimeString('sv-SE', { timeZone: TZ, hour12: false }).slice(0, 5);
-if (!FORZAR && ahora > '06:55') {
+if (!FORZAR && ahora > '06:55' && process.env.GITHUB_ACTIONS !== 'true') {
   const { spawn } = await import('child_process');
   spawn('wscript.exe', [path.join(ROOT, 'scripts', 'run-daily-images-hidden.vbs')], { detached: true, stdio: 'ignore' }).unref();
   log('Imágenes lanzadas (run-daily-images).');
