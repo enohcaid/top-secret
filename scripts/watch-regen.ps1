@@ -1,8 +1,8 @@
 ﻿# Corre via Task Scheduler cada 1 minuto.
 # 1) Si el browser descartó la noticia del día → borra sus imágenes del repo
 #    local (Renders/Daily News) y de GitHub.
-# 2) Si el browser pidió regenerar la noticia → la reescribe scripts/noticia-diaria.mjs --forzar
-#    (artículo) y después genera las imágenes localmente.
+# 2) Si el borrador de hoy no tiene imágenes → las genera (ChatGPT por Chrome). Desde 2026-11-11 la nota, y el
+#    "Rehacer" del sitio, los escribe la nube (.github/workflows/noticia-diaria.yml); acá solo quedan las imágenes.
 
 $ErrorActionPreference = 'Stop'
 $repoRoot   = 'D:\proyectos\top-secret'
@@ -127,109 +127,37 @@ if ($ventanaVigia) { try {
     }
 } catch { } }
 
-# Verificar si hay pedido de regeneración pendiente
+# ── PASO I: imágenes de la noticia del día (híbrido, 2026-11-11) ─────────────
+# La nota (también el "Rehacer" del sitio) la escribe la nube: .github/workflows/noticia-diaria.yml, disparado por el
+# Worker. Acá solo se miran las imágenes: si el borrador de hoy tiene título y no tiene imágenes, y no hay una
+# generación corriendo, se lanza run-daily-images (ChatGPT + lote de aprobar.html). Una vez por borrador (generatedAt):
+# si falla, no se relanza cada minuto; un borrador nuevo (rehacer) sí vuelve a lanzar.
+$fsUrl = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft'
 try {
-    $flag = Invoke-RestMethod "$worker/regen-flag" -TimeoutSec 10
+    $doc = Invoke-RestMethod $fsUrl -TimeoutSec 10
 } catch {
     # Corre cada minuto: sin red (PC suspendida, wifi caído) esto llenaba el
     # log con miles de líneas idénticas. Loguear como máximo una vez cada 30 min.
     $marker = "$repoRoot\scripts\.last-neterr"
     $silent = (Test-Path $marker) -and ((Get-Date) - (Get-Item $marker).LastWriteTime).TotalMinutes -lt 30
     if (-not $silent) {
-        Log "Error consultando regen-flag: $_"
+        Log "Error consultando el borrador: $_"
         New-Item -ItemType File -Path $marker -Force | Out-Null
     }
     exit 0
 }
+$draft = $null
+try { $draft = $doc.fields.data.stringValue | ConvertFrom-Json } catch {}
+$today = (Get-Date).ToUniversalTime().AddHours(-3).ToString('yyyy-MM-dd')
+if (-not $draft -or $draft.date -ne $today -or -not $draft.title -or $draft.imagePost) { exit 0 }
 
-if (-not $flag.requested) { exit 0 }
+$marca = "$repoRoot\scripts\.imagenes-lanzadas"
+$clave = [string]$draft.generatedAt
+if ((Test-Path $marca) -and ((Get-Content $marca -Raw).Trim() -eq $clave)) { exit 0 }
+$enCurso = Get-CimInstance Win32_Process -Filter "Name='node.exe' OR Name='powershell.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -match 'generate-image-chatgpt|run-daily-images' }
+if ($enCurso) { exit 0 }
 
-Log "Pedido de regeneración detectado — iniciando pipeline"
-
-# Limpiar el flag inmediatamente para evitar doble ejecución
-try {
-    Invoke-RestMethod "$worker/regen-flag" -Method DELETE -TimeoutSec 10 | Out-Null
-} catch {
-    Log "Advertencia: no se pudo limpiar el flag: $_"
-}
-
-# ── PASO 1: Reescribir el artículo en esta PC (scripts/noticia-diaria.mjs) ───
-# Desde 2026-10-26 la nota la escribe el script local (Claude en una llamada liviana, modelo local de respaldo).
-Log "Reescribiendo la noticia (noticia-diaria.mjs --forzar)..."
-try {
-    Push-Location $repoRoot
-    # motivo: lo que Juan escribió al tocar "Rehacer" en aprobar.html (2026-11-02), por variable de entorno.
-    # cmd /c en vez de "& node ... 2>&1": PowerShell 5.1 convertía el aviso de Node en stderr en un error que cortaba
-    # todo (02/11: la nota nunca se reescribía)
-    $env:NOTICIA_MOTIVO = if ($flag.motivo) { [string]$flag.motivo } else { '' }
-    cmd /c "node scripts\noticia-diaria.mjs --forzar >> scripts\noticia-diaria.log 2>&1"
-    $env:NOTICIA_MOTIVO = ''
-    $out = Get-Content scripts\noticia-diaria.log -Tail 20 | Select-String '\[noticia\]'
-    Pop-Location
-    Log "Noticia: $($out | Select-Object -Last 1)"
-} catch {
-    Log "Error reescribiendo la noticia: $_"
-}
-
-# ── PASO 2: Esperar que el draft aparezca en Firestore (max 10 min) ──────────
-Log "Esperando draft nuevo en Firestore..."
-$fsUrl    = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft'
-$today    = (Get-Date).ToUniversalTime().AddHours(-3).ToString('yyyy-MM-dd')
-$deadline = (Get-Date).AddMinutes(10)
-$draftOk  = $false
-
-while ((Get-Date) -lt $deadline) {
-    Start-Sleep -Seconds 15
-    try {
-        $doc   = Invoke-RestMethod $fsUrl -TimeoutSec 10
-        $draft = $doc.fields.data.stringValue | ConvertFrom-Json
-        if ($draft.date -eq $today -and -not $draft.imagePost) {
-            Log "Draft listo: $($draft.title)"
-            $draftOk = $true
-            break
-        }
-    } catch {}
-}
-
-if (-not $draftOk) {
-    Log "Timeout esperando draft — abortando generación de imágenes"
-    exit 1
-}
-
-# ── PASO 3: Generar imágenes ─────────────────────────────────────────────────
-Log "Lanzando generación de imágenes..."
-Set-Location $repoRoot
-
-$chromeExe  = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-$profileDir = "$repoRoot\scripts\.chrome-profile"
-
-function Test-CDP {
-    try { Invoke-WebRequest 'http://localhost:9222/json/version' -UseBasicParsing -TimeoutSec 3 | Out-Null; return $true }
-    catch { return $false }
-}
-
-if (-not (Test-CDP)) {
-    Start-Process -FilePath $chromeExe -ArgumentList @(
-        '--remote-debugging-port=9222',
-        "--user-data-dir=$profileDir",
-        '--no-first-run',
-        '--no-default-browser-check',
-        'https://chatgpt.com'
-    )
-    Start-Sleep -Seconds 12
-}
-# Recién reiniciada la PC, Chrome tarda más en atender CDP (02/11: el generador se rindió al minuto): esperar hasta 3 min
-$cdpHasta = (Get-Date).AddMinutes(3)
-while (-not (Test-CDP) -and (Get-Date) -lt $cdpHasta) { Start-Sleep -Seconds 10 }
-
-# cmd /c en vez de *>> : PowerShell 5.1 redirige a UTF-16 y mezclaba encodings
-# en el log; cmd escribe los bytes UTF-8 de node tal cual. Un reintento si falla.
-cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
-if ($LASTEXITCODE -ne 0) {
-    Log "La generación de imágenes falló: un reintento en 1 minuto"
-    Start-Sleep -Seconds 60
-    cmd /c "node scripts\generate-image-chatgpt.mjs >> scripts\daily-images.log 2>&1"
-}
-# la nota rehecha vuelve a aprobar.html: su lote reemplaza al de la nota anterior (mismo id del día)
-cmd /c "node scripts\social\noticia-lote.mjs >> scripts\daily-images.log 2>&1"
-Log "Pipeline completo."
+Set-Content -Path $marca -Value $clave -Encoding ASCII
+Log "Borrador de hoy sin imagenes ($($draft.title)) - lanzando run-daily-images"
+Start-Process -FilePath 'wscript.exe' -ArgumentList "`"$repoRoot\scripts\run-daily-images-hidden.vbs`"" -WindowStyle Hidden
