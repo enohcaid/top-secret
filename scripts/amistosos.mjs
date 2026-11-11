@@ -902,4 +902,23 @@ async function iniciar(intento = 1) {
   }
 }
 process.on('unhandledRejection', e => log('error no manejado:', String(e && e.message || e).split('\n')[0]));
+
+// Regla de Juan (2026-11-11): los días de triple competencia (3 o más partidos oficiales en el calendario,
+// p. ej. VPUG + 2 de VPN) el bot queda APAGADO: no se conecta a WhatsApp en todo el día (la sesión queda libre).
+// Misma fuente que la placa del vivo (placa-envivo --json). Sale con 0 para que el vigilante no lo relance.
+// --forzar lo arranca igual.
+async function diaDeTripleCompetencia() {
+  const hoyArt = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
+  const out = await new Promise(res => execFile(process.execPath, [path.join(ROOT, 'scripts', 'placa-envivo.mjs'), '--json', '--fecha', hoyArt],
+    { cwd: ROOT, timeout: 90000 }, (e, so) => res(String(so || ''))));
+  try {
+    const oficiales = JSON.parse(out.trim().split('\n').pop() || '[]').filter(p => p.liga && p.liga !== 'Amistoso');
+    return oficiales.length >= 3 ? oficiales : null;
+  } catch { return null; }   // si no se puede leer el calendario, arranca como siempre
+}
+const triple = process.argv.includes('--forzar') ? null : await diaDeTripleCompetencia();
+if (triple) {
+  log('hoy hay triple competencia (' + triple.map(p => `${p.hora} ${p.liga}`).join(', ') + '): el bot queda apagado todo el día');
+  process.exit(0);
+}
 iniciar();
