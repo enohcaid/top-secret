@@ -69,3 +69,5 @@ Cuando el usuario pasa el link del fixture de VPN (`virtualpronetwork.com/web/ap
 - Los escudos ya no están en `/api/media/images/teamlogos/` (404): la tabla trae `team.logoSmallUrl`/`logoUrl` completos en `media.virtualpronetwork.com/teamlogos/`. `posiciones.html` y `calendario.html` usan esos campos.
 - `/vpn-table` del Worker ya no tiene la temporada fija: la toma de `/api/leagues/2127` (`seasons[].active`). T11: 2da División = 6447, 1ra = 6446. Top Secret sigue en 2da (liga 2127).
 - Las temporadas de los scripts del bot de amistosos (`LIGAS`, `VPN` en escudos.mjs) siguen siendo fijas: actualizarlas en cada temporada.
+
+**T4 (2026-11-11, temporada 11 = season id 6447, misma liga 2127):** desde 2026-11 la API es `virtualpronetwork.com` (sin www) y da la fecha en **UTC** → el Worker `/vpn-fixtures` ahora la pasa a ART (si no, el partido de las 23:00 figura al día siguiente 02:00 y convocatoria no lo muestra hoy). El fixture se cargó en `custom` con `instancia:'Fecha N'` (ART, convertido a mano: UTC − 3 h). Ojo: el partido de las 23:59 la API lo trae como 02:59 UTC.
