@@ -339,7 +339,8 @@ const T3_FRENTES_DIR = path.resolve('Renders/T3-Frentes');   // solo para script
 // Jugadores con licencia/baja temporal: no se los usa como protagonistas de imágenes hasta nuevo aviso.
 const PLAYERS_ON_LEAVE = [];
 
-const PLAYERS_WITH_RENDERS = fs.readdirSync(T4_FRENTES_DIR)
+// (en la nube no existe la carpeta: noticia-diaria.mjs importa este archivo solo por styleFromBrief)
+const PLAYERS_WITH_RENDERS = (fs.existsSync(T4_FRENTES_DIR) ? fs.readdirSync(T4_FRENTES_DIR) : [])
   .filter(f => /\.(png|jpg)$/i.test(f))
   .map(f => f.replace(/\.(png|jpg)$/i, ''))
   .filter(p => !PLAYERS_ON_LEAVE.includes(p));
