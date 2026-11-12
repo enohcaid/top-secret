@@ -2927,6 +2927,10 @@ const SEED_MATCHES = [
     {name:'davidelapaternal', matched:'davidelapaternal', played_pos:'MC', rating:7.4, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, shots:null, tackle_attempts:null, saves:null, red_cards:0, minutes:92, mom:false, archetype_id:8, ea_pos:'midfielder'},
     {name:'Elianja20', matched:'Elianja20', played_pos:'DFC', rating:8.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, shots:null, tackle_attempts:null, saves:null, red_cards:0, minutes:92, mom:false, archetype_id:4, ea_pos:'defender'},
   ]},
+
+  // VPN — Division Palermo — 2026-11-11 (1-1) · resultado de la liga (EA inconsistente)
+  {rival:'Division Palermo', league:'VPN', date:'2026-11-11', match_result:'1-1', isHome:false, uploadedAt:'2026-11-12T11:45:03.650Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
 ];
 
 
