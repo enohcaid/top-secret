@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-**Pedido de Juan (2026-11-12):** automatizar la carga de reportes en las webs de las ligas. En las dos ligas, cuando el partido termina **empatado**, hay que entrar al panel del equipo, aparece el partido pendiente y se carga a mano el resultado, las valoraciones, etc., con capturas de la transmisión que confirmen el resultado y las valoraciones.
+**Pedido de Juan (2026-11-12):** automatizar la carga de reportes en las webs de las ligas. **VPUG pide el reporte en todos los partidos**; VPN, cuando el partido termina **empatado**. Se entra al panel del equipo, aparece el partido pendiente y se carga a mano el resultado, las valoraciones, etc., con capturas de la transmisión que confirmen el resultado y las valoraciones.
 
 **Sesión:** Juan inició sesión en las dos webs en el Chrome del pipeline (CDP 9222, `scripts/.chrome-profile/`), 2026-11-12. Las sesiones vencen: la de VPUG había vencido el 11/11. Si una página muestra "INGRESAR"/sin usuario, pedirle a Juan que vuelva a entrar. No guardar tokens en archivos.
 
