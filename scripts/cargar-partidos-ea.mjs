@@ -117,14 +117,21 @@ for (const p of [...(hist.partidos || [])].reverse()) {                 // del m
 }
 
 // Partidos de VPN de los últimos 7 días que la liga ya publicó y no están cargados (EA no los guardó: el 11/11 pasó con
-// Division Palermo). Solo se avisa: sin EA ni video no hay de dónde sacar más que el resultado.
+// Division Palermo y la noticia del día siguiente salió sin ese resultado). Se cargan con el resultado de la liga, sin
+// estadísticas, para completar con el reporte del video.
 const hace7 = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
 for (const m of (Array.isArray(vpn) ? vpn : []).filter(x => x.date >= hace7 && x.ts != null && x.rv != null))
-  if (!cargados.some(s => s.league === 'VPN' && s.date === m.date && mismoClub(s.rival, m.rival)))
-    console.log(`FALTA: ${m.date} VPN vs ${m.rival} ${m.ts}-${m.rv} según la liga, y no está en EA ni en seed_matches.js: cargarlo desde el reporte del video.`);
+  if (!cargados.some(s => s.league === 'VPN' && s.date === m.date && mismoClub(s.rival, m.rival))) {
+    console.log(`FALTA EN EA: ${m.date} VPN vs ${m.rival} ${m.ts}-${m.rv} según la liga → se carga con ese resultado, sin estadísticas.`);
+    const n = { rival: m.rival, league: 'VPN', date: m.date, match_result: `${m.ts}-${m.rv}`, isHome: !!m.isHome, uploadedAt: new Date().toISOString(), origen: 'ea-auto',
+      notes: 'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)',
+      team_stats: Object.fromEntries(['posesion', 'tiros', 'tiros_arco', 'goles_esperados', 'pases', 'precision_pases', 'entradas', 'entradas_exito', 'intercepciones', 'paradas', 'faltas', 'fuera_juego', 'corneres', 'regates_exito', 'precision_tiro'].map(x => [x, null])),
+      players: [] };
+    nuevos.push(n); cargados.push(n);
+  }
 
 if (!nuevos.length) { console.log('No hay partidos nuevos de EA para cargar.'); process.exit(0); }
-for (const n of nuevos) console.log(`${n.date} ${n.league} vs ${n.rival}: ${n.match_result} (${n.players.length} jugadores, EA ${n.ea_match_id})`);
+for (const n of nuevos) console.log(`${n.date} ${n.league} vs ${n.rival}: ${n.match_result} (${n.players.length} jugadores, ${n.ea_match_id ? `EA ${n.ea_match_id}` : 'sin EA'})`);
 if (!APLICAR) { console.log('(sin --aplicar: no se escribió nada)'); process.exit(0); }
 
 // Al final del array, con el estilo del archivo (claves sin comillas)
