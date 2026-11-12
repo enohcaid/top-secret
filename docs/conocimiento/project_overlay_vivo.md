@@ -132,6 +132,12 @@ Las redes estuvieron 5 min sin imagen (23:32–23:37): OBS quedó colgado con el
 - **Probado** con `--archivo` sobre el VOD del YouTube de Dani (`yt-dlp -f 299`; el 720p 298 recién terminado el vivo bajaba vacío): COM → (cierre) → YSH 2-0 → HYT, sin falsos cierres.
 - **YouTube no salió al aire en la segunda sesión** (también 26/10 y 2/11: siempre al reabrir el vivo enseguida de un corte, con YouTube todavía cerrando la transmisión anterior). `retransmitir.mjs` ahora lo mira cada 2 min toda la sesión (`vigilarYouTube`) y con 2 chequeos negativos seguidos corta solo el relevo de YouTube, espera 45 s y reconecta.
 
+## Noche del 2026-11-11: audio del partido atrasado
+
+- Desde las 22:53 OBS repetía cada 2-3 s `Source Partido audio is lagging (over by …) at max audio buffering. Restarting source audio.` (corte de sonido en cada uno). El margen de audio de OBS se había llenado a las 22:45 por la misma fuente (`total audio buffering is now …`, fuente YouTube de Dani vía streamlink). Reiniciar solo la fuente (`TriggerMediaInputAction` RESTART sobre 'Partido') **no** lo arregla: el margen solo se vacía reiniciando OBS. El atraso fue creciendo de ~1 s a ~3 s hasta el reinicio de OBS (23:04, entre partidos).
+- **Regla de Juan (2026-11-11): siempre que haga falta reiniciar OBS, reiniciarlo sin preguntar** (mismo procedimiento que `reiniciarObs()`), y avisar después.
+- Pendiente: que `salud-vivo.mjs` lo detecte solo (varios "lagging" seguidos en un minuto → `reiniciarObs()`, mejor entre partidos). No aplicarlo con un vivo en curso.
+
 ## Pendientes para corregir
 
 - **Charlas: los jugadores miran para el lado opuesto (Juan, vivo del 2026-11-04).** Cuando dos jugadores hablan en el modo pausa, quedan mirando hacia afuera en vez de mirarse. Sin corregir ni diagnosticar todavía. Pista: `pj()` en `overlay-pausa.js` asume que todos los clips `habla`/`escucha` miran a la derecha y espeja solo al de la derecha, pero los prompts de `clip-jugador.mjs` dicen "hacia un costado" sin indicar cuál, así que el lado puede variar por clip. Revisar la dirección real de cada clip. No aplicar el arreglo con un vivo en curso.
