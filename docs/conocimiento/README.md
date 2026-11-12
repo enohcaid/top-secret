@@ -109,4 +109,5 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [feedback_una_publicacion_por_red](feedback_una_publicacion_por_red.md) — noticia + video del mismo hecho = una publicación por red
 - [project_resumen_quincenal_eg](project_resumen_quincenal_eg.md) — Resumen quincenal de Espacio Gamer (31/10 placas, 1/11 video YouTube + vertical): scripts quincena-eg*, datos del fixture de EG, sync de EA con 403, detector de ChatGPT que tomaba el adjunto
 - [Lyric videos de Tacet Sin](project_videos_youtube_tacet_sin.md) — The Shorts para YouTube y /music: loop de Canva, letra solo de lo cantado, comandos de scripts/beats/videos-youtube.mjs
+- [project_reportes_ligas](project_reportes_ligas.md) — reportes de partido en las webs de VPUG (/panel-dt) y VPN (/my-vpn): en empates los carga el equipo; plan para automatizarlo (pendiente ver el formulario real)
 - [project_vpug_primera_t4](project_vpug_primera_t4.md) — VPUG T4 = Primera División en la web propia de la liga (vpug-liga, dejó CopáFácil): API pública/con token, ids (temp 7, club 107, div 1), Worker /vpug-table-primera
