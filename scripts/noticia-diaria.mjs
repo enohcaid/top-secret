@@ -85,11 +85,30 @@ const { ROSTER_T4 } = await import(pathToFileURL(path.join(ROOT, 'roster.js')).h
 const PLANTEL = ROSTER_T4.map(r => r.key);
 const LIGA = l => l === '11x11' ? 'Espacio Gamer' : l;
 const oficial = l => ['VPN', 'VPUG', '11x11'].includes(l);
+// Las notas del seed mezclan datos del partido ("Cuartos de Final · Ida") con notas internas de carga (EA, vigía, web de
+// la liga, estadísticas descartadas…). Lo interno no va a la noticia: el 12/11 salió "EA registró mal el partido… el
+// vigía del vivo lo vio completo" en el texto publicado. Se parte en frases (" · ", "; ", ". " fuera de paréntesis y sin
+// cortar iniciales como "A. Ribeiro") y se descarta entera cada frase que hable de eso.
+const INTERNO = /cargado autom|cargado desde EA|falta completar|\bEA\b|vig[ií]a|web de (la liga|VPN|VPUG)|descartad|reporte del video|^\d{1,2}:\d{2} hs$|^reporte\b/i;
+function limpiarNotas(s) {
+  const t = String(s || ''), partes = []; let cur = '', depth = 0;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (c === '(') depth++; else if (c === ')') depth = Math.max(0, depth - 1);
+    const inicial = c === '.' && /(^|\s)[A-ZÁÉÍÓÚÑ]$/.test(cur);
+    const fin = (c === ';' || (c === '.' && !inicial)) && t[i + 1] === ' ';
+    const sep = depth === 0 && (t.startsWith(' · ', i) ? 3 : fin ? 2 : 0);
+    if (sep) { partes.push(cur); cur = ''; i += sep - 1; continue; }
+    cur += c;
+  }
+  partes.push(cur);
+  return partes.map(x => x.trim()).filter(x => x && !INTERNO.test(x)).join(' · ').slice(0, 400) || null;
+}
 
 const partidos = SEED_MATCHES.filter(m => m.date >= '2026-09-29').slice(-14).map(m => {
   const [gf, gc] = String(m.match_result).split('-').map(Number);
   return { fecha: m.date, dia: dia(m.date), liga: LIGA(m.league), torneo: m.torneo || null, rival: m.rival, local: m.isHome ?? null,
-    resultado: `${gf}-${gc}`, res: gf > gc ? 'victoria' : gf < gc ? 'derrota' : 'empate', notas: (m.notes || '').replace(/cargado autom[^.]*\.|falta completar[^.]*\./gi, '').trim().slice(0, 400) || null,
+    resultado: `${gf}-${gc}`, res: gf > gc ? 'victoria' : gf < gc ? 'derrota' : 'empate', notas: limpiarNotas(m.notes),
     jugadores: (m.players || []).filter(p => p.matched || PLANTEL.includes(p.name)).map(p => ({ gt: p.matched || p.name, pos: p.played_pos || null,
       goles: p.goals || 0, asist: p.assists || 0, nota: p.rating ?? null })) };
 });
@@ -129,7 +148,7 @@ function fichaRival(liga, rival) {
   const hit = eq.length ? buscarEquipo(rival, eq.map(t => ({ nombre: t.nombre }))) : null;
   const fila = hit && !hit.dudoso && hit.score >= 0.8 ? eq.find(t => t.nombre === hit.nombre) : null;
   const historial = SEED_MATCHES.filter(m => buscarEquipo(m.rival, [{ nombre: rival }])?.score >= 0.8)
-    .map(m => ({ fecha: m.date, liga: LIGA(m.league), resultado: String(m.match_result), notas: m.notes || null }));
+    .map(m => ({ fecha: m.date, liga: LIGA(m.league), resultado: String(m.match_result), notas: limpiarNotas(m.notes) }));
   return { rival, liga, en_la_tabla: fila ? { pos: fila.pos ?? eq.indexOf(fila) + 1, pj: fila.pj, g: fila.g, e: fila.e, p: fila.p, gf: fila.gf, gc: fila.gc, pts: fila.pts, ...(fila.grupo ? { grupo: fila.grupo } : {}), ...(fila.ultimos ? { ultimos_5: fila.ultimos } : {}) } : null,
     historial_contra_top_secret: historial.length ? historial : 'nunca se enfrentaron' };
 }
