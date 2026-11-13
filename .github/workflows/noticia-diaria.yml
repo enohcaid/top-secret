@@ -17,6 +17,10 @@ on:
         description: Lo que se pidió al rehacer la nota
         type: string
         default: ''
+      corregir:
+        description: Corrección de la nota de hoy ("mantener" = misma foto, "nueva" = foto nueva; vacío = rehacer)
+        type: string
+        default: ''
       prueba:
         description: Solo prueba (deja la nota en un artifact, no toca Firestore)
         type: boolean
@@ -50,6 +54,7 @@ jobs:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           KV_NAMESPACE_ID: ${{ secrets.KV_NAMESPACE_ID }}
           NOTICIA_MOTIVO: ${{ inputs.motivo }}
+          NOTICIA_CORREGIR: ${{ inputs.corregir }}
           FORZAR: ${{ inputs.forzar }}
           PRUEBA: ${{ inputs.prueba }}
         run: |

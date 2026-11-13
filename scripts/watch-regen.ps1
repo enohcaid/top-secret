@@ -149,6 +149,21 @@ try {
 $draft = $null
 try { $draft = $doc.fields.data.stringValue | ConvertFrom-Json } catch {}
 $today = (Get-Date).ToUniversalTime().AddHours(-3).ToString('yyyy-MM-dd')
+# Correccion con la misma foto ("Pedir correccion" en aprobar.html, 2026-11-13): el borrador corregido ya trae las
+# imagenes y rearmarLote; se rehace el lote de aprobar.html con el texto nuevo. Una vez por borrador (generatedAt).
+if ($draft -and $draft.date -eq $today -and $draft.imagePost -and $draft.rearmarLote) {
+    $marcaLote = "$repoRoot\scripts\.lote-rearmado"
+    $claveLote = [string]$draft.generatedAt
+    if ((Test-Path $marcaLote) -and ((Get-Content $marcaLote -Raw).Trim() -eq $claveLote)) { exit 0 }
+    $loteEnCurso = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match 'noticia-lote' }
+    if ($loteEnCurso) { exit 0 }
+    Set-Content -Path $marcaLote -Value $claveLote -Encoding ASCII
+    Log "Noticia corregida con la misma foto ($($draft.title)) - rearmando el lote de aprobar"
+    Start-Process -FilePath 'cmd.exe' -WorkingDirectory $repoRoot -WindowStyle Hidden `
+        -ArgumentList '/c', 'node scripts\social\noticia-lote.mjs --no-abrir >> scripts\daily-images.log 2>&1'
+    exit 0
+}
 if (-not $draft -or $draft.date -ne $today -or -not $draft.title -or $draft.imagePost) { exit 0 }
 
 $marca = "$repoRoot\scripts\.imagenes-lanzadas"

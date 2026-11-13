@@ -45,3 +45,5 @@ capturas-tv/
 scripts/.publicar.lock
 avatares-3d/
 __pycache__/
+scripts/.imagenes-lanzadas
+scripts/.lote-rearmado

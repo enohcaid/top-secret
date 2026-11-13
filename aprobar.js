@@ -222,7 +222,7 @@
       <div class="lote-cab">
         <div><h2>${esc(l.titulo)}</h2><div class="meta">${meta}</div>${fecha}</div>
         <div class="acciones">
-          ${/^noticia-/.test(l.id) && !salio ? '<button data-rehacer>Rehacer</button>' : ''}
+          ${/^noticia-/.test(l.id) && !salio ? '<button data-corregir>Pedir corrección</button><button data-rehacer>Rehacer</button>' : ''}
           ${!salio && vivas ? '<button class="no" data-descartar-lote>Descartar propuesta</button>' : ''}
           ${pend ? `<button class="si" data-todo="aprobada">${esGuion ? 'Aprobar todas las ideas' : 'Aprobar todo lo pendiente'}</button>` : ''}
           <button class="plegar" data-plegar>${cerrado ? `Ver ${fila.length} ${esGuion ? 'ideas' : 'piezas'}` : 'Ocultar'}</button>
@@ -372,6 +372,25 @@
       return api('/request-regen', { motivo: motivo.trim() })
         .then(() => aviso('Pedido enviado: la nota nueva vuelve acá en unos 15 minutos'))
         .catch(err => { rh.disabled = false; aviso(err.message); });
+    }
+    // Pedir corrección (Juan, 2026-11-13): la misma nota con los cambios pedidos, con la misma foto o con una nueva.
+    // La escribe la nube (noticia-diaria.mjs --corregir); con la misma foto la PC rearma el lote, con foto nueva la genera.
+    const co = e.target.closest('button[data-corregir]');
+    if (co) {
+      const dlg = document.getElementById('correccion'), txt = document.getElementById('correccion-txt');
+      txt.value = '';
+      dlg.querySelector('input[value="mantener"]').checked = true;
+      dlg.onclose = () => {
+        if (dlg.returnValue !== 'enviar' || !txt.value.trim()) return co.focus();
+        const foto = dlg.querySelector('input[name="foto"]:checked').value;
+        co.disabled = true;
+        api('/request-regen', { motivo: txt.value.trim(), corregir: foto })
+          .then(() => aviso(foto === 'mantener' ? 'Corrección pedida: la nota corregida vuelve acá en unos 15 minutos' : 'Corrección pedida: la nota corregida y su foto nueva vuelven acá en unos 30 minutos'))
+          .catch(err => { co.disabled = false; aviso(err.message); });
+      };
+      dlg.returnValue = '';
+      dlg.showModal();
+      return txt.focus();
     }
     // portada en grande, como en /music: clic en la tapa; se cierra con clic, Esc o la ×
     const tp = e.target.closest('[data-tapa]');

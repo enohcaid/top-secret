@@ -1133,10 +1133,16 @@ export default {
         if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
         // motivo (opcional): lo que Juan escribió en aprobar.html al pedir "Rehacer" o "Generar noticia" (2026-11-02)
-        let motivo = '';
-        try { motivo = String((await request.json())?.motivo || '').slice(0, 1000); } catch(e) {}
-        await fetch(FS_DRAFT, { method: 'DELETE' });
-        await env.TS_KV.put('regen_request', JSON.stringify({ requested: true, at: new Date().toISOString(), ...(motivo ? { motivo } : {}) }));
+        // corregir (2026-11-13, "Pedir corrección"): 'mantener' = misma nota corregida con la misma foto, 'nueva' = con
+        // foto nueva. Ahí el borrador NO se borra: la nube lo necesita para corregirlo.
+        let motivo = '', corregir = '';
+        try {
+          const b = await request.json();
+          motivo = String(b?.motivo || '').slice(0, 1000);
+          corregir = ['mantener', 'nueva'].includes(b?.corregir) ? b.corregir : '';
+        } catch(e) {}
+        if (!corregir) await fetch(FS_DRAFT, { method: 'DELETE' });
+        await env.TS_KV.put('regen_request', JSON.stringify({ requested: true, at: new Date().toISOString(), ...(motivo ? { motivo } : {}), ...(corregir ? { corregir } : {}) }));
         return jsonResp({ ok: true });
       }
 
@@ -1526,12 +1532,12 @@ async function despacharNoticia(env, scheduledTime) {
   if (!env.GITHUB_TOKEN) return;
   try {
     const hm = new Date(scheduledTime - 3 * 3600e3).toISOString().slice(11, 16);   // ART = UTC-3, sin horario de verano
-    if (NOTICIA_HORAS_ART.includes(hm)) await dispararNoticia(env, { forzar: 'false', motivo: '', prueba: 'false' });
+    if (NOTICIA_HORAS_ART.includes(hm)) await dispararNoticia(env, { forzar: 'false', motivo: '', corregir: '', prueba: 'false' });
     const pedido = await env.TS_KV.get('regen_request', 'json');
     if (!pedido?.requested) return;
     if (pedido.despachado && Date.now() - Date.parse(pedido.despachado) < 20 * 60e3) return;
     if ((pedido.intentos || 0) >= 2) { await env.TS_KV.delete('regen_request'); console.log('noticia: rehacer falló 2 veces, se descarta el pedido'); return; }
-    if (await dispararNoticia(env, { forzar: 'true', motivo: String(pedido.motivo || ''), prueba: 'false' }))
+    if (await dispararNoticia(env, { forzar: 'true', motivo: String(pedido.motivo || ''), corregir: String(pedido.corregir || ''), prueba: 'false' }))
       await env.TS_KV.put('regen_request', JSON.stringify({ ...pedido, despachado: new Date().toISOString(), intentos: (pedido.intentos || 0) + 1 }));
   } catch (e) { console.log('noticia: ' + e.message); }
 }

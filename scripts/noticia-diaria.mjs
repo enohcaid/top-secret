@@ -32,6 +32,11 @@ loadEnv();
 const argv = process.argv.slice(2);
 const FORZAR = argv.includes('--forzar'), PRUEBA = argv.includes('--prueba');
 const MOTIVO = (argv.includes('--motivo') ? String(argv[argv.indexOf('--motivo') + 1] || '') : process.env.NOTICIA_MOTIVO || '').trim();
+// "Pedir corrección" en aprobar.html (2026-11-13): misma nota con los cambios pedidos. 'mantener' = misma foto (la PC
+// rearma el lote con el texto nuevo), 'nueva' = la PC rehace la foto. Vacío = "Rehacer" (otra nota).
+//   node scripts/noticia-diaria.mjs --forzar --corregir mantener|nueva --motivo "…"
+const FOTO = (argv.includes('--corregir') ? String(argv[argv.indexOf('--corregir') + 1] || '') : process.env.NOTICIA_CORREGIR || '').trim();
+const CORREGIR = FOTO === 'mantener' || FOTO === 'nueva';
 const FS = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/';
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const MEDIA = `${WORKER}/media/`;
@@ -227,12 +232,19 @@ const DATOS = {
 if (diaHoy === 6 && !jugadosRecientes.length && !partidosHoy.length && !FORZAR) { log('Sábado sin partidos: no hay nota (sale el resumen semanal).'); process.exit(0); }
 
 // ── 2. Escritura ─────────────────────────────────────────────────────────────
+// la nota que se corrige (el Worker no borra el borrador al pedir una corrección); sin ella, se rehace como siempre
+const notaActual = CORREGIR && draftHoy?.date === HOY && Array.isArray(draftHoy.body) ? draftHoy : null;
+const pedidoCorreccion = !notaActual ? '' : `\n\n## El editor pide correcciones a la nota de hoy\n${MOTIVO || '(sin detalle: revisá la nota contra los datos de arriba y corregí lo que no coincida)'}\n\nNota actual:\n`
+  + JSON.stringify({ angulo: topicos.find(t => t.date === HOY)?.angle || null, category: notaActual.category, title: notaActual.title, excerpt: notaActual.excerpt,
+    body: notaActual.body, shareCaption: notaActual.shareCaption, shareCaptions: notaActual.shareCaptions, imageBrief: notaActual.imageBrief, toma: notaActual.toma })
+  + `\n\nDevolvé esta misma nota corregida, en el formato de siempre: mismo ángulo y estructura; cambiá lo que pide el editor y lo que los datos de arriba contradigan (también en el copete y los textos para redes), y dejá el resto como está. `
+  + (FOTO === 'mantener' ? 'La foto no cambia: devolvé "imageBrief" y "toma" iguales.\n' : 'La foto se rehace: actualizá "imageBrief" y "toma" si el pedido lo necesita.\n');
 const reglasExtra = fs.readFileSync(path.join(ROOT, 'docs/conocimiento/reglas-noticia-diaria.md'), 'utf8').replace(/^# .*\n+/, '').replace(/^La noticia diaria la escribe[^\n]*\n+/m, '');
 const encargo = fs.readFileSync(path.join(ROOT, 'scripts/noticia-diaria-encargo.md'), 'utf8')
   .replace('{{HOY}}', HOY).replace('{{DIA}}', dia(HOY)).replace('{{REGLAS_EXTRA}}', reglasExtra).replace('{{SABADO}}', '')
   .replace('{{DATOS}}', JSON.stringify(DATOS, null, 1))
   // --motivo: lo que Juan pidió al tocar "Rehacer" en aprobar.html (watch-regen.ps1 lo pasa)
-  + (MOTIVO ? `\n\n## El editor rechazó la nota anterior de hoy y pide otra\n${MOTIVO}\nLa nota rechazada fue: "${draftPrevio?.title || ''}". Escribí una nota distinta: otro ángulo, otro título.\n` : '');
+  + (pedidoCorreccion || MOTIVO ? pedidoCorreccion || `\n\n## El editor rechazó la nota anterior de hoy y pide otra\n${MOTIVO}\nLa nota rechazada fue: "${draftPrevio?.title || ''}". Escribí una nota distinta: otro ángulo, otro título.\n` : '');
 
 // Controles: lo que antes el agente tenía que verificar a mano
 const exJugadores = [...new Set(SEED_MATCHES.flatMap(m => (m.players || []).map(p => p.matched)).filter(g => g && !PLANTEL.includes(g)))]
@@ -275,7 +287,7 @@ function controlar(n) {
   const estiloHoy = styleFromBrief({ imageBrief: n.imageBrief })?.id;
   const usados = estilos.filter(e => e.date >= sumar(HOY, -3) && e.date < HOY).map(e => e.style);
   if (estiloHoy && usados.includes(estiloHoy)) err.push(`la foto vuelve a ser en ${LUGAR[estiloHoy] || estiloHoy}, que ya se usó en los últimos 3 días (${[...new Set(usados.map(u => LUGAR[u] || u))].join(', ')}): elegí otro lugar y otra composición`);
-  if (n.toma && DATOS.tomas_recientes.includes(n.toma)) err.push(`toma "${n.toma}" repetida (recientes: ${DATOS.tomas_recientes.join(', ')})`);
+  if (n.toma && DATOS.tomas_recientes.includes(n.toma) && !(notaActual && FOTO === 'mantener')) err.push(`toma "${n.toma}" repetida (recientes: ${DATOS.tomas_recientes.join(', ')})`);
   const ini = t => plano(t).toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ0-9 ]/g, '').split(/\s+/).slice(0, 3).join(' ');
   const parecido = topicos.slice(0, 5).find(t => t.date < HOY && ini(t.title) === ini(n.title));
   if (parecido) err.push(`el título empieza igual que el de ${parecido.date} ("${parecido.title}"): buscá otro enganche, con el rival y el dato que importa, sin "DOBLE FECHA"`);
@@ -328,6 +340,16 @@ const draft = { id: `auto-${HOY}`, generatedAt: new Date().toISOString(), catego
   excerpt: n.excerpt, body: n.body, shareCaption: n.shareCaption, shareCaptions: n.shareCaptions, imageBrief: n.imageBrief, toma: n.toma || null,
   imagePost: null, imageStory: null, image: null, canvaDesignId: null, canvaStoryDesignId: null, status: 'draft',
   escritoPor: motor === 'claude' ? 'claude-opus' : 'local', ...(err.length ? { avisos: err } : {}) };
+// Corrección con la misma foto: se copian las imágenes de la nota anterior y rearmarLote le avisa a la PC
+// (watch-regen.ps1) que rehaga el lote de aprobar.html con el texto nuevo. Con foto nueva quedan en null y la PC la genera.
+if (notaActual) {
+  draft.correccion = { motivo: MOTIVO, foto: FOTO, at: draft.generatedAt };
+  if (FOTO === 'mantener' && notaActual.imagePost) {
+    for (const k of ['imagePost', 'imageStory', 'image', 'canvaDesignId', 'canvaStoryDesignId', 'imageBrief', 'toma', 'imagenesExtra', 'pieRedes'])
+      if (notaActual[k] !== undefined) draft[k] = notaActual[k];
+    draft.rearmarLote = true;
+  }
+}
 if (PRUEBA) {
   fs.mkdirSync(path.join(ROOT, 'pruebas'), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'pruebas/noticia-diaria.json'), JSON.stringify({ angulo: n.angulo, protagonistas: n.protagonistas, ...draft }, null, 2));
