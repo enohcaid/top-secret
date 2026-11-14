@@ -55,6 +55,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [project_avatares_3d](project_avatares_3d.md) — Avatares 3D animados del plantel: repo privado enohcaid/avatares-3d (Codex modela en PCJUAN, Claude revisa); arranca con Juan_Martinez4
 - [project_espacio_gamer](project_espacio_gamer.md) — Desde la T4 la liga 11x11 se llama "Espacio Gamer" (espaciogamer.cl); tabla vía Worker /eg-table; la clave interna sigue siendo 11x11/e11
 
+- [reference_goleadores_ligas](reference_goleadores_ligas.md) — Goleadores/asistentes cuando EA falla: web de VPN y Espacio Gamer + ficha del gol en la grabación del vigía (completar-goleadores.mjs, fin de noche)
 - [project_ronda_redes](project_ronda_redes.md) — Ronda de redes de las 14:00 (día después de jornada + sábados): carrusel/Reel/Short/TikTok/X/Facebook con datos reales; Juan aprueba en aprobar.html, la página única de aprobación
 - [project_voz_textos_produccion](project_voz_textos_produccion.md) — Voz en off en los videos (edge-tts, lib/voz.mjs), revisor de descripciones (revisar-textos.js) y producción automática de ideas aprobadas (producir.mjs, pendiente de autorizar)
 - [project_baja_cat_fel_ltemp_prep_t4](project_baja_cat_fel_ltemp_prep_t4.md) — CAT_FEL y lTemp30148 dejaron el club (2026-09-08); prep de Temporada 4 en plantilla.html/roster.js queda pendiente, el usuario pidió posponerla

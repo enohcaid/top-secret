@@ -510,5 +510,9 @@ log('Fin del horario. Retransmisor apagado.');
 if (!PRUEBA) {
   try { log('Carga desde EA:', (await node('scripts/cargar-partidos-ea.mjs', '--aplicar', '--commit')).trim().replace(/\s*\n\s*/g, ' · ').slice(0, 600)); }
   catch (e) { log('No pude cargar los partidos desde EA:', e.message.slice(0, 200)); }
+  // Goles sin autor (EA no guardó el partido o lo guardó corrupto): web de la liga y, si no alcanza, la ficha del gol
+  // en la grabación del vigía. Lo que no cierra queda como "REVISAR A MANO" en el log.
+  try { log('Goleadores:', (await node('scripts/completar-goleadores.mjs', '--aplicar', '--commit')).trim().replace(/\s*\n\s*/g, ' · ').slice(0, 800)); }
+  catch (e) { log('No pude completar los goleadores:', e.message.slice(0, 200)); }
 }
 process.exit(0);
