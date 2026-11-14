@@ -46,9 +46,16 @@ const delPlantel = n => ROSTER.find(g => plano(g) === plano(n)) || null;   // "e
 const traer = async (url, opt = {}) => { try { const r = await fetch(url, { signal: AbortSignal.timeout(40000), ...opt }); return r.ok ? r : null; } catch { return null; } };
 const golesDe = m => Number(String(m.match_result).split('-')[0]);
 const conAutor = m => (m.players || []).reduce((a, p) => a + (p.goals || 0), 0);
+// Goleadores sacados de la ficha del vivo porque la liga todavía tenía lo de EA: la liga siempre termina cargando lo
+// correcto (pide corregirlo, a veces tarda — Juan, 2026-11-14), así que estos se vuelven a mirar hasta que la liga los
+// confirme (o los corrija: lo de la liga manda) durante 30 días.
+const PROVISORIO = 'GOLEADORES PROVISORIOS (ficha del vivo): falta que la liga los cargue.';
+const esProvisorio = m => String(m.notes || '').includes(PROVISORIO);
+const DESDE_PROV = new Date(Date.parse(hoy) - 30 * 864e5).toISOString().slice(0, 10);
 
-const pendientes = SEED_MATCHES.filter(m => m.date >= DESDE && ['VPN', '11x11', 'VPUG'].includes(m.league) && golesDe(m) > conAutor(m));
-if (!pendientes.length) { log(`Sin goles sin autor desde ${DESDE}.`); process.exitCode = 0; }
+const pendientes = SEED_MATCHES.filter(m => ['VPN', '11x11', 'VPUG'].includes(m.league)
+  && ((m.date >= DESDE && golesDe(m) > conAutor(m)) || (m.date >= DESDE_PROV && esProvisorio(m))));
+if (!pendientes.length) log(`Sin goles sin autor desde ${DESDE} ni provisorios desde ${DESDE_PROV}.`);
 
 // ── 1. Ligas ─────────────────────────────────────────────────────────────────
 const mismoClub = (a, b) => { const x = plano(a), y = plano(b); return !!x && !!y && (x === y || x.startsWith(y.slice(0, 10)) || y.startsWith(x.slice(0, 10))); };
@@ -174,20 +181,29 @@ for (const m of pendientes) {
   const ligaG = liga && aPlantel(liga.goles), ligaA = liga && aPlantel(liga.asist);
   if (liga && (!ligaG || !ligaA)) log(`  ${m.date} ${m.rival}: la liga nombra a alguien que no está en el plantel T4 (${JSON.stringify({ ...liga.goles, ...liga.asist })})`);
   const ligaOk = ligaG && ligaA && suma(ligaG) === meta;
+  const yaG = Object.fromEntries((m.players || []).filter(p => p.goals).map(p => [p.matched || p.name, p.goals]));
+  // Provisorio de una noche anterior: solo se mira la liga. Cuando la liga ya lo tiene completo, manda lo de la liga.
+  if (esProvisorio(m)) {
+    if (!ligaOk) { log(`${m.date} ${m.rival}: la liga todavía no cargó los goleadores (${liga ? `${suma(ligaG || {})}/${meta}` : 'sin datos'}); quedan los de la ficha del vivo`); continue; }
+    if (!igual(ligaG, yaG)) log(`${m.date} ${m.rival}: la liga corrigió la ficha del vivo — ficha ${JSON.stringify(yaG)}, liga ${JSON.stringify(ligaG)} (queda lo de la liga)`);
+    cambios.push({ m, goles: ligaG, asist: ligaA, fuente: liga.fuente, exacto: true });
+    log(`${m.date} ${m.rival} ${m.match_result} → confirmado por la liga: goles ${JSON.stringify(ligaG)} · asist ${JSON.stringify(ligaA)}`);
+    continue;
+  }
   const vivo = fichasVivo(m);
   const vivoOk = vivo && suma(vivo.goles) === meta;
-  let goles, asist, fuente;
-  if (ligaOk && vivo && suma(vivo.goles) && !Object.entries(vivo.goles).every(([g, n]) => (ligaG[g] || 0) >= n)) {
-    log(`REVISAR A MANO ${m.date} ${m.rival} ${m.match_result}: la liga dice ${JSON.stringify(ligaG)} y la ficha del vivo ${JSON.stringify(vivo.goles)}`); continue;
+  let goles, asist, fuente, provisorio = false;
+  if (ligaOk) {
+    if (vivo && suma(vivo.goles) && !Object.entries(vivo.goles).every(([g, n]) => (ligaG[g] || 0) >= n))
+      log(`${m.date} ${m.rival}: la ficha del vivo leyó ${JSON.stringify(vivo.goles)} y la liga dice ${JSON.stringify(ligaG)} (queda lo de la liga)`);
+    goles = ligaG; asist = ligaA; fuente = liga.fuente + (vivo && suma(vivo.goles) ? ' + ficha del gol del vivo' : '');
   }
-  if (ligaOk) { goles = ligaG; asist = ligaA; fuente = liga.fuente + (vivo && suma(vivo.goles) ? ' + ficha del gol del vivo' : ''); }
-  else if (vivoOk) { goles = vivo.goles; asist = {}; fuente = vivo.fuente + (liga ? `; ${liga.fuente} incompleta (${suma(ligaG || {})}/${meta} goles)` : ''); }
+  else if (vivoOk) { goles = vivo.goles; asist = {}; provisorio = true; fuente = vivo.fuente + (liga ? `; ${liga.fuente} todavía con ${suma(ligaG || {})}/${meta} goles` : ''); }
   else { log(`REVISAR A MANO ${m.date} ${m.rival} ${m.match_result}: liga ${liga ? `${suma(ligaG || {})}/${meta}` : 'sin datos'}, vivo ${vivo ? `${suma(vivo.goles)}/${meta}` : 'sin datos'}`); continue; }
   // Nunca bajar lo ya cargado: si ya hay goles que la fuente no trae, no cierra → revisar.
-  const yaG = Object.fromEntries((m.players || []).filter(p => p.goals).map(p => [p.matched || p.name, p.goals]));
   if (Object.entries(yaG).some(([g, n]) => (goles[g] || 0) < n)) { log(`REVISAR A MANO ${m.date} ${m.rival}: lo cargado ${JSON.stringify(yaG)} no coincide con ${JSON.stringify(goles)}`); continue; }
-  cambios.push({ m, goles, asist, fuente });
-  log(`${m.date} ${m.rival} ${m.match_result} → goles ${JSON.stringify(goles)} · asist ${JSON.stringify(asist)} · ${fuente}`);
+  cambios.push({ m, goles, asist, fuente, provisorio });
+  log(`${m.date} ${m.rival} ${m.match_result} → goles ${JSON.stringify(goles)} · asist ${JSON.stringify(asist)} · ${fuente}${provisorio ? ' · PROVISORIO hasta que cargue la liga' : ''}`);
 }
 if (ocrN) log(`(${ocrN} cuadros leídos con OCR)`);
 if (!cambios.length || !APLICAR) { if (cambios.length) log('Sin --aplicar: no se escribe nada.'); }
@@ -195,13 +211,15 @@ else {
   let src = fs.readFileSync(SEED, 'utf8');
   const crlf = src.includes('\r\n'); src = src.replace(/\r\n/g, '\n');
   const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  for (const { m, goles, asist, fuente } of cambios) {
+  for (const { m, goles, asist, fuente, provisorio, exacto } of cambios) {
     const ini = src.search(new RegExp(`\\{rival:'${esc(m.rival.replace(/'/g, "\\'"))}', league:'${m.league}', date:'${m.date}'`));
     if (ini < 0) { log(`No encuentro la entrada de ${m.rival} ${m.date} en el seed: queda sin escribir`); continue; }
     const pi = src.indexOf('players:[', ini), fin = src.indexOf(']}', pi);
     let bloque = src.slice(ini, fin);
     const tocados = new Set();
     bloque = bloque.replace(/\{name:'[^']*', matched:'([^']*)'[^\n]*\}/g, (linea, gt) => {
+      // exacto (confirmación de la liga): goles y asistencias quedan como los dice la liga, también para el resto.
+      if (exacto) { tocados.add(gt); return linea.replace(/goals:\d+/, `goals:${goles[gt] || 0}`).replace(/assists:\d+/, `assists:${asist[gt] || 0}`); }
       if (!(gt in goles) && !(gt in asist)) return linea;
       tocados.add(gt);
       return linea.replace(/goals:\d+/, `goals:${Math.max(goles[gt] || 0, +(linea.match(/goals:(\d+)/)?.[1] || 0))}`)
@@ -211,8 +229,9 @@ else {
       .map(g => `    {name:'${g}', matched:'${g}', rating:null, goals:${goles[g] || 0}, assists:${asist[g] || 0}},\n`).join('');
     if (nuevos) bloque = bloque.replace(/players:\[\s*$/, 'players:[\n').replace(/\n?\s*$/, '\n') + nuevos + '  ';
     const quien = Object.entries(goles).map(([g, n]) => g + (n > 1 ? ` x${n}` : '')).join(', ');
-    const nota = ` Goleadores: ${quien}${Object.keys(asist).length ? `; asistencias: ${Object.keys(asist).join(', ')}` : ''} (${fuente}; completar-goleadores.mjs).`;
-    bloque = bloque.replace(/notes:'((?:[^'\\]|\\.)*)'/, (x, n) => `notes:'${n}${nota.replace(/'/g, "\\'")}'`);
+    const nota = exacto ? ` Confirmado por ${fuente}: goleadores ${quien}${Object.keys(asist).length ? `; asistencias: ${Object.keys(asist).join(', ')}` : ''}.`
+      : ` Goleadores: ${quien}${Object.keys(asist).length ? `; asistencias: ${Object.keys(asist).join(', ')}` : ''} (${fuente}; completar-goleadores.mjs).${provisorio ? ' ' + PROVISORIO : ''}`;
+    bloque = bloque.replace(/notes:'((?:[^'\\]|\\.)*)'/, (x, n) => `notes:'${(exacto ? n.replace(' ' + PROVISORIO, '').replace(PROVISORIO, '') : n)}${nota.replace(/'/g, "\\'")}'`);
     src = src.slice(0, ini) + bloque + src.slice(fin);
   }
   if (crlf) src = src.replace(/\n/g, '\r\n');
