@@ -14,8 +14,9 @@ import { spawn } from 'child_process';
 import { ROOT } from '../lib/env.mjs';
 import { putFile } from '../lib/r2.mjs';
 import { elegirMusica, infoTema } from '../lib/musica.mjs';
-import { cargar, hoyART, diaSemana, fechaCorta, TEMPORADA } from './lib/datos.mjs';
-import { carrusel, video } from './lib/render.mjs';
+import { cargar, hoyART, diaSemana, fechaCorta, TEMPORADA, LIGA_VISIBLE } from './lib/datos.mjs';
+import { carrusel, video, dropDelTema } from './lib/render.mjs';
+import { GRUPALES_IA_T4 } from '../../estadisticas-datos.js';
 import { escribirTextos, escribirNoticia } from './lib/textos.mjs';
 import { agregarLote, leer, PAGINA } from './lib/aprobaciones.mjs';
 import * as semana from './formatos/semana.mjs';
@@ -45,7 +46,16 @@ async function armar() {
   d.fixture = d.fixture.map(f => ({ ...f, escudo: f.escudo || d.escudos[f.rival] || '' }));
   const desde = sumar(FECHA, -7), hasta = sumar(FECHA, -1);
   const nSemana = Math.max(1, Math.ceil((Date.parse(hasta) - Date.parse(TEMPORADA.desde) + 86400000) / (7 * 86400000)));
-  const pieza = semana.datos(d, { desde, hasta, semana: nSemana });
+  // Portada: una foto grupal T4 (ChatGPT), rotando por semana, para no repetir los renders de la placa de goleadores.
+  const ESCENAS_GRUPALES = ['estudio-suelto', 'estadio-suelto', 'tunel', 'vestuario', 'estudio', 'estadio'];
+  const dirHero = path.join(ROOT, 'fuentes/redes/resumen', FECHA);
+  fs.mkdirSync(dirHero, { recursive: true });
+  const hero = path.join(dirHero, 'hero-grupal.webp');
+  if (!fs.existsSync(hero)) {
+    const key = GRUPALES_IA_T4[ESCENAS_GRUPALES[nSemana % ESCENAS_GRUPALES.length]];
+    try { const r = await fetch(`${MEDIA}/${key}`); if (r.ok) fs.writeFileSync(hero, Buffer.from(await r.arrayBuffer())); } catch (e) { log(`Sin foto grupal (${e.message}): portada con renders`); }
+  }
+  const pieza = semana.datos(d, { desde, hasta, semana: nSemana, hero: fs.existsSync(hero) ? hero : null });
   if (!pieza) { log(`Sin partidos entre ${desde} y ${hasta}: no hay resumen esta semana.`); return; }
   log(`Resumen ${FECHA} (${desde} a ${hasta}, semana ${nSemana}) — sale ${HORA}`);
 
@@ -58,7 +68,8 @@ async function armar() {
   log('Video vertical…');
   const musica = await elegirMusica(id);
   const mp4 = path.join(dir, `${id}.mp4`);
-  await video('semana.html', pieza.plantilla, mp4, { escenas: semana.ESCENAS_VIDEO, gancho: 1.6, musica });
+  const drop = dropDelTema(musica)?.drop || 0;   // que el drop del tema caiga al terminar el gancho
+  await video('semana.html', pieza.plantilla, mp4, { escenas: semana.ESCENAS_VIDEO, gancho: 1.6, musica, musicaDesde: Math.max(0, drop - 1.6) });
   const nombreTema = infoTema(musica).titulo;
 
   log('Subiendo a R2…');
@@ -70,15 +81,21 @@ async function armar() {
 
   // ── Textos ────────────────────────────────────────────────────────────────
   const r = pieza.resumen;
+  const lvTxt = h => h === true ? ' (local)' : h === false ? ' (visitante)' : '';
+  const golesConAutor = r.goleadores.reduce((a, j) => a + j.goles, 0);
+  const ligasTxt = pieza.ligas.map(l => `${l.liga}: ${l.pj} partidos, ${l.v}V ${l.e}E ${l.d}D, ${l.gf}-${l.gc} en goles, ${l.pts} puntos`);
   const datosTexto = {
-    contexto: `Resumen de la semana ${nSemana} (${desde} a ${hasta}) en ${TEMPORADA.torneo}`,
-    liga: TEMPORADA.liga,
-    record: `${r.pj} partidos: ${r.v} victorias, ${r.e} empates, ${r.d} derrotas · ${r.gf} goles a favor, ${r.gc} en contra · ${r.pts} puntos`,
-    partidos: pieza.partidos.map(m => `${diaSemana(m.date)} ${fechaCorta(m.date)}: Top Secret ${m.gf}-${m.gc} ${m.rival} (${m.isHome ? 'local' : 'visitante'})`),
+    contexto: `Resumen de la semana ${nSemana} de la Temporada 4 (${desde} a ${hasta}). ` + (pieza.ligas.length > 1
+      ? `Top Secret juega ${pieza.ligas.length} ligas a la vez (${pieza.ligas.map(l => l.liga).join(', ')}): cada partido dice de qué liga es; los puntos son por liga y NO se suman entre ligas.`
+      : `Liga: ${pieza.ligas[0]?.liga}.`),
+    ligas: ligasTxt,
+    record: `${r.pj} partidos en total: ${r.v} victorias, ${r.e} empates, ${r.d} derrotas · ${r.gf} goles a favor, ${r.gc} en contra`,
+    partidos: pieza.partidos.map(m => `${diaSemana(m.date)} ${fechaCorta(m.date)} · ${LIGA_VISIBLE(m.league)}: Top Secret ${m.gf}-${m.gc} ${m.rival}${lvTxt(m.isHome)}`),
     goleadores: r.goleadores.map(j => `${j.gt}: ${j.goles} gol${j.goles > 1 ? 'es' : ''}`),
-    mejor_promedio: r.promedios[0] ? `${r.promedios[0].gt} (${r.promedios[0].prom.toFixed(2)} en ${r.promedios[0].pj} partidos)` : null,
-    proximos: d.fixture.filter(f => f.date > hasta).slice(0, 3).map(f => `${diaSemana(f.date)} ${fechaCorta(f.date)} ${f.time}: vs ${f.rival} (${f.isHome ? 'local' : 'visitante'})`),
-    vivo: 'Los partidos se transmiten en vivo por Twitch y Kick (topsecretfc)',
+    ...(golesConAutor < r.gf ? { goles_sin_autor: `${r.gf - golesConAutor} de los ${r.gf} goles no tienen autor cargado: no los atribuyas a nadie ni digas que la lista de goleadores está completa.` } : {}),
+    mejor_promedio: r.promedios[0] ? `${r.promedios[0].gt} (${r.promedios[0].prom.toFixed(2)} en ${r.promedios[0].ratings.length} partidos)` : null,
+    proximos: pieza.proximos.map(f => `${diaSemana(f.date)} ${fechaCorta(f.date)} ${f.time} · ${LIGA_VISIBLE(f.league)}: vs ${f.rival}${lvTxt(f.isHome)}`),
+    vivo: 'Los partidos se transmiten en vivo por Twitch, Kick, YouTube e Instagram (topsecretfc)',
   };
   let t, n;
   if (argv.includes('--sin-textos')) {
@@ -100,7 +117,7 @@ async function armar() {
     image: urlsSlides[0], imagePost: urlsSlides[0],
     body: [
       n.apertura,
-      { specs: [['Semana', `${r.v}V · ${r.e}E · ${r.d}D`], ['Puntos', String(r.pts)], ['Goles', `${r.gf} a favor · ${r.gc} en contra`], ...(fig ? [['Mejor promedio', `${fig.gt} · ${fig.prom.toFixed(2).replace('.', ',')}`]] : [])] },
+      { specs: [['Semana', `${r.v}V · ${r.e}E · ${r.d}D`], ...(pieza.ligas.length > 1 ? pieza.ligas.map(l => [l.liga, `${l.v}V · ${l.e}E · ${l.d}D · ${l.pts} pts`]) : [['Puntos', String(r.pts)]]), ['Goles', `${r.gf} a favor · ${r.gc} en contra`], ...(fig ? [['Mejor promedio', `${fig.gt} · ${fig.prom.toFixed(2).replace('.', ',')}`]] : [])] },
       { img: urlsSlides[1], caption: 'Los resultados de la semana.' },
       { h: 'Los goles y la figura' },
       n.goles,

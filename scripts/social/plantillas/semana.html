@@ -58,6 +58,23 @@ html,body{background:var(--bg);overflow:hidden}
 .fila .score i{font:800 22px 'Barlow Condensed';font-style:normal;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#0A0907}
 .V i{background:var(--win)} .D i{background:var(--loss)} .E i{background:var(--text2)}
 
+/* escudo que falta: iniciales en un círculo, nunca una imagen rota */
+.sinescudo{display:grid;place-items:center;border-radius:50%;border:2px solid var(--line);font:800 30px 'Barlow Condensed';color:var(--text2);letter-spacing:.04em}
+.fila .sinescudo{width:92px;height:92px}
+/* más de 6 resultados (semanas con tres ligas): filas compactas para que entren todos */
+.lista.compacta .fila{grid-template-columns:118px 64px 1fr auto;gap:18px;padding:13px 0}
+.lista.compacta .fila img,.lista.compacta .fila .sinescudo{width:64px;height:64px;font-size:22px}
+.lista.compacta .fila .fecha{font-size:19px}
+.lista.compacta .fila .fecha b{font-size:24px}
+.lista.compacta .fila .rival{font-size:29px}
+.lista.compacta .fila .rival small{font-size:16px;margin-top:3px}
+.lista.compacta .fila .score{font-size:66px;gap:12px}
+.lista.compacta .fila .score i{width:38px;height:38px;font-size:19px}
+.story .lista.compacta .fila{grid-template-columns:150px 92px 1fr auto;padding:22px 0}
+.story .lista.compacta .fila img,.story .lista.compacta .fila .sinescudo{width:92px;height:92px}
+.story .lista.compacta .fila .rival{font-size:36px}
+.story .lista.compacta .fila .score{font-size:92px}
+
 /* 2 · goleadores */
 .podio{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end}
 .podio .col{position:relative;width:350px;display:flex;flex-direction:column;align-items:center}
@@ -84,7 +101,45 @@ html,body{background:var(--bg);overflow:hidden}
 .grilla b{display:block;font:400 168px/.85 'Bebas Neue'}
 .grilla span{font:800 24px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;color:var(--text2)}
 
-/* 5 · lo que viene */
+/* récord por liga (debajo de los números) */
+.ligas{position:absolute;left:64px;right:64px;display:grid;gap:0}
+.ligas .lg{display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:34px;padding:16px 0;border-bottom:1px solid var(--line)}
+.ligas .lg span{font:800 30px 'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase}
+.ligas .lg em{font:700 26px 'Barlow Condensed';font-style:normal;letter-spacing:.12em;color:var(--text2)}
+.ligas .lg b{font:400 54px/1 'Bebas Neue';color:var(--gold)}
+.story .ligas .lg{padding:26px 0}
+.story .ligas .lg span{font-size:38px}
+
+/* 5 · lo que viene: un bloque por día con sus partidos (todas las ligas) */
+.dia{display:grid;grid-template-columns:118px 1fr;gap:22px;padding:16px 0;border-bottom:1px solid var(--line)}
+.dia .fecha{font:700 22px 'Barlow Condensed';letter-spacing:.12em;text-transform:uppercase;color:var(--text2);line-height:1.15;padding-top:8px}
+.dia .fecha b{display:block;color:var(--text);font-size:28px;letter-spacing:.04em}
+.pp{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:16px;padding:5px 0}
+.pp img,.pp .sinescudo{width:52px;height:52px;object-fit:contain;font-size:18px}
+.pp .rival{font:800 27px/1.05 'Barlow Condensed';text-transform:uppercase}
+.pp .rival small{font:700 16px 'Barlow Condensed';letter-spacing:.18em;color:var(--text2);margin-left:10px}
+.pp .hora{font:400 40px/1 'Bebas Neue';color:var(--gold)}
+.story .dia{padding:26px 0;grid-template-columns:150px 1fr}
+.story .pp{grid-template-columns:72px 1fr auto;padding:9px 0}
+.story .pp img,.story .pp .sinescudo{width:72px;height:72px}
+.story .pp .rival{font-size:34px}
+.story .pp .hora{font-size:52px}
+
+/* semanas cargadas (más de 8 partidos por delante): todo más chico para que entre hasta el último */
+.prox.denso .dia{padding:9px 0}
+.prox.denso .dia .fecha{padding-top:4px}
+.prox.denso .pp{grid-template-columns:42px 1fr auto;gap:14px;padding:2px 0}
+.prox.denso .pp img,.prox.denso .pp .sinescudo{width:42px;height:42px;font-size:15px}
+.prox.denso .pp .rival{font-size:24px}
+.prox.denso .pp .rival small{font-size:14px}
+.prox.denso .pp .hora{font-size:33px}
+.story .prox.denso .dia{padding:18px 0}
+.story .prox.denso .pp{grid-template-columns:58px 1fr auto;padding:5px 0}
+.story .prox.denso .pp img,.story .prox.denso .pp .sinescudo{width:58px;height:58px}
+.story .prox.denso .pp .rival{font-size:30px}
+.story .prox.denso .pp .hora{font-size:44px}
+
+/* 5 · lo que viene (formato viejo, un partido por fila) */
 .prox .fila{grid-template-columns:150px 120px 1fr auto;padding:40px 0}
 .prox .fila img{width:120px;height:120px}
 .prox .hora{font:400 64px/1 'Bebas Neue';color:var(--gold)}
@@ -100,6 +155,8 @@ html,body{background:var(--bg);overflow:hidden}
 .story .grilla .n{padding:92px 0 80px}
 .story .grilla .n b{font-size:270px}
 .story .e3 .nota{font-size:280px}
+/* en el video la tarjeta "Sonando ahora" ocupa la franja de arriba: la marca baja para no quedar tapada */
+.story .marca{top:178px}
 
 /* Capa de motion (story) */
 .story .titulo{font-kerning:none}
@@ -128,6 +185,9 @@ let F = 'post', ESC = [];
 function marca(D) {
   return `<div class="marca"><span>${D.kicker}</span><img src="${D.escudo}"></div>`;
 }
+const iniciales = n => String(n || '').replace(/e-?sports?/ig, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const escudoHtml = p => p.escudo ? `<img src="${p.escudo}" onerror="this.outerHTML='<div class=&quot;sinescudo&quot;>${iniciales(p.rival)}</div>'">` : `<div class="sinescudo">${iniciales(p.rival)}</div>`;
+const sub = p => [p.liga, p.lv].filter(Boolean).join(' · ');
 function pie(D, n) { return `<div class="pie"><span>Top Secret FC</span><span><b>${String(n + 1).padStart(2, '0')}</b> / ${String(D.total).padStart(2, '0')}</span></div>`; }
 
 async function pintar(D, formato) {
@@ -152,11 +212,11 @@ async function pintar(D, formato) {
 
   // 1 · resultados
   escenas.push(`<section class="escena e1"><div class="fondo"></div><div class="cancha"></div>${marca(D)}
-    <div class="lista" style="top:${Y(170, 300)}px">
-      <div data-in="0.05"><div class="kicker">Resultados</div><div class="titulo" style="font-size:${Y(112, 140)}px;margin:10px 0 18px">${D.resultadosTitulo}</div></div>
-      ${D.partidos.map((p, i) => `<div class="fila ${p.res}" data-in="${0.3 + i * 0.16}">
-        <div class="fecha">${p.dia}<b>${p.fecha}</b></div><img src="${p.escudo}">
-        <div class="rival">${p.rival}<small>${p.lv}</small></div>
+    <div class="lista${D.compacto ? ' compacta' : ''}" style="top:${Y(170, 300)}px">
+      <div data-in="0.05"><div class="kicker">Resultados</div><div class="titulo" style="font-size:${Y(112, 140)}px;margin:10px 0 ${D.compacto ? 8 : 18}px">${D.resultadosTitulo}</div></div>
+      ${D.partidos.map((p, i) => `<div class="fila ${p.res}" data-in="${0.3 + i * (D.compacto ? 0.1 : 0.16)}">
+        <div class="fecha">${p.dia}<b>${p.fecha}</b></div>${escudoHtml(p)}
+        <div class="rival">${p.rival}<small>${sub(p)}</small></div>
         <div class="score">${p.gf}-${p.gc}<i>${p.res}</i></div></div>`).join('')}
     </div>${pie(D, 1)}</section>`);
 
@@ -184,19 +244,22 @@ async function pintar(D, formato) {
   escenas.push(`<section class="escena e4"><div class="fondo"></div><div class="cancha"></div>${marca(D)}
     <div class="lista" style="top:${Y(170, 300)}px" data-in="0.05"><div class="kicker">El equipo</div>
       <div class="titulo" style="font-size:${Y(112, 140)}px;margin-top:10px">En números</div></div>
-    <div class="grilla" style="top:${Y(420, 620)}px">${D.numeros.map((n, i) => `<div class="n" data-in="${0.25 + i * 0.14}">
+    <div class="grilla" style="top:${Y(D.ligas?.length ? 360 : 420, 560)}px">${D.numeros.map((n, i) => `<div class="n" data-in="${0.25 + i * 0.14}">
       <b class="${n.oro ? 'oro' : ''}" data-count="${n.n}" ${n.dec ? `data-dec="${n.dec}"` : ''} ${n.suf ? `data-suf="${n.suf}"` : ''}>${n.n}${n.suf || ''}</b><span>${n.t}</span></div>`).join('')}</div>
+    ${D.ligas?.length ? `<div class="ligas" style="bottom:${Y(130, 250)}px">${D.ligas.map((l, i) => `<div class="lg" data-in="${0.85 + i * 0.12}"><span>${l.liga}</span><em>${l.rec}</em><b>${l.pts} pts</b></div>`).join('')}</div>` : ''}
     ${pie(D, 4)}</section>`);
 
   // 5 · lo que viene
   escenas.push(`<section class="escena e5"><div class="fondo"></div><div class="cancha"></div>${marca(D)}
-    <div class="lista prox" style="top:${Y(170, 300)}px">
+    <div class="lista prox${(D.proxDias || []).reduce((a, d) => a + d.partidos.length, 0) > 8 ? ' denso' : ''}" style="top:${Y(170, 300)}px">
       <div data-in="0.05"><div class="kicker">Lo que viene</div><div class="titulo" style="font-size:${Y(112, 140)}px;margin:10px 0 18px">${D.proxTitulo}</div></div>
-      ${D.proximos.map((p, i) => `<div class="fila" data-in="${0.3 + i * 0.16}">
-        <div class="fecha">${p.dia}<b>${p.fecha}</b></div><img src="${p.escudo}">
-        <div class="rival">${p.rival}<small>${p.lv}</small></div><div class="hora">${p.hora}</div></div>`).join('')}
+      ${D.proxDias ? D.proxDias.map((d, i) => `<div class="dia" data-in="${0.3 + i * 0.16}"><div class="fecha">${d.dia}<b>${d.fecha}</b></div>
+        <div>${d.partidos.map(p => `<div class="pp">${escudoHtml(p)}<div class="rival">${p.rival}<small>${sub(p)}</small></div><div class="hora">${p.hora}</div></div>`).join('')}</div></div>`).join('')
+      : (D.proximos || []).map((p, i) => `<div class="fila" data-in="${0.3 + i * 0.16}">
+        <div class="fecha">${p.dia}<b>${p.fecha}</b></div>${escudoHtml(p)}
+        <div class="rival">${p.rival}<small>${sub(p)}</small></div><div class="hora">${p.hora}</div></div>`).join('')}
     </div>
-    <div class="vivo" style="bottom:${Y(130, 230)}px" data-in="${0.4 + D.proximos.length * 0.16}"><span class="rec"></span>En vivo por Twitch y Kick · topsecretfc</div>
+    <div class="vivo" style="bottom:${Y(110, 230)}px" data-in="${0.4 + (D.proxDias || D.proximos || []).length * 0.16}"><span class="rec"></span>En vivo por Twitch, Kick, YouTube e Instagram</div>
     ${pie(D, 5)}</section>`);
 
   for (const h of escenas) L.appendChild($(h));
