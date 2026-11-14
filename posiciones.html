@@ -520,12 +520,9 @@ td[data-pts], .pts-col { font-variant-numeric: tabular-nums; }
     </div>
 
     <!-- VPN T4 -->
+    <!-- VPN T4 — Liga Argentina 2da División (temporada activa, vía Worker /vpn-table) -->
     <div class="tab-pane" id="t4-pane-vpn">
-      <div class="prox-wrap">
-        <div class="prox-badge">Temporada 4 · VPN</div>
-        <div class="prox-title">Arranca el 9 de noviembre</div>
-        <p class="prox-sub">La temporada de VPN empieza el lunes 9 de noviembre. La tabla aparece acá cuando arranque.</p>
-      </div>
+      <div class="table-wrap"><table class="standings-table" id="t4-vpn-table"></table></div>
     </div>
 
     <!-- Espacio Gamer T4 (ex 11x11) — CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA, vía Worker /eg-table -->
@@ -740,6 +737,31 @@ const E11_DATA = [
   {name:'Instituto Senior',      abbr:'INS', gp:21, w:2,  d:6, l:13, gf:14, gc:47, gd:-33, pts:12, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/public'},
   {name:'Acosta Beef Esports',   abbr:'XXL', gp:21, w:3,  d:1, l:17, gf:20, gc:78, gd:-58, pts:10, logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/422609e3-a369-46cf-1094-879a0a822800/public'},
   {name:'Team Valhalla',         abbr:'VAL', gp:21, w:2,  d:2, l:17, gf:19, gc:55, gd:-36, pts:8,  logo:'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/admin_a0feb073-7b6d-4eef-95d4-7377635fc2f2/public'},
+];
+
+// VPN T3 (Liga Argentina 2da División, season 6410) — temporada finalizada, tabla congelada.
+// Desde 2026-11-09 /vpn-table devuelve la temporada activa (T4), así que T3 queda como snapshot.
+const VPN_T3_DATA = [
+  {name:"Argentino de Merlo ",abbr:"Arg",gp:19,w:15,d:3,l:1,gf:49,gc:13,gd:36,pts:48,logo:"https://media.virtualpronetwork.com/teamlogos/4e9c837e8d4affaa024de631ac74701c_thumb.png"},
+  {name:"Parke Avellane",abbr:"Pke",gp:19,w:14,d:3,l:2,gf:34,gc:14,gd:20,pts:45,logo:"https://media.virtualpronetwork.com/teamlogos/588dc5e55fcd21fa4196b426cc89cb0c_thumb.png"},
+  {name:"SUB 21CF",abbr:"SUB",gp:19,w:13,d:1,l:5,gf:30,gc:22,gd:8,pts:40,logo:"https://media.virtualpronetwork.com/teamlogos/5bc60aad3e9b33ab6594760eda698f84_thumb.png"},
+  {name:"Instituto Reserva",abbr:"ACC",gp:19,w:11,d:3,l:5,gf:32,gc:27,gd:5,pts:36,logo:"https://media.virtualpronetwork.com/teamlogos/ceb0395a176d64ce6375847dfc59fa8a_thumb.png"},
+  {name:"Misky Mayu FC",abbr:"MYM",gp:19,w:10,d:5,l:4,gf:34,gc:25,gd:9,pts:35,logo:"https://media.virtualpronetwork.com/teamlogos/57f9a7bd5244dcb5dc23d80715d3cc32_thumb.png"},
+  {name:"WAP Esports",abbr:"WAP",gp:19,w:10,d:4,l:5,gf:39,gc:18,gd:21,pts:34,logo:"https://media.virtualpronetwork.com/teamlogos/e7d9b24b77a07f952d254f4b0c23253a_thumb.png"},
+  {name:"Al Hueso",abbr:"Eq5",gp:19,w:10,d:2,l:7,gf:27,gc:20,gd:7,pts:32,logo:"https://media.virtualpronetwork.com/teamlogos/1068beb6372b11cef1b0d0055877fc06_thumb.png"},
+  {name:"Instituto Cantera ",abbr:"INS",gp:19,w:9,d:5,l:5,gf:27,gc:23,gd:4,pts:32,logo:"https://media.virtualpronetwork.com/teamlogos/67004976dd4706b30d022daedba9e066_thumb.png"},
+  {name:"MONOTRIBUTISTAS",abbr:"MON",gp:19,w:9,d:2,l:8,gf:37,gc:31,gd:6,pts:29,logo:"https://media.virtualpronetwork.com/teamlogos/7209d4ec71b97ff0119bb4e4f1f68213_thumb.png"},
+  {name:"AlToke Perro",abbr:"ATP",gp:19,w:8,d:5,l:6,gf:22,gc:21,gd:1,pts:29,logo:"https://media.virtualpronetwork.com/teamlogos/4816a1d4dd66e9a194fa5f21a2389b98_thumb.png"},
+  {name:"Al-Yateh FC",abbr:"AYT",gp:19,w:8,d:2,l:9,gf:31,gc:26,gd:5,pts:26,logo:"https://media.virtualpronetwork.com/teamlogos/278d51fa8bb7beb51b98398aaf504a04_thumb.png"},
+  {name:"TOP Secret",abbr:"TOP",gp:19,w:8,d:2,l:9,gf:26,gc:29,gd:-3,pts:26,us:true,logo:"https://media.virtualpronetwork.com/teamlogos/620f22701badec31d4a20f716e317b67_thumb.png"},
+  {name:"Dalmine Esports",abbr:"DAL",gp:19,w:7,d:4,l:8,gf:31,gc:29,gd:2,pts:25,logo:"https://media.virtualpronetwork.com/teamlogos/25ee5cc4f4c90fa6078dc5c49eaefb3b_thumb.png"},
+  {name:"Ysh Fc",abbr:"Ysh",gp:19,w:7,d:4,l:8,gf:38,gc:39,gd:-1,pts:25,logo:"https://media.virtualpronetwork.com/teamlogos/8a9a0ff39a20c35c7125d2888d997952_thumb.png"},
+  {name:"Comunicaciones Cantera",abbr:"COM",gp:19,w:7,d:1,l:11,gf:29,gc:46,gd:-17,pts:22,logo:"https://media.virtualpronetwork.com/teamlogos/4aaceb0f9dc9efdbedc3ffc3ae267a4a_thumb.png"},
+  {name:"Division Palermo",abbr:"DP ",gp:19,w:6,d:2,l:11,gf:16,gc:34,gd:-18,pts:20,logo:"https://media.virtualpronetwork.com/teamlogos/8926aa45d7e95ab9ca14cbadd238c46c_thumb.png"},
+  {name:"United Mito FC",abbr:"MTO",gp:19,w:5,d:4,l:10,gf:18,gc:29,gd:-11,pts:19,logo:"https://media.virtualpronetwork.com/teamlogos/cc05541a1e938205a55dc65ddd63a479_thumb.png"},
+  {name:"Suda Esports",abbr:"SDA",gp:19,w:4,d:2,l:13,gf:17,gc:57,gd:-40,pts:14,logo:"https://media.virtualpronetwork.com/teamlogos/9474fad6617350c950c9ddb38325d8f3_thumb.png"},
+  {name:"NUVO FC",abbr:"NUV",gp:19,w:1,d:0,l:18,gf:1,gc:18,gd:-17,pts:3,logo:"https://media.virtualpronetwork.com/teamlogos/42a2accd27808c2419e0f04c5cbfa414_thumb.png"},
+  {name:"Sarmiento eSp",abbr:"SAR",gp:19,w:1,d:0,l:18,gf:1,gc:18,gd:-17,pts:3,logo:"https://media.virtualpronetwork.com/teamlogos/aeebed21145167b540e976c49a09608e_thumb.png"},
 ];
 
 /* ── NORMALIZERS ── */
@@ -1080,17 +1102,23 @@ function renderT2VPN() {
   gsap.to('#t2-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
 }
 
-/* ── FETCH & RENDER T3 VPN (Liga Argentina 2da División) ── */
-async function fetchT3VPN() {
+/* ── T3 VPN: tabla final congelada ── */
+function renderT3VPN() {
+  renderTable('t3-vpn-table', VPN_T3_DATA, 'var(--vpn)');
+  gsap.to('#t3-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+}
+
+/* ── FETCH & RENDER T4 VPN (Liga Argentina 2da División, temporada activa) ── */
+async function fetchT4VPN() {
   try {
     const r = await fetch(VPN_URL);
     if (!r.ok) throw new Error(r.status);
     const raw = await r.json();
     const data = normVPN(Array.isArray(raw) ? raw : []);
-    renderTable('t3-vpn-table', data, 'var(--vpn)');
-    gsap.to('#t3-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
+    renderTable('t4-vpn-table', data, 'var(--vpn)');
+    gsap.to('#t4-vpn-table tbody tr', {opacity:1, duration:0.3, stagger:0.02, ease:'power1.out', delay:0.1});
   } catch(e) {
-    const table = document.getElementById('t3-vpn-table');
+    const table = document.getElementById('t4-vpn-table');
     if (table) table.innerHTML = '<tbody><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--mid)">No se pudo cargar la tabla. Intentá más tarde.</td></tr></tbody>';
   }
 }
@@ -1144,7 +1172,8 @@ renderT1();
 renderT2VPN();
 fetchT2VPUG();
 fetchT2E11();
-fetchT3VPN();
+renderT3VPN();
+fetchT4VPN();
 fetchT3E11();
 fetchT3VPUG();
 fetchT4VPUG();
