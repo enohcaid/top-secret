@@ -117,11 +117,44 @@ async function ligaEG(m) {
   return null;
 }
 
-let avisoVPUG = false;
-async function ligaVPUG() {
-  if (!avisoVPUG) log('VPUG: la API pide sesión de usuario y el detalle de partido todavía no está cableado — se usa solo la ficha del vivo.');
-  avisoVPUG = true;
-  return null;
+// VPUG (vpug-liga-api.onrender.com/v1): /partidos y /partidos/{id} piden el token de la sesión de Juan, que vive en
+// el localStorage del Chrome del pipeline (CDP 9222). Se lee en cada corrida y no se guarda en ningún archivo.
+// /partidos/{id} → local|visitante.jugadores[] con idExterno (gamertag), goles, asistencias, nota. TOP Secret = club 107.
+const VPUG_API = 'https://vpug-liga-api.onrender.com/v1', VPUG_TS = 107;
+let vpug = null;
+async function ligaVPUG(m) {
+  if (!vpug) {
+    vpug = { lista: [] };
+    try {
+      const { chromium } = await import('playwright');
+      const b = await chromium.connectOverCDP('http://localhost:9222', { timeout: 15000 });
+      const ctx = b.contexts()[0];
+      let p = ctx.pages().find(x => x.url().includes('vpug-liga.onrender.com')), nueva = false;
+      if (!p) { p = await ctx.newPage(); nueva = true; await p.goto('https://vpug-liga.onrender.com/', { waitUntil: 'domcontentloaded', timeout: 90000 }); }
+      vpug.token = await p.evaluate(() => localStorage.getItem('token'));
+      if (nueva) await p.close().catch(() => {});
+      await b.close().catch(() => {});
+    } catch (e) { log(`VPUG: no pude leer la sesión del Chrome del pipeline (${e.message.split('\n')[0]})`); }
+    if (!vpug.token) { log('VPUG: sesión vencida — hay que volver a entrar en vpug-liga.onrender.com en el Chrome del pipeline'); return null; }
+    vpug.h = { Authorization: 'Bearer ' + vpug.token };
+    const temps = await (await traer(`${VPUG_API}/temporadas`))?.json().catch(() => null);
+    const temp = (Array.isArray(temps) ? temps : temps?.data || []).find(t => t.estado === 'EN_CURSO')?.id || 7;
+    for (const div of [1, 2, 3, 4]) {
+      const d = await (await traer(`${VPUG_API}/partidos?temporadaId=${temp}&divisionId=${div}`, { headers: vpug.h }))?.json().catch(() => null);
+      const ps = (d?.jornadas || []).flatMap(j => j.partidos || []).filter(x => x.local?.id === VPUG_TS || x.visitante?.id === VPUG_TS);
+      if (ps.length) { vpug.lista = ps; break; }
+    }
+  }
+  if (!vpug.token) return null;
+  const fechaART = iso => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+  const x = vpug.lista.find(p => p.jugado && fechaART(p.fechaHora) === m.date && mismoClub(p.local.id === VPUG_TS ? p.visitante.nombre : p.local.nombre, m.rival));
+  if (!x) return null;
+  const d = await (await traer(`${VPUG_API}/partidos/${x.id}`, { headers: vpug.h }))?.json().catch(() => null);
+  const nuestros = d?.[d?.partido?.local?.id === VPUG_TS ? 'local' : 'visitante']?.jugadores;
+  if (!nuestros) return null;
+  const goles = {}, asist = {};
+  for (const j of nuestros) { const n = String(j.idExterno || j.nombre).trim(); if (j.goles) goles[n] = j.goles; if (j.asistencias) asist[n] = j.asistencias; }
+  return { fuente: `web de VPUG (partido ${x.id})`, goles, asist };
 }
 
 // ── 2. Fichas del gol en la grabación del vigía ──────────────────────────────
