@@ -101,11 +101,20 @@ client.on('ready', async () => {
       // y tomar el selector de archivos que abre ese ítem.
       // El texto del ítem cambia (con/sin tilde, "Fotos y videos" / "Fotos y vídeos" / "Photos & videos"):
       // se busca por patrón y, si no aparece, se listan las opciones del menú para diagnosticar.
-      const item = await p.evaluateHandle(() => {
+      const buscarItem = () => p.evaluateHandle(() => {
         const el = [...document.querySelectorAll('li, [role=button], [role=menuitem], div, span')]
           .find(e => e.childElementCount <= 3 && /^(fotos\s*(y|&)\s*v[ií]deos|photos\s*(&|and)\s*videos)$/i.test((e.innerText || '').trim()));
         return el ? (el.closest('li,[role=button],[role=menuitem]') || el) : null;
       });
+      let item = await buscarItem();
+      // A veces el primer clic en Adjuntar no abre el menú (2026-11-09 y 11-16; al reintentar anduvo): se reintenta.
+      for (let i = 0; i < 2 && !item.asElement(); i++) {
+        await p.keyboard.press('Escape').catch(() => {});
+        await new Promise(r => setTimeout(r, 1500));
+        await p.click('footer [aria-label="Adjuntar"]').catch(() => {});
+        await new Promise(r => setTimeout(r, 2000));
+        item = await buscarItem();
+      }
       if (!item.asElement()) {
         const opciones = await p.evaluate(() => [...document.querySelectorAll('[role=menuitem], [role=application] li, li, [role=button]')]
           .map(e => (e.getAttribute('aria-label') || e.innerText || '').trim()).filter(Boolean).slice(0, 25));
