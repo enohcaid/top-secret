@@ -127,11 +127,17 @@ client.on('ready', async () => {
       await new Promise(r => setTimeout(r, 3000 + 1500 * archivos.length));
       // El botón cambió de forma más de una vez (2026-10-22 ya no tenía data-icon "send"): se prueba por ícono,
       // por etiqueta y, si no aparece, Enter (en la vista previa también envía). El ack de abajo confirma igual.
-      const boton = await p.evaluateHandle(() => {
+      // La vista previa puede tardar en cargar (2026-11-17 seguía con el spinner a los 6 s): se espera al botón hasta 30 s.
+      const buscarBoton = () => p.evaluateHandle(() => {
         const el = document.querySelector('[data-icon*="send"]')
           || [...document.querySelectorAll('[aria-label]')].find(e => /^(enviar|send)$/i.test(e.getAttribute('aria-label').trim()));
         return el?.closest('[role=button],button,div[tabindex]') || el || null;
       });
+      let boton = await buscarBoton();
+      for (let i = 0; i < 12 && !boton.asElement(); i++) {
+        await new Promise(r => setTimeout(r, 2500));
+        boton = await buscarBoton();
+      }
       if (boton.asElement()) await boton.asElement().click();
       else {
         await p.screenshot({ path: path.join(ROOT, 'fuentes', 'wa-enviar-sin-boton.png') }).catch(() => {});
