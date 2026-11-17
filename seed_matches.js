@@ -2971,6 +2971,13 @@ const SEED_MATCHES = [
     {name:'davidelapaternal', matched:'davidelapaternal', played_pos:'MC', rating:6.9, goals:0, assists:0, passes:19, pass_accuracy:84, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:0, red_cards:0, minutes:91, mom:false, archetype_id:8, ea_pos:'midfielder'},
     {name:'Elianja20', matched:'Elianja20', played_pos:'DFC', rating:10, goals:0, assists:0, passes:18, pass_accuracy:61, distance_km:null, sprints:null, tackles:7, interceptions:null, shots:0, tackle_attempts:11, saves:0, red_cards:0, minutes:91, mom:true, archetype_id:4, ea_pos:'defender'},
   ]},
+
+  // VPN — Moreno Al Ritmo — 2026-11-16 (2-0) · resultado de la liga (EA inconsistente)
+  {rival:'Moreno Al Ritmo', league:'VPN', date:'2026-11-16', match_result:'2-0', isHome:false, uploadedAt:'2026-11-17T03:30:51.081Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
+  // VPN — Suda Esports — 2026-11-16 (3-1) · resultado de la liga (EA inconsistente)
+  {rival:'Suda Esports', league:'VPN', date:'2026-11-16', match_result:'3-1', isHome:true, uploadedAt:'2026-11-17T03:30:51.082Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
 ];
 
 
