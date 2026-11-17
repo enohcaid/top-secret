@@ -2978,6 +2978,13 @@ const SEED_MATCHES = [
   // VPN — Suda Esports — 2026-11-16 (3-1) · resultado de la liga (EA inconsistente)
   {rival:'Suda Esports', league:'VPN', date:'2026-11-16', match_result:'3-1', isHome:true, uploadedAt:'2026-11-17T03:30:51.082Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
   players:[]},
+
+  // VPN — Instituto Reserva — 2026-11-16 (1-2) · resultado de la liga (EA inconsistente)
+  {rival:'Instituto Reserva', league:'VPN', date:'2026-11-16', match_result:'1-2', isHome:true, uploadedAt:'2026-11-17T12:02:15.374Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones) Goleadores: Cabers14; asistencias: pepolemmo2710 (web de VPN (partido 785087); completar-goleadores.mjs).', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[
+    {name:'Cabers14', matched:'Cabers14', rating:null, goals:1, assists:0},
+    {name:'pepolemmo2710', matched:'pepolemmo2710', rating:null, goals:0, assists:1},
+  ]},
 ];
 
 
