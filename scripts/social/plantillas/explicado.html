@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "Qué es Clubs Pro, en 30 segundos": infografía animada. Todo es función pura de t (mostrar(0, t)); los once, sus
+     recorridos, la tabla real y los tiempos de la voz llegan en pintar(datos). Cancha en coordenadas de juego
+     (x 0..68, y 0..105, atacamos hacia arriba) → la cancha se achica hasta el escudo de Top Secret en la tabla → reloj de la
+     jornada → cierre en vivo. En formato post, mostrar(n, 99) es la placa n del carrusel. Franja de arriba libre (rótulo del
+     tema, 165 px). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#060606;overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:#060606}
+#lienzo.post{height:1350px}
+canvas{position:absolute;left:0;top:0}
+</style>
+</head>
+<body>
+<div id="lienzo"><canvas id="cv"></canvas></div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eIO = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const eBack = p => { p = clamp(p); const c = 1.7; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const W = 1080;
+let H = 1920, D, ctx, IMG = {}, MA = 1;   // MA: transparencia de la capa tabla/ligas al irse
+const ORO = '#C9A84C', ORO2 = '#E6CF85', TXT = '#F7F2E4', ROJO = '#e5484d', VERDE = '#3ecf8e', FONDO = '#060606';
+const BEBAS = "'Bebas Neue'", COND = "'Barlow Condensed'";
+const carga = src => new Promise(r => { if (!src) return r(null); const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+
+// ── Recorridos ──
+function enK(k, u) {
+  if (u <= k[0][0]) return [k[0][1], k[0][2]];
+  for (let i = 0; i < k.length - 1; i++) if (u <= k[i + 1][0]) { const p = eIO((u - k[i][0]) / (k[i + 1][0] - k[i][0])); return [lerp(k[i][1], k[i + 1][1], p), lerp(k[i][2], k[i + 1][2], p)]; }
+  const z = k[k.length - 1]; return [z[1], z[2]];
+}
+const pelotaEn = u => { const k = D.pelota; if (u <= k[0][0]) return [k[0][1], k[0][2]]; for (let i = 0; i < k.length - 1; i++) if (u <= k[i + 1][0]) { const p = (u - k[i][0]) / (k[i + 1][0] - k[i][0]); return [lerp(k[i][1], k[i + 1][1], p), lerp(k[i][2], k[i + 1][2], p)]; } const z = k[k.length - 1]; return [z[1], z[2]]; };
+const quienTiene = u => { let g = null; for (const [a, x] of D.tiene) if (u >= a) g = x; return g; };
+const uJugada = t => clamp((t - D.T.jugada) / (D.T.finJugada - D.T.jugada));
+
+// ── Dibujo base ──
+function fondo() {
+  const g = ctx.createRadialGradient(W / 2, H * .42, 80, W / 2, H * .45, H * .8);
+  g.addColorStop(0, '#11140f'); g.addColorStop(1, FONDO);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+function viñeta() {
+  const g = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .78);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.55)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+function grano(t) {
+  ctx.save(); ctx.globalAlpha = .045;
+  let h = Math.floor(t * 30) * 9301 + 49297;
+  for (let i = 0; i < 900; i++) { h = (h * 9301 + 49297) % 233280; const x = h / 233280 * W; h = (h * 9301 + 49297) % 233280; const y = h / 233280 * H; ctx.fillStyle = i % 2 ? '#fff' : '#000'; ctx.fillRect(x, y, 2, 2); }
+  ctx.restore();
+}
+const P = (R, x, y) => [R.x + x / 68 * R.w, R.y + y / 105 * R.h];
+function cancha(R, a = 1) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  const s = R.w / 740;
+  // pasto: franjas apenas marcadas
+  ctx.fillStyle = '#0c120d'; ctx.fillRect(R.x, R.y, R.w, R.h);
+  for (let i = 0; i < 12; i++) if (i % 2) { ctx.fillStyle = 'rgba(255,255,255,.018)'; ctx.fillRect(R.x, R.y + i * R.h / 12, R.w, R.h / 12); }
+  ctx.strokeStyle = 'rgba(230,207,133,.55)'; ctx.lineWidth = Math.max(.6, 3 * s);
+  ctx.strokeRect(R.x, R.y, R.w, R.h);
+  const L = (x1, y1, x2, y2) => { const [a1, b1] = P(R, x1, y1), [a2, b2] = P(R, x2, y2); ctx.beginPath(); ctx.moveTo(a1, b1); ctx.lineTo(a2, b2); ctx.stroke(); };
+  const Rc = (x, y, w, h) => { const [a1, b1] = P(R, x, y); ctx.strokeRect(a1, b1, w / 68 * R.w, h / 105 * R.h); };
+  L(0, 52.5, 68, 52.5);
+  const [cx, cy] = P(R, 34, 52.5); ctx.beginPath(); ctx.arc(cx, cy, 9.15 / 68 * R.w, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(230,207,133,.55)'; ctx.beginPath(); ctx.arc(cx, cy, 4 * s, 0, Math.PI * 2); ctx.fill();
+  Rc(13.85, 0, 40.3, 16.5); Rc(24.85, 0, 18.3, 5.5); Rc(13.85, 88.5, 40.3, 16.5); Rc(24.85, 99.5, 18.3, 5.5);
+  ctx.lineWidth = Math.max(.6, 5 * s); L(30.3, 0, 37.7, 0); L(30.3, 105, 37.7, 105);
+  ctx.restore();
+}
+// joystick: cuerpo de control con dos palancas; la izquierda se inclina hacia donde corre el jugador
+function joystick(x, y, s, o = {}) {
+  const { a = 1, brillo = 0, dx = 0, dy = 0 } = o;
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(s, s);
+  if (brillo > 0) { ctx.shadowColor = ORO2; ctx.shadowBlur = 30 * brillo; }
+  ctx.beginPath();
+  ctx.moveTo(-34, -14); ctx.bezierCurveTo(-20, -22, 20, -22, 34, -14);
+  ctx.bezierCurveTo(46, -8, 52, 18, 46, 24); ctx.bezierCurveTo(40, 30, 30, 26, 22, 14);
+  ctx.lineTo(-22, 14); ctx.bezierCurveTo(-30, 26, -40, 30, -46, 24); ctx.bezierCurveTo(-52, 18, -46, -8, -34, -14); ctx.closePath();
+  ctx.fillStyle = brillo > 0 ? `rgba(230,207,133,${.12 + .2 * brillo})` : 'rgba(20,20,18,.92)'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = brillo > 0 ? ORO2 : ORO; ctx.stroke();
+  ctx.shadowBlur = 0;
+  // palancas
+  const m = Math.hypot(dx, dy) || 1, k = Math.min(1, Math.hypot(dx, dy)) * 6;
+  ctx.fillStyle = 'rgba(230,207,133,.25)'; ctx.beginPath(); ctx.arc(-17, 3, 9, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(14, 9, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = brillo > 0 ? ORO2 : ORO; ctx.beginPath(); ctx.arc(-17 + dx / m * k, 3 + dy / m * k, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(14, 9, 5, 0, Math.PI * 2); ctx.fill();
+  // botones
+  [[24, -6], [30, -11], [30, -1], [36, -6]].forEach(([bx, by]) => { ctx.beginPath(); ctx.arc(bx, by, 2.6, 0, Math.PI * 2); ctx.fill(); });
+  ctx.restore();
+}
+function ficha(j, x, y, r, o = {}) {
+  const { a = 1, brillo = 0, nombre = true, tam = 1 } = o;
+  if (a <= 0 || r < 4) return;
+  ctx.save(); ctx.globalAlpha = a;
+  if (brillo > 0) { ctx.shadowColor = ORO2; ctx.shadowBlur = 36 * brillo; }
+  ctx.fillStyle = '#16140f'; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+  const img = IMG['c:' + j.gt];
+  if (img) { ctx.save(); ctx.beginPath(); ctx.arc(x, y, r - 2, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(img, x - r, y - r * 1.02, r * 2, r * 2); ctx.restore(); }
+  ctx.lineWidth = Math.max(1, r * .09); ctx.strokeStyle = brillo > 0 ? ORO2 : ORO; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+  // dorsal
+  if (r > 18) {
+    const br = r * .36, bx = x + r * .74, by = y + r * .7;
+    ctx.fillStyle = ORO2; ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0b0b0b'; ctx.font = `400 ${Math.round(br * 1.3)}px ${BEBAS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(j.num, bx, by + br * .08);
+  }
+  if (nombre && r > 18) {
+    ctx.font = `700 ${Math.round(19 * tam)}px ${COND}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(0,0,0,.6)'; const w = ctx.measureText(j.gt).width + 12;
+    ctx.fillRect(x - w / 2, y + r + 5, w, 24 * tam); ctx.fillStyle = TXT; ctx.fillText(j.gt, x, y + r + 8);
+  }
+  ctx.restore();
+}
+function pelota(x, y, s, a = 1) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.shadowColor = '#fff'; ctx.shadowBlur = 18;
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 9 * s, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+}
+function texto(lineas, x, y, o = {}) {
+  const { tam = 120, font = BEBAS, peso = 400, color = TXT, alfa = 1, inter = .95, oro = [], align = 'center', esp = 0, sombra = true } = o;
+  if (alfa <= 0) return;
+  ctx.save(); ctx.globalAlpha = alfa; ctx.textAlign = align; ctx.textBaseline = 'top';
+  ctx.font = `${peso} ${tam}px ${font}`; ctx.letterSpacing = esp + 'px';
+  if (sombra) { ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 26; }
+  lineas.forEach((l, i) => { ctx.fillStyle = oro.includes(i) ? ORO2 : color; ctx.fillText(l, x, y + i * tam * inter); });
+  ctx.restore();
+}
+function kicker(txt, y, a = 1, color = ORO2) { texto([txt], W / 2, y, { tam: 30, font: COND, peso: 800, color, alfa: a, esp: 6, sombra: false }); }
+
+// ── Rieles de joysticks (a los costados de la cancha) ──
+function rieles(R, n, i) {
+  const { izq, k } = D.once[i].riel, cant = izq ? 6 : 5;
+  const paso = R.h / cant;
+  return [izq ? R.x - 78 * R.w / 740 : R.x + R.w + 78 * R.w / 740, R.y + paso * (k + .5)];
+}
+
+// ── Escena 1 y 2: la cancha con los once ──
+function escenaCancha(t, R, o = {}) {
+  const T = D.T;
+  const u = uJugada(t), aRieles = o.rieles ?? eIO((t - (T.b - .75)) / .8);
+  const tiene = t >= T.jugada ? quienTiene(u) : null;
+  const s = R.w / 740;
+  cancha(R, o.aCancha ?? 1);
+  const pos = D.once.map((j, i) => {
+    const [x, y] = P(R, ...enK(j.k, u));
+    const [x2, y2] = P(R, ...enK(j.k, Math.min(1, u + .02)));
+    return { x, y, vx: (x2 - x), vy: (y2 - y) };
+  });
+  const aparece = i => o.todos ? 1 : eBack((t - (T.aparece + i * T.paso)) / .45);
+  // líneas jugador → joystick (debajo de las fichas)
+  D.once.forEach((j, i) => {
+    const ap = clamp(aparece(i));
+    if (ap <= 0) return;
+    const p = pos[i], [rx, ry] = rieles(R, 11, i);
+    const jx = lerp(p.x + 66 * s, rx, aRieles), jy = lerp(p.y + 4 * s, ry, aRieles);
+    if (aRieles > .05) {
+      const vivo = tiene === j.gt;
+      ctx.save(); ctx.globalAlpha = aRieles * ap * (vivo ? .95 : .4) * (o.aFichas ?? 1);
+      ctx.strokeStyle = vivo ? ORO2 : ORO; ctx.lineWidth = (vivo ? 3.2 : 1.6) * s; ctx.setLineDash(vivo ? [] : [6 * s, 6 * s]);
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.bezierCurveTo(lerp(p.x, jx, .5), p.y, lerp(p.x, jx, .5), jy, jx, jy); ctx.stroke();
+      ctx.restore();
+    }
+    j._joy = [jx, jy];
+  });
+  // pelota con estela
+  if (t >= T.jugada - .3 && (o.aFichas ?? 1) > 0 && !o.sinPelota) {
+    for (let k = 6; k >= 0; k--) { const [bx, by] = P(R, ...pelotaEn(Math.max(0, u - k * .012))); pelota(bx, by, s * (1 - k * .1), (k ? .12 : 1) * (o.aFichas ?? 1) * clamp((t - T.jugada + .3) / .3)); }
+  }
+  D.once.forEach((j, i) => {
+    const ap = aparece(i); if (ap <= 0) return;
+    const p = pos[i], vivo = tiene === j.gt;
+    const [jx, jy] = j._joy;
+    joystick(jx, jy, .62 * s * (aRieles > .5 ? 1.15 : 1), { a: clamp(ap) * (o.aFichas ?? 1), brillo: vivo ? 1 : 0, dx: aRieles > .5 ? p.vx : 0, dy: aRieles > .5 ? p.vy : 0 });
+    if (aRieles > .5 && !o.sinNombres) {
+      ctx.save(); ctx.globalAlpha = (aRieles - .5) * 2 * (o.aFichas ?? 1);
+      ctx.font = `700 ${Math.round(18 * s)}px ${COND}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = vivo ? ORO2 : 'rgba(247,242,228,.75)';
+      ctx.fillText(j.gt, jx, jy + 26 * s); ctx.restore();
+    }
+    ficha(j, p.x, p.y, 40 * s * Math.max(.001, ap), { a: clamp(ap) * (o.aFichas ?? 1), brillo: vivo ? 1 : 0, nombre: aRieles < .5 && !o.sinNombres, tam: s });
+  });
+}
+
+// ── Escena 3: la tabla ──
+function tabla(t, y0, rh, o = {}) {
+  const T = D.T, F = D.filas, i0 = F.findIndex(f => f.nuestro);
+  const xPos = 92, xEsc = 150, xNom = 196, xPj = 860, xPts = 975;
+  ctx.save(); ctx.textBaseline = 'middle';
+  // encabezado
+  const aH = o.todo ? 1 : eOut((t - T.tabla) / .4);
+  ctx.globalAlpha = aH * MA; ctx.font = `800 24px ${COND}`; ctx.letterSpacing = '4px'; ctx.fillStyle = 'rgba(247,242,228,.5)';
+  ctx.textAlign = 'left'; ctx.fillText(D.tablaTitulo, xPos - 20, y0 - 34);
+  ctx.textAlign = 'center'; ctx.fillText('PJ', xPj, y0 - 34); ctx.fillText('PTS', xPts, y0 - 34); ctx.letterSpacing = '0px';
+  F.forEach((f, i) => {
+    const y = y0 + i * rh + rh / 2;
+    const d = Math.abs(i - i0), a = o.todo ? 1 : f.nuestro ? eOut((t - T.c - .7) / .4) : eOut((t - T.tabla - d * .045) / .35);
+    if (a <= 0) return;
+    ctx.globalAlpha = a * MA;
+    const zP = f.zona === 'PLAYOFF', zD = f.zona === 'DESCENSO';
+    const aZ = !(zP || zD) ? 0 : o.todo ? 1 : zP ? eOut((t - T.arriba) / .4) : zD ? eOut((t - T.abajo) / .4) : 0;
+    if (f.nuestro) { ctx.fillStyle = 'rgba(230,207,133,.16)'; ctx.fillRect(30, y - rh / 2 + 2, W - 60, rh - 4); ctx.fillStyle = ORO2; ctx.fillRect(30, y - rh / 2 + 2, 6, rh - 4); }
+    else if (aZ > 0) { ctx.fillStyle = zP ? `rgba(62,207,142,${.1 * aZ})` : `rgba(229,72,77,${.12 * aZ})`; ctx.fillRect(54, y - rh / 2 + 2, W - 84, rh - 4); }
+    ctx.strokeStyle = 'rgba(247,242,228,.06)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(54, y + rh / 2); ctx.lineTo(W - 30, y + rh / 2); ctx.stroke();
+    ctx.font = `400 ${Math.round(rh * .62)}px ${BEBAS}`; ctx.textAlign = 'center'; ctx.fillStyle = f.nuestro ? ORO2 : 'rgba(247,242,228,.6)'; ctx.fillText(f.pos, xPos, y + 2);
+    const esc = IMG['e:' + i];
+    if (esc && !(f.nuestro && o.ocultarNuestro)) { const es = rh * .78; ctx.drawImage(esc, xEsc - es / 2, y - es / 2, es, es); }
+    ctx.textAlign = 'left'; ctx.font = `${f.nuestro ? 800 : 700} ${Math.round(rh * .5)}px ${COND}`; ctx.fillStyle = f.nuestro ? ORO2 : TXT;
+    ctx.fillText(f.nuestro ? 'TOP SECRET' : f.nombre.toUpperCase(), xNom, y + 1);
+    ctx.textAlign = 'center'; ctx.font = `700 ${Math.round(rh * .5)}px ${COND}`; ctx.fillStyle = 'rgba(247,242,228,.6)'; ctx.fillText(f.pj, xPj, y + 1);
+    ctx.font = `400 ${Math.round(rh * .66)}px ${BEBAS}`; ctx.fillStyle = f.nuestro ? ORO2 : TXT; ctx.fillText(f.pts, xPts, y + 3);
+  });
+  // zonas: barra a la izquierda con su rótulo
+  const zona = (nombre, color, desde, hasta, a) => {
+    if (a <= 0) return;
+    const ya = y0 + desde * rh + 4, yb = y0 + (hasta + 1) * rh - 4;
+    ctx.globalAlpha = a * MA; ctx.fillStyle = color; ctx.fillRect(34, ya, 7, (yb - ya) * eOut(a));
+    ctx.save(); ctx.translate(26, (ya + yb) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.font = `800 22px ${COND}`; ctx.letterSpacing = '4px'; ctx.fillText(nombre, 0, -2); ctx.restore();
+  };
+  const iP = F.map((f, i) => f.zona === 'PLAYOFF' ? i : -1).filter(i => i >= 0), iD = F.map((f, i) => f.zona === 'DESCENSO' ? i : -1).filter(i => i >= 0);
+  if (iP.length) zona('PLAYOFF', VERDE, iP[0], iP.at(-1), o.todo ? 1 : eOut((t - T.arriba) / .5));
+  if (iD.length) zona('DESCENSO', ROJO, iD[0], iD.at(-1), o.todo ? 1 : eOut((t - T.abajo) / .5));
+  ctx.restore();
+  return { slot: [xEsc, y0 + i0 * rh + rh / 2], rh };
+}
+function ligas(t, y, alto, o = {}) {
+  const T = D.T, n = D.ligas.length, gap = o.gap ?? 70;
+  const anchos = D.ligas.map((l, i) => { const im = IMG['l:' + i]; return im ? alto * im.width / im.height * (l.nombre === 'ESPACIO GAMER' ? 1.25 : 1) : 0; });
+  const tot = anchos.reduce((a, b) => a + b, 0) + gap * (n - 1);
+  let x = W / 2 - tot / 2;
+  D.ligas.forEach((l, i) => {
+    const im = IMG['l:' + i], a = o.todo ? 1 : eBack((t - T.ligas - i * .18) / .45);
+    if (im && a > 0) {
+      const w = anchos[i], h = w * im.height / im.width;
+      ctx.save(); ctx.globalAlpha = clamp(a) * MA; ctx.translate(x + w / 2, y + alto / 2); ctx.scale(a, a); ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore();
+    }
+    x += anchos[i] + gap;
+  });
+}
+
+// ── Escena 4: el reloj ──
+function reloj(t, cy, o = {}) {
+  const T = D.T, a = o.todo ? 1 : eOut((t - T.d - .25) / .45);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  // días
+  const dias = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'], dw = 124, x0 = W / 2 - dw * 3.5;
+  dias.forEach((d, i) => {
+    const on = i < 4, p = o.todo ? 1 : on ? eBack((t - T.lunes - i * .12) / .35) : 0;
+    const x = x0 + dw * i + dw / 2, y = cy - (o.diasY ?? 470);
+    ctx.fillStyle = on && p > 0 ? `rgba(230,207,133,${.9 * clamp(p)})` : 'rgba(247,242,228,.08)';
+    ctx.beginPath(); ctx.roundRect(x - 52, y - 34, 104, 68, 14); ctx.fill();
+    ctx.font = `400 46px ${BEBAS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = on && p > .5 ? '#0b0b0b' : 'rgba(247,242,228,.35)'; ctx.fillText(d, x, y + 3);
+  });
+  // anillo + hora: de 22:30 a 00:30
+  const p = o.todo ? 1 : eIO((t - T.diez) / 1.5), R = o.radio ?? 270;
+  const min = Math.round(lerp(0, 120, p)), hh = (22 * 60 + 30 + min) % (24 * 60);
+  const hora = `${String(Math.floor(hh / 60)).padStart(2, '0')}:${String(hh % 60).padStart(2, '0')}`;
+  ctx.lineWidth = 16; ctx.strokeStyle = 'rgba(247,242,228,.08)'; ctx.beginPath(); ctx.arc(W / 2, cy, R, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = ORO2; ctx.lineCap = 'round'; ctx.shadowColor = ORO2; ctx.shadowBlur = 22;
+  if (p > 0) { ctx.beginPath(); ctx.arc(W / 2, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p * .92); ctx.stroke(); }
+  ctx.shadowBlur = 0;
+  ctx.font = `400 ${o.tamHora ?? 230}px ${BEBAS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = TXT; ctx.fillText(hora, W / 2, cy + 10);
+  ctx.font = `800 30px ${COND}`; ctx.letterSpacing = '6px'; ctx.fillStyle = ORO2; ctx.fillText('22:30 → 00:30', W / 2, cy + R * .5); ctx.letterSpacing = '0px';
+  // tres partidos
+  const yP = cy + R + (o.partidosY ?? 150);
+  for (let i = 0; i < 3; i++) {
+    const q = o.todo ? 1 : eBack((t - T.noches - .1 - i * .2) / .4);
+    if (q <= 0) continue;
+    const x = W / 2 + (i - 1) * 230;
+    ctx.save(); ctx.globalAlpha = clamp(q) * a; ctx.translate(x, yP); ctx.scale(q, q);
+    cancha({ x: -78, y: -50, w: 156, h: 100 * 1 }, 1);
+    ctx.font = `400 64px ${BEBAS}`; ctx.fillStyle = ORO2; ctx.fillText(String(i + 1), 0, 4);
+    ctx.restore();
+  }
+  const q = o.todo ? 1 : eOut((t - T.noches - .5) / .4);
+  texto(['NOCHES DE TRES PARTIDOS'], W / 2, yP + 80, { tam: 62, font: COND, peso: 800, alfa: q * a, esp: 2 });
+  ctx.restore();
+}
+function cierre(t, o = {}) {
+  const T = D.T, u = o.todo ? 9 : t - T.e;
+  if (u < 0) return;
+  const a = eOut(u / .5), esc = IMG.escudo;
+  if (esc) { const eh = 360 * lerp(.8, 1, eBack(u / .6)), ew = eh * esc.width / esc.height; ctx.save(); ctx.globalAlpha = a; ctx.drawImage(esc, W / 2 - ew / 2, (o.yEsc ?? 470) - eh / 2 + 160, ew, eh); ctx.restore(); }
+  texto(['Y TODO SE TRANSMITE'], W / 2, o.yTxt ?? 930, { tam: 110, alfa: eOut((u - .2) / .4) });
+  const v = o.todo ? 1 : eBack((t - T.vivo) / .4);
+  if (v > 0) {
+    const y = (o.yTxt ?? 930) + 120;
+    ctx.save(); ctx.globalAlpha = clamp(v); ctx.translate(W / 2, y + 80); ctx.scale(v, v);
+    ctx.fillStyle = ROJO; ctx.beginPath(); ctx.roundRect(-250, -80, 500, 160, 30); ctx.fill();
+    const pul = .6 + .4 * Math.sin(t * 7);
+    ctx.fillStyle = '#fff'; ctx.globalAlpha = clamp(v) * pul; ctx.beginPath(); ctx.arc(-192, 0, 22, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = clamp(v);
+    ctx.font = `400 150px ${BEBAS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText('EN VIVO', 32, 8);
+    ctx.restore();
+    texto(['TWITCH · KICK · YOUTUBE · INSTAGRAM'], W / 2, y + 200, { tam: 36, font: COND, peso: 800, color: 'rgba(247,242,228,.7)', alfa: clamp((t - T.vivo - .3) / .4) + (o.todo ? 1 : 0), esp: 4 });
+  }
+}
+
+// ── Subtítulos: palabra por palabra ──
+function subtitulos(t, y) {
+  const q = D.frases.find(f => t >= f.en - .05 && t < f.fin);
+  if (!q) return;
+  const a = clamp((t - q.en + .05) / .15) * clamp((q.fin - t) / .15);
+  ctx.save(); ctx.globalAlpha = a; ctx.font = `800 58px ${COND}`; ctx.textBaseline = 'top';
+  const max = 900, lineas = [[]]; let ancho = 0;
+  for (const p of q.palabras) { const w = ctx.measureText(p.w + ' ').width; if (ancho + w > max && lineas.at(-1).length) { lineas.push([]); ancho = 0; } lineas.at(-1).push({ ...p, w2: w }); ancho += w; }
+  lineas.forEach((l, k) => {
+    const tw = l.reduce((s, p) => s + p.w2, 0); let x = W / 2 - tw / 2;
+    for (const p of l) {
+      ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 18;
+      ctx.fillStyle = t >= p.t && t < p.t + Math.max(p.d, .2) ? ORO2 : t >= p.t ? TXT : 'rgba(247,242,228,.32)';
+      ctx.fillText(p.w, x, y + k * 66); x += p.w2;
+    }
+  });
+  ctx.restore();
+}
+
+async function pintar(datos, formato = 'story') {
+  D = datos; H = formato === 'post' ? 1350 : 1920; D.formato = formato;
+  const cv = $('#cv'); cv.width = W; cv.height = H; $('#lienzo').className = formato;
+  ctx = cv.getContext('2d');
+  // riel de cada joystick: los 6 más a la izquierda (al arrancar) van a la izquierda, ordenados de arriba abajo; para que las líneas no se crucen
+  const porX = D.once.map((j, i) => ({ i, x: j.k[0][1], y: j.k[0][2] })).sort((a, b) => a.x - b.x || a.y - b.y);
+  [porX.slice(0, 6), porX.slice(6)].forEach((g, lado) => g.sort((a, b) => a.y - b.y).forEach((p, k) => { D.once[p.i].riel = { izq: lado === 0, k }; }));
+  const tareas = [carga(D.escudo).then(i => IMG.escudo = i)];
+  D.once.forEach(j => tareas.push(carga(j.cara).then(i => IMG['c:' + j.gt] = i)));
+  D.filas.forEach((f, i) => tareas.push(carga(f.escudo).then(im => IMG['e:' + i] = im)));
+  D.ligas.forEach((l, i) => tareas.push(carga(l.logo).then(im => IMG['l:' + i] = im)));
+  await Promise.all(tareas);
+  await document.fonts.ready;
+  await Promise.all([`400 120px ${BEBAS}`, `800 40px ${COND}`, `700 40px ${COND}`].map(f => document.fonts.load(f)));
+  return D.placas ? D.placas.length : 1;
+}
+
+const R0 = { x: 170, y: 330, w: 740, h: 1140 };
+async function mostrar(n, t, o = {}) {
+  if (D.formato === 'post') return placa(n);
+  const T = D.T;
+  fondo();
+  // zoom: la cancha se achica hasta el escudo de Top Secret en la tabla
+  const z = eIO((t - (T.c - .1)) / 1.1);
+  const slot = tablaSlot();
+  const Rs = { x: slot[0] - 17, y: slot[1] - 26, w: 34, h: 52 };
+  const R = { x: lerp(R0.x, Rs.x, z), y: lerp(R0.y, Rs.y, z), w: lerp(R0.w, Rs.w, z), h: lerp(R0.h, Rs.h, z) };
+  const fuera = t >= T.d ? eIO((t - T.d) / .5) : 0;   // la tabla se va al reloj
+  MA = 1 - fuera; ctx.save(); ctx.globalAlpha = MA; ctx.translate(0, -fuera * 120);
+  if (t >= T.c - .2) tabla(t, TY, TRH, { ocultarNuestro: z < 1 || t < T.c + 1.1 });
+  if (z < 1 || t < T.c + 1.3) {
+    const aC = 1 - clamp((t - T.c - .95) / .35);
+    escenaCancha(t, R, { aCancha: aC, aFichas: (1 - clamp(z * 2.2)) * aC, sinNombres: z > .05 });
+  }
+  if (t >= T.ligas - .1) ligas(t, 192, 100);
+  ctx.restore(); MA = 1;
+  // títulos de arriba (escena 1 y 2)
+  if (t < T.c) {
+    const aT = clamp((t - 2.2) / .3) * (1 - clamp((t - T.c + .4) / .3));
+    if (!o.sinTexto) {
+      kicker('CLUBS PRO EN 30 SEGUNDOS', 196, aT);
+      const t1 = t < T.b - .2;
+      texto([t1 ? 'CADA JUGADOR ES UNA PERSONA' : 'NADIE MANEJA A DOS'], W / 2, 238, { tam: 76, alfa: aT * (t1 ? 1 - clamp((t - T.b + .5) / .3) : clamp((t - T.b + .2) / .3)), oro: [0] });
+      // recreación y gol
+      const aR = clamp((t - T.jugada) / .3) * (1 - clamp((t - T.c + .3) / .3));
+      texto([D.recreacion], W / 2, 1488, { tam: 24, font: COND, peso: 800, color: 'rgba(247,242,228,.55)', alfa: aR, esp: 3, sombra: false });
+      const g = t - T.finJugada;
+      if (g > -.1 && t < T.c - .05) {
+        const a = eBack((g + .1) / .35) * (1 - clamp((t - T.c + .35) / .3));
+        ctx.save(); ctx.globalAlpha = clamp(a); ctx.translate(W / 2, 560); ctx.scale(clamp(a, 0, 1.2), clamp(a, 0, 1.2));
+        ctx.fillStyle = 'rgba(6,6,6,.82)'; ctx.beginPath(); ctx.roundRect(-330, -100, 660, 200, 22); ctx.fill(); ctx.strokeStyle = ORO2; ctx.lineWidth = 3; ctx.stroke();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `400 120px ${BEBAS}`; ctx.fillStyle = ORO2; ctx.fillText('GOL', 0, -18);
+        ctx.font = `800 32px ${COND}`; ctx.fillStyle = TXT; ctx.fillText(`${D.gol.de} · asist. ${D.gol.asist}`, 0, 56);
+        ctx.restore();
+      }
+    }
+  }
+  // gancho: los primeros 2 segundos, sobre la cancha vacía
+  if (!o.sinTexto && t < 2.6) {
+    const a = clamp(t / .15) * (1 - clamp((t - 2.15) / .4));
+    const e1 = eOut(t / .35);
+    ctx.save(); ctx.translate(0, (1 - e1) * 40);
+    texto(['ONCE PERSONAS.'], W / 2, 690, { tam: 150, alfa: a, oro: [0] });
+    texto(['CADA UNA MANEJA', 'A UN SOLO JUGADOR'], W / 2, 850, { tam: 96, alfa: a * clamp((t - .7) / .25), inter: 1 });
+    ctx.restore();
+  }
+  // tabla: rótulo de arriba
+  if (!o.sinTexto && t >= T.c && t < T.d + .4) kicker('TRES LIGAS · FECHAS · TABLA', 330 - 30, clamp((t - T.ligas - .3) / .3) * (1 - clamp((t - T.d) / .4)));
+  // reloj y cierre
+  if (t >= T.d - .1 && t < T.e + .5) { ctx.save(); const s = t > T.e ? eIO((t - T.e) / .5) : 0; ctx.globalAlpha = 1 - s; reloj(t, 900); ctx.restore(); }
+  if (t >= T.e) cierre(t);
+  viñeta();
+  if (!o.sinTexto) subtitulos(t, 1590);
+  grano(t);
+}
+// la tabla (story): filas de 58 px desde y 420
+const TY = 420, TRH = 58;
+const tablaSlot = () => { const i0 = D.filas.findIndex(f => f.nuestro); return [150, TY + i0 * TRH + TRH / 2]; };
+
+// ── Carrusel (1080x1350) ──
+function cabecera(n) {
+  ctx.save(); ctx.textBaseline = 'alphabetic'; ctx.font = `800 28px ${COND}`; ctx.letterSpacing = '5px';
+  ctx.fillStyle = ORO2; ctx.textAlign = 'left'; ctx.fillText('QUÉ ES CLUBS PRO', 56, 80);
+  ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(247,242,228,.5)'; ctx.fillText(`${n + 1}/${D.placas.length}`, W - 56, 80); ctx.restore();
+}
+function placa(n) {
+  const P0 = D.placas[n], T = D.T;
+  fondo();
+  if (P0.tipo === 'portada') {
+    texto(['ONCE PERSONAS,', 'UNA SOLA PELOTA'], W / 2, 120, { tam: 118, inter: .92, oro: [1] });
+    const Rp = { x: 290, y: 360, w: 500, h: 772 };
+    escenaCancha(0, Rp, { todos: true, rieles: 0, sinNombres: true });
+    texto(['Cada una maneja a un solo jugador.'], W / 2, 1170, { tam: 50, font: COND, peso: 800, color: TXT });
+    texto(['DESLIZÁ →'], W / 2, 1250, { tam: 30, font: COND, peso: 800, color: ORO2, esp: 5, sombra: false });
+  } else if (P0.tipo === 'joysticks') {
+    texto(['CADA JUGADOR', 'ES UNA PERSONA'], W / 2, 110, { tam: 100, inter: .92, oro: [1] });
+    const Rp = { x: 300, y: 330, w: 480, h: 740 };
+    const tt = T.jugada + (T.finJugada - T.jugada) * .55;
+    escenaCancha(tt, Rp, { todos: true, rieles: 1 });
+    texto(['Una persona, un joystick, un jugador. Nadie maneja a dos.'], W / 2, 1150, { tam: 40, font: COND, peso: 800, color: TXT });
+    texto([D.recreacion], W / 2, 1222, { tam: 22, font: COND, peso: 800, color: 'rgba(247,242,228,.5)', esp: 3, sombra: false });
+  } else if (P0.tipo === 'ligas') {
+    texto(['Y NO ES', 'UN AMISTOSO'], W / 2, 150, { tam: 130, inter: .92, oro: [1] });
+    texto(['TRES LIGAS'], W / 2, 470, { tam: 48, font: COND, peso: 800, color: ORO2, esp: 8, sombra: false });
+    ligas(0, 600, 120, { todo: true, gap: 60 });
+    texto(['Con fechas, tabla,', 'playoff y descenso.'], W / 2, 900, { tam: 70, font: COND, peso: 800, color: TXT, inter: 1.1 });
+  } else if (P0.tipo === 'tabla') {
+    texto(['LA TABLA ES REAL'], W / 2, 110, { tam: 110, oro: [0] });
+    tabla(0, 300, 54, { todo: true });
+  } else if (P0.tipo === 'reloj') {
+    reloj(0, 560, { todo: true, radio: 220, tamHora: 190, diasY: 380, partidosY: 110 });
+    if (IMG.escudo) { const eh = 90, ew = eh * IMG.escudo.width / IMG.escudo.height; ctx.drawImage(IMG.escudo, W / 2 - ew / 2, 1165, ew, eh); }
+    texto(['Y todo se transmite en vivo.'], W / 2, 1090, { tam: 50, font: COND, peso: 800, color: ORO2 });
+  }
+  cabecera(n);
+  viñeta();
+  grano(0);
+}
+</script>
+</body>
+</html>
