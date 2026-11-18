@@ -13,6 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { chromium } from 'playwright';
 import { asegurarVentana, enfocar, cargarArchivos } from './lib/ventana.mjs';
+import { CAJA_X, ARCHIVO_X, botonListoX, tocarPostX } from './lib/x-editor.mjs';
 
 const argv = process.argv.slice(2);
 const opt = k => { const i = argv.indexOf(k); return i < 0 ? null : argv[i + 1]; };
@@ -75,23 +76,21 @@ try {
   if (red === 'x') {
     await p.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await espera(6000);
-    await enfocar(p, '[data-testid="tweetTextarea_0"]');
+    await p.locator(CAJA_X).first().waitFor({ timeout: 45000 });
+    await enfocar(p, CAJA_X);
     await p.keyboard.type(TEXTO, { delay: 5 });
-    await cargarArchivos(p.locator('input[data-testid="fileInput"]').first(), VIDEO, { timeout: 5 * 60000 });   // videos de 60 fps pesan ~30 MB: por CDP tardan más de 30 s
+    await cargarArchivos(p.locator(ARCHIVO_X).first(), VIDEO, { timeout: 5 * 60000 });   // videos de 60 fps pesan ~30 MB: por CDP tardan más de 30 s
     // Listo = el botón Postear se habilita (X lo deja deshabilitado mientras procesa el video)
     let listo = false;
     for (let i = 0; i < 100 && !listo; i++) {
       await espera(3000);
-      listo = await p.evaluate(() => {
-        const bt = document.querySelector('[data-testid="tweetButtonInline"]');
-        return !!bt && !bt.disabled && bt.getAttribute('aria-disabled') !== 'true' && !!document.querySelector('[data-testid="attachments"] video');
-      });
+      listo = await botonListoX(p, { conVideo: true });
     }
     await espera(4000);
     await shot('1');
     if (!listo) throw new Error('X no terminó de subir el video');
     // El click normal falla: una capa del header intercepta el puntero
-    await p.evaluate(() => document.querySelector('[data-testid="tweetButtonInline"]').click());
+    await tocarPostX(p);
     await espera(12000);
     await p.goto('https://x.com/FCTOPSecret', { waitUntil: 'domcontentloaded' }); await espera(8000);
     const posts = await p.evaluate(() => [...document.querySelectorAll('article')].slice(0, 3).map(a => ({

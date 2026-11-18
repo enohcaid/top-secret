@@ -18,6 +18,7 @@ import path from 'path';
 import { chromium } from 'playwright';
 import { need, ROOT } from './lib/env.mjs';
 import { asegurarVentana, enfocar } from './lib/ventana.mjs';
+import { CAJA_X, botonListoX, tocarPostX } from './lib/x-editor.mjs';
 
 const KV = `https://api.cloudflare.com/client/v4/accounts/${need('CF_ACCOUNT_ID')}/storage/kv/namespaces/${need('KV_NAMESPACE_ID')}/values/redes_job`;
 const AUTH = { 'X-Auth-Email': need('CF_EMAIL'), 'X-Auth-Key': need('CF_API_KEY') };
@@ -52,17 +53,14 @@ async function publicarX(texto) {
     await asegurarVentana(p);
     await p.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await espera(6000);
-    await enfocar(p, '[data-testid="tweetTextarea_0"]');
+    await p.locator(CAJA_X).first().waitFor({ timeout: 45000 });
+    await enfocar(p, CAJA_X);
     await p.keyboard.type(texto, { delay: 5 });
     await espera(6000);   // que X arme la tarjeta del link
-    const ok = await p.evaluate(() => {
-      const bt = document.querySelector('[data-testid="tweetButtonInline"]');
-      return !!bt && !bt.disabled && bt.getAttribute('aria-disabled') !== 'true';
-    });
-    if (!ok) throw new Error('X no habilitó el botón de publicar (¿texto demasiado largo?)');
+    if (!(await botonListoX(p))) throw new Error('X no habilitó el botón de publicar (¿texto demasiado largo?)');
     if (PRUEBA) { await p.keyboard.press('Control+A'); await p.keyboard.press('Delete'); return '(prueba: no se publicó)'; }
     // El click normal falla: una capa del header intercepta el puntero (ver reference_publicar_redes).
-    await p.evaluate(() => document.querySelector('[data-testid="tweetButtonInline"]').click());
+    await tocarPostX(p);
     await espera(10000);
     await p.goto('https://x.com/FCTOPSecret', { waitUntil: 'domcontentloaded' });
     await espera(8000);

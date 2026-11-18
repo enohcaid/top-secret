@@ -11,6 +11,7 @@ import { spawnSync } from 'child_process';
 import { chromium } from 'playwright';
 import { ROOT } from '../lib/env.mjs';
 import { asegurarVentana, enfocar } from '../lib/ventana.mjs';
+import { CAJA_X, ARCHIVO_X, botonListoX, tocarPostX } from '../lib/x-editor.mjs';
 import { leer, actualizarPieza, leerKV, guardarKV } from './lib/aprobaciones.mjs';
 import { asegurarChrome } from './lib/chrome.mjs';
 import { revisarPieza } from '../../revisar-textos.js';
@@ -102,22 +103,21 @@ async function xConImagenes(texto, archivos) {
     await page.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 60000 });
     // X a veces tarda más de 15 s en armar el editor de la portada (el 2026-11-03 la noticia del día no salió en X por
     // eso): esperarlo y, si no aparece, recargar una vez.
-    const caja = page.locator('[data-testid="tweetTextarea_0"]').first();
+    const caja = page.locator(CAJA_X).first();
     try { await caja.waitFor({ timeout: 45000 }); }
     catch { await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 }); await caja.waitFor({ timeout: 45000 }); }
     await espera(2000);
-    await enfocar(page, '[data-testid="tweetTextarea_0"]');
+    await enfocar(page, CAJA_X);
     await page.keyboard.type(texto, { delay: 5 });
-    if (archivos.length) await page.locator('input[data-testid="fileInput"]').first().setInputFiles(archivos);
+    if (archivos.length) await page.locator(ARCHIVO_X).first().setInputFiles(archivos);
     else await espera(6000);   // solo texto + link: que X arme la tarjeta del link
     // Que terminen de subir las imágenes: el botón se habilita recién ahí.
     for (let i = 0; i < 30; i++) {
       await espera(2000);
-      const ok = await page.evaluate(() => { const bt = document.querySelector('[data-testid="tweetButtonInline"]'); return !!bt && !bt.disabled && bt.getAttribute('aria-disabled') !== 'true'; });
-      if (ok) break;
+      if (await botonListoX(page)) break;
       if (i === 29) throw new Error('X no habilitó el botón de publicar');
     }
-    await page.evaluate(() => document.querySelector('[data-testid="tweetButtonInline"]').click());
+    await tocarPostX(page);
     await espera(12000);
     await page.goto('https://x.com/FCTOPSecret', { waitUntil: 'domcontentloaded' });
     await espera(8000);
