@@ -24,7 +24,10 @@ export function revisarTexto({ red, metodo, texto = '', titulo, protagonistas = 
 
   // Límites de cada red
   if (red === 'x' && largoX(t) > 280) e(`X: ${largoX(t)} caracteres (máximo 280, el link cuenta 23).`);
-  if (red === 'tiktok' && [...t].length > 300) a(`TikTok: ${[...t].length} caracteres; más de 300 se corta y nadie lo lee.`);
+  if (metodo === 'x-texto' && !/https?:\/\//.test(t)) e('Falta el link de la nota: sin link no hay tarjeta con la foto (al publicar se agrega solo).');
+  // el crédito de la música ("Música: … · youtube.com/@tacetsin", lo agrega el lote al final) no cuenta: va igual
+  const tt = [...t.replace(/\n*Música: .*$/s, '')].length;
+  if (red === 'tiktok' && tt > 300) a(`TikTok: ${tt} caracteres; más de 300 se corta y nadie lo lee.`);
   if (metodo === 'ig-reel' && [...t].length > 400) a(`Reel: ${[...t].length} caracteres; el del Reel va corto (hasta 400).`);
   if (red === 'youtube' && titulo != null) {
     if ([...titulo].length > 100) e(`Título de YouTube: ${[...titulo].length} caracteres (máximo 100).`);

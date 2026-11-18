@@ -179,7 +179,8 @@ async function publicar(p) {
     case 'ig-historia': correr('scripts/meta.mjs', ['ig-historia', urls(p)[0]]); return 'https://www.instagram.com/stories/fctopsecret/';
     case 'fb-link':     return link(correr('scripts/meta.mjs', ['fb-link', p.link, p.texto]));
     case 'fb-historia': correr('scripts/meta.mjs', ['fb-historia', urls(p)[0]]); return null;
-    case 'x-texto':     return xConImagenes(p.texto, []);
+    // el link de la nota (tarjeta con la foto) aunque se haya borrado al editar el texto en aprobar (2026-11-18)
+    case 'x-texto':     return xConImagenes(p.link && !p.texto.includes(p.link) ? `${p.texto.trimEnd()}\n${p.link}` : p.texto, []);
     case 'ig-carrusel': return link(correr('scripts/meta.mjs', ['ig-carrusel', p.texto, ...urls(p)]));
     // portada (regla de Juan 2026-10-21): p.portada = { url, local }; IG la usa como portada del reel y FB como miniatura.
     // TikTok, YouTube y X toman un cuadro del video: por eso el video de la pieza ya trae la portada como primeros cuadros.

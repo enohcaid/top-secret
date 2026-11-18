@@ -223,16 +223,20 @@
 
   // Vista previa del link (og:image, 1200x630) para Facebook y X: la foto con el logo. El Worker
   // la sirve en /og/<id> si existe (logos/noticias/redes/<id>-og.jpg).
+  // Siempre lleva el escudo propio: la foto de la nota es 4:5 y el recorte a 1200x630 deja afuera las esquinas, donde
+  // está el escudo estampado de la publicada (2026-11-18: la vista previa de la nota del día salía sin logo). La foto
+  // limpia se busca en Daily News/raw/ aunque la nota no traiga imagePostRaw (las ya publicadas no lo guardan).
   async function og(n) {
-    const raw = n.imagePostRaw, pub = n.imagePost || n.image;
-    let foto = await loadImg(raw), yaTiene = false;
-    if (!foto) { foto = await loadImg(pub); yaTiene = estampada(pub); }
+    const pub = n.imagePost || n.image;
+    const raw = n.imagePostRaw || (estampada(pub) ? pub.replace(/Daily(%20| )News\//, 'Daily$1News/raw/') : null);
+    const foto = (await loadImg(raw)) || (await loadImg(pub));
     if (!foto) return null;
     const c = document.createElement('canvas');
     c.width = 1200; c.height = 630;
     const ctx = c.getContext('2d');
     cover(ctx, foto, 1200, 630, 0.3);
-    if (!yaTiene) { const escudo = await loadImg(ESCUDO); if (escudo) estamparEscudo(ctx, escudo, 1200, 630); }
+    const escudo = await loadImg(ESCUDO);
+    if (escudo) estamparEscudo(ctx, escudo, 1200, 630);
     return c;
   }
 

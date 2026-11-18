@@ -316,7 +316,7 @@
 
   // Revisor de descripciones (revisar-textos.js, el mismo que usa la PC): avisos en vivo bajo el texto.
   let revisor = null;
-  import('./revisar-textos.js?v=1').then(m => { revisor = m; document.querySelectorAll('.pieza:not(.guion):not(.musica)').forEach(revisar); }).catch(() => {});
+  import('./revisar-textos.js?v=2').then(m => { revisor = m; document.querySelectorAll('.pieza:not(.guion):not(.musica)').forEach(revisar); }).catch(() => {});
   function revisar(art) {
     const ul = art.querySelector('.avisos');
     const l = lotes.find(x => x.id === art.dataset.lote), p = l?.piezas.find(x => x.id === art.dataset.pieza);

@@ -55,6 +55,13 @@ else {
   }
   const imgs = us => us.map(u => ({ tipo: 'imagen', url: u }));
   const textoX = `${sc.x || n.shareCaption || n.title}\n${link}`;
+  // Instagram no tiene link tocable en el texto: el aviso va antes de los hashtags (2026-11-18: desde que la noticia se
+  // aprueba en aprobar.html el texto no lo traía). TikTok: shareCaption (hasta 280), no el caption largo de Instagram,
+  // que pasaba de 300 y la app lo corta.
+  const conBio = t => { const ls = String(t || '').trimEnd().split('\n'), ult = ls[ls.length - 1] || '';
+    const tags = /^\s*#/.test(ult) ? ls.pop() : null; return [...ls, '', 'Nota completa: link en la bio.', ...(tags ? ['', tags] : [])].join('\n').replace(/^\n+/, ''); };
+  const textoIG = conBio(sc.ig || n.excerpt || '');
+  const textoTT = sc.tiktok || n.shareCaption || sc.ig || n.excerpt || '';
   // Cuerpo editable: un párrafo o bloque por línea (los bloques {h}, {specs}, {quote}, {pair}, {img} como JSON),
   // igual que el editor viejo del borrador.
   const cuerpo = (n.body || []).map(b => typeof b === 'string' ? b : JSON.stringify(b)).join('\n');
@@ -65,8 +72,8 @@ else {
     piezas: [
       P({ id: 'sitio', red: 'sitio', formato: 'Noticia en el sitio', descripcion: `${n.category || ''} · sale apenas la aprobás`, media: [{ tipo: 'imagen', url: n.imagePost }], titulo: n.title, texto: cuerpo, noticia: n, metodo: 'sitio-borrador', etiquetaTexto: 'Cuerpo (un párrafo o bloque por línea)' }),
       extra.length
-        ? P({ id: 'ig-post', red: 'instagram', formato: 'Carrusel', descripcion: `La foto con el título + ${extra.length} imagen(es) más`, media: imgs([url.ig, ...extra]), texto: sc.ig || n.excerpt || '', metodo: 'ig-carrusel' })
-        : P({ id: 'ig-post', red: 'instagram', formato: 'Post con título', descripcion: 'La foto con el título encima', media: [{ tipo: 'imagen', url: url.ig }], texto: sc.ig || n.excerpt || '', metodo: 'ig-imagen' }),
+        ? P({ id: 'ig-post', red: 'instagram', formato: 'Carrusel', descripcion: `La foto con el título + ${extra.length} imagen(es) más`, media: imgs([url.ig, ...extra]), texto: textoIG, metodo: 'ig-carrusel' })
+        : P({ id: 'ig-post', red: 'instagram', formato: 'Post con título', descripcion: 'La foto con el título encima', media: [{ tipo: 'imagen', url: url.ig }], texto: textoIG, metodo: 'ig-imagen' }),
       P({ id: 'ig-historia', red: 'instagram', formato: 'Historia', descripcion: '24 h', media: [{ tipo: 'imagen', url: url.historia, vertical: true }], texto: '', metodo: 'ig-historia' }),
       extra.length
         ? P({ id: 'fb-post', red: 'facebook', formato: 'Álbum', descripcion: 'Las mismas imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: `${sc.fb || n.excerpt || ''}\n${link}`, metodo: 'fb-album' })
@@ -74,8 +81,8 @@ else {
       P({ id: 'fb-historia', red: 'facebook', formato: 'Historia', descripcion: '24 h', media: [{ tipo: 'imagen', url: url.historia, vertical: true }], texto: '', metodo: 'fb-historia' }),
       extra.length
         ? P({ id: 'x', red: 'x', formato: 'Post con imágenes', descripcion: 'Las imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: textoX, metodo: 'x-imagenes', local: { slides: [piezas.ig, ...extraLocal] } })
-        : P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: textoX, metodo: 'x-texto' }),
-      P({ id: 'tiktok', red: 'tiktok', formato: 'Video de placas', descripcion: `${piezas.tiktok.length} placas · con "${infoTema(musica).titulo}" de The Shorts`, media: [{ tipo: 'video', url: url.tiktok, vertical: true }], texto: sc.tiktok || sc.ig || n.excerpt || '', musica: infoTema(musica).titulo, metodo: 'tiktok', local: { video: mp4 } }),
+        : P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: textoX, metodo: 'x-texto', link }),
+      P({ id: 'tiktok', red: 'tiktok', formato: 'Video de placas', descripcion: `${piezas.tiktok.length} placas · con "${infoTema(musica).titulo}" de The Shorts`, media: [{ tipo: 'video', url: url.tiktok, vertical: true }], texto: textoTT, musica: infoTema(musica).titulo, metodo: 'tiktok', local: { video: mp4 } }),
     ],
   });
   log(`Lote noticia-${n.id} listo para aprobar.`);

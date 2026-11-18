@@ -72,7 +72,7 @@ SOLO un JSON válido:
   "excerpt": "resumen de hasta 200 caracteres",
   "body": [ … ],
   "shareCaption": "hasta 280 caracteres, termina con #TopSecretFC",
-  "shareCaptions": { "ig": "caption de Instagram con 3 a 5 hashtags", "x": "post de hasta 260 caracteres", "fb": "post de Facebook, tono de crónica" },
+  "shareCaptions": { "ig": "caption de Instagram con 3 a 5 hashtags", "x": "post de hasta 257 caracteres (se le suma el link de la nota)", "fb": "post de Facebook, tono de crónica" },
   "imageBrief": "escena",
   "toma": "id de la toma si es una victoria; si no, null",
   "protagonistas": ["gamertags que protagonizan la nota"],

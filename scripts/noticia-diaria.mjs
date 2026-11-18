@@ -301,6 +301,10 @@ function controlar(n) {
     if (sinRival.length) err.push(`la nota no habla de: ${sinRival.join(', ')}. Cada rival lleva su dato (puesto, puntos, cómo viene, historial contra Top Secret) de DATOS.rivales`);
   }
   if (String(n.shareCaption).length > 280) err.push('shareCaption de más de 280 caracteres');
+  // X lleva además el link de la nota (cuenta 23): el texto, hasta 257 para no pasar de 280 (2026-11-18: antes no se
+  // controlaba). TikTok usa shareCaption (más de 300 se corta en la app).
+  const largoX = [...String(n.shareCaptions?.x || '')].length;
+  if (largoX > 257) err.push(`shareCaptions.x tiene ${largoX} caracteres: máximo 257 (X suma el link de la nota, que cuenta 23)`);
   if (jugadosRecientes.length && n.angulo !== 'RESULTADO') err.push('ayer hubo partidos oficiales: la nota tiene que ser RESULTADO');
   if (!jugadosRecientes.length && partidosHoy.length && n.angulo !== 'PREVIA') err.push('hoy hay partido: la nota tiene que ser PREVIA');
   if (n.angulo === 'PREMIO_INTERNO' && diaHoy !== 0) err.push('PREMIO_INTERNO es solo los domingos');

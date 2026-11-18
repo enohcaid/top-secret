@@ -47,6 +47,15 @@ export async function generarPiezas(n, { titulo } = {}) {
       out[tipo] = file;
       console.log(`  ${tipo}: ${path.relative(process.cwd(), file)}`);
     }
+    // Vista previa del link (2026-11-18): 1200x630 con el logo, JPEG liviano. Sin ella /og/<id> usaba la foto PNG de la
+    // nota (2,5 MB, vertical): WhatsApp no muestra vistas previas tan pesadas y Facebook/X la recortaban. El lote la sube
+    // a logos/noticias/redes/<id>-og.jpg, que es donde la busca el Worker.
+    const og = await page.evaluate(async ({ n }) => (await window.TSRedes.limpia(n, 'og'))?.toDataURL('image/jpeg', 0.85) || null, { n });
+    if (og) {
+      out.og = path.join(OUT_DIR, `${n.id}-og.jpg`);
+      fs.writeFileSync(out.og, Buffer.from(og.split(',')[1], 'base64'));
+      console.log(`  og: ${path.relative(process.cwd(), out.og)}`);
+    }
     // Carrusel de TikTok (modo fotos): portada, ficha, frase e imágenes extra, 1080x1920.
     const placas = await page.evaluate(async ({ n, titulo, gamertags }) =>
       (await window.TSRedes.tiktok(n, { titulo, gamertags, extras: n.imagenesExtra || [] })).map(c => c.toDataURL('image/jpeg', 0.9)),
