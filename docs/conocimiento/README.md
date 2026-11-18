@@ -6,6 +6,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 
 ## Reglas y preferencias (cómo trabajar)
 
+- [feedback_tokens_todos_los_permisos](feedback_tokens_todos_los_permisos.md) — Juan 2026-11-18: al generar un token para una cuenta, pedir de entrada todos los permisos (métricas incluidas) y verificarlos con debug_token; al de Meta le faltan los de insights y Juan no va a re-autorizar
 - [feedback_no_repetir](feedback_no_repetir.md) — Juan 2026-10-27: no repetir conceptos, lugares ni composiciones en poco tiempo (dos noticias seguidas con el equipo en el túnel); cada proceso recibe lo reciente y lo controla con código
 - [feedback_contenido_visual_motion](feedback_contenido_visual_motion.md) — Regla de Juan: el contenido de redes se tiene que ver de otro nivel; videos con motion design sincronizado a la música (60 fps, desenfoque); el club se comunica por audio, no por chat
 - [feedback_no_publicar_music](feedback_no_publicar_music.md) — 2026-11-07: nunca poner topsecret.ar/music en nada publicado; para mandar a escuchar, el canal youtube.com/@tacetsin
