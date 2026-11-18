@@ -1359,7 +1359,7 @@ export default {
         if (!env.ADMIN_PIN || pin !== env.ADMIN_PIN) return jsonResp({ error: 'Unauthorized' }, 401);
         let body;
         try { body = await request.json(); } catch(e) { return jsonResp({ error: 'Invalid JSON' }, 400); }
-        const { lote, piezas = [], decision, texto, titulo, publicarA, descartarTema } = body || {};
+        const { lote, piezas = [], decision, texto, titulo, publicarA, descartarTema, republicar } = body || {};
         if (decision && !['aprobada', 'descartada', 'pendiente'].includes(decision)) return jsonResp({ error: 'Decisión inválida' }, 400);
         const data = (await env.TS_KV.get('aprobaciones', 'json')) || { lotes: [] };
         const l = data.lotes.find(x => x.id === lote);
@@ -1375,6 +1375,12 @@ export default {
         if (descartarTema && l.etapa === 'musica' && !l.estado) l.descartar = ahora;
         for (const p of l.piezas.filter(p => piezas.includes(p.id))) {
           if (p.estado === 'publicado' || p.estado === 'publicando') continue;   // ya salió: no se toca
+          // volver a publicar una pieza que falló (Juan, 2026-11-18): vuelve a la cola de la PC (publicar.mjs), aunque el
+          // lote ya haya pasado su ventana de 36 h. Solo las que están en error y aprobadas.
+          if (republicar) {
+            if (p.estado === 'error' && p.decision === 'aprobada') Object.assign(p, { estado: null, error: null, intentos: 0, reintentarDesde: null, republicarEn: ahora });
+            continue;
+          }
           if (decision) { p.decision = decision; p.decididoEn = ahora; }
           if (typeof texto === 'string') p.texto = texto.slice(0, 20000);   // el cuerpo de una nota (bloques JSON) supera los 5000
           if (typeof titulo === 'string' && p.titulo !== undefined) p.titulo = titulo.slice(0, 200);

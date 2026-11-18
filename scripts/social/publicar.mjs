@@ -72,8 +72,13 @@ const ahora = Date.now();
 const conReintento = p => /^(ig|fb)-/.test(p.metodo);
 const esperaReintento = n => Math.min(10 * 2 ** Math.max(0, n - 1), 60) * 60000;
 const reintentable = p => p.estado === 'error' && conReintento(p) && ahora >= Date.parse(p.reintentarDesde || 0);
-const cola = ESTADO ? [] : data.lotes.filter(l => l.publicarA && Date.parse(l.publicarA) <= ahora && ahora - Date.parse(l.publicarA) < 36 * 3600000)
-  .flatMap(l => l.piezas.filter(p => p.decision === 'aprobada' && (!p.estado || reintentable(p) || (p.estado === 'publicando' && ahora - Date.parse(p.desde || 0) > 15 * 60000))).map(p => ({ l, p })));
+// "Volver a publicar" en aprobar.html (2026-11-18): el Worker deja la pieza sin estado y con `republicarEn`; entra
+// aunque el lote ya haya pasado su ventana de 36 h (pero el pedido mismo vence a las 36 h).
+const republicada = p => p.republicarEn && ahora - Date.parse(p.republicarEn) < 36 * 3600000;
+const enVentana = (l, p) => ahora - Date.parse(l.publicarA) < 36 * 3600000 || republicada(p);
+const trabada = p => p.estado === 'publicando' && ahora - Date.parse(p.desde || 0) > 15 * 60000;
+const cola = ESTADO ? [] : data.lotes.filter(l => l.publicarA && Date.parse(l.publicarA) <= ahora)
+  .flatMap(l => l.piezas.filter(p => p.decision === 'aprobada' && enVentana(l, p) && (!p.estado || reintentable(p) || trabada(p))).map(p => ({ l, p })));
 
 function correr(script, args) {
   const r = spawnSync(process.execPath, [path.join(ROOT, script), ...args], { cwd: ROOT, encoding: 'utf8', timeout: 20 * 60000 });

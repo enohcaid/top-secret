@@ -103,6 +103,7 @@
       <ul class="avisos"></ul>
       ${p.url ? `<div class="link"><a href="${esc(p.url)}" target="_blank" rel="noopener">Ver publicación</a></div>` : ''}
       ${p.error ? `<div class="error-txt">${esc(p.error)}</div>` : ''}
+      ${p.estado === 'error' && p.decision === 'aprobada' ? '<div class="botones"><button class="si" data-republicar>Volver a publicar</button></div>' : ''}
       <div class="botones">
         <button class="no" data-accion="descartada" ${cerrada ? 'disabled' : ''}>Descartar</button>
         <button class="si" data-accion="aprobada" ${cerrada || p.decision === 'aprobada' ? 'disabled' : ''}>${p.decision === 'aprobada' ? 'Aprobada' : 'Aprobar'}</button>
@@ -224,6 +225,7 @@
         <div class="acciones">
           ${/^noticia-/.test(l.id) && !salio ? '<button data-corregir>Pedir corrección</button><button data-rehacer>Rehacer</button>' : ''}
           ${!salio && vivas ? '<button class="no" data-descartar-lote>Descartar propuesta</button>' : ''}
+          ${l.piezas.filter(p => p.estado === 'error' && p.decision === 'aprobada').length > 1 ? '<button class="si" data-republicar-lote>Volver a publicar las que fallaron</button>' : ''}
           ${pend ? `<button class="si" data-todo="aprobada">${esGuion ? 'Aprobar todas las ideas' : 'Aprobar todo lo pendiente'}</button>` : ''}
           <button class="plegar" data-plegar>${cerrado ? `Ver ${fila.length} ${esGuion ? 'ideas' : 'piezas'}` : 'Ocultar'}</button>
         </div>
@@ -404,6 +406,21 @@
       return api('/aprobaciones/decidir', { lote: l.id, piezas: [], descartarTema: true })
         .then(({ lote: n }) => { lotes = lotes.map(x => x.id === n.id ? n : x); pintar(); aviso('Descartado: pasa a Discards'); })
         .catch(err => { dt.disabled = false; aviso(err.message); });
+    }
+    // Volver a publicar lo que falló (Juan, 2026-11-18). Instagram y Facebook (API de Meta) dan error solo si no salió;
+    // X, TikTok y YouTube van por el navegador y pueden haber salido igual: antes de repetirlos, pedir que lo revise.
+    const rp = e.target.closest('button[data-republicar], button[data-republicar-lote]');
+    if (rp) {
+      const l = lotes.find(x => x.id === rp.closest('.lote').dataset.lote);
+      const una = rp.dataset.republicar !== undefined && rp.closest('.pieza')?.dataset.pieza;
+      const ps = l.piezas.filter(p => p.estado === 'error' && p.decision === 'aprobada' && (!una || p.id === una));
+      if (!ps.length) return;
+      const dudosas = [...new Set(ps.filter(p => !/^(ig|fb)-|^sitio/.test(p.metodo || '')).map(p => REDES[p.red]?.nombre || p.red))];
+      if (dudosas.length && !window.confirm(`Antes de repetir, fijate en ${dudosas.join(' y ')} que no haya salido igual: si salió, se publica dos veces.\n\n¿Volver a publicar?`)) return;
+      rp.disabled = true;
+      return api('/aprobaciones/decidir', { lote: l.id, piezas: ps.map(p => p.id), republicar: true })
+        .then(({ lote: n }) => { lotes = lotes.map(x => x.id === n.id ? n : x); pintar(); aviso(ps.length > 1 ? `${ps.length} piezas otra vez en cola: salen en unos minutos` : 'Otra vez en cola: sale en unos minutos'); })
+        .catch(err => { rp.disabled = false; aviso(err.message); });
     }
     const dl = e.target.closest('button[data-descartar-lote]');
     if (dl) {
