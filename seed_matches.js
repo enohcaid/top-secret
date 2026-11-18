@@ -2985,6 +2985,70 @@ const SEED_MATCHES = [
     {name:'Cabers14', matched:'Cabers14', rating:null, goals:1, assists:0},
     {name:'pepolemmo2710', matched:'pepolemmo2710', rating:null, goals:0, assists:1},
   ]},
+
+  // Espacio Gamer — IACC Reserva — 2026-11-17 (0-2) · web de la liga (EA no guardó el partido)
+  {rival:'IACC Reserva', league:'11x11', date:'2026-11-17', match_result:'0-2', isHome:true, uploadedAt:'2026-11-18T17:36:21.892Z', notes:'23:00 hs · Fecha 17 · datos de espaciogamer.cl (partido 1839): EA no guardó el partido. Figura del partido: Ghurkayzer (IACC Reserva).', team_stats:{posesion:62, tiros:2, tiros_arco:null, goles_esperados:null, pases:158, precision_pases:80, entradas:null, entradas_exito:8, intercepciones:null, paradas:2, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[
+    {name:'Cabers14', matched:'Cabers14', played_pos:'DFC', rating:8.4, goals:0, assists:0, passes:21, pass_accuracy:81, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:5, saves:0, mom:false},
+    {name:'Huber236', matched:'Huber236', played_pos:'DFC', rating:8, goals:0, assists:0, passes:21, pass_accuracy:100, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:3, saves:0, mom:false},
+    {name:'Alexisraies23', matched:'Alexisraies23', played_pos:'DFC', rating:7.4, goals:0, assists:0, passes:12, pass_accuracy:92, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:1, tackle_attempts:1, saves:0, mom:false},
+    {name:'Guiidow', matched:'Guiidow', played_pos:'MD', rating:7.4, goals:0, assists:0, passes:18, pass_accuracy:86, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:3, saves:0, mom:false},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', played_pos:'MC', rating:7.2, goals:0, assists:0, passes:20, pass_accuracy:87, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:1, saves:0, mom:false},
+    {name:'Davidelapaternal', matched:'davidelapaternal', played_pos:'MC', rating:7.2, goals:0, assists:0, passes:21, pass_accuracy:84, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:1, saves:0, mom:false},
+    {name:'Endiabladorojo66', matched:'endiabladorojo66', played_pos:'DFC', rating:6.4, goals:0, assists:0, passes:15, pass_accuracy:79, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:0, mom:false},
+    {name:'NicoBJ_96', matched:'NicoBJ_96', played_pos:'DC', rating:6, goals:0, assists:0, passes:10, pass_accuracy:77, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:1, tackle_attempts:3, saves:0, mom:false},
+    {name:'pepolemmo2710', matched:'pepolemmo2710', played_pos:'DC', rating:6, goals:0, assists:0, passes:9, pass_accuracy:45, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:2, saves:0, mom:false},
+    {name:'Nikileo527', matched:'nikileo527', played_pos:'DC', rating:5.9, goals:0, assists:0, passes:8, pass_accuracy:62, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:1, saves:0, mom:false},
+    {name:'adri_cai', matched:'adri_cai', played_pos:'PO', rating:4.5, goals:0, assists:0, passes:3, pass_accuracy:75, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:2, mom:false}
+  ]},
+
+  // Espacio Gamer — Nuvo FC — 2026-11-17 (1-2) · web de la liga (EA no guardó el partido)
+  {rival:'Nuvo FC', league:'11x11', date:'2026-11-17', match_result:'1-2', isHome:false, uploadedAt:'2026-11-18T17:36:22.461Z', notes:'23:30 hs · Fecha 18 · datos de espaciogamer.cl (partido 1850): EA no guardó el partido. Gol de NicoBJ_96 (asist. Juan_Martinez4). Figura del partido: Juan_Martinez4 (Top Secret FC).', team_stats:{posesion:40, tiros:5, tiros_arco:null, goles_esperados:null, pases:151, precision_pases:81, entradas:null, entradas_exito:17, intercepciones:null, paradas:3, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[
+    {name:'NicoBJ_96', matched:'NicoBJ_96', played_pos:'DC', rating:6.9, goals:1, assists:0, passes:6, pass_accuracy:75, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:2, tackle_attempts:4, saves:0, mom:false},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', played_pos:'MC', rating:9, goals:0, assists:1, passes:19, pass_accuracy:79, distance_km:null, sprints:null, tackles:6, interceptions:null, shots:0, tackle_attempts:7, saves:0, mom:true},
+    {name:'Guiidow', matched:'Guiidow', played_pos:'MD', rating:7.8, goals:0, assists:0, passes:18, pass_accuracy:90, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:1, saves:0, mom:false},
+    {name:'Alexisraies23', matched:'Alexisraies23', played_pos:'DFC', rating:7.6, goals:0, assists:0, passes:18, pass_accuracy:82, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:4, saves:0, mom:false},
+    {name:'Huber236', matched:'Huber236', played_pos:'DFC', rating:7.5, goals:0, assists:0, passes:17, pass_accuracy:89, distance_km:null, sprints:null, tackles:4, interceptions:null, shots:0, tackle_attempts:4, saves:0, mom:false},
+    {name:'Davidelapaternal', matched:'davidelapaternal', played_pos:'MC', rating:6.9, goals:0, assists:0, passes:15, pass_accuracy:79, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:1, tackle_attempts:1, saves:0, mom:false},
+    {name:'pepolemmo2710', matched:'pepolemmo2710', played_pos:'DC', rating:6.7, goals:0, assists:0, passes:15, pass_accuracy:79, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:2, saves:0, mom:false},
+    {name:'Cabers14', matched:'Cabers14', played_pos:'DFC', rating:6.6, goals:0, assists:0, passes:12, pass_accuracy:71, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:0, mom:false},
+    {name:'Endiabladorojo66', matched:'endiabladorojo66', played_pos:'DFC', rating:6.6, goals:0, assists:0, passes:14, pass_accuracy:78, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:2, saves:0, mom:false},
+    {name:'Nikileo527', matched:'nikileo527', played_pos:'DC', rating:6.2, goals:0, assists:0, passes:12, pass_accuracy:75, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:2, tackle_attempts:4, saves:0, mom:false},
+    {name:'adri_cai', matched:'adri_cai', played_pos:'PO', rating:4.9, goals:0, assists:0, passes:5, pass_accuracy:100, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:3, mom:false}
+  ]},
+
+  // Espacio Gamer — La Carreta FC — 2026-11-17 (0-4) · web de la liga (EA no guardó el partido)
+  {rival:'La Carreta FC', league:'11x11', date:'2026-11-17', match_result:'0-4', isHome:true, uploadedAt:'2026-11-18T17:36:23.034Z', notes:'23:59 hs · Fecha 19 (adelantada del jueves 19) · datos de espaciogamer.cl (partido 1861): EA no guardó el partido. Figura del partido: Muthaa92 (La Carreta FC).', team_stats:{posesion:58, tiros:1, tiros_arco:null, goles_esperados:null, pases:159, precision_pases:81, entradas:null, entradas_exito:9, intercepciones:null, paradas:6, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[
+    {name:'Guiidow', matched:'Guiidow', played_pos:'MD', rating:8.1, goals:0, assists:0, passes:20, pass_accuracy:80, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:1, saves:0, mom:false},
+    {name:'Alexisraies23', matched:'Alexisraies23', played_pos:'DFC', rating:7.1, goals:0, assists:0, passes:19, pass_accuracy:79, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:1, saves:0, mom:false},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', played_pos:'MC', rating:7, goals:0, assists:0, passes:18, pass_accuracy:69, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:2, saves:0, mom:false},
+    {name:'Endiabladorojo66', matched:'endiabladorojo66', played_pos:'DFC', rating:7, goals:0, assists:0, passes:13, pass_accuracy:72, distance_km:null, sprints:null, tackles:3, interceptions:null, shots:1, tackle_attempts:3, saves:0, mom:false},
+    {name:'Cabers14', matched:'Cabers14', played_pos:'DFC', rating:6.9, goals:0, assists:0, passes:17, pass_accuracy:94, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:4, saves:0, mom:false},
+    {name:'Davidelapaternal', matched:'davidelapaternal', played_pos:'MC', rating:6.9, goals:0, assists:0, passes:17, pass_accuracy:85, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:3, saves:0, mom:false},
+    {name:'Huber236', matched:'Huber236', played_pos:'DFC', rating:6.5, goals:0, assists:0, passes:17, pass_accuracy:85, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:1, saves:0, mom:false},
+    {name:'pepolemmo2710', matched:'pepolemmo2710', played_pos:'DC', rating:6.4, goals:0, assists:0, passes:10, pass_accuracy:71, distance_km:null, sprints:null, tackles:1, interceptions:null, shots:0, tackle_attempts:2, saves:0, mom:false},
+    {name:'Nikileo527', matched:'nikileo527', played_pos:'DC', rating:6.1, goals:0, assists:0, passes:11, pass_accuracy:92, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:0, mom:false},
+    {name:'NicoBJ_96', matched:'NicoBJ_96', played_pos:'DC', rating:6, goals:0, assists:0, passes:12, pass_accuracy:86, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:3, saves:0, mom:false},
+    {name:'adri_cai', matched:'adri_cai', played_pos:'PO', rating:5, goals:0, assists:0, passes:5, pass_accuracy:100, distance_km:null, sprints:null, tackles:0, interceptions:null, shots:0, tackle_attempts:0, saves:6, mom:false}
+  ]},
+
+  // VPUG — INSTITUTO CANT — 2026-11-17 (1-0) · web de la liga (EA no guardó el partido)
+  {rival:'INSTITUTO CANT', league:'VPUG', date:'2026-11-17', match_result:'1-0', isHome:false, uploadedAt:'2026-11-18T17:36:23.449Z', notes:'22:30 hs · Primera, Fecha 5 · datos de la web de VPUG (partido 287): EA no guardó el partido. Gol de pepolemmo2710 (asist. davidelapaternal). Figura del partido: Alexisraies23.', team_stats:{posesion:null, tiros:3, tiros_arco:null, goles_esperados:null, pases:173, precision_pases:82, entradas:15, entradas_exito:7, intercepciones:null, paradas:1, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[
+    {name:'Alexisraies23', matched:'Alexisraies23', played_pos:'DFC', rating:8.1, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:true},
+    {name:'Cabers14', matched:'Cabers14', played_pos:'DFC', rating:8, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'Guiidow', matched:'Guiidow', played_pos:'LD', rating:7.6, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'pepolemmo2710', matched:'pepolemmo2710', played_pos:'ED', rating:7.4, goals:1, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'davidelapaternal', matched:'davidelapaternal', played_pos:'MC', rating:7.2, goals:0, assists:1, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'endiabladorojo66', matched:'endiabladorojo66', played_pos:'DFC', rating:7.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'Juan_Martinez4', matched:'Juan_Martinez4', played_pos:'MC', rating:7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'nikileo527', matched:'nikileo527', played_pos:'EI', rating:6.9, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'adri_cai', matched:'adri_cai', played_pos:'PO', rating:6.7, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'Huber236', matched:'Huber236', played_pos:'LD', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
+    {name:'NicoBJ_96', matched:'NicoBJ_96', played_pos:'DC', rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false}
+  ]},
 ];
 
 
