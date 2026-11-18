@@ -6,9 +6,11 @@
 // Decisiones (producción sin supervisión):
 //   - Los once: el equipo que le ganó 1-0 a INSTITUTO CANT por VPUG el 17/11 (seed_matches.js, posiciones de la web de VPUG).
 //     Guiidow y Huber236 figuran los dos como LD: Guiidow va de carrilero derecho y Huber236 del izquierdo.
-//   - La jugada: recreación esquemática de ese 1-0 (asistencia de davidelapaternal, gol de pepolemmo2710, datos de la web de VPUG).
+//   - La jugada: ilustrativa, con ese once (no se afirma que sea el gol del 1-0).
 //     El gol no se pudo identificar con certeza en el video del vivo del 17/11 (el marcador del HUD no muestra al rival), así que
-//     los recorridos son ilustrativos y en pantalla dice "RECREACIÓN".
+//     en pantalla dice "JUGADA ILUSTRATIVA". El GOL no lleva nombres. En el vivo, el gol de TOP al 32' (HUD rival "ZZZ") es una
+//     jugada de área tras un centro, y el festejo parece de Alexisraies23: no coincide con la web de VPUG (gol de pepolemmo2710), así
+//     que no se usa como fuente de la jugada.
 //   - La tabla: la de VPUG Primera tal cual la da la liga (Worker /vpug-table-primera), guardada en caché al 18/11, con sus zonas
 //     reales (PLAYOFF y DESCENSO). VPUG Primera no tiene ascenso, así que la voz dice "playoff" y "descenso" (lo que se ve).
 //   - "Hasta tres partidos por noche" del guion no es exacto (el 17/11 hubo cuatro): se dice "noches de tres partidos".
@@ -151,7 +153,7 @@ const LIGAS = [
 const ESCUDO = archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png'));
 const datos = {
   T, total, once: ONCE, pelota: PELOTA, tiene: TIENE, filas, ligas: LIGAS, escudo: ESCUDO, frases,
-  recreacion: 'RECREACIÓN · 1-0 A INSTITUTO CANT · VPUG · 17/11', gol: { de: GOLEADOR, asist: ASISTIDOR },
+  recreacion: 'JUGADA ILUSTRATIVA · EL ONCE DEL 1-0 A INSTITUTO CANT · VPUG', gol: { sub: '' },
   tablaTitulo: 'VPUG · PRIMERA · TABLA AL 18/11',
 };
 const dPlacas = {
@@ -261,22 +263,22 @@ const uVid = await subir(mp4), uSl = [];
 for (const s of slides) uSl.push(await subir(s));
 const uPortada = await subirPortada(jpg, 'social/viral/mar-explicado-portada.jpg');
 const once = ONCE.map(j => j.gt);
-const desc = `${Math.round(total)} s · con voz (Elena: explica qué es Clubs Pro; los jugadores no se nombran en la voz, los gamertags van en pantalla) · infografía animada por código: cancha desde arriba con los renders T4 como fichas, cada una atada a su joystick; la cancha se aleja y queda dentro de la tabla real de VPUG Primera (al 18/11, con sus zonas reales de playoff y descenso); reloj de la jornada 22:30 a 00:30 · los once son los del 1-0 a INSTITUTO CANT por VPUG del 17/11 y la jugada es una RECREACIÓN de ese gol (asistencia de davidelapaternal, gol de pepolemmo2710, según la web de VPUG): el gol no se pudo identificar con certeza en el video del vivo, así que los recorridos son ilustrativos y lo dice en pantalla · "hasta tres partidos por noche" del guion cambió a "noches de tres partidos" (el 17/11 hubo cuatro) · música: ${tema.titulo}.`;
+const desc = `${Math.round(total)} s · con voz (Elena: explica qué es Clubs Pro; los jugadores no se nombran en la voz, los gamertags van en pantalla) · infografía animada por código: cancha desde arriba con los renders T4 como fichas, cada una atada a su joystick; la cancha se aleja y queda dentro de la tabla real de VPUG Primera (al 18/11, con sus zonas reales de playoff y descenso); reloj de la jornada 22:30 a 00:30 · los once son los del 1-0 a INSTITUTO CANT por VPUG del 17/11 y la jugada es ILUSTRATIVA (lo dice en pantalla; el GOL no lleva nombres). Ojo, para que decidas: en el video del vivo del 17/11 el gol de TOP al 32' (rival "ZZZ" en el HUD) es una jugada de área tras un centro y el festejo parece de Alexisraies23, mientras la web de VPUG da gol de pepolemmo2710 con pase de davidelapaternal (eso es lo que dicen los textos) · "hasta tres partidos por noche" del guion cambió a "noches de tres partidos" (el 17/11 hubo cuatro) · música: ${tema.titulo}.`;
 const P = o => ({ decision: 'pendiente', protagonistas: once, descripcion: desc, musica: tema.titulo, media: [{ tipo: 'video', url: uVid, vertical: true }], local: { video: mp4 }, portada: { url: uPortada, local: jpg }, ...o });
 const lote = {
   id: ID, tipo: 'viral', creado: new Date().toISOString(), idea: { lote: 'viral-guiones-2026-11-23', pieza: 'mar-explicado' },
   titulo: 'Qué es Clubs Pro, en 30 segundos', piezas: [
     P({ id: 'ig-reel', red: 'instagram', formato: 'Reel · Qué es Clubs Pro', metodo: 'ig-reel',
-      texto: `Once personas, once jugadores, una sola pelota. Así es Clubs Pro y así juega Top Secret: tres ligas con tabla, playoff y descenso, de lunes a jueves y todo en vivo.\n\nLa jugada: el 1-0 a INSTITUTO CANT, pase de davidelapaternal y gol de pepolemmo2710.\n\n#TopSecretFC #ProClubs #EAFC #ClubsPro` }),
+      texto: `Once personas, once jugadores, una sola pelota. Así es Clubs Pro y así juega Top Secret: tres ligas con fechas y tabla, de lunes a jueves y todo en vivo.\n\nEn la cancha, el once que le ganó 1-0 a INSTITUTO CANT por VPUG (gol de pepolemmo2710).\n\n#TopSecretFC #ProClubs #EAFC #ClubsPro` }),
     P({ id: 'tiktok', red: 'tiktok', formato: 'Video · Qué es Clubs Pro', metodo: 'tiktok',
-      texto: `Clubs Pro en 30 segundos: once personas, cada una con un solo jugador. Y hay tabla, playoff y descenso. La jugada: pase de davidelapaternal, gol de pepolemmo2710. #TopSecretFC #ProClubs #EAFC #ClubsPro` }),
+      texto: `Clubs Pro en 30 segundos: once personas, cada una con un solo jugador. Tres ligas con tabla, y en VPUG hay playoff y descenso. El once: el del 1-0 a INSTITUTO CANT, gol de pepolemmo2710. #TopSecretFC #ProClubs #EAFC #ClubsPro` }),
     P({ id: 'yt-short', red: 'youtube', formato: 'Short · Qué es Clubs Pro', metodo: 'youtube',
       titulo: 'Qué es Pro Clubs, en 30 segundos | EA FC',
-      texto: `Once personas, cada una maneja a un solo jugador, y se juega por tabla en tres ligas. Así juega Top Secret, de lunes a jueves y en vivo. En la jugada, pase de davidelapaternal y gol de pepolemmo2710. #Shorts #ProClubs #EAFC` }),
+      texto: `Once personas, cada una maneja a un solo jugador, y se juega por tabla en tres ligas. Así juega Top Secret, de lunes a jueves y en vivo. En la cancha, el once del 1-0 a INSTITUTO CANT (gol de pepolemmo2710). #Shorts #ProClubs #EAFC` }),
     { id: 'ig-carrusel', red: 'instagram', formato: 'Carrusel · Qué es Clubs Pro', decision: 'pendiente', protagonistas: once, metodo: 'ig-carrusel',
-      descripcion: 'Cinco placas: la cancha con los once, cada uno atado a su joystick, las tres ligas, la tabla real de VPUG Primera al 18/11 y la jornada (lunes a jueves, 22:30 a 00:30, todo en vivo). Sin música ni voz. Va además del Reel porque el guion aprobado pide las dos.',
+      descripcion: 'Cinco placas: la cancha con los once (jugada ilustrativa), cada uno atado a su joystick, las tres ligas, la tabla real de VPUG Primera al 18/11 y la jornada (lunes a jueves, 22:30 a 00:30, todo en vivo). Sin música ni voz. Va además del Reel porque el guion aprobado pide las dos.',
       media: uSl.map(url => ({ tipo: 'imagen', url })), local: { slides },
-      texto: `¿Qué es Clubs Pro? Deslizá.\n\nOnce personas, once jugadores, una sola pelota: cada uno maneja a uno solo. Y no es un amistoso: tres ligas (VPN, VPUG y Espacio Gamer) con fechas, tabla, playoff y descenso.\n\nTop Secret juega de lunes a jueves, de 22:30 a 00:30, y todo se transmite en vivo. En la cancha, el once del 1-0 a INSTITUTO CANT: gol de pepolemmo2710 con pase de davidelapaternal.\n\n#TopSecretFC #ProClubs #EAFC #ClubsPro` },
+      texto: `¿Qué es Clubs Pro? Deslizá.\n\nOnce personas, once jugadores, una sola pelota: cada uno maneja a uno solo. Y no es un amistoso: tres ligas (VPN, VPUG y Espacio Gamer), cada una con fechas y tabla; en VPUG, arriba el playoff y abajo el descenso.\n\nTop Secret juega de lunes a jueves, de 22:30 a 00:30, y todo se transmite en vivo. En la cancha, el once que le ganó 1-0 a INSTITUTO CANT (gol de pepolemmo2710).\n\n#TopSecretFC #ProClubs #EAFC #ClubsPro` },
   ],
 };
 let avisos = 0;

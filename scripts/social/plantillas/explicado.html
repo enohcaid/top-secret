@@ -375,7 +375,7 @@ async function mostrar(n, t, o = {}) {
         ctx.save(); ctx.globalAlpha = clamp(a); ctx.translate(W / 2, 560); ctx.scale(clamp(a, 0, 1.2), clamp(a, 0, 1.2));
         ctx.fillStyle = 'rgba(6,6,6,.82)'; ctx.beginPath(); ctx.roundRect(-330, -100, 660, 200, 22); ctx.fill(); ctx.strokeStyle = ORO2; ctx.lineWidth = 3; ctx.stroke();
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `400 120px ${BEBAS}`; ctx.fillStyle = ORO2; ctx.fillText('GOL', 0, -18);
-        ctx.font = `800 32px ${COND}`; ctx.fillStyle = TXT; ctx.fillText(`${D.gol.de} · asist. ${D.gol.asist}`, 0, 56);
+        ctx.font = `800 32px ${COND}`; ctx.fillStyle = TXT; if (D.gol?.sub) ctx.fillText(D.gol.sub, 0, 56);
         ctx.restore();
       }
     }
@@ -428,7 +428,7 @@ function placa(n) {
     texto(['Y NO ES', 'UN AMISTOSO'], W / 2, 150, { tam: 130, inter: .92, oro: [1] });
     texto(['TRES LIGAS'], W / 2, 470, { tam: 48, font: COND, peso: 800, color: ORO2, esp: 8, sombra: false });
     ligas(0, 600, 120, { todo: true, gap: 60 });
-    texto(['Con fechas, tabla,', 'playoff y descenso.'], W / 2, 900, { tam: 70, font: COND, peso: 800, color: TXT, inter: 1.1 });
+    texto(['Cada una con fechas', 'y su tabla.'], W / 2, 900, { tam: 70, font: COND, peso: 800, color: TXT, inter: 1.1 });
   } else if (P0.tipo === 'tabla') {
     texto(['LA TABLA ES REAL'], W / 2, 110, { tam: 110, oro: [0] });
     tabla(0, 300, 54, { todo: true });
