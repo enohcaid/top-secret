@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "Un partido entero en 30 segundos": capa transparente que va ENCIMA de la grabación del vivo (la arma
+     scripts/social/piezas/2026-11-23-jue-partido30.mjs con ffmpeg). Todo es función pura de t: mostrar(0, t).
+     pintar(datos) recibe, por cuadro (30 fps), el segundo de la grabación y la velocidad; de ahí salen el reloj del
+     partido (tabla leída del marcador de FC27), el marcador (sube cuando la pelota entra) y la velocidad que se ve.
+     Franja de arriba libre (rótulo del tema, 165 px). La grabación ocupa la franja y=800..1350. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Barlow+Condensed:wght@600;700;800&family=Bebas+Neue&display=block" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4;--loss:#e5484d;--bg:#0c0b09}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent;overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:transparent;color:var(--text);font-family:'Barlow Condensed',sans-serif}
+.abs{position:absolute}
+.bebas{font-family:'Bebas Neue',sans-serif;font-weight:400}
+/* gancho */
+#gancho{left:0;right:0;top:250px;text-align:center}
+#gancho .k{font:800 40px 'Barlow Condensed';letter-spacing:10px;color:var(--gold2)}
+#gancho .t{font-family:'Bebas Neue';font-size:178px;line-height:.9;letter-spacing:2px;margin-top:14px;text-shadow:0 10px 40px rgba(0,0,0,.8)}
+#gancho .t b{color:var(--gold2);font-weight:400}
+#gancho .s{font:700 46px 'Barlow Condensed';letter-spacing:2px;margin-top:22px;color:rgba(247,242,228,.85)}
+/* reloj */
+#reloj{left:0;right:0;top:215px;text-align:center}
+#reloj .k{font:800 34px 'Barlow Condensed';letter-spacing:9px;color:rgba(247,242,228,.7)}
+#reloj .n{font-family:'Bebas Neue';font-size:270px;line-height:.86;color:var(--gold2);letter-spacing:4px;text-shadow:0 12px 50px rgba(0,0,0,.75);font-variant-numeric:tabular-nums}
+#reloj .n small{font-size:110px;color:var(--text);margin-left:10px}
+#crono{right:60px;top:200px;text-align:right;font:800 30px 'Barlow Condensed';letter-spacing:4px;color:rgba(247,242,228,.6)}
+#crono b{display:block;font-family:'Bebas Neue';font-weight:400;font-size:76px;letter-spacing:2px;color:var(--text);line-height:.95}
+#barra{left:140px;right:140px;top:540px;height:10px;border-radius:5px;background:rgba(247,242,228,.15);overflow:hidden}
+#barra i{position:absolute;left:0;top:0;bottom:0;background:var(--gold2);border-radius:5px}
+/* marcador */
+#marcador{left:40px;right:40px;top:595px;height:170px;border-radius:26px;background:rgba(12,11,9,.88);border:3px solid rgba(230,207,133,.55);box-shadow:0 20px 60px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:space-between;padding:0 26px}
+#marcador .eq{display:flex;align-items:center;gap:18px;width:380px}
+#marcador .eq.r{flex-direction:row-reverse;text-align:right}
+#marcador img{width:112px;height:112px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6))}
+#marcador .nom{font:800 44px 'Barlow Condensed';letter-spacing:1px;line-height:1}
+#marcador .res{display:flex;align-items:center;gap:14px}
+#marcador .g{font-family:'Bebas Neue';font-size:150px;line-height:1;width:92px;text-align:center;display:inline-block}
+#marcador .sep{font-family:'Bebas Neue';font-size:90px;color:rgba(247,242,228,.45)}
+/* franja del video */
+#marco{left:0;right:0;top:800px;height:550px;box-shadow:inset 0 0 0 0 rgba(230,207,133,0)}
+#flash{left:0;right:0;top:800px;height:550px;background:#fff;opacity:0}
+#real{left:30px;top:822px;padding:8px 20px;border-radius:10px;background:var(--gold2);color:#0c0b09;font:800 34px 'Barlow Condensed';letter-spacing:4px;opacity:0}
+#medio{left:0;right:0;top:1010px;text-align:center;opacity:0}
+#medio span{display:inline-block;padding:14px 34px;border-radius:14px;background:rgba(12,11,9,.9);border:3px solid var(--gold2);font:800 52px 'Barlow Condensed';letter-spacing:8px;color:var(--gold2)}
+/* velocidad */
+#vel{left:0;right:0;top:1385px;text-align:center}
+#vel .n{font-family:'Bebas Neue';font-size:190px;line-height:.9;letter-spacing:2px;font-variant-numeric:tabular-nums}
+#vel .n .x{font-size:120px;color:var(--gold2);margin-right:6px}
+#vel .k{font:800 36px 'Barlow Condensed';letter-spacing:9px;color:rgba(247,242,228,.7);margin-top:4px}
+#vel .ff{display:inline-block;width:0;height:0;border-top:34px solid transparent;border-bottom:34px solid transparent;border-left:48px solid var(--gold2);margin:0 -6px 30px 0;vertical-align:middle}
+/* tarjeta de gol */
+#gol{left:40px;right:40px;top:1380px;height:230px;border-radius:26px;background:rgba(12,11,9,.94);border:4px solid var(--gold2);box-shadow:0 30px 80px rgba(0,0,0,.7);overflow:hidden;opacity:0;display:flex;align-items:center}
+#gol.ellos{border-color:var(--loss)}
+#gol .foto{width:250px;height:230px;flex:none;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(230,207,133,.3),transparent 70%)}
+#gol .foto img{position:absolute;left:-105px;top:-6px;width:460px;height:auto}
+#gol .tx{padding:0 30px;flex:1}
+#gol .k{font:800 36px 'Barlow Condensed';letter-spacing:8px;color:var(--gold2)}
+#gol.ellos .k{color:var(--loss)}
+#gol .q{font-family:'Bebas Neue';font-size:108px;line-height:.95;letter-spacing:1px}
+#gol .m{font:700 38px 'Barlow Condensed';letter-spacing:3px;color:rgba(247,242,228,.8)}
+/* placas finales */
+#fin,#cierre{left:0;right:0;top:2px;bottom:0;/* 2 px libres: el PNG sigue con alfa */background:radial-gradient(ellipse at 50% 42%,#221d12,#080705);opacity:0;text-align:center}
+#fin .k{position:absolute;left:0;right:0;top:330px;font:800 44px 'Barlow Condensed';letter-spacing:12px;color:var(--gold2)}
+#fin .esc{position:absolute;left:0;right:0;top:420px;display:flex;justify-content:center;gap:250px}
+#fin .esc img{width:260px;height:260px;object-fit:contain;filter:drop-shadow(0 16px 40px rgba(0,0,0,.8))}
+#fin .res{position:absolute;left:0;right:0;top:690px;font-family:'Bebas Neue';font-size:330px;line-height:.9;letter-spacing:6px}
+#fin .res b{color:var(--gold2);font-weight:400}
+#fin .nom{position:absolute;left:0;right:0;top:990px;display:flex;justify-content:center;gap:120px;font:800 52px 'Barlow Condensed';letter-spacing:3px}
+#fin .gs{position:absolute;left:80px;right:80px;top:1110px;font:700 44px 'Barlow Condensed';letter-spacing:1px;line-height:1.35;color:rgba(247,242,228,.85)}
+#fin .gs b{color:var(--gold2)}
+#cierre .e{position:absolute;left:50%;top:330px;width:300px;margin-left:-150px}
+#cierre .a{position:absolute;left:0;right:0;top:720px;font-family:'Bebas Neue';font-size:124px;line-height:.95;letter-spacing:2px}
+#cierre .b{position:absolute;left:0;right:0;top:860px;font-family:'Bebas Neue';font-size:124px;line-height:.95;letter-spacing:2px;color:var(--gold2)}
+#cierre .c{position:absolute;left:0;right:0;top:1060px;font:700 48px 'Barlow Condensed';letter-spacing:3px;color:rgba(247,242,228,.8)}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="marco" class="abs"></div>
+  <div id="flash" class="abs"></div>
+  <div id="real" class="abs">VELOCIDAD REAL</div>
+  <div id="medio" class="abs"><span>ENTRETIEMPO</span></div>
+  <div id="gancho" class="abs"><div class="k">UN PARTIDO ENTERO</div><div class="t">90 MINUTOS<br><b>EN 30 SEGUNDOS</b></div><div class="s">Cuando hay gol, el video frena.</div></div>
+  <div id="reloj" class="abs"><div class="k">RELOJ DEL PARTIDO</div><div class="n"></div></div>
+  <div id="crono" class="abs">VIDEO<b></b></div>
+  <div id="barra" class="abs"><i></i></div>
+  <div id="marcador" class="abs">
+    <div class="eq"><img id="escN"><div class="nom">TOP<br>SECRET</div></div>
+    <div class="res"><span class="g" id="gN">0</span><span class="sep">-</span><span class="g" id="gR">0</span></div>
+    <div class="eq r"><img id="escR"><div class="nom" id="nomR"></div></div>
+  </div>
+  <div id="vel" class="abs"><div class="n"><span class="ff"></span><span class="ff"></span> <span class="x">x</span><span id="velN">1</span></div><div class="k" id="velK">VELOCIDAD</div></div>
+  <div id="gol" class="abs"><div class="foto"><img></div><div class="tx"><div class="k"></div><div class="q"></div><div class="m"></div></div></div>
+  <div id="fin" class="abs"><div class="k"></div><div class="esc"><img id="fEscN"><img id="fEscR"></div><div class="res"></div><div class="nom"><span>TOP SECRET</span><span id="fNomR"></span></div><div class="gs"></div></div>
+  <div id="cierre" class="abs"><img class="e"><div class="a"></div><div class="b"></div><div class="c"></div></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eBack = p => { p = clamp(p); const c = 1.7; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+let D;
+
+function pintar(d) {
+  D = d;
+  $('#escN').src = d.escudo; $('#escR').src = d.escudoRival; $('#fEscN').src = d.escudo; $('#fEscR').src = d.escudoRival;
+  $('#nomR').innerHTML = d.rivalCorto; $('#fNomR').textContent = d.rival.toUpperCase();
+  $('#fin .k').textContent = d.fin.kicker; $('#fin .res').innerHTML = d.fin.res; $('#fin .gs').innerHTML = d.fin.goles;
+  $('#cierre .e').src = d.escudo; $('#cierre .a').textContent = d.cierre[0]; $('#cierre .b').textContent = d.cierre[1]; $('#cierre .c').textContent = d.cierre[2];
+}
+
+// reloj del juego: tabla [segundo de la grabación, segundos de juego], interpolada por tramos
+function relojJuego(s) {
+  const R = D.reloj;
+  if (s <= R[0][0]) return R[0][1];
+  for (let i = 0; i < R.length - 1; i++) {
+    const [a, x] = R[i], [b, y] = R[i + 1];
+    if (s <= b) return b - a > 30 ? x : x + (y - x) * (s - a) / (b - a);   // salto de entretiempo: sin interpolar
+  }
+  return R[R.length - 1][1];
+}
+const mmss = g => `${String(Math.floor(g / 60)).padStart(2, '0')}:${String(Math.floor(g % 60)).padStart(2, '0')}`;
+
+function cuadro(t) { const f = clamp(Math.round(t * 30), 0, D.cuadros.length - 1); return D.cuadros[f]; }
+
+function mostrar(n, t) {
+  const tFin = D.tFin;
+  const [s, v] = cuadro(t);
+  // gancho → reloj
+  const g = clamp((t - D.tGancho) / .35);
+  $('#gancho').style.opacity = 1 - g; $('#gancho').style.transform = `translateY(${-30 * g}px)`;
+  $('#reloj').style.opacity = g; $('#barra').style.opacity = g;
+  const juego = relojJuego(s);
+  $('#reloj .n').textContent = mmss(juego);
+  $('#barra i').style.width = `${clamp(juego / (93 * 60)) * 100}%`;
+  $('#crono b').textContent = `0:${String(Math.min(30, Math.floor(t))).padStart(2, '0')}`;
+  // marcador: sube cuando la pelota entra
+  let nos = 0, ellos = 0, ult = null;
+  for (const go of D.goles) if (t >= go.t) { go.nuestro ? nos++ : ellos++; ult = go; }
+  $('#gN').textContent = nos; $('#gR').textContent = ellos;
+  for (const [id, nuestro] of [['#gN', true], ['#gR', false]]) {
+    const u = ult && ult.nuestro === nuestro ? clamp((t - ult.t) / .45) : 1;
+    $(id).style.transform = `scale(${u < 1 ? 1 + .45 * Math.sin(Math.PI * u) : 1})`;
+    $(id).style.color = u < 1 ? (nuestro ? '#E6CF85' : '#e5484d') : '#F7F2E4';
+  }
+  // velocidad
+  const vr = v < 1.15 ? 1 : v;
+  $('#velN').textContent = vr < 10 ? (vr < 1.15 ? '1' : vr.toFixed(1).replace('.', ',')) : Math.round(vr);
+  const real = vr === 1;
+  $('#velK').textContent = real ? 'VELOCIDAD REAL' : 'VELOCIDAD';
+  $('#velK').style.color = real ? '#E6CF85' : '';
+  document.querySelectorAll('#vel .ff').forEach(e => { e.style.opacity = real ? .2 : 1; });
+  const enReal = D.ventanas.some(w => t >= w[0] && t <= w[1]);
+  $('#real').style.opacity = enReal ? 1 : 0;
+  $('#marco').style.boxShadow = enReal ? 'inset 0 0 0 6px #E6CF85' : 'none';
+  // flash del gol
+  const fl = ult ? clamp(1 - (t - ult.t) / .3) : 0;
+  $('#flash').style.opacity = ult && t - ult.t < .3 ? (ult.nuestro ? .55 : .3) * fl : 0;
+  $('#flash').style.background = ult && !ult.nuestro ? '#e5484d' : '#fff';
+  // entretiempo
+  $('#medio').style.opacity = Math.abs(t - D.tMedio) < .45 ? 1 : 0;
+  // tarjeta de gol: desde la pelota adentro hasta un rato después de volver a acelerar
+  const go = D.goles.find(x => t >= x.t - .02 && t < x.t + x.dur);
+  const card = $('#gol');
+  if (go) {
+    const u = (t - go.t), ent = eBack(u / .3), sal = clamp((go.t + go.dur - t) / .25);
+    card.style.opacity = Math.min(1, u / .12) * sal;
+    card.style.transform = `translateY(${(1 - ent) * 60}px) scale(${.92 + .08 * ent})`;
+    card.classList.toggle('ellos', !go.nuestro);
+    card.querySelector('.foto').style.display = go.foto ? '' : 'none';
+    if (go.foto && card.querySelector('img').getAttribute('src') !== go.foto) card.querySelector('img').src = go.foto;
+    card.querySelector('.k').textContent = go.kicker; card.querySelector('.q').textContent = go.quien; card.querySelector('.m').textContent = go.detalle;
+    $('#vel').style.opacity = 0;
+  } else { card.style.opacity = 0; $('#vel').style.opacity = t < tFin ? 1 : 0; }
+  // placas finales
+  const f1 = clamp((t - tFin) / .3), f2 = clamp((t - D.tCierre) / .35);
+  $('#fin').style.opacity = f1 * (1 - f2);
+  $('#fin .res').style.transform = `scale(${1.25 - .25 * eOut((t - tFin) / .45)})`;
+  $('#fin .gs').style.opacity = clamp((t - tFin - .6) / .35);
+  $('#cierre').style.opacity = f2;
+  $('#cierre .b').style.opacity = clamp((t - D.tCierre - .7) / .3);
+  $('#cierre .c').style.opacity = clamp((t - D.tCierre - 1.3) / .3);
+  $('#cierre .b').style.transform = `translateY(${(1 - eOut((t - D.tCierre - .7) / .4)) * 40}px)`;
+}
+</script>
+</body>
+</html>
