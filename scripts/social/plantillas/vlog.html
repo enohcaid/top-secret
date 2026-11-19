@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "Un día en la vida: noche de triple fecha": video de celular estilo vlog. Cada toma es una foto de ChatGPT (con la jugada
+     real del vivo entrando en la tele por homografía, desenfocada: el foco del celular está en el pibe) o un clip de Canva.
+     Encima, por código y en función de t: mano que tiembla, foco que busca al cortar, exposición que respira, ruido de
+     sensor, la hora grande del vlog, subtítulos palabra por palabra y el resultado chico de cada partido.
+     Un solo tramo: mostrar(0, t). Franja de arriba libre: rótulo del tema. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4;--loss:#e5484d;--win:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;will-change:transform,filter}
+#mundo>*{position:absolute;left:0;top:0}
+#foto,#clip,#delante{width:1080px;height:1920px}
+#tele{width:1280px;height:720px;transform-origin:0 0}
+#luz{width:1080px;height:1920px;mix-blend-mode:screen;pointer-events:none}
+#vineta{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 46%,rgba(0,0,0,.55) 100%);pointer-events:none}
+#grano{position:absolute;inset:0;width:1080px;height:1920px;opacity:.16;mix-blend-mode:overlay;pointer-events:none}
+#negro{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+#reloj{position:absolute;left:0;right:0;top:232px;text-align:center;text-shadow:0 6px 30px rgba(0,0,0,.85),0 2px 6px rgba(0,0,0,.8);will-change:transform,opacity}
+#reloj .h{font-family:'Bebas Neue';font-size:230px;line-height:.9;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:4px}
+#reloj .e{margin-top:6px;font:800 40px 'Barlow Condensed';letter-spacing:.22em;color:var(--gold2)}
+#subs{position:absolute;left:70px;right:70px;top:1260px;text-align:center;font:800 80px/1.08 'Barlow Condensed';color:var(--text);text-shadow:0 4px 22px rgba(0,0,0,.95),0 0 4px rgba(0,0,0,.9)}
+#subs span{opacity:.55}
+#subs span.d{opacity:1}
+#subs span.a{color:var(--gold2)}
+#chip{position:absolute;left:0;right:0;top:1560px;display:flex;justify-content:center;will-change:transform,opacity}
+#chip div{display:flex;align-items:center;gap:20px;padding:16px 30px;border-radius:16px;background:rgba(8,8,8,.78);box-shadow:0 0 0 2px rgba(230,207,133,.35)}
+#chip .l{font:800 30px 'Barlow Condensed';letter-spacing:.14em;color:var(--gold2)}
+#chip .r{font:800 46px 'Barlow Condensed';letter-spacing:.04em;color:var(--text);white-space:nowrap}
+#chip .r b{font-family:'Bebas Neue';font-weight:400;font-size:60px;padding:0 6px}
+#fin{position:absolute;left:60px;right:60px;top:820px;text-align:center;display:none}
+#fin img{height:190px;will-change:transform,opacity}
+#fin .a{margin-top:50px;font:800 96px/1.05 'Barlow Condensed';color:var(--text);will-change:transform,opacity}
+#fin .a b{color:var(--gold2);font-weight:800}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <div id="mundo">
+    <img id="foto">
+    <canvas id="clip" width="1080" height="1920"></canvas>
+    <canvas id="tele" width="1280" height="720"></canvas>
+    <img id="delante">
+    <div id="luz"></div>
+  </div>
+  <div id="vineta"></div>
+  <canvas id="grano" width="540" height="960"></canvas>
+  <div id="negro"></div>
+  <div id="reloj"><div class="h"></div><div class="e"></div></div>
+  <div id="subs"></div>
+  <div id="chip"><div><span class="l"></span><span class="r"></span></div></div>
+  <div id="fin"><img id="esc"><div class="a"></div></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eIO = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const tele = $('#tele').getContext('2d'), clipC = $('#clip').getContext('2d'), granoC = $('#grano').getContext('2d');
+let D, cache = new Map();
+const n4 = n => String(n).padStart(4, '0');
+
+async function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const i = new Image(); i.src = src; await i.decode();
+  if (cache.size > 40) cache.delete(cache.keys().next().value);
+  cache.set(src, i);
+  return i;
+}
+
+// Homografía: del rectángulo w×h de la tele a los 4 rincones medidos en la foto (TL, TR, BR, BL)
+function matriz(w, h, q) {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3, dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  const d = dx1 * dy2 - dx2 * dy1, g = (dx3 * dy2 - dx2 * dy3) / d, k = (dx1 * dy3 - dx3 * dy1) / d;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + k * x3, c = x0, e = y1 - y0 + g * y1, f = y3 - y0 + k * y3, i = y0;
+  return `matrix3d(${a / w},${e / w},0,${g / w},${b / h},${f / h},0,${k / h},0,0,1,0,${c},${i},0,1)`;
+}
+
+// Pulso de mano: sumas de senos, nada al azar (mismo cuadro, mismo resultado)
+function mano(t) {
+  return [Math.sin(t * 1.3) * 5 + Math.sin(t * 2.9 + 1) * 2.6 + Math.sin(t * 7.1) * 1,
+          Math.sin(t * 1.7 + 2) * 4 + Math.sin(t * 3.7) * 2.2 + Math.sin(t * 8.3 + 1) * .9,
+          Math.sin(t * .9 + .5) * .35 + Math.sin(t * 2.3) * .15];
+}
+function ponerCamara(z, x, y, rot) {
+  const X = clamp(x, 1080 * (1 - z), 0), Y = clamp(y, 1920 * (1 - z), 0);
+  $('#mundo').style.transform = `translate(${X.toFixed(2)}px,${Y.toFixed(2)}px) scale(${z.toFixed(4)}) rotate(${rot.toFixed(3)}deg)`;
+}
+
+// La tele: la jugada real (o el apagado, que colapsa la imagen a una línea y a un punto, como una tele de verdad)
+async function pintarTele(e, tau) {
+  const k = clamp(Math.floor(tau * 30 * (e.vel || 1)) + 1, 1, e.tele.n);
+  const f = await img(`${e.tele.dir}/${n4(k)}.jpg`);
+  tele.globalAlpha = 1; tele.fillStyle = '#000'; tele.fillRect(0, 0, 1280, 720);
+  if (e.apaga != null && tau >= e.apaga) {
+    const u = tau - e.apaga;
+    if (u < .14) {   // se aplasta a una línea brillante
+      const h = Math.max(4, 720 * (1 - eOut(u / .14)));
+      tele.drawImage(f, 0, (720 - h) / 2, 1280, h);
+      tele.fillStyle = `rgba(255,255,255,${.5 * u / .14})`; tele.fillRect(0, (720 - h) / 2, 1280, h);
+      return 1.3;
+    }
+    if (u < .32) {   // la línea se encoge al centro
+      const w = 1280 * (1 - eOut((u - .14) / .18)) + 6;
+      tele.fillStyle = '#fff'; tele.fillRect(640 - w / 2, 357, w, 6);
+      return .6 * (1 - (u - .14) / .18);
+    }
+    if (u < .5) {    // queda un punto que se apaga
+      const a = 1 - (u - .32) / .18;
+      const g = tele.createRadialGradient(640, 360, 0, 640, 360, 26); g.addColorStop(0, `rgba(255,255,255,${a})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+      tele.fillStyle = g; tele.fillRect(600, 320, 80, 80);
+    }
+    return 0;
+  }
+  tele.drawImage(f, 0, 0, 1280, 720);
+  if (e.teleOscura) { tele.fillStyle = `rgba(0,0,0,${e.teleOscura})`; tele.fillRect(0, 0, 1280, 720); }
+  return 1;
+}
+
+async function cuadroClip(c, seg, vel) {
+  const m = c.n - 1; let n = Math.round(seg * vel * 30) % (2 * m); n = n > m ? 2 * m - n : n;   // ida y vuelta
+  const f = await img(`${c.dir}/${n4(clamp(n + 1, 1, c.n))}.jpg`);
+  clipC.drawImage(f, 0, 0, 1080, 1920);
+}
+
+function grano(t) {
+  const s = Math.floor(t * 30), W = 540, H = 960;
+  const d = granoC.createImageData(W, H);
+  for (let i = 0; i < d.data.length; i += 4) {
+    const v = ((i * 7919 + s * 104729) ^ (i >>> 3) * 31) % 255;
+    d.data[i] = d.data[i + 1] = d.data[i + 2] = v < 0 ? -v : v; d.data[i + 3] = 255;
+  }
+  granoC.putImageData(d, 0, 0);
+}
+
+function reloj(t, e, tau) {
+  const r = $('#reloj');
+  if (!e.hora) { r.style.opacity = 0; return; }
+  r.style.opacity = 1;
+  r.querySelector('.h').textContent = e.hora;
+  r.querySelector('.e').textContent = e.bajada || '';
+  // la hora cambia de golpe en el corte, con un pequeño salto
+  const nueva = e.horaNueva ? eOut(tau / .22) : 1;
+  r.style.transform = `scale(${lerp(1.18, 1, nueva)})`;
+}
+function subtitulos(t) {
+  const s = $('#subs'); s.innerHTML = '';
+  const f = D.frases.find(f => t >= f.en - .02 && t < f.en + f.dur + .35);
+  if (!f) return;
+  // de a bloques de ~4 palabras, como los subtítulos de TikTok
+  const bloques = []; let b = [];
+  for (const p of f.palabras) { b.push(p); if (b.length >= 4 || /[.,!?…]$/.test(p.w)) { bloques.push(b); b = []; } }
+  if (b.length) bloques.push(b);
+  const bl = bloques.findLast(b => t >= b[0].t - .02) || bloques[0];
+  s.innerHTML = bl.map(p => `<span class="${t >= p.t - .02 ? 'd' : ''}${t >= p.t - .02 && t < p.t + p.d + .05 ? ' a' : ''}">${p.w}</span>`).join(' ');
+}
+function chip(t) {
+  const c = $('#chip');
+  const x = D.chips.find(x => t >= x.desde && t < x.hasta);
+  if (!x) { c.style.opacity = 0; return; }
+  c.querySelector('.l').textContent = x.liga;
+  c.querySelector('.r').innerHTML = x.html;
+  const p = eOut((t - x.desde) / .3), q = clamp((x.hasta - t) / .2);
+  c.style.opacity = Math.min(p, q); c.style.transform = `translateY(${(1 - p) * 26}px)`;
+}
+
+async function pintar(datos) {
+  D = datos;
+  $('#esc').src = D.escudo;
+  $('#fin .a').innerHTML = D.cierre;
+  await document.fonts.ready;
+  await Promise.all(["230px 'Bebas Neue'", "800 70px 'Barlow Condensed'", "800 30px 'Barlow Condensed'"].map(f => document.fonts.load(f)));
+  await Promise.all(D.escenas.filter(e => e.foto).flatMap(e => [img(e.foto), img(e.delante)]));
+  return 1;
+}
+
+async function mostrar(n, t, o = {}) {
+  const e = D.escenas.find(e => t >= e.desde && t < e.hasta) || D.escenas[D.escenas.length - 1];
+  const tau = t - e.desde, [hx, hy, hr] = mano(t);
+  const foto = $('#foto'), clip = $('#clip'), tv = $('#tele'), luz = $('#luz'), del = $('#delante');
+  let brillo = 0;
+  if (e.foto) {
+    if (foto.getAttribute('src') !== e.foto) foto.src = e.foto;
+    foto.style.display = ''; clip.style.display = 'none';
+    if (e.quad) {
+      tv.style.display = ''; tv.style.transform = matriz(1280, 720, e.quad);
+      tv.style.filter = `blur(${e.teleBlur ?? 2.2}px) saturate(1.1)`;
+      brillo = await pintarTele(e, tau);
+      if (del.getAttribute('src') !== e.delante) { del.src = e.delante; await del.decode().catch(() => {}); }
+      del.style.display = '';
+    } else { tv.style.display = 'none'; del.style.display = 'none'; }
+  } else {
+    foto.style.display = 'none'; tv.style.display = 'none'; del.style.display = 'none'; clip.style.display = '';
+    await cuadroClip(e.clip, tau, e.vel || .55);
+  }
+  // Luz de la tele sobre el cuarto: parpadea con la jugada
+  if (e.quad && brillo > 0) {
+    const q = e.quad, cx = (q[0][0] + q[2][0]) / 2, cy = (q[0][1] + q[2][1]) / 2;
+    luz.style.display = ''; luz.style.background = `radial-gradient(ellipse 760px 1100px at ${cx}px ${cy + 260}px, rgba(120,170,200,.9) 0%, rgba(0,0,0,0) 70%)`;
+    luz.style.opacity = (e.luz ?? .2) * brillo * (1 + .12 * Math.sin(t * 9.3) * Math.sin(t * 3.1));
+  } else luz.style.display = 'none';
+
+  // Cámara: empuje lento + mano; foco que busca y exposición que se acomoda al cortar (menos en la primera toma: el gancho)
+  const p = eIO(tau / (e.hasta - e.desde));
+  const z = lerp(e.z?.[0] ?? 1.05, e.z?.[1] ?? 1.11, p), fx = e.foco?.[0] ?? 540, fy = e.foco?.[1] ?? 960;
+  ponerCamara(z, fx - fx * z + hx * 1.6, fy - fy * z + hy * 1.6, hr);
+  const busca = e.primera ? 0 : 7 * Math.exp(-tau * 5.5) * Math.abs(Math.cos(tau * 13));
+  const expo = (e.primera ? 1 : 1 + .22 * Math.exp(-tau * 4)) * (1 + .025 * Math.sin(t * 1.9));
+  $('#mundo').style.filter = `blur(${busca.toFixed(2)}px) brightness(${(expo * (e.oscuro || 1)).toFixed(3)})`;
+
+  // Negro: el fundido final después de que se apaga la tele
+  $('#negro').style.opacity = D.negro ? clamp((t - D.negro) / .5) : 0;
+  const fin = $('#fin');
+  if (D.cierreDesde && t >= D.cierreDesde && !o.sinTexto) {
+    const c = t - D.cierreDesde; fin.style.display = 'block';
+    $('#esc').style.opacity = clamp(c / .3); $('#esc').style.transform = `translateY(${(1 - eOut(c / .5)) * 24}px)`;
+    const a = $('#fin .a'); a.style.opacity = clamp((c - .25) / .2); a.style.transform = `translateY(${(1 - eOut((c - .25) / .4)) * 30}px)`;
+  } else fin.style.display = 'none';
+
+  if (o.sinTexto) { $('#reloj').style.opacity = 0; $('#subs').innerHTML = ''; $('#chip').style.opacity = 0; }
+  else { reloj(t, e, tau); subtitulos(t); chip(t); if (D.cierreDesde && t >= D.cierreDesde) { $('#reloj').style.opacity = 0; $('#subs').innerHTML = ''; } }
+  grano(t);
+}
+</script>
+</body>
+</html>
