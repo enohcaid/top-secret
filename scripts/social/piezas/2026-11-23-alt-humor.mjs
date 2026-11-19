@@ -58,64 +58,80 @@ function pulsoDelTema(mp3, largo) {
 }
 const musica = await elegirMusica(ID);
 const tema = infoTema(musica);
-const { beat: B, inicio: musicaDesde } = pulsoDelTema(musica, 26);
+const { beat: B, inicio: musicaDesde } = pulsoDelTema(musica, 32);
 const enB = s => Math.round(s / B) * B;
+
+// ── v2 (Juan, 2026-11-18: "poco gráfica, aprovechemos para mostrar nuestros goles, las animaciones que podemos
+// hacer"): el humor sigue un partido REAL, el 3-2 a San Miguel eSports por VPUG (12/11), leído del marcador de la
+// grabación del vivo (fuentes/goles/vvivo-2026-11-12/source.mp4): 0-1 temprano, 1-1, 1-2 (rompe el piso), un largo
+// rato abajo y la remontada 2-2 y 3-2 sobre el final. Nuestros tres goles entran como jugada real en una pantalla
+// encima del gráfico, y el cierre muestra a los goleadores con sus renders. Los carteles dicen el marcador, no el
+// minuto (el reloj del juego se ve en la propia jugada); el eje en minutos es aproximado a la grabación.
+// Goleadores (seed_matches.js): NicoBJ_96, pepolemmo2710 y Guiidow, uno cada uno (el orden no se nombra).
+const VOD = path.join(ROOT, 'fuentes/goles/vvivo-2026-11-12/source.mp4');
+// [desde, largo] en la grabación: 1-1, 2-2, 3-2. Las ventanas de gol del vigía son 550-565, 1236-1251 y 1290-1305 y el
+// saque del medio con los escudos aparece a los 1253 y 1306: se usan los últimos 6,5 s de cada una (el remate).
+const CLIPS = [[559, 6.5], [1244.5, 6.5], [1298.5, 6.5]];
+const GOLEADORES = ['NicoBJ_96', 'pepolemmo2710', 'Guiidow'];
 
 // ── La curva del humor (minuto → humor; 0 = el piso). 'seco' = salto rápido, sin oleaje ──
 const CURVA = [
-  [-9, 50], [-4, 58], [0, 70], [1, 86], [11.4, 83, 'seco'], [12.6, 38], [33.4, 44, 'seco'], [34.6, 97], [45, 90], [46.5, 88], [58, 84], [60, 80],
-  [80, 52], [88.4, 48, 'seco'], [89.6, -36], [92.4, -38, 'seco'], [93.6, 80], [99, 80],
+  [-9, 50], [-4, 58], [0, 70], [1, 86], [4.4, 84, 'seco'], [5.6, 40], [15.4, 44, 'seco'], [16.6, 92], [20.4, 48, 'seco'], [21.6, -36],
+  [50, -30], [84.4, -38, 'seco'], [85.6, 80], [89.4, 78, 'seco'], [90.6, 103], [96, 103],
 ];
-const MIN_FIN = 93.6;
-// ── Tiempos (s) de cada tramo, al pulso ──
-const T = { gancho: enB(2.4) };
-const tE1 = enB(2.6), tB = enB(4.6), tC = tB + enB(.7), tD = enB(7.4), tE = tD + enB(.6), tF = enB(10.2), tG = tF + enB(.6),
-  tH = enB(12.6), tI = enB(13.6), tJ = tI + enB(.6), tK = enB(16.2), tL = tK + enB(.6);
-const TIEMPOS = [[0, -2.5], [tE1, 1], [tB, 11.4], [tC, 12.6], [tD, 33.4], [tE, 34.6], [tF, 58], [tG, 60], [tH, 80], [tI, 88.4], [tJ, 89.6], [tK, 92.4], [tL, MIN_FIN]];
-// el instante en que la línea cruza el piso (para el choque, el sonido y el temblor)
+const MIN_FIN = 90.6;
+// ── Tiempos (s) de cada tramo, al pulso. Después de cada gol nuestro, ~3,6 s de jugada real ──
+const T = { gancho: enB(2.2) };
+const CLIP = enB(3.6);
+const tE1 = enB(2.4), tB = enB(3.8), tC = tB + enB(.6), tD = enB(5.4), tE = tD + enB(.6),
+  tF = tE + CLIP + enB(.4), tG = tF + enB(.6), tH = tG + enB(2.4), tI = tH + enB(.6),
+  tK = tI + CLIP + enB(.4), tL = tK + enB(.6);
+const TIEMPOS = [[0, -2.5], [tE1, 1], [tB, 4.4], [tC, 5.6], [tD, 15.4], [tE, 16.6], [tF, 20.4], [tG, 21.6], [tG + enB(1.2), 50], [tH, 84.4], [tI, 85.6], [tK, 89.4], [tL, MIN_FIN]];
+// el instante en que la línea cruza el piso con el 1-2 (choque, sonido y temblor)
 let CRASH_MIN;
 {
   const k = 48 / (48 + 36), p = 1 - Math.cbrt(1 - k);   // el salto 'seco' (eOut) cruza el 0 cuando eOut(p) = k
-  T.crash = tI + (tJ - tI) * p; CRASH_MIN = 88.4 + (89.6 - 88.4) * p;
+  T.crash = tF + (tG - tF) * p; CRASH_MIN = 20.4 + (21.6 - 20.4) * p;
 }
-T.abre = tL + enB(1.3);
+const PANTALLAS = [tE, tI, tL].map((t, i) => ({ t: t + .1, dur: CLIP + (i === 2 ? enB(.6) : 0), clip: CLIPS[i] }));
+T.abre = tL + CLIP + enB(3.4);   // entre la última jugada y el cierre, la placa de goleadores
 T.cierre = T.abre + enB(1.9);
 const total = T.cierre + enB(3.4);
 log(`Tema: ${tema.titulo} · beat ${B.toFixed(2)} · total ${total.toFixed(1)} s · crash ${T.crash.toFixed(2)}`);
 
 const EVENTOS = [
-  { m: 1, t: tE1 - .05, min: "1'", kicker: 'ARRANQUE', texto: 'Optimismo total', lado: 'abajo', ancho: 560, pin: [-10, -36] },
-  { m: 12.6, t: tC - .1, min: "12'", kicker: 'PELOTA PERDIDA', texto: 'Te la sacan y es gol de ellos', lado: 'arriba', ancho: 720, color: '#e5484d', zoom: .12, pin: [0, 80] },
-  { m: 34.6, t: tE - .05, min: "34'", kicker: 'GOL NUESTRO', texto: 'Sube como cohete', lado: 'abajo', ancho: 600, zoom: .18, pin: [-50, -36] },
-  { m: 60, t: tG - .05, min: "60'", kicker: 'ESE COMPAÑERO', texto: 'Que no pasa la pelota', lado: 'arriba', ancho: 640, zoom: .08 },
-  { m: 89.6, t: T.crash + .2, min: "89'", kicker: 'GOL EN CONTRA', texto: 'Atravesaste el piso', lado: 'arriba', ancho: 640, color: '#e5484d', zoom: .22, pin: [-70, 20] },
-  { m: MIN_FIN, t: tL - .05, min: "90+3'", kicker: 'EMPATE', texto: 'Y lo festejás como un título', lado: 'abajo', ancho: 720, zoom: .16, pin: [-110, 40] },
+  { m: 1, t: tE1 - .05, min: '0-0', kicker: 'ARRANQUE', texto: 'Hoy ganamos seguro', lado: 'abajo', ancho: 560, pin: [-10, -36] },
+  { m: 5.6, t: tC - .1, min: '0-1', kicker: 'GOL DE ELLOS', texto: 'De entrada', lado: 'arriba', ancho: 560, color: '#e5484d', zoom: .12, pin: [0, 80] },
+  { m: 16.6, t: tE - .05, min: '1-1', kicker: 'GOL NUESTRO', texto: 'Volvimos', lado: 'abajo', ancho: 520, zoom: .14, pin: [-50, -36] },
+  { m: 21.6, t: T.crash + .2, min: '1-2', kicker: 'GOL DE ELLOS', texto: 'Atravesaste el piso', lado: 'arriba', ancho: 640, color: '#e5484d', zoom: .2, pin: [-70, 20] },
+  { m: 50, t: tG + enB(1.2), min: '1-2', kicker: 'EL SUBSUELO', texto: 'Una hora abajo', lado: 'arriba', ancho: 560, color: '#e5484d', zoom: .06 },
+  { m: 85.6, t: tI - .05, min: '2-2', kicker: 'SOBRE EL FINAL', texto: 'Empatamos', lado: 'abajo', ancho: 560, zoom: .16, pin: [-60, 40] },
+  { m: MIN_FIN, t: tL - .05, min: '3-2', kicker: 'GOL NUESTRO', texto: 'Lo dimos vuelta', lado: 'abajo', ancho: 620, zoom: .18, pin: [-110, 40] },
 ];
 const ESCUDO = archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png'));
 const datos = {
-  curva: CURVA, tiempos: TIEMPOS, minFin: MIN_FIN, crash: CRASH_MIN, T, px: 40, py: 9, rango: [-45, 105], escudo: ESCUDO,
+  curva: CURVA, tiempos: TIEMPOS, minFin: MIN_FIN, crash: CRASH_MIN, T, px: 40, py: 9, rango: [-45, 108], escudo: ESCUDO,
+  equipos: ['TOP SECRET', 'SAN MIGUEL'], bajadaGancho: 'Con un partido de verdad.',
   estados: [[100, 'EUFORIA'], [75, 'TODO BIEN'], [50, 'NERVIOS'], [25, 'BRONCA'], [-25, 'SUBSUELO']],
   eventos: EVENTOS,
-  goles: [{ t: tC - .1, m: 12.5, nuestro: false }, { t: tE - .05, m: 34.5, nuestro: true }, { t: T.crash, m: 89.5, nuestro: false }, { t: tL - .05, m: 93.5, nuestro: true }],
+  goles: [{ t: tC - .1, m: 5.5, nuestro: false }, { t: tE - .05, m: 16.5, nuestro: true }, { t: T.crash, m: 21.5, nuestro: false }, { t: tI - .05, m: 85.5, nuestro: true }, { t: tL - .05, m: 90.5, nuestro: true }],
   golpes: [
-    { t: tE - .05, dur: 1.5, txt: 'GOOOL', y: 1080, color: 'rgba(230,207,133,.22)', tam: 330 },
     { t: T.crash, dur: 1.8, txt: 'PISO ROTO', y: 1080, color: 'rgba(229,72,77,.24)', tam: 250 },
-    { t: tL - .05, dur: 1.3, txt: 'REBOTE', y: 1080, color: 'rgba(230,207,133,.22)', tam: 300 },
   ],
-  sacudidas: [{ t: tB + .2, dur: .3, am: 8 }, { t: tE - .05, dur: .35, am: 12 }, { t: T.crash, dur: .7, am: 28 }, { t: tL - .05, dur: .35, am: 12 }],
-  destellos: [{ t: tE - .05, color: '#E6CF85', a: .22 }, { t: T.crash, color: '#e5484d', a: .3 }, { t: tL - .05, color: '#E6CF85', a: .2 }],
+  sacudidas: [{ t: tB + .2, dur: .3, am: 8 }, { t: tE - .05, dur: .35, am: 12 }, { t: T.crash, dur: .7, am: 28 }, { t: tI - .05, dur: .35, am: 12 }, { t: tL - .05, dur: .5, am: 18 }],
+  destellos: [{ t: tE - .05, color: '#E6CF85', a: .22 }, { t: T.crash, color: '#e5484d', a: .3 }, { t: tI - .05, color: '#E6CF85', a: .2 }, { t: tL - .05, color: '#E6CF85', a: .3 }],
 };
-// Carrusel (1080x1350): el partido entero hasta cada minuto
+// Carrusel (1080x1350): el partido entero hasta cada momento
 const dPlacas = {
   ...datos,
   placas: [
-    { m: MIN_FIN, titulo: ['TU HUMOR EN UN PARTIDO', 'DE CLUBS PRO'], oro: [1], pines: true, pie: ['El minuto 89 es real.'], pieOro: [0] },
-    { m: 1.2, min: "1'", texto: 'Optimismo total', sub: 'Hoy ganamos seguro.' },
-    { m: 12.6, min: "12'", texto: 'Te la sacan', sub: 'Y es gol de ellos. Se cae todo.', color: '#e5484d' },
-    { m: 34.6, min: "34'", texto: 'Gol nuestro', sub: 'Sube como cohete.' },
-    { m: 70, min: "60'", texto: 'Ese compañero', sub: 'Que no pasa la pelota. Baja de a poco.' },
-    { m: 90.4, min: "89'", texto: 'Gol en contra', sub: 'La línea atraviesa el piso.', color: '#e5484d' },
-    { m: MIN_FIN, min: "90+3'", texto: 'Empate', sub: 'Y lo festejás como un título.', pines: true, pie: ['¿En qué minuto estás vos ahora?'], pieOro: [0], escudo: true },
+    { m: MIN_FIN, titulo: ['TU HUMOR EN UN PARTIDO', 'DE CLUBS PRO'], oro: [1], pines: true, pie: ['Top Secret 3-2 San Miguel. VPUG.'], pieOro: [0] },
+    { m: 1.2, min: '0-0', texto: 'Hoy ganamos seguro', sub: 'El optimismo del arranque.' },
+    { m: 5.6, min: '0-1', texto: 'Gol de ellos', sub: 'De entrada. Se cae todo.', color: '#e5484d' },
+    { m: 16.6, min: '1-1', texto: 'Gol nuestro', sub: 'Volvimos.' },
+    { m: 22.4, min: '1-2', texto: 'Gol de ellos', sub: 'La línea atraviesa el piso.', color: '#e5484d' },
+    { m: 85.6, min: '2-2', texto: 'Sobre el final', sub: 'Una hora abajo y empatamos.' },
+    { m: MIN_FIN, min: '3-2', texto: 'Lo dimos vuelta', sub: 'NicoBJ_96, pepolemmo2710 y Guiidow.', pines: true, pie: ['¿En qué minuto estás vos ahora?'], pieOro: [0], escudo: true },
   ],
 };
 
@@ -128,7 +144,7 @@ async function abrir() {
 }
 if (flag('--cuadros')) {
   const { b, p } = await abrir(), comp = [];
-  const M = [.1, 1, 2.2, tE1 + .3, tB + .3, tC + .4, tD - .5, tE + .1, tE + .6, tF, tG + .4, tH, tI + .2, T.crash + .05, T.crash + .4, T.crash + 1.2, tK, tL + .2, tL + 1, T.abre + .6, T.abre + 1.8, T.cierre + .2, T.cierre + 1.2, total - .1];
+  const M = [.1, 1, 2.2, tE1 + .3, tB + .3, tC + .4, tD - .3, tE + .1, tE + 2, tF, T.crash + .05, T.crash + .4, T.crash + 1.2, tG + 1.4, tH, tI + .2, tI + 2, tK, tL + .2, tL + 2, T.abre + .6, T.abre + 1.8, T.cierre + .2, total - .1];
   const cols = 8, cw = 240, ch = 427;
   for (const [i, t] of M.entries()) {
     await p.evaluate(t => mostrar(0, t), t);
@@ -182,11 +198,12 @@ function sonido(entra, sale) {
 
   blip(tE1 - .05, .25); sube(.05, tE1 - .2, .12);
   cae(tB, tC - tB, .3); golpe(tC - .1, .45); blip(tC - .1, .2);
-  sube(tD, tE - tD, .32); golpe(tE - .05, .8); hinchada(tE - .05, 3, .32);
-  blip(tG - .05, .2); cae(tG, tH - tG, .07, 380, 300);
-  cae(tI, T.crash - tI, .3, 700, 120); golpe(T.crash, 1); vidrio(T.crash, .4); trombon(T.crash + .55, .22);
-  sube(tK, tL - tK, .34); golpe(tL - .05, .7); hinchada(tL - .05, 3.2, .34);
-  golpe(T.cierre, .55);
+  sube(tD, tE - tD, .32); golpe(tE - .05, .8); hinchada(tE - .05, CLIP, .3);
+  cae(tF, T.crash - tF, .3, 700, 120); golpe(T.crash, 1); vidrio(T.crash, .4); trombon(T.crash + .55, .22);
+  blip(tG + enB(1.2) - .05, .2); cae(tG + enB(1.2), tH - tG - enB(1.2), .06, 300, 240);
+  sube(tH, tI - tH, .34); golpe(tI - .05, .8); hinchada(tI - .05, CLIP, .32);
+  sube(tK, tL - tK, .38); golpe(tL - .05, 1); hinchada(tL - .05, CLIP + 1, .4);
+  golpe(T.abre, .5); golpe(T.cierre, .55);
   for (let k = 0; k < n; k++) { o[k * 2] += fx[k]; o[k * 2 + 1] += fx[k]; }
   let pico = 0; for (const x of o) pico = Math.max(pico, Math.abs(x));
   if (pico > .97) { const f = .97 / pico; for (let i = 0; i < o.length; i++) o[i] *= f; }
@@ -203,15 +220,79 @@ if (!flag('--sin-render') || !fs.existsSync(base)) {
 }
 sonido(base, mezclado);
 
-// Portada: el choque contra el piso, sin textos (el título lo pone la portada)
+// ── v2: las jugadas reales y la placa de goleadores, encima del gráfico ──
+// Marco (pantalla con borde dorado y rótulo) y placa final: HTML con las fuentes del sitio, fotografiado con fondo
+// transparente. Las jugadas: los últimos 6,5 s de cada ventana de gol del vigía, acelerados para entrar en su tramo.
+const conJugadas = path.join(DIR, 'alt-humor-jugadas.mp4');
+const PANT = { x: 40, y: 330, w: 1000, h: 562 };   // alto par (yuv420p no acepta impares)
+async function capas() {
+  const b = await chromium.launch(), p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
+  const fuentes = '<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">';
+  const marcos = [];
+  for (const [i, rot] of ['1-1 · LA JUGADA', '2-2 · LA JUGADA', '3-2 · LA JUGADA'].entries()) {
+    await p.setContent(`<!doctype html><html><head><meta charset="utf-8">${fuentes}<style>html,body{margin:0;background:transparent}
+      .m{position:absolute;left:${PANT.x - 8}px;top:${PANT.y - 8}px;width:${PANT.w + 16}px;height:${PANT.h + 16}px;box-sizing:border-box;border:8px solid #E6CF85;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.75),0 0 60px rgba(230,207,133,.35)}
+      .r{position:absolute;left:${PANT.x + 24}px;top:${PANT.y + PANT.h - 30}px;background:#E6CF85;color:#0c0b09;font:800 40px 'Barlow Condensed';letter-spacing:3px;padding:8px 22px;border-radius:10px}
+      .v{position:absolute;left:${PANT.x + PANT.w - 230}px;top:${PANT.y - 30}px;background:#0c0b09;color:#E6CF85;border:3px solid #E6CF85;font:700 30px 'Barlow Condensed';letter-spacing:3px;padding:6px 16px;border-radius:10px}
+      </style></head><body><div class="m"></div><div class="v">VPUG · 12/11</div><div class="r">${rot}</div></body></html>`, { waitUntil: 'networkidle' });
+    const f = path.join(DIR, `marco-${i + 1}.png`); await p.screenshot({ path: f, omitBackground: true }); marcos.push(f);
+  }
+  const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
+  const jug = GOLEADORES.map(g => `<div class="j"><img src="${MEDIA}/Renders/${g}/Unica4.webp"><div class="g">${g}</div></div>`).join('');
+  await p.setContent(`<!doctype html><html><head><meta charset="utf-8">${fuentes}<style>html,body{margin:0;background:transparent}
+    .f{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(30,26,16,.9),rgba(8,7,5,.96))}
+    .k{position:absolute;top:250px;width:100%;text-align:center;color:#E6CF85;font:800 46px 'Barlow Condensed';letter-spacing:10px}
+    .res{position:absolute;top:320px;width:100%;text-align:center;color:#f7f2e4;font:400 190px 'Bebas Neue';letter-spacing:4px;line-height:1}
+    .res b{color:#E6CF85;font-weight:400}
+    .s{position:absolute;top:530px;width:100%;text-align:center;color:rgba(247,242,228,.7);font:700 40px 'Barlow Condensed';letter-spacing:6px}
+    .js{position:absolute;top:700px;left:0;right:0;display:flex;justify-content:center;gap:10px}
+    .j{width:340px;text-align:center}.j img{width:340px;height:620px;object-fit:contain;object-position:bottom;filter:drop-shadow(0 20px 40px rgba(0,0,0,.8))}
+    .g{margin-top:-10px;color:#E6CF85;font:800 40px 'Barlow Condensed';letter-spacing:1px}
+    .p{position:absolute;top:1450px;width:100%;text-align:center;color:#f7f2e4;font:700 44px 'Barlow Condensed';letter-spacing:4px}
+    </style></head><body><div class="f"></div><div class="k">REMONTADA</div><div class="res">TOP SECRET <b>3-2</b></div><div class="s">ANTE SAN MIGUEL · VPUG</div>
+    <div class="js">${jug}</div><div class="p">LOS GOLES DE LA REMONTADA</div></body></html>`, { waitUntil: 'networkidle' });
+  await p.waitForFunction(() => [...document.images].every(i => i.complete && i.naturalWidth));
+  const placa = path.join(DIR, 'placa-goleadores.png'); await p.screenshot({ path: placa, omitBackground: true });
+  await b.close();
+  return { marcos, placa };
+}
+{
+  const { marcos, placa } = await capas();
+  const args = ['-hide_banner', '-loglevel', 'error', '-y', '-i', mezclado];
+  for (const [i, pa] of PANTALLAS.entries()) args.push('-ss', String(pa.clip[0]), '-t', String(pa.clip[1]), '-i', VOD, '-loop', '1', '-t', String(total), '-i', marcos[i]);
+  args.push('-loop', '1', '-t', String(total), '-i', placa);
+  const ult = PANTALLAS[PANTALLAS.length - 1], tPlaca = ult.t + ult.dur + .1, fPlaca = T.abre - .15;
+  let f = '', prev = '0:v';
+  PANTALLAS.forEach((pa, i) => {
+    const vi = 1 + i * 2, mi = 2 + i * 2, vel = pa.clip[1] / pa.dur;
+    f += `[${vi}:v]setpts=(PTS-STARTPTS)/${vel.toFixed(4)},fps=60,scale=${PANT.w}:${PANT.h}:force_original_aspect_ratio=increase,crop=${PANT.w}:${PANT.h},format=yuva420p,fade=in:st=0:d=0.18:alpha=1,fade=out:st=${(pa.dur - .2).toFixed(2)}:d=0.2:alpha=1,setpts=PTS+${pa.t.toFixed(3)}/TB[c${i}];`;
+    f += `[${prev}][c${i}]overlay=${PANT.x}:${PANT.y}:eof_action=pass:enable='between(t,${pa.t.toFixed(3)},${(pa.t + pa.dur).toFixed(3)})'[a${i}];`;
+    f += `[${mi}:v]format=rgba,fade=in:st=${pa.t.toFixed(3)}:d=0.18:alpha=1,fade=out:st=${(pa.t + pa.dur - .2).toFixed(3)}:d=0.2:alpha=1[m${i}];`;
+    f += `[a${i}][m${i}]overlay=0:0:enable='between(t,${pa.t.toFixed(3)},${(pa.t + pa.dur).toFixed(3)})'[b${i}];`;
+    prev = `b${i}`;
+  });
+  f += `[7:v]format=rgba,fade=in:st=${tPlaca.toFixed(3)}:d=0.3:alpha=1,fade=out:st=${(fPlaca - .3).toFixed(3)}:d=0.3:alpha=1[pl];[${prev}][pl]overlay=0:0:enable='between(t,${tPlaca.toFixed(3)},${fPlaca.toFixed(3)})'[v]`;
+  // por archivo: en Windows el filtro largo como argumento no llega entero a ffmpeg ("Invalid argument")
+  const guion = path.join(DIR, 'jugadas.filtro'); fs.writeFileSync(guion, f);
+  args.push('-filter_complex_script', guion, '-map', '[v]', '-map', '0:a', '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', '60', '-c:a', 'copy', '-movflags', '+faststart', conJugadas);
+  const r = spawnSync(ffmpeg, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  if (r.status !== 0) throw new Error('ffmpeg (jugadas): ' + (r.stderr || '').slice(-800));
+  log('Jugadas y placa de goleadores encima del gráfico.');
+  // Carrusel: la placa de la remontada (goleadores con sus renders) como segunda, recortada a 1080x1350
+  const remontada = path.join(DIR, 'alt-humor-placa-remontada.jpg');
+  await sharp(placa).extract({ left: 0, top: 180, width: 1080, height: 1350 }).flatten({ background: '#0c0b09' }).jpeg({ quality: 92 }).toFile(remontada);
+  slides.splice(1, 0, remontada);
+}
+
+// Portada: el choque contra el piso del 1-2, sin textos (el título lo pone la portada)
 {
   const { b, p } = await abrir();
   await p.evaluate(t => mostrar(0, t, { sinTexto: true, subir: 420 }), T.crash + .9);
   await p.locator('#lienzo').screenshot({ path: fotoPortada, type: 'jpeg', quality: 95 });
   await b.close();
 }
-await portada({ imagen: fotoPortada, kicker: 'Tu humor en un partido', dato: "89'", titulo: 'El minuto 89 *es real*', foco: '50% 45%' }, jpg);
-conPortada(mezclado, jpg, mp4);
+await portada({ imagen: fotoPortada, kicker: 'Tu humor en un partido', dato: '3-2', titulo: 'Lo dimos *vuelta*', foco: '50% 45%' }, jpg);
+conPortada(conJugadas, jpg, mp4);
 if (flag('--sin-lote')) { log('Listo (sin lote): ' + mp4); process.exit(0); }
 
 // ── Lote ──
@@ -220,24 +301,25 @@ const subir = async f => { const key = `social/viral/${path.basename(f)}`; await
 const uVid = await subir(mp4), uSl = [];
 for (const s of slides) uSl.push(await subir(s));
 const uPortada = await subirPortada(jpg, 'social/viral/alt-humor-portada.jpg');
-const desc = `${Math.round(total)} s · sin voz (guion aprobado: pieza visual al pulso, el chiste va en pantalla) · gráfico animado por código: cámara que sigue la punta, carita que cambia con el humor, piso que se rompe en el 89; efectos en cada subida y caída · datos inventados y en chiste (índice de humor, marcador NOSOTROS · ELLOS): ni jugadores ni resultados del club · el 12' suma "y es gol de ellos" para que el empate del 90+3 cierre (0-1, 1-1, 1-2, 2-2) · música: ${tema.titulo}.`;
+const desc = `${Math.round(total)} s · v2 (Juan: "poco gráfica, mostremos nuestros goles"): el humor sigue el 3-2 real a San Miguel eSports por VPUG (12/11), leído del marcador de la grabación del vivo · las tres jugadas de nuestros goles (1-1, 2-2, 3-2) entran reales en una pantalla con marco dorado · placa de remontada con los renders de NicoBJ_96, pepolemmo2710 y Guiidow · el piso se rompe con el 1-2 · los carteles dicen el marcador (el minuto del eje es aproximado) · sin voz · música: ${tema.titulo}. Única publicación del sábado 21 (Juan, 18/11).`;
 const P = o => ({ decision: 'pendiente', protagonistas: [], descripcion: desc, musica: tema.titulo, media: [{ tipo: 'video', url: uVid, vertical: true }], local: { video: mp4 }, portada: { url: uPortada, local: jpg }, ...o });
 const lote = {
   id: ID, tipo: 'viral', creado: new Date().toISOString(), idea: { lote: 'viral-guiones-2026-11-23', pieza: 'alt-humor' },
-  titulo: 'Tu humor durante un partido, minuto a minuto', piezas: [
-    P({ id: 'ig-reel', red: 'instagram', formato: 'Reel · Tu humor durante un partido', metodo: 'ig-reel',
-      texto: `Tu humor durante un partido de Clubs Pro, minuto a minuto. El 89 es real.\n\n¿En qué minuto estás vos ahora?\n\n#TopSecretFC #ProClubs #EAFC` }),
-    P({ id: 'tiktok', red: 'tiktok', formato: 'Video · Tu humor durante un partido', metodo: 'tiktok',
-      texto: `Del optimismo del minuto 1 al subsuelo del 89. ¿En qué minuto estás vos? #TopSecretFC #ProClubs #EAFC #ClubsPro` }),
-    P({ id: 'yt-short', red: 'youtube', formato: 'Short · Tu humor durante un partido', metodo: 'youtube',
-      titulo: 'Tu humor durante un partido de Pro Clubs, minuto a minuto | EA FC',
-      texto: `Gol nuestro, ese compañero que no pasa la pelota y el minuto 89. ¿En cuál estás vos? #Shorts #ProClubs #EAFC` }),
-    P({ id: 'x-video', red: 'x', formato: 'Video · Tu humor durante un partido', metodo: 'x-video',
-      texto: `Tu humor durante un partido, minuto a minuto. El 89 es real. ¿En qué minuto estás vos? #TopSecretFC` }),
-    { id: 'ig-carrusel', red: 'instagram', formato: 'Carrusel · Tu humor durante un partido', decision: 'pendiente', protagonistas: [], metodo: 'ig-carrusel',
-      descripcion: 'Siete placas: el gráfico entero y después minuto a minuto (1, 12, 34, 60, 89 y 90+3), con el cierre "¿En qué minuto estás vos ahora?". Sin música ni voz. Va además del Reel porque el guion aprobado pide las dos; en carrusel se guarda.',
+  publicarA: '2026-11-21T14:00:00-03:00',   // Juan, 18/11: la única publicación viral del sábado 21
+  titulo: 'Tu humor durante un partido · el 3-2 a San Miguel', piezas: [
+    P({ id: 'ig-reel', red: 'instagram', formato: 'Reel · Tu humor durante un partido', metodo: 'ig-reel', protagonistas: GOLEADORES,
+      texto: `Tu humor durante un partido de Clubs Pro, minuto a minuto. Este fue de verdad: 0-1, 1-1, 1-2 y una hora en el subsuelo. Después NicoBJ_96, pepolemmo2710 y Guiidow lo dieron vuelta: 3-2 a San Miguel eSports por VPUG.\n\n¿En qué minuto estás vos ahora?\n\n#TopSecretFC #ProClubs #EAFC` }),
+    P({ id: 'tiktok', red: 'tiktok', formato: 'Video · Tu humor durante un partido', metodo: 'tiktok', protagonistas: GOLEADORES,
+      texto: `Una hora en el subsuelo y remontada 3-2. Goles de NicoBJ_96, pepolemmo2710 y Guiidow. ¿En qué minuto estás vos? #TopSecretFC #ProClubs #EAFC` }),
+    P({ id: 'yt-short', red: 'youtube', formato: 'Short · Tu humor durante un partido', metodo: 'youtube', protagonistas: GOLEADORES,
+      titulo: 'Tu humor durante un partido de Pro Clubs: remontada 3-2 | EA FC',
+      texto: `0-1, 1-1, 1-2 y una hora abajo. Después NicoBJ_96, pepolemmo2710 y Guiidow lo dieron vuelta. ¿En qué minuto estás vos? #Shorts #ProClubs #EAFC` }),
+    P({ id: 'x-video', red: 'x', formato: 'Video · Tu humor durante un partido', metodo: 'x-video', protagonistas: GOLEADORES,
+      texto: `Tu humor en un partido real: 0-1, 1-1, 1-2, una hora abajo y remontada 3-2 a San Miguel eSports en VPUG. Goles de NicoBJ_96, pepolemmo2710 y Guiidow. #TopSecretFC` }),
+    { id: 'ig-carrusel', red: 'instagram', formato: 'Carrusel · Tu humor durante un partido', decision: 'pendiente', protagonistas: GOLEADORES, metodo: 'ig-carrusel',
+      descripcion: 'Ocho placas: el gráfico entero del 3-2 a San Miguel, la remontada con los renders de los tres goleadores y después cada momento del marcador (0-0, 0-1, 1-1, 1-2, 2-2, 3-2), con el cierre "¿En qué minuto estás vos ahora?". Sin música ni voz. En carrusel se guarda.',
       media: uSl.map(url => ({ tipo: 'imagen', url })), local: { slides },
-      texto: `El minuto 89 es real.\n\nDeslizá: así se mueve tu humor durante un partido de Clubs Pro. Del optimismo del arranque al gol nuestro, ese compañero que no pasa la pelota, el piso roto y el empate del final.\n\n¿En qué minuto estás vos ahora? Guardalo para el próximo partido.\n\n#TopSecretFC #ProClubs #EAFC #ClubsPro` },
+      texto: `Tu humor en un partido real.\n\nDeslizá: el 3-2 a San Miguel eSports por VPUG, marcador por marcador. El optimismo del arranque, el 0-1 de entrada, el 1-1, el 1-2 que rompió el piso, una hora abajo y la remontada de NicoBJ_96, pepolemmo2710 y Guiidow.\n\n¿En qué minuto estás vos ahora? Guardalo para el próximo partido.\n\n#TopSecretFC #ProClubs #EAFC #ClubsPro` },
   ],
 };
 let avisos = 0;
