@@ -3049,6 +3049,16 @@ const SEED_MATCHES = [
     {name:'Huber236', matched:'Huber236', played_pos:'LD', rating:6.5, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false},
     {name:'NicoBJ_96', matched:'NicoBJ_96', played_pos:'DC', rating:6.2, goals:0, assists:0, passes:null, pass_accuracy:null, distance_km:null, sprints:null, tackles:null, interceptions:null, red_cards:0, mom:false}
   ]},
+
+  // VPN — Los Picantes — 2026-11-18 (1-0) · resultado de la liga (EA inconsistente)
+  {rival:'Los Picantes', league:'VPN', date:'2026-11-18', match_result:'1-0', isHome:true, uploadedAt:'2026-11-20T03:30:10.893Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
+  // VPN — Dalmine Esports — 2026-11-18 (1-1) · resultado de la liga (EA inconsistente)
+  {rival:'Dalmine Esports', league:'VPN', date:'2026-11-18', match_result:'1-1', isHome:false, uploadedAt:'2026-11-20T03:30:10.894Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
+  // VPN — AlToke Perro — 2026-11-18 (1-1) · resultado de la liga (EA inconsistente)
+  {rival:'AlToke Perro', league:'VPN', date:'2026-11-18', match_result:'1-1', isHome:true, uploadedAt:'2026-11-20T03:30:10.894Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
 ];
 
 
