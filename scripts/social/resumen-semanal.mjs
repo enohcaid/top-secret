@@ -18,7 +18,7 @@ import { cargar, hoyART, diaSemana, fechaCorta, TEMPORADA, LIGA_VISIBLE } from '
 import { carrusel, video, dropDelTema } from './lib/render.mjs';
 import { GRUPALES_IA_T4 } from '../../estadisticas-datos.js';
 import { escribirTextos, escribirNoticia } from './lib/textos.mjs';
-import { agregarLote, leer, PAGINA } from './lib/aprobaciones.mjs';
+import { agregarLote, leer, abrirAprobaciones } from './lib/aprobaciones.mjs';
 import * as semana from './formatos/semana.mjs';
 
 const argv = process.argv.slice(2);
@@ -154,5 +154,5 @@ async function armar() {
     publicarA: `${FECHA}T${HORA}:00-03:00`, piezas,
   });
   log(`Lote ${id} listo para aprobar: ${piezas.length} piezas.`);
-  if (!argv.includes('--no-abrir')) spawn('cmd', ['/c', 'start', '', PAGINA], { detached: true, stdio: 'ignore' }).unref();
+  if (!argv.includes('--no-abrir')) abrirAprobaciones();
 }

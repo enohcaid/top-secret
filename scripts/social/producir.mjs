@@ -20,7 +20,7 @@ import os from 'os';
 import path from 'path';
 import { spawn, spawnSync } from 'child_process';
 import { ROOT } from '../lib/env.mjs';
-import { leer, actualizarPieza, PAGINA } from './lib/aprobaciones.mjs';
+import { leer, actualizarPieza, abrirAprobaciones } from './lib/aprobaciones.mjs';
 
 const DIR = path.join(ROOT, 'fuentes/redes');
 const LOCK = path.join(DIR, '.produccion.lock');
@@ -137,7 +137,7 @@ async function trabajar(loteId, ideaId) {
     if (fin.estado === 'lista') {
       await conReintento(() => actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'lista', resumen: fin.resumen || '' } }));
       log(`${ideaId}: lista → ${loteFinal}. ${fin.resumen || ''}`);
-      spawnSync('cmd', ['/c', 'start', '', PAGINA], { stdio: 'ignore' });   // a Juan se le abre aprobar.html, como con los otros lotes
+      abrirAprobaciones();   // solo con APROBAR_ABRIR=1 (Juan aprueba desde otra PC)
     } else if (fin.estado === 'esperando-chatgpt') {
       await conReintento(() => actualizarPieza(loteId, ideaId, { produccion: { ...base, estado: 'esperando', motivo: fin.motivo || 'ChatGPT sin cupo', reintentarDesde: new Date(ahora + 3 * HORA).toISOString() } }));
       log(`${ideaId}: ${fin.motivo || 'ChatGPT sin cupo'}. Reintenta en 3 h.`);

@@ -6,6 +6,12 @@ import { creditoTexto } from '../../lib/musica.mjs';
 const KV = k => `https://api.cloudflare.com/client/v4/accounts/${need('CF_ACCOUNT_ID')}/storage/kv/namespaces/${need('KV_NAMESPACE_ID')}/values/${k}`;
 const AUTH = () => ({ 'X-Auth-Email': need('CF_EMAIL'), 'X-Auth-Key': need('CF_API_KEY') });
 export const PAGINA = 'https://topsecret.ar/aprobar.html';
+// Juan aprueba desde otra PC (2026-11-20): esta PC ya no abre aprobar.html sola. Para volver a abrirla acá: APROBAR_ABRIR=1 en el .env.
+export async function abrirAprobaciones() {
+  if (process.env.APROBAR_ABRIR !== '1') return;
+  const { spawn } = await import('child_process');
+  spawn('cmd', ['/c', 'start', '', PAGINA], { detached: true, stdio: 'ignore' }).unref();
+}
 
 export async function leerKV(clave, porDefecto) {
   const r = await fetch(KV(clave), { headers: AUTH() });

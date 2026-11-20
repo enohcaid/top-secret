@@ -11,7 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import { putFile } from '../lib/r2.mjs';
 import { cargarNoticia, generarPiezas } from '../noticia-redes.mjs';
-import { leer, agregarLote, PAGINA } from './lib/aprobaciones.mjs';
+import { leer, agregarLote, abrirAprobaciones } from './lib/aprobaciones.mjs';
 import { videoDeFotos } from './lib/render.mjs';
 import { elegirMusica, infoTema } from '../lib/musica.mjs';
 
@@ -86,5 +86,5 @@ else {
     ],
   });
   log(`Lote noticia-${n.id} listo para aprobar.`);
-  if (!process.argv.includes('--no-abrir')) spawn('cmd', ['/c', 'start', '', PAGINA], { detached: true, stdio: 'ignore' }).unref();
+  if (!process.argv.includes('--no-abrir')) abrirAprobaciones();
 }

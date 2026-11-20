@@ -10,7 +10,7 @@ import { ROOT } from '../lib/env.mjs';
 import { putFile } from '../lib/r2.mjs';
 import { cargar } from './lib/datos.mjs';
 import { carrusel, video, archivo, dropDelTema } from './lib/render.mjs';
-import { agregarLote, leer, PAGINA } from './lib/aprobaciones.mjs';
+import { agregarLote, leer, abrirAprobaciones } from './lib/aprobaciones.mjs';
 
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 const dir = path.join(ROOT, 'fuentes/redes/simulacro');
@@ -149,4 +149,4 @@ if (!(await leer()).lotes.some(l => l.id === 'viral-guiones-2026-10-12')) await 
 });
 
 console.log('Listo.');
-if (!process.argv.includes('--no-abrir')) spawn('cmd', ['/c', 'start', '', PAGINA], { detached: true, stdio: 'ignore' }).unref();
+if (!process.argv.includes('--no-abrir')) abrirAprobaciones();
