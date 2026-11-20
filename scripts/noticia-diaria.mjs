@@ -253,7 +253,11 @@ if (diaHoy === 6 && !jugadosRecientes.length && !partidosHoy.length && !FORZAR) 
 
 // ── 2. Escritura ─────────────────────────────────────────────────────────────
 // la nota que se corrige (el Worker no borra el borrador al pedir una corrección); sin ella, se rehace como siempre
-const notaActual = CORREGIR && draftHoy?.date === HOY && Array.isArray(draftHoy.body) ? draftHoy : null;
+// --nota <archivo.json> (con --prueba y --fecha): corrige una nota guardada que ya no está en news/draft (2026-11-20:
+// quedaron pendientes las notas del 19 y del 20 y el borrador solo guarda una). El resultado queda en pruebas/.
+const notaArchivo = argv.includes('--nota') ? JSON.parse(fs.readFileSync(argv[argv.indexOf('--nota') + 1], 'utf8')) : null;
+const notaActual = !CORREGIR ? null : notaArchivo?.date === HOY && Array.isArray(notaArchivo.body) ? notaArchivo
+  : draftHoy?.date === HOY && Array.isArray(draftHoy.body) ? draftHoy : null;
 const pedidoCorreccion = !notaActual ? '' : `\n\n## El editor pide correcciones a la nota de hoy\n${MOTIVO || '(sin detalle: revisá la nota contra los datos de arriba y corregí lo que no coincida)'}\n\nNota actual:\n`
   + JSON.stringify({ angulo: topicos.find(t => t.date === HOY)?.angle || null, category: notaActual.category, title: notaActual.title, excerpt: notaActual.excerpt,
     body: notaActual.body, shareCaption: notaActual.shareCaption, shareCaptions: notaActual.shareCaptions, imageBrief: notaActual.imageBrief, toma: notaActual.toma })

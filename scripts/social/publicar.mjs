@@ -157,14 +157,18 @@ async function noticiaSitio(p) {
 const FS_DRAFT = 'https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/news/draft';
 async function noticiaBorrador(p) {
   const doc = await (await fetch(FS_DRAFT)).json();
-  const draft = JSON.parse(doc.fields?.data?.stringValue || 'null') || p.noticia;
-  if (!draft || draft.id !== p.noticia.id) throw new Error('El borrador de Firestore ya no es esta noticia (¿se regeneró?).');
+  const enFirestore = JSON.parse(doc.fields?.data?.stringValue || 'null');
+  // Si el borrador de Firestore ya es la nota de otro día (quedaron dos lotes de noticia pendientes, 2026-11-20), se
+  // publica la copia que guarda el lote y el borrador de Firestore no se toca.
+  const esElBorrador = enFirestore?.id === p.noticia?.id;
+  const draft = esElBorrador ? enFirestore : p.noticia;
+  if (!draft) throw new Error('El lote no tiene la noticia y el borrador de Firestore es otra.');
   const body = p.texto.split('\n').map(l => l.trim()).filter(Boolean).map(l => { if (l.startsWith('{')) { try { return JSON.parse(l); } catch {} } return l; });
   const n = { ...draft, title: p.titulo || draft.title, body, status: 'published', publishedAt: new Date().toISOString() };
   const lista = await leerKV('published_noticias', []);
   if (lista.some(a => a.id === n.id)) throw new Error(`La noticia ${n.id} ya estaba publicada.`);
   await guardarKV('published_noticias', [n, ...lista]);
-  await fetch(FS_DRAFT, { method: 'DELETE' });
+  if (esElBorrador) await fetch(FS_DRAFT, { method: 'DELETE' });
   return `https://topsecret.ar/noticias.html?id=${n.id}`;
 }
 
