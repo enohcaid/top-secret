@@ -3057,8 +3057,11 @@ const SEED_MATCHES = [
   {rival:'Dalmine Esports', league:'VPN', date:'2026-11-18', match_result:'1-1', isHome:false, uploadedAt:'2026-11-20T03:30:10.894Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
   players:[]},
   // VPN — AlToke Perro — 2026-11-18 (1-1) · resultado de la liga (EA inconsistente)
-  {rival:'AlToke Perro', league:'VPN', date:'2026-11-18', match_result:'1-1', isHome:true, uploadedAt:'2026-11-20T03:30:10.894Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
-  players:[]},
+  {rival:'AlToke Perro', league:'VPN', date:'2026-11-18', match_result:'1-1', isHome:true, uploadedAt:'2026-11-20T03:30:10.894Z', origen:'ea-auto', notes:'resultado de la web de VPN (EA no guardó el partido); falta completar con el reporte del video (estadísticas, goleadores y minutos, valoraciones) Goleadores: NicoBJ_96; asistencias: Lautavester7 (web de VPN (partido 785106); completar-goleadores.mjs).', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[
+    {name:'NicoBJ_96', matched:'NicoBJ_96', rating:null, goals:1, assists:0},
+    {name:'Lautavester7', matched:'Lautavester7', rating:null, goals:0, assists:1},
+  ]},
 ];
 
 
