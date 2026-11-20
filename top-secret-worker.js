@@ -1518,13 +1518,14 @@ export default {
 
 // ── NOTICIA DIARIA EN LA NUBE (híbrido, 2026-11-11) ──────────────────────────
 // La nota la escribe GitHub Actions (.github/workflows/noticia-diaria.yml → scripts/noticia-diaria.mjs). El Worker la
-// dispara a las 06:00, 06:30, 07:30, 09:00 y 12:00 ART (si ya hay nota de hoy, la corrida termina enseguida) y apenas
+// dispara a las 06:00, 06:30, 07:30, 09:00, 12:00, 15:00, 18:00 y 21:00 ART (si ya hay nota de hoy, la corrida termina enseguida) y apenas
 // aparece un pedido de "Rehacer" (KV regen_request, lo escribe /request-regen): forzar + motivo. El workflow borra el
 // pedido al terminar bien; si sigue ahí a los 20 min se vuelve a disparar, como mucho 2 veces. Las imágenes las genera
 // la PC (watch-regen.ps1 ve el borrador sin imágenes). Secreto GITHUB_TOKEN: token fine-grained con Actions
 // lectura/escritura sobre enohcaid/top-secret (el mismo de Satinrail; vence 2027-11). Sin él no se dispara nada.
 const NOTICIA_REPO = 'enohcaid/top-secret', NOTICIA_WORKFLOW = 'noticia-diaria.yml';
-const NOTICIA_HORAS_ART = ['06:00', '06:30', '07:30', '09:00', '12:00'];
+// 15:00, 18:00 y 21:00 (Juan, 2026-11-20): si ayer hubo partidos sin resultado cargado no se escribe nota y se vuelve a mirar.
+const NOTICIA_HORAS_ART = ['06:00', '06:30', '07:30', '09:00', '12:00', '15:00', '18:00', '21:00'];
 async function dispararNoticia(env, inputs) {
   const r = await fetch(`https://api.github.com/repos/${NOTICIA_REPO}/actions/workflows/${NOTICIA_WORKFLOW}/dispatches`, {
     method: 'POST',

@@ -129,10 +129,30 @@ const partidosHoy = fixture.filter(f => f.fecha === HOY);
 
 // Resultado obligatorio: partidos oficiales de ayer (o de hoy, si ya se jugaron de madrugada) en seed_matches o el calendario
 const jugadosRecientes = partidos.filter(p => p.fecha >= AYER && oficial(SEED_MATCHES.find(m => m.date === p.fecha && m.rival === p.rival)?.league));
-for (const c of custom.filter(c => c.date === AYER && oficial(c.league))) {
-  if (!jugadosRecientes.some(p => p.fecha === c.date && p.rival === c.rival))
-    jugadosRecientes.push({ fecha: c.date, dia: dia(c.date), liga: LIGA(c.league), rival: c.rival, local: c.isHome ?? null,
-      resultado: c.resultado ? `${c.resultado[0]}-${c.resultado[1]}` : 'sin resultado cargado', jugadores: [], notas: 'Solo figura en el calendario: sin goleadores cargados.' });
+const mismoRival = (a, b) => a === b || (buscarEquipo(a, [{ nombre: b }])?.score || 0) >= 0.8;
+// Fixture fijo de calendario.html (RAW: VPUG Primera y otros torneos que no están en Firestore). Índice = clave de
+// cal.suspended. Antes no se leía y el 1-2 con Hacha (VPUG, 19/11) no existió para la nota del 20/11.
+const RAW_CAL = (() => {
+  const s = fs.readFileSync(path.join(ROOT, 'calendario.html'), 'utf8'), i = s.indexOf('const RAW = ['), b = s.slice(i, s.indexOf('\n];', i));
+  return [...b.matchAll(/\{\s*date:'(\d{4}-\d\d-\d\d)'[^\n]*/g)].map((m, k) => {
+    const x = m[0].match(/league:'(\w+)'.*?rival:'((?:[^'\\]|\\.)*)'.*?isHome:(true|false)/);
+    return x && { k, date: m[1], league: x[1], rival: x[2].replace(/\\'/g, "'"), isHome: x[3] === 'true' };
+  }).filter(Boolean);
+})();
+const delCalendario = [...custom.filter(c => c.date === AYER && oficial(c.league)),
+  ...RAW_CAL.filter(r => oficial(r.league) && (cal.suspended?.[r.k]?.newDate || r.date) === AYER)];
+for (const c of delCalendario) {
+  if (jugadosRecientes.some(p => p.fecha === AYER && mismoRival(p.rival, c.rival))) continue;
+  const s = SEED_MATCHES.find(m => m.date === AYER && mismoRival(m.rival, c.rival));
+  jugadosRecientes.push({ fecha: AYER, dia: dia(AYER), liga: LIGA(c.league), rival: c.rival, local: c.isHome ?? null,
+    resultado: s ? String(s.match_result) : c.resultado ? `${c.resultado[0]}-${c.resultado[1]}` : 'sin resultado cargado', jugadores: [], notas: 'Solo figura en el calendario: sin goleadores cargados.' });
+}
+// Sin resultados no hay nota (Juan, 2026-11-20: salían notas "los resultados todavía no están cargados"). Si ayer hubo
+// partidos oficiales y alguno no tiene resultado, no se escribe: el próximo horario del cron del Worker vuelve a mirar.
+const sinResultado = jugadosRecientes.filter(p => p.resultado === 'sin resultado cargado');
+if (sinResultado.length && !argv.includes('--sin-resultados')) {
+  log(`Ayer hubo partido(s) sin resultado cargado (${sinResultado.map(p => `${p.liga} vs ${p.rival}`).join(', ')}): no hay nota todavía, se vuelve a mirar en el próximo horario.`);
+  process.exit(0);
 }
 
 const tablaEG = await intentar(async () => (await (await fetch(`${WORKER}/eg-table`, { signal: AbortSignal.timeout(30000) })).json())

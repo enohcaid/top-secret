@@ -3062,6 +3062,10 @@ const SEED_MATCHES = [
     {name:'NicoBJ_96', matched:'NicoBJ_96', rating:null, goals:1, assists:0},
     {name:'Lautavester7', matched:'Lautavester7', rating:null, goals:0, assists:1},
   ]},
+
+  // VPUG — Hacha eSports — 2026-11-19 (1-2) · Primera, Fecha 7 · resultado del vivo (EA no guardó el partido)
+  {rival:'Hacha eSports', league:'VPUG', date:'2026-11-19', match_result:'1-2', isHome:true, uploadedAt:'2026-11-20T14:30:00.000Z', origen:'ea-auto', notes:'22:30 hs · Primera, Fecha 7 · resultado del marcador del vivo (fuentes/vivo/2026-11-19-WGBU3T25Lq0): Top Secret abrió a los 14\', Hacha empató a los 17\' y lo dio vuelta a los 34\'. EA no guardó el partido y la web de VPUG pide sesión; falta completar goleadores, estadísticas y valoraciones.', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
 ];
 
 
