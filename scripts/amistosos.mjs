@@ -257,7 +257,16 @@ const client = new Client({
 });
 let yo = null, yoLid = null, grupoId = null;
 
+// QR (Juan, 2026-11-20: "que no aparezca más el QR en la pantalla como un pop up"): sin sesión, el bot NO abre ventanas
+// ni sigue generando códigos; lo anota y termina (salida 0: el vigilante no lo relanza). Para vincular a propósito:
+//   node scripts/amistosos.mjs --vincular   → recién ahí muestra el QR.
+const VINCULAR = process.argv.includes('--vincular');
 client.on('qr', async qr => {
+  if (!VINCULAR) {
+    log('la sesión de WhatsApp está desvinculada: no abro el QR. Para vincular: node scripts/amistosos.mjs --vincular');
+    try { await client.destroy(); } catch {}
+    process.exit(0);
+  }
   const png = path.join(DIR, 'qr-vincular.png');
   await QRCode.toFile(png, qr, { width: 420, margin: 2 });
   log('Escaneá el QR con tu celular: WhatsApp → Dispositivos vinculados → Vincular un dispositivo. Imagen:', png);
