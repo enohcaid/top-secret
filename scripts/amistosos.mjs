@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Bot de amistosos sobre el WhatsApp PERSONAL de Juan, vinculado como un
- * dispositivo más (whatsapp-web.js, sesión en scripts/.wa-personal/, gitignored). No tiene nada
- * que ver con el bot de Losinno (otro número, otra sesión).
+ * Bot de amistosos sobre el WhatsApp PERSONAL de Juan. Desde 2026-11-20 no tiene sesión propia: se
+ * conecta por el puente del consultorio (PracticeMCS/puente-wa, scripts/lib/wa-puente.mjs), que es la
+ * única vinculación de ese número. No tiene nada que ver con el bot de Losinno (otro número, otra sesión).
  *
  *   node scripts/amistosos.mjs            corre hasta llenar los horarios o hasta las 22:00 ART
  *   node scripts/amistosos.mjs --prueba   no manda nada a terceros ni carga en el sitio: solo avisa a Juan
@@ -36,8 +36,7 @@
  *    y en la formación exportada. Cualquier otra respuesta se la reenvía a Juan para que decida.
  */
 import os from 'os';
-import wweb from 'whatsapp-web.js';
-import QRCode from 'qrcode';
+import { ClientePuente } from './lib/wa-puente.mjs';
 import fs from 'fs';
 import path from 'path';
 import { execFile } from 'child_process';
@@ -48,7 +47,6 @@ import { leerPedido } from './lib/pedido-amistoso.mjs';
 import { equiposEG } from './lib/espacio-gamer.mjs';
 import { cambiarAmistoso } from './lib/amistoso-cambiar.mjs';
 
-const { Client, LocalAuth } = wweb;
 const PRUEBA = process.argv.includes('--prueba');
 const AUTO = process.argv.includes('--auto');
 const TODOS = ['22:40', '23:00', '23:20', '23:40'];
@@ -249,47 +247,13 @@ async function cargarEnSitio(p) {
 
 // ── WhatsApp ────────────────────────────────────────────────────────────────
 const CHROME = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'].find(p => p && fs.existsSync(p));
-const client = new Client({
-  authStrategy: new LocalAuth({ dataPath: path.join(ROOT, 'scripts', '.wa-personal') }),
-  authTimeoutMs: 120000,
-  puppeteer: { headless: true, executablePath: CHROME, protocolTimeout: 180000, handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false,
-    args: ['--no-first-run', '--disable-extensions', '--disable-gpu'] },
-});
+// Conexión (Juan, 2026-11-20: "que el bot de amistosos conecte a través de la vinculación con consultorio, es el mismo
+// número; cuando necesite al bot lo vinculo por ahí"): ya no tiene sesión propia (scripts/.wa-personal quedó sin uso).
+// Usa el puente del consultorio (PracticeMCS/puente-wa) por su acceso local; nunca muestra QR. Si el consultorio está
+// desvinculado, lo anota y sale 0 (el vigilante no lo relanza): se vincula desde consultorio → WhatsApp → Vincular con QR.
+const client = new ClientePuente();
 let yo = null, yoLid = null, grupoId = null;
 
-// QR (Juan, 2026-11-20: "que no aparezca más el QR en la pantalla como un pop up"): sin sesión, el bot NO abre ventanas
-// ni sigue generando códigos; lo anota y termina (salida 0: el vigilante no lo relanza). Para vincular a propósito:
-//   node scripts/amistosos.mjs --vincular   → recién ahí muestra el QR.
-const VINCULAR = process.argv.includes('--vincular');
-client.on('qr', async qr => {
-  if (!VINCULAR) {
-    log('la sesión de WhatsApp está desvinculada: no abro el QR. Para vincular: node scripts/amistosos.mjs --vincular');
-    try { await client.destroy(); } catch {}
-    process.exit(0);
-  }
-  const png = path.join(DIR, 'qr-vincular.png');
-  await QRCode.toFile(png, qr, { width: 420, margin: 2 });
-  log('Escaneá el QR con tu celular: WhatsApp → Dispositivos vinculados → Vincular un dispositivo. Imagen:', png);
-  if (process.platform === 'win32') execFile('cmd', ['/c', 'start', '', png]);
-});
-client.on('authenticated', () => { log('sesión autenticada'); cerrarNovedades(); });
-// WhatsApp Web a veces muestra "Novedades en WhatsApp Web" con un botón Continuar: mientras está
-// abierta, el bot nunca queda listo (2026-10-08 quedó colgado así). Se cierra sola durante 5 min.
-async function cerrarNovedades() {
-  for (let i = 0; i < 60 && !yo; i++) {
-    await new Promise(r => setTimeout(r, 5000));
-    try {
-      const ok = await client.pupPage.evaluate(() => {
-        const d = document.querySelector('[role=dialog]') || document.body;
-        if (!/novedades|what.?s new/i.test(d.innerText || '')) return false;
-        const b = [...d.querySelectorAll('button,[role=button]')].find(e => /^(continuar|continue|ok|entendido)$/i.test(e.innerText.trim()));
-        if (b) b.click();
-        return !!b;
-      });
-      if (ok) log('cerré la ventana de novedades de WhatsApp Web');
-    } catch (e) {}
-  }
-}
 client.on('auth_failure', m => log('fallo de autenticación:', m));
 client.on('disconnected', r => { log('desconectado:', r); process.exit(1); });
 
@@ -899,15 +863,12 @@ process.on('SIGINT', async () => { try { await client.destroy(); } catch {} proc
 
 // Al recuperar la sesión, WhatsApp Web a veces recarga la página mientras se inyecta el bot
 // ("Execution context was destroyed"): reintentar el arranque.
-async function iniciar(intento = 1) {
-  log('iniciando WhatsApp personal', PRUEBA ? '(MODO PRUEBA)' : '', intento > 1 ? '— intento ' + intento : '');
+async function iniciar() {
+  log('conectando al WhatsApp del consultorio', PRUEBA ? '(MODO PRUEBA)' : '');
   try { await client.initialize(); }
   catch (e) {
-    if (intento >= 4) { log('no pude iniciar WhatsApp:', e.message.split('\n')[0]); process.exit(1); }
-    log('falló el arranque (' + e.message.split('\n')[0].slice(0, 80) + '), reintento en 5 s');
-    try { await client.destroy(); } catch {}
-    await new Promise(r => setTimeout(r, 5000));
-    return iniciar(intento + 1);
+    if (e.desvinculado) { log('WhatsApp desvinculado en el consultorio: no arranco. Vincular desde consultorio → WhatsApp → "Vincular con QR".'); process.exit(0); }
+    log('no pude conectar:', String(e.message).split(/\r?\n/)[0]); process.exit(1);
   }
 }
 process.on('unhandledRejection', e => log('error no manejado:', String(e && e.message || e).split('\n')[0]));
