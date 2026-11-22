@@ -1495,6 +1495,154 @@
       "letraFinal": "[intro - female]\nDust motes fall, a silver grace\nLost in the dark, a fading trace\n\n[verse - male rap]\nConcrete bloom, a fractured sign\nStatic whispers in the wire\nShadows lengthen, intertwine\nA hollow echo, burning higher\nPulse beneath the fractured stone\nMelting edges, blurred and deep\nA silent claim of space unknown, secrets that the darkness keep\n\n[chorus - female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[verse - male rap]\nTwo cups of porcelain coal, a vacant room, a muted plea\nThe weight of stories untold\nA fragile ghost stares back at me\nThis resonance a blinding plea\nA fever dream a stolen sigh\nThe ghost of you surrounding me\nBeneath a bruised and fading sky\n\n[chorus - male & female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[bridge - female]\nA single breath, a silent plea\nLost in the current, wild and free\n\n[chorus - female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[chorus - male & female]\nWhere I am, you begin\nA tangled thread, a blurred skin\n\n[outro - female]\nOh yeah, you begin\nThe tangled thread of the skin",
       "publicado": false,
       "descartado": true
+    },
+    {
+      "fecha": "2026-11-15",
+      "slug": "hungry-halo",
+      "titulo": "Hungry Halo",
+      "concepto": "Tenés casi todo lo que alguna vez pediste y aun así seguís con hambre, y esa sed te pesa como una traición a lo que ya te salvó.",
+      "rasgo": "culpa por querer más",
+      "voz": "dúo: ella abre aireada en falsete, él rapea grave y rasposo, ella vuelve solo en el estribillo y el puente",
+      "captionInstrumental": "dark trap, cinematic trap, smoky detuned saxophone loop, half-time drums, clap on beat three, deep sliding 808 bass, rolling hi-hat triplets and stutters, low sub drones, vinyl warmth, long dark reverb, sparse, sultry, menacing, 134 BPM, F minor",
+      "captionVoces": "male rapper leads, low gravelly voice, confident behind-the-beat flow, restrained menace; female voice only on intro, hook and bridge, airy breathy falsetto, haunting, reverb-soaked",
+      "bpm": 134,
+      "tonalidad": "F minor",
+      "duracion": 138,
+      "estructura": [
+        "intro",
+        "verse",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "chorus"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 7.16,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 7.16,
+          "fin": 35.82,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 35.82,
+          "fin": 50.15,
+          "compases": 8
+        },
+        {
+          "nombre": "verse",
+          "inicio": 50.15,
+          "fin": 78.81,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 78.81,
+          "fin": 93.13,
+          "compases": 8
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 93.13,
+          "fin": 114.63,
+          "compases": 12
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 114.63,
+          "fin": 136.12,
+          "compases": 12
+        }
+      ],
+      "beat": "saxo ahumado y desafinado (tres voces desfasadas, soplido, cinta) que sube y",
+      "instrumental": "codigo",
+      "letra": "[intro - female]\nDust settles slow\nA gilded glow\n\n[verse - male rap]\nChrome reflections bleed across the floor\nAnother dawn cracks through the velvet drape\nThese phantom echoes linger at the door\nA hollow kingdom built on borrowed shape\nThe weight of diamonds pressing on my chest\nA silent anthem playing in the gloom\nEach whispered promise put me to the test\nA shadowed blessing sealed within this room\nI trace the patterns etched within the glass\nA thousand sunsets painted on the wall\nThis opulent prison built to last\nResponding to a need I can’t recall\n\n[chorus - female]\nHungry halo\nStarving in the glow\n\n[verse - male rap]\nThe polished marble cold beneath my feet\nA vacant stillness stretches out ahead\nThe taste of triumph bittersweet\nA hunger lingering, a ghost instead\nThese endless corridors, a winding maze\nEach perfect detail sharpens every doubt\nLost in the echo of forgotten days\nA silent question screaming from without\nThe scent of jasmine clinging to the air\nA fragile beauty masking deep despair\nThe empty spaces whisper everywhere\nA vacant promise hanging in the glare\n\n[chorus - female]\nHungry halo\nStarving in the glow\n\n[bridge - female]\nThe price of wanting more\nA gilded chain to explore\nA hollow, hungry sign\nWhat’s left of mine?\n\n[chorus - female]\nHungry halo\nStarving in the glow\nHungry halo\nStarving in the glow",
+      "letraPor": "claude",
+      "avisosRima": [
+        "\"Starving in the glow\" — la frase cierra con \"glow\", que no rima (por sonido) con el cierre anterior del esquema",
+        "\"Starving in the glow\" — la frase cierra con \"glow\", que no rima (por sonido) con el cierre anterior del esquema"
+      ]
+    },
+    {
+      "fecha": "2026-11-22",
+      "slug": "swallowed-words",
+      "titulo": "Swallowed Words",
+      "concepto": "Es esa sensación de achicarte hasta casi desaparecer: te tragás lo que sentís, bajás la voz y te vas borrando de a poco, todo para que no se rompa la calma de lo que amás.",
+      "rasgo": "autoborrarse para mantener la paz",
+      "voz": "dúo: él contenido y grave, con flow entrecortado; ella abre la canción y vuelve en el estribillo, lejana y aireada, en voz de cabeza",
+      "captionInstrumental": "dark trap, hypnotic trap, muted dark kalimba loop, half-time drums, clap on beat three, deep gliding 808 bass, tight hi-hat rolls and triplets, low muffled sub swells, soft room hiss, sparse, hushed, menacing, seductive, nocturnal, 146 BPM, Bb minor",
+      "captionVoces": "Male rapper leads, low restrained voice, clipped half-muted flow, tense pauses; airy, distant female voice on intro and hook, soft breathy head voice, haunting",
+      "bpm": 146,
+      "tonalidad": "Bb minor",
+      "duracion": 140,
+      "estructura": [
+        "intro",
+        "verse",
+        "chorus",
+        "verse",
+        "chorus",
+        "bridge",
+        "outro"
+      ],
+      "secciones": [
+        {
+          "nombre": "intro",
+          "inicio": 0,
+          "fin": 6.58,
+          "compases": 4
+        },
+        {
+          "nombre": "verse",
+          "inicio": 6.58,
+          "fin": 32.88,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 32.88,
+          "fin": 59.18,
+          "compases": 16
+        },
+        {
+          "nombre": "verse",
+          "inicio": 59.18,
+          "fin": 85.48,
+          "compases": 16
+        },
+        {
+          "nombre": "chorus",
+          "inicio": 85.48,
+          "fin": 111.78,
+          "compases": 16
+        },
+        {
+          "nombre": "bridge",
+          "inicio": 111.78,
+          "fin": 124.93,
+          "compases": 8
+        },
+        {
+          "nombre": "outro",
+          "inicio": 124.93,
+          "fin": 138.08,
+          "compases": 8
+        }
+      ],
+      "beat": "\"palabras tragadas\" — la misma llamada de kalimba muteada; en los versos se",
+      "instrumental": "codigo",
+      "letra": "[intro - female]\nShh, don't wake the house\n\n[verse - male rap]\nSocks on the hallway, I know which boards complain\nHand on the kettle 'fore it learns to scream\nSentence climbs my throat, I chew it, send it down\nDim my face on a switch, keep the room a dream\nPlates stacked quiet, nothing clinks, nothing's wrong\nCoat on the chair holds the last of my shape\nMouth full of glass but I'm chewing it slow\nSwallow it whole, no one sees the escape\n\n[chorus - male]\nI hush it down, I hush it down\nFolded small so there's no sound\nSmaller by the inch, the lights stay low\nPeace is loud when nobody says no\n\n[chorus - female]\nSwallowed words, I let them sink\nQuiet's all you'll hear me think\n\n[chorus - male]\nGone by degrees, the room stays warm\nI'm the quiet inside the storm\n\n[verse - male rap]\nName on the mailbox, the ink going pale\nChair at the table that I slide out for you\nSay I'm not hungry, I ate on the way\nVoice down to a hum, like a draft slipping through\nPhone face-down so the light won't wake the night\nI rehearse the whole truth in the shower steam\nFinger on the mirror, watch it fade away\nRoom stays warm, I'm thinning like a dream\n\n[chorus - male]\nI hush it down, I hush it down\nFolded small so there's no sound\nSmaller by the inch, the lights stay low\nPeace is loud when nobody says no\n\n[chorus - female]\nSwallowed words, I let them sink\nQuiet's all you'll hear me think\n\n[chorus - male]\nGone by degrees, the room stays warm\nI'm the quiet inside the storm\n\n[bridge - female]\nWhat if one word slipped out loud\nWould the ceiling crack and show its bones\nHeavy under my tongue like a coin\nI swallow it, I let it sink like stones\n\n[outro - male]\nSay nothing. Say it soft. Say nothing.",
+      "letraPor": "claude",
+      "audio": "musica/thrive/swallowed-words.mp3?v=mwrfgfen",
+      "generado": "2026-11-22T05:59:52.319Z",
+      "letraFinal": "[intro - female]\nShh, don't wake the house\n\n[verse - male rap]\nSocks on the hallway, I know which boards complain\nHand on the kettle 'fore it learns to scream\nSentence climbs my throat, I chew it, send it down\nDim my face on a switch, keep the room a dream\nPlates stacked quiet, nothing clinks, nothing's wrong\nCoat on the chair holds the last of my shape\nMouth full of glass but I'm chewing it slow\nSwallow it whole, no one sees the escape\n\n[chorus - male]\nI hush it down, I hush it down\nFold it small, so there's no sound\nSmaller by the inch, the lights stay low\nPeace is loud, but nobody says no\n\n[chorus - female]\nSwallowed words, I let them sink\nQuiet so you hear me think\n\n[chorus - male]\nGone by the breeze, the room stays warm\nGone by the breeze, the room stays warm\nI'm the quiet inside this storm\n\n[verse - male rap]\nName on the mailbox, stickin' gold pill\nChair at the table, say I'm not hungry\nSay I'm none of me, I ate on the way\nVoice down to a hum, like a draft slipping through\nPhone face-down so the light won't wake the night\nI rehearse the whole truth in the shower steam\nFinger on the mirror, watch it fade away\nRoom stays warm, I'm thinning like a dream\n\n[chorus - male]\nI hush it down, I hush it down\nFold it small, so there's no sound\nSmaller by the inch, the lights stay low\nPeace is loud, nobody says no\nEveryone\n\n[chorus - female]\nSwallowed words, I let them sink\nQuiet so you hear me think\n\n[chorus - male]\nGone by the breeze, the room stays warm\nI'm the quiet inside the storm\n\n[bridge - female]\nBut if one word slipped out loud\nSit down love\nWith the ceiling cracking\nShow his bones\nHeavy under\nLike a coin I swallow it, I let it sink like stones\n\n[outro - male]\nSay nothing, say it's hard\nSay nothing",
+      "publicado": false
     }
   ]
 }
