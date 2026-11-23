@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "¿Era penal? El VAR lo decidís vos": jugada real a velocidad normal, revisión en cámara lenta dentro de un monitor,
+     cuenta de 5 con SÍ / NO, pausa en negro y la revelación (lo que cobró el juego + el penal pateado). Al final, "¿Acertaste?".
+     Escenas: 0 jugada · 1 revisión · 2 cuenta · 3 negro · 4 revelación · 5 cierre. Todo sale de t (determinístico).
+     Coordenadas en píxeles del video original (1280x720); los cuadros en disco van a D.K veces ese tamaño.
+     Franja de arriba (0-170) libre: ahí va el rótulo del tema. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4;--loss:#e5484d;--win:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+canvas{position:absolute;inset:0;width:1080px;height:1920px}
+.capa{position:absolute;left:0;right:0;text-align:center;will-change:transform,opacity}
+#kicker{top:236px;font:800 44px/1 'Barlow Condensed';letter-spacing:.16em;color:var(--gold2);text-shadow:0 3px 18px rgba(0,0,0,.8)}
+#grande{top:1556px;font-family:'Bebas Neue';font-size:232px;line-height:.9;text-shadow:0 10px 50px rgba(0,0,0,.75)}
+#sub{top:1782px;font:800 50px/1 'Barlow Condensed';letter-spacing:.04em;color:var(--text);opacity:.92}
+#titulo{top:262px;font-family:'Bebas Neue';font-size:168px;line-height:.9;text-shadow:0 8px 40px rgba(0,0,0,.7)}
+#titulo small{display:block;font:800 44px/1.2 'Barlow Condensed';letter-spacing:.12em;color:var(--gold2)}
+#pregunta{top:1240px;padding:0 70px;font:800 76px/1.04 'Barlow Condensed';text-shadow:0 4px 24px rgba(0,0,0,.8)}
+#cuenta{top:230px;font-family:'Bebas Neue';font-size:270px;line-height:1}
+#votos{position:absolute;left:70px;right:70px;top:1236px;display:flex;gap:40px}
+.voto{flex:1;height:250px;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,10,10,.72);box-shadow:inset 0 0 0 4px var(--c);will-change:transform}
+.voto b{font-family:'Bebas Neue';font-weight:400;font-size:190px;line-height:.86;color:var(--c)}
+.voto i{font:800 34px 'Barlow Condensed';font-style:normal;letter-spacing:.14em;color:var(--text);opacity:.85}
+#comenta{top:1660px;font:800 54px/1 'Barlow Condensed';letter-spacing:.06em;color:var(--gold2)}
+#negro{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px}
+#negro .a{font-family:'Bebas Neue';font-size:150px;line-height:.92;text-align:center}
+#negro .b{font:800 56px 'Barlow Condensed';letter-spacing:.14em;color:var(--gold2)}
+#sello{top:1530px;font-family:'Bebas Neue';font-size:290px;line-height:.86;color:var(--gold2);text-shadow:0 10px 60px rgba(0,0,0,.8)}
+#sello small{display:block;font-size:110px;color:var(--text)}
+#pateo{top:1560px}
+#pateo .a{font:800 50px 'Barlow Condensed';letter-spacing:.16em;color:var(--gold2)}
+#pateo .b{font:800 112px/1.05 'Barlow Condensed';color:var(--text);text-shadow:0 6px 30px rgba(0,0,0,.8)}
+#pateo .c{font-family:'Bebas Neue';font-size:150px;line-height:1;color:var(--gold2)}
+#cierre{position:absolute;inset:0}
+#c1{top:640px;font-family:'Bebas Neue';font-size:250px;line-height:.9;text-shadow:0 10px 60px rgba(0,0,0,.8)}
+#c2{top:900px;padding:0 90px;font:800 60px/1.15 'Barlow Condensed';color:var(--text)}
+#esc{position:absolute;left:50%;top:1300px;height:250px;margin-left:-112px;will-change:transform,opacity}
+#destello{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <canvas id="fondo" width="1080" height="1920"></canvas>
+  <canvas id="marcas" width="1080" height="1920"></canvas>
+  <div id="kicker" class="capa"></div>
+  <div id="titulo" class="capa"></div>
+  <div id="cuenta" class="capa"></div>
+  <div id="pregunta" class="capa"></div>
+  <div id="votos"><div class="voto" style="--c:var(--win)"><b>SÍ</b><i>ERA PENAL</i></div><div class="voto" style="--c:var(--loss)"><b>NO</b><i>SIGA, SIGA</i></div></div>
+  <div id="comenta" class="capa"></div>
+  <div id="grande" class="capa"></div>
+  <div id="sub" class="capa"></div>
+  <div id="sello" class="capa"></div>
+  <div id="pateo" class="capa"><div class="a"></div><div class="b"></div><div class="c"></div></div>
+  <div id="cierre"><div id="c1" class="capa"></div><div id="c2" class="capa"></div><img id="esc"></div>
+  <div id="negro"><div class="a"></div><div class="b"></div></div>
+  <div id="destello"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const eIO = p => { p = clamp(p); return p * p * (3 - 2 * p); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const W = 1080, H = 1920;
+const fondo = $('#fondo').getContext('2d'), marcas = $('#marcas').getContext('2d');
+fondo.imageSmoothingQuality = 'high';
+let D, cache = new Map();
+
+async function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const i = new Image(); i.src = src; await i.decode();
+  if (cache.size > 16) cache.delete(cache.keys().next().value);
+  cache.set(src, i);
+  return i;
+}
+function tabla(k, x, col = 1) {
+  if (x <= k[0][0]) return k[0][col];
+  for (let i = 1; i < k.length; i++) if (x <= k[i][0]) return lerp(k[i - 1][col], k[i][col], eIO((x - k[i - 1][0]) / (k[i][0] - k[i - 1][0])));
+  return k[k.length - 1][col];
+}
+// Cuadro del tramo `tr` en el segundo `seg` del video original (mezcla los dos cuadros vecinos: cámara lenta sin saltos)
+async function cuadro(tr, seg) {
+  const f = clamp((seg - tr.desde) * D.fps, 0, tr.n - 1), a = Math.floor(f), b = Math.min(tr.n - 1, a + 1);
+  const nom = k => `${tr.dir}/${String(k + 1).padStart(4, '0')}.jpg`;
+  return { a: await img(nom(a)), b: await img(nom(b)), m: f - a };
+}
+// Dibuja la ventana (cx, cy, ancho en px de video) del cuadro en el rectángulo de pantalla r = [x, y, w, h]
+function ventana(ctx, c, cx, cy, ancho, r, filtro = 'none') {
+  const alto = ancho * r[3] / r[2], K = D.K;
+  const x = clamp(cx - ancho / 2, 0, 1280 - ancho), y = clamp(cy - alto / 2, 0, 720 - alto);
+  ctx.save(); ctx.filter = filtro;
+  ctx.drawImage(c.a, x * K, y * K, ancho * K, alto * K, r[0], r[1], r[2], r[3]);
+  if (c.m > .02) { ctx.globalAlpha = c.m; ctx.drawImage(c.b, x * K, y * K, ancho * K, alto * K, r[0], r[1], r[2], r[3]); }
+  ctx.restore();
+}
+// Fondo esmerilado: el mismo cuadro, grande, desenfocado y oscuro (sin barras negras)
+function esmerilado(c, cx, oscuro = .34) { ventana(fondo, c, cx, 360, 405, [0, 0, W, H], `blur(26px) brightness(${oscuro})`); }
+// Franja principal: el cuadro con su altura completa (720 px de video → BANDA px de pantalla)
+const BANDA = [0, 420, 1080, 1100];
+function franja(c, cx, sac = 0) {
+  esmerilado(c, cx);
+  const r = [BANDA[0] + sac, BANDA[1], BANDA[2], BANDA[3]];
+  ventana(fondo, c, cx, 368, 1080 * 616 / 1100, r);   // 616 de alto: afuera quedan el overlay de la transmisión y el HUD de abajo
+  // bordes suaves arriba y abajo de la franja
+  for (const [y, dir] of [[BANDA[1], 1], [BANDA[1] + BANDA[3], -1]]) {
+    const g = fondo.createLinearGradient(0, y, 0, y + dir * 90);
+    g.addColorStop(0, 'rgba(5,5,5,.85)'); g.addColorStop(1, 'rgba(5,5,5,0)');
+    fondo.fillStyle = g; fondo.fillRect(0, Math.min(y, y + dir * 90), W, 90);
+  }
+}
+function golpe(el, t, en, de = 1.5, dur = .24) { const p = eOut((t - en) / dur); el.style.transform = `scale(${lerp(de, 1, p)})`; el.style.opacity = clamp((t - en) / .07); }
+function entra(el, t, en, de = 40) { const p = eOut((t - en) / .3); el.style.opacity = clamp((t - en) / .1); el.style.transform = `translateY(${(1 - p) * de}px)`; }
+function ver(sel, on = true) { $(sel).style.display = on ? '' : 'none'; }
+
+// Monitor de revisión: marco, esquinas, REC, velocidad, líneas de barrido
+const MON = [44, 500, 992, 640];
+function monitor(c, cam, t, vel) {
+  const [x, y, w, h] = MON, m = marcas, b = 16;
+  fondo.save(); fondo.fillStyle = '#0b0b0b'; fondo.shadowColor = 'rgba(0,0,0,.7)'; fondo.shadowBlur = 60;
+  fondo.beginPath(); fondo.roundRect(x - b, y - b, w + 2 * b, h + 2 * b + 54, 26); fondo.fill(); fondo.restore();
+  ventana(fondo, c, cam.cx, cam.cy, cam.ancho, [x, y, w, h], 'contrast(1.06) saturate(.92)');
+  m.save();
+  m.beginPath(); m.rect(x, y, w, h); m.clip();
+  m.fillStyle = 'rgba(0,0,0,.16)'; for (let yy = y + ((t * 90) % 6); yy < y + h; yy += 6) m.fillRect(x, yy, w, 2);
+  const g = m.createRadialGradient(x + w / 2, y + h / 2, h * .35, x + w / 2, y + h / 2, w * .72);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.5)'); m.fillStyle = g; m.fillRect(x, y, w, h);
+  m.restore();
+  // esquinas de encuadre
+  m.save(); m.strokeStyle = '#F7F2E4'; m.lineWidth = 6; m.globalAlpha = .9;
+  const e = 54, p = 26;
+  for (const [cx, cy, sx, sy] of [[x + p, y + p, 1, 1], [x + w - p, y + p, -1, 1], [x + p, y + h - p, 1, -1], [x + w - p, y + h - p, -1, -1]]) {
+    m.beginPath(); m.moveTo(cx, cy + sy * e); m.lineTo(cx, cy); m.lineTo(cx + sx * e, cy); m.stroke();
+  }
+  m.restore();
+  // barra inferior del monitor
+  m.save(); m.font = "800 34px 'Barlow Condensed'"; m.textBaseline = 'middle';
+  const yb = y + h + 27;
+  if (Math.floor(t * 2.2) % 2 === 0) { m.fillStyle = '#e5484d'; m.beginPath(); m.arc(x + 18, yb, 11, 0, 7); m.fill(); }
+  m.fillStyle = '#F7F2E4'; m.textAlign = 'left'; m.fillText('REVISIÓN · REPETICIÓN', x + 42, yb);
+  m.textAlign = 'right'; m.fillStyle = '#E6CF85'; m.fillText(vel, x + w - 4, yb);
+  m.restore();
+}
+
+async function pintar(datos) {
+  D = datos;
+  $('#esc').src = D.escudo;
+  await document.fonts.ready;
+  await Promise.all(["800 34px 'Barlow Condensed'", "60px 'Bebas Neue'", "700 36px Barlow"].map(f => document.fonts.load(f)));
+  return 6;
+}
+
+function ocultarTodo() {
+  for (const s of ['#kicker', '#titulo', '#cuenta', '#pregunta', '#votos', '#comenta', '#grande', '#sub', '#sello', '#pateo', '#cierre', '#negro']) ver(s, false);
+  $('#destello').style.opacity = 0;
+  marcas.clearRect(0, 0, W, H);
+  fondo.fillStyle = '#050505'; fondo.fillRect(0, 0, W, H);
+}
+
+// 0 · La jugada a velocidad normal, con la pregunta
+async function jugada(t, o) {
+  const J = D.jugada, seg = J.desde + t;
+  const c = await cuadro(J, seg);
+  const entrada = 1 - eOut(t / .3);
+  franja(c, tabla(J.cam, seg), entrada * 60);
+  $('#destello').style.opacity = entrada * .35;
+  if (o?.sinTexto) return;
+  ver('#kicker'); $('#kicker').innerHTML = D.textos.kicker; entra($('#kicker'), t, .1, -20);
+  ver('#grande'); $('#grande').innerHTML = D.textos.pregunta; golpe($('#grande'), t, .05, 1.45);
+  ver('#sub'); $('#sub').innerHTML = D.textos.contesta; entra($('#sub'), t, .5, 30);
+}
+
+// Cámara del monitor durante la revisión (y la cuenta): se acerca despacio al lío
+const camMon = seg => ({ cx: tabla(D.rev.cam, seg, 1), cy: tabla(D.rev.cam, seg, 2), ancho: tabla(D.rev.cam, seg, 3) });
+
+// 1 · Revisión en cámara lenta
+async function revision(t, o) {
+  const R = D.rev, seg = R.desde + t * R.vel;
+  const c = await cuadro(D.jugada, seg);
+  esmerilado(c, 760, .3);
+  const llega = eOut(t / .35);
+  monitor(c, camMon(seg), t, `CÁMARA LENTA ×${R.vel.toFixed(1).replace('.', ',')}`);
+  $('#destello').style.opacity = clamp(1 - t / .14) * .45;
+  if (o?.sinTexto) return;
+  ver('#titulo'); $('#titulo').innerHTML = `REVISIÓN<small>${D.textos.revision}</small>`;
+  $('#titulo').style.opacity = llega; $('#titulo').style.transform = `scale(${lerp(1.25, 1, llega)})`;
+  ver('#pregunta'); $('#pregunta').innerHTML = D.textos.duda; entra($('#pregunta'), t, .6, 40);
+}
+
+// 2 · Cuenta de 5 con SÍ / NO; el monitor sigue el lío en súper lenta
+async function cuenta(t) {
+  const R = D.rev, tk = D.T.tick, seg = R.lazo[0] + (R.lazo[1] - R.lazo[0]) * clamp(t / (5 * tk));
+  const c = await cuadro(D.jugada, seg);
+  esmerilado(c, 760, .26);
+  monitor(c, camMon(seg), t, 'CÁMARA SÚPER LENTA');
+  const u = t / tk, n5 = Math.max(1, 5 - Math.floor(u)), f = u % 1;
+  ver('#cuenta'); const cu = $('#cuenta');
+  cu.textContent = n5; cu.style.color = n5 <= 2 ? '#E6CF85' : '#F7F2E4';
+  cu.style.transform = `scale(${1 + .3 * Math.max(0, 1 - f / .28)})`; cu.style.opacity = 1;
+  ver('#votos'); const vs = [...document.querySelectorAll('.voto')];
+  vs.forEach((v, i) => { const p = eOut((t - i * .08) / .3); v.style.transform = `translateY(${(1 - p) * 120}px) scale(${1 + .04 * Math.max(0, 1 - f / .25) * (u > 2 ? 1 : 0)})`; v.style.opacity = clamp((t - i * .08) / .12); });
+  ver('#comenta'); $('#comenta').innerHTML = D.textos.comenta; entra($('#comenta'), t, .35, 20);
+}
+
+// 3 · Pausa en negro
+function negro(t) {
+  ver('#negro'); const n = $('#negro');
+  n.querySelector('.a').innerHTML = D.textos.negro[0]; n.querySelector('.b').innerHTML = D.textos.negro[1];
+  n.querySelector('.a').style.opacity = clamp((t - .08) / .12); n.querySelector('.b').style.opacity = clamp((t - .35) / .15);
+}
+
+// 4 · Revelación: el árbitro pita, la amarilla y el penal pateado
+async function revelacion(t, o) {
+  const V = D.revela;
+  let k = 0, ini = 0;
+  while (k < V.tramos.length - 1 && t >= ini + V.tramos[k].dur) { ini += V.tramos[k].dur; k++; }
+  const tr = V.tramos[k], tl = t - ini, c = await cuadro(tr, tr.desde + tl);
+  const sac = tl < .18 && k < 2 ? Math.sin(tl * 80) * 18 * (1 - tl / .18) : 0;
+  franja(c, tr.cx, sac);
+  $('#destello').style.opacity = k < 2 ? clamp(1 - tl / .12) * .6 : 0;
+  if (o?.sinTexto) return;
+  ver('#kicker'); $('#kicker').innerHTML = D.textos.cobro; $('#kicker').style.opacity = 1; $('#kicker').style.transform = '';
+  if (k < 2) {
+    ver('#sello'); $('#sello').innerHTML = `PENAL${k === 1 ? '<small>Y AMARILLA</small>' : ''}`;
+    if (k === 0) golpe($('#sello'), tl, .02, 1.7, .22); else { $('#sello').style.opacity = 1; $('#sello').style.transform = ''; }
+  } else {
+    const g = tl - V.golEn;
+    ver('#pateo'); const p = $('#pateo');
+    p.querySelector('.a').textContent = 'LO PATEÓ'; p.querySelector('.b').textContent = D.textos.pateador;
+    p.querySelector('.c').textContent = g > 0 ? D.textos.gol : '';
+    entra(p, tl, 0, 40);
+    if (g > 0) { $('#destello').style.opacity = clamp(1 - g / .14) * .45; golpe(p.querySelector('.c'), g, 0, 1.6); }
+  }
+}
+
+// 5 · Cierre
+async function cierre(t) {
+  const tr = D.revela.tramos[D.revela.tramos.length - 1], c = await cuadro(tr, tr.desde + D.revela.golEn + .35);
+  ventana(fondo, c, tr.cx, 360, 405 - t * 18, [0, 0, W, H], 'blur(10px) brightness(.4)');
+  ver('#cierre');
+  ver('#c1'); $('#c1').innerHTML = D.textos.cierre[0]; golpe($('#c1'), t, .05, 1.4);
+  ver('#c2'); $('#c2').innerHTML = D.textos.cierre[1]; entra($('#c2'), t, .5, 30);
+  entra($('#esc'), t, .85, 20);
+}
+
+async function mostrar(n, t, o) {
+  ocultarTodo();
+  if (n === 0) return jugada(t, o);
+  if (n === 1) return revision(t, o);
+  if (n === 2) return cuenta(t);
+  if (n === 3) return negro(t);
+  if (n === 4) return revelacion(t, o);
+  return cierre(t);
+}
+</script>
+</body>
+</html>
