@@ -8,12 +8,15 @@
 //     pelota parada en fuentes/goles/*/source.mp4; los resúmenes de EA leídos dan 0 penales y la otra serie de penales,
 //     19/10, es una definición, no una jugada). Es del 4/11 contra HYT (fuentes/goles/vvivo-2026-11-04, 56:10–56:44 del
 //     vivo): enredo con varios en el piso justo sobre la línea del área de ellos, minuto 45 (el del cartel de la amarilla).
-//     El juego cobró penal y amarilla para FODEN (HYT); lo pateó el 22, Lil_Dekuroko, y entró: 1-1 (marcador del vigía).
+//     El juego cobró penal y amarilla para FODEN (HYT); lo pateó NicoBJ_96 (en el juego lleva el 11: último cartel de
+//     pateador antes del remate + etiqueta junto a la pelota + su look, decolorado con barba) y entró: 1-1 (saque del medio).
+//     Ojo: el primer cartel de pateador dice LILDEKUROKO y el 22 se para en el punto, pero después cambia.
 //   - El guion decía "área nuestra, minuto 70": se cambia por lo real (área de ellos, minuto 45). La duda es genuina:
 //     el contacto es en la línea del área, entre cuatro jugadores.
 //   - Ese partido no está en seed_matches.js (no es del calendario oficial): no se nombra la liga ni el resultado final,
 //     solo lo que se ve en la grabación.
-//   - No se nombra a quién le hicieron la falta (no se distingue con certeza en el lío); el protagonista es el que pateó.
+//   - No se dice a quién le hicieron la falta (no se distingue con certeza en el lío); el protagonista es el que pateó,
+//     que aparece en la escena del árbitro tras el pitazo (por eso los textos lo ponen "en el lío", sin revelar el penal).
 //   - Sin voz (lo pide el guion: es un juego para opinar). El audio del vivo no se usa (puede tener voces de la
 //     transmisión): música + efectos sintetizados, con el silbato en la revelación.
 //   - Sin Facebook: no está en las redes del guion.
@@ -99,7 +102,7 @@ const total = escenas.reduce((s, e) => s + e.dur, 0);
 log(`Tema: ${tema.titulo} · beat ${B.toFixed(2)} s · tick ${T.tick.toFixed(2)} s · cámara lenta ×${REV.vel} · total ${total.toFixed(1)} s`);
 if (T.tick < .85 || T.tick > 1.25) log(`  ojo: el tick da ${T.tick.toFixed(2)} s, lejos del segundo que promete la cuenta`);
 
-const PATEADOR = 'Lil_Dekuroko';
+const PATEADOR = 'NicoBJ_96';
 const datos = {
   K, fps: FPS, T, escudo: archivo(path.join(ROOT, 'logos/rebrand/Clean logo Dorado.png')),
   jugada: tr.jugada, rev: REV,
@@ -225,20 +228,20 @@ const lote = {
   id: ID, tipo: 'viral', creado: new Date().toISOString(), idea: { lote: 'viral-guiones-2026-11-23', pieza: 'alt-penal' },
   titulo: '¿Era penal? El VAR lo decidís vos', piezas: [
     pieza({ id: 'ig-reel', red: 'instagram', formato: 'Reel · Juego de VAR', metodo: 'ig-reel',
-      texto: `¿Era penal? Jugada real de esta temporada: área de ellos, minuto 45, Lil_Dekuroko en el lío y varios en el piso sobre la línea.
+      texto: `¿Era penal? Jugada real de esta temporada: área de ellos, minuto 45, NicoBJ_96 en el lío y varios en el piso sobre la línea.
 
-Mirá la repetición en cámara lenta y decidí antes de que llegue a cero. Lo que cobró el juego está en el último segundo.
+Mirá la repetición en cámara lenta y decidí antes de que llegue a cero. Lo que cobró el juego aparece al final.
 
 SÍ o NO en los comentarios.
 
 #TopSecretFC #ProClubs #EAFC` }),
     pieza({ id: 'tiktok', red: 'tiktok', formato: 'Video · Juego de VAR', metodo: 'tiktok',
-      texto: `El VAR sos vos. Lío en el área con Lil_Dekuroko adentro: ¿penal o siga, siga? Comentá antes de ver lo que cobró el juego. #TopSecretFC #ProClubs #EAFC` }),
+      texto: `El VAR sos vos. Lío en el área con NicoBJ_96 adentro: ¿penal o siga, siga? Comentá antes de ver lo que cobró el juego. #TopSecretFC #ProClubs #EAFC` }),
     pieza({ id: 'yt-short', red: 'youtube', formato: 'Short · Juego de VAR', metodo: 'youtube',
       titulo: '¿Era penal? El VAR lo decidís vos · Top Secret FC en Pro Clubs',
-      texto: `Una jugada real de esta temporada, con Lil_Dekuroko en el área: ¿hay falta y fue adentro? Mirala en cámara lenta y decidí antes del final; lo que cobró el juego aparece recién al cierre. #Shorts #ProClubs #EAFC` }),
+      texto: `Una jugada real de esta temporada, con NicoBJ_96 en el área: ¿hay falta y fue adentro? Mirala en cámara lenta y decidí antes del final; lo que cobró el juego aparece recién al cierre. #Shorts #ProClubs #EAFC` }),
     pieza({ id: 'x-video', red: 'x', formato: 'Video · Juego de VAR', metodo: 'x-video',
-      texto: `¿Era penal? Minuto 45, Lil_Dekuroko en el lío, todo sobre la línea del área. Contestá SÍ o NO antes del final: lo que cobró el juego está en el último segundo. #TopSecretFC` }),
+      texto: `¿Era penal? Minuto 45, NicoBJ_96 en el lío, todo sobre la línea del área. Contestá SÍ o NO antes de ver lo que cobró el juego, que aparece al final. #TopSecretFC` }),
   ],
 };
 let avisos = 0;
