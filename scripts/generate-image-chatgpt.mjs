@@ -844,13 +844,16 @@ async function waitForGeneratedImage(page, excludeSrcs = [], excludeSizes = []) 
   // Snapshot de las imágenes ya presentes (adjuntos recién enviados, imágenes
   // previas del chat): la generada siempre aparece DESPUÉS de este punto, así
   // que todo lo que exista ahora queda excluido, viva donde viva en el DOM.
-  const preExisting = await page.evaluate(() => {
+  // Salvo en el primer pedido del chat (excludeSrcs vacío): ahí una imagen marcada como generada es la nuestra. El
+  // 2026-11-24 el reintento de envío demoró tanto que ya estaba lista al llegar acá, quedó excluida y se esperó en vano.
+  const preExisting = await page.evaluate(primera => {
     return [...document.querySelectorAll('img')]
+      .filter(i => !(primera && i.closest('[data-testid="generated-image-preview"]')))
       .map(i => i.src || '')
       .filter(s => s.includes('oaiusercontent') || s.includes('files.openai') ||
                    s.includes('openai.com/files') || s.includes('estuary/content') ||
                    s.startsWith('blob:'));
-  });
+  }, !excludeSrcs.length);
   excludeSrcs = [...excludeSrcs, ...preExisting];
 
   const TIMEOUT_MS  = 25 * 60 * 1000;
