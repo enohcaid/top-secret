@@ -123,24 +123,27 @@ const custom = (cal.custom || []).map((c, i) => {
   const k = `c${i}`, e = cal.edits?.[k] || {}, s = cal.suspended?.[k];
   return { ...c, ...e, date: s?.newDate || e.date || c.date, resultado: cal.results?.[k] || null };
 }).filter(c => (c.tipo || 'partido') === 'partido');
-const fixture = custom.filter(c => c.date >= HOY && oficial(c.league)).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)).slice(0, 8)
+// Fixture fijo de torneos-datos.js (RAW: VPUG Primera y otros torneos que no están en Firestore). Índice = clave de
+// cal.suspended. Antes no se leía y el 1-2 con Hacha (VPUG, 19/11) no existió para la nota del 20/11.
+const RAW_CAL = (() => {
+  const s = fs.readFileSync(path.join(ROOT, 'torneos-datos.js'), 'utf8'), i = s.indexOf('const RAW = ['), b = s.slice(i, s.indexOf('\n];', i));
+  return [...b.matchAll(/\{\s*date:'(\d{4}-\d\d-\d\d)'[^\n]*/g)].map((m, k) => {
+    const t = m[0].match(/time:'(\d\d:\d\d)'/)?.[1], rd = m[0].match(/round:(\d+)/)?.[1];
+    const x = m[0].match(/league:'(\w+)'.*?rival:'((?:[^'\\]|\\.)*)'.*?isHome:(true|false)/);
+    return x && { k, date: m[1], league: x[1], rival: x[2].replace(/\\'/g, "'"), isHome: x[3] === 'true', time: t || '', instancia: rd ? `Fecha ${rd}` : null };
+  }).filter(Boolean);
+})();
+const rawVigente = RAW_CAL.map(r => ({ ...r, ...(cal.edits?.[r.k] || {}), date: cal.suspended?.[r.k]?.newDate || cal.edits?.[r.k]?.date || r.date }));
+// Hasta el 2026-11-24 el fixture salía solo de Firestore y la nota no se enteraba de los partidos de VPUG Primera.
+const fixture = [...custom, ...rawVigente].filter(c => c.date >= HOY && oficial(c.league)).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)).slice(0, 8)
   .map(c => ({ fecha: c.date, dia: dia(c.date), hora: c.time, liga: LIGA(c.league), instancia: c.instancia || null, rival: c.rival, local: c.isHome ?? null }));
 const partidosHoy = fixture.filter(f => f.fecha === HOY);
 
 // Resultado obligatorio: partidos oficiales de ayer (o de hoy, si ya se jugaron de madrugada) en seed_matches o el calendario
 const jugadosRecientes = partidos.filter(p => p.fecha >= AYER && oficial(SEED_MATCHES.find(m => m.date === p.fecha && m.rival === p.rival)?.league));
 const mismoRival = (a, b) => a === b || (buscarEquipo(a, [{ nombre: b }])?.score || 0) >= 0.8;
-// Fixture fijo de torneos-datos.js (RAW: VPUG Primera y otros torneos que no están en Firestore). Índice = clave de
-// cal.suspended. Antes no se leía y el 1-2 con Hacha (VPUG, 19/11) no existió para la nota del 20/11.
-const RAW_CAL = (() => {
-  const s = fs.readFileSync(path.join(ROOT, 'torneos-datos.js'), 'utf8'), i = s.indexOf('const RAW = ['), b = s.slice(i, s.indexOf('\n];', i));
-  return [...b.matchAll(/\{\s*date:'(\d{4}-\d\d-\d\d)'[^\n]*/g)].map((m, k) => {
-    const x = m[0].match(/league:'(\w+)'.*?rival:'((?:[^'\\]|\\.)*)'.*?isHome:(true|false)/);
-    return x && { k, date: m[1], league: x[1], rival: x[2].replace(/\\'/g, "'"), isHome: x[3] === 'true' };
-  }).filter(Boolean);
-})();
 const delCalendario = [...custom.filter(c => c.date === AYER && oficial(c.league)),
-  ...RAW_CAL.filter(r => oficial(r.league) && (cal.suspended?.[r.k]?.newDate || r.date) === AYER)];
+  ...rawVigente.filter(r => r.date === AYER && oficial(r.league))];
 for (const c of delCalendario) {
   if (jugadosRecientes.some(p => p.fecha === AYER && mismoRival(p.rival, c.rival))) continue;
   const s = SEED_MATCHES.find(m => m.date === AYER && mismoRival(m.rival, c.rival));
@@ -154,6 +157,9 @@ if (sinResultado.length && !argv.includes('--sin-resultados')) {
   log(`Ayer hubo partido(s) sin resultado cargado (${sinResultado.map(p => `${p.liga} vs ${p.rival}`).join(', ')}): no hay nota todavía, se vuelve a mirar en el próximo horario.`);
   process.exit(0);
 }
+
+// Con --sin-resultados, lo que no tiene resultado no existe para la nota: ni como jugado ni como "sin cargar".
+for (const p of sinResultado) jugadosRecientes.splice(jugadosRecientes.indexOf(p), 1);
 
 const tablaEG = await intentar(async () => (await (await fetch(`${WORKER}/eg-table`, { signal: AbortSignal.timeout(30000) })).json())
   .map((t, i) => ({ pos: i + 1, equipo: t.name, pj: t.gp, g: t.w, e: t.d, p: t.l, gf: t.gf, gc: t.gc, pts: t.pts })));

@@ -21,6 +21,10 @@ on:
         description: Corrección de la nota de hoy ("mantener" = misma foto, "nueva" = foto nueva; vacío = rehacer)
         type: string
         default: ''
+      sin_resultados:
+        description: Escribir aunque falte un resultado de ayer (esos partidos no se nombran)
+        type: boolean
+        default: false
       prueba:
         description: Solo prueba (deja la nota en un artifact, no toca Firestore)
         type: boolean
@@ -57,10 +61,12 @@ jobs:
           NOTICIA_CORREGIR: ${{ inputs.corregir }}
           FORZAR: ${{ inputs.forzar }}
           PRUEBA: ${{ inputs.prueba }}
+          SIN_RESULTADOS: ${{ inputs.sin_resultados }}
         run: |
           ARGS=""
           if [ "$FORZAR" = "true" ]; then ARGS="$ARGS --forzar"; fi
           if [ "$PRUEBA" = "true" ]; then ARGS="$ARGS --prueba"; fi
+          if [ "$SIN_RESULTADOS" = "true" ]; then ARGS="$ARGS --sin-resultados"; fi
           node scripts/noticia-diaria.mjs $ARGS
       - name: Pedido de rehacer atendido
         if: success() && inputs.forzar && !inputs.prueba

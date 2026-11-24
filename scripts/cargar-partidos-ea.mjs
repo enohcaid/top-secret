@@ -39,6 +39,9 @@ const APLICAR = process.argv.includes('--aplicar'), COMMIT = process.argv.includ
 const { SEED_MATCHES } = await import(pathToFileURL(SEED).href + '?t=' + Date.now());
 const hist = await (await fetch(`${WORKER}/ea-historial`, { signal: AbortSignal.timeout(20000) })).json();
 
+await import('../torneos-datos.js');
+const RAW = globalThis.TSTorneos.RAW, HOY_ART = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
+
 const ids = new Set(SEED_MATCHES.map(m => m.ea_match_id).filter(Boolean));
 const triples = SEED_MATCHES.map(m => `${m.rival}|${m.date}|${m.match_result}`);
 const POS = { goalkeeper: 'PO', defender: 'DFC', midfielder: 'MC', forward: 'DC' };
@@ -62,6 +65,9 @@ function oficial(c, ea) {
   if (c.liga === 'VPUG' && c.fecha >= VPUG_PRIMERA_DESDE && filaTop && !vpugTabla?.cache) {
     const prev = cargados.filter(m => m.league === 'VPUG' && m.date >= VPUG_PRIMERA_DESDE);
     if (filaTop.gp !== prev.length + 1) return null;                    // la tabla todavía no lo cuenta (o falta otro): no se sabe
+    // si hay otra fecha ya jugada sin cargar, la diferencia de la tabla puede ser de esa y no de este partido
+    const falta = RAW.some(r => r.league === 'VPUG' && r.date >= VPUG_PRIMERA_DESDE && r.date <= HOY_ART && !(r.date === c.fecha && mismoClub(r.rival, c.rival)) && !prev.some(m => m.date === r.date && mismoClub(m.rival, r.rival)));
+    if (falta) return null;
     const [gf, gc] = prev.reduce(([a, b], m) => { const [x, y] = goles(m.match_result); return [a + x, b + y]; }, [0, 0]);
     const r = `${filaTop.gf - gf}-${filaTop.gc - gc}`;
     return /^\d+-\d+$/.test(r) ? r : null;
@@ -75,6 +81,10 @@ for (const p of [...(hist.partidos || [])].reverse()) {                 // del m
   if (!c?.rival || !c.fecha || p.sospechoso) continue;
   let res = `${p.gf}-${p.gc}`;
   if (ids.has(p.id) && p.id !== FORZAR) continue;
+  // Ya cargado con el mismo resultado de EA (p. ej. a mano desde el vivo): va antes de mirar la liga. El 2026-11-24 la
+  // diferencia de la tabla de VPUG (1-0, de Argentino de Merlo, sin cargar) se le anotó a Hacha, que ya estaba 1-2.
+  const ya = triples.indexOf(`${c.rival}|${c.fecha}|${res}`);
+  if (ya >= 0 && p.id !== FORZAR) { triples.splice(ya, 1); continue; }
   const jug = p.jugadores || [];
   const e = p.equipo || {};
   const vacio = (e.tiros || 0) === 0 && jug.filter(j => (j.pases_int || 0) > 0).length <= 2;
