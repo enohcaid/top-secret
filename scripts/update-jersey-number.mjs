@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Updates a player's current-squad (T3) jersey number across every file where it's
+// Updates a player's current-squad (T4) jersey number across every file where it's
 // duplicated, so a number change never has to be hunted down by hand again.
 //
 // Usage:
@@ -9,8 +9,7 @@
 // writes to disk if nothing conflicted (or --force was passed). No partial writes.
 //
 // Touches:
-//   - plantilla.html                         (ROSTER_T3 only — ROSTER_T2 is historical, left untouched)
-//   - convocatoria.html                      (PLAYERS array)
+//   - plantel-datos.js                       (ROSTER_T4; convocatoria takes its number from here)
 //   - scripts/generate-image-chatgpt.mjs     (PLAYER_TRAITS dorsal)
 //   - scripts/chatgpt-project-instructions.md (roster table — mirror of the live ChatGPT project;
 //     you must still paste the updated table into the ChatGPT project yourself)
@@ -42,57 +41,29 @@ const conflicts = [];
 const pendingWrites = []; // { rel, content }
 const skipped = [];       // files where the gamertag wasn't found (not every file lists everyone)
 
-/* ─── plantilla.html : ROSTER_T3 only ─── */
+/* ─── plantel-datos.js : ROSTER_T4 ─── */
 {
-  const rel = 'plantilla.html';
+  const rel = 'plantel-datos.js';
   const src = readUtf8(rel);
-  const startMarker = 'const ROSTER_T3 = [';
+  const startMarker = 'const ROSTER_T4 = [';
   const start = src.indexOf(startMarker);
-  if (start === -1) throw new Error(`No se encontró ROSTER_T3 en ${rel}`);
+  if (start === -1) throw new Error(`No se encontró ROSTER_T4 en ${rel}`);
   const end = src.indexOf('\n];', start);
-  if (end === -1) throw new Error(`No se encontró el cierre de ROSTER_T3 en ${rel}`);
+  if (end === -1) throw new Error(`No se encontró el cierre de ROSTER_T4 en ${rel}`);
 
   const block = src.slice(start, end);
   const numRe = new RegExp(`num:'${newNumber}'`);
   const keyRe = new RegExp(`key:'${gamertag}'`);
   const conflictLine = block.split('\n').find(l => numRe.test(l) && !keyRe.test(l));
   if (conflictLine) {
-    conflicts.push(`${rel} (ROSTER_T3): el dorsal ${newNumber} ya está asignado a otro jugador → ${conflictLine.trim()}`);
+    conflicts.push(`${rel} (ROSTER_T4): el dorsal ${newNumber} ya está asignado a otro jugador → ${conflictLine.trim()}`);
   }
 
   const playerRe = new RegExp(`(key:'${gamertag}'[^\\n]*?num:')(\\d+)(')`);
   if (!playerRe.test(block)) {
-    throw new Error(`No se encontró a '${gamertag}' en ROSTER_T3 de ${rel}`);
+    throw new Error(`No se encontró a '${gamertag}' en ROSTER_T4 de ${rel}`);
   }
   const newBlock = block.replace(playerRe, `$1${newNumber}$3`);
-  if (newBlock !== block) {
-    pendingWrites.push({ rel, content: src.slice(0, start) + newBlock + src.slice(end) });
-  }
-}
-
-/* ─── convocatoria.html : PLAYERS array ─── */
-{
-  const rel = 'convocatoria.html';
-  const src = readUtf8(rel);
-  const startMarker = 'const PLAYERS = [';
-  const start = src.indexOf(startMarker);
-  if (start === -1) throw new Error(`No se encontró PLAYERS en ${rel}`);
-  const end = src.indexOf('\n];', start);
-  if (end === -1) throw new Error(`No se encontró el cierre de PLAYERS en ${rel}`);
-
-  const block = src.slice(start, end);
-  const numRe = new RegExp(`num:${newNumber}(?:\\D)`);
-  const nameRe = new RegExp(`name:'${gamertag}'`);
-  const conflictLine = block.split('\n').find(l => numRe.test(l) && !nameRe.test(l));
-  if (conflictLine) {
-    conflicts.push(`${rel} (PLAYERS): el dorsal ${newNumber} ya está asignado a otro jugador → ${conflictLine.trim()}`);
-  }
-
-  const playerRe = new RegExp(`(name:'${gamertag}'[^\\n]*?num:)(\\d+)`);
-  if (!playerRe.test(block)) {
-    throw new Error(`No se encontró a '${gamertag}' en PLAYERS de ${rel}`);
-  }
-  const newBlock = block.replace(playerRe, `$1${newNumber}`);
   if (newBlock !== block) {
     pendingWrites.push({ rel, content: src.slice(0, start) + newBlock + src.slice(end) });
   }

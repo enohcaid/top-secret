@@ -1,13 +1,14 @@
 // Portada: noticias, plantel, competencias y redes. Módulo cargado por index.html.
 import { SEED_MATCHES } from './seed_matches.js';
 import { generateMatchNews } from './auto-noticias.js';
+import './plantel-datos.js?v=1';
 import { ROSTER_T4 } from './roster.js';
 
 const WORKER     = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const MEDIA_BASE = WORKER + '/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores o fotos editoriales
 // (duplas, nosotros, hero) — R2 las cachea un año en el navegador.
-const RENDER_V = '2026-11-04';
+const { RENDER_V } = globalThis.TSPlantel;
 const mediaUrl = p => MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (/^(Renders\/|logos\/duos\/|logos\/nosotros\/|logos\/hero-)/.test(p) ? '?v=' + RENDER_V : '');
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

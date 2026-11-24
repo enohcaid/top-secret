@@ -571,29 +571,16 @@ html body .pitch .stoken.empty{width:var(--tok-w) !important;height:var(--tok-h)
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="torneos-datos.js?v=1"></script>
+<script src="plantel-datos.js?v=1"></script>
 <script>
 /* ─────────────────────────────────────────────
    ROSTER — posiciones siguen la nomenclatura
    de convocatoria.html (DCD, DFC, LD, MCI…)
 ───────────────────────────────────────────── */
+// Los del plantel con `conv` en plantel-datos.js (fuente única) + el invitado de prueba.
 const PLAYERS = [
-  { name:'Ivan_Cabj_La12',  pos:'POR', num:12, folder:'Ivan_Cabj_La12', campo:true },  // campo: tiene render con kit de jugador para usar fuera del arco
-  { name:'rivarola90',      pos:'DFC', num:2,  folder:'rivarola90'     },
-  { name:'Alexisraies23',   pos:'DFC', num:3,  folder:'Alexisraies23'  },
-  { name:'Cabers14',        pos:'DFC', num:5,  folder:'Cabers14'       },
-  { name:'Huber236',        pos:'LD',  num:8,  folder:'Huber236'       },
-  { name:'Guiidow',         pos:'LD',  num:20, folder:'Guiidow'        },
-  { name:'Juan_Martinez4',  pos:'MCD', num:6,  folder:'Juan_Martinez4' },
-  { name:'RS32-DaniStone',  pos:'MCI', num:13, folder:'RS32-DaniStone' },
-  { name:'Ciprimancini32',    pos:'MVD', num:14, folder:'Ciprimancini32'   },
-  { name:'Lil_Dekuroko',    pos:'LI',  num:22, folder:'Lil_Dekuroko'   },
-  { name:'Lautavester7',    pos:'DC',  num:7,  folder:'Lautavester7'   },
-  { name:'adri_cai',         pos:'POR', num:'', folder:'adri_cai'         },
-  { name:'endiabladorojo66', pos:'DFC', num:'', folder:'endiabladorojo66' },
-  { name:'nikileo527',       pos:'EI',  num:'', folder:'nikileo527'       },
-  { name:'pepolemmo2710',    pos:'ED',  num:'', folder:'pepolemmo2710'    },
-  { name:'NicoBJ_96',        pos:'DC',  num:'', folder:'NicoBJ_96'        },
-  { name:'davidelapaternal', pos:'MCI', num:34, folder:'davidelapaternal' },
+  ...TSPlantel.paraConvocatoria(),
   { name:'Prueba',          pos:'MCD', num:'', folder:null, isGuest:true },
 ];
 
@@ -784,279 +771,12 @@ let calCustom = [];
 let vpnFixtures = [];
 let inviernoMatches = [];
 
-// 11x11 team badges — T2/CHALLENGERS#3 (historico) + T3/CHALLENGERS#4 (temporada actual)
-const _CVPG = 'https://virtualprogaming.com/cdn-cgi/imagedelivery/cl8ocWLdmZDs72LEaQYaYw/';
-// Espacio Gamer (ex 11x11) — T4: CHALLENGERS (2°) | ESPACIO GAMER ARGENTINA, escudos de espaciogamer.cl
-// (nombres exactos de su fixture). Va antes que T3: algunos clubes repiten con escudo nuevo.
-// Los que EG sube con fondo van sin fondo desde R2 logos/escudos-eg/ (scripts/escudos-sin-fondo.mjs).
-const E11_T4_BADGES = {
-  'Al Hueso':               'https://espaciogamer.cl/wp-content/uploads/2026/10/logo-20261013-202926-r4ry7akmsa.png',
-  'ALL BOYS':               'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/all-boys.webp',
-  'Argentinos Jrs Esp':     'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/argentinos-jrs-esp.webp',
-  'Cambaceres':             'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183948-j9beahxkmy.png',
-  'Comunicaciones eSports': 'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-chmnf1o33c.png',
-  'Fco Kannabiense':        'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184026-lfizbcrewy.png',
-  'IACC Reserva':           'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/iacc-reserva.webp',
-  'InfinitX':               'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-vrqhkmuma0.png',
-  'Instituto Cantera':      'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-16lzbul3pg.png',
-  'La Carreta FC':          'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184025-jnoqea0x5f.png',
-  'Los Picantes':           'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184002-fyufpthupl.png',
-  'MISKYMAYU FC':           'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/miskymayu-fc.webp',
-  'MONOTRIBUTISTAS':        'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/monotributistas.webp',
-  'Nuvo FC':                'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMvBXyushQcOcLYfub.png?alt=media&token=1', // EG no tiene escudo: el de NuVo FC en VPUG
-  'Parke Avellane':         'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183948-d4ddpbb8lw.png',
-  'Sarmiento eSports':      'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-015205-zh9dt80nct.png',
-  'Sub 21':                 'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184004-ml2ubyzw5d.png',
-  'SF Drysdale':            'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/suda-esports.webp', // ex Suda eSports (2026-10-22), mismo escudo
-  'Suda eSports':           'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/suda-esports.webp',
-  'WAP eSports':            'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261018-162806-ikyvnqcvqk.png',
-};
-const badgeSinMayus = (mapa, n) => n && (mapa[n] || mapa[Object.keys(mapa).find(k => k.toLowerCase() === n.toLowerCase())]);   // EG cambia mayúsculas de los nombres
+// Fixture y escudos: torneos-datos.js (fuente única)
+const { fixtureVigente: FIXTURE, vpugBadge, e11Badge } = TSTorneos;
 
 // Etiqueta visible de la liga: acá solo hay partidos de hoy (T4 en adelante), así que '11x11' = "Espacio Gamer".
 const lgLabel = m => m.league === '11x11' ? 'Espacio Gamer' : m.league;
-const E11_T3_BADGES = {
-  'Los Waxiturros':         _CVPG+'admin_cc6be38a-ba09-42a9-8b02-f212a63a69ee/public',
-  'Argentino de Merlo':     _CVPG+'admin_4b75c893-290e-4735-a5a9-8ec09a84c088/public',
-  'Ferro':                  _CVPG+'admin_1c583c95-59d3-4e79-9682-4d87ea41d8fe/public',
-  'Dep. Ballester':         _CVPG+'admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public',
-  'All Boys':               _CVPG+'admin_9d643667-da1a-4878-923c-88713acb1625/public',
-  'Comunicaciones eSports': _CVPG+'admin_defffab4-7d4a-489c-b9fd-ed65a8883046/public',
-  'Instituto Reserva':      _CVPG+'admin_033e2f03-d800-42fb-9a06-ef1339a9abf3/public',
-  '4BDOMIFL4NES':           _CVPG+'admin_d926fffb-49b9-44a2-8230-f2a44400927e/public',
-  'Los Picantes eSports':   _CVPG+'admin_f47091ff-af62-4f7f-bdb4-9aba143c3bef/public',
-  // CHALLENGERS #4 — Zona 1 (Temporada 3)
-  'Sub 21 CF':              _CVPG+'admin_eaba7052-0cc9-4e41-8565-1a30736c24d9/public',
-  'Parke Avellane':         _CVPG+'admin_9596d0a8-192b-4d0c-ac39-00904c60220b/public',
-  'IACC Cantera':           _CVPG+'admin_f0266fdf-ebf4-4ddd-af73-81e1fe2daf17/public',
-  'Camioneros eSports':     _CVPG+'admin_e5ab2259-7ae3-47ce-a6c7-bc479b7bff72/public',
-  'Deportivo Ballester':    _CVPG+'admin_92280d3f-785a-4421-a51b-ae8d6fc1be84/public',
-  'Interzonal A':           _CVPG+'admin_22f4d8b1-33cb-4346-9bca-a64b9de5850f/public',
-  'Olimpo Esports':         _CVPG+'admin_b993e784-2fac-4459-bc68-db298ab57240/public',
-  'Cambaceres':             _CVPG+'admin_0418078a-b62c-4e2e-9656-6ace007d73f7/public',
-};
 
-// VPUG T2 badges (Firebase Storage)
-const _CFB = 'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2Fpg59%2Fteams%2F';
-const _CFQ = '.png?alt=media&token=1';
-const VPUG_T2_BADGES = {
-  'United Mito':           _CFB+'-OsMvCo5TroXXRQESh8X'+_CFQ,
-  'All Boys eSports':      _CFB+'-OsMuxjrkBhlxqgHYo3h'+_CFQ,
-  'Olimpo eSports':        _CFB+'-OsMunLybVb4pwFbqCue'+_CFQ,
-  'InfinitX':              _CFB+'-OsMuhE-u1E66GmHygQ8'+_CFQ,
-  'I.A.C.C Cantera':       _CFB+'-OsMuw6E8LdYHDoCUr1l'+_CFQ,
-  'Hacha eSports':         _CFB+'-OsMuj6jB2yFLi8_u_BT'+_CFQ,
-  'Evermeet Rising':       _CFB+'-OsMuzAoZE3jVN4OQFXE'+_CFQ,
-  'Real Marcianos FC':     _CFB+'-OsMv2cJ5Fped-UWTHGu'+_CFQ,
-  'Team Valhalla':         _CFB+'-OsMv-OatbjUrVHU2SRR'+_CFQ,
-  'Germinal eSports':      _CFB+'-OsMutXodyVLwoM4J5wE'+_CFQ,
-  'Atletico Moneiro':      _CFB+'-OsMufqFxBsoawhOuaBj'+_CFQ,
-  'Villa Dalmine eSports': _CFB+'-OsMusnJNuTqdPlqecqy'+_CFQ,
-  'La Unión FC':           _CFB+'-OsMuv-Tncx4ZJag-r26'+_CFQ,
-  '4BDOMIFL4NES':          _CFB+'-OsMv3twVIiqprWZaFrj'+_CFQ,
-  'NuVo FC':               _CFB+'-OsMvBXyushQcOcLYfub'+_CFQ,
-  'Suda eSports':          _CFB+'-OsMuuL37DZJ4_U3v-AE'+_CFQ,
-  'Nueva Chicago eSports': _CFB+'-OsMv1LKGj7lioqdDP0i'+_CFQ,
-};
-
-// VPUG T2 schedule (mirrors RAW in calendario.html — update both if dates change)
-const VPUG_T2_SCHEDULE = [
-  {date:'2026-05-18',time:'22:40',league:'VPUG',rival:'United Mito',           isHome:false},
-  {date:'2026-05-19',time:'22:40',league:'VPUG',rival:'All Boys eSports',      isHome:true },
-  {date:'2026-05-20',time:'22:40',league:'VPUG',rival:'Olimpo eSports',        isHome:false},
-  {date:'2026-05-21',time:'22:40',league:'VPUG',rival:'InfinitX',              isHome:true },
-  {date:'2026-05-26',time:'22:40',league:'VPUG',rival:'I.A.C.C Cantera',       isHome:false},
-  {date:'2026-05-27',time:'22:40',league:'VPUG',rival:'Hacha eSports',         isHome:true },
-  {date:'2026-05-28',time:'22:40',league:'VPUG',rival:'Evermeet Rising',       isHome:false},
-  {date:'2026-06-01',time:'22:40',league:'VPUG',rival:'Real Marcianos FC',     isHome:false},
-  {date:'2026-06-02',time:'22:40',league:'VPUG',rival:'Team Valhalla',         isHome:true },
-  {date:'2026-06-03',time:'22:40',league:'VPUG',rival:'Germinal eSports',      isHome:false},
-  {date:'2026-06-04',time:'22:40',league:'VPUG',rival:'Atletico Moneiro',      isHome:true },
-  {date:'2026-06-08',time:'22:40',league:'VPUG',rival:'Villa Dalmine eSports', isHome:false},
-  {date:'2026-06-10',time:'22:40',league:'VPUG',rival:'La Unión FC',           isHome:true },
-  {date:'2026-06-11',time:'22:40',league:'VPUG',rival:'4BDOMIFL4NES',          isHome:false},
-  {date:'2026-06-11',time:'23:00',league:'VPUG',rival:'NuVo FC',               isHome:true },
-  {date:'2026-06-11',time:'23:30',league:'VPUG',rival:'Suda eSports',          isHome:false},
-  {date:'2026-06-11',time:'23:59',league:'VPUG',rival:'Nueva Chicago eSports', isHome:true },
-];
-
-// VPUG T3 badges — #1 Primera División VPUG (T6 CopáFácil), temporada regular desde 2026-08-10
-const VPUG_T3_BADGES = {
-  'Nueva Chicago':       'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJG4wNcts0vozc6_Q.png?alt=media&token=1&m=1777384491268',
-  'Deportivo Moron':     'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fl2fb%2Fteams%2F-Osl76Pr_C10tVEcf6jZ.png?alt=media&token=1&m=1778999664645',
-  'Real MarcianoFC':     'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJK2phXP4iCdiats2.png?alt=media&token=1&m=1777383674107',
-  'InfinitX':            'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuhE-u1E66GmHygQ8.png?alt=media&token=1&m=1778519186424',
-  'Germinal eSports':    'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJFPe1ZweZc87RIxz.png?alt=media&token=1&m=1777384309012',
-  'Argentino de Merlo':  'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2F6w2f%2Fteams%2F-OsqaWiCI-o32hNoVxCB.png?alt=media&token=1&m=1779040380037',
-  'Hacha eSports':       'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQbx98GunA039zp-bH.png?alt=media&token=1&m=1781803912247',
-  'Suda eSports':        'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2F7zxj%2Fteams%2F-OvQevHLY6602L6O9nnC.png?alt=media&token=1&m=1786312911683',
-  'Ysh FC':              'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-rivales/ysh-fc.webp',
-  'I.A.C.C Cantera':     'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fpg59%2Fteams%2F-OsMuw6E8LdYHDoCUr1l.png?alt=media&token=1&m=1778519091798',
-  'Atlético Moneiro':    'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJ8gO1MV4MpdIkj31.png?alt=media&token=1&m=1777384209613',
-  '4BDOMIFL4NES':        'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fjk0u%2Fteams%2F-OrJJHNtZzsN6pGKzstV.png?alt=media&token=1&m=1777384517795',
-  'United Mito':         'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQc3HN0-1ALKiuvvQK.png?alt=media&token=1&m=1781803881039',
-  'All Boys eSp':        'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fh6z9%2Fteams%2F-OlZaxMFjlVs5_rNMfbA.png?alt=media&token=1&m=1771279886020',
-  'Temperley eSports':   'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fllo8%2Fteams%2F-OvQc6Ze0TMTfq1T1qlS.png?alt=media&token=1&m=1782828958852',
-  'San Miguel eSports':  'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fl2fb%2Fteams%2F-Osl6TMQmCXINP2THWYM.png?alt=media&token=1&m=1778942125257',
-  'Colon SL':            'https://firebasestorage.googleapis.com/v0/b/copafacil-web.appspot.com/o/events%2F-fthh5%2F7zxj%2Fteams%2F-OmWPzqBjj1QCR6oNHIq.png?alt=media&token=1&m=1786214093523',
-};
-
-// VPUG T3 schedule (mirrors RAW in calendario.html — update both if dates change)
-const VPUG_T3_SCHEDULE = [
-  {date:'2026-08-10',time:'22:30',league:'VPUG',rival:'Nueva Chicago',      isHome:false},
-  {date:'2026-08-11',time:'22:30',league:'VPUG',rival:'Deportivo Moron',    isHome:true },
-  {date:'2026-08-12',time:'22:30',league:'VPUG',rival:'Real MarcianoFC',    isHome:false},
-  {date:'2026-08-13',time:'22:30',league:'VPUG',rival:'InfinitX',           isHome:true },
-  {date:'2026-08-17',time:'22:30',league:'VPUG',rival:'Germinal eSports',   isHome:false},
-  {date:'2026-08-18',time:'22:30',league:'VPUG',rival:'Argentino de Merlo', isHome:true },
-  {date:'2026-08-19',time:'22:30',league:'VPUG',rival:'Hacha eSports',      isHome:false},
-  {date:'2026-08-20',time:'22:30',league:'VPUG',rival:'Suda eSports',       isHome:false},
-  {date:'2026-08-24',time:'22:30',league:'VPUG',rival:'Ysh FC',             isHome:true },
-  {date:'2026-08-25',time:'22:30',league:'VPUG',rival:'I.A.C.C Cantera',    isHome:false},
-  {date:'2026-08-26',time:'22:30',league:'VPUG',rival:'Atlético Moneiro',   isHome:true },
-  {date:'2026-08-27',time:'22:30',league:'VPUG',rival:'4BDOMIFL4NES',       isHome:false},
-  {date:'2026-08-31',time:'22:30',league:'VPUG',rival:'United Mito',        isHome:true },
-  {date:'2026-09-01',time:'22:30',league:'VPUG',rival:'All Boys eSp',       isHome:false},
-  {date:'2026-09-01',time:'23:00',league:'VPUG',rival:'Temperley eSports',  isHome:true },
-  {date:'2026-09-01',time:'23:59',league:'VPUG',rival:'San Miguel eSports', isHome:false},
-  {date:'2026-09-01',time:'23:30',league:'VPUG',rival:'Colon SL',           isHome:true },
-];
-
-// VPUG T4 badges — Liga Pretemporada VPUG (FC-27) (T7 CopáFácil), Grupo D, desde 2026-10-05
-const VPUG_T4_BADGES = {
-  'Comunicaciones Cantera':  'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2JRiVP2pCqmqxrPfis.png?alt=media&token=1&m=1791296980020',   // ex Villa Dalmine eSports
-  'Norpatagonicos eSports':  'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P31SBjRST6W8mTvYHP0.png?alt=media&token=1&m=1791042652994',
-  'Cambaceres':              'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2sJ7lR0q6j546X1yLj.png?alt=media&token=1&m=1790872517335',
-  'Real Envido':             'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2dRpWyb-B6cLLfTYAj.png?alt=media&token=1&m=1790623057205',
-  'CSyD La Mochila':         'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2OXy0twcTpDlidx8p-.png?alt=media&token=1&m=1791232638434',
-  'Temperley eSports':       'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2xb8ufrcFsK91qcsrN.png?alt=media&token=1&m=1791045825948',
-  'Peñarol Creadores':       'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2nt3cP2umFGxBQ5FKa.png?alt=media&token=1&m=1790798403308',
-  'Argentino de Merlo':      'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/club-161-1793991827920.webp',   // playoff Fase Oro, octavos · desde 10/11 el escudo de vpug-liga (Primera)
-  // Primera División VPUG (vpug-liga, desde 2026-11-10) — escudos de la web nueva de la liga (Supabase); los que venían
-  // con fondo opaco, sin fondo en R2 logos/escudos/vpug/ (scripts/escudo-sin-fondo.py)
-  'MON0TRIBUTIST4S':          'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos/vpug/monotributistas.webp',   // sin fondo (el de la liga traía fondo opaco)
-  'Deportivo Madryn eSports': 'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-1929-1794153209937.webp',
-  'San Miguel eSports':       'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-1081-1793398579721.webp',
-  'COMUNICACIONES':           'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos/vpug/comunicaciones.webp',   // sin fondo (el de la liga traía fondo opaco)
-  'INSTITUTO CANT':           'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-1173-1793546676663.webp',
-  'Hacha eSports':            'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-1279-1793580261004.webp',
-  'Instituto esp':            'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-1141-1793485125510.webp',
-  'United Mito':              'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-788-1793214523849.webp',
-  'IACC Reserva':             'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos/vpug/iacc-reserva.webp',   // sin fondo (el de la liga traía fondo opaco)
-  'Hacha Reserva':            'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-655-1793144856526.webp',
-  'moron esp':                'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos/vpug/moron-esp.webp',   // sin fondo (el de la liga traía fondo opaco)
-  'ALL BOYS':                 'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-1337-1793627903704.webp',
-  'YSH FC':                   'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos/vpug/ysh-fc.webp',   // sin fondo (el de la liga traía fondo opaco)
-  'AtleticoMoneiro':          'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos/vpug/atletico-moneiro.webp',   // sin fondo (el de la liga traía fondo opaco)
-  'Belgrano eSports':         'https://nkqjsmxxmrodientlnlh.supabase.co/storage/v1/object/public/escudos/pedido-1333-1793626806878.webp',
-  'Deportivo Murra':          'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos/vpug/deportivo-murra.webp',   // sin fondo (el de la liga traía fondo opaco)
-};
-
-// VPUG T4 schedule (mirrors RAW in calendario.html — update both if dates change).
-// Cadencia confirmada por el usuario: lunes y miércoles 23:00 y 23:30 (CopáFácil no guarda fechas).
-const VPUG_T4_SCHEDULE = [
-  {date:'2026-10-07',time:'22:30',league:'VPUG',rival:'Comunicaciones Cantera', isHome:true },   // F1 (ex Villa Dalmine eSports) reprogramada (05/10 23:00 → 06/10 22:30 → 07/10 22:30)
-  {date:'2026-10-05',time:'23:30',league:'VPUG',rival:'Norpatagonicos eSports', isHome:false},
-  {date:'2026-10-07',time:'23:00',league:'VPUG',rival:'Cambaceres',             isHome:true },
-  {date:'2026-10-07',time:'23:30',league:'VPUG',rival:'Real Envido',            isHome:false},
-  {date:'2026-10-12',time:'23:00',league:'VPUG',rival:'CSyD La Mochila',        isHome:true },
-  {date:'2026-10-12',time:'23:30',league:'VPUG',rival:'Temperley eSports',      isHome:false},
-  {date:'2026-10-12',time:'23:59',league:'VPUG',rival:'Peñarol Creadores',      isHome:true },   // F7 adelantada (mié 14/10 23:00 → lun 12/10 23:59)
-  // Playoff Fase Oro — Octavos #7, ida y vuelta (horarios = cadencia de grupos, sin confirmar)
-  {date:'2026-10-14',time:'23:00',league:'VPUG',rival:'Argentino de Merlo',     isHome:false},   // Ida
-  {date:'2026-10-14',time:'23:30',league:'VPUG',rival:'Argentino de Merlo',     isHome:true },   // Vuelta
-  // Primera División VPUG — fixture real de vpug-liga (fecha y hora por partido), mismo orden que RAW en calendario.html
-  {date:'2026-11-10',time:'22:30',league:'VPUG',rival:'MON0TRIBUTIST4S',          isHome:false},   // Primera F1
-  {date:'2026-11-11',time:'22:30',league:'VPUG',rival:'Deportivo Madryn eSports', isHome:true },   // Primera F2
-  {date:'2026-11-12',time:'22:30',league:'VPUG',rival:'San Miguel eSports',       isHome:false},   // Primera F3
-  {date:'2026-11-16',time:'22:30',league:'VPUG',rival:'COMUNICACIONES',           isHome:true },   // Primera F4
-  {date:'2026-11-17',time:'22:30',league:'VPUG',rival:'INSTITUTO CANT',           isHome:false},   // Primera F5
-  {date:'2026-11-18',time:'22:30',league:'VPUG',rival:'Argentino de Merlo',       isHome:false},   // Primera F6
-  {date:'2026-11-19',time:'22:30',league:'VPUG',rival:'Hacha eSports',            isHome:true },   // Primera F7
-  {date:'2026-11-23',time:'22:30',league:'VPUG',rival:'Instituto esp',            isHome:false},   // Primera F8
-  {date:'2026-11-24',time:'22:30',league:'VPUG',rival:'United Mito',              isHome:true },   // Primera F9
-  {date:'2026-11-25',time:'22:30',league:'VPUG',rival:'IACC Reserva',             isHome:false},   // Primera F10
-  {date:'2026-11-26',time:'22:30',league:'VPUG',rival:'Hacha Reserva',            isHome:true },   // Primera F11
-  {date:'2026-11-30',time:'22:30',league:'VPUG',rival:'moron esp',                isHome:false},   // Primera F12
-  {date:'2026-12-01',time:'22:30',league:'VPUG',rival:'ALL BOYS',                 isHome:true },   // Primera F13
-  {date:'2026-12-02',time:'22:30',league:'VPUG',rival:'YSH FC',                   isHome:true },   // Primera F14
-  {date:'2026-12-03',time:'22:30',league:'VPUG',rival:'AtleticoMoneiro',          isHome:false},   // Primera F15
-  {date:'2026-12-07',time:'22:30',league:'VPUG',rival:'Belgrano eSports',         isHome:true },   // Primera F16
-  {date:'2026-12-08',time:'22:30',league:'VPUG',rival:'Deportivo Murra',          isHome:false},   // Primera F17
-];
-
-// Campeonato de Invierno VPUG (hardcoded fallback; fetch enriquece con badges)
-const INVIERNO_SCHEDULE = [
-  {date:'2026-06-18',time:'22:30',league:'VPUG',rival:'Black Mamba AC',            isHome:false},
-  {date:'2026-06-18',time:'23:00',league:'VPUG',rival:'Vikings Team',              isHome:true },
-  {date:'2026-06-23',time:'22:30',league:'VPUG',rival:'Comunicaciones',            isHome:false},
-  {date:'2026-06-23',time:'23:00',league:'VPUG',rival:'InfinitX',                  isHome:true },
-  {date:'2026-06-25',time:'22:30',league:'VPUG',rival:'Adrenalina FC',             isHome:false},
-  {date:'2026-06-25',time:'23:00',league:'VPUG',rival:'Team Valhalla',             isHome:true },
-  {date:'2026-06-30',time:'22:30',league:'VPUG',rival:'Big Ban FC',                isHome:false},
-  {date:'2026-06-30',time:'23:00',league:'VPUG',rival:'Matreros eSp',              isHome:true },
-  {date:'2026-07-02',time:'22:30',league:'VPUG',rival:'Villa Dalmine eSports',     isHome:false},
-  {date:'2026-07-02',time:'23:00',league:'VPUG',rival:'Talleres Reserva',          isHome:true },
-  {date:'2026-07-07',time:'22:30',league:'VPUG',rival:'Vultur Sports',             isHome:false},
-  {date:'2026-07-07',time:'23:00',league:'VPUG',rival:'Almirante Brown eSports',   isHome:true },
-  {date:'2026-07-09',time:'22:30',league:'VPUG',rival:'Gallito 1708',              isHome:false},
-  {date:'2026-07-09',time:'23:00',league:'VPUG',rival:'CA Estrella Roja',          isHome:true },
-  {date:'2026-07-14',time:'22:30',league:'VPUG',rival:'La Union FC',               isHome:false},
-  {date:'2026-07-14',time:'23:00',league:'VPUG',rival:'BNA San Jorge',             isHome:true },
-  {date:'2026-07-21',time:'22:30',league:'VPUG',rival:'Ojo al Piojo FC',           isHome:false},
-  {date:'2026-07-21',time:'23:00',league:'VPUG',rival:'Olimpo eSports',            isHome:false},
-  {date:'2026-07-23',time:'22:30',league:'VPUG',rival:'All Boys Reserva',          isHome:true },
-  {date:'2026-07-23',time:'23:00',league:'VPUG',rival:'Inter de BS AS',            isHome:false},
-  {date:'2026-07-23',time:'23:30',league:'VPUG',rival:'El Gallo FC',               isHome:true },
-  // Cuartos de Final vs Polenta Fria (puntero Zona A)
-  {date:'2026-07-28',time:'23:00',league:'VPUG',rival:'Polenta Fria',              isHome:true },
-  {date:'2026-07-28',time:'23:30',league:'VPUG',rival:'Polenta Fria',              isHome:false},
-];
-
-// 11x11 T3 schedule — Zona 1, Challengers #4 (temporada actual, arranco 2026-08-04).
-// Fuente: https://api.virtualprogaming.com/public/tournaments/CHALLENGERS-T4/matches/?season=1
-// (fechas ya jugadas confirmadas contra seed_matches.js, que es la fuente autoritativa de
-// resultados). Bracket anterior (Challengers #3, terminaba 2026-05-28) reemplazado el 2026-08-07
-// tras detectar que esta tabla desactualizada le impedia a la rutina de noticia diaria confirmar
-// partidos de 11x11 ya jugados. Actualizar cuando la liga confirme nuevas fechas.
-// 2026-08-13: la liga adelanto el partido MD9 (TOP SECRET vs Camioneros, antes 08-18 23:00) a
-// 13/08 23:59, agregando una 3ra fecha ese dia (ya jugada, cargada en seed_matches.js). MD7-9
-// confirmados contra la fuente en vivo.
-// 2026-08-14: reacomodado varias veces a pedido del usuario, ninguna confirmada por la fuente
-// en vivo (VPG) mas alla de MD7-9 (13/08, ya jugada).
-// 2026-08-18: el usuario pidio pasar de fechas triples a fechas DOBLES (2 partidos por dia) —
-// el 3er partido del 18/08 (Interzonal A) se corrio al jueves 20/08, y todo lo demas se
-// recorrio en cascada manteniendo el patron martes/jueves (ver [2,4] en calendario.html) a 2
-// partidos por fecha: 18/08, 20/08, 25/08 y 27/08. El 9no partido (Camioneros eSports, quedaba
-// solo en 01/09 por ser numero impar) el usuario pidio volver a meterlo el 27/08 a las 23:59 en
-// vez de dejarlo en fecha propia — 27/08 queda como la unica fecha triple del resto del
-// calendario. Es una proyeccion, no un dato confirmado — si la liga publica fechas oficiales
-// distintas para MD10-18, esas mandan por sobre este reacomodo.
-// 2026-08-20: el usuario deshizo el ultimo agrupamiento triple — Camioneros eSports vuelve a
-// tener fecha propia (01/09, martes, siguiente slot del patron [2,4]) en vez de sumarse al
-// 27/08. Con esto el resto del calendario 11x11 queda en fechas dobles.
-// 2026-08-27: el usuario pidio volver a agrupar Camioneros eSports con el 27/08 (23:59),
-// haciendola de nuevo la unica fecha triple del calendario — vuelve a quedar sin fecha propia.
-const E11_T3_SCHEDULE = [
-  {date:'2026-08-04',time:'23:00',league:'11x11',rival:'IACC Cantera',           isHome:true },
-  {date:'2026-08-04',time:'23:30',league:'11x11',rival:'Cambaceres',             isHome:false},
-  {date:'2026-08-06',time:'23:00',league:'11x11',rival:'Interzonal A',           isHome:true },
-  {date:'2026-08-06',time:'23:30',league:'11x11',rival:'Sub 21 CF',              isHome:true },
-  {date:'2026-08-11',time:'23:00',league:'11x11',rival:'Olimpo Esports',         isHome:false},
-  {date:'2026-08-11',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:false},
-  {date:'2026-08-13',time:'23:00',league:'11x11',rival:'Deportivo Ballester',    isHome:true },
-  {date:'2026-08-13',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:false},
-  {date:'2026-08-13',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:true },
-  {date:'2026-08-18',time:'23:00',league:'11x11',rival:'IACC Cantera',           isHome:false},
-  {date:'2026-08-18',time:'23:30',league:'11x11',rival:'Cambaceres',             isHome:true },
-  {date:'2026-08-20',time:'23:00',league:'11x11',rival:'Interzonal A',           isHome:false},
-  {date:'2026-08-20',time:'23:30',league:'11x11',rival:'Sub 21 CF',              isHome:false},
-  {date:'2026-08-25',time:'23:00',league:'11x11',rival:'Olimpo Esports',         isHome:true },
-  {date:'2026-08-25',time:'23:30',league:'11x11',rival:'Comunicaciones eSports', isHome:true },
-  {date:'2026-08-27',time:'23:00',league:'11x11',rival:'Deportivo Ballester',    isHome:false},
-  {date:'2026-08-27',time:'23:30',league:'11x11',rival:'Parke Avellane',         isHome:true },
-  {date:'2026-08-27',time:'23:59',league:'11x11',rival:'Camioneros eSports',     isHome:false},
-];
 // Los partidos cargados en el calendario (Espacio Gamer, VPN, amistosos) viven en Firestore calendario/estado.custom.
 // El primer onSnapshot tarda 2-3 s (handshake del canal en vivo del SDK) y la tarjeta de hoy salía sin ellos
 // (Juan, 2026-11-10). Para que aparezcan enseguida: (1) lo último visto en este navegador, al instante;
@@ -1105,8 +825,8 @@ function getTodayMatches() {
     .filter(m => m.date === TODAY && (!m.tipo || m.tipo === 'partido'))
     .map(m => {
       if (m.badge) return m;
-      if (m.league === 'VPUG')  return {...m, badge: VPUG_T4_BADGES[m.rival]||VPUG_T2_BADGES[m.rival]||VPUG_T3_BADGES[m.rival]||null};
-      if (m.league === '11x11') return {...m, badge: badgeSinMayus(E11_T4_BADGES, m.rival)||badgeSinMayus(E11_T3_BADGES, m.rival)||null};
+      if (m.league === 'VPUG')  return {...m, badge: vpugBadge(m.rival)};
+      if (m.league === '11x11') return {...m, badge: e11Badge(m.rival)};
       if (m.league === 'VPN') {
         const live = vpnFixtures.find(v => (v.rival||'').toLowerCase().trim() === (m.rival||'').toLowerCase().trim());
         return {...m, badge: (live && live.badge) || null};
@@ -1116,38 +836,21 @@ function getTodayMatches() {
   const fromVpn = vpnFixtures
     .filter(m => m.date === TODAY)
     .map(m => ({ ...m, league: 'VPN' }));
-  // VPUG T2 schedule — include today's entry if not already in calCustom
-  const fromVpugT2 = VPUG_T2_SCHEDULE
+  // Fixture fijo (torneos-datos.js): los de hoy que no estén ya en calCustom
+  const fromFixture = FIXTURE
     .filter(m => m.date === TODAY)
-    .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({...m, badge: VPUG_T2_BADGES[m.rival]||null}));
-  // VPUG T3 schedule — #1 Primera División VPUG (T6), include today's entry if not already in calCustom
-  const fromVpugT3 = VPUG_T3_SCHEDULE
-    .filter(m => m.date === TODAY)
-    .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({...m, badge: VPUG_T3_BADGES[m.rival]||null}));
-  // VPUG T4 schedule — Liga Pretemporada VPUG (FC-27), include today's entry if not already in calCustom
-  const fromVpugT4 = VPUG_T4_SCHEDULE
-    .filter(m => m.date === TODAY)
-    .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({...m, badge: VPUG_T4_BADGES[m.rival]||null}));
-  // 11x11 T2 schedule — include today's entries if not already in calCustom
-  const from11x11 = E11_T3_SCHEDULE
-    .filter(m => m.date === TODAY)
-    .filter(m => !fromCustom.some(c => c.league === '11x11' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({...m, badge: badgeSinMayus(E11_T4_BADGES, m.rival)||badgeSinMayus(E11_T3_BADGES, m.rival)||null}));
+    .filter(m => !fromCustom.some(c => c.league === m.league && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
+    .map(({date, time, league, rival, isHome}) => ({date, time, league, rival, isHome, badge: league === '11x11' ? e11Badge(rival) : vpugBadge(rival)}));
   // Deduplicate VPN: skip if calCustom already has same rival
   const dedupedVpn = fromVpn.filter(v =>
     !fromCustom.some(c => c.league === 'VPN' && (c.rival||'').toLowerCase().trim() === (v.rival||'').toLowerCase().trim())
   );
-  // Prefer live dates/rivals from the Worker (single source of truth for reprogramaciones);
-  // INVIERNO_SCHEDULE is only a pre-fetch fallback so the panel isn't empty on first paint.
-  const inviernoSource = inviernoMatches.length ? inviernoMatches : INVIERNO_SCHEDULE;
-  const fromInvierno = inviernoSource
+  // Campeonato de Invierno: solo en vivo desde el Worker
+  const fromInvierno = inviernoMatches
     .filter(m => m.date === TODAY)
     .filter(m => !fromCustom.some(c => c.league === 'VPUG' && (c.rival||'').toLowerCase() === (m.rival||'').toLowerCase()))
-    .map(m => ({ ...m, league: 'VPUG', badge: m.rivalLogo || VPUG_T2_BADGES[m.rival] || null }));
-  return [...fromCustom, ...fromVpugT2, ...fromVpugT3, ...fromVpugT4, ...from11x11, ...fromInvierno, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    .map(m => ({ ...m, league: 'VPUG', badge: m.rivalLogo || vpugBadge(m.rival) }));
+  return [...fromCustom, ...fromFixture, ...fromInvierno, ...dedupedVpn].sort((a,b) => (a.time||'').localeCompare(b.time||''));
 }
 function renderTodayMatchesPanel() {
   const wrap = document.getElementById('todayMatchesPanel');
@@ -1175,7 +878,7 @@ function renderTodayMatchesPanel() {
    abiertas con una versión vieja del script (ver incidente 2026-08-11: una
    pestaña vieja siguió pisando el documento entero varios minutos después
    de un deploy que ya lo arreglaba). */
-const BUILD_VERSION = '2026-10-14T10:30:00-03:00';
+const BUILD_VERSION = '2026-11-24T02:30:00-03:00';
 
 /* ─── STATE ─── */
 // Use GMT-3 (Argentina) for TODAY so midnight resets at 00:00 local time
@@ -1473,7 +1176,7 @@ function fmtEdit(name) {
 /* ─── PHOTO HELPERS ─── */
 const MEDIA_BASE = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: subir cuando se regeneren renders de jugadores (R2 los cachea un año en el navegador).
-const RENDER_V = '2026-11-04';
+const RENDER_V = TSPlantel.RENDER_V;
 function mediaUrl(p) { return MEDIA_BASE + '/' + p.split('/').map(encodeURIComponent).join('/') + (p.startsWith('Renders/') ? '?v=' + RENDER_V : ''); }
 function brazosPath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Brazos.png`); }
 function frontePath(p)  { return mediaUrl(`Renders/${p.folder || p.name}/Frente.png`); }

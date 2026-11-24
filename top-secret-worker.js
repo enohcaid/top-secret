@@ -1604,7 +1604,16 @@ function eaCompactar(m, tipo) {
 // HTML publicado) con edits/suspended de Firestore aplicados por índice + los custom.
 // Solo ligas oficiales (VPN, VPUG, 11x11 = Espacio Gamer); amistosos y demás afuera.
 const EA_LIGAS_OFICIALES = new Set(['VPN', 'VPUG', '11x11']);
-const CALENDARIO_HTML_URL = 'https://topsecret.ar/calendario.html';
+// Fixture fijo: torneos-datos.js (calendario.html queda de respaldo por si el sitio publicado es anterior al cambio).
+const CALENDARIO_URLS = ['https://topsecret.ar/torneos-datos.js', 'https://topsecret.ar/calendario.html'];
+async function textoFixture() {
+  for (const u of CALENDARIO_URLS) {
+    const r = await fetch(u, { cf: { cacheTtlByStatus: { '200-299': 300, '300-599': 0 } } }).catch(() => null);
+    const t = r?.ok ? await r.text() : '';
+    if (t.includes('const RAW = [')) return t;
+  }
+  throw new Error('RAW no encontrado en torneos-datos.js ni en calendario.html');
+}
 
 function parseObjLiteral(linea) {
   const o = {};
@@ -1627,11 +1636,10 @@ function fsVal(v) {
 }
 async function cargarCalendarioOficial() {
   const [html, fsDoc] = await Promise.all([
-    fetch(CALENDARIO_HTML_URL, { cf: { cacheTtl: 300 } }).then(r => r.ok ? r.text() : Promise.reject(new Error(`calendario.html ${r.status}`))),
+    textoFixture(),
     fetch('https://firestore.googleapis.com/v1/projects/top-secret-fc/databases/(default)/documents/calendario/estado').then(r => r.json()),
   ]);
   const ini = html.indexOf('const RAW = [');
-  if (ini < 0) throw new Error('RAW no encontrado en calendario.html');
   const fin = html.indexOf('\n];', ini);
   const raw = html.slice(ini, fin).split('\n').map(l => l.trim()).filter(l => l.startsWith('{')).map(parseObjLiteral);
   const estado = fsVal({ mapValue: { fields: fsDoc.fields || {} } }) || {};

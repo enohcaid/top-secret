@@ -1,6 +1,6 @@
 // Placa del fixture de Espacio Gamer (T4) para la noticia y redes.
 // Datos: Firestore calendario/estado.custom (league '11x11' desde T4_CUTOFF) — lo que ve el sitio.
-// Escudos: E11_T4_BADGES de calendario.html (los reales de espaciogamer.cl).
+// Escudos: E11_T4_BADGES de torneos-datos.js (los reales de espaciogamer.cl).
 // Renderiza HTML con Playwright (fuentes de Google) y guarda PNG + WebP en logos/.
 //   node scripts/placa-fixture-eg.mjs            → logos/Fixture Espacio Gamer T4.{png,webp}
 //   node scripts/placa-fixture-eg.mjs --subir    → además sube el .webp a R2
@@ -22,9 +22,8 @@ const partidos = (doc.fields?.custom?.arrayValue?.values || []).map(val)
   .sort((a, b) => parseInt(a.instancia.slice(6)) - parseInt(b.instancia.slice(6)));
 if (!partidos.length) throw new Error('No hay partidos de Espacio Gamer en calendario/estado.custom');
 
-const cal = fs.readFileSync('calendario.html', 'utf8');
-const bloque = cal.match(/const E11_T4_BADGES = \{([\s\S]*?)\};/)[1];
-const BADGES = Object.fromEntries([...bloque.matchAll(/'([^']+)':\s*'(https?:[^']+)'/g)].map(m => [m[1], m[2]]));
+await import('../torneos-datos.js');
+const BADGES = globalThis.TSTorneos.E11_T4_BADGES;
 
 // Escudos embebidos (data URI) para que el screenshot no dependa de la carga remota.
 async function dataUri(src, { sinFondo = false } = {}) {

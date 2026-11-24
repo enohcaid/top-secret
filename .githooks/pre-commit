@@ -1,0 +1,5 @@
+#!/bin/sh
+# Control de datos: solo si el commit toca fixture, plantel o las versiones de las páginas.
+if git diff --cached --name-only | grep -qE "^(torneos-datos|plantel-datos|layout)\.js$"; then
+  node --no-warnings scripts/control-datos.mjs || { echo "control-datos: commit frenado (corregir lo de arriba)"; exit 1; }
+fi

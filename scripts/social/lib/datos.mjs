@@ -5,27 +5,16 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { ROOT } from '../../lib/env.mjs';
+import '../../../torneos-datos.js';
 
-export const TEMPORADA = { id: 'T4', desde: '2026-10-05', torneo: 'Primera División VPUG', liga: 'VPUG', schedule: 'VPUG_T4_SCHEDULE', badges: 'VPUG_T4_BADGES' };
+export const TEMPORADA = { id: 'T4', desde: '2026-10-05', torneo: 'Primera División VPUG', liga: 'VPUG', badges: 'VPUG_T4_BADGES' };
 
 export const hoyART = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
 export const diaSemana = f => new Date(f + 'T12:00:00-03:00').toLocaleDateString('es-AR', { weekday: 'long', timeZone: 'America/Argentina/Buenos_Aires' });
 export const fechaCorta = f => { const [, m, d] = f.split('-'); return `${Number(d)}/${Number(m)}`; };
 
-// Lee un `const NOMBRE = [...]` o `{...}` de un html del sitio (son literales JS simples).
-function literal(archivo, nombre) {
-  const src = fs.readFileSync(path.join(ROOT, archivo), 'utf8');
-  const i = src.indexOf(`const ${nombre} =`);
-  if (i < 0) throw new Error(`No encuentro ${nombre} en ${archivo}`);
-  const abre = src.indexOf(src[src.indexOf('=', i) + 2] === '{' ? '{' : '[', i);
-  const par = { '[': ']', '{': '}' }[src[abre]];
-  let nivel = 0, j = abre;
-  for (; j < src.length; j++) { if (src[j] === src[abre]) nivel++; else if (src[j] === par && --nivel === 0) break; }
-  return Function(`return (${src.slice(abre, j + 1)})`)();
-}
-
 // Desde la competencia oficial de la T4 (2026-10-20) se juegan tres ligas a la vez: VPUG, VPN y Espacio Gamer
-// (clave interna '11x11'). Cada partido lleva su liga; el fixture junta el de VPUG (convocatoria.html) con los de
+// (clave interna '11x11'). Cada partido lleva su liga; el fixture junta el de VPUG (torneos-datos.js) con los de
 // VPN y Espacio Gamer (Firestore calendario/estado.custom, con edits/suspended aplicados como en calendario.html).
 export const LIGA_VISIBLE = l => l === '11x11' ? 'Espacio Gamer' : l;
 const OFICIALES = ['VPUG', 'VPN', '11x11'];
@@ -57,8 +46,8 @@ export async function cargar() {
   const { SEED_MATCHES } = await import(pathToFileURL(path.join(ROOT, 'seed_matches.js')).href + `?t=${Date.now()}`);
   const { ROSTER_T4 } = await import(pathToFileURL(path.join(ROOT, 'roster.js')).href).catch(() => ({}));
   const mapas = {
-    VPUG: literal('convocatoria.html', TEMPORADA.badges),
-    '11x11': literal('convocatoria.html', 'E11_T4_BADGES'),
+    VPUG: globalThis.TSTorneos[TEMPORADA.badges],
+    '11x11': globalThis.TSTorneos.E11_T4_BADGES,
     VPN: await intentar(escudosVPN, {}),
   };
   // Escudo por liga (el mismo nombre puede ser otro club en otra liga): nombre exacto, sin mayúsculas/acentos/"eSports".
@@ -69,7 +58,7 @@ export async function cargar() {
     return k ? m[k] : null;
   };
   const custom = await intentar(calendarioCustom, []);
-  const fixture = [...literal('convocatoria.html', TEMPORADA.schedule), ...custom.filter(c => c.league !== 'VPUG')]
+  const fixture = [...globalThis.TSTorneos.fixtureVigente.filter(m => m.league === 'VPUG'), ...custom.filter(c => c.league !== 'VPUG')]
     .map(f => ({ date: f.date, time: f.time, league: f.league, rival: f.rival, isHome: f.isHome ?? null, instancia: f.instancia || null, escudo: escudo(f.league, f.rival) }))
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   const partidos = SEED_MATCHES.filter(m => m.date >= TEMPORADA.desde)

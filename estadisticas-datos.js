@@ -1,12 +1,13 @@
 // Cálculos de estadisticas.html: temporadas, competencias, agregados de equipo y jugadores, líderes.
 // Funciones puras sobre SEED_MATCHES + roster.js (sin DOM), para poder verificarlas desde Node.
 import { SEED_MATCHES } from './seed_matches.js';
+import './plantel-datos.js?v=1';
 import { ROSTER_T3, ROSTER_T4 } from './roster.js';
 import { ESCUDOS } from './estadisticas-escudos.js?v=7';
 
 export const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media';
 // RENDER_V: mismo valor que plantilla.html / convocatoria.html / index-home.js (R2 cachea un año).
-export const RENDER_V = '2026-11-04';
+export const { RENDER_V } = globalThis.TSPlantel;
 // Fotos grupales T4 en R2 logos/grupales/. Generadas con ChatGPT (scripts/grupales-chatgpt.mjs): el hero de
 // estadisticas.html usa "estudio-suelto"; las demás quedan para otros usos (noticias, redes, inicio). Las compuestas con los renders (scripts/fotos-grupales-t4.mjs) quedan de respaldo.
 export const GRUPALES_IA_T4 = {

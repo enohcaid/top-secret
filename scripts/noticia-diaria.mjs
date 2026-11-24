@@ -130,10 +130,10 @@ const partidosHoy = fixture.filter(f => f.fecha === HOY);
 // Resultado obligatorio: partidos oficiales de ayer (o de hoy, si ya se jugaron de madrugada) en seed_matches o el calendario
 const jugadosRecientes = partidos.filter(p => p.fecha >= AYER && oficial(SEED_MATCHES.find(m => m.date === p.fecha && m.rival === p.rival)?.league));
 const mismoRival = (a, b) => a === b || (buscarEquipo(a, [{ nombre: b }])?.score || 0) >= 0.8;
-// Fixture fijo de calendario.html (RAW: VPUG Primera y otros torneos que no están en Firestore). Índice = clave de
+// Fixture fijo de torneos-datos.js (RAW: VPUG Primera y otros torneos que no están en Firestore). Índice = clave de
 // cal.suspended. Antes no se leía y el 1-2 con Hacha (VPUG, 19/11) no existió para la nota del 20/11.
 const RAW_CAL = (() => {
-  const s = fs.readFileSync(path.join(ROOT, 'calendario.html'), 'utf8'), i = s.indexOf('const RAW = ['), b = s.slice(i, s.indexOf('\n];', i));
+  const s = fs.readFileSync(path.join(ROOT, 'torneos-datos.js'), 'utf8'), i = s.indexOf('const RAW = ['), b = s.slice(i, s.indexOf('\n];', i));
   return [...b.matchAll(/\{\s*date:'(\d{4}-\d\d-\d\d)'[^\n]*/g)].map((m, k) => {
     const x = m[0].match(/league:'(\w+)'.*?rival:'((?:[^'\\]|\\.)*)'.*?isHome:(true|false)/);
     return x && { k, date: m[1], league: x[1], rival: x[2].replace(/\\'/g, "'"), isHome: x[3] === 'true' };

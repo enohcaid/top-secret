@@ -2,8 +2,8 @@
 // una forma intuitiva, dinámica y organizada"). Agrupa los partidos de la temporada elegida por torneo:
 //   EN CURSO   — abiertos, a todo el ancho: estado, avance (jugados / total), récord, próximo partido y todas las fechas
 //   FINALIZADOS — cerrados, en grilla: resumen (fechas, récord, goles); se despliegan con un clic
-// El torneo de cada partido: los de RAW por el bloque "// ══ <LIGA> T? — <torneo> ══" bajo el que están en calendario.html
-// (se lee del propio <script>, mismo criterio que scripts/placa-envivo.mjs); playoffs por m.playoff; los cargados a mano
+// El torneo de cada partido: los de RAW por el bloque "// ══ <LIGA> T? — <torneo> ══" bajo el que están en torneos-datos.js
+// (TSTorneos.cabeceras, mismo criterio que scripts/placa-envivo.mjs); playoffs por m.playoff; los cargados a mano
 // (Firestore calendario/estado.custom) por liga + instancia ("Fecha N" = fase regular); amistosos aparte.
 // Datos: window.TSCal (lo expone el script principal). La vista "Por mes" (la grilla de siempre) sigue disponible.
 (() => {
@@ -18,20 +18,6 @@
   const logoLiga = liga => LOGO[liga] ? `<img class="comp-logo${liga === 'VPN' || liga === 'VPUG' ? ' mono' : ''}" src="https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/ligas/${LOGO[liga]}.webp" alt="${liga}" loading="lazy">` : '';
   const fechaCorta = d => { const x = new Date(d + 'T12:00:00'); return `${x.getDate()} ${MES[x.getMonth()].toLowerCase()}`; };
 
-  // ── Torneo de cada partido de RAW: las cabeceras de bloque del propio script ──
-  let cabeceras = null;
-  function cabecerasRAW(n) {
-    if (cabeceras) return cabeceras;
-    const s = [...document.scripts].find(x => x.textContent.includes('const RAW = ['))?.textContent || '';
-    const ini = s.indexOf('const RAW = ['), fin = s.indexOf('\n];', ini);
-    const out = []; let cab = '';
-    for (const l of s.slice(ini, fin).split('\n')) {
-      const h = l.match(/\/\/\s*══\s*(.*?)\s*══/);
-      if (h) cab = h[1]; else if (/^\s*\{\s*date\s*:/.test(l)) out.push(cab);
-    }
-    cabeceras = out.length === n ? out : [];          // si no cuadra con RAW, sin nombres (queda la liga)
-    return cabeceras;
-  }
   const titulo = t => t.replace(/\b(\p{Lu})(\p{Lu}+)\b/gu, (_, a, b) => a + b.toLowerCase());
   function nombreDeCabecera(h, liga) {
     if (!h) return null;
@@ -46,7 +32,7 @@
   // ── Agrupar ──
   function competencias() {
     const C = window.TSCal; if (!C) return [];
-    const ps = C.partidos(), cabs = cabecerasRAW(C.cantidadRAW());
+    const ps = C.partidos(), cabs = TSTorneos.cabeceras;
     const mapa = new Map();
     for (const p of ps) {
       const m = p.m; if (!m || !m.date) continue;

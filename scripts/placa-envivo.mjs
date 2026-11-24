@@ -33,25 +33,19 @@ const FECHA = arg('--fecha') || new Date().toLocaleDateString('sv-SE', { timeZon
 const OUT = path.resolve(arg('--out') || `fuentes/placas/envivo-${FECHA}.png`);
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
-// ── Partidos del día ──
-const literal = (src, desde) => { const k = src.indexOf(desde); const ini = src.indexOf(desde.endsWith('[') ? '[' : '{', k);
-  const fin = src.indexOf(desde.endsWith('[') ? '\n];' : '\n};', ini); return new Function('return ' + src.slice(ini, fin + 2))(); };
-const cal = fs.readFileSync('calendario.html', 'utf8');
-const RAW = literal(cal, 'const RAW = [');
-const BADGES = { ...literal(cal, 'const VPUG_T4_BADGES = {'), ...literal(cal, 'const E11_T4_BADGES = {') };
+// ── Partidos del día ── (fixture y escudos: torneos-datos.js)
+await import('../torneos-datos.js');
+const { RAW, cabeceras: TORNEOS, VPUG_T4_BADGES, E11_T4_BADGES } = globalThis.TSTorneos;
+const BADGES = { ...VPUG_T4_BADGES, ...E11_T4_BADGES };
 // Desde la T4 la clave interna '11x11' es la liga Espacio Gamer (mismo criterio que lgLabel() de calendario.html)
 const ligaVisible = m => m.league === '11x11' && m.date > '2026-09-28' ? 'Espacio Gamer' : m.league;
-// Torneo de cada partido de RAW: el bloque "// ══ <LIGA> T? — <torneo> ══" bajo el que está anotado en calendario.html
+// Torneo de cada partido de RAW: el bloque "// ══ <LIGA> T? — <torneo> ══" bajo el que está anotado en torneos-datos.js
 // ("VPUG T4 — Liga Pretemporada VPUG (FC-27) (T7 CopáFácil), Grupo D" → "Liga Pretemporada"). Sin nombre → la liga sola.
 const torneoDe = (h, liga) => {
   const t = (h.split(/\s+—\s+/)[1] || '').replace(/\(.*?\)/g, '').replace(/,.*$/, '').replace(/#\d+/g, '')
     .replace(new RegExp('\\b' + liga + '\\b', 'gi'), '').replace(/\s+/g, ' ').trim();
   return !t || /^temporada\b|^partidos jugados/i.test(t) ? liga : t.replace(/\b(\p{Lu})(\p{Lu}+)\b/gu, (_, a, b) => a + b.toLowerCase());
 };
-const rawSrc = cal.slice(cal.indexOf('const RAW = ['), cal.indexOf('\n];', cal.indexOf('const RAW = [')));
-const TORNEOS = []; let cab = '';
-for (const l of rawSrc.split('\n')) { const h = l.match(/\/\/\s*══\s*(.*?)\s*══/); if (h) cab = h[1]; else if (/^\s*\{\s*date:/.test(l)) TORNEOS.push(cab); }
-if (TORNEOS.length !== RAW.length) TORNEOS.length = 0;          // si no cuadra, cae a la liga sola
 const un = v => v.mapValue ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, un(x)]))
   : v.arrayValue ? (v.arrayValue.values || []).map(un) : Object.values(v)[0];
 let est = {};
