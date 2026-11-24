@@ -18,129 +18,39 @@ python -m http.server 8000
 
 - **The repo is public: never write credentials in code.** They live in `.env` (gitignored; template `.env.example`), loaded by `scripts/lib/env.mjs` (Node) or parsed directly in `.ps1` scripts. Variables: `CF_EMAIL`, `CF_API_KEY`, `CF_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `KV_NAMESPACE_ID`.
 - **R2** (all site images + working originals): `node scripts/r2.mjs ls|put|get|sync-up|sync-down` (lib: `scripts/lib/r2.mjs`). Keys mirror repo paths (`logos/…`, `Renders/…`); reference photos (game captures, player cards, kit sheets) are in `_fuentes/fotos/` — scripts find them through `FOTOS_DIR` (drygan's `Documents/TOP SECRET/Fotos` if present, else `fuentes/fotos/` pulled from R2).
-- **Project knowledge**: `docs/conocimiento/README.md` indexes the accumulated notes (workflows, user rules, gotchas). Read it before non-trivial work; when you learn something durable about the project, add a note there too (not only to local memory), so other PCs get it.
+- **Project knowledge**: `docs/conocimiento/README.md` indexes the accumulated notes (workflows, user rules, gotchas). Grep it for the topic before non-trivial work (do not read it whole); when you learn something durable about the project, add a note there too (not only to local memory), so other PCs get it.
 - **Working from another PC / claude.ai/code**: see `docs/trabajar-desde-otra-pc.md`. ChatGPT image generation needs a local Chrome with CDP: `scripts/abrir-chrome-chatgpt.ps1`.
+
+## Where to read (load only what the task needs)
+
+| Task touches | Read |
+|---|---|
+| A page, `layout.js`, nav, page-specific behaviour | `docs/claude/paginas.md` |
+| Fixture, rival badges, squad, match reports, `seed_matches.js` | `docs/claude/datos.md` |
+| Manual articles, news style, publishing to networks | `docs/claude/noticias.md` |
+| The automatic daily article or its images | `docs/claude/noticia-diaria.md` |
+| Worker routes/cron, Firestore docs and rules | `docs/claude/worker-firestore.md` |
+| Images, renders, logos, group photos, page weight, design tokens | `docs/claude/assets.md` |
+| New match / article / player in or out / new tournament / layout change | `docs/claude/checklists.md` |
+| Anything else learned on the job | grep `docs/conocimiento/README.md` (index), then open only the note |
+
+Large files (`calendario.html`, `convocatoria.html`, `seed_matches.js`, `noticias-data.js`, `top-secret-worker.js`): grep and read ranges, never whole.
 
 ## Architecture
 
-Three layers:
+Static site (this repo → GitHub Pages) + Firestore `top-secret-fc` (live overrides; every page has a local fallback) + Cloudflare Worker (`top-secret-worker.js` → `https://top-secret-proxy.juan-c-m-1985.workers.dev`; edits need `node scripts/deploy-worker.mjs`).
 
-1. **Static site** (this repo → GitHub Pages) — 10 self-contained HTML pages + shared JS.
-2. **Firestore** (project `top-secret-fc`) — real-time overrides and app state; every page falls back to locally computed data when unavailable.
-3. **Cloudflare Worker** (`top-secret-worker.js` → `https://top-secret-proxy.juan-c-m-1985.workers.dev`) — API proxy, OG previews, visit counter, news pipeline endpoints.
-
-### Pages
-
-| File | Purpose |
-|---|---|
-| `index.html` | Home (logic in `index-home.js`): hero card (text + `logos/hero-t4.webp`, Twitch live overlays it), big-image news grid, Miembros (T4 squad rail + Convocatoria/Plan tiles), Competencias (season stats, leagues, tops, results), Redes |
-| `plantilla.html` | Squad roster. **T4 = full-page group photo** (`plantel-t4-stage.js`: since 2026-10-16 the ChatGPT "túnel" group photo + a % hotspot box per player **measured by hand** — if the photo changes, re-measure the boxes; the old `scripts/plantel-foto-t4.mjs` collage only rewrites it with `--reemplazar-escenario`) — hover shows a dossier (name, number, Frente4), click opens the borderless profile panel with the player's unique pose. When the squad changes: new group photo + new boxes. T1–T3 keep the card grid (also shown on touch screens) |
-| `estadisticas.html` | "Informe de rendimiento" (redesign 2026-10-16): one long scroll page — hero scoreboard over the T4 group photo, sticky bar (season T1–T4 · competition = league or `torneo` · section anchors), **Protagonistas** (4 leaders side by side — goles, asistencias, rating, regularidad — big number + small portrait + top 5 with bars; Juan 2026-10-16: data first, **no videos and no pinned/scroll transitions** in this page), Cómo juega (SVG arcs + radar that morphs by tramo/liga), Partido a partido (rating line + ribbon → match panel), Plantel (Flip sort/filter → full-screen profile), Cara a cara (comparator), Club EA (live, lazy). Code split: `estadisticas-datos.js` (pure aggregations, testable from Node), `-graficos.js` (SVG), `-motion.js` (GSAP 3.12.5 + ScrollTrigger + Flip from cdnjs; page is complete without it / with reduced motion), `-club-ea.js`, `-app.js`, `-escudos.js` (copy of calendario's VPUG badge maps). State in URL: `?t=3&c=l:VPN&player=<gt>`. Player poses in R2 (`Unica4.webp`) prepared by `node scripts/estadisticas-recursos.mjs` — re-run when the squad changes |
-| `calendario.html` | Match calendar; admin editing writes to Firestore `calendario/estado`. Default view **por competencia** (`calendario-competencias.js`, 2026-10-21): one unified agenda on top (next matches of ALL competitions by day + latest results — built for simultaneous VPN/VPUG/Espacio Gamer), then every tournament as a folded card (in progress: progress bar, record, next match; finished below), an opened card spans the full width; tournament name comes from the `// ══ <LEAGUE> T? — <torneo> ══` block headers of `RAW` (keep that format when adding a tournament), from `playoff`, or from league + `instancia` for Firestore `custom` matches. Toggle "Por mes" = the old month grid (PRE always uses it). Data reaches the new file through `window.TSCal` |
-| `convocatoria.html` | Call-up/lineup tool. **Two modes**: plain URL (direct link only, never linked in the UI) = full editor; `?vista` (what the nav links to) = read-only — `EDIT_MODE` gates all Firestore writes (`saveState`/`_saveBackup`) and hides edit controls. **"Convocar"** button above today's matches (`convocatoria-convocar.js`): copies "Buenas! Ya pueden confirmar para los partidos de hoy!" (or "…el entrenamiento de hoy" when there are no matches) + the editable link, and shares the same "Partidos de hoy" card as calendario (`calendario-share.js` → `TSMatchdayCard`). **Edit times (2026-10-14):** every status action calls `markEdit(name)` → `convocatoria/state.statusEdits[name] = {at, status, note}` (diff-saved like the rest, also in the backup; the Worker reset never touches it); shown as "Estado editado hoy 09:33" in the card tooltip and the status modal. Before that date there is no per-player history |
-| `convo.html` | Retired 2026-07-13 — now just redirects to `convocatoria.html?vista` (it was the public read-only copy) |
-| `posiciones.html` | Live league standings (fetched via Worker/API) |
-| `noticias.html` | News feed + article view (`?id=<article-id>`) |
-| `nosotros.html` | About page (editorial, Chelsea kit-launch style): proyecto, identidad, historia (season stats computed from `SEED_MATCHES`), escudo (variants + palette), equipaciones (titular/alternativa/arquero), redes. Images in R2 `logos/nosotros/` and `logos/duos/` |
-| `reclutamiento.html` | Recruitment form (posts to Worker `/notify-reclu`) |
-| `plan-de-juego.html` | Game plan: vault-door lock (combination `3557`, client-side only — cosmetic, not real security; remembered per tab in sessionStorage) then a scroll landing page for the **3-5-2 con MCO** (principles, roles, build-up, press, attack, block, marks per rival system, corners). Tactic diagrams are SVG drawn from data in `plan-de-juego.js` (`DIAGRAMS`, `RIVALS`) — edit positions/text there. Door image in R2 `logos/plan/boveda.webp`. The old PDF (T2, 4-3-3) stays in R2 but is no longer linked |
-| `pizarra.html` | Live shared tactics board at `topsecret.ar/pizarra` (Miembros menu; logic in `pizarra.js`): T4 squad as small circular face + number tokens (on the pitch: whoever is on the convocatoria pitch, read live from `convocatoria/state.lineup`; rest on the bench strip), 11 red-rimmed black rival silhouettes, ball, pencil/arrow/eraser. No login: anyone with the link can edit. See `docs/conocimiento/reference_pizarra.md` |
-
-Every page loads `layout.js?v=N` at the end of `<body>` (redesign 2026-09-28, v=11):
-- **`layout.js`** injects the only navigation: a transparent top nav (gains blur/background on scroll) with the `Clean logo` (→ index), grouped menus in `NAV` — Noticias · **Miembros** (→ plantilla; dropdown Convocatoria, Plan de juego) · **Competencias** (→ posiciones; dropdown Calendario, Estadísticas) · **Nosotros** (→ `nosotros.html`; dropdown with its chapters + every social network, list in `SOCIAL`, also exposed as `window.TS_SOCIAL`) — plus "Sumate" (reclutamiento), visit counter and theme toggle. On ≤980px it becomes a full-screen menu. **No sidebars, no social bubbles, no bottom tab bar** (the user asked to remove them; `mobile-nav.js` was deleted). It also turns each interior page's `.page-header` into a hero card with a duo image (`PAGE_ART` map → R2 `logos/duos/*.webp`) and resets the old per-page sidebar offsets (`--sb-left/--sb-right`, body margins). New pages go into `NAV` (and its `match` list so the group highlights). Themes: `cls` default (black/gold), `t3`, `dark`, `light`.
-- **Cache busting is manual**: bump the `?v=N` query across all pages when editing these files, or GitHub Pages visitors get stale JS. `seed_matches.js` imports are sometimes versioned too (`?v=20260612` in calendario.html).
-
-### Data Layer — `seed_matches.js`
-
-Single source of truth for historical match data. ES module exporting `SEED_MATCHES`, imported by index, plantilla, estadisticas, calendario, and noticias. Real shape:
-
-```js
-{
-  rival: 'La Unión FC',          // exact name — must match fixture/logo references in other pages
-  league: 'VPUG',                // 'VPN' | 'VPUG' | '11x11'
-  date: '2026-03-04',            // ART date
-  match_result: '8-1',           // OUR goals first, as a score string (NOT win/draw/loss)
-  isHome: true,                  // optional
-  uploadedAt: '2026-03-04T00:00:00.000Z',
-  notes: '',                     // e.g. 'W.O.', 'Cuartos de Final · Ida (Visita)'
-  torneo: '...',                 // optional (playoffs etc.)
-  team_stats: {                  // Spanish field names, null when unknown
-    posesion, tiros, tiros_arco, goles_esperados, pases, precision_pases,
-    entradas, entradas_exito, intercepciones, paradas, faltas, fuera_juego,
-    corneres, regates_exito, precision_tiro
-  },
-  players: [{                    // English field names; empty array for W.O. matches
-    name, matched, rating, goals, assists, passes, pass_accuracy,
-    distance_km, sprints, tackles, interceptions
-  }]
-}
-```
-
-**When a match is played, append it to `SEED_MATCHES`.** Match reports arrive as images in `reportes/` (read them directly — see workflow memories). Walkover wins: `match_result:'1-0'`, `notes:'W.O.'`, `players:[]`.
-
-### News — `noticias-data.js` + `auto-noticias.js`
-
-- `noticias-data.js`: plain script defining `NOTICIAS` (manual articles, newest first, `pinned` supported). Each entry: `id`, `category`, `title`, `date`, `dateLabel`, `excerpt`, `image`, `body`, `shareCaption(s)`. `body` mixes HTML paragraph strings with blocks rendered by `bodyHtml()` in noticias.html: `{h}`, `{img, caption, wide}`, `{pair:[a,b], caption, ratio}` (ratio default `4/5`; `16/10` for desktop screenshots), `{quote, by}`, `{specs:[[k,v]]}`.
-- **Editorial standard (user rule, 2026-09-29): every new article follows the style of `presentacion-kits-t4`** — Chelsea kit-launch style: short lead, a `specs` strip, sections with `{h}`, big images/pairs with captions, one quote, closing line with a link. Clean and graphic; the old paper-file ("fichero") look is retired. Images: reuse site imagery (R2 `logos/duos`, `logos/nosotros`, screenshots) composed with sharp + the right crest before generating new ones; new covers go to R2 `logos/noticias/`.
-- **Publishing to social networks (2026-10-06)**: after "Publicar" on the draft, noticias.html opens the "Publicar en redes" step (`noticias-redes-ui.js`): per-network preview + text, checkboxes, "Publicar en todas". Titled pieces for Instagram post/stories are drawn by `noticia-redes.js` (canvas); Facebook/X post the `/og/<id>` link (clean photo preview). Worker `/redes-publicar` stores the pieces in R2 and a job in KV `redes_job`; `watch-regen.ps1` runs `scripts/publicar-noticia-redes.mjs` on this PC (Meta API + X via CDP) and writes per-network status back. News go out without music. Details: `docs/conocimiento/reference_noticias_en_redes.md`.
-- `share-cards.js`: builds, in the browser (canvas), the Instagram post (1080×1350) and story (1080×1920) for any article with the digital-dossier look (Clean dorado crest, `EXP-…` id, file window). Used by the share modal and "Descargar historia" — no per-article share images needed.
-- `auto-noticias.js`: ES module that auto-generates result news from `SEED_MATCHES`; exports result-image pools (`RESULT_IMAGES`, per-period overrides).
-- **Publishing a manual article requires 3 steps or the WhatsApp share preview breaks**: (1) add to `NOTICIAS`, (2) add the id to `NOTICIAS_OG` in `top-secret-worker.js`, (3) redeploy the Worker.
-
-### Firestore (project `top-secret-fc`)
-
-| Doc | Used by | Contents |
-|---|---|---|
-| `calendario/estado` | calendario, convo, convocatoria | `results`, `edits`, `suspended`, `custom` match overrides |
-| `news/draft` | daily-news pipeline | today's auto-generated article draft |
-| `news/image_style_history` | image generator | style rotation (avoid repeats) |
-| convocatoria/plantel/reclutamiento docs | convo, convocatoria, reclutamiento | lineup state, roster, applications |
-| `plantel/pizarra`, `plantel/pizarra-trazos` | pizarra | moved tokens (`f`; a player's move only counts while the convocatoria lineup in its `l` is still current) and strokes (`t`); empty = convocatoria lineup |
-
-Pages use the Firebase compat SDK 10.12.0 (`convo`, `convocatoria`, `estadisticas`, `plantilla`, `reclutamiento`) or the modular ESM SDK (`calendario`). All Firestore reads have local fallbacks — the site must keep working read-only if Firestore is down.
-
-**Security Rules (2026-08-13)**: no longer a single open wildcard. Reads stay open (`if true`) for every collection. Writes are open (`if true`) per-collection for `calendario`, `reclutamiento`, `plantel`, `news`, `torneos` — **but `convocatoria` writes require `request.auth != null`** (Firebase Anonymous Auth, silent — `convocatoria.html` calls `signInAnonymously()` on load, no login screen). This closed a recurring incident where an old/stale copy of `convocatoria.html` kept writing bogus `resetDate`/`dailyOverrides` values indefinitely; now any write without a valid auth token is rejected outright by Firestore itself. Because rules moved from one blanket wildcard to an explicit per-collection allowlist, **a brand-new Firestore collection needs its own `match` block added to the rules or its writes will silently 403** — this used to work with zero rules changes. The Worker's `dailyConvocatoriaReset()` cron (see below) also authenticates this way, via anonymous sign-in against Identity Toolkit with the project's public Web API key (not a service account — cached in `TS_KV` under `conv_auth_token`, ~55min TTL).
-
-### Cloudflare Worker — `top-secret-worker.js`
-
-Source lives in this repo; **edits require redeploying**: `node scripts/deploy-worker.mjs` (reads credentials from `.env`; keeps the KV + R2 bindings and verifies `/media`). A GitHub Action (`.github/workflows/deploy-worker.yml`) also deploys on push when its repo secrets are set. `/media/_fuentes/*` is deliberately 404 (private working originals). Key routes:
-
-- `/vpn-table`, `/vpn-results`, `/vpn-fixtures`, `/vpug-table` (hardcoded fallback), `/copafacil-pretemporada` — standings/results proxies used by `posiciones.html`. 11x11 is fetched directly: `https://api.virtualprogaming.com/public/leagues/Challengers/table/?season=2`
-- `/counter` — visit counter (GET reads, POST increments)
-- `/og?id=<article>` — OG meta HTML for sharing news; driven by the `NOTICIAS_OG` map at the top of the file
-- `/draft-noticia`, `/publish-noticia`, `/persist-draft-image`, `/draft-image`, `/request-regen`, `/regen-flag`, `/discard-flag` — daily news pipeline. Discarding a draft (`DELETE /draft-noticia`) also queues its generated images for deletion via `/discard-flag`
-- `/notify-reclu`, `/reclutamiento-activo`, `/convocatoria-status`, `/img-proxy`, `/ea`, `/kv`, `/log-event`
-- Admin endpoints (publish/discard/edit draft, regen) require `env.ADMIN_PIN` — a Worker **secret** with no default in code (the old public `8189` fallback was removed 2026-07-13; the user types the PIN in the noticias UI). The client-side gates in calendario/reclutamiento are cosmetic and separate.
-- **Cron Trigger** (`scheduled()` handler, `* * * * *` — every minute): `dailyConvocatoriaReset()` keeps `convocatoria/state` correct server-side (clears expired `dailyOverrides`/`availability`, advances `resetDate`) independent of any browser tab's clock. The same cron also runs `purgarAmistososPasados()`: friendlies (`league:'Amistoso'` in `calendario/estado.custom`) are deleted once their day has passed (user rule — friendlies never get a result), re-indexing the `c<N>` keys of results/edits/suspended. Authenticates via anonymous Firebase sign-in (see Security Rules note above). Registering/changing the schedule is a separate Cloudflare API call from deploying the script — `PUT .../workers/scripts/top-secret-proxy/schedules` with a JSON **array** body like `[{"cron":"* * * * *"}]` (not `{"crons":[...]}`, that 400s).
-
-### Daily News Pipeline (automated)
-
-1. **Since 2026-11-11 the article is written in the cloud (hybrid)**: GitHub Actions `.github/workflows/noticia-diaria.yml` runs `scripts/noticia-diaria.mjs`, dispatched by the Worker cron (`despacharNoticia`: 06:00, 06:30, 07:30, 09:00, 12:00, 15:00, 18:00, 21:00 ART — **no results, no article (Juan 2026-11-20)**: if yesterday had official matches (seed, Firestore `custom` or the `RAW` fixture of calendario.html) without a result, the script exits without writing and the next slot retries; `--sin-resultados` skips it, `--nota <file> --fecha --prueba --corregir` rewrites a pending article that is no longer in `news/draft`; and right after a "Rehacer" — KV `regen_request`, forzar + motivo; Worker secret `GITHUB_TOKEN` = the Satinrail fine-grained PAT, also scoped to top-secret, expires ~2027-11; repo secret `CLAUDE_CODE_OAUTH_TOKEN`). No Ollama fallback there: if Claude fails, the next slot retries. Test: `gh workflow run noticia-diaria.yml -f prueba=true` (artifact). PC tasks `TopSecretFC-NoticiaDiaria` and `-Imagenes` are disabled; the script still runs by hand on the PC. (From 2026-10-26 to 11-11 it ran on this PC.): code gathers all data (seed_matches, `calendario/estado.custom`, `/eg-table`, absences, history docs), Claude writes it in ONE light call (`scripts/lib/ia.mjs`, brief `scripts/noticia-diaria-encargo.md`, local Ollama model as fallback), code checks length/gamertags/leagues/weekdays/format and sends errors back for a fix; `--forzar` rewrites (used by the site's "regenerar" via `watch-regen.ps1`), `--prueba` writes to `pruebas/` only. Editorial corrections still go in `docs/conocimiento/reglas-noticia-diaria.md`. The old cloud routine `trig_01Kz9ev31E5WfSN2mkVrHq7a` was disabled the same day. `run-daily-images.ps1` (task at 06:10) waits up to 45 min for today's draft before generating.
-2. Windows Task Scheduler runs `scripts/run-daily-images.ps1` → `scripts/generate-image-chatgpt.mjs`: drives a logged-in Chrome (CDP on `localhost:9222`, profile in `scripts/.chrome-profile/`, gitignored) against the ChatGPT project "TOP Secret FC", generates post/story images with style rotation, saves to `Renders/Daily News/`, commits and pushes. **T4 look (2026-10-06):** clean campaign photos with NO text (no headline, no 'expediente' papers/stamps — the site adds the title), styles (= place/light) `CAMPANA_ESTUDIO`/`ESTADIO_NOCHE`/`TUNEL`/`RETRATO_EDITORIAL`/`ACCION_PARTIDO`/`VESTUARIO` + since 2026-11-07 `BANCO`/`ENTRENAMIENTO`/`LLUVIA`/`ATARDECER`/`PRECALENTAMIENTO`/`TRIBUNA_VACIA`. **Variety (Juan 2026-11-07, replaces the 29/10 "always 5 players, fixed eye-level framing" rule):** `pickPlano()` rotates a camera shot from `PLANOS` (lens, angle, foreground/background depth) and the player count 1–5 by the article's `toma`; both saved as `plano`/`n` in `news/image_style_history`. A new place must be added to `STYLE_FROM_BRIEF`, `LUGAR` + the place regex in `noticia-diaria.mjs`, and `noticia-diaria-encargo.md`. **Visual references are attached to each generation message from the local repo**: `logos/rebrand/Clean logo Dorado.png` + each featured player's T4 render already wearing the day's kit (`Renders/T4-Frentes/` = titular, `Renders/T4-Frentes-K2/` = alternativa; goalkeepers always their orange kit) — files uploaded to the ChatGPT project do NOT reach the image generator reliably (it invented crests). New player render: drop the PNG in `Renders/T4-Frentes/` (+ `-K2`) and add their look to `PLAYER_TRAITS`. The routine writes `body` as editorial blocks (`{specs}`, `{h}`, `{quote}`, `{pair}` with `logos/noticias/plantel-t4/<gt>.webp`) — `noticias.html` renders them and the draft editor edits blocks as one JSON line each. Every ChatGPT chat the pipeline creates (generation attempts, evals) is deleted after its image is downloaded or the attempt is rejected.
-3. `scripts/watch-regen.ps1` runs every minute on the PC: `/discard-flag` (news discarded in the browser → deletes its images from R2 and locally) and, since 2026-11-11, **images only**: if today's draft has a title and no `imagePost` and no generation is running, it launches `run-daily-images` (ChatGPT + aprobar.html batch) once per draft `generatedAt` (marker `scripts/.imagenes-lanzadas`). It no longer reads `/regen-flag` (the Worker dispatches the rewrite). **This PC no longer opens aprobar.html by itself** (Juan approves from another PC, 2026-11-20; `APROBAR_ABRIR=1` in .env brings it back). **"Pedir corrección" (aprobar.html, 2026-11-13)**: same article with the requested changes, keeping the photo or making a new one — `/request-regen` with `corregir:'mantener'|'nueva'` (the draft is NOT deleted), workflow input `corregir` → `noticia-diaria.mjs --corregir`; with the same photo the draft keeps its images + `rearmarLote:true` and watch-regen re-runs `scripts/social/noticia-lote.mjs` once per `generatedAt` (marker `scripts/.lote-rearmado`). "Rehacer" still writes a different article.
-4. `scripts/*.vbs` are hidden-window launchers for Task Scheduler.
-5. **`.ps1` files with non-ASCII text must be UTF-8 WITH BOM** — PowerShell 5.1 reads BOM-less files as CP1252 and em-dashes silently break parsing (this made `watch-regen.ps1` a no-op for weeks). ASCII-only scripts like `run-daily-images.ps1` are safe either way.
-
-### Assets
-
-- `Renders/<gamertag>/` — player render folders. **Never delete ex-player folders** (historical archive). `T2-Frentes/`, `T3-Frentes/`, `T4-Frentes/` are gitignored source frames, not players. Each season has its own set (`Brazos3/Frente3/Pose3` for T3, `Brazos4/Frente4/Pose4` for T4 — Kit 1 negro/dorado + `Clean logo Dorado`, generated with `scripts/renders-t4-once.mjs`); pages try the newest season first and fall back to older ones. Renders are served from R2 (`/media/`), not git — upload new ones to the bucket. **Browser cache gotcha:** the Worker serves `/media/` with `Cache-Control: immutable, max-age=1y`, so overwriting a render in R2 is invisible to returning visitors. `mediaUrl()` in plantilla.html, convocatoria.html and index-home.js appends `?v=RENDER_V` to every `Renders/` URL — **bump `RENDER_V` in all three** whenever a player's render is regenerated (new look, dorsal change).
-- **Season boundaries (T4)**: plantel T4 lives in `roster.js` (`ROSTER_T4`; `ROSTER_T3` kept as history). `T4_CUTOFF = '2026-09-28'` in plantilla/estadisticas/calendario/index — any match after that counts as T4. This is correct, not provisional: **T4 starts with a preseason** (Liga Pretemporada VPUG, Fase Oro playoffs, friendlies; 29/9–19/10) that is part of T4, and the official competition starts on Tuesday **2026-10-20 with Espacio Gamer** (Juan, 2026-10-15). In public copy, call the preseason "pretemporada" (not "arranque de la Temporada 4").
-- **Group photos T4 generated with ChatGPT** (2026-10-16, what Juan prefers — "una foto nueva, no un collage"): `estudio`, `estadio`, `tunel`, `vestuario` + looser versions without rows `estudio-suelto`, `estadio-suelto`, in R2 `logos/grupales/grupal-ia-<id>-<ver>.webp` (1536x1024; originals `_fuentes/grupales-ia/`), list `GRUPALES_IA_T4` in `estadisticas-datos.js`. estadisticas.html hero uses `estudio-suelto`; keep the others for other contexts (Juan: "no descartes las que tenemos"). Made by `node scripts/grupales-chatgpt.mjs [escena…]`. What makes it work (learned 2026-10-16): (1) reference sheets labeled with LETTERS A–Q, never numbers (numbers got painted as dorsals); (2) a face sheet + two full-body sheets (A–I, J–Q) so each player's kit, sleeves and accessories stay on him; (3) a mandatory placement per letter for each scene (`PLANES`) — without it ChatGPT duplicated players (19 people); (4) the T4 shirt has NO front number: the dorsal goes only small on the right leg of the shorts (and on the back), and the number in the text list wins over any number seen in a render (adri_cai's render shows 99, his dorsal is 32). Check the count before using a new one.
-- Older composited group photos (2026-10-16): 4 compositions from the real renders (Brazos4/Pose4/Gesto4/Unica4) — `campana`, `piramide`, `bloque`, `noche` — in R2 `logos/grupales/grupal-t4-<id>-<ver>.webp` (originals in `_fuentes/grupales/`), list in `GRUPALES_T4` (`estadisticas-datos.js`). Made by `node scripts/fotos-grupales-t4.mjs --subir` (layouts per photo inside; re-run when the squad changes, then update the file names). estadisticas.html hero uses `campana`. Never line players up in rows "like soldiers" (user rule). `logos/plantel-t4-*.webp` is a different one (plantilla hotspots, `scripts/plantel-foto-t4.mjs`).
-- `logos/` — club logos, league logos, news images. Convention: heavy PNGs get a `.webp` sibling for web use.
-- **Page weight (2026-10-19)**: the home was downloading 41 MB (daily-news PNGs of ~3.5 MB + every player's `Brazos4/Frente4.png` ~900 KB via `new Image()`, which ignores `loading="lazy"`). Now `webp()` in index-home.js/noticias.html swaps `.png/.jpg` (with or without `?v=`) for the R2 `.webp` sibling and falls back on error, renders try `<kind>4.webp` first, and `fillRender` sets the chain on the `<img>` itself so lazy loading works → 2.9 MB. The daily pipeline uploads the `.webp` itself (`uploadImagesToR2`); for anything else run `node scripts/webp-livianos.mjs` (creates missing `.webp` in `Renders/Daily News/` and `logos/noticias/`). Measure with a headless page before assuming it's the network.
-- `logos/rebrand/` — high-res crest set from the 2026-09 rebrand (4x upscale, transparent PNG): `Top Secret Logo New.png` (metallic badge, 5016px), `Top Secret Logo New White/Azul/Dorado/Negro.png` (flat badge, 5016px) and `Clean logo` (spy mark alone) in white/Metal/Azul/Dorado/Negro (1740×1932). Azul = `#1E69BC` (from `logos/TOP Secret Blue.png`). Source masters stay in `logos/` (`Top Secret Logo New*.png`, `Clean logo.png`) — never overwrite them. These are source assets: derive a small `.webp` before using one in a page.
-- Favicon (all pages): `Clean logo Metal` → R2 `logos/rebrand/favicon-64.png` + `favicon-180.png` (apple-touch). `Top-Secret.png` — old crest. Theme logos: `logos/TOP Secret Blue.png` (t3), `logos/Top Secret white.png` (dark), `Top-Secret.png` (light).
-- **Commit images to git together with the code that references them** — GitHub Pages serves only what's committed.
-- Optimize before committing: images displayed small must not be multi-MB. `sharp` is available in `node_modules` (devDependency, scripts only — never in page code).
-
-### Design System
-
-CSS variables defined inline per page; `layout.js` overrides them per theme. Base tokens (t3 theme is the live default — blue accent `#4a9eff` on `#0d1117`):
-
-`--bg`, `--card`, `--gold` (accent — silver/blue/gold depending on theme), `--vpn` `#f5c518`, `--vpug` `#3ecf8e`, `--e11` `#4a9eff`, `--win`/`--draw`/`--loss`.
-
-Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded from Google Fonts.
+Non-negotiables:
+- **Fixture + badges live only in `torneos-datos.js`; squad + `RENDER_V` only in `plantel-datos.js`.** Never copy them into a page. `RAW` is append-only (its index is a Firestore key). After editing: bump `?v=`, `node scripts/control-datos.mjs`.
+- Once per PC: `git config core.hooksPath .githooks` (runs that check on commit).
+- **Cache busting is manual**: bump `?v=N` across all pages when a shared file changes.
+- **A manual article needs 3 steps**: `NOTICIAS` in `noticias-data.js` → `NOTICIAS_OG` in the Worker → redeploy. **No results, no daily article.**
+- **`convocatoria.html` without `?vista` is the live editor**: never open it from automated tests.
+- A brand-new Firestore collection needs its own rules block. `/media/` is cached a year: new version = new URL or `RENDER_V`.
+- **T4 starts 2026-09-28** (`T4_CUTOFF`; the preseason 29/9–19/10 counts as T4, public name "pretemporada"); official competition since 2026-10-20.
+- **Never delete `Renders/<gamertag>/`** of ex-players nor overwrite source masters in `logos/`. Never line players up in rows "like soldiers". Group photos come from ChatGPT, not collage; keep all of them.
+- No sidebars, social bubbles or bottom tab bar. Estadísticas: data first, no videos or pinned scroll.
+- `.ps1` files with non-ASCII text must be UTF-8 **with BOM**.
 
 ## Conventions & Gotchas
 
@@ -151,60 +61,11 @@ Fonts: Barlow + Barlow Condensed (body/headings), Bebas Neue (brand). Loaded fro
 - **League naming in news prose** (manual `noticias-data.js` entries and the automated daily-news routine, per user instruction 2026-08-19): in any published text — title, excerpt, body, share captions — name a league only by its short form: `VPN`, `VPUG`, or `Espacio Gamer` — **from T4 on (2026-10-13) the old 11x11 league is called "Espacio Gamer"** (division page https://espaciogamer.cl/division/challengers-2-espacio-gamer-argentina/, standings via Worker `/eg-table`; internal code keys stay `11x11`/`e11`; T1–T3 copy keeps "11x11"; see `docs/conocimiento/project_espacio_gamer.md`). Never append season suffixes like `T3`/`T6`/`Temporada 3` (those are fine as internal/code labels, e.g. comments in `seed_matches.js`, just not in reader-facing copy), and **never use an article** — it's "en VPN"/"por VPUG"/"en 11x11", not "en la VPN"/"en el 11x11". Also, the league is the tournament/context, not a subject that "wins" or "loses" — never write "VPN ganó"; the **club** is always the subject, the league is the frame: "Top Secret ganó esta noche en VPN", "cayó 1-2 en VPUG", "goleada por 4-0 en 11x11".
 - **GitHub Pages is case-sensitive**: file references must match the git-tracked filename case (local Windows FS won't catch this).
 - ART timezone (`America/Argentina/Buenos_Aires`) for all date/time logic.
-- CSS: use the design tokens, never hard-code colors; no `transition: all`; no emojis in UI text unless requested.
+- CSS: use the design tokens (`--bg`, `--card`, `--gold`, `--vpn`, `--vpug`, `--e11`, `--win/--draw/--loss`), never hard-code colors; no `transition: all`; no emojis in UI text unless requested.
 - **`layout.js` owns the `.ts-hero*` class names** (page hero card: min-height 420px, centered with transform). Never reuse them inside a page — estadisticas.html did (`.ts-hero` for the team-stats header) and it opened a 400px gap until 2026-10-16 (renamed `.tsx-head`).
 - Keep inline `<script>` blocks under ~500 lines in new code; extract to `.js` files. (Legacy pages exceed this — don't grow them further.)
-- Each page is self-contained — no cross-page dependencies beyond `layout.js`, `roster.js`, `seed_matches.js`, `noticias-data.js`, `auto-noticias.js`.
+- Each page is self-contained — no cross-page dependencies beyond `layout.js`, `torneos-datos.js`, `plantel-datos.js`/`roster.js`, `seed_matches.js`, `noticias-data.js`, `auto-noticias.js`.
 - Never delete or overwrite code unless explicitly instructed; ask when context is missing.
 - Commit when a change is done (user preference: don't wait to be asked). Commit messages in the existing style: `feat:`/`fix:` + short Spanish description.
 
-## Common Tasks — Checklists
-
-**New match played**
-1. Read the report (image in `reportes/` or user-provided) → append the match object to `SEED_MATCHES`. **Since 2026-10-15 official matches may already be there**, loaded automatically from EA at the end of each live night (`scripts/cargar-partidos-ea.mjs`, run by `retransmitir.mjs`) with `origen:'ea-auto'`: in that case complete THAT entry with the video report (possession, xG, corners, goal minutes, exact positions, names as shown in the report; the video wins on any difference) and remove `origen`, instead of adding a duplicate. Matches EA recorded inconsistently (e.g. a cut match logged as 3-0 with no goals) are skipped and reported as "REVISAR A MANO" in `fuentes/redes/retransmitir.log`.
-2. Verify rival name matches existing fixture entries.
-3. Run `node scripts/ea-completar.mjs` (then `--aplicar`) to fill the per-player stats the video lacks from EA (stored by the Worker, see `docs/conocimiento/reference_ea_proclubs_api.md`). EA only keeps 5 matches per type in its API, but the Worker cron saves every official calendar match. If a knockout series (ida/vuelta) ended won-one-lost-one by the same goal difference, the Worker auto-adds the 3rd match to the calendar; load its report as a separate entry with `notes` containing "Desempate (3er partido)". Commit.
-
-**New manual news article**
-1. Add entry at the top of `NOTICIAS` in `noticias-data.js` (exact gamertags; image committed to `logos/` or `Renders/`).
-2. Add id → `{t, i}` to `NOTICIAS_OG` in `top-secret-worker.js`.
-3. Redeploy the Worker. Commit everything.
-
-**New player joins**
-1. Create `Renders/<gamertag>/` with renders (PNG, transparent background — review each image visually before committing).
-2. Add to `plantilla.html` roster data with the gamertag verbatim.
-
-**Player leaves the club**
-1. Remove them from the roster data in `plantilla.html` (`ROSTER_T3`) and `convocatoria.html` (`PLAYERS` array, and any hardcoded slot in `autoLineup()`).
-2. Delete `Renders/T4-Frentes/<gamertag>.png` and `Renders/T4-Frentes-K2/<gamertag>.png` (gitignored, local-only), their entry in `PLAYER_TRAITS` in `scripts/generate-image-chatgpt.mjs` — this is what stops the daily news image generator from picking them as a featured player. **Never delete `Renders/<gamertag>/`** (the per-player render source folder) — historical archive, same as any other ex-player.
-3. Remove their row from the table in `scripts/chatgpt-project-instructions.md` (reference only — since 2026-09 the ChatGPT project "TOP Secret FC" has no instructions of its own, so there is nothing to update there).
-4. The article-writing routine (the scheduled cloud agent that drafts `news/draft`) is external to this repo and can still write an ex-player's name into an article's text from stale knowledge — steps 1-3 only stop them from appearing as an image protagonist, not from being mentioned in prose. If that happens, discard/regenerate the draft.
-
-**Edit shared UI (`layout.js`)**
-1. Make the change (`NAV` if navigation changed).
-2. Bump `?v=N` on every page's script tags. Commit.
-
-**Reprogramar una fecha del Campeonato de Invierno VPUG (pretemporada)**
-1. Edit the `SCHEDULE` array in `top-secret-worker.js` (`/copafacil-pretemporada` handler) — this is the single source of truth for round dates/times; both `calendario.html` and `convocatoria.html` fetch it live. Redeploy the Worker.
-2. Also update the matching entries in `INVIERNO_SCHEDULE` in `convocatoria.html` — it's only a pre-fetch fallback (used for an instant before the live fetch resolves), so a stale date there is low-risk but should still match.
-3. **Push to `main`** — GitHub Pages only serves what's pushed; a local commit alone leaves the live site stale (this bit us: `convocatoria.html` kept showing the old triple date until pushed).
-4. If a match result needs correcting and the external CopáFácil API hasn't caught up (e.g. wrong/missing score), use `RESULT_OVERRIDES` in the same Worker handler rather than editing `SEED_MATCHES` — this bracket's data is API-driven, not part of `SEED_MATCHES`.
-
-**Nueva temporada/torneo de CopáFácil (VPUG)**
-
-A new VPUG competition (regular season, pretemporada, playoffs, whatever CopáFácil calls it) shows up as a link like `https://copafacil.com/{eventId}@{tournamentCode}`. That URL is a Flutter web app — `WebFetch`/scraping only sees the loading screen — so pull data from Firebase RTDB directly (see [[reference_copafacil_api.md]] for the full pattern) or, if you need to eyeball something the API doesn't expose (see step 2), screenshot it with Playwright (`playwright` is already a devDependency — launch headless, `goto` the URL, it's normal server-rendered HTML/CSS despite being Flutter, not canvas, so screenshots are crisp and `page.content()` returns readable DOM).
-
-1. **Get the tournament identity.** `GET https://copafacil-web.firebaseio.com/events/{eventId}@{code}/info.json` → `info.sub_title` is the tournament's display name (e.g. `"#1 Primera División VPUG (T6)"`) and `d_i` is the start date (epoch ms).
-2. **Get TOP Secret's fixture.** `GET https://copafacil-web.firebaseio.com/events/{eventId}/matchs.json` (note: **event ID only**, no `@code` — matches for every tournament under that community live in one flat node), filter entries where `evt === "{eventId}@{code}"`. Group by `m_set` (sorted ascending = chronological round order) to get fecha/round numbers. Find the entries where `team1` or `team2` is TOP Secret's team key (look it up in `teams.json` below, or reuse the key from a prior tournament — it's stable across seasons) — `team1` = home, `team2` = away.
-   - **CopáFácil does not store calendar dates or kickoff times per match** — only the pairing and round order. Firebase has nothing to scrape here; the real cadence (which weekday(s), what time) has to come from the user/organizer. Ask before inventing a schedule. Once you have the cadence, project it forward Mon–Thu (or whatever the pattern is) starting from `d_i` — see the 2026-08 VPUG T6 season for a worked example.
-3. **Get team names/logos.** `GET https://copafacil-web.firebaseio.com/events/{eventId}@{code}/teams.json` → `{name, url (logo)}` per team key. Standings (`w/d/l/gf/gc/pts`) live in each team's `dt` snapshot object, keyed by timestamp — **absent until at least one match in that tournament has been scored**, so a brand-new season legitimately returns teams with no `dt` at all (not a bug).
-4. **Wire it into the site** (all of these, or the fetch will silently show stale/wrong data on one page while looking fine on another):
-   - `top-secret-worker.js`: if the tournament will run for a while (not a one-off playoff leg), add a dedicated proxy endpoint like `/vpug-table-t3` mirroring `/vpug-table`'s stats-parsing (`dt` string format `"0=pts#1=gp#2=w#..."`) — don't reuse an existing endpoint hardcoded to a different event key. Redeploy (`node scripts/deploy-worker.mjs`, see `docs/conocimiento/reference_cloudflare_y_r2.md`).
-   - `posiciones.html`: check for a `PRÓXIMAMENTE` placeholder pane already reserved for this — the site pre-builds "Temporada 1/2/3" tab slots ahead of time (`t1-pane-vpug`, `t2-pane-vpug`, `t3-pane-vpug`, etc.) precisely so the next VPUG season has a home. Replace the placeholder `<div>` with a `<table id="tN-vpug-table">`, add a `fetchTNVPUG()` following the `fetchT2VPUG()` pattern (live fetch with a hardcoded all-zero fallback array for when the Worker is down), reuse `normVPUG()` (it already flags the `TOP Secret` row via regex).
-   - `calendario.html`: add TOP Secret's fixture rows to the `RAW` array (only TS's own matches, not the whole round-robin) under a new `// ══ VPUG T? — <name> ══` comment block, plus rival logos to a new `VPUG_T?_BADGES` map wired into `vpugBadge()`. Months auto-bucket into the Temporada 1/2/3 UI sections by date against `T3_CUTOFF` — no manual section wiring needed unless the cutoff itself needs to move.
-   - `convocatoria.html`: mirror the exact same fixture rows into a `VPUG_T?_SCHEDULE` array and the badges into a matching `VPUG_T?_BADGES` map (comment reminding future edits to keep both files in sync), then wire both into `getTodayMatches()` — filter today's entries, dedupe against `calCustom`, and fold into the final merged array — following the existing `VPUG_T2_SCHEDULE`/`fromVpugT2` block as the template.
-5. **Push to `main`** — GitHub Pages only serves what's pushed.
-
-## PRP Workflow
-
-For larger features: `/generate-prp <feature>` → review the PRP in `PRPs/` (gitignored, local) → `/execute-prp PRPs/<feature>.md`. Existing PRPs: daily news automation, T3 theme, T2→T3 transition.
+PRP workflow for large features: see `docs/claude/checklists.md`.

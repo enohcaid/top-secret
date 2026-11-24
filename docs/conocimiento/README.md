@@ -4,6 +4,8 @@ Notas acumuladas trabajando con Claude Code (antes vivían solo en la memoria lo
 
 Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los links `[[nombre]]` apuntan a otras notas de esta carpeta. Al aprender algo nuevo y duradero sobre el proyecto, sumarlo acá (y al índice) en vez de solo a la memoria local.
 
+**Actualización 2026-11-24:** el fixture y los escudos fijos viven solo en `torneos-datos.js` y el plantel en `plantel-datos.js` (ver `docs/claude/datos.md`). Ya no existen los arrays `*_SCHEDULE`, los mapas `*_BADGES` ni la lista `PLAYERS` escrita a mano en las páginas, ni `RAW` en calendario.html. Sigue valiendo: Espacio Gamer y lo cargado en el sitio está en Firestore `calendario/estado.custom`. Las notas anteriores que los nombran valen como historia.
+
 ## Reglas y preferencias (cómo trabajar)
 
 - [feedback_tokens_todos_los_permisos](feedback_tokens_todos_los_permisos.md) — Juan 2026-11-18: al generar un token para una cuenta, pedir de entrada todos los permisos (métricas incluidas) y verificarlos con debug_token; al de Meta le faltan los de insights y Juan no va a re-autorizar

@@ -7,6 +7,9 @@ metadata:
   modified: 2026-08-20T20:55:27.199Z
 ---
 
+**Actualización 2026-11-24:** el fixture y los escudos fijos viven solo en `torneos-datos.js` y el plantel en `plantel-datos.js` (ver `docs/claude/datos.md`). Ya no existen los arrays `*_SCHEDULE`, los mapas `*_BADGES` ni la lista `PLAYERS` escrita a mano en las páginas, ni `RAW` en calendario.html. Sigue valiendo: Espacio Gamer y lo cargado en el sitio está en Firestore `calendario/estado.custom`.
+
+
 Rescheduling an 11x11 (or VPN/VPUG) match affects two independent data sources, and editing only one leaves the live site showing the old schedule:
 
 1. **`convocatoria.html`'s hardcoded `E11_T3_SCHEDULE` array** (and equivalent VPN/VPUG arrays) — a static JS array in the repo, only read by convocatoria.html itself.
