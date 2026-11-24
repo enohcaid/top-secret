@@ -85,6 +85,14 @@ for (const p of [...(hist.partidos || [])].reverse()) {                 // del m
   // diferencia de la tabla de VPUG (1-0, de Argentino de Merlo, sin cargar) se le anotó a Hacha, que ya estaba 1-2.
   const ya = triples.indexOf(`${c.rival}|${c.fecha}|${res}`);
   if (ya >= 0 && p.id !== FORZAR) { triples.splice(ya, 1); continue; }
+  // Ese partido del calendario ya está cargado con otro resultado (liga o vivo): no se duplica. Vale también para cuando
+  // EA asigna por horario un amistoso (18/11: Las Palmas en el hueco de Argentino de Merlo, que fue 1-0 de la liga).
+  const mismos = x => x.league === c.liga && (x.date === c.fecha) && mismoClub(x.rival, c.rival);
+  const previstos = RAW.filter(mismos).length || (hist.partidos || []).filter(x => !x.sospechoso && x.calendario && mismos({ league: x.calendario.liga, date: x.calendario.fecha, rival: x.calendario.rival })).length;
+  if (cargados.filter(mismos).length >= previstos && previstos && p.id !== FORZAR && cargados.some(mismos)) {
+    console.log(`YA CARGADO: ${c.fecha} ${c.liga} vs ${c.rival}; EA dice ${res} (${p.rival?.nombre || '?'}, ${p.id}): se deja el que está.`);
+    continue;
+  }
   const jug = p.jugadores || [];
   const e = p.equipo || {};
   const vacio = (e.tiros || 0) === 0 && jug.filter(j => (j.pases_int || 0) > 0).length <= 2;

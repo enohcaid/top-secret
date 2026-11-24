@@ -1739,7 +1739,13 @@ async function syncEaPartidos(env, conMiembros, limpiar = false) {
     let guardados = (await env.TS_KV.get('ea_partidos', 'json')) || [];
     const ids = new Set(guardados.map(p => p.id));
     const candidatos = [];
+    // EA le responde 403 al Worker (desde mediados de noviembre 2026): la PC baja lo mismo con Chrome y lo deja en KV
+    // (scripts/ea-traer.mjs). Si EA vuelve a responder acá, se usan las dos fuentes.
+    const crudo = (await env.TS_KV.get('ea_crudo', 'json')) || {};
     for (const tipo of EA_MATCH_TYPES) {
+      for (const m of (crudo.partidos?.[tipo] || [])) {
+        if (!ids.has(String(m.matchId))) { ids.add(String(m.matchId)); candidatos.push(eaCompactar(m, tipo)); }
+      }
       try {
         const lista = await eaGet(`clubs/matches?platform=${EA_PLATFORM}&clubIds=${EA_CLUB_ID}&matchType=${tipo}`);
         for (const m of (Array.isArray(lista) ? lista : [])) {
@@ -1791,7 +1797,10 @@ async function syncEaPartidos(env, conMiembros, limpiar = false) {
           eaGet(`members/career/stats?platform=${EA_PLATFORM}&clubId=${EA_CLUB_ID}`),
         ]);
         await env.TS_KV.put('ea_miembros', JSON.stringify({ ts: Date.now(), stats: stats.members || [], carrera: carrera.members || [] }));
-      } catch (e) { res.errores.push(e.message); }
+      } catch (e) {
+        if (crudo.stats?.length) await env.TS_KV.put('ea_miembros', JSON.stringify({ ts: crudo.ts, stats: crudo.stats, carrera: crudo.carrera || [] }));
+        else res.errores.push(e.message);
+      }
     }
     if (res.nuevos || res.errores.length || conMiembros) {
       await env.TS_KV.put('ea_sync_meta', JSON.stringify({ ts: Date.now(), ...res, total: guardados.length }));
