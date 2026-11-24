@@ -1,7 +1,7 @@
 // Trae de EA los últimos partidos y las estadísticas del plantel, por el Chrome del pipeline (CDP 9222): a los pedidos
 // directos (Worker, node) EA les responde 403 desde mediados de noviembre de 2026; a la página abierta en Chrome no.
 // Los deja en KV `ea_crudo`, y el Worker (syncEaPartidos) los asigna al calendario como siempre.
-//   node scripts/ea-traer.mjs               → trae, sincroniza y carga a seed_matches.js lo nuevo (tarea cada 30 min)
+//   node scripts/ea-traer.mjs               → trae, sincroniza y carga a seed_matches.js lo nuevo (tarea 00:45 y 05:45)
 //   node scripts/ea-traer.mjs --solo-traer  → sin cargar (retransmitir.mjs carga después)
 // Entre las 22:00 y las 00:30 solo trae: la liga tarda en publicar y la carga es al final de la noche.
 import { execFileSync } from 'child_process';

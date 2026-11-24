@@ -1,6 +1,6 @@
 ---
 name: project_ea_por_chrome
-description: EA responde 403 al Worker; los partidos se bajan por el Chrome del pipeline (scripts/ea-traer.mjs, tarea "TopSecret - EA" cada 30 min)
+description: EA responde 403 al Worker; los partidos se bajan por el Chrome del pipeline (scripts/ea-traer.mjs, tarea "TopSecret - EA" 00:45 y 05:45)
 metadata:
   type: project
 ---
