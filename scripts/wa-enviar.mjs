@@ -1,22 +1,21 @@
 #!/usr/bin/env node
 /**
- * Manda texto y fotos desde el WhatsApp PERSONAL de Juan (misma sesión que scripts/amistosos.mjs,
- * scripts/.wa-personal/). No correrlo mientras el bot de amistosos está prendido: comparten sesión.
+ * Manda texto, fotos y videos desde el WhatsApp PERSONAL de Juan, por la vinculación del consultorio
+ * (PracticeMCS/puente-wa, scripts/lib/wa-puente.mjs). Desde 2026-11-24: la sesión propia (.wa-personal) quedó sin
+ * uso el 20/11. Se puede correr con el bot de amistosos prendido. El puente tiene que estar andando.
  *
  *   node scripts/wa-enviar.mjs --a 59893798044 --texto "..." foto1.png foto2.png ...
+ *   node scripts/wa-enviar.mjs --a 78211505475589@lid foto.png    también acepta el id del chat
  *   node scripts/wa-enviar.mjs --grupo "Top Secret FC" video.mp4   a un grupo, por su nombre exacto
  *   --prueba      manda todo al chat "Mensaje a mí mismo" de Juan en vez de al destinatario
  *
- * Las fotos van todas juntas en un solo envío, después del texto.
- *
- * Uso típico: reporte de VPUG a Angel (ver docs/conocimiento/project_vpug_t4_pretemporada.md).
+ * El texto va primero y después cada archivo, en orden. Espera que WhatsApp confirme cada uno (ack ≥ 1).
+ * Uso típico: reporte de VPUG a Angel (ver docs/conocimiento/reference_wa_enviar_reporte_angel.md).
  */
-import wweb from 'whatsapp-web.js';
 import fs from 'fs';
 import path from 'path';
-import { ROOT } from './lib/env.mjs';
+import { ClientePuente } from './lib/wa-puente.mjs';
 
-const { Client, LocalAuth } = wweb;
 const args = process.argv.slice(2);
 const opt = n => { const i = args.indexOf(n); return i >= 0 ? args.splice(i, 2)[1] : null; };
 const flag = n => { const i = args.indexOf(n); if (i >= 0) args.splice(i, 1); return i >= 0; };
@@ -27,24 +26,21 @@ const texto = opt('--texto');
 const archivos = args.map(a => path.resolve(a));
 const faltan = archivos.filter(a => !fs.existsSync(a));
 if ((!destino && !grupo && !PRUEBA) || (!texto && !archivos.length) || faltan.length) {
-  console.error(faltan.length ? `No existen: ${faltan.join(', ')}` : 'Uso: --a <teléfono> | --grupo "<nombre>" [--texto "..."] [--prueba] [--pie-archivo] archivos...');
+  console.error(faltan.length ? `No existen: ${faltan.join(', ')}` : 'Uso: --a <teléfono> | --grupo "<nombre>" [--texto "..."] [--prueba] archivos...');
   process.exit(1);
 }
 
-const CHROME = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'].find(p => p && fs.existsSync(p));
-const client = new Client({
-  authStrategy: new LocalAuth({ dataPath: path.join(ROOT, 'scripts', '.wa-personal') }),
-  authTimeoutMs: 120000,
-  puppeteer: { headless: true, executablePath: CHROME, protocolTimeout: 180000, handleSIGINT: false, handleSIGTERM: false, handleSIGHUP: false,
-    args: ['--no-first-run', '--disable-extensions', '--disable-gpu'] },
-});
-client.on('qr', () => { console.error('La sesión pide QR: vincularla primero con scripts/amistosos.mjs.'); process.exit(1); });
-// WA_TIMEOUT (ms) para darle más margen cuando la sesión tarda en sincronizar (2026-10-26 no llegó en 5 min).
+const MIME = { '.mp4': 'video/mp4', '.mov': 'video/quicktime', '.webm': 'video/webm', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
+const raros = archivos.filter(a => !MIME[path.extname(a).toLowerCase()]);
+if (raros.length) { console.error(`Tipo de archivo no soportado: ${raros.join(', ')}`); process.exit(1); }
+
+const client = new ClientePuente();
+// WA_TIMEOUT (ms): límite total.
 const LIMITE = +(process.env.WA_TIMEOUT || 300000);
 setTimeout(() => { console.error(`WhatsApp no terminó en ${LIMITE / 60000} min.`); process.exit(1); }, LIMITE);
 
-client.on('ready', async () => {
-  try {
+try {
+    await client.initialize({ esperaMs: 60000 });
     let chat;
     if (PRUEBA) chat = client.info.wid._serialized;
     else if (grupo) {
@@ -67,98 +63,44 @@ client.on('ready', async () => {
       }
       if (!chat) throw new Error(`no encontré el grupo "${grupo}"`);
     } else {
-      const id = await client.getNumberId(destino.replace(/\D/g, ''));
-      if (!id) throw new Error(`${destino} no tiene WhatsApp`);
-      chat = id._serialized;
+      if (destino.includes('@')) chat = destino;
+      else {
+        chat = await client.pupPage.evaluate(async id => {
+          const r = await window.WWebJS.enforceLidAndPnRetrieval?.(id).catch(() => null);
+          if (r?.lid || r?.phone) return (r.lid || r.phone)._serialized;
+          const wid = window.require('WAWebWidFactory').createWid(id);
+          return (await window.require('WAWebQueryExistsJob').queryWidExists(wid))?.wid?._serialized || null;
+        }, destino.replace(/D/g, '') + '@c.us');
+        if (!chat) throw new Error(`${destino} no tiene WhatsApp`);
+      }
     }
     console.log('Enviando a', PRUEBA ? 'mí mismo (prueba)' : grupo ? `grupo "${grupo}" (${chat})` : chat);
-    await new Promise(r => setTimeout(r, 15000));   // recién conectado, WhatsApp Web todavía sincroniza
-    const desde = Math.floor(Date.now() / 1000) - 5;
-    // whatsapp-web.js 1.34 a veces tira "Data passed to getter must include an id" al leer el mensaje
-    // ya enviado (2026-10-13): el envío sale igual. Se tolera y al final se verifica en la colección.
-    const enviar = async (contenido, o) => {
-      try { await client.sendMessage(chat, contenido, { sendSeen: false, ...o }); }
-      catch (e) { if (!/must include an id/.test(e.message)) throw e; }
-    };
-    let n = 0;
-    if (texto) { await enviar(texto); n++; }
-    // Fotos: client.sendMessage con MessageMedia no crea el mensaje (1.34.7, 2026-10-13), así que se
-    // adjuntan por la interfaz de WhatsApp Web como lo haría una persona: abrir chat → Adjuntar →
-    // "Fotos y videos" → enviar. Todas juntas en un solo envío (sin texto por foto).
-    if (archivos.length) {
-      const p = client.pupPage;
-      await p.setViewport({ width: 1400, height: 900 });
-      await p.evaluate(async id => {
-        const C = window.require('WAWebCollections').Chat;
-        const ch = C.get(id) || await window.require('WAWebFindChatAction').findOrCreateLatestChat(window.require('WAWebWidFactory').createWid(id)).then(r => r.chat);
-        await window.require('WAWebCmd').Cmd.openChatBottom({ chat: ch });
-      }, chat);
-      await new Promise(r => setTimeout(r, 2500));
-      await p.click('footer [aria-label="Adjuntar"]');
-      await new Promise(r => setTimeout(r, 1500));
-      // Ojo: el <input type=file accept="image/*"> que está en la página es el de "Nuevo sticker"
-      // (2026-10-13 así salieron stickers en vez de fotos). Hay que hacer click en "Fotos y videos"
-      // y tomar el selector de archivos que abre ese ítem.
-      // El texto del ítem cambia (con/sin tilde, "Fotos y videos" / "Fotos y vídeos" / "Photos & videos"):
-      // se busca por patrón y, si no aparece, se listan las opciones del menú para diagnosticar.
-      const buscarItem = () => p.evaluateHandle(() => {
-        const el = [...document.querySelectorAll('li, [role=button], [role=menuitem], div, span')]
-          .find(e => e.childElementCount <= 3 && /^(fotos\s*(y|&)\s*v[ií]deos|photos\s*(&|and)\s*videos)$/i.test((e.innerText || '').trim()));
-        return el ? (el.closest('li,[role=button],[role=menuitem]') || el) : null;
-      });
-      let item = await buscarItem();
-      // A veces el primer clic en Adjuntar no abre el menú (2026-11-09 y 11-16; al reintentar anduvo): se reintenta.
-      for (let i = 0; i < 2 && !item.asElement(); i++) {
-        await p.keyboard.press('Escape').catch(() => {});
-        await new Promise(r => setTimeout(r, 1500));
-        await p.click('footer [aria-label="Adjuntar"]').catch(() => {});
+    // Mismo envío que PracticeMCS/scripts/whatsapp-video.mjs: WWebJS.sendMessage dentro de la página del puente.
+    const mandar = (cuerpo, media) => client.pupPage.evaluate(async (to, cuerpo, media) => {
+      const ch = await window.WWebJS.getChat(to, { getAsModel: false });
+      if (!ch) return null;
+      const msg = await window.WWebJS.sendMessage(ch, cuerpo, { ...(media ? { media } : {}), linkPreview: undefined,
+        parseVCards: true, mentionedJidList: [], ignoreQuoteErrors: true, waitUntilMsgSent: false });
+      return msg ? (window.WWebJS.getMessageModel(msg)?.id?._serialized || msg.__x_id?._serialized || null) : null;
+    }, chat, cuerpo, media);
+    const salio = async id => {
+      for (let i = 0; i < 60; i++) {
+        if (await client.pupPage.evaluate(id => window.require('WAWebCollections').Msg.get(id)?.ack ?? 0, id) >= 1) return true;
         await new Promise(r => setTimeout(r, 2000));
-        item = await buscarItem();
       }
-      if (!item.asElement()) {
-        const opciones = await p.evaluate(() => [...document.querySelectorAll('[role=menuitem], [role=application] li, li, [role=button]')]
-          .map(e => (e.getAttribute('aria-label') || e.innerText || '').trim()).filter(Boolean).slice(0, 25));
-        await p.screenshot({ path: path.join(ROOT, 'fuentes', 'wa-enviar-sin-menu.png') }).catch(() => {});
-        throw new Error(`no encontré "Fotos y videos" en el menú Adjuntar (opciones: ${opciones.join(' | ') || 'ninguna'})`);
-      }
-      const [selector] = await Promise.all([p.waitForFileChooser({ timeout: 15000 }), item.asElement().click()]);
-      if (!selector.isMultiple() && archivos.length > 1) throw new Error('el selector de "Fotos y videos" no acepta varios archivos');
-      await selector.accept(archivos);
-      await new Promise(r => setTimeout(r, 3000 + 1500 * archivos.length));
-      // El botón cambió de forma más de una vez (2026-10-22 ya no tenía data-icon "send"): se prueba por ícono,
-      // por etiqueta y, si no aparece, Enter (en la vista previa también envía). El ack de abajo confirma igual.
-      // La vista previa puede tardar en cargar (2026-11-17 seguía con el spinner a los 6 s): se espera al botón hasta 30 s.
-      const buscarBoton = () => p.evaluateHandle(() => {
-        const el = document.querySelector('[data-icon*="send"]')
-          || [...document.querySelectorAll('[aria-label]')].find(e => /^(enviar|send)$/i.test(e.getAttribute('aria-label').trim()));
-        return el?.closest('[role=button],button,div[tabindex]') || el || null;
-      });
-      let boton = await buscarBoton();
-      for (let i = 0; i < 12 && !boton.asElement(); i++) {
-        await new Promise(r => setTimeout(r, 2500));
-        boton = await buscarBoton();
-      }
-      if (boton.asElement()) await boton.asElement().click();
-      else {
-        await p.screenshot({ path: path.join(ROOT, 'fuentes', 'wa-enviar-sin-boton.png') }).catch(() => {});
-        console.warn('  sin botón de enviar visible (captura en fuentes/wa-enviar-sin-boton.png): pruebo con Enter');
-        await p.keyboard.press('Enter');
-      }
-      n += archivos.length;
-      archivos.forEach(a => console.log('  →', path.basename(a)));
-    }
-    // Esperar a que todos tengan al menos ack 1 (salieron del teléfono/servidor), hasta 3 min
+      return false;
+    };
     let ok = 0;
-    for (let i = 0; i < 36; i++) {
-      ok = await client.pupPage.evaluate(t => window.require('WAWebCollections').Msg.getModelsArray()
-        .filter(m => m.id?.fromMe && m.t >= t && m.ack >= 1 && ['chat', 'image', 'video'].includes(m.type)).length, desde);
-      if (ok >= n) break;
-      await new Promise(r => setTimeout(r, 5000));
+    const n = (texto ? 1 : 0) + archivos.length;
+    // De a uno y en orden; si uno no sale se corta ahí, para no mandar el resto desordenado.
+    for (const a of [...(texto ? [null] : []), ...archivos]) {
+      const id = await mandar(a ? '' : texto, a && { mimetype: MIME[path.extname(a).toLowerCase()], data: fs.readFileSync(a).toString('base64'), filename: path.basename(a) });
+      if (!id || !await salio(id)) { console.error(`No salió: ${a ? path.basename(a) : 'el texto'}`); break; }
+      ok++;
+      console.log('  →', a ? path.basename(a) : 'texto');
     }
     console.log(`${ok}/${n} mensajes confirmados por WhatsApp.`);
     if (ok < n) process.exitCode = 1;
   } catch (e) { console.error('Error:', e.message); process.exitCode = 1; }
-  await client.destroy();
-  process.exit();
-});
-client.initialize();
+await client.destroy();
+process.exit();
