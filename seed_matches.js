@@ -3070,6 +3070,10 @@ const SEED_MATCHES = [
   // VPUG — Hacha eSports — 2026-11-19 (1-2) · Primera, Fecha 7 · resultado del vivo (EA no guardó el partido)
   {rival:'Hacha eSports', league:'VPUG', date:'2026-11-19', match_result:'1-2', isHome:true, uploadedAt:'2026-11-20T14:30:00.000Z', origen:'ea-auto', notes:'22:30 hs · Primera, Fecha 7 · resultado del marcador del vivo (fuentes/vivo/2026-11-19-WGBU3T25Lq0): Top Secret abrió a los 14\', Hacha empató a los 17\' y lo dio vuelta a los 34\'. EA no guardó el partido y la web de VPUG pide sesión; falta completar goleadores, estadísticas y valoraciones.', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
   players:[]},
+
+  // VPUG — Hacha eSports — 2026-11-19 (1-0) · resultado de la liga (EA inconsistente)
+  {rival:'Hacha eSports', league:'VPUG', date:'2026-11-19', match_result:'1-0', uploadedAt:'2026-11-24T03:30:27.471Z', ea_match_id:'203894563780477', origen:'ea-auto', notes:'22:30 hs · resultado de la web de la liga (EA dice 1-2, la liga 1-0); estadísticas de EA descartadas. Falta completar con el reporte del video (posesión, xG, córners, goleadores y minutos, posiciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
 ];
 
 
