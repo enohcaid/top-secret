@@ -28,10 +28,12 @@ import { putFile } from '../lib/r2.mjs';
 import { pedirJSON, pedirTexto, claude, liberar, guardarEjemplo, ultimoMotor } from '../lib/ia.mjs';
 import { pedirPartitura, leer, criticar, reintentar, guardarPartitura, planCompases } from './partitura.mjs';
 import { armarCatalogo } from './catalogo.mjs';
+import { PAUSADO } from './pausa.mjs';
 import { letraFinal } from './letra-final.mjs';
 import { mandarAAprobar } from './musica-aprobacion.mjs';
 import { leer as leerAprobaciones, guardarKV } from '../social/lib/aprobaciones.mjs';
 
+if (PAUSADO) { console.log('[thrive] Generación de canciones en pausa (scripts/beats/pausa.mjs).'); process.exit(0); }
 loadEnv();
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i < 0 ? d : argv[i + 1]; };

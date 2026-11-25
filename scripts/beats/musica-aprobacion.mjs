@@ -18,6 +18,7 @@ import { ROOT } from '../lib/env.mjs';
 import { leer, guardarKV, agregarLote } from '../social/lib/aprobaciones.mjs';
 import { guardarEjemplo } from '../lib/ia.mjs';
 import { armarCatalogo, MEDIA } from './catalogo.mjs';
+import { PAUSADO } from './pausa.mjs';
 
 const REG = path.join(ROOT, 'scripts', 'beats', 'thrive.json');
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [musica] ${m}`);
@@ -79,6 +80,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`); git('push', '-q');
     if (l.piezas.some(p => !p.decision || p.decision === 'pendiente')) continue;
     const reg = leerReg(), t = reg.temas.find(x => x.slug === l.tema.slug);
     if (!t) continue;
+    if (PAUSADO && l.piezas.some(p => p.decision === 'descartada')) continue;   // en pausa no se rehace: queda como está
     for (const p of l.piezas) guardarEjemplo('musica-feedback', JSON.stringify({ tema: t.slug, version: t.version || 1, parte: p.id, detalle: p.detalle }),
       JSON.stringify({ decision: p.decision === 'aprobada' ? 'bien' : 'a mejorar', comentario: p.texto || '' }));
     const mejorar = l.piezas.filter(p => p.decision === 'descartada');

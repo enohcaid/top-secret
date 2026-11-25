@@ -36,3 +36,6 @@ Juan: "intentemos entrenar a Gemma para que en el futuro se encargue de todo. Ha
   - Algo "a mejorar" → `thrive.mjs --revisar <slug>` rehace esa parte y lo que depende de ella, con el comentario, y vuelve como versión siguiente. Letra y voces las rehace Gemma primero; el beat, Sonnet. Si se rechaza el concepto, sale un tema nuevo.
 - El catálogo solo muestra temas con `publicado: true`. "Too Far In" y "Still Here" están publicados. **Flicker** volvió a ser demo, versión 1 (`node scripts/beats/musica-aprobacion.mjs --demo <slug>`).
 - Cada decisión, con su comentario, queda en `fuentes/ia/dataset/musica-feedback.jsonl`: es la base para entrenar a Gemma, junto con los ejemplos de Claude ([[reference_ia_local]]).
+
+## EN PAUSA (Juan, 2026-11-25)
+"Que se dejen de generar canciones en Top Secret; vamos a cambiar el enfoque de la generación en el futuro." Tarea `TopSecretFC-Thrive` deshabilitada y `PAUSADO = true` en `scripts/beats/pausa.mjs` (corta también las revisiones "A mejorar"). Aprobar, descartar y /music siguen funcionando. No reactivar hasta que Juan defina el enfoque nuevo.
