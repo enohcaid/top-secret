@@ -236,7 +236,7 @@ const RAW = [
   {date:'2026-11-19',time:'22:30',league:'VPUG', rival:'Hacha eSports',            isHome:true,  result:null, round:7}, // F7 (jue)
   {date:'2026-11-23',time:'22:30',league:'VPUG', rival:'Instituto esp',            isHome:false, result:null, round:8}, // F8 (lun)
   {date:'2026-11-24',time:'22:30',league:'VPUG', rival:'United Mito',              isHome:true,  result:null, round:9}, // F9 (mar) — en VPUG figura "UNITED MITO"
-  {date:'2026-11-25',time:'22:30',league:'VPUG', rival:'IACC Reserva',             isHome:false, result:null, round:10}, // F10 (mié)
+  {date:'2026-11-25',time:'23:59',league:'VPUG', rival:'IACC Reserva',             isHome:false, result:null, round:10}, // F10 (mié)
   {date:'2026-11-26',time:'22:30',league:'VPUG', rival:'Hacha Reserva',            isHome:true,  result:null, round:11}, // F11 (jue)
   {date:'2026-11-30',time:'22:30',league:'VPUG', rival:'moron esp',                isHome:false, result:null, round:12}, // F12 (lun)
   {date:'2026-12-01',time:'22:30',league:'VPUG', rival:'ALL BOYS',                 isHome:true,  result:null, round:13}, // F13 (mar)
