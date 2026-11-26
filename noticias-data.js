@@ -3,6 +3,37 @@
 
 const NOTICIAS = [
   {
+    id: 'fc27-actualizacion-1-3-0',
+    category: 'Análisis',
+    title: 'FC 27 1.3.0: arqueros firmes en el primer palo, menos flicks y más agilidad para los altos',
+    date: '2026-11-26',
+    dateLabel: '26 de noviembre de 2026',
+    excerpt: 'EA lanzó la actualización 1.3.0 de FC 27. Cambian el regate de los jugadores altos, la ubicación de los arqueros, los remates de ángulo cerrado, las intercepciones y los flicks. En Clubes Pro hay un solo cambio: se corrigió un error de las mejoras de IA.',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/Renders/Daily%20News/auto-2026-11-20_post.webp',
+    body: [
+      'El juego cambió otra vez. EA publicó hoy la <strong>actualización 1.3.0 de FC 27</strong>, que ya está disponible. Casi todos los cambios están en la jugabilidad, y varios tocan cosas que se ven en cada partido: el primer palo, los jugadores altos y el flick con el stick derecho. Para Clubes Pro trae un solo cambio, y es la corrección de un error.',
+      { specs: [['Versión', '1.3.0'], ['Fecha', '26/11/2026'], ['Jugabilidad', '10 cambios · 6 correcciones'], ['Clubes Pro', '1 corrección']] },
+      { h: 'Ataque: los altos ganan cintura y el flick pierde peso' },
+      'El cambio más grande es para los <strong>jugadores altos</strong>. EA ajustó cómo responde el regate con el stick izquierdo, el primer control y la agilidad en los movimientos de habilidad, para que se muevan mejor en espacios chicos. Según las notas, esto vale en PS5, Xbox Series X|S y PC. Además, a un jugador bajo ya no le resulta tan fácil sacarle la pelota a uno mucho más alto con el cuerpo, aunque una carga a tiempo sigue funcionando si el alto deja la pelota expuesta.',
+      'Los <strong>flicks con el stick derecho</strong> pierden efectividad, sobre todo si se repiten seguido, y el jugador queda más lento después de levantar la pelota. Los <strong>remates desde ángulos difíciles</strong> tienen un poco más de error y de dispersión.',
+      { h: 'Arqueros y defensa' },
+      'Los arqueros se paran con <strong>mejores ángulos de entrada</strong> y responden con más seguridad cuando les patean al primer palo. En el área, el árbitro ya no cobra tan fácil un penal por un empujón de costado o por un tropiezo después de una entrada limpia.',
+      'Los jugadores con atributos defensivos bajos tienen <strong>menos alcance para interceptar</strong>. Después de una intercepción, la pelota queda un poco más cerca de quien la cortó, así puede controlarla antes de que lo vuelvan a presionar. Si un jugador no logra controlar una pelota suelta, la suelta para que la tome un compañero mejor ubicado. Y las cargas de hombro desde atrás del que lleva la pelota ya casi no provocan tropiezos raros ni pérdidas.',
+      { quote: 'Arqueros más firmes en el primer palo y menos premio para el flick repetido: cambia la forma de atacar el área.', by: 'Top Secret FC' },
+      { h: 'Errores corregidos en la jugabilidad' },
+      'EA corrigió cuatro errores que se veían en los partidos: una entrada limpia ya no termina en <strong>falta durante la animación de recuperación</strong>, los <strong>volantes defensivos</strong> ya no tardan en subir, <strong>cubrir la pelota</strong> en ciertas zonas ya no desactiva las entradas automáticas de los defensores y la pelota ya no <strong>atraviesa el pie</strong> del que intenta quitarla o interceptarla. Las otras dos correcciones son del 1v1 de The Grounds y no afectan a los partidos de Clubes Pro.',
+      { h: 'Clubes Pro: una sola corrección' },
+      'Para Clubes Pro, la 1.3.0 corrige un error: la <strong>mejora de Instalaciones para la IA</strong> también les subía los atributos a los Virtual Pro manejados por personas. Desde ahora, esa mejora solo afecta a los compañeros controlados por la máquina. No hay otros cambios para el modo: ni en los Virtual Pro, ni en los estilos de juego, ni en el emparejamiento.',
+      'EA también avisó que <strong>los laterales no se tocaron en esta actualización</strong> y que trabaja en mejorar su ubicación para una próxima. Las notas completas, en inglés, están en <a href="https://www.ea.com/games/ea-sports-fc/fc-27/news/fc27-title-update-v1-3-0" target="_blank" rel="noopener">la web de EA</a>.',
+    ],
+    shareCaption: 'FC 27 1.3.0: arqueros más firmes en el primer palo, menos flicks, más agilidad para los altos y una corrección para Clubes Pro. Lo que cambia, en la nota.',
+    shareCaptions: {
+      ig: 'FC 27 · Actualización 1.3.0\n\n▪️ Arqueros más firmes en el primer palo\n▪️ Más agilidad para los jugadores altos\n▪️ Flicks menos efectivos\n▪️ Menos alcance para interceptar con defensa baja\n▪️ Clubes Pro: la mejora de IA ya no afecta a los Virtual Pro\n\nNota completa en el sitio.\n\n#TopSecretFC #ClubsPro #EAFC27',
+      x: 'FC 27 1.3.0: arqueros más firmes en el primer palo, menos flicks, más agilidad para los altos y una corrección para Clubes Pro. Lo que cambia: #TopSecretFC #EAFC27',
+      fb: 'EA lanzó la actualización 1.3.0 de FC 27. Los arqueros se paran mejor contra el primer palo, los jugadores altos ganan agilidad, los flicks pierden efectividad y los defensores flojos interceptan menos. En Clubes Pro hay una sola corrección: la mejora de IA ya no les sube los atributos a los Virtual Pro. Nota completa en el sitio.',
+    },
+  },
+  {
     id: 'nuevos-fichajes-t4',
     pinned: true,
     category: 'Club',

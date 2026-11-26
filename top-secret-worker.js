@@ -8,6 +8,10 @@
 const SITE = 'https://topsecret.ar/';
 const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/';
 const NOTICIAS_OG = {
+  'fc27-actualizacion-1-3-0': {
+    t: 'FC 27 1.3.0: arqueros firmes en el primer palo, menos flicks y más agilidad para los altos',
+    i: MEDIA + 'Renders/Daily%20News/auto-2026-11-20_post.webp',
+  },
   'nuevos-fichajes-t4': {
     t: 'Seis caras nuevas: los fichajes de la Temporada 4',
     i: MEDIA + 'logos/noticias/fichajes-t4-portada.jpg',
