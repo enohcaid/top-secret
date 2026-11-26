@@ -203,17 +203,38 @@ async function publicar(p) {
 // X, TikTok y YouTube van por el Chrome con CDP: si está cerrado, se abre antes de empezar.
 if (cola.some(({ p }) => ['x-imagenes', 'x-video', 'x-texto', 'tiktok', 'tiktok-fotos', 'youtube'].includes(p.metodo))) await asegurarChrome().catch(e => log(e.message));
 
+// Registro LOCAL de lo publicado (2026-11-26): el KV de Cloudflare puede devolver el estado viejo hasta ~60 s después
+// de escribirlo, y watch-regen corre esto cada minuto. Así, la corrida siguiente veía la pieza "pendiente" y la volvía a
+// publicar: la nota de FC 27 salió 5 veces en Instagram y la del día 4. Todo se publica desde esta PC, así que el
+// archivo es la fuente que manda: si dice publicado (o tomado hace menos de 15 min), no se publica, diga lo que diga el KV.
+// La clave incluye `republicarEn`, así "Volver a publicar" de aprobar.html sigue funcionando.
+const REGISTRO = path.join(ROOT, 'scripts', '.publicadas.json');
+const registro = (() => { try { return JSON.parse(fs.readFileSync(REGISTRO, 'utf8')); } catch { return {}; } })();
+const anotar = (k, v) => {
+  if (v) registro[k] = v; else delete registro[k];
+  const limite = Date.now() - 30 * 86400000;   // se guarda un mes
+  for (const [c, x] of Object.entries(registro)) if (Date.parse(x.en) < limite) delete registro[c];
+  fs.writeFileSync(REGISTRO, JSON.stringify(registro, null, 1));
+};
 for (const { l, p } of cola) {
   // Releer justo antes: si otra corrida ya la tomó o la publicó (o Juan la sacó), no se repite.
   const fresca = (await leer()).lotes.find(x => x.id === l.id)?.piezas.find(x => x.id === p.id);
   if (!fresca || fresca.decision !== 'aprobada' || fresca.estado === 'publicado' || (fresca.estado === 'publicando' && Date.now() - Date.parse(fresca.desde || 0) < 15 * 60000)) {
     log(`${l.id} · ${p.id}: ya la tomó otra corrida (${fresca?.estado || 'sin pieza'}), sigo.`); continue;
   }
+  const clave = `${l.id}|${p.id}|${fresca.republicarEn || ''}`, local = registro[clave];
+  if (local && (local.estado === 'publicado' || Date.now() - Date.parse(local.en) < 15 * 60000)) {
+    log(`${l.id} · ${p.id}: según el registro local ya está ${local.estado} (el KV todavía no lo refleja), no se repite.`);
+    if (local.estado === 'publicado' && fresca.estado !== 'publicado') await actualizarPieza(l.id, p.id, { estado: 'publicado', url: local.url || null, publicadoEn: local.en }).catch(() => {});
+    continue;
+  }
   log(`${l.id} · ${p.id}: publicando…`);
   for (const r of revisarPieza(p, l)) log(`${l.id} · ${p.id}: [${r.nivel}] ${r.msg}`);   // no frena: queda en el log
+  anotar(clave, { estado: 'publicando', en: new Date().toISOString() });
   await actualizarPieza(l.id, p.id, { estado: 'publicando', desde: new Date().toISOString(), error: null });
   try {
     const url = await publicar(p);
+    anotar(clave, { estado: 'publicado', url: url || null, en: new Date().toISOString() });
     await actualizarPieza(l.id, p.id, { estado: 'publicado', url, publicadoEn: new Date().toISOString() });
     log(`${l.id} · ${p.id}: publicado ${url || ''}`);
     const h = await leerKV('social_historial', { rondas: [], piezas: [] });
@@ -222,6 +243,9 @@ for (const { l, p } of cola) {
     await guardarKV('social_historial', h);
   } catch (e) {
     const msg = String(e.message || e).slice(0, 300);
+    // Instagram/Facebook con error = no salió: se libera para el reintento. X/TikTok/YouTube pueden haber salido igual:
+    // queda tomada en el registro y no se repite sola.
+    if (conReintento(p)) anotar(clave, null); else anotar(clave, { estado: 'publicado', url: null, en: new Date().toISOString(), error: msg });
     if (!conReintento(p)) {
       await actualizarPieza(l.id, p.id, { estado: 'error', error: `${msg} (no se reintenta sola: revisar si salió)` });
       log(`${l.id} · ${p.id}: ERROR ${msg} — sin reintento (puede haber salido)`);

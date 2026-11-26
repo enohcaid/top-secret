@@ -43,6 +43,7 @@ scripts/.wa-personal/
 .wwebjs_cache/
 capturas-tv/
 scripts/.publicar.lock
+scripts/.publicadas.json
 avatares-3d/
 __pycache__/
 scripts/.imagenes-lanzadas
