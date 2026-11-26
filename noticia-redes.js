@@ -383,7 +383,11 @@
     if (specs) interiores.push(ctx => { encabezado(ctx, escudo, 'La ficha'); placaFicha(ctx, specs, opts.gamertags); });
     else if (n.excerpt) interiores.push(ctx => { encabezado(ctx, escudo, n.category || 'La nota'); placaFrase(ctx, { quote: n.excerpt }, opts.gamertags); });
     if (quote) interiores.push(ctx => { encabezado(ctx, escudo, 'La frase'); placaFrase(ctx, quote, opts.gamertags); });
-    for (const img of extras) interiores.push(ctx => {
+    // capas (n.capasTikTok, scripts/placas-carrusel.mjs): placas 1080x1920 sin fondo, ya armadas dentro de la zona
+    // segura; reemplazan a las extras (que en 9:16 quedaban chicas) y van enteras sobre el fondo oscuro.
+    const capas = (await Promise.all((opts.capas || []).slice(0, 3).map(loadImg))).filter(Boolean);
+    for (const img of capas) interiores.push(ctx => ctx.drawImage(img, 0, 0, TT.W, TT.H));
+    for (const img of capas.length ? [] : extras) interiores.push(ctx => {
       // Entera, lo más grande posible sin meterse bajo los botones de la derecha ni el texto de abajo.
       const w = Math.min(TT.maxW + 60, img.width * (TT.bottom - TT.top - 90) / img.height), h = w * img.height / img.width;
       const x = Math.max(40, TT.X + (TT.maxW - w) / 2), y = TT.top + (TT.bottom - TT.top - 90 - h) / 2;

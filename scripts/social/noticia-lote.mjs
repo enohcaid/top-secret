@@ -18,7 +18,15 @@ import { elegirMusica, infoTema } from '../lib/musica.mjs';
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [noticia-lote] ${m}`);
 
-const n = await cargarNoticia(null).catch(() => null);
+// --id <id>: noticia MANUAL ya publicada en noticias-data.js (2026-11-26): mismas piezas de redes, sin la del sitio.
+const idManual = (i => i > 0 ? process.argv[i + 1] : null)(process.argv.indexOf('--id'));
+let n;
+if (idManual) {
+  const src = fs.readFileSync(path.resolve('noticias-data.js'), 'utf8');
+  n = new Function(`${src}; return NOTICIAS;`)().find(x => x.id === idManual);
+  if (!n) { log(`No encontré ${idManual} en noticias-data.js.`); process.exit(1); }
+  n = { ...n, imagePost: n.imagePost || n.image, manual: true };
+} else n = await cargarNoticia(null).catch(() => null);
 if (!n || !n.imagePost) log('No hay borrador con imágenes: nada para aprobar.');
 else if ((await leer()).lotes.some(l => l.id === `noticia-${n.id}` && l.piezas.some(p => p.estado === 'publicado'))) log(`La noticia ${n.id} ya salió.`);
 else {
@@ -68,9 +76,9 @@ else {
   const P = o => ({ decision: 'pendiente', ...o });
   await agregarLote({
     id: `noticia-${n.id}`, tipo: 'noticia', creado: new Date().toISOString(), publicarA: new Date().toISOString(),
-    titulo: `Noticia del día · ${n.dateLabel || n.date}`,
+    titulo: n.manual ? `Noticia · ${n.title}` : `Noticia del día · ${n.dateLabel || n.date}`,
     piezas: [
-      P({ id: 'sitio', red: 'sitio', formato: 'Noticia en el sitio', descripcion: `${n.category || ''} · sale apenas la aprobás`, media: [{ tipo: 'imagen', url: n.imagePost }], titulo: n.title, texto: cuerpo, noticia: n, metodo: 'sitio-borrador', etiquetaTexto: 'Cuerpo (un párrafo o bloque por línea)' }),
+      n.manual ? null : P({ id: 'sitio', red: 'sitio', formato: 'Noticia en el sitio', descripcion: `${n.category || ''} · sale apenas la aprobás`, media: [{ tipo: 'imagen', url: n.imagePost }], titulo: n.title, texto: cuerpo, noticia: n, metodo: 'sitio-borrador', etiquetaTexto: 'Cuerpo (un párrafo o bloque por línea)' }),
       extra.length
         ? P({ id: 'ig-post', red: 'instagram', formato: 'Carrusel', descripcion: `La foto con el título + ${extra.length} imagen(es) más`, media: imgs([url.ig, ...extra]), texto: textoIG, metodo: 'ig-carrusel' })
         : P({ id: 'ig-post', red: 'instagram', formato: 'Post con título', descripcion: 'La foto con el título encima', media: [{ tipo: 'imagen', url: url.ig }], texto: textoIG, metodo: 'ig-imagen' }),
@@ -83,7 +91,7 @@ else {
         ? P({ id: 'x', red: 'x', formato: 'Post con imágenes', descripcion: 'Las imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: textoX, metodo: 'x-imagenes', local: { slides: [piezas.ig, ...extraLocal] } })
         : P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: textoX, metodo: 'x-texto', link }),
       P({ id: 'tiktok', red: 'tiktok', formato: 'Video de placas', descripcion: `${piezas.tiktok.length} placas · con "${infoTema(musica).titulo}" de The Shorts`, media: [{ tipo: 'video', url: url.tiktok, vertical: true }], texto: textoTT, musica: infoTema(musica).titulo, metodo: 'tiktok', local: { video: mp4 } }),
-    ],
+    ].filter(Boolean),
   });
   log(`Lote noticia-${n.id} listo para aprobar.`);
   if (!process.argv.includes('--no-abrir')) abrirAprobaciones();

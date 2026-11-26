@@ -9,7 +9,12 @@ const NOTICIAS = [
     date: '2026-11-26',
     dateLabel: '26 de noviembre de 2026',
     excerpt: 'EA lanzó la actualización 1.3.0 de FC 27. Cambian el regate de los jugadores altos, la ubicación de los arqueros, los remates de ángulo cerrado, las intercepciones y los flicks. En Clubes Pro hay un solo cambio: se corrigió un error de las mejoras de IA.',
-    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/Renders/Daily%20News/auto-2026-11-20_post.webp',
+    image: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/fc27-actualizacion-1-3-0-portada.webp',
+    imagePostRaw: 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/fc27-actualizacion-1-3-0-portada-raw.jpg',
+    tituloImagen: 'FC 27 1.3.0: lo que cambia',
+    pieRedes: 'Deslizá: ataque, defensa y Clubes Pro',
+    imagenesExtra: [2, 3, 4].map(i => 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/redes/fc27-actualizacion-1-3-0-carrusel' + i + '.jpg?v=mwxpzsah'),
+    capasTikTok: [2, 3, 4].map(i => 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/noticias/redes/fc27-actualizacion-1-3-0-capa' + i + '.png?v=mwxpzsah'),
     body: [
       'El juego cambió otra vez. EA publicó hoy la <strong>actualización 1.3.0 de FC 27</strong>, que ya está disponible. Casi todos los cambios están en la jugabilidad, y varios tocan cosas que se ven en cada partido: el primer palo, los jugadores altos y el flick con el stick derecho. Para Clubes Pro trae un solo cambio, y es la corrección de un error.',
       { specs: [['Versión', '1.3.0'], ['Fecha', '26/11/2026'], ['Jugabilidad', '10 cambios · 6 correcciones'], ['Clubes Pro', '1 corrección']] },

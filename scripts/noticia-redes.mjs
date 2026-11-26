@@ -58,7 +58,7 @@ export async function generarPiezas(n, { titulo } = {}) {
     }
     // Carrusel de TikTok (modo fotos): portada, ficha, frase e imágenes extra, 1080x1920.
     const placas = await page.evaluate(async ({ n, titulo, gamertags }) =>
-      (await window.TSRedes.tiktok(n, { titulo, gamertags, extras: n.imagenesExtra || [] })).map(c => c.toDataURL('image/jpeg', 0.9)),
+      (await window.TSRedes.tiktok(n, { titulo, gamertags, extras: n.imagenesExtra || [], capas: n.capasTikTok || [] })).map(c => c.toDataURL('image/jpeg', 0.9)),
       { n, titulo, gamertags: Object.keys(PLAYER_TRAITS) });
     out.tiktok = placas.map((dataUrl, i) => {
       const file = path.join(OUT_DIR, `${n.id}-tiktok${i + 1}.jpg`);
