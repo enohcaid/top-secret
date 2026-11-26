@@ -27,6 +27,7 @@ import { ROOT, loadEnv } from './lib/env.mjs';
 import { claude, ollama, guardarEjemplo } from './lib/ia.mjs';
 import { styleFromBrief } from './generate-image-chatgpt.mjs';
 import { buscarEquipo, norm } from './lib/equipos-match.mjs';
+import { controlarTextos, controlarCarrusel } from './lib/reglas-redes.mjs';
 
 loadEnv();
 const argv = process.argv.slice(2);
@@ -266,7 +267,7 @@ const notaActual = !CORREGIR ? null : notaArchivo?.date === HOY && Array.isArray
   : draftHoy?.date === HOY && Array.isArray(draftHoy.body) ? draftHoy : null;
 const pedidoCorreccion = !notaActual ? '' : `\n\n## El editor pide correcciones a la nota de hoy\n${MOTIVO || '(sin detalle: revisá la nota contra los datos de arriba y corregí lo que no coincida)'}\n\nNota actual:\n`
   + JSON.stringify({ angulo: topicos.find(t => t.date === HOY)?.angle || null, category: notaActual.category, title: notaActual.title, excerpt: notaActual.excerpt,
-    body: notaActual.body, shareCaption: notaActual.shareCaption, shareCaptions: notaActual.shareCaptions, imageBrief: notaActual.imageBrief, toma: notaActual.toma })
+    body: notaActual.body, shareCaption: notaActual.shareCaption, shareCaptions: notaActual.shareCaptions, tituloImagen: notaActual.tituloImagen, carrusel: notaActual.carrusel, imageBrief: notaActual.imageBrief, toma: notaActual.toma })
   + `\n\nDevolvé esta misma nota corregida, en el formato de siempre: mismo ángulo y estructura; cambiá lo que pide el editor y lo que los datos de arriba contradigan (también en el copete y los textos para redes), y dejá el resto como está. `
   + (FOTO === 'mantener' ? 'La foto no cambia: devolvé "imageBrief" y "toma" iguales.\n' : 'La foto se rehace: actualizá "imageBrief" y "toma" si el pedido lo necesita.\n');
 const reglasExtra = fs.readFileSync(path.join(ROOT, 'docs/conocimiento/reglas-noticia-diaria.md'), 'utf8').replace(/^# .*\n+/, '').replace(/^La noticia diaria la escribe[^\n]*\n+/m, '');
@@ -331,6 +332,12 @@ function controlar(n) {
     if (sinRival.length) err.push(`la nota no habla de: ${sinRival.join(', ')}. Cada rival lleva su dato (puesto, puntos, cómo viene, historial contra Top Secret) de DATOS.rivales`);
   }
   if (String(n.shareCaption).length > 280) err.push('shareCaption de más de 280 caracteres');
+  // Redes (2026-11-26, scripts/lib/reglas-redes.mjs): gancho en los 125 caracteres del feed, 3 hashtags, sin rayas ni
+  // muletillas, tituloImagen corto y el carrusel clave → ideas → resumen → acción.
+  if (!n.tituloImagen) err.push('sin "tituloImagen" (título de la foto, 6 palabras o menos)');   // no "falta …": eso descarta la nota
+  err.push(...controlarTextos(n), ...controlarCarrusel(n.carrusel));
+  const textoCarrusel = JSON.stringify(n.carrusel || []);
+  for (const g of exJugadores) if (new RegExp(`\\b${g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(textoCarrusel)) err.push(`carrusel: "${g}" no está en el plantel actual`);
   // X lleva además el link de la nota (cuenta 23): el texto, hasta 257 para no pasar de 280 (2026-11-18: antes no se
   // controlaba). TikTok usa shareCaption (más de 300 se corta en la app).
   const largoX = [...String(n.shareCaptions?.x || '')].length;
@@ -371,7 +378,7 @@ const { n, err, motor } = mejor;
 
 // ── 3. Guardado ──────────────────────────────────────────────────────────────
 const draft = { id: `auto-${HOY}`, generatedAt: new Date().toISOString(), category: n.category, title: n.title, date: HOY, dateLabel: dateLabel(HOY),
-  excerpt: n.excerpt, body: n.body, shareCaption: n.shareCaption, shareCaptions: n.shareCaptions, imageBrief: n.imageBrief, toma: n.toma || null,
+  excerpt: n.excerpt, body: n.body, shareCaption: n.shareCaption, shareCaptions: n.shareCaptions, tituloImagen: n.tituloImagen || null, carrusel: n.carrusel || null, imageBrief: n.imageBrief, toma: n.toma || null,
   imagePost: null, imageStory: null, image: null, canvaDesignId: null, canvaStoryDesignId: null, status: 'draft',
   escritoPor: motor === 'claude' ? 'claude-opus' : 'local', ...(err.length ? { avisos: err } : {}) };
 // Corrección con la misma foto: se copian las imágenes de la nota anterior y rearmarLote le avisa a la PC

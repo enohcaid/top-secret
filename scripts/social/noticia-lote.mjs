@@ -14,6 +14,8 @@ import { cargarNoticia, generarPiezas } from '../noticia-redes.mjs';
 import { leer, agregarLote, abrirAprobaciones } from './lib/aprobaciones.mjs';
 import { videoDeFotos } from './lib/render.mjs';
 import { elegirMusica, infoTema } from '../lib/musica.mjs';
+import { armarCarrusel } from '../lib/carrusel.mjs';
+import { controlarTextos, controlarCarrusel } from '../lib/reglas-redes.mjs';
 
 const WORKER = 'https://top-secret-proxy.juan-c-m-1985.workers.dev';
 const log = m => console.log(`${new Date().toLocaleString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })} [noticia-lote] ${m}`);
@@ -31,6 +33,19 @@ if (!n || !n.imagePost) log('No hay borrador con imágenes: nada para aprobar.')
 else if ((await leer()).lotes.some(l => l.id === `noticia-${n.id}` && l.piezas.some(p => p.estado === 'publicado'))) log(`La noticia ${n.id} ya salió.`);
 else {
   log(`Piezas para redes de ${n.id}…`);
+  // Reglas de contenido (2026-11-26, scripts/lib/reglas-redes.mjs): en la noticia diaria ya las controló
+  // noticia-diaria.mjs; acá quedan como aviso (notas manuales o lo que se haya escapado).
+  for (const a of controlarTextos(n)) log(`AVISO texto: ${a}`);
+  // Carrusel (n.carrusel: placas clave/idea/resumen/cta que escribe Claude o la nota manual): se dibujan con la foto
+  // limpia de fondo y pasan a ser las imágenes extra (4:5) y las capas de TikTok (9:16). Si la nota ya traía extras
+  // (la placa del fixture), van antes del resumen y la acción final.
+  if (Array.isArray(n.carrusel) && n.carrusel.length && !n.capasTikTok) {
+    for (const a of controlarCarrusel(n.carrusel)) log(`AVISO carrusel: ${a}`);
+    const c = await armarCarrusel({ id: n.id, placas: n.carrusel, fondo: n.imagePostRaw || n.imagePost, subir: true });
+    for (const a of c.avisos) log(`AVISO carrusel: ${a}`);
+    const previas = n.imagenesExtra || [], k = Math.max(0, c.urls.length - 2);
+    n = { ...n, imagenesExtra: [...c.urls.slice(0, k), ...previas, ...c.urls.slice(k)].slice(0, 9), capasTikTok: c.urlsCapas, pieRedes: n.pieRedes || 'Deslizá' };
+  }
   const piezas = await generarPiezas(n);
   const v = Date.now().toString(36);
   const url = {};
@@ -54,7 +69,8 @@ else {
   // Imágenes extra (n.imagenesExtra: URLs públicas JPEG 4:5, p. ej. la placa del fixture): Instagram pasa a carrusel,
   // Facebook a álbum (el link va en el texto) y X sube las imágenes (necesita copias locales). n.pieRedes pone en la
   // foto principal el aviso de que hay más ("Deslizá para ver…", lo dibuja noticia-redes.js).
-  const extra = (n.imagenesExtra || []).slice(0, 3);
+  // Hasta 9 extras: Instagram acepta 10 imágenes por carrusel (portada + 9). X, 4 por post (portada + 3).
+  const extra = (n.imagenesExtra || []).slice(0, 9);
   const extraLocal = [];
   for (const [i, u] of extra.entries()) {
     const file = path.resolve('fuentes/redes/noticias', `${n.id}-extra${i + 1}.jpg`);
@@ -62,6 +78,8 @@ else {
     extraLocal.push(file);
   }
   const imgs = us => us.map(u => ({ tipo: 'imagen', url: u }));
+  // X: 4 imágenes por post. Con más extras van la primera (la clave) y las dos últimas (resumen y acción final).
+  const paraX = xs => xs.length <= 3 ? xs : [xs[0], ...xs.slice(-2)];
   const textoX = `${sc.x || n.shareCaption || n.title}\n${link}`;
   // Instagram no tiene link tocable en el texto: el aviso va antes de los hashtags (2026-11-18: desde que la noticia se
   // aprueba en aprobar.html el texto no lo traía). TikTok: shareCaption (hasta 280), no el caption largo de Instagram,
@@ -88,7 +106,7 @@ else {
         : P({ id: 'fb-post', red: 'facebook', formato: 'Post con link', descripcion: 'La vista previa del link trae la foto y el título', media: [{ tipo: 'imagen', url: n.imagePost }], texto: sc.fb || n.excerpt || '', metodo: 'fb-link', link }),
       P({ id: 'fb-historia', red: 'facebook', formato: 'Historia', descripcion: '24 h', media: [{ tipo: 'imagen', url: url.historia, vertical: true }], texto: '', metodo: 'fb-historia' }),
       extra.length
-        ? P({ id: 'x', red: 'x', formato: 'Post con imágenes', descripcion: 'Las imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...extra]), texto: textoX, metodo: 'x-imagenes', local: { slides: [piezas.ig, ...extraLocal] } })
+        ? P({ id: 'x', red: 'x', formato: 'Post con imágenes', descripcion: 'Las imágenes del carrusel; el link va en el texto', media: imgs([url.ig, ...paraX(extra)]), texto: textoX, metodo: 'x-imagenes', local: { slides: [piezas.ig, ...paraX(extraLocal)] } })
         : P({ id: 'x', red: 'x', formato: 'Post con link', descripcion: 'La tarjeta del link trae la foto', media: [{ tipo: 'imagen', url: n.imagePost }], texto: textoX, metodo: 'x-texto', link }),
       P({ id: 'tiktok', red: 'tiktok', formato: 'Video de placas', descripcion: `${piezas.tiktok.length} placas · con "${infoTema(musica).titulo}" de The Shorts`, media: [{ tipo: 'video', url: url.tiktok, vertical: true }], texto: textoTT, musica: infoTema(musica).titulo, metodo: 'tiktok', local: { video: mp4 } }),
     ].filter(Boolean),

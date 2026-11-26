@@ -59,6 +59,17 @@ Estructura típica: apertura → specs → h → 1–2 párrafos → (pair) → 
 - **Nada repetido** (Juan: "que me guste algo no significa que hay que hacer todo igual; si noto algo repetido ya no sirve"): el lugar no puede ser ninguno de los usados en los últimos 3 días de DATOS.escenas_recientes, y la composición, la acción y los protagonistas tienen que ser distintos de DATOS.imagenes_recientes.
 - Gesto y acción concretos y distintos de los de siempre. No describas el kit. Sin texto, pantallas, pizarrones ni objetos protagonistas.
 
+## Redes: textos y carrusel (Juan, 2026-11-26; el código los controla y te devuelve lo que no cumpla)
+- `shareCaptions.ig`: el feed muestra solo los primeros 125 caracteres antes del "más". La PRIMERA LÍNEA (hasta 125) es el gancho: el dato o el hecho concreto, con el nombre propio que importa; nunca arranca con emoji ni hashtag, nunca un saludo ni "Atención". Después, párrafos cortos con una línea en blanco entre ellos, UNA sola acción (leer la nota, ver el vivo) y al final EXACTAMENTE 3 hashtags: #TopSecretFC + uno del juego o la liga + uno del tema. Meté en el texto las palabras que alguien buscaría (rival, liga, jugador).
+- En todos los textos de redes (shareCaption y shareCaptions): sin rayas (—) y sin muletillas de máquina ("sin lugar a dudas", "cabe destacar", "un antes y un después", "no es solo…", "en definitiva", "llevar al siguiente nivel"). Decilo directo, como un periodista de cancha.
+- `tituloImagen`: el título que va sobre la foto en el post y la historia, de 6 palabras o menos, legible en la grilla. Puede ser distinto del título de la nota.
+- `carrusel`: las placas que siguen a la foto en el carrusel de Instagram (también Facebook, X y TikTok). De 5 a 9 placas, en este orden:
+  1. {"tipo":"clave","titulo":"…","texto":"…"}: por qué importa, en una frase. Instagram puede volver a mostrar el carrusel desde esta placa: tiene que entenderse sola, sin "como dijimos".
+  2. De 2 a 6 × {"tipo":"idea","titulo":"3 a 7 palabras","texto":"hasta 25 palabras"}: UNA idea por placa (un partido, un gol, un dato de tabla, un jugador). Si necesita más, son dos placas. Podés marcar en negrita con **así** el dato clave.
+  3. {"tipo":"resumen","titulo":"…","items":["2 a 6 puntos de hasta 10 palabras"]}: todo junto, la placa que se guarda.
+  4. {"tipo":"cta","titulo":"una sola acción, 8 palabras o menos","texto":"opcional"}: p. ej. "Leé la nota completa", "Esta noche, en vivo a las 22:30".
+  Mismos datos, gamertags y reglas de escritura que la nota. Sin emojis.
+
 ## Antes de responder, releé como editor
 Cada dato contra DATOS; cada día de semana contra DATOS; gamertags exactos y del plantel; ligas bien nombradas; largo ≤ 2100; el imageBrief cuenta la misma historia.
 
@@ -72,7 +83,9 @@ SOLO un JSON válido:
   "excerpt": "resumen de hasta 200 caracteres",
   "body": [ … ],
   "shareCaption": "hasta 280 caracteres, termina con #TopSecretFC",
-  "shareCaptions": { "ig": "caption de Instagram con 3 a 5 hashtags", "x": "post de hasta 257 caracteres (se le suma el link de la nota)", "fb": "post de Facebook, tono de crónica" },
+  "shareCaptions": { "ig": "gancho en la primera línea (≤125), cuerpo corto, una acción y 3 hashtags", "x": "post de hasta 257 caracteres (se le suma el link de la nota)", "fb": "post de Facebook, tono de crónica" },
+  "tituloImagen": "título de la foto, 6 palabras o menos",
+  "carrusel": [ {"tipo":"clave", …}, {"tipo":"idea", …}, …, {"tipo":"resumen", …}, {"tipo":"cta", …} ],
   "imageBrief": "escena",
   "toma": "id de la toma si es una victoria; si no, null",
   "protagonistas": ["gamertags que protagonizan la nota"],

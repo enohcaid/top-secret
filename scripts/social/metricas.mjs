@@ -76,5 +76,21 @@ for (const fmt of [...new Set(filas.map(f => f.formato))]) {
   console.log(`${fmt.padEnd(9)} ${String(g.length).padStart(6)} ${c('alcance', 8)} ${c('vistas', 7)} ${c('likes', 6)} ${c('compartidos', 8)} ${c('guardados', 6)}`);
 }
 
+// Qué funcionó de verdad (2026-11-26, criterio de /ig-audit del pack instagram-agent-skill): las vistas crudas dependen
+// de cuánta gente ya nos sigue; lo que dice algo es cuánto superó cada post a la MEDIANA de su formato (x mediana; 3x o
+// más es una señal, menos de 1,5x es un día normal) y cuántos lo guardaron o lo mandaron por cada 100 alcanzados.
+const base = f => f.vistas ?? f.alcance;
+for (const f of filas) {
+  const med = mediana(filas.filter(g => g.formato === f.formato).map(base));
+  f.xMediana = med && base(f) != null ? +(base(f) / med).toFixed(1) : null;
+  f.compartidosCada100 = f.alcance ? +(100 * (f.compartidos ?? 0) / f.alcance).toFixed(1) : null;
+  f.guardadosCada100 = f.alcance ? +(100 * (f.guardados ?? 0) / f.alcance).toFixed(1) : null;
+}
+console.log('\nLo que más superó a su formato (x mediana) · compartidos y guardados cada 100 alcanzados');
+for (const f of [...filas].filter(f => f.xMediana != null).sort((a, b) => b.xMediana - a.xMediana).slice(0, 8))
+  console.log(`  ${String(f.xMediana).padStart(5)}x  ${f.fecha}  ${f.formato.padEnd(8)} compart ${String(f.compartidosCada100 ?? '-').padStart(4)}  guard ${String(f.guardadosCada100 ?? '-').padStart(4)}  ${f.texto}`);
+const flojos = filas.filter(f => f.xMediana != null && f.xMediana < 0.5);
+if (flojos.length) console.log(`  Por debajo de la mitad de su mediana: ${flojos.length} (${[...new Set(flojos.map(f => f.formato))].join(', ')})`);
+
 const salida = opt('--json');
 if (salida) { fs.mkdirSync(salida.replace(/[\\/][^\\/]+$/, ''), { recursive: true }); fs.writeFileSync(salida, JSON.stringify(filas, null, 2)); console.log('\nDetalle en', salida); }

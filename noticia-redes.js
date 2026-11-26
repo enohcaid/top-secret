@@ -378,14 +378,15 @@
     const bloques = (n.body || []).filter(b => b && typeof b === 'object');
     const specs = bloques.find(b => Array.isArray(b.specs) && b.specs.length)?.specs;
     const quote = bloques.find(b => b.quote);
-    const extras = (await Promise.all((opts.extras || []).slice(0, 3).map(loadImg))).filter(Boolean);
+    const extras = (await Promise.all((opts.extras || []).slice(0, 9).map(loadImg))).filter(Boolean);
+    // capas (n.capasTikTok, scripts/lib/carrusel.mjs): el carrusel de la nota ya armado en 9:16; si está, reemplaza a la
+    // ficha y la frase (el carrusel ya las cubre: clave, ideas, resumen, acción final).
+    const capas = (await Promise.all((opts.capas || []).slice(0, 9).map(loadImg))).filter(Boolean);
     const interiores = [];
-    if (specs) interiores.push(ctx => { encabezado(ctx, escudo, 'La ficha'); placaFicha(ctx, specs, opts.gamertags); });
-    else if (n.excerpt) interiores.push(ctx => { encabezado(ctx, escudo, n.category || 'La nota'); placaFrase(ctx, { quote: n.excerpt }, opts.gamertags); });
-    if (quote) interiores.push(ctx => { encabezado(ctx, escudo, 'La frase'); placaFrase(ctx, quote, opts.gamertags); });
-    // capas (n.capasTikTok, scripts/placas-carrusel.mjs): placas 1080x1920 sin fondo, ya armadas dentro de la zona
-    // segura; reemplazan a las extras (que en 9:16 quedaban chicas) y van enteras sobre el fondo oscuro.
-    const capas = (await Promise.all((opts.capas || []).slice(0, 3).map(loadImg))).filter(Boolean);
+    if (!capas.length && specs) interiores.push(ctx => { encabezado(ctx, escudo, 'La ficha'); placaFicha(ctx, specs, opts.gamertags); });
+    else if (!capas.length && n.excerpt) interiores.push(ctx => { encabezado(ctx, escudo, n.category || 'La nota'); placaFrase(ctx, { quote: n.excerpt }, opts.gamertags); });
+    if (quote && !capas.length) interiores.push(ctx => { encabezado(ctx, escudo, 'La frase'); placaFrase(ctx, quote, opts.gamertags); });
+    // Las capas van enteras sobre el fondo oscuro (ya respetan la zona segura) y reemplazan a las extras, que en 9:16 quedaban chicas.
     for (const img of capas) interiores.push(ctx => ctx.drawImage(img, 0, 0, TT.W, TT.H));
     for (const img of capas.length ? [] : extras) interiores.push(ctx => {
       // Entera, lo más grande posible sin meterse bajo los botones de la derecha ni el texto de abajo.

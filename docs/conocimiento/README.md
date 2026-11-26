@@ -53,6 +53,7 @@ Formato: cada nota tiene *frontmatter* (`name`, `description`, `type`) y los lin
 - [feedback_triage_antes_de_debug_profundo](feedback_triage_antes_de_debug_profundo.md) — Antes de multiplicar hipótesis debugueando un fallo que puede ser externo (no de este lado), hacer 2-3 chequeos mínimos de triage primero
 - [feedback_video_formacion_fixture_block](feedback_video_formacion_fixture_block.md) — Los videos 'Formación Titular' llevan el partido de VPUG del día en el bloque de fixture — pero la copia grande y la copia chica del bloque NO tienen por qué mostrar las mismas filas: eso es el formato real, no un bug
 - [feedback_solo_automatizable](feedback_solo_automatizable.md) — Redes: no proponer nada que Juan tenga que hacer a mano desde la app (ej. destacadas de IG, que la API no permite); solo lo automatizable
+- [feedback_reglas_contenido_redes](feedback_reglas_contenido_redes.md) — Desde 2026-11-26: gancho en 125 caracteres, 3 hashtags, sin rayas ni muletillas de IA, carrusel clave→ideas→resumen→acción (scripts/lib/reglas-redes.mjs + carrusel.mjs); de instagram-agent-skill, sin instalarlo
 
 ## Estado y decisiones del proyecto
 
