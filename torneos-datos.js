@@ -362,6 +362,7 @@ const E11_T4_BADGES = {
   'Argentinos Jrs Esp':     'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/argentinos-jrs-esp.webp',
   'Cambaceres':             'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-183948-j9beahxkmy.png',
   'Comunicaciones eSports': 'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-chmnf1o33c.png',
+  'CSyD La Mochila':        'https://copafacil-storage.b-cdn.net/events%2F-fthh5%2Fb7we%2Fteams%2F-P2OXy0twcTpDlidx8p-.png?alt=media&token=1&m=1791232638434', // rival de la promoción (01/12), escudo de VPUG
   'Fco Kannabiense':        'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184026-lfizbcrewy.png',
   'IACC Reserva':           'https://top-secret-proxy.juan-c-m-1985.workers.dev/media/logos/escudos-eg/iacc-reserva.webp',
   'InfinitX':               'https://espaciogamer.cl/wp-content/uploads/2026/10/escudo-20261017-184001-vrqhkmuma0.png',
