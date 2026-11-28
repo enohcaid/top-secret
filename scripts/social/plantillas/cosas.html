@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- "Cosas que solo entendés si jugás Clubs Pro": lista numerada que se escribe sola sobre jugadas reales del vivo.
+     Video (story 1080x1920): 0 gancho · 1..5 los puntos (el 4 con un congelado real: el lag) · 6 cierre.
+     Carrusel (post 1080x1350): 0 portada · 1 clave · 2..6 los puntos · 7 resumen · 8 acción.
+     Los cuadros del vivo están en disco a D.K veces 1280x720; la franja recorta el HUD (escudo del kit del juego y nombres
+     de los jugadores). Franja de arriba (0-170) libre: ahí va el rótulo del tema. Todo sale de t (determinístico). -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--gold:#C9A84C;--gold2:#E6CF85;--text:#F7F2E4}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);overflow:hidden}
+#lienzo{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text);font-family:Barlow,sans-serif}
+#lienzo.post{height:1350px}
+canvas{position:absolute;left:0;top:0}
+.capa{position:absolute;will-change:transform,opacity}
+.oc{display:none!important}
+/* puntos del video */
+#num{left:44px;top:196px;font-family:'Bebas Neue';font-size:330px;line-height:.8;color:var(--gold2);text-shadow:0 10px 40px rgba(0,0,0,.7)}
+#txt{left:262px;right:50px;top:212px;height:370px;display:flex;align-items:center;font:800 76px/1.02 'Barlow Condensed';text-shadow:0 4px 24px rgba(0,0,0,.85)}
+#txt .no{color:transparent;text-shadow:none}
+#txt .cur{display:inline-block;width:8px;height:66px;margin-left:4px;vertical-align:-6px;background:var(--gold2)}
+#chip{left:36px;top:628px;background:#0c0b09;border:3px solid var(--gold2);border-radius:12px;padding:6px 18px;font:800 46px/1 'Barlow Condensed';letter-spacing:.06em;color:var(--gold2)}
+#tag{left:0;right:0;top:1406px;text-align:center}
+#tag span{display:inline-block;background:var(--gold2);color:#0c0b09;font:800 44px/1 'Barlow Condensed';letter-spacing:.04em;padding:12px 26px;border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.6)}
+#lag{left:0;right:0;top:880px;text-align:center}
+#lag .rueda{width:150px;height:150px;margin:0 auto 26px;border-radius:50%;border:14px solid rgba(247,242,228,.25);border-top-color:var(--text)}
+#lag b{display:inline-block;font:800 50px/1 'Barlow Condensed';letter-spacing:.14em;background:rgba(5,5,5,.7);padding:12px 24px;border-radius:10px}
+#placa{left:70px;right:70px;top:1330px;background:rgba(12,11,9,.94);border:4px solid var(--gold2);border-radius:22px;padding:22px 30px 24px;box-shadow:0 24px 70px rgba(0,0,0,.75);text-align:center}
+#placa .k{font:800 34px/1 'Barlow Condensed';letter-spacing:.3em;color:var(--gold2)}
+#placa .r{display:flex;align-items:center;justify-content:center;gap:22px;margin:14px 0 10px}
+#placa .r img{height:96px;width:96px;object-fit:contain}
+#placa .r span{font:800 50px/1 'Barlow Condensed';letter-spacing:.02em}
+#placa .r b{font-family:'Bebas Neue';font-weight:400;font-size:110px;line-height:.8;color:var(--gold2)}
+#placa .s{font:700 32px/1 'Barlow Condensed';letter-spacing:.1em;color:rgba(247,242,228,.75)}
+/* gancho */
+#g1{left:60px;right:60px;top:720px;text-align:center;font-family:'Bebas Neue';font-size:178px;line-height:.88;text-shadow:0 10px 50px rgba(0,0,0,.85)}
+#g1 em{font-style:normal;color:var(--gold2)}
+#g2{left:80px;right:80px;top:1280px;text-align:center;font:800 64px/1.06 'Barlow Condensed';text-shadow:0 4px 24px rgba(0,0,0,.9)}
+#g2 .no{color:transparent;text-shadow:none}
+#gk{left:90px;right:90px;top:240px;text-align:center;font:800 44px/1.15 'Barlow Condensed';letter-spacing:.14em;color:var(--gold2);text-shadow:0 3px 18px rgba(0,0,0,.8)}
+/* cierre */
+#c1{left:40px;right:40px;top:560px;text-align:center;font-family:'Bebas Neue';font-size:200px;line-height:.86;text-shadow:0 10px 60px rgba(0,0,0,.8)}
+#c2{left:40px;right:40px;top:960px;text-align:center;font:800 70px/1 'Barlow Condensed';color:var(--gold2);letter-spacing:.02em}
+#nums{left:90px;right:90px;top:1100px;display:flex;gap:26px}
+#nums div{flex:1;height:170px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:140px;background:rgba(10,10,10,.7);box-shadow:inset 0 0 0 4px rgba(230,207,133,.5);will-change:transform}
+#nums div.on{background:var(--gold2);color:#0c0b09}
+#esc{left:50%;top:1340px;height:150px;margin-left:-68px}
+#destello{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+/* carrusel */
+.pl{position:absolute;left:0;right:0}
+#pk{left:80px;right:80px;font:800 34px/1 'Barlow Condensed';letter-spacing:.24em;color:var(--gold2)}
+#pt{left:80px;right:80px;font-family:'Bebas Neue';font-size:128px;line-height:.9;text-shadow:0 8px 40px rgba(0,0,0,.7)}
+#pt em{font-style:normal;color:var(--gold2)}
+#px{left:80px;right:80px;font:500 44px/1.3 Barlow;color:rgba(247,242,228,.92)}
+#pn{left:64px;font-family:'Bebas Neue';font-size:250px;line-height:.8;color:var(--gold2);text-shadow:0 10px 40px rgba(0,0,0,.7)}
+#pl{left:80px;right:80px;list-style:none;display:flex;flex-direction:column;gap:30px}
+#pl li{font:700 50px/1.12 'Barlow Condensed';padding-left:86px;position:relative}
+#pl li b{position:absolute;left:0;top:-6px;font-family:'Bebas Neue';font-weight:400;font-size:72px;line-height:1;color:var(--gold2)}
+#pe{right:70px;top:66px;height:84px}
+#pc{right:80px;top:96px;font:700 30px 'Barlow Condensed';letter-spacing:.2em;color:rgba(247,242,228,.6)}
+#pp{left:80px;right:80px;bottom:76px;font:800 32px/1 'Barlow Condensed';letter-spacing:.24em;color:var(--gold2)}
+</style>
+</head>
+<body>
+<div id="lienzo">
+  <canvas id="fondo" width="1080" height="1920"></canvas>
+  <canvas id="marcas" width="1080" height="1920"></canvas>
+  <div id="gk" class="capa oc"></div>
+  <div id="g1" class="capa oc"></div>
+  <div id="g2" class="capa oc"></div>
+  <div id="num" class="capa oc"></div>
+  <div id="txt" class="capa oc"><div></div></div>
+  <div id="chip" class="capa oc"></div>
+  <div id="lag" class="capa oc"><div class="rueda"></div><b>RECONECTANDO</b></div>
+  <div id="tag" class="capa oc"><span></span></div>
+  <div id="placa" class="capa oc"><div class="k">FINAL</div><div class="r"><img id="pr1"><span id="pq1"></span><b id="pres"></b><span id="pq2"></span><img id="pr2"></div><div class="s" id="ps"></div></div>
+  <div id="c1" class="capa oc"></div>
+  <div id="c2" class="capa oc"></div>
+  <div id="nums" class="capa oc"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div>
+  <img id="esc" class="capa oc">
+  <div id="pk" class="capa pl oc"></div>
+  <div id="pn" class="capa pl oc"></div>
+  <div id="pt" class="capa pl oc"></div>
+  <div id="px" class="capa pl oc"></div>
+  <ul id="pl" class="capa pl oc"></ul>
+  <img id="pe" class="capa oc">
+  <div id="pc" class="capa oc"></div>
+  <div id="pp" class="capa oc"></div>
+  <div id="destello"></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const eOut = p => 1 - Math.pow(1 - clamp(p), 3);
+const lerp = (a, b, p) => a + (b - a) * p;
+const W = 1080;
+let H = 1920, D, POST = false, cache = new Map();
+const fondo = $('#fondo').getContext('2d'), marcas = $('#marcas').getContext('2d');
+fondo.imageSmoothingQuality = 'high';
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const oro = s => esc(s).replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+async function img(src) {
+  if (cache.has(src)) return cache.get(src);
+  const i = new Image(); i.src = src; await i.decode();
+  if (cache.size > 12) cache.delete(cache.keys().next().value);
+  cache.set(src, i);
+  return i;
+}
+// Cuadro del tramo en el segundo `s` del tramo (0 = su comienzo)
+async function cuadro(tr, s) {
+  const k = Math.round(clamp(s * D.fps, 0, tr.n - 1));
+  return img(`${tr.dir}/${String(k + 1).padStart(4, '0')}.jpg`);
+}
+// Ventana (cx, cy, ancho en px del video de 1280x720) del cuadro en el rectángulo r = [x, y, w, h]
+function ventana(ctx, im, cx, cy, ancho, r, filtro = 'none') {
+  const alto = ancho * r[3] / r[2], K = D.K;
+  const x = clamp(cx - ancho / 2, 0, 1280 - ancho), y = clamp(cy - alto / 2, 0, 720 - alto);
+  ctx.save(); ctx.filter = filtro;
+  ctx.drawImage(im, x * K, y * K, ancho * K, alto * K, r[0], r[1], r[2], r[3]);
+  ctx.restore();
+}
+// Fondo: el mismo cuadro grande, desenfocado y oscuro
+function esmerilado(im, cx, oscuro = .32) { ventana(fondo, im, cx, 330, 405, [0, 0, W, H], `blur(26px) brightness(${oscuro})`); }
+// Franja: el cuadro sin el HUD (alto 496 px de video: de 80 a 576), con bordes que se funden
+const BANDA = [0, 600, 1080, 880];
+function franja(im, tr, filtro = 'contrast(1.06) saturate(1.05)', zoom = 1, banda = BANDA) {
+  esmerilado(im, tr.cx);
+  const [x, y, w, h] = banda, dz = (zoom - 1) / 2;
+  const alto = tr.alto || 496;
+  ventana(fondo, im, tr.cx, tr.cy || 328, alto * w / h / zoom, [x, y, w, h], filtro);
+  for (const [yy, dir] of [[y, 1], [y + h, -1]]) {
+    const g = fondo.createLinearGradient(0, yy, 0, yy + dir * 70);
+    g.addColorStop(0, 'rgba(5,5,5,.9)'); g.addColorStop(1, 'rgba(5,5,5,0)');
+    fondo.fillStyle = g; fondo.fillRect(0, Math.min(yy, yy + dir * 70), W, 70);
+  }
+  marcas.fillStyle = '#E6CF85'; marcas.fillRect(x, y - 3, w, 4); marcas.fillRect(x, y + h - 1, w, 4);
+}
+function golpe(el, t, en, de = 1.4, dur = .24) { const p = eOut((t - en) / dur); el.style.transform = `scale(${lerp(de, 1, p)})`; el.style.opacity = clamp((t - en) / .07); }
+function entra(el, t, en, de = 40) { const p = eOut((t - en) / .3); el.style.opacity = clamp((t - en) / .1); el.style.transform = `translateY(${(1 - p) * de}px)`; }
+function ver(sel, on = true) { $(sel).classList.toggle('oc', !on); }
+// Texto que se escribe solo: lo escrito visible, lo que falta transparente (el bloque no se reacomoda) y el cursor
+function escribir(el, texto, t, desde, cps, cursor = true) {
+  const n = clamp(Math.floor((t - desde) * cps), 0, texto.length);
+  const parpadeo = n < texto.length || Math.floor(t * 2.4) % 2 === 0;
+  el.innerHTML = esc(texto.slice(0, n)) + (cursor && t >= desde && parpadeo ? '<i class="cur"></i>' : '') + `<span class="no">${esc(texto.slice(n))}</span>`;
+}
+
+async function pintar(datos, formato) {
+  D = datos; POST = formato === 'post'; H = POST ? 1350 : 1920;
+  $('#lienzo').classList.toggle('post', POST);
+  for (const c of [$('#fondo'), $('#marcas')]) c.height = H;
+  for (const s of ['#esc', '#pe', '#pr2']) $(s).src = D.escudo;
+  $('#pr1').src = D.final.escudoRival;
+  $('#pq1').textContent = D.final.local; $('#pq2').textContent = D.final.visita; $('#pres').textContent = D.final.res; $('#ps').textContent = D.final.sub;
+  await document.fonts.ready;
+  await Promise.all(["800 76px 'Barlow Condensed'", "700 30px 'Barlow Condensed'", "60px 'Bebas Neue'", "500 40px Barlow"].map(f => document.fonts.load(f)));
+  await Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })));
+  return POST ? D.placas.length : 7;
+}
+
+function ocultarTodo() {
+  document.querySelectorAll('.capa').forEach(e => e.classList.add('oc'));
+  $('#destello').style.opacity = 0;
+  marcas.clearRect(0, 0, W, H);
+  fondo.fillStyle = '#050505'; fondo.fillRect(0, 0, W, H);
+}
+function corte(t) { $('#destello').style.opacity = clamp(1 - t / .14) * .32; }
+
+// 0 · gancho
+async function gancho(t, o) {
+  const tr = D.tramos.gancho, im = await cuadro(tr, t);
+  franja(im, tr, `brightness(${lerp(.85, .42, eOut((t - .1) / .3))}) contrast(1.05)`, lerp(1.08, 1, eOut(t / .5)));
+  corte(t);
+  if (o?.sinTexto) return;
+  ver('#gk'); $('#gk').textContent = D.textos.kicker; entra($('#gk'), t, .05, -20);
+  ver('#g1'); $('#g1').innerHTML = oro(D.textos.gancho[0]); golpe($('#g1'), t, .05, 1.35);
+  ver('#g2'); escribir($('#g2'), D.textos.gancho[1], t, D.T.g2, D.cps, false);
+}
+
+// 1..5 · los puntos
+async function punto(n, t, o) {
+  const P = D.puntos[n - 1], tr = D.tramos['p' + n];
+  let s = t, congelado = false;
+  if (P.lag) { const [a, f] = P.lag; congelado = t >= a && t < a + f; s = t < a ? t : t < a + f ? a : t - f; }
+  const im = await cuadro(tr, s);
+  const punch = lerp(1.06, 1, eOut(t / .35));
+  franja(im, tr, congelado ? 'contrast(1.1) saturate(.75) brightness(.8)' : 'contrast(1.06) saturate(1.05)', punch);
+  corte(t);
+  if (congelado) {
+    // el lag: el cuadro se queda, rayas de compresión, la rueda de reconexión
+    const k = t - P.lag[0];
+    marcas.save(); marcas.globalAlpha = .5;
+    for (let i = 0; i < 7; i++) {
+      const y = BANDA[1] + ((i * 137 + Math.floor(k * 10) * 53) % BANDA[3]), h = 6 + (i * 29) % 28;
+      marcas.drawImage($('#fondo'), 0, y, W, h, (i % 2 ? 1 : -1) * (10 + (i * 17) % 30), y, W, h);
+    }
+    marcas.restore();
+    ver('#lag'); $('#lag .rueda').style.transform = `rotate(${Math.floor(k * 12) * 30}deg)`; $('#lag').style.opacity = clamp(k / .12);
+  }
+  if (o?.sinTexto) return;
+  ver('#num'); $('#num').textContent = n; golpe($('#num'), t, .02, 1.6, .2);
+  ver('#txt'); escribir($('#txt div'), P.texto, t, D.T.escribe, D.cps);
+  if (P.chip) { ver('#chip'); $('#chip').textContent = P.chip; entra($('#chip'), t, .25, -14); }
+  if (P.tag && t >= P.tag[0]) { ver('#tag'); $('#tag span').textContent = P.tag[1]; golpe($('#tag'), t, P.tag[0], 1.25); }
+  if (P.final && t >= P.final) { ver('#placa'); golpe($('#placa'), t, P.final, 1.18, .3); }
+}
+
+// 6 · cierre
+async function cierre(t, o) {
+  const tr = D.tramos.p5, im = await cuadro(tr, tr.n / D.fps);
+  esmerilado(im, tr.cx, .22);
+  corte(t);
+  if (o?.sinTexto) return;
+  ver('#c1'); $('#c1').innerHTML = oro(D.textos.cierre[0]); golpe($('#c1'), t, .04, 1.3);
+  ver('#c2'); $('#c2').textContent = D.textos.cierre[1]; entra($('#c2'), t, .35, 30);
+  ver('#nums'); entra($('#nums'), t, .5, 40);
+  [...$('#nums').children].forEach((d, i) => {
+    const en = D.T.nums[i], on = t >= en;
+    d.classList.toggle('on', on);
+    d.style.transform = `scale(${on ? lerp(1.22, 1, eOut((t - en) / .2)) : 1})`;
+  });
+  ver('#esc'); entra($('#esc'), t, .7, 30);
+}
+
+// Carrusel: placas 1080x1350
+async function placa(i) {
+  const P = D.placas[i];
+  const total = D.placas.length;
+  ver('#pe'); ver('#pc'); $('#pc').textContent = `${i + 1} / ${total}`;
+  $('#pe').style.top = '66px'; $('#pc').style.right = '180px';
+  const conImg = P.tramo && D.tramos[P.tramo];
+  if (conImg) {
+    const tr = D.tramos[P.tramo], im = await cuadro(tr, P.s);
+    const b = P.tipo === 'portada' ? [0, 0, 1080, 1350] : [0, 190, 1080, 600];
+    if (P.tipo === 'portada') { ventana(fondo, im, tr.cx, (tr.cy || 328) + 18, 496 * 1080 / 1350, b, 'contrast(1.06) brightness(.62)'); }
+    else franja(im, tr, 'contrast(1.06) saturate(1.05)', 1, b);
+  } else {
+    const tr = D.tramos.p5, im = await cuadro(tr, tr.n / D.fps);
+    esmerilado(im, tr.cx, .2);
+  }
+  const g = fondo.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, 'rgba(5,5,5,.55)'); g.addColorStop(.3, 'rgba(5,5,5,0)'); g.addColorStop(.55, 'rgba(5,5,5,.25)'); g.addColorStop(1, 'rgba(5,5,5,.92)');
+  fondo.fillStyle = g; fondo.fillRect(0, 0, W, H);
+  const pon = (s, top, html) => { ver(s); $(s).style.top = top + 'px'; $(s).innerHTML = html; };
+  if (P.tipo === 'portada') {
+    pon('#pk', 640, esc(P.kicker)); pon('#pt', 690, oro(P.titulo)); pon('#px', 1100, esc(P.texto)); pon('#pp', 0, 'DESLIZÁ'); $('#pp').style.top = '';
+    $('#pt').style.fontSize = '138px';
+  } else if (P.tipo === 'idea') {
+    pon('#pn', 650, esc(P.n)); pon('#pk', 808, 'COSA ' + esc(P.n) + ' DE 5'); $('#pk').style.left = '250px';
+    pon('#pt', 850, oro(P.titulo)); $('#pt').style.fontSize = '104px';
+    $('#pt').style.left = '250px';
+    pon('#px', 1100, esc(P.texto)); $('#px').style.left = '250px';
+    if (P.tag) { ver('#tag'); $('#tag').style.top = '714px'; $('#tag span').textContent = P.tag; $('#tag span').style.fontSize = '36px'; }
+  } else if (P.tipo === 'clave') {
+    pon('#pk', 330, 'POR QUÉ IMPORTA'); pon('#pt', 390, oro(P.titulo)); $('#pt').style.fontSize = '124px'; pon('#px', 900, esc(P.texto));
+  } else if (P.tipo === 'resumen') {
+    pon('#pk', 250, 'EN RESUMEN'); pon('#pt', 300, oro(P.titulo)); $('#pt').style.fontSize = '96px';
+    pon('#pl', 520, P.items.map((x, k) => `<li><b>${k + 1}</b>${esc(x)}</li>`).join(''));
+  } else if (P.tipo === 'cta') {
+    pon('#pk', 430, esc(P.kicker)); pon('#pt', 480, oro(P.titulo)); $('#pt').style.fontSize = '150px'; pon('#px', 860, esc(P.texto));
+    ver('#esc'); $('#esc').style.top = '1080px'; $('#esc').style.opacity = 1; $('#esc').style.transform = 'none';
+  }
+  if (P.tipo !== 'cta' && P.tipo !== 'portada') pon('#pp', 0, 'DESLIZÁ');
+  if (P.tipo !== 'cta') { $('#pp').style.top = ''; }
+  for (const s of ['#pk', '#pn', '#pt', '#px', '#pl', '#pp', '#pe', '#pc']) { $(s).style.opacity = 1; $(s).style.transform = 'none'; }
+  // el texto va debajo del título, según cuántas líneas ocupe
+  if (P.tipo === 'portada' || P.tipo === 'idea') $('#px').style.top = ($('#pt').offsetTop + $('#pt').offsetHeight + 34) + 'px';
+}
+
+async function mostrar(n, t, o) {
+  ocultarTodo();
+  for (const s of ['#pk', '#pt', '#px']) { $(s).style.left = ''; $(s).style.fontSize = ''; }
+  if (POST) return placa(n);
+  if (n === 0) return gancho(t, o);
+  if (n <= 5) return punto(n, t, o);
+  return cierre(t, o);
+}
+</script>
+</body>
+</html>
