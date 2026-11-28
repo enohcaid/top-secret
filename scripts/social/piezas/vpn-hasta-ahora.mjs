@@ -184,12 +184,12 @@ const lote = {
     P({ id: 'ig-reel', red: 'instagram', formato: 'Reel · VPN, lo que va', metodo: 'ig-reel',
       texto: `Ocho goles de VPN en cámara lenta. Elianja20, Guiidow, Cabers14, NicoBJ_96 y el resto del equipo.\n\nEl lunes 30 a las 23:00 seguimos, en vivo. ¿Cuál te quedás?\n\n#TopSecretFC #ProClubs #VPN` }),
     P({ id: 'tiktok', red: 'tiktok', formato: 'Video · VPN, lo que va', metodo: 'tiktok',
-      texto: `Ocho goles de VPN en cámara lenta. ¿Cuál te quedás? #TopSecretFC #ProClubs #EAFC` }),
+      texto: `Ocho goles de VPN en cámara lenta: Elianja20, Guiidow, Cabers14, NicoBJ_96 y el resto del equipo. ¿Cuál te quedás? #TopSecretFC #ProClubs #EAFC` }),
     P({ id: 'yt-short', red: 'youtube', formato: 'Short · VPN, lo que va', metodo: 'youtube',
       titulo: 'Ocho goles de Pro Clubs en cámara lenta | Top Secret FC en VPN',
       texto: `Los goles de Top Secret en VPN, en cámara lenta: Elianja20, Guiidow, Cabers14, NicoBJ_96 y el resto del equipo. #Shorts #ProClubs #EAFC` }),
     P({ id: 'x-video', red: 'x', formato: 'Video · VPN, lo que va', metodo: 'x-video',
-      texto: `Ocho goles de VPN en cámara lenta. El lunes 30 a las 23:00 seguimos, en vivo. ¿Cuál te quedás? #TopSecretFC` }),
+      texto: `Ocho goles de VPN en cámara lenta, con Elianja20, Guiidow, Cabers14 y NicoBJ_96. El lunes 30 a las 23:00 seguimos, en vivo. ¿Cuál te quedás? #TopSecretFC` }),
   ],
 };
 let avisos = 0;
