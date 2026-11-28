@@ -38,12 +38,12 @@ const run = (args, que) => { const r = spawnSync(ffmpeg, ['-hide_banner', '-logl
 const final = path.join(DIR, 'vpn-hasta-ahora.mp4');
 const SOLO_LOTE = flag("--solo-lote") && fs.existsSync(final);   // reusa el video ya renderizado
 if (flag('--hoja')) {
-  const comp = [], dur = 50, n = 24;
+  const comp = [], dur = 61, n = 32;
   for (let i = 0; i < n; i++) {
     const r = spawnSync(ffmpeg, ['-loglevel', 'error', '-ss', String((i + .5) * dur / n), '-i', final, '-frames:v', '1', '-vf', 'scale=240:426', '-f', 'image2pipe', '-vcodec', 'mjpeg', '-'], { maxBuffer: 1e8 });
     comp.push({ input: r.stdout, left: (i % 8) * 240, top: Math.floor(i / 8) * 426 });
   }
-  await sharp({ create: { width: 1920, height: 3 * 426, channels: 3, background: '#000' } }).composite(comp).jpeg({ quality: 85 }).toFile(path.join(DIR, 'hoja.jpg'));
+  await sharp({ create: { width: 1920, height: 4 * 426, channels: 3, background: '#000' } }).composite(comp).jpeg({ quality: 85 }).toFile(path.join(DIR, 'hoja.jpg'));
   log('Hoja en ' + path.join(DIR, 'hoja.jpg'));
   process.exit(0);
 }
@@ -67,8 +67,9 @@ const GOLES = [
 });
 const GOLEADORES = [...new Set(GOLES.map(g => g.autor).filter(Boolean))];
 
-// Tiempos: 2,2 s de jugada a velocidad normal y el remate (0,8 s antes y 0,8 s después de que entra) a la mitad
-const NORMAL = 2.2, LENTO = 1.6, FPS = 30;
+// Tiempos (v3, Juan 28/11: "que podamos ver la jugada previa y el gol, no el festejo"): 5 s de jugada previa a
+// velocidad normal y el remate a la mitad (0,45 s antes y 0,45 s después de que entra); corta ahí, sin festejo
+const NORMAL = 5.0, LENTO = 0.9, FPS = 30;
 const DUR_GOL = NORMAL + LENTO * 2, DUR_INTRO = 2.6, DUR_CIERRE = 3.8;
 const total = DUR_INTRO + GOLES.length * DUR_GOL + DUR_CIERRE;
 const VENT = { y: 528, w: 1080, h: 864 };          // ventana de la jugada
