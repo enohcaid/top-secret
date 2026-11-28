@@ -3151,6 +3151,10 @@ const SEED_MATCHES = [
     {name:'davidelapaternal', matched:'davidelapaternal', played_pos:'MC', rating:7.3, goals:0, assists:0, passes:20, pass_accuracy:80, distance_km:null, sprints:null, tackles:2, interceptions:null, shots:0, tackle_attempts:2, saves:0, red_cards:0, minutes:93, mom:false, archetype_id:8, ea_pos:'midfielder'},
     {name:'Elianja20', matched:'Elianja20', played_pos:'DFC', rating:9.4, goals:0, assists:0, passes:19, pass_accuracy:79, distance_km:null, sprints:null, tackles:6, interceptions:null, shots:0, tackle_attempts:9, saves:0, red_cards:0, minutes:93, mom:true, archetype_id:4, ea_pos:'defender'},
   ]},
+
+  // VPUG — United Mito — 2026-11-24 (3-3) · resultado de la liga (EA inconsistente)
+  {rival:'United Mito', league:'VPUG', date:'2026-11-24', match_result:'3-3', uploadedAt:'2026-11-28T03:45:40.422Z', ea_match_id:'212340396140355', origen:'ea-auto', notes:'22:30 hs · resultado de la web de la liga (EA dice 0-3, la liga 3-3); estadísticas de EA descartadas. Falta completar con el reporte del video (posesión, xG, córners, goleadores y minutos, posiciones)', team_stats:{posesion:null, tiros:null, tiros_arco:null, goles_esperados:null, pases:null, precision_pases:null, entradas:null, entradas_exito:null, intercepciones:null, paradas:null, faltas:null, fuera_juego:null, corneres:null, regates_exito:null, precision_tiro:null},
+  players:[]},
 ];
 
 
