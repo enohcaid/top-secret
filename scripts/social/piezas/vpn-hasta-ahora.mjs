@@ -4,7 +4,7 @@
 //
 // Material (revisado cuadro a cuadro el 28/11): 8 de los 14 goles de VPN están grabados. Los otros clips de esas
 // noches son de VPUG (CCC = COMUNICACIONES, ZZZ = INSTITUTO CANT, LP = Argentino de Merlo) y quedan afuera; Moreno Al
-// Ritmo (16/11), Los Picantes (18/11) y MONOTRIBUTISTAS (25/11) no se grabaron. Goleador con nombre solo donde el seed
+// Ritmo (16/11), Los Picantes (18/11) y MONOTRIBUTISTAS (25/11) no se grabaron. Goleador con nombre donde el seed
 // lo tiene; los demás dicen "TOP SECRET".
 //
 // Estética: vertical 1080x1920, la jugada recortada del lado del arco (sin marcador ni barras del juego) en una
@@ -38,7 +38,7 @@ const run = (args, que) => { const r = spawnSync(ffmpeg, ['-hide_banner', '-logl
 const final = path.join(DIR, 'vpn-hasta-ahora.mp4');
 const SOLO_LOTE = flag("--solo-lote") && fs.existsSync(final);   // reusa el video ya renderizado
 if (flag('--hoja')) {
-  const comp = [], dur = 46, n = 24;
+  const comp = [], dur = 50, n = 24;
   for (let i = 0; i < n; i++) {
     const r = spawnSync(ffmpeg, ['-loglevel', 'error', '-ss', String((i + .5) * dur / n), '-i', final, '-frames:v', '1', '-vf', 'scale=240:426', '-f', 'image2pipe', '-vcodec', 'mjpeg', '-'], { maxBuffer: 1e8 });
     comp.push({ input: r.stdout, left: (i % 8) * 240, top: Math.floor(i / 8) * 426 });
@@ -48,24 +48,27 @@ if (flag('--hoja')) {
   process.exit(0);
 }
 
-// [noche del vigía, índice del gol, lado del arco, fecha, rival, goleador o null]
+// [noche del vigía, índice del gol, segundo en que entra la pelota (desde el inicio de la ventana del vigía), lado
+// del arco, fecha, rival, goleador o null]. El "fin" del vigía NO es el gol: el marcador del juego cambia recién con
+// el festejo, así que la v1 (tomada desde el fin) mostraba solo festejos (Juan, 28/11). Segundo del gol leído cuadro
+// a cuadro, cada 0,5 s, mirando la red.
 const GOLES = [
-  ['2026-11-11', 0, 'der', '11 NOV', 'Misky Mayu FC', 'Elianja20'],
-  ['2026-11-11', 1, 'izq', '11 NOV', 'Division Palermo', 'Guiidow'],
-  ['2026-11-17', 2, 'der', '16 NOV', 'Suda Esports', null],
-  ['2026-11-17', 3, 'der', '16 NOV', 'Suda Esports', null],
-  ['2026-11-17', 4, 'izq', '16 NOV', 'Suda Esports', null],
-  ['2026-11-17', 5, 'der', '16 NOV', 'Instituto Reserva', 'Cabers14'],
-  ['2026-11-18', 2, 'der', '18 NOV', 'AlToke Perro', 'NicoBJ_96'],
-  ['2026-11-18', 3, 'der', '18 NOV', 'Dalmine Esports', null],
-].map(([noche, i, lado, fecha, rival, autor]) => {
+  ['2026-11-11', 0, 12.0, 'der', '11 NOV', 'Misky Mayu FC', 'Elianja20'],
+  ['2026-11-11', 1, 13.0, 'izq', '11 NOV', 'Division Palermo', 'Guiidow'],
+  ['2026-11-17', 2, 12.3, 'der', '16 NOV', 'Suda Esports', 'nikileo527'],  // etiqueta del juego sobre el que la empuja,
+  ['2026-11-17', 3, 11.8, 'der', '16 NOV', 'Suda Esports', null],
+  ['2026-11-17', 4, 11.3, 'izq', '16 NOV', 'Suda Esports', null],
+  ['2026-11-17', 5, 13.6, 'der', '16 NOV', 'Instituto Reserva', 'Cabers14'],
+  ['2026-11-18', 2, 11.9, 'der', '18 NOV', 'AlToke Perro', 'NicoBJ_96'],
+  ['2026-11-18', 3, 12.8, 'der', '18 NOV', 'Dalmine Esports', 'NicoBJ_96'],   // etiqueta del juego: elude al arquero,
+].map(([noche, i, seg, lado, fecha, rival, autor]) => {
   const g = JSON.parse(fs.readFileSync(path.join(ROOT, `fuentes/goles/vvivo-${noche}/datos.json`))).goles[i];
-  return { vod: path.join(ROOT, `fuentes/goles/vvivo-${noche}/source.mp4`), fin: g.fin, lado, fecha, rival, autor };
+  return { vod: path.join(ROOT, `fuentes/goles/vvivo-${noche}/source.mp4`), gol: g.inicio + seg, lado, fecha, rival, autor };
 });
 const GOLEADORES = [...new Set(GOLES.map(g => g.autor).filter(Boolean))];
 
-// Tiempos: 2,4 s a velocidad normal y el remate (1,3 s de grabación) a la mitad → 5 s por gol
-const NORMAL = 2.4, LENTO = 1.3, FPS = 30;
+// Tiempos: 2,2 s de jugada a velocidad normal y el remate (0,8 s antes y 0,8 s después de que entra) a la mitad
+const NORMAL = 2.2, LENTO = 1.6, FPS = 30;
 const DUR_GOL = NORMAL + LENTO * 2, DUR_INTRO = 2.6, DUR_CIERRE = 3.8;
 const total = DUR_INTRO + GOLES.length * DUR_GOL + DUR_CIERRE;
 const VENT = { y: 528, w: 1080, h: 864 };          // ventana de la jugada
@@ -120,7 +123,7 @@ const fadeV = d => `fade=in:st=0:d=0.25,fade=out:st=${(d - .3).toFixed(2)}:d=0.3
 }
 for (const [i, g] of GOLES.entries()) {
   const f = path.join(DIR, `t-gol-${i}.mp4`);
-  const desde = g.fin - .2 - LENTO - NORMAL;
+  const desde = g.gol - LENTO / 2 - NORMAL;
   const cx = g.lado === 'der' ? 1280 - CROP.w : 0;
   const filtro = [
     `[0:v]split[a][b]`,
@@ -159,7 +162,7 @@ for (const t of [...tramos, lista]) fs.rmSync(t, { force: true });
 // Portada: el remate de NicoBJ_96 en cámara lenta, sin textos del video
 {
   const g = GOLES.find(x => x.autor === 'NicoBJ_96');
-  run(['-ss', (g.fin - .8).toFixed(2), '-i', g.vod, '-frames:v', '1', '-vf', `crop=${CROP.w}:${CROP.h}:${1280 - CROP.w}:${CROP.y},scale=1080:-2`, '-q:v', '2', fotoPortada], 'foto portada');
+  run(['-ss', (g.gol - .3).toFixed(2), '-i', g.vod, '-frames:v', '1', '-vf', `crop=${CROP.w}:${CROP.h}:${1280 - CROP.w}:${CROP.y},scale=1080:-2`, '-q:v', '2', fotoPortada], 'foto portada');
 }
 await portada({ imagen: fotoPortada, kicker: 'VPN', titulo: 'Lo que *va*', foco: '50% 50%' }, jpg);
 const conTapa = path.join(DIR, 'vpn-tapa.mp4');
@@ -176,20 +179,20 @@ const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media', v = Da
 const key = `social/viral/${path.basename(final)}`; await putFile(final, key);
 const uVid = `${MEDIA}/${key}?v=${v}`;
 const uPortada = await subirPortada(jpg, 'social/viral/vpn-hasta-ahora-portada.jpg');
-const desc = `${Math.round(total)} s · pedido de Juan (28/11): video estético de VPN, no de datos · los 8 goles de VPN que quedaron grabados (de 14: Moreno Al Ritmo, Los Picantes y MONOTRIBUTISTAS no se grabaron), en orden, con el remate en cámara lenta · goleador con nombre donde lo sabemos (Elianja20, Guiidow, Cabers14, NicoBJ_96); los otros dicen TOP SECRET · cierre: lunes 30, 23:00, en vivo · sin voz · música: ${tema.titulo}.`;
+const desc = `${Math.round(total)} s · pedido de Juan (28/11): video estético de VPN, no de datos · los 8 goles de VPN que quedaron grabados (de 14: Moreno Al Ritmo, Los Picantes y MONOTRIBUTISTAS no se grabaron), en orden, con el remate en cámara lenta · goleador con nombre donde se sabe (seed o etiqueta del juego en la jugada): Elianja20, Guiidow, nikileo527, Cabers14, NicoBJ_96 x2; los dos de Suda en un amontonamiento dicen TOP SECRET · el remate en cámara lenta centrado en el segundo en que entra la pelota (v2: la v1 mostraba solo festejos) · cierre: lunes 30, 23:00, en vivo · sin voz · música: ${tema.titulo}.`;
 const P = o => ({ decision: 'pendiente', protagonistas: GOLEADORES, descripcion: desc, musica: tema.titulo, media: [{ tipo: 'video', url: uVid, vertical: true }], local: { video: final }, portada: { url: uPortada, local: jpg }, ...o });
 const lote = {
   id: ID, tipo: 'viral', creado: new Date().toISOString(), publicarA: new Date().toISOString(),
   titulo: 'VPN, lo que va · los goles en cámara lenta', piezas: [
     P({ id: 'ig-reel', red: 'instagram', formato: 'Reel · VPN, lo que va', metodo: 'ig-reel',
-      texto: `Ocho goles de VPN en cámara lenta. Elianja20, Guiidow, Cabers14, NicoBJ_96 y el resto del equipo.\n\nEl lunes 30 a las 23:00 seguimos, en vivo. ¿Cuál te quedás?\n\n#TopSecretFC #ProClubs #VPN` }),
+      texto: `Ocho goles de VPN en cámara lenta. Elianja20, Guiidow, nikileo527, Cabers14 y NicoBJ_96.\n\nEl lunes 30 a las 23:00 seguimos, en vivo. ¿Cuál te quedás?\n\n#TopSecretFC #ProClubs #VPN` }),
     P({ id: 'tiktok', red: 'tiktok', formato: 'Video · VPN, lo que va', metodo: 'tiktok',
-      texto: `Ocho goles de VPN en cámara lenta: Elianja20, Guiidow, Cabers14, NicoBJ_96 y el resto del equipo. ¿Cuál te quedás? #TopSecretFC #ProClubs #EAFC` }),
+      texto: `Ocho goles de VPN en cámara lenta: Elianja20, Guiidow, nikileo527, Cabers14 y NicoBJ_96. ¿Cuál te quedás? #TopSecretFC #ProClubs #EAFC` }),
     P({ id: 'yt-short', red: 'youtube', formato: 'Short · VPN, lo que va', metodo: 'youtube',
       titulo: 'Ocho goles de Pro Clubs en cámara lenta | Top Secret FC en VPN',
-      texto: `Los goles de Top Secret en VPN, en cámara lenta: Elianja20, Guiidow, Cabers14, NicoBJ_96 y el resto del equipo. #Shorts #ProClubs #EAFC` }),
+      texto: `Los goles de Top Secret en VPN, en cámara lenta: Elianja20, Guiidow, nikileo527, Cabers14 y NicoBJ_96. #Shorts #ProClubs #EAFC` }),
     P({ id: 'x-video', red: 'x', formato: 'Video · VPN, lo que va', metodo: 'x-video',
-      texto: `Ocho goles de VPN en cámara lenta, con Elianja20, Guiidow, Cabers14 y NicoBJ_96. El lunes 30 a las 23:00 seguimos, en vivo. ¿Cuál te quedás? #TopSecretFC` }),
+      texto: `Ocho goles de VPN en cámara lenta, con Elianja20, Guiidow, nikileo527, Cabers14 y NicoBJ_96. El lunes 30 a las 23:00 seguimos, en vivo. ¿Cuál te quedás? #TopSecretFC` }),
   ],
 };
 let avisos = 0;
