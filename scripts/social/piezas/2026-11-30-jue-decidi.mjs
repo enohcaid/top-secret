@@ -9,10 +9,9 @@
 //     del vigía (fuentes/goles/vvivo-*) solo guardan goles: se revisaron las ventanas de 11/11, 12/11, 16/11, 17/11 y 18/11 y
 //     no hay una jugada nuestra perdida o atajada que se lea clara. Quedan tres goles con TRES DECISIONES DISTINTAS (tiro, pase,
 //     gambeta al arquero): el juego sigue siendo "adiviná qué hizo".
-//   - Jugada 1 = la tijera de Lautavester7 en el 90+ del 3-3 a SF Drysdale (22/10, Espacio Gamer; reloj del juego 90:15,
-//     perdíamos 2-3): es la única decisión en el minuto 90 grabada limpia, y el gancho del guion ("minuto 89… ¿pase, tiro o
-//     gambeta?") es justo eso. No es de noviembre y la tijera también aparece en "Cosas que solo entendés…" (lunes 30): acá
-//     es otra cosa (la decisión congelada y la pregunta), y se avisa en la descripción.
+//   - Jugada 1 = Lautavester7 en el 87' del 3-3 a SF Drysdale (22/10, Espacio Gamer; reloj del juego 87:03, perdíamos 1-3):
+//     recibe en el área y le pega rasante, 2-3. Es lo más cerca del "minuto 89" del gancho que está grabado limpio. No es de
+//     noviembre; la tijera del 90+ de ese partido no se usa porque ya sale (con la respuesta) en "Cosas que solo entendés…".
 //   - Jugada 2 = pepolemmo2710 en el borde del área, pase al medio y gol de Cabers14 (16/11, VPN, ante Instituto Reserva; la
 //     asistencia figura en seed_matches.js, web de VPN).
 //   - Jugada 3 = mano a mano de NicoBJ_96, gambetea al arquero y la empuja (18/11, VPN, ante Dalmine Esports; etiqueta del juego
@@ -51,12 +50,11 @@ fs.mkdirSync(DIR, { recursive: true });
 // lento = tramo a la mitad de velocidad; golEn = segundo en que entra la pelota; foco = el que decide (px de 1280x720);
 // cam = [segundo, centro x] de la franja.
 const JUGADAS = [
-  { noche: '2026-10-22', desde: 2123.2, congela: 2125.6, fin: 2128.9, lento: [2126.4, 2127.6], golEn: 2127.3,
-    foco: [430, 205], zoom: 330, anilloDy: 12, cy: 330, ancho: 500,   // más cerca: el radar del juego asoma abajo al principio
-    cam: [[2123.2, 420], [2125.6, 380], [2128.9, 330]],
-    kicker: 'JUGADA 1 · MINUTO 90 · PERDEMOS 2-3', pregunta: '¿Pase, tiro<br>o gambeta?',
-    opciones: ['PASE', 'TIRO', 'GAMBETA'], correcta: 1, autor: 'Lautavester7', hizo: 'TIRO · DE TIJERA',
-    gol: 'GOL<small>3-3 EN EL 90+</small>', contexto: 'Espacio Gamer · ante SF Drysdale' },
+  { noche: '2026-10-22', desde: 2087.0, congela: 2089.4, fin: 2091.4, lento: [2089.45, 2090.5], golEn: 2090.2,
+    foco: [360, 280], zoom: 330, anilloDy: 10, cy: 380, ancho: 540, cam: [[2087.0, 470], [2089.4, 320], [2090.0, 230], [2091.4, 220]],
+    kicker: 'JUGADA 1 · MINUTO 87 · PERDEMOS 1-3', pregunta: '¿Pase, tiro<br>o gambeta?',
+    opciones: ['PASE', 'TIRO', 'GAMBETA'], correcta: 1, autor: 'Lautavester7', hizo: 'TIRO RASANTE',
+    gol: "GOL<small>2-3 EN EL 87'</small>", contexto: 'Espacio Gamer · ante SF Drysdale' },
   { noche: '2026-11-17', desde: 3899.0, congela: 3901.25, fin: 3905.3, lento: [3903.2, 3904.5], golEn: 3904.15,
     foco: [717, 470], zoom: 330, anilloDy: 0, cy: 380, ancho: 540, cam: [[3899.0, 820], [3901.25, 800], [3904.2, 830]],
     kicker: 'JUGADA 2 · BORDE DEL ÁREA', pregunta: '¿Pase, tiro<br>o gambeta?',
@@ -223,7 +221,7 @@ const MEDIA = 'https://top-secret-proxy.juan-c-m-1985.workers.dev/media', v = Da
 await putFile(mp4, 'social/viral/decidi.mp4');
 const uVid = `${MEDIA}/social/viral/decidi.mp4?v=${v}`;
 const uPortada = await subirPortada(jpg, 'social/viral/decidi-portada.jpg');
-const desc = `${Math.round(total)} s · sin voz (es un juego para contestar, como pide el guion) · tres jugadas reales del vivo que se congelan antes de la decisión (desaturado, zoom lento y anillo dorado al que tiene la pelota), tres botones y cuenta real de 3 s con un tic por segundo; en cero se traban y la jugada sigue con lo que hizo y el gol · 1 tijera de Lautavester7 en el 90+ del 3-3 a SF Drysdale (22/10, Espacio Gamer; ojo: la misma tijera sale en "Cosas que solo entendés…" del lunes 30, es la única decisión del minuto 90 grabada limpia) · 2 pase de pepolemmo2710 para el gol de Cabers14 (16/11, VPN, Instituto Reserva) · 3 mano a mano de NicoBJ_96, gambeta al arquero (18/11, VPN, Dalmine Esports) · el guion pedía una buena, una mala y una dudosa: las grabaciones del vigía solo guardan goles, así que son tres goles con tres decisiones distintas (tiro, pase, gambeta) · audio del vivo descartado: música + efectos sintetizados · música: ${tema.titulo}.`;
+const desc = `${Math.round(total)} s · sin voz (es un juego para contestar, como pide el guion) · tres jugadas reales del vivo que se congelan antes de la decisión (desaturado, zoom lento y anillo dorado al que tiene la pelota), tres botones y cuenta real de 3 s con un tic por segundo; en cero se traban y la jugada sigue con lo que hizo y el gol · 1 Lautavester7 en el 87' con 1-3 abajo, tiro rasante para el 2-3 ante SF Drysdale (22/10, Espacio Gamer: no es de noviembre; es lo más cerca del "minuto 89" del gancho grabado limpio, y la tijera del 90+ no se usó porque ya sale con la respuesta en "Cosas que solo entendés…") · 2 pase de pepolemmo2710 para el gol de Cabers14 (16/11, VPN, Instituto Reserva) · 3 mano a mano de NicoBJ_96, gambeta al arquero (18/11, VPN, Dalmine Esports) · el guion pedía una buena, una mala y una dudosa: las grabaciones del vigía solo guardan goles, así que son tres goles con tres decisiones distintas (tiro, pase, gambeta) · audio del vivo descartado: música + efectos sintetizados · música: ${tema.titulo}.`;
 const pieza = o => ({ decision: 'pendiente', protagonistas: PROTAS, descripcion: desc, musica: tema.titulo, media: [{ tipo: 'video', url: uVid, vertical: true }], local: { video: mp4 }, portada: { url: uPortada, local: jpg }, ...o });
 const lote = {
   id: ID, tipo: 'viral', creado: new Date().toISOString(), idea: { lote: 'viral-guiones-2026-11-30', pieza: 'jue-decidi' },
@@ -231,18 +229,18 @@ const lote = {
     pieza({ id: 'ig-reel', red: 'instagram', formato: 'Reel · Decidí en 3 segundos', metodo: 'ig-reel',
       texto: `Tres jugadas reales, tres segundos para elegir cada una. ¿Pase, tiro o gambeta?
 
-La de Lautavester7 en el 90, la de pepolemmo2710 en el borde del área y el mano a mano de NicoBJ_96.
+La de Lautavester7 en el 87 con el partido 1-3, la de pepolemmo2710 en el borde del área y el mano a mano de NicoBJ_96.
 
 ¿Cuántas acertaste de las tres? Contestá con el número.
 
 #TopSecretFC #ProClubs #EAFC` }),
     pieza({ id: 'tiktok', red: 'tiktok', formato: 'Video · Decidí en 3 segundos', metodo: 'tiktok',
-      texto: `Minuto 90, perdés 2-3 y tenés tres segundos: ¿pase, tiro o gambeta? Lautavester7, pepolemmo2710 y NicoBJ_96 ya eligieron. ¿Cuántas acertaste? #TopSecretFC #ProClubs #EAFC` }),
+      texto: `Minuto 87, perdés 1-3 y tenés tres segundos: ¿pase, tiro o gambeta? Lautavester7, pepolemmo2710 y NicoBJ_96 ya eligieron. ¿Cuántas acertaste? #TopSecretFC #ProClubs #EAFC` }),
     pieza({ id: 'yt-short', red: 'youtube', formato: 'Short · Decidí en 3 segundos', metodo: 'youtube',
       titulo: 'Decidí en 3 segundos: ¿pase, tiro o gambeta? | Pro Clubs',
       texto: `Tres jugadas reales de Top Secret que se congelan justo antes de la decisión. Elegí antes de que siga y mirá qué hicieron Lautavester7, pepolemmo2710 y NicoBJ_96. ¿Cuántas acertaste? #Shorts #ProClubs #EAFC` }),
     pieza({ id: 'x-video', red: 'x', formato: 'Video · Decidí en 3 segundos', metodo: 'x-video',
-      texto: `Decidí en 3 segundos: pase, tiro o gambeta. Tres jugadas reales, con Lautavester7 en el 90, pepolemmo2710 en el borde del área y NicoBJ_96 mano a mano. ¿Cuántas acertaste de las tres? #TopSecretFC` }),
+      texto: `Decidí en 3 segundos: pase, tiro o gambeta. Tres jugadas reales, con Lautavester7 en el 87, pepolemmo2710 en el borde del área y NicoBJ_96 mano a mano. ¿Cuántas acertaste de las tres? #TopSecretFC` }),
   ],
 };
 let avisos = 0;
