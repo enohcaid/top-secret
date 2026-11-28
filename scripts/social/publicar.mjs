@@ -39,9 +39,10 @@ if (ESTADO) {
 }
 // ── Agenda automática del contenido viral (pedido de Juan, 2026-10-10) ──────────────────────────────────────────
 // Un lote viral ya producido (no guion, no simulacro) sin hora, con todas sus piezas decididas y alguna aprobada,
-// va al próximo TURNO libre: martes, jueves y sábado a las 14:00 (ART), uno por turno y con al menos 3 h de margen.
-// Calidad > cantidad: si no hay piezas, el turno queda vacío (no se rellena).
-const TURNOS = { dias: [2, 4, 6], hora: '14:00' };
+// va al próximo TURNO libre: lunes, martes, jueves, viernes y sábado a las 14:00 (ART), uno por turno y con al menos
+// 3 h de margen. Eran 3 por semana; desde 2026-11-28 son 5 (las vistas por reel no bajaron cuando en agosto salía
+// casi uno por día: más turnos = más alcance total). Calidad > cantidad: si no hay piezas, el turno queda vacío.
+const TURNOS = { dias: [1, 2, 4, 5, 6], hora: '14:00' };
 function proximoTurno(ocupados, desde) {
   for (let k = 0; k < 60; k++) {
     const f = new Date(desde + k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' });
